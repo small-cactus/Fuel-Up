@@ -7,17 +7,23 @@
     "android": "expo start --android",
     "ios": "expo run:ios --device 00008150-001470C22220401C",
     "ios:sim": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "node --test ./tests/**/*.test.cjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-masked-view/masked-view": "0.3.2",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.9.8",
     "@react-navigation/native": "^7.1.8",
+    "@sbaiahmed1/react-native-blur": "^4.5.7",
     "expo": "~55.0.3",
     "expo-asset": "~55.0.8",
+    "expo-blur": "~55.0.8",
     "expo-constants": "~55.0.7",
     "expo-glass-effect": "~55.0.7",
+    "expo-linear-gradient": "~55.0.8",
     "expo-linking": "~55.0.7",
     "expo-location": "~55.1.2",
     "expo-router": "~55.0.3",
@@ -27,7 +33,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-native": "0.83.2",
-    "react-native-maps": "1.20.1",
+    "react-native-maps": "^1.26.20",
     "react-native-safe-area-context": "~5.6.2",
     "react-native-screens": "~4.23.0"
   },
