@@ -5,7 +5,8 @@
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
-    "ios": "expo start --ios",
+    "ios": "expo run:ios --device 00008150-001470C22220401C",
+    "ios:sim": "expo start --ios",
     "web": "expo start --web"
   },
   "dependencies": {
