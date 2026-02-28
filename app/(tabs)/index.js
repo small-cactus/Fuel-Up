@@ -1,4 +1,4 @@
-import React, { startTransition, useEffect, useRef, useState } from 'react';
+import React, { startTransition, useEffect, useRef, useState, useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
@@ -13,6 +13,18 @@ import FuelSummaryCard from '../../src/components/FuelSummaryCard';
 import TopCanopy from '../../src/components/TopCanopy';
 import { getCachedFuelPriceSnapshot, getFuelFailureMessage, refreshFuelPriceSnapshot } from '../../src/services/fuel';
 import { useTheme } from '../../src/ThemeContext';
+import { usePreferences } from '../../src/PreferencesContext';
+import BottomCanopy from '../../src/components/BottomCanopy';
+import Animated, {
+    useSharedValue,
+    useAnimatedScrollHandler,
+    useAnimatedStyle,
+    interpolate,
+    Extrapolate,
+    interpolateColor
+} from 'react-native-reanimated';
+
+const AnimatedGlassView = Animated.createAnimatedComponent(GlassView);
 
 const DEFAULT_REGION = {
     latitude: 37.3346,
@@ -25,12 +37,130 @@ const CARD_GAP = 0;
 const SIDE_MARGIN = 16;
 const TOP_CANOPY_HEIGHT = 72;
 
+function AnimatedMarkerOverlay({ quote, index, isCheapest, isActive, scrollX, itemWidth, isDark, themeColors }) {
+    const animatedOverlayStyle = useAnimatedStyle(() => {
+        const inputRange = [(index - 1) * itemWidth, index * itemWidth, (index + 1) * itemWidth];
+
+        const borderWidth = interpolate(
+            scrollX.value,
+            inputRange,
+            [0, 2, 0],
+            Extrapolate.CLAMP
+        );
+
+        const activeBorderColor = isCheapest ? '#168B57' : (isDark ? '#FFFFFF' : '#000000');
+        const borderColor = interpolateColor(
+            scrollX.value,
+            inputRange,
+            ['transparent', activeBorderColor, 'transparent']
+        );
+
+        return {
+            borderWidth,
+            borderColor,
+        };
+    });
+
+    const animatedTextStyle = useAnimatedStyle(() => {
+        if (isCheapest) return { color: '#168B57' };
+        const inputRange = [(index - 1) * itemWidth, index * itemWidth, (index + 1) * itemWidth];
+        const color = interpolateColor(
+            scrollX.value,
+            inputRange,
+            ['#888888', themeColors.text, '#888888']
+        );
+        return { color };
+    });
+
+    return (
+        <Marker
+            key={quote.stationId || index}
+            coordinate={{
+                latitude: quote.latitude,
+                longitude: quote.longitude,
+            }}
+            style={{ zIndex: isActive ? 3 : isCheapest ? 2 : 1 }}
+        >
+            <AnimatedGlassView
+                glassEffectStyle="clear"
+                tintColor={isDark ? '#000000' : '#FFFFFF'}
+                key={isDark ? `marker-dark-${index}` : `marker-light-${index}`}
+                style={[
+                    styles.priceOverlay,
+                    animatedOverlayStyle,
+                ]}
+            >
+                <SymbolView
+                    name="fuelpump.fill"
+                    size={14}
+                    tintColor={isCheapest ? '#168B57' : (isActive ? themeColors.text : '#888888')}
+                    style={styles.priceIcon}
+                />
+                <Animated.Text
+                    style={[
+                        styles.priceText,
+                        isCheapest && styles.bestPriceText,
+                        animatedTextStyle,
+                    ]}
+                >
+                    ${quote.price.toFixed(2)}
+                </Animated.Text>
+            </AnimatedGlassView>
+        </Marker>
+    );
+}
+
+function AnimatedCardItem({ item, index, scrollX, itemWidth, isDark, benchmarkQuote, errorMsg, isRefreshing, themeColors }) {
+    const animatedDimStyle = useAnimatedStyle(() => {
+        if (isDark) return { opacity: 0 };
+
+        const inputRange = [(index - 1) * itemWidth, index * itemWidth, (index + 1) * itemWidth];
+        const dimOpacity = interpolate(
+            scrollX.value,
+            inputRange,
+            [0.3, 0, 0.3],
+            Extrapolate.CLAMP
+        );
+
+        return { opacity: dimOpacity };
+    });
+
+    return (
+        <View style={{ width: itemWidth, paddingHorizontal: 4 }}>
+            <FuelSummaryCard
+                benchmarkQuote={benchmarkQuote}
+                errorMsg={errorMsg}
+                isDark={isDark}
+                isRefreshing={isRefreshing}
+                quote={item}
+                themeColors={themeColors}
+                rank={index + 1}
+            />
+            {!isDark && (
+                <Animated.View
+                    pointerEvents="none"
+                    style={[{
+                        position: 'absolute',
+                        top: 0,
+                        bottom: 0,
+                        left: 4,
+                        right: 4,
+                        backgroundColor: '#000000',
+                        borderRadius: 32
+                    }, animatedDimStyle]}
+                />
+            )}
+        </View>
+    );
+}
+
 export default function HomeScreen() {
     const mapRef = useRef(null);
     const isMountedRef = useRef(true);
     const isFocused = useIsFocused();
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
+    const { preferences } = usePreferences();
     const { fuelResetToken, manualLocationOverride, setFuelDebugState } = useAppState();
     const [location, setLocation] = useState(DEFAULT_REGION);
     const [bestQuote, setBestQuote] = useState(null);
@@ -42,6 +172,7 @@ export default function HomeScreen() {
     const [hasLocationPermission, setHasLocationPermission] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     const router = useRouter();
+    const scrollX = useSharedValue(0);
 
     const USE_SHEET_UX = false; // Temporary toggle for the Form Sheet UX experiment
 
@@ -192,8 +323,8 @@ export default function HomeScreen() {
         const query = {
             latitude,
             longitude,
-            radiusMiles: 10,
-            fuelType: 'regular',
+            radiusMiles: preferences.searchRadiusMiles || 10,
+            fuelType: preferences.preferredOctane || 'regular',
         };
         const baseDebugState = {
             input: {
@@ -311,20 +442,28 @@ export default function HomeScreen() {
 
     const onViewableItemsChanged = useRef(({ viewableItems }) => {
         if (viewableItems.length > 0) {
-            const newIndex = viewableItems[0].index;
-            setActiveIndex(newIndex);
+            setActiveIndex(viewableItems[0].index);
         }
     }).current;
+
+    const scrollHandler = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollX.value = event.contentOffset.x;
+        },
+    });
 
     const viewabilityConfig = useRef({
         itemVisiblePercentThreshold: 50,
     }).current;
 
-    const top3Quotes = topStations.length > 0 ? topStations : (bestQuote ? [bestQuote] : []);
+    const minRating = preferences.minimumRating || 0;
+    const top3Quotes = (topStations.length > 0 ? topStations : (bestQuote ? [bestQuote] : []))
+        .filter(q => minRating === 0 || (q.rating != null && q.rating >= minRating));
     const { width } = Dimensions.get('window');
-    const cardPeekAmount = 32;
-    const itemWidth = width - horizontalPadding.left - horizontalPadding.right - cardPeekAmount;
-    const cardGap = 16;
+
+    // We want the card to be almost full width, minus some padding to peek the next card.
+    const peekPadding = 16;
+    const itemWidth = width - (peekPadding * 2);
     const sideInset = (width - itemWidth) / 2;
 
     useEffect(() => {
@@ -357,49 +496,19 @@ export default function HomeScreen() {
                 showsUserLocation={hasLocationPermission}
             >
                 {top3Quotes.length > 0 ? (
-                    top3Quotes.map((quote, index) => {
-                        const isCheapest = index === 0;
-                        const isActive = index === activeIndex;
-
-                        return (
-                            <Marker
-                                key={quote.stationId || index}
-                                coordinate={{
-                                    latitude: quote.latitude,
-                                    longitude: quote.longitude,
-                                }}
-                                style={{ zIndex: isActive ? 3 : isCheapest ? 2 : 1 }}
-                            >
-                                <GlassView
-                                    glassEffectStyle="clear"
-                                    tintColor={isDark ? '#000000' : '#FFFFFF'}
-                                    key={isDark ? `marker-dark-${index}` : `marker-light-${index}`}
-                                    style={[
-                                        styles.priceOverlay,
-                                        isActive && !isCheapest && { borderColor: isDark ? '#FFFFFF' : '#000000', borderWidth: 2 },
-                                        isActive && isCheapest && { borderColor: '#168B57', borderWidth: 2 },
-                                    ]}
-                                >
-                                    <SymbolView
-                                        name="fuelpump.fill"
-                                        size={14}
-                                        tintColor={isCheapest ? '#168B57' : isActive ? themeColors.text : '#888888'}
-                                        style={styles.priceIcon}
-                                    />
-                                    <Text
-                                        style={[
-                                            styles.priceText,
-                                            { color: isActive ? themeColors.text : '#888888' },
-                                            isCheapest && { color: '#168B57' },
-                                            isCheapest && styles.bestPriceText,
-                                        ]}
-                                    >
-                                        ${quote.price.toFixed(2)}
-                                    </Text>
-                                </GlassView>
-                            </Marker>
-                        );
-                    })
+                    top3Quotes.map((quote, index) => (
+                        <AnimatedMarkerOverlay
+                            key={quote.stationId || index}
+                            quote={quote}
+                            index={index}
+                            isCheapest={index === 0}
+                            isActive={index === activeIndex}
+                            scrollX={scrollX}
+                            itemWidth={itemWidth}
+                            isDark={isDark}
+                            themeColors={themeColors}
+                        />
+                    ))
                 ) : (
                     <Marker
                         coordinate={fallbackCoordinate}
@@ -417,6 +526,7 @@ export default function HomeScreen() {
             </MapView>
 
             <TopCanopy edgeColor={canopyEdgeLine} height={topCanopyHeight} isDark={isDark} topInset={insets.top} />
+            <BottomCanopy height={bottomPadding + 140} isDark={isDark} />
 
             <View
                 style={[
@@ -500,35 +610,36 @@ export default function HomeScreen() {
                         </GlassView>
                     </Pressable>
                 ) : top3Quotes.length > 0 ? (
-                    <FlatList
+                    <Animated.FlatList
                         data={top3Quotes}
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        snapToAlignment="center"
                         decelerationRate="fast"
                         keyExtractor={(item, index) => item.stationId || index.toString()}
                         contentContainerStyle={{
                             paddingHorizontal: sideInset,
                         }}
-                        snapToInterval={itemWidth + cardGap}
+                        snapToOffsets={top3Quotes.map((_, i) => i * itemWidth)}
                         onViewableItemsChanged={onViewableItemsChanged}
                         viewabilityConfig={viewabilityConfig}
+                        onScroll={scrollHandler}
+                        scrollEventThrottle={16}
                         renderItem={({ item, index }) => (
-                            <View style={{ width: itemWidth, marginRight: index === top3Quotes.length - 1 ? 0 : cardGap }}>
-                                <FuelSummaryCard
-                                    benchmarkQuote={benchmarkQuote}
-                                    errorMsg={errorMsg}
-                                    isDark={isDark}
-                                    isRefreshing={isRefreshingPrices || isLoadingLocation}
-                                    quote={item}
-                                    themeColors={themeColors}
-                                    rank={index + 1}
-                                />
-                            </View>
+                            <AnimatedCardItem
+                                item={item}
+                                index={index}
+                                scrollX={scrollX}
+                                itemWidth={itemWidth}
+                                isDark={isDark}
+                                benchmarkQuote={benchmarkQuote}
+                                errorMsg={errorMsg}
+                                isRefreshing={isRefreshingPrices || isLoadingLocation}
+                                themeColors={themeColors}
+                            />
                         )}
                     />
                 ) : (
-                    <View style={{ width: itemWidth, marginHorizontal: sideInset }}>
+                    <View style={{ width: width, paddingHorizontal: sideInset }}>
                         <FuelSummaryCard
                             benchmarkQuote={benchmarkQuote}
                             errorMsg={errorMsg}

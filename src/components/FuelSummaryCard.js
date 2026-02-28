@@ -9,7 +9,7 @@ function formatPrice(price) {
         return '--';
     }
 
-    return price.toFixed(3);
+    return price.toFixed(2);
 }
 
 function formatDistance(distanceMiles) {
@@ -75,13 +75,29 @@ export default function FuelSummaryCard({
                             </View>
                         ) : null}
                         <Text style={[styles.cardTitle, { color: themeColors.text }]} numberOfLines={1}>{title}</Text>
+                        {quote?.rating != null && (
+                            <View style={styles.ratingRow}>
+                                <SymbolView name="star.fill" size={12} tintColor="#FFB800" />
+                                <Text style={[styles.ratingText, { color: themeColors.text }]}>
+                                    {quote.rating.toFixed(1)}
+                                </Text>
+                                {quote?.userRatingCount != null && (
+                                    <Text style={[styles.ratingCount, { color: themeColors.text }]}>
+                                        ({quote.userRatingCount.toLocaleString()})
+                                    </Text>
+                                )}
+                            </View>
+                        )}
                     </View>
                     {isRefreshing ? <ActivityIndicator size="small" color={themeColors.text} /> : null}
                 </View>
 
                 <View style={styles.pricesRow}>
                     <View style={styles.priceColumn}>
-                        <Text style={[styles.priceLabel, { color: themeColors.text }]}>Regular</Text>
+                        <View style={styles.gradeLabelRow}>
+                            <Text style={[styles.priceLabel, { color: themeColors.text }]}>Regular</Text>
+                            <Text style={[styles.octaneLabel, { color: themeColors.text }]}>87</Text>
+                        </View>
                         <Text style={[styles.cardPrice, { color: '#168B57' }]}>
                             ${formatPrice(quote?.price)}
                         </Text>
@@ -89,7 +105,10 @@ export default function FuelSummaryCard({
 
                     {quote?.allPrices?.midgrade && (
                         <View style={styles.priceColumn}>
-                            <Text style={[styles.priceLabel, { color: themeColors.text }]}>Mid</Text>
+                            <View style={styles.gradeLabelRow}>
+                                <Text style={[styles.priceLabel, { color: themeColors.text }]}>Mid</Text>
+                                <Text style={[styles.octaneLabel, { color: themeColors.text }]}>89</Text>
+                            </View>
                             <Text style={[styles.cardPrice, { color: themeColors.text }]}>
                                 ${formatPrice(quote.allPrices.midgrade)}
                             </Text>
@@ -98,7 +117,10 @@ export default function FuelSummaryCard({
 
                     {quote?.allPrices?.premium && (
                         <View style={styles.priceColumn}>
-                            <Text style={[styles.priceLabel, { color: themeColors.text }]}>Prem</Text>
+                            <View style={styles.gradeLabelRow}>
+                                <Text style={[styles.priceLabel, { color: themeColors.text }]}>Prem</Text>
+                                <Text style={[styles.octaneLabel, { color: themeColors.text }]}>93</Text>
+                            </View>
                             <Text style={[styles.cardPrice, { color: themeColors.text }]}>
                                 ${formatPrice(quote.allPrices.premium)}
                             </Text>
@@ -151,8 +173,25 @@ const styles = StyleSheet.create({
     titleContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        flex: 1,
+        flexShrink: 1,
+        flexWrap: 'wrap',
         marginRight: 12,
+        gap: 6,
+    },
+    ratingRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 3,
+        marginLeft: 4,
+    },
+    ratingText: {
+        fontSize: 13,
+        fontWeight: '600',
+    },
+    ratingCount: {
+        fontSize: 12,
+        fontWeight: '400',
+        opacity: 0.6,
     },
     rankBadge: {
         paddingHorizontal: 8,
@@ -167,7 +206,6 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: 18,
         fontWeight: '700',
-        flex: 1,
     },
     pricesRow: {
         flexDirection: 'row',
@@ -177,6 +215,16 @@ const styles = StyleSheet.create({
     },
     priceColumn: {
         flex: 1,
+    },
+    gradeLabelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    octaneLabel: {
+        fontSize: 10,
+        fontWeight: '500',
+        opacity: 0.5,
     },
     priceLabel: {
         fontSize: 12,

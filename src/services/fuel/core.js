@@ -158,6 +158,8 @@ function buildGoogleNearbySearchRequest({ latitude, longitude, radiusMiles = 10 
             'places.formattedAddress',
             'places.location',
             'places.fuelOptions',
+            'places.rating',
+            'places.userRatingCount',
         ].join(','),
         url: 'https://places.googleapis.com/v1/places:searchNearby',
     };
@@ -296,6 +298,8 @@ function createQuote({
     isEstimated,
     sourceLabel,
     origin,
+    rating = null,
+    userRatingCount = null,
 }) {
     return {
         providerId,
@@ -315,6 +319,8 @@ function createQuote({
         updatedAt: updatedAt || null,
         isEstimated: Boolean(isEstimated),
         sourceLabel,
+        rating: typeof rating === 'number' ? rating : null,
+        userRatingCount: typeof userRatingCount === 'number' ? userRatingCount : null,
     };
 }
 
@@ -462,6 +468,8 @@ function normalizeGooglePlacesResponse({ origin, fuelType, payload }) {
                 isEstimated: false,
                 sourceLabel: PROVIDER_LABELS.google,
                 origin,
+                rating: place?.rating ?? null,
+                userRatingCount: pickFirstDefined([place?.userRatingsTotal, place?.userRatingCount]) ?? null,
             });
         })
         .filter(Boolean);
