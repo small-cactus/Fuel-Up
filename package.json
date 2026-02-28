@@ -4,7 +4,7 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
+    "android": "expo run:android",
     "ios": "expo run:ios --device 00008150-001470C22220401C",
     "ios:sim": "expo start --ios",
     "web": "expo start --web",
@@ -13,6 +13,7 @@
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/slider": "5.1.2",
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.9.8",

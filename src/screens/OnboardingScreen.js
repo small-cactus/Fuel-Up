@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GlassView } from 'expo-glass-effect';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
-import MapView, { Marker, PROVIDER_APPLE } from 'react-native-maps';
+import MapView, { Circle, Marker, PROVIDER_APPLE } from 'react-native-maps';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import Slider from '@react-native-community/slider';
 
 import { usePreferences } from '../PreferencesContext';
 import { useTheme } from '../ThemeContext';
@@ -30,13 +31,15 @@ const DEMO_REGION = {
 };
 
 const DEMO_STATIONS = [
-    { lat: 37.7749, lng: -122.4394, price: 3.89, name: 'Costco' },
-    { lat: 37.7849, lng: -122.4094, price: 4.59, name: 'Chevron' },
-    { lat: 37.7649, lng: -122.4294, price: 4.79, name: 'Shell' },
-    { lat: 37.7799, lng: -122.3994, price: 4.65, name: '76' },
-    { lat: 37.7699, lng: -122.4494, price: 4.49, name: 'Arco' },
-    { lat: 37.7549, lng: -122.4194, price: 4.72, name: 'Valero' },
+    { lat: 37.7760, lng: -122.4300, price: 3.89, name: 'Costco' },
+    { lat: 37.7830, lng: -122.4120, price: 4.59, name: 'Chevron' },
+    { lat: 37.7680, lng: -122.4250, price: 4.79, name: 'Shell' },
+    { lat: 37.7800, lng: -122.4050, price: 4.65, name: '76' },
+    { lat: 37.7710, lng: -122.4380, price: 4.49, name: 'Arco' },
+    { lat: 37.7600, lng: -122.4180, price: 4.72, name: 'Valero' },
 ];
+
+const MAP_MARGIN = 0.006; // Inset margin to avoid edge chips
 
 function WelcomeStep({ isDark, themeColors, insets }) {
     const [visibleStations, setVisibleStations] = useState([]);
@@ -73,6 +76,19 @@ function WelcomeStep({ isDark, themeColors, insets }) {
             >
                 {visibleStations.map((station, index) => {
                     const isCheapest = station.price === cheapestPrice;
+                    // Skip off-screen stations
+                    const latMin = DEMO_REGION.latitude - DEMO_REGION.latitudeDelta / 2 + MAP_MARGIN;
+                    const latMax = DEMO_REGION.latitude + DEMO_REGION.latitudeDelta / 2 - MAP_MARGIN;
+                    const lngMin = DEMO_REGION.longitude - DEMO_REGION.longitudeDelta / 2 + MAP_MARGIN;
+                    const lngMax = DEMO_REGION.longitude + DEMO_REGION.longitudeDelta / 2 - MAP_MARGIN;
+                    if (station.lat < latMin || station.lat > latMax || station.lng < lngMin || station.lng > lngMax) {
+                        return null;
+                    }
+
+                    const chipTint = cheapestRevealed
+                        ? (isCheapest ? '#168B57' : '#E35D4F')
+                        : (isDark ? '#000000' : '#FFFFFF');
+
                     return (
                         <Marker
                             key={`demo-${index}`}
@@ -80,8 +96,8 @@ function WelcomeStep({ isDark, themeColors, insets }) {
                         >
                             <GlassView
                                 glassEffectStyle="clear"
-                                tintColor={isDark ? '#000000' : '#FFFFFF'}
-                                key={isDark ? `demo-dark-${index}` : `demo-light-${index}`}
+                                tintColor={chipTint}
+                                key={`demo-${isDark ? 'dark' : 'light'}-${index}-${cheapestRevealed ? 'r' : 'u'}`}
                                 style={[
                                     styles.demoChip,
                                     cheapestRevealed && isCheapest && styles.demoChipCheapest,
@@ -90,12 +106,12 @@ function WelcomeStep({ isDark, themeColors, insets }) {
                                 <SymbolView
                                     name="fuelpump.fill"
                                     size={14}
-                                    tintColor={cheapestRevealed && isCheapest ? '#168B57' : (cheapestRevealed ? '#E35D4F' : '#888888')}
+                                    tintColor={cheapestRevealed ? '#FFFFFF' : '#888888'}
                                     style={styles.demoChipIcon}
                                 />
                                 <Text style={[
                                     styles.demoChipText,
-                                    { color: cheapestRevealed && isCheapest ? '#168B57' : (cheapestRevealed ? '#E35D4F' : '#888888') },
+                                    { color: cheapestRevealed ? '#FFFFFF' : '#888888' },
                                     cheapestRevealed && isCheapest && styles.demoChipTextCheapest,
                                 ]}>
                                     ${station.price.toFixed(2)}
@@ -120,9 +136,11 @@ function WelcomeStep({ isDark, themeColors, insets }) {
 
             {/* Floating content over map */}
             <View style={[styles.welcomeOverlay, { paddingTop: insets.top + 40 }]} pointerEvents="none">
-                <View style={[styles.appIconCircle, { backgroundColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)' }]}>
-                    <SymbolView name="fuelpump.fill" size={40} tintColor="#168B57" />
-                </View>
+                <Image
+                    source={require('../../assets/fuelup-icon.png')}
+                    style={{ width: 64, height: 64, borderRadius: 14 }}
+                    resizeMode="contain"
+                />
                 <Text style={[styles.appName, { color: themeColors.text }]}>Fuel Up</Text>
                 <Text style={[styles.welcomeSubtitle, { color: themeColors.text }]}>
                     Find the cheapest gas near you, instantly.
@@ -132,162 +150,216 @@ function WelcomeStep({ isDark, themeColors, insets }) {
     );
 }
 
-function RadiusStep({ isDark, themeColors, value, onChange }) {
-    const radiusValues = [5, 10, 15, 20, 25];
+function RadiusStep({ isDark, themeColors, insets, value, onChange }) {
+    const MILES_TO_METERS = 1609.34;
+    const radiusMeters = value * MILES_TO_METERS;
+
+    // Calculate map delta to fit the radius nicely (1 degree lat ≈ 111km)
+    const latDelta = (radiusMeters / 111000) * 3.5;
+    const region = {
+        ...DEMO_REGION,
+        latitudeDelta: Math.max(latDelta, 0.02),
+        longitudeDelta: Math.max(latDelta, 0.02),
+    };
 
     return (
-        <View style={styles.stepContainer}>
-            <SymbolView name="location.magnifyingglass" size={44} tintColor={themeColors.text} />
-            <Text style={[styles.stepTitle, { color: themeColors.text }]}>Search Radius</Text>
-            <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
-                How far should we look for gas stations?
-            </Text>
+        <View style={StyleSheet.absoluteFill}>
+            {/* Full-screen map */}
+            <MapView
+                style={StyleSheet.absoluteFillObject}
+                region={region}
+                provider={PROVIDER_APPLE}
+                scrollEnabled={false}
+                zoomEnabled={false}
+                rotateEnabled={false}
+                pitchEnabled={false}
+            >
+                <Circle
+                    center={{ latitude: DEMO_REGION.latitude, longitude: DEMO_REGION.longitude }}
+                    radius={radiusMeters}
+                    strokeColor="rgba(22, 139, 87, 0.5)"
+                    strokeWidth={2}
+                    fillColor="rgba(22, 139, 87, 0.08)"
+                />
+            </MapView>
 
-            <Text style={[styles.radiusValue, { color: '#168B57' }]}>{value} miles</Text>
+            {/* Light top gradient — just enough for readability */}
+            <LinearGradient
+                colors={[isDark ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)', isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)']}
+                locations={[0, 1]}
+                style={[styles.topGradient, { height: insets.top + 140 }]}
+                pointerEvents="none"
+            />
 
-            <View style={styles.segmentRow}>
-                {radiusValues.map(r => (
-                    <Pressable key={r} onPress={() => onChange(r)}>
-                        <GlassView
-                            glassEffectStyle={r === value ? 'regular' : 'clear'}
-                            tintColor={isDark ? '#000000' : '#FFFFFF'}
-                            style={[
-                                styles.segmentButton,
-                                r === value && styles.segmentButtonActive,
-                            ]}
-                        >
-                            <Text style={[
-                                styles.segmentText,
-                                { color: r === value ? '#168B57' : themeColors.text },
-                                r === value && { fontWeight: '700' },
-                            ]}>
-                                {r}
-                            </Text>
-                        </GlassView>
-                    </Pressable>
-                ))}
+            {/* Light bottom gradient */}
+            <LinearGradient
+                colors={[isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)', isDark ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)']}
+                locations={[0, 1]}
+                style={[styles.footerGradient, { height: 180 }]}
+                pointerEvents="none"
+            />
+
+            {/* Floating header */}
+            <View style={[styles.welcomeOverlay, { paddingTop: insets.top + 40 }]} pointerEvents="none">
+                <SymbolView name="location.magnifyingglass" size={44} tintColor={themeColors.text} />
+                <Text style={[styles.stepTitle, { color: themeColors.text }]}>Search Radius</Text>
+                <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
+                    How far should we look for gas stations?
+                </Text>
+            </View>
+
+            {/* Hero value centered on map */}
+            <View style={styles.radiusHeroCenter} pointerEvents="none">
+                <Text style={[styles.heroValue, { color: '#168B57', textShadowColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.8)', textShadowRadius: 12 }]}>{value} mi</Text>
+            </View>
+
+            {/* Slider at bottom */}
+            <View style={[styles.radiusControls, { bottom: insets.bottom + 100 }]}>
+                <GlassView
+                    glassEffectStyle="regular"
+                    tintColor={isDark ? '#000000' : '#FFFFFF'}
+                    key={isDark ? 'slider-dark' : 'slider-light'}
+                    style={styles.sliderCard}
+                >
+                    <View style={styles.sliderLabels}>
+                        <Text style={[styles.sliderLabel, { color: themeColors.text }]}>5 mi</Text>
+                        <Text style={[styles.sliderLabel, { color: themeColors.text }]}>25 mi</Text>
+                    </View>
+                    <Slider
+                        style={styles.slider}
+                        minimumValue={5}
+                        maximumValue={25}
+                        step={1}
+                        value={value}
+                        onValueChange={onChange}
+                        minimumTrackTintColor="#168B57"
+                        maximumTrackTintColor={isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'}
+                        thumbTintColor="#168B57"
+                    />
+                </GlassView>
             </View>
         </View>
     );
 }
 
-function OctaneStep({ isDark, themeColors, value, onChange }) {
+function OctaneStep({ isDark, themeColors, insets, value, onChange }) {
     return (
         <View style={styles.stepContainer}>
-            <SymbolView name="gauge.with.dots.needle.33percent" size={44} tintColor={themeColors.text} />
-            <Text style={[styles.stepTitle, { color: themeColors.text }]}>Preferred Octane</Text>
-            <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
-                Which fuel grade do you usually get?
-            </Text>
+            <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
+                <SymbolView name="gauge.with.dots.needle.33percent" size={44} tintColor={themeColors.text} />
+                <Text style={[styles.stepTitle, { color: themeColors.text }]}>Preferred Octane</Text>
+                <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
+                    Which fuel grade do you usually get?
+                </Text>
+            </View>
 
-            <View style={styles.octaneOptions}>
-                {OCTANE_OPTIONS.map(option => (
-                    <Pressable key={option.key} onPress={() => onChange(option.key)}>
-                        <GlassView
-                            glassEffectStyle={value === option.key ? 'regular' : 'clear'}
-                            tintColor={isDark ? '#000000' : '#FFFFFF'}
-                            style={[
-                                styles.octaneCard,
-                                value === option.key && { borderColor: '#168B57', borderWidth: 2 },
-                            ]}
-                        >
-                            <Text style={[styles.octaneNumber, { color: value === option.key ? '#168B57' : themeColors.text }]}>
-                                {option.octane}
-                            </Text>
-                            <Text style={[styles.octaneLabel, { color: themeColors.text }]}>
-                                {option.label}
-                            </Text>
-                        </GlassView>
-                    </Pressable>
-                ))}
+            <View style={styles.stepContent}>
+                <View style={styles.octaneOptions}>
+                    {OCTANE_OPTIONS.map(option => {
+                        const isSelected = value === option.key;
+                        return (
+                            <Pressable key={option.key} onPress={() => onChange(option.key)}>
+                                <GlassView
+                                    glassEffectStyle={isSelected ? 'regular' : 'clear'}
+                                    tintColor={isDark ? '#000000' : '#FFFFFF'}
+                                    key={isDark ? `oct-dark-${option.key}` : `oct-light-${option.key}`}
+                                    style={[
+                                        styles.octaneCard,
+                                        isSelected && { borderColor: '#168B57', borderWidth: 2 },
+                                    ]}
+                                >
+                                    <Text style={[styles.octaneNumber, { color: isSelected ? '#168B57' : themeColors.text }]}>
+                                        {option.octane}
+                                    </Text>
+                                    <Text style={[styles.octaneLabel, { color: themeColors.text }]}>
+                                        {option.label}
+                                    </Text>
+                                </GlassView>
+                            </Pressable>
+                        );
+                    })}
+                </View>
             </View>
         </View>
     );
 }
 
-function RatingStep({ isDark, themeColors, value, onChange }) {
+function RatingStep({ isDark, themeColors, insets, value, onChange }) {
     const ratingValues = [0, 3, 3.5, 4, 4.5];
 
     return (
         <View style={styles.stepContainer}>
-            <SymbolView name="star.fill" size={44} tintColor="#FFB800" />
-            <Text style={[styles.stepTitle, { color: themeColors.text }]}>Minimum Rating</Text>
-            <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
-                Only show stations above a certain rating?
-            </Text>
+            <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
+                <SymbolView name="star.fill" size={44} tintColor="#FFB800" />
+                <Text style={[styles.stepTitle, { color: themeColors.text }]}>Minimum Rating</Text>
+                <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
+                    Only show stations above a certain rating?
+                </Text>
+            </View>
 
-            <Text style={[styles.radiusValue, { color: '#FFB800' }]}>
-                {value === 0 ? 'Show All' : `${value}+ stars`}
-            </Text>
+            <View style={styles.stepContent}>
+                <Text style={[styles.heroValue, { color: '#FFB800' }]}>
+                    {value === 0 ? 'Show All' : `${value}+`}
+                </Text>
 
-            <View style={styles.segmentRow}>
-                {ratingValues.map(r => (
-                    <Pressable key={r} onPress={() => onChange(r)}>
-                        <GlassView
-                            glassEffectStyle={r === value ? 'regular' : 'clear'}
-                            tintColor={isDark ? '#000000' : '#FFFFFF'}
-                            style={[
-                                styles.segmentButton,
-                                r === value && styles.segmentButtonActive,
-                            ]}
-                        >
-                            <Text style={[
-                                styles.segmentText,
-                                { color: r === value ? '#FFB800' : themeColors.text },
-                                r === value && { fontWeight: '700' },
-                            ]}>
-                                {r === 0 ? 'All' : r}
-                            </Text>
-                        </GlassView>
-                    </Pressable>
-                ))}
+                <View style={styles.segmentRow}>
+                    {ratingValues.map(r => (
+                        <Pressable key={r} onPress={() => onChange(r)}>
+                            <GlassView
+                                glassEffectStyle={r === value ? 'regular' : 'clear'}
+                                tintColor={isDark ? '#000000' : '#FFFFFF'}
+                                style={[
+                                    styles.segmentButton,
+                                    r === value && { borderColor: '#FFB800', borderWidth: 2 },
+                                ]}
+                            >
+                                <Text style={[
+                                    styles.segmentText,
+                                    { color: r === value ? '#FFB800' : themeColors.text },
+                                    r === value && { fontWeight: '700' },
+                                ]}>
+                                    {r === 0 ? 'All' : r}
+                                </Text>
+                            </GlassView>
+                        </Pressable>
+                    ))}
+                </View>
             </View>
         </View>
     );
 }
 
-function LocationStep({ isDark, themeColors, onGrant, onSkip }) {
-    const [permissionStatus, setPermissionStatus] = useState(null);
-
-    const handleRequestPermission = async () => {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        setPermissionStatus(status);
-        if (status === 'granted') {
-            onGrant();
-        }
-    };
-
+function LocationStep({ isDark, themeColors, insets, permissionStatus }) {
     return (
         <View style={styles.stepContainer}>
-            <SymbolView name="location.fill" size={44} tintColor="#007AFF" />
-            <Text style={[styles.stepTitle, { color: themeColors.text }]}>Enable Location</Text>
-            <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
-                We need your location to find gas stations near you. Your location never leaves your device.
-            </Text>
+            <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
+                <SymbolView name="location.fill" size={44} tintColor="#007AFF" />
+                <Text style={[styles.stepTitle, { color: themeColors.text }]}>Enable Location</Text>
+                <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
+                    To find the absolute cheapest gas, we need to know where you are.
+                </Text>
+            </View>
 
-            {permissionStatus === 'granted' ? (
-                <View style={styles.grantedRow}>
-                    <SymbolView name="checkmark.circle.fill" size={24} tintColor="#168B57" />
-                    <Text style={[styles.grantedText, { color: '#168B57' }]}>Location Enabled</Text>
+            <View style={styles.stepContent}>
+                <View style={styles.locationGraphicContainer}>
+                    <View style={[styles.locationGraphicCircle, { backgroundColor: isDark ? 'rgba(0,122,255,0.15)' : 'rgba(0,122,255,0.1)' }]}>
+                        <SymbolView name="mappin.and.ellipse" size={60} tintColor="#007AFF" />
+                    </View>
+                    <View style={styles.locationExplanation}>
+                        <SymbolView name="info.circle.fill" size={16} tintColor={themeColors.text} style={{ opacity: 0.5 }} />
+                        <Text style={[styles.locationExplanationText, { color: themeColors.text }]}>
+                            Without location, we can't show real-time prices at stations around you.
+                        </Text>
+                    </View>
                 </View>
-            ) : (
-                <View style={styles.locationButtons}>
-                    <Pressable onPress={handleRequestPermission}>
-                        <GlassView
-                            glassEffectStyle="regular"
-                            tintColor="#007AFF"
-                            style={styles.locationButton}
-                        >
-                            <SymbolView name="location.fill" size={18} tintColor="#FFFFFF" />
-                            <Text style={styles.locationButtonText}>Enable Location</Text>
-                        </GlassView>
-                    </Pressable>
 
-                    <Pressable onPress={onSkip}>
-                        <Text style={[styles.skipText, { color: themeColors.text }]}>Skip for now</Text>
-                    </Pressable>
-                </View>
-            )}
+                {permissionStatus === 'granted' && (
+                    <View style={styles.grantedRow}>
+                        <SymbolView name="checkmark.circle.fill" size={32} tintColor="#168B57" />
+                        <Text style={[styles.grantedText, { color: '#168B57' }]}>Access Granted</Text>
+                    </View>
+                )}
+            </View>
         </View>
     );
 }
@@ -302,13 +374,27 @@ export default function OnboardingScreen() {
     const [radius, setRadius] = useState(preferences.searchRadiusMiles);
     const [octane, setOctane] = useState(preferences.preferredOctane);
     const [minRating, setMinRating] = useState(preferences.minimumRating);
+    const [permissionStatus, setPermissionStatus] = useState(null);
+
+    const handleRequestPermission = async () => {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        setPermissionStatus(status);
+        if (status === 'granted') {
+            setTimeout(() => setCurrentStep(currentStep + 1), 600);
+        }
+    };
 
     const handleContinue = () => {
+        if (currentStep === 1 && permissionStatus !== 'granted') {
+            handleRequestPermission();
+            return;
+        }
+
         if (currentStep < totalSteps - 1) {
             // Save preferences as we go
-            if (currentStep === 1) updatePreference('searchRadiusMiles', radius);
-            if (currentStep === 2) updatePreference('preferredOctane', octane);
-            if (currentStep === 3) updatePreference('minimumRating', minRating);
+            if (currentStep === 2) updatePreference('searchRadiusMiles', radius);
+            if (currentStep === 3) updatePreference('preferredOctane', octane);
+            if (currentStep === 4) updatePreference('minimumRating', minRating);
             setCurrentStep(currentStep + 1);
         } else {
             // Final step
@@ -316,25 +402,20 @@ export default function OnboardingScreen() {
         }
     };
 
-    const handleLocationGrant = () => {
-        // Small delay for visual feedback
-        setTimeout(() => completeOnboarding(), 600);
-    };
-
     const isLastStep = currentStep === totalSteps - 1;
 
     return (
-        <View style={[styles.container, { backgroundColor: currentStep === 0 ? 'transparent' : themeColors.background }]}>
-            <View style={[styles.content, { paddingTop: currentStep === 0 ? 0 : insets.top + 20 }]}>
+        <View style={[styles.container, { backgroundColor: (currentStep === 0 || currentStep === 2) ? 'transparent' : themeColors.background }]}>
+            <View style={styles.content}>
                 {currentStep === 0 && <WelcomeStep isDark={isDark} themeColors={themeColors} insets={insets} />}
-                {currentStep === 1 && <RadiusStep isDark={isDark} themeColors={themeColors} value={radius} onChange={setRadius} />}
-                {currentStep === 2 && <OctaneStep isDark={isDark} themeColors={themeColors} value={octane} onChange={setOctane} />}
-                {currentStep === 3 && <RatingStep isDark={isDark} themeColors={themeColors} value={minRating} onChange={setMinRating} />}
-                {currentStep === 4 && <LocationStep isDark={isDark} themeColors={themeColors} onGrant={handleLocationGrant} onSkip={handleContinue} />}
+                {currentStep === 1 && <LocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={permissionStatus} />}
+                {currentStep === 2 && <RadiusStep isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} />}
+                {currentStep === 3 && <OctaneStep isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} />}
+                {currentStep === 4 && <RatingStep isDark={isDark} themeColors={themeColors} insets={insets} value={minRating} onChange={setMinRating} />}
             </View>
 
             {/* Progress dots + continue */}
-            {currentStep === 0 && (
+            {(currentStep === 0 || currentStep === 2) && (
                 <LinearGradient
                     colors={[isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)', isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)', isDark ? '#000000' : '#FFFFFF']}
                     locations={[0, 0.4, 1]}
@@ -342,7 +423,7 @@ export default function OnboardingScreen() {
                     pointerEvents="box-none"
                 />
             )}
-            <View style={[styles.footer, currentStep === 0 && styles.footerAbsolute, { paddingBottom: insets.bottom + 20 }]}>
+            <View style={[styles.footer, (currentStep === 0 || currentStep === 2) && styles.footerAbsolute, { paddingBottom: insets.bottom + 20 }]}>
                 <View style={styles.dotsRow}>
                     {Array.from({ length: totalSteps }).map((_, i) => (
                         <View
@@ -364,8 +445,14 @@ export default function OnboardingScreen() {
                             isInteractive
                             style={styles.continueGlass}
                         >
-                            <Text style={styles.continueText}>Continue</Text>
-                            <SymbolView name="arrow.right" size={18} tintColor="#FFFFFF" />
+                            <Text style={styles.continueText}>
+                                {currentStep === 1 && permissionStatus !== 'granted' ? 'Enable Location' : 'Continue'}
+                            </Text>
+                            <SymbolView
+                                name={currentStep === 1 && permissionStatus !== 'granted' ? 'location.fill' : 'arrow.right'}
+                                size={18}
+                                tintColor="#FFFFFF"
+                            />
                         </GlassView>
                     </Pressable>
                 )}
@@ -398,9 +485,42 @@ const styles = StyleSheet.create({
     },
     stepContainer: {
         flex: 1,
+    },
+    stepHeader: {
+        alignItems: 'center',
+        gap: 12,
+    },
+    stepContent: {
+        flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 16,
+        paddingHorizontal: 24,
+        gap: 24,
+    },
+    heroValue: {
+        fontSize: 56,
+        fontWeight: '800',
+        letterSpacing: -1,
+    },
+    sliderCard: {
+        width: '100%',
+        paddingHorizontal: 20,
+        paddingVertical: 16,
+        borderRadius: 20,
+    },
+    sliderLabels: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 4,
+    },
+    sliderLabel: {
+        fontSize: 13,
+        fontWeight: '600',
+        opacity: 0.5,
+    },
+    slider: {
+        width: '100%',
+        height: 40,
     },
     // Welcome step
     welcomeOverlay: {
@@ -469,11 +589,6 @@ const styles = StyleSheet.create({
         maxWidth: 300,
         lineHeight: 22,
     },
-    radiusValue: {
-        fontSize: 42,
-        fontWeight: '800',
-        marginVertical: 8,
-    },
     segmentRow: {
         flexDirection: 'row',
         gap: 10,
@@ -517,32 +632,41 @@ const styles = StyleSheet.create({
         opacity: 0.7,
     },
     // Location
+    locationGraphicContainer: {
+        alignItems: 'center',
+        gap: 32,
+    },
+    locationGraphicCircle: {
+        width: 140,
+        height: 140,
+        borderRadius: 70,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    locationExplanation: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        paddingHorizontal: 20,
+        maxWidth: 320,
+    },
+    locationExplanationText: {
+        fontSize: 15,
+        fontWeight: '500',
+        opacity: 0.6,
+        lineHeight: 20,
+    },
     grantedRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
-        marginTop: 16,
+        gap: 10,
+        backgroundColor: 'rgba(22, 139, 87, 0.1)',
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        borderRadius: 100,
     },
     grantedText: {
-        fontSize: 18,
-        fontWeight: '700',
-    },
-    locationButtons: {
-        gap: 16,
-        alignItems: 'center',
-        marginTop: 16,
-    },
-    locationButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        paddingHorizontal: 28,
-        paddingVertical: 16,
-        borderRadius: 20,
-    },
-    locationButtonText: {
-        color: '#FFFFFF',
-        fontSize: 17,
+        fontSize: 16,
         fontWeight: '700',
     },
     skipText: {
@@ -574,6 +698,22 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
+    },
+    radiusHeroCenter: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    radiusControls: {
+        position: 'absolute',
+        left: 24,
+        right: 24,
+        alignItems: 'center',
+        gap: 16,
     },
     dotsRow: {
         flexDirection: 'row',
