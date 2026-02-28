@@ -53,7 +53,25 @@ async function setCachedEntry(key, value) {
     return value;
 }
 
+async function clearCachedEntries(prefix = 'fuel:') {
+    memoryCache.clear();
+
+    try {
+        const storedKeys = await AsyncStorage.getAllKeys();
+        const matchingKeys = storedKeys.filter(key => key.startsWith(prefix));
+
+        if (matchingKeys.length) {
+            await AsyncStorage.multiRemove(matchingKeys);
+        }
+    } catch (error) {
+        return false;
+    }
+
+    return true;
+}
+
 module.exports = {
+    clearCachedEntries,
     getCachedEntry,
     setCachedEntry,
 };

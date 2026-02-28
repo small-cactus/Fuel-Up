@@ -1,10 +1,13 @@
 const MILES_TO_METERS = 1609.344;
 const GALLON = 'gallon';
 const USD = 'USD';
+const TOMTOM_PETROL_CATEGORY_ID = '7311';
 
 const PROVIDER_LABELS = {
     tomtom: 'TomTom Fuel Prices',
     barchart: 'Barchart OnDemand',
+    google: 'Google Places Fuel Options',
+    cardog: 'Cardog Gas Prices',
     bls: 'BLS Average Price Data',
     eia: 'EIA Retail Gasoline',
     fred: 'FRED Retail Gasoline',
@@ -70,10 +73,11 @@ function buildTomTomSearchUrl({ apiKey, latitude, longitude, radiusMiles = 10, l
         lat: String(latitude),
         lon: String(longitude),
         radius: String(milesToMeters(radiusMiles)),
+        categorySet: TOMTOM_PETROL_CATEGORY_ID,
         limit: String(Math.max(1, Math.round(limit))),
     });
 
-    return `https://api.tomtom.com/search/2/categorySearch/${encodeURIComponent('gas station')}.json?${params.toString()}`;
+    return `https://api.tomtom.com/search/2/categorySearch/${encodeURIComponent('petrol station')}.json?${params.toString()}`;
 }
 
 function buildTomTomPlaceUrl({ apiKey, entityId }) {
@@ -120,6 +124,43 @@ function buildBarchartUrl({
     }
 
     return `https://ondemand.websol.barchart.com/getFuelPrices.json?${params.toString()}`;
+}
+
+function buildCardogUrl({ latitude, longitude, fuelType = 'regular' }) {
+    const params = new URLSearchParams({
+        country: 'US',
+        latitude: String(latitude),
+        longitude: String(longitude),
+    });
+
+    return `https://api.cardog.io/v1/fuel/${encodeURIComponent(normalizeFuelTypeName(fuelType))}?${params.toString()}`;
+}
+
+function buildGoogleNearbySearchRequest({ latitude, longitude, radiusMiles = 10 }) {
+    return {
+        body: {
+            includedTypes: ['gas_station'],
+            rankPreference: 'DISTANCE',
+            maxResultCount: 8,
+            locationRestriction: {
+                circle: {
+                    center: {
+                        latitude: Number(latitude),
+                        longitude: Number(longitude),
+                    },
+                    radius: milesToMeters(radiusMiles),
+                },
+            },
+        },
+        fieldMask: [
+            'places.id',
+            'places.displayName',
+            'places.formattedAddress',
+            'places.location',
+            'places.fuelOptions',
+        ].join(','),
+        url: 'https://places.googleapis.com/v1/places:searchNearby',
+    };
 }
 
 function toRadians(value) {
@@ -249,6 +290,7 @@ function createQuote({
     longitude,
     fuelType,
     price,
+    allPrices = {},
     updatedAt = null,
     currency = USD,
     isEstimated,
@@ -265,6 +307,7 @@ function createQuote({
         longitude: toFiniteNumber(longitude),
         fuelType: normalizeFuelTypeName(fuelType),
         price: Number(Number(price).toFixed(3)),
+        allPrices,
         currency: currency || USD,
         priceUnit: GALLON,
         distanceMiles: calculateDistanceMiles(origin, { latitude, longitude }),
@@ -350,7 +393,80 @@ function normalizeBarchartResponse({ origin, fuelType, payload }) {
         })
         .filter(Boolean);
 
-    return selectLowestPricedQuote(normalizedEntries);
+    return normalizedEntries;
+}
+
+function extractGoogleMoneyValue(priceValue) {
+    if (!priceValue) {
+        return null;
+    }
+
+    if (toFiniteNumber(priceValue) !== null) {
+        return toFiniteNumber(priceValue);
+    }
+
+    const units = toFiniteNumber(priceValue.units) || 0;
+    const nanos = toFiniteNumber(priceValue.nanos) || 0;
+    const combinedValue = units + nanos / 1000000000;
+
+    return Number.isFinite(combinedValue) ? combinedValue : null;
+}
+
+function normalizeGooglePlacesResponse({ origin, fuelType, payload }) {
+    const places = Array.isArray(payload?.places) ? payload.places : [];
+
+    if (!places.length) {
+        return null;
+    }
+
+    const quotes = places
+        .map(place => {
+            const fuelEntries = Array.isArray(place?.fuelOptions?.fuelPrices) ? place.fuelOptions.fuelPrices : [];
+            const matchingEntry =
+                fuelEntries.find(entry =>
+                    doesFuelNameMatch(
+                        fuelType,
+                        pickFirstDefined([entry?.type, entry?.fuelType, entry?.name, entry?.productName])
+                    )
+                ) || fuelEntries[0];
+            const priceValue = extractGoogleMoneyValue(pickFirstDefined([matchingEntry?.price, matchingEntry?.amount]));
+
+            if (priceValue === null) {
+                return null;
+            }
+
+            const midgradeEntry = fuelEntries.find(entry => doesFuelNameMatch('midgrade', pickFirstDefined([entry?.type, entry?.fuelType, entry?.name, entry?.productName])));
+            const premiumEntry = fuelEntries.find(entry => doesFuelNameMatch('premium', pickFirstDefined([entry?.type, entry?.fuelType, entry?.name, entry?.productName])));
+
+            const midgradePrice = extractGoogleMoneyValue(pickFirstDefined([midgradeEntry?.price, midgradeEntry?.amount]));
+            const premiumPrice = extractGoogleMoneyValue(pickFirstDefined([premiumEntry?.price, premiumEntry?.amount]));
+
+            const allPrices = {};
+            if (priceValue !== null) allPrices.regular = priceValue;
+            if (midgradePrice !== null) allPrices.midgrade = midgradePrice;
+            if (premiumPrice !== null) allPrices.premium = premiumPrice;
+
+            return createQuote({
+                providerId: 'google',
+                providerTier: 'station',
+                stationId: place?.id || null,
+                stationName: pickFirstDefined([place?.displayName?.text, place?.displayName, 'Gas station']),
+                address: pickFirstDefined([place?.formattedAddress, 'Nearby fuel station']),
+                latitude: pickFirstDefined([place?.location?.latitude, place?.location?.lat]),
+                longitude: pickFirstDefined([place?.location?.longitude, place?.location?.lng]),
+                fuelType,
+                price: priceValue,
+                allPrices,
+                updatedAt: pickFirstDefined([matchingEntry?.updateTime, matchingEntry?.updatedAt]),
+                currency: pickFirstDefined([matchingEntry?.price?.currencyCode, matchingEntry?.currencyCode, USD]),
+                isEstimated: false,
+                sourceLabel: PROVIDER_LABELS.google,
+                origin,
+            });
+        })
+        .filter(Boolean);
+
+    return quotes;
 }
 
 function createAreaQuote({ origin, providerId, fuelType, price, updatedAt, stationName, address }) {
@@ -373,6 +489,40 @@ function createAreaQuote({ origin, providerId, fuelType, price, updatedAt, stati
         isEstimated: true,
         sourceLabel: PROVIDER_LABELS[providerId],
         origin,
+    });
+}
+
+function normalizeCardogResponse({ origin, fuelType, payload }) {
+    const currentSection = payload?.current || payload?.data?.current || payload?.gasPrice || payload?.currentPrice || payload;
+    const areaPrice = pickFirstDefined([
+        currentSection?.price,
+        currentSection?.regular,
+        currentSection?.amount,
+        payload?.average,
+        payload?.averagePrice,
+        payload?.regular,
+        payload?.price,
+    ]);
+    const locationLabel = pickFirstDefined([
+        payload?.location?.city,
+        payload?.location?.displayName,
+        payload?.city,
+        payload?.state,
+        'Current area average',
+    ]);
+
+    return createAreaQuote({
+        origin,
+        providerId: 'cardog',
+        fuelType,
+        price: areaPrice,
+        updatedAt: pickFirstDefined([
+            payload?.updatedAt,
+            payload?.timestamp,
+            currentSection?.updatedAt,
+        ]),
+        stationName: 'Cardog market price',
+        address: locationLabel,
     });
 }
 
@@ -438,21 +588,48 @@ function selectPreferredQuote(quotes) {
     return null;
 }
 
+function getFuelFailureMessage({ reason, debugState } = {}) {
+    if (reason === 'invalid-manual-location') {
+        return 'The manual location is invalid. Check the latitude and longitude you entered.';
+    }
+
+    const providerStates = Array.isArray(debugState?.providers) ? debugState.providers : [];
+    const stationProviders = providerStates.filter(provider => provider.providerTier === 'station');
+    const enabledProviders = stationProviders.filter(provider => provider.enabled);
+
+    if (!enabledProviders.length) {
+        return 'No station price provider is configured. Add a live API key in Settings.';
+    }
+
+    const hasLocationIssue = enabledProviders.some(provider => provider.failureCategory === 'location');
+
+    if (hasLocationIssue) {
+        return 'The selected location did not return nearby gas stations. Check the coordinates being sent to the API.';
+    }
+
+    return 'No prices returned. Live station feeds did not return a usable nearby price.';
+}
+
 module.exports = {
     PROVIDER_LABELS,
     buildBarchartUrl,
     buildCacheKey,
+    buildCardogUrl,
+    buildGoogleNearbySearchRequest,
     buildTomTomFuelPriceUrl,
     buildTomTomPlaceUrl,
     buildTomTomSearchUrl,
     calculateDistanceMiles,
     doesFuelNameMatch,
     formatFuelProductName,
+    getFuelFailureMessage,
     isCacheEntryFresh,
     normalizeBarchartResponse,
     normalizeBlsResponse,
+    normalizeCardogResponse,
     normalizeEiaResponse,
     normalizeFredResponse,
+    normalizeGooglePlacesResponse,
     normalizeTomTomStationBundle,
     pickFirstDefined,
     selectLowestPricedQuote,

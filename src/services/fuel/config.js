@@ -36,6 +36,8 @@ function getFuelServiceConfig() {
         areaCacheTtlMs: AREA_CACHE_TTL_MS,
         tomTomApiKey: process.env.EXPO_PUBLIC_TOMTOM_API_KEY || '',
         barchartApiKey: process.env.EXPO_PUBLIC_BARCHART_API_KEY || '',
+        googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+        cardogApiKey: process.env.EXPO_PUBLIC_CARDOG_API_KEY || '',
         eiaApiKey: process.env.EXPO_PUBLIC_EIA_API_KEY || '',
         fredApiKey: process.env.EXPO_PUBLIC_FRED_API_KEY || '',
     };

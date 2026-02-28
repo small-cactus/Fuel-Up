@@ -4,12 +4,15 @@ const assert = require('node:assert/strict');
 const {
     buildCacheKey,
     buildBarchartUrl,
+    buildGoogleNearbySearchRequest,
     buildTomTomSearchUrl,
+    getFuelFailureMessage,
     isCacheEntryFresh,
     normalizeBarchartResponse,
     normalizeBlsResponse,
     normalizeEiaResponse,
     normalizeFredResponse,
+    normalizeGooglePlacesResponse,
     normalizeTomTomStationBundle,
     selectPreferredQuote,
 } = require('../src/services/fuel/core');
@@ -28,11 +31,12 @@ test('buildTomTomSearchUrl produces a location-scoped station search request', (
         limit: 6,
     });
 
-    assert.match(url, /categorySearch\/gas%20station\.json/);
+    assert.match(url, /categorySearch\/petrol%20station\.json/);
     assert.match(url, /key=demo-key/);
     assert.match(url, /lat=40\.7128/);
     assert.match(url, /lon=-74\.006/);
     assert.match(url, /radius=12875/);
+    assert.match(url, /categorySet=7311/);
     assert.match(url, /limit=6/);
 });
 
@@ -143,6 +147,54 @@ test('Barchart payload normalizes and filters to the requested fuel type', () =>
     assert.equal(quote.stationId, 'A1');
     assert.equal(quote.stationName, 'Speedway');
     assert.equal(quote.price, 3.099);
+    assert.equal(quote.isEstimated, false);
+});
+
+test('Google nearby search request and payload normalize into a station quote', () => {
+    const request = buildGoogleNearbySearchRequest({
+        latitude: origin.latitude,
+        longitude: origin.longitude,
+        radiusMiles: 5,
+    });
+    const quote = normalizeGooglePlacesResponse({
+        origin,
+        fuelType: 'regular',
+        payload: {
+            places: [
+                {
+                    id: 'google-station-1',
+                    displayName: {
+                        text: 'BP',
+                    },
+                    formattedAddress: '1 Wall St, New York, NY',
+                    location: {
+                        latitude: 40.7074,
+                        longitude: -74.0113,
+                    },
+                    fuelOptions: {
+                        fuelPrices: [
+                            {
+                                type: 'REGULAR_UNLEADED',
+                                price: {
+                                    currencyCode: 'USD',
+                                    units: 3,
+                                    nanos: 129000000,
+                                },
+                                updateTime: '2026-02-28T09:30:00Z',
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+    });
+
+    assert.equal(request.url, 'https://places.googleapis.com/v1/places:searchNearby');
+    assert.deepEqual(request.body.includedTypes, ['gas_station']);
+    assert.ok(request.fieldMask.includes('places.fuelOptions'));
+    assert.equal(quote.providerId, 'google');
+    assert.equal(quote.stationId, 'google-station-1');
+    assert.equal(quote.price, 3.129);
     assert.equal(quote.isEstimated, false);
 });
 
@@ -291,6 +343,34 @@ test('No station quotes means no preferred quote is returned', () => {
     ]);
 
     assert.equal(bestQuote, null);
+});
+
+test('Fuel failure messaging distinguishes bad location from missing station prices', () => {
+    const locationMessage = getFuelFailureMessage({
+        debugState: {
+            providers: [
+                {
+                    enabled: true,
+                    providerTier: 'station',
+                    failureCategory: 'location',
+                },
+            ],
+        },
+    });
+    const priceMessage = getFuelFailureMessage({
+        debugState: {
+            providers: [
+                {
+                    enabled: true,
+                    providerTier: 'station',
+                    failureCategory: 'price',
+                },
+            ],
+        },
+    });
+
+    assert.match(locationMessage, /did not return nearby gas stations/i);
+    assert.match(priceMessage, /no prices returned/i);
 });
 
 test('cache keys are bucketed by search region and freshness respects the ttl', () => {

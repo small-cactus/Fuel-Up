@@ -2,6 +2,8 @@ import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { GlassContainer, GlassView } from 'expo-glass-effect';
 
+import { SymbolView } from 'expo-symbols';
+
 function formatPrice(price) {
     if (typeof price !== 'number' || Number.isNaN(price)) {
         return '--';
@@ -22,6 +24,20 @@ function formatDistance(distanceMiles) {
     return `${distanceMiles.toFixed(1)} mi away`;
 }
 
+function formatRelativeTime(updatedAt) {
+    if (!updatedAt) return 'Unknown';
+    const updated = new Date(updatedAt).getTime();
+    const now = Date.now();
+    const diffMins = Math.floor((now - updated) / 60000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays}d ago`;
+}
+
 export default function FuelSummaryCard({
     isDark,
     isRefreshing,
@@ -29,9 +45,10 @@ export default function FuelSummaryCard({
     quote,
     benchmarkQuote,
     themeColors,
+    rank,
 }) {
     const hasFailureState = !quote && Boolean(errorMsg);
-    const title = hasFailureState ? 'No Prices Returned' : 'Cheapest Nearby';
+    const title = hasFailureState ? 'No Prices Returned' : quote?.stationName || 'Cheapest Nearby';
     const subtitle = quote ? formatDistance(quote?.distanceMiles) : null;
     const benchmarkLine =
         benchmarkQuote && quote && benchmarkQuote.providerId !== quote.providerId
@@ -44,25 +61,52 @@ export default function FuelSummaryCard({
                 style={styles.card}
                 tintColor={isDark ? '#000000' : '#FFFFFF'}
                 glassEffectStyle={{
-                    style: 'clear',
+                    style: 'regular',
                     animate: true,
                     animationDuration: 0.2,
                 }}
                 key={isDark ? 'dark' : 'light'}
             >
                 <View style={styles.headerRow}>
-                    <Text style={[styles.cardTitle, { color: themeColors.text }]}>{title}</Text>
+                    <View style={styles.titleContainer}>
+                        {rank ? (
+                            <View style={[styles.rankBadge, { backgroundColor: themeColors.text }]}>
+                                <Text style={[styles.rankText, { color: themeColors.background }]}>#{rank}</Text>
+                            </View>
+                        ) : null}
+                        <Text style={[styles.cardTitle, { color: themeColors.text }]} numberOfLines={1}>{title}</Text>
+                    </View>
                     {isRefreshing ? <ActivityIndicator size="small" color={themeColors.text} /> : null}
                 </View>
 
-                <Text style={[styles.cardPrice, { color: themeColors.text }]}>
-                    ${formatPrice(quote?.price)} <Text style={styles.cardPriceUnit}>/gal</Text>
-                </Text>
+                <View style={styles.pricesRow}>
+                    <View style={styles.priceColumn}>
+                        <Text style={[styles.priceLabel, { color: themeColors.text }]}>Regular</Text>
+                        <Text style={[styles.cardPrice, { color: '#168B57' }]}>
+                            ${formatPrice(quote?.price)}
+                        </Text>
+                    </View>
+
+                    {quote?.allPrices?.midgrade && (
+                        <View style={styles.priceColumn}>
+                            <Text style={[styles.priceLabel, { color: themeColors.text }]}>Mid</Text>
+                            <Text style={[styles.cardPrice, { color: themeColors.text }]}>
+                                ${formatPrice(quote.allPrices.midgrade)}
+                            </Text>
+                        </View>
+                    )}
+
+                    {quote?.allPrices?.premium && (
+                        <View style={styles.priceColumn}>
+                            <Text style={[styles.priceLabel, { color: themeColors.text }]}>Prem</Text>
+                            <Text style={[styles.cardPrice, { color: themeColors.text }]}>
+                                ${formatPrice(quote.allPrices.premium)}
+                            </Text>
+                        </View>
+                    )}
+                </View>
 
                 <Text style={[styles.cardAddress, { color: themeColors.text }]}>
-                    {quote?.stationName || (hasFailureState ? 'We could not find a nearby station price.' : 'Finding the fastest available fuel feed')}
-                </Text>
-                <Text style={[styles.cardSubtitle, { color: themeColors.text }]}>
                     {quote?.address || (hasFailureState ? 'Try again once live provider data is available.' : 'Checking nearby providers')}
                 </Text>
 
@@ -70,9 +114,18 @@ export default function FuelSummaryCard({
                     <Text style={[styles.cardMeta, { color: themeColors.text }]}>
                         {subtitle || (hasFailureState ? 'No prices returned' : 'Loading your location')}
                     </Text>
-                    {benchmarkLine ? <Text style={[styles.cardMeta, { color: themeColors.text }]}>{benchmarkLine}</Text> : null}
-                    {errorMsg ? <Text style={[styles.cardNotice, { color: themeColors.text }]}>{errorMsg}</Text> : null}
+
+                    {quote?.updatedAt && (
+                        <View style={styles.timeRow}>
+                            <SymbolView name="clock.fill" size={12} tintColor={themeColors.text} style={{ opacity: 0.7 }} />
+                            <Text style={[styles.cardMeta, { color: themeColors.text }]}>
+                                {formatRelativeTime(quote.updatedAt)}
+                            </Text>
+                        </View>
+                    )}
                 </View>
+
+                {errorMsg ? <Text style={[styles.cardNotice, { color: themeColors.text }]}>{errorMsg}</Text> : null}
             </GlassView>
         </GlassContainer>
     );
@@ -81,10 +134,8 @@ export default function FuelSummaryCard({
 const styles = StyleSheet.create({
     cardGroup: {
         width: '100%',
-        maxWidth: 560,
     },
     card: {
-        minHeight: 208,
         padding: 24,
         borderRadius: 32,
         overflow: 'hidden',
@@ -95,42 +146,77 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 12,
+        marginBottom: 12,
+    },
+    titleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+        marginRight: 12,
+    },
+    rankBadge: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 10,
+        marginRight: 8,
+    },
+    rankText: {
+        fontSize: 13,
+        fontWeight: '800',
     },
     cardTitle: {
-        fontSize: 16,
-        fontWeight: '500',
-        marginBottom: 8,
+        fontSize: 18,
+        fontWeight: '700',
+        flex: 1,
     },
-    cardPrice: {
-        fontSize: 36,
-        fontWeight: '800',
+    pricesRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 16,
+        gap: 12,
+    },
+    priceColumn: {
+        flex: 1,
+    },
+    priceLabel: {
+        fontSize: 12,
+        fontWeight: '600',
+        textTransform: 'uppercase',
+        opacity: 0.6,
         marginBottom: 4,
     },
-    cardPriceUnit: {
-        fontSize: 14,
+    cardPrice: {
+        fontSize: 24,
+        fontWeight: '800',
     },
     cardAddress: {
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    cardSubtitle: {
         fontSize: 13,
-        marginTop: 4,
-        opacity: 0.7,
+        fontWeight: '500',
+        opacity: 0.8,
+        marginBottom: 16,
     },
     footerBlock: {
-        marginTop: 16,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: 'rgba(150, 150, 150, 0.3)',
+        paddingTop: 12,
+    },
+    timeRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
         gap: 4,
     },
     cardMeta: {
         fontSize: 12,
-        lineHeight: 18,
-        opacity: 0.82,
+        fontWeight: '500',
+        opacity: 0.7,
     },
     cardNotice: {
         fontSize: 12,
         lineHeight: 18,
-        marginTop: 6,
+        marginTop: 12,
         opacity: 0.88,
     },
 });
