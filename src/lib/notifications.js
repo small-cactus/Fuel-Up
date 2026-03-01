@@ -101,6 +101,7 @@ export async function scheduleTestNotification(title, body, delaySeconds = 0) {
         } : null,
     };
 
+    await Notifications.scheduleNotificationAsync(notificationConfig);
 }
 
 // ==========================================

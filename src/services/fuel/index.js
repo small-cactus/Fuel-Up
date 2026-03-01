@@ -976,8 +976,7 @@ async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMi
         });
 
         const topStations = Array.from(uniqueQuotesMap.values())
-            .sort((a, b) => a.price - b.price || a.distanceMiles - b.distanceMiles)
-            .slice(0, 3);
+            .sort((a, b) => a.price - b.price || a.distanceMiles - b.distanceMiles);
 
         const bestQuote = selectPreferredQuote(allQuotes);
         const supplementalQuotes = allQuotes.filter(quote => quote.providerTier === 'area');

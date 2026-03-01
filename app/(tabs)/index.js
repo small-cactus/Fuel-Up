@@ -3,7 +3,7 @@ import { FlatList, Pressable, StyleSheet, Text, View, Dimensions } from 'react-n
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { GlassView } from 'expo-glass-effect';
+import { GlassView, GlassContainer } from 'expo-glass-effect';
 import { SymbolView } from 'expo-symbols';
 import * as Location from 'expo-location';
 import MapView, { Marker, PROVIDER_APPLE } from 'react-native-maps';
@@ -19,9 +19,15 @@ import Animated, {
     useSharedValue,
     useAnimatedScrollHandler,
     useAnimatedStyle,
+    useAnimatedProps,
     interpolate,
     Extrapolate,
-    interpolateColor
+    interpolateColor,
+    FadeIn,
+    FadeOut,
+    ZoomIn,
+    ZoomOut,
+    withTiming
 } from 'react-native-reanimated';
 
 const AnimatedGlassView = Animated.createAnimatedComponent(GlassView);
@@ -37,9 +43,17 @@ const CARD_GAP = 0;
 const SIDE_MARGIN = 16;
 const TOP_CANOPY_HEIGHT = 72;
 
-function AnimatedMarkerOverlay({ quote, index, isCheapest, isActive, scrollX, itemWidth, isDark, themeColors }) {
+function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColors, activeIndex, onMarkerPress }) {
+    const { quotes, averageLat, averageLng } = cluster;
+
+    // A cluster is considered active if any of its station indices matches the activeIndex
+    const isActive = quotes.some(q => q.originalIndex === activeIndex);
+    const isCheapestAcrossAll = quotes.some(q => q.originalIndex === 0);
+
     const animatedOverlayStyle = useAnimatedStyle(() => {
-        const inputRange = [(index - 1) * itemWidth, index * itemWidth, (index + 1) * itemWidth];
+        // We use the first quote's index for the scroll interpolation base
+        const baseIndex = quotes[0].originalIndex;
+        const inputRange = [(baseIndex - 1) * itemWidth, baseIndex * itemWidth, (baseIndex + 1) * itemWidth];
 
         const borderWidth = interpolate(
             scrollX.value,
@@ -48,7 +62,7 @@ function AnimatedMarkerOverlay({ quote, index, isCheapest, isActive, scrollX, it
             Extrapolate.CLAMP
         );
 
-        const activeBorderColor = isCheapest ? '#007AFF' : (isDark ? '#FFFFFF' : '#000000');
+        const activeBorderColor = isCheapestAcrossAll ? '#007AFF' : (isDark ? '#FFFFFF' : '#000000');
         const borderColor = interpolateColor(
             scrollX.value,
             inputRange,
@@ -62,8 +76,9 @@ function AnimatedMarkerOverlay({ quote, index, isCheapest, isActive, scrollX, it
     });
 
     const animatedTextStyle = useAnimatedStyle(() => {
-        if (isCheapest) return { color: '#007AFF' };
-        const inputRange = [(index - 1) * itemWidth, index * itemWidth, (index + 1) * itemWidth];
+        if (isCheapestAcrossAll) return { color: '#007AFF' };
+        const baseIndex = quotes[0].originalIndex;
+        const inputRange = [(baseIndex - 1) * itemWidth, baseIndex * itemWidth, (baseIndex + 1) * itemWidth];
         const color = interpolateColor(
             scrollX.value,
             inputRange,
@@ -72,40 +87,94 @@ function AnimatedMarkerOverlay({ quote, index, isCheapest, isActive, scrollX, it
         return { color };
     });
 
+    // Determine what to render inside the chip
+    const primaryQuote = quotes[0];
+    const isMultiQuote = quotes.length > 1;
+
+    // Native Glass blur state
+    const [glassConfig, setGlassConfig] = useState({
+        style: 'none',
+        animate: false
+    });
+
+    // Content fade-in animation
+    const mountAnim = useSharedValue(0);
+
+    useEffect(() => {
+        // Fade in text content
+        mountAnim.value = withTiming(1, { duration: 300 });
+
+        // Trigger native glass blur animation slightly after mount
+        const timer = setTimeout(() => {
+            setGlassConfig({
+                style: 'clear',
+                animate: true,
+                animationDuration: 0.3
+            });
+        }, 16);
+
+        return () => clearTimeout(timer);
+    }, []);
+
+    const animatedContentStyle = useAnimatedStyle(() => {
+        return {
+            opacity: mountAnim.value,
+            transform: [{ scale: interpolate(mountAnim.value, [0, 1], [0.8, 1]) }]
+        };
+    });
+
     return (
         <Marker
-            key={quote.stationId || index}
+            key={quotes.map(q => q.stationId).join('-')}
             coordinate={{
-                latitude: quote.latitude,
-                longitude: quote.longitude,
+                latitude: averageLat,
+                longitude: averageLng,
             }}
-            style={{ zIndex: isActive ? 3 : isCheapest ? 2 : 1 }}
+            onPress={() => onMarkerPress(cluster)}
+            style={{ zIndex: isActive ? 3 : isCheapestAcrossAll ? 2 : 1 }}
+            tracksViewChanges={true}
         >
-            <AnimatedGlassView
-                glassEffectStyle="clear"
-                tintColor={isDark ? '#000000' : '#FFFFFF'}
-                key={isDark ? `marker-dark-${index}` : `marker-light-${index}`}
-                style={[
-                    styles.priceOverlay,
-                    animatedOverlayStyle,
-                ]}
-            >
-                <SymbolView
-                    name="fuelpump.fill"
-                    size={14}
-                    tintColor={isCheapest ? '#007AFF' : (isActive ? themeColors.text : '#888888')}
-                    style={styles.priceIcon}
-                />
-                <Animated.Text
+            <GlassContainer spacing={10}>
+                <AnimatedGlassView
+                    glassEffectStyle={glassConfig}
+                    tintColor={isDark ? '#000000' : '#FFFFFF'}
                     style={[
-                        styles.priceText,
-                        isCheapest && styles.bestPriceText,
-                        animatedTextStyle,
+                        styles.priceOverlay,
+                        animatedOverlayStyle,
                     ]}
                 >
-                    ${quote.price.toFixed(2)}
-                </Animated.Text>
-            </AnimatedGlassView>
+                    <Animated.View style={[styles.rowItem, animatedContentStyle]}>
+                        <SymbolView
+                            name="fuelpump.fill"
+                            size={14}
+                            tintColor={primaryQuote.originalIndex === 0 ? '#007AFF' : (primaryQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
+                            style={styles.priceIcon}
+                        />
+                        <Animated.Text
+                            style={[
+                                styles.priceText,
+                                primaryQuote.originalIndex === 0 && styles.bestPriceText,
+                                animatedTextStyle,
+                            ]}
+                        >
+                            ${primaryQuote.price.toFixed(2)}
+                        </Animated.Text>
+
+                        {isMultiQuote && (
+                            <>
+                                <Text style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)', fontSize: 12, marginHorizontal: 6 }}>|</Text>
+                                <Animated.Text
+                                    style={[
+                                        styles.priceText,
+                                        animatedTextStyle,
+                                    ]}
+                                >
+                                    +{quotes.length - 1}
+                                </Animated.Text>
+                        )}
+                            </Animated.View>
+                </AnimatedGlassView>
+            </GlassContainer>
         </Marker>
     );
 }
@@ -156,6 +225,7 @@ function AnimatedCardItem({ item, index, scrollX, itemWidth, isDark, benchmarkQu
 
 export default function HomeScreen() {
     const mapRef = useRef(null);
+    const flatListRef = useRef(null);
     const isMountedRef = useRef(true);
     const isFocused = useIsFocused();
     const insets = useSafeAreaInsets();
@@ -171,6 +241,7 @@ export default function HomeScreen() {
     const [isRefreshingPrices, setIsRefreshingPrices] = useState(false);
     const [hasLocationPermission, setHasLocationPermission] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
+    const [mapRegion, setMapRegion] = useState(DEFAULT_REGION);
     const router = useRouter();
     const scrollX = useSharedValue(0);
 
@@ -458,8 +529,113 @@ export default function HomeScreen() {
     }).current;
 
     const minRating = preferences.minimumRating || 0;
-    const top3Quotes = (topStations.length > 0 ? topStations : (bestQuote ? [bestQuote] : []))
-        .filter(q => minRating === 0 || (q.rating != null && q.rating >= minRating));
+    const stationQuotes = (topStations.length > 0 ? topStations : (bestQuote ? [bestQuote] : []))
+        .filter(q => minRating === 0 || (q.rating != null && q.rating >= minRating))
+        .map((q, idx) => ({ ...q, originalIndex: idx }));
+
+    const clusters = useMemo(() => {
+        if (stationQuotes.length === 0) return [];
+
+        const latDelta = mapRegion.latitudeDelta || 0.05;
+        const lngDelta = mapRegion.longitudeDelta || 0.05;
+
+        // Visual thresholds based on chip pixel dimensions (approx 120x40)
+        // More vertically sensitive
+        const chipLatHeight = latDelta * 0.04;
+        const chipLngWidth = lngDelta * 0.20;
+
+        const cheapestStation = stationQuotes[0];
+        const others = stationQuotes.slice(1);
+
+        const finalClusters = [];
+
+        // 1. Cheapest station is always standalone
+        finalClusters.push({
+            quotes: [cheapestStation],
+            averageLat: cheapestStation.latitude,
+            averageLng: cheapestStation.longitude,
+        });
+
+        // 2. Group all other overlapping stations together
+        others.forEach(quote => {
+            let grouped = false;
+            for (const cluster of finalClusters) {
+                // Don't group with the absolute cheapest standalone station
+                if (cluster.quotes[0].originalIndex === 0) continue;
+
+                const latDiff = Math.abs(cluster.averageLat - quote.latitude);
+                const lngDiff = Math.abs(cluster.averageLng - quote.longitude);
+
+                // If within physical overlap bounds, swallow into cluster
+                if (latDiff < chipLatHeight && lngDiff < chipLngWidth) {
+                    cluster.quotes.push(quote);
+                    // Dynamically update center of mass
+                    cluster.averageLat = cluster.quotes.reduce((sum, q) => sum + q.latitude, 0) / cluster.quotes.length;
+                    cluster.averageLng = cluster.quotes.reduce((sum, q) => sum + q.longitude, 0) / cluster.quotes.length;
+                    grouped = true;
+                    break;
+                }
+            }
+
+            if (!grouped) {
+                finalClusters.push({
+                    quotes: [quote],
+                    averageLat: quote.latitude,
+                    averageLng: quote.longitude,
+                });
+            }
+        });
+
+        // Ensure quotes inside clusters are sorted by price ascending (just in case)
+        finalClusters.forEach(cluster => {
+            if (cluster.quotes.length > 1) {
+                cluster.quotes.sort((a, b) => a.price - b.price);
+            }
+        });
+
+        return finalClusters;
+    }, [stationQuotes, mapRegion.latitudeDelta, mapRegion.longitudeDelta]);
+
+    const handleMarkerPress = (cluster) => {
+        const primaryQuote = cluster.quotes[0];
+        const index = primaryQuote.originalIndex;
+
+        isUserScrollingRef.current = false; // Prevent map feedback loop
+        flatListRef.current?.scrollToOffset({
+            offset: index * itemWidth,
+            animated: true,
+        });
+        setActiveIndex(index);
+
+        // If it's a cluster, zoom in to naturally separate them
+        if (cluster.quotes.length > 1 && mapRef.current) {
+            // Find the maximum spread of the cluster to determine how far to zoom in
+            const lats = cluster.quotes.map(q => q.latitude);
+            const lngs = cluster.quotes.map(q => q.longitude);
+
+            const maxLat = Math.max(...lats);
+            const minLat = Math.min(...lats);
+            const maxLng = Math.max(...lngs);
+            const minLng = Math.min(...lngs);
+
+            const latSpread = maxLat - minLat;
+            const lngSpread = maxLng - minLng;
+
+            // Zoom out far enough so we can comfortably see all separated icons around the center
+            // A multiplier of 5-6 ensures the cluster spread occupies only a fraction of the screen, safely unmerging them
+            const targetLatDelta = Math.max(latSpread * 6, 0.03);
+            const targetLngDelta = Math.max(lngSpread * 6, 0.03);
+
+            isAnimatingRef.current = true;
+            mapRef.current.animateToRegion({
+                latitude: cluster.averageLat,
+                longitude: cluster.averageLng,
+                latitudeDelta: targetLatDelta,
+                longitudeDelta: targetLngDelta,
+            }, 600);
+        }
+    };
+
     const { width } = Dimensions.get('window');
 
     // We want the card to be almost full width, minus some padding to peek the next card.
@@ -469,15 +645,17 @@ export default function HomeScreen() {
 
     const lastDataHashRef = useRef('');
     const isUserScrollingRef = useRef(false);
+    const isAnimatingRef = useRef(false);
     const prevIsFocusedRef = useRef(isFocused);
 
     useEffect(() => {
         const wasFocused = prevIsFocusedRef.current;
         prevIsFocusedRef.current = isFocused;
 
-        if (!mapRef.current || top3Quotes.length === 0) return;
+        if (!mapRef.current || stationQuotes.length === 0 || isAnimatingRef.current) return;
 
-        const currentHash = top3Quotes.map(q => q.stationId).join(',');
+        // Use ONLY stationQuotes for the data hash to avoid feedback loops from zooming
+        const currentHash = stationQuotes.map(q => q.stationId).join(',');
         const isFocusGained = isFocused && !wasFocused;
         const isNewData = currentHash !== lastDataHashRef.current;
 
@@ -485,14 +663,14 @@ export default function HomeScreen() {
             lastDataHashRef.current = currentHash;
             isUserScrollingRef.current = false;
 
+            // Frame all stations (since clusters are dynamic and zoom-dependent)
             const coords = [
                 { latitude: location.latitude, longitude: location.longitude },
-                ...top3Quotes
-                    .filter(q => q.latitude && q.longitude)
-                    .map(q => ({ latitude: q.latitude, longitude: q.longitude }))
+                ...stationQuotes.filter(q => q.latitude && q.longitude).map(q => ({ latitude: q.latitude, longitude: q.longitude }))
             ];
 
             if (coords.length > 1) {
+                isAnimatingRef.current = true;
                 setTimeout(() => {
                     mapRef.current?.fitToCoordinates(coords, {
                         edgePadding: { top: 120, right: 60, bottom: bottomPadding + 160, left: 60 },
@@ -500,9 +678,10 @@ export default function HomeScreen() {
                     });
                 }, 100);
             }
-        } else if (isUserScrollingRef.current && activeIndex >= 0 && activeIndex < top3Quotes.length) {
-            const activeQuote = top3Quotes[activeIndex];
+        } else if (isUserScrollingRef.current && activeIndex >= 0 && activeIndex < stationQuotes.length) {
+            const activeQuote = stationQuotes[activeIndex];
             if (activeQuote.latitude && activeQuote.longitude) {
+                isAnimatingRef.current = true;
                 mapRef.current.animateToRegion({
                     latitude: activeQuote.latitude,
                     longitude: activeQuote.longitude,
@@ -511,7 +690,7 @@ export default function HomeScreen() {
                 }, 400);
             }
         }
-    }, [activeIndex, top3Quotes, location, bottomPadding, isFocused]);
+    }, [activeIndex, stationQuotes, location, bottomPadding, isFocused]);
 
     const fallbackCoordinate = {
         latitude: location.latitude,
@@ -528,19 +707,28 @@ export default function HomeScreen() {
                 provider={PROVIDER_APPLE}
                 showsUserLocation={hasLocationPermission}
                 userInterfaceStyle={isDark ? 'dark' : 'light'}
+                onRegionChange={(region) => {
+                    // Precompute clusters during scroll for real-time combination, but don't save to state if animating
+                    if (!isAnimatingRef.current) {
+                        setMapRegion(region);
+                    }
+                }}
+                onRegionChangeComplete={(region) => {
+                    setMapRegion(region);
+                    isAnimatingRef.current = false;
+                }}
             >
-                {top3Quotes.length > 0 ? (
-                    top3Quotes.map((quote, index) => (
+                {clusters.length > 0 ? (
+                    clusters.map((cluster, index) => (
                         <AnimatedMarkerOverlay
-                            key={quote.stationId || index}
-                            quote={quote}
-                            index={index}
-                            isCheapest={index === 0}
-                            isActive={index === activeIndex}
+                            key={cluster.quotes.map(q => q.stationId).join('-')}
+                            cluster={cluster}
                             scrollX={scrollX}
                             itemWidth={itemWidth}
                             isDark={isDark}
                             themeColors={themeColors}
+                            activeIndex={activeIndex}
+                            onMarkerPress={handleMarkerPress}
                         />
                     ))
                 ) : (
@@ -624,7 +812,7 @@ export default function HomeScreen() {
                             router.push({
                                 pathname: '/prices-sheet',
                                 params: {
-                                    quotesData: top3Quotes.length > 0 ? JSON.stringify(top3Quotes) : JSON.stringify([bestQuote].filter(Boolean)),
+                                    quotesData: stationQuotes.length > 0 ? JSON.stringify(stationQuotes) : JSON.stringify([bestQuote].filter(Boolean)),
                                     benchmarkData: benchmarkQuote ? JSON.stringify(benchmarkQuote) : null,
                                     errorMsg: errorMsg || '',
                                 },
@@ -638,22 +826,26 @@ export default function HomeScreen() {
                             style={styles.sheetTriggerButton}
                         >
                             <Text style={[styles.sheetTriggerText, { color: themeColors.text }]}>
-                                {top3Quotes.length > 0 ? `View Top ${top3Quotes.length} Stations` : 'View Gas Stations'}
+                                {stationQuotes.length > 0 ? `View ${stationQuotes.length} Nearby Stations` : 'View Gas Stations'}
                             </Text>
                             <Ionicons name="chevron-up" size={20} color={themeColors.text} />
                         </GlassView>
                     </Pressable>
-                ) : top3Quotes.length > 0 ? (
+                ) : stationQuotes.length > 0 ? (
                     <Animated.FlatList
-                        data={top3Quotes}
+                        ref={flatListRef}
+                        data={stationQuotes}
                         horizontal
                         showsHorizontalScrollIndicator={false}
                         decelerationRate="fast"
                         keyExtractor={(item, index) => item.stationId || index.toString()}
                         contentContainerStyle={{
                             paddingHorizontal: sideInset,
+                            alignItems: 'center', // Fix bottom padding mismatch 
                         }}
-                        snapToOffsets={top3Quotes.map((_, i) => i * itemWidth)}
+                        snapToInterval={itemWidth} // Precise snapping prevents jitter
+                        snapToAlignment="start"
+                        disableIntervalMomentum={true}
                         onViewableItemsChanged={onViewableItemsChanged}
                         viewabilityConfig={viewabilityConfig}
                         onScrollBeginDrag={() => { isUserScrollingRef.current = true; }}
@@ -753,6 +945,10 @@ const styles = StyleSheet.create({
         borderWidth: StyleSheet.hairlineWidth,
         borderColor: 'rgba(150, 150, 150, 0.4)',
         overflow: 'hidden',
+    },
+    rowItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     priceText: {
         fontSize: 15,

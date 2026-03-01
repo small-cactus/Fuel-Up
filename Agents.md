@@ -25,3 +25,6 @@ The primary objectives of this app are fiercely prioritized as follows:
 
 7. **No Monofiles**: Never use monofiles. All components should be ported from separate files and linked in screens.
    - *Exceptions*: You may include a component in the current file ONLY if it is NEVER to be repeated elsewhere, or if it is so simple that creating a separate file would be more time-consuming than implementing it inline.
+
+8. **Design Rules**:
+   - **Never put borders on liquid glass components**.

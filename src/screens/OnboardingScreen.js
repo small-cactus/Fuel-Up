@@ -43,24 +43,6 @@ const DEMO_STATIONS = [
 const MAP_MARGIN = 0.006; // Inset margin to avoid edge chips
 
 function WelcomeStep({ isDark, themeColors, insets }) {
-    const [visibleStations, setVisibleStations] = useState([]);
-    const [cheapestRevealed, setCheapestRevealed] = useState(false);
-
-    useEffect(() => {
-        let i = 0;
-        const interval = setInterval(() => {
-            if (i < DEMO_STATIONS.length) {
-                const currentIndex = i;
-                setVisibleStations(prev => [...prev, DEMO_STATIONS[currentIndex]]);
-                i++;
-            } else {
-                clearInterval(interval);
-                setTimeout(() => setCheapestRevealed(true), 200);
-            }
-        }, 200);
-        return () => clearInterval(interval);
-    }, []);
-
     const cheapestPrice = Math.min(...DEMO_STATIONS.map(s => s.price));
 
     return (
@@ -76,7 +58,7 @@ function WelcomeStep({ isDark, themeColors, insets }) {
                 pitchEnabled={false}
                 userInterfaceStyle={isDark ? 'dark' : 'light'}
             >
-                {visibleStations.map((station, index) => {
+                {DEMO_STATIONS.map((station, index) => {
                     const isCheapest = station.price === cheapestPrice;
                     // Skip off-screen stations
                     const latMin = DEMO_REGION.latitude - DEMO_REGION.latitudeDelta / 2 + MAP_MARGIN;
@@ -87,34 +69,35 @@ function WelcomeStep({ isDark, themeColors, insets }) {
                         return null;
                     }
 
-                    const chipTint = cheapestRevealed
-                        ? (isCheapest ? '#007AFF' : '#E35D4F')
-                        : (isDark ? '#000000' : '#FFFFFF');
+                    const chipTint = isCheapest ? 'rgba(0, 255, 47, 0.3)' : 'rgba(255, 25, 0, 0.3)';
 
                     return (
                         <Marker
                             key={`demo-${index}`}
                             coordinate={{ latitude: station.lat, longitude: station.lng }}
+                            tracksViewChanges={true}
                         >
                             <GlassView
-                                glassEffectStyle="clear"
                                 tintColor={chipTint}
-                                key={`demo-${isDark ? 'dark' : 'light'}-${index}-${cheapestRevealed ? 'r' : 'u'}`}
+                                glassEffectStyle="clear"
+                                colorScheme={isDark ? 'dark' : 'light'}
+                                isInteractive={false}
+                                key={`demo-${isDark ? 'dark' : 'light'}-${index}`}
                                 style={[
                                     styles.demoChip,
-                                    cheapestRevealed && isCheapest && styles.demoChipCheapest,
+                                    isCheapest && styles.demoChipCheapest,
                                 ]}
                             >
                                 <SymbolView
                                     name="fuelpump.fill"
                                     size={14}
-                                    tintColor={cheapestRevealed ? '#FFFFFF' : '#888888'}
+                                    tintColor="#000000ff"
                                     style={styles.demoChipIcon}
                                 />
                                 <Text style={[
                                     styles.demoChipText,
-                                    { color: cheapestRevealed ? '#FFFFFF' : '#888888' },
-                                    cheapestRevealed && isCheapest && styles.demoChipTextCheapest,
+                                    { color: '#000000ff' },
+                                    isCheapest && styles.demoChipTextCheapest,
                                 ]}>
                                     ${station.price.toFixed(2)}
                                 </Text>
@@ -126,7 +109,7 @@ function WelcomeStep({ isDark, themeColors, insets }) {
 
             {/* Blur canopies — extend further than gradients */}
             <TopCanopy edgeColor={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.42)'} height={insets.top + 300} isDark={isDark} topInset={0} />
-            <BottomCanopy height={420} isDark={isDark} />
+            <BottomCanopy height={270} isDark={isDark} />
 
             {/* White gradients — shorter, sit inside the blur */}
             <LinearGradient
@@ -263,12 +246,11 @@ function OctaneStep({ isDark, themeColors, insets, value, onChange }) {
                         return (
                             <Pressable key={option.key} onPress={() => onChange(option.key)}>
                                 <GlassView
-                                    glassEffectStyle={isSelected ? 'regular' : 'clear'}
                                     tintColor={isDark ? '#000000' : '#FFFFFF'}
                                     key={isDark ? `oct-dark-${option.key}` : `oct-light-${option.key}`}
                                     style={[
                                         styles.octaneCard,
-                                        isSelected && { borderColor: '#007AFF', borderWidth: 2 },
+                                        isSelected && { backgroundColor: isDark ? 'rgba(0,122,255,0.2)' : 'rgba(0,122,255,0.1)' },
                                     ]}
                                 >
                                     <Text style={[styles.octaneNumber, { color: isSelected ? '#007AFF' : themeColors.text }]}>
@@ -309,11 +291,10 @@ function RatingStep({ isDark, themeColors, insets, value, onChange }) {
                     {ratingValues.map(r => (
                         <Pressable key={r} onPress={() => onChange(r)}>
                             <GlassView
-                                glassEffectStyle={r === value ? 'regular' : 'clear'}
                                 tintColor={isDark ? '#000000' : '#FFFFFF'}
                                 style={[
                                     styles.segmentButton,
-                                    r === value && { borderColor: '#FFB800', borderWidth: 2 },
+                                    r === value && { backgroundColor: isDark ? 'rgba(255,184,0,0.2)' : 'rgba(255,184,0,0.1)' },
                                 ]}
                             >
                                 <Text style={[
@@ -614,14 +595,9 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
         borderRadius: 16,
         gap: 6,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: 'rgba(150, 150, 150, 0.4)',
         overflow: 'hidden',
     },
     demoChipCheapest: {
-        borderColor: '#007AFF',
-        borderWidth: 2,
-        transform: [{ scale: 1.2 }],
     },
     demoChipIcon: {
         marginRight: 2,
@@ -660,8 +636,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     segmentButtonActive: {
-        borderColor: '#007AFF',
-        borderWidth: 2,
     },
     segmentText: {
         fontSize: 16,
