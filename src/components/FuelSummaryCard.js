@@ -61,7 +61,7 @@ export default function FuelSummaryCard({
                 style={styles.card}
                 tintColor={isDark ? '#000000' : '#FFFFFF'}
                 glassEffectStyle={{
-                    style: 'regular',
+                    style: 'clear',
                     animate: true,
                     animationDuration: 0.2,
                 }}
@@ -98,7 +98,7 @@ export default function FuelSummaryCard({
                             <Text style={[styles.priceLabel, { color: themeColors.text }]}>Regular</Text>
                             <Text style={[styles.octaneLabel, { color: themeColors.text }]}>87</Text>
                         </View>
-                        <Text style={[styles.cardPrice, { color: '#168B57' }]}>
+                        <Text style={[styles.cardPrice, { color: '#007AFF' }]}>
                             ${formatPrice(quote?.price)}
                         </Text>
                     </View>

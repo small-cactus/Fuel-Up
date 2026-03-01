@@ -4,14 +4,17 @@ const assert = require('node:assert/strict');
 const {
     buildCacheKey,
     buildBarchartUrl,
+    buildGasBuddyGraphQLRequest,
     buildGoogleNearbySearchRequest,
     buildTomTomSearchUrl,
+    GASBUDDY_FUEL_MAP,
     getFuelFailureMessage,
     isCacheEntryFresh,
     normalizeBarchartResponse,
     normalizeBlsResponse,
     normalizeEiaResponse,
     normalizeFredResponse,
+    normalizeGasBuddyResponse,
     normalizeGooglePlacesResponse,
     normalizeTomTomStationBundle,
     selectPreferredQuote,
@@ -112,7 +115,7 @@ test('TomTom station bundle normalizes into an actual station quote', () => {
 });
 
 test('Barchart payload normalizes and filters to the requested fuel type', () => {
-    const quote = normalizeBarchartResponse({
+    const quotes = normalizeBarchartResponse({
         origin,
         fuelType: 'regular',
         payload: {
@@ -143,6 +146,8 @@ test('Barchart payload normalizes and filters to the requested fuel type', () =>
         },
     });
 
+    assert.ok(Array.isArray(quotes));
+    const quote = quotes[0];
     assert.equal(quote.providerId, 'barchart');
     assert.equal(quote.stationId, 'A1');
     assert.equal(quote.stationName, 'Speedway');
@@ -156,7 +161,7 @@ test('Google nearby search request and payload normalize into a station quote', 
         longitude: origin.longitude,
         radiusMiles: 5,
     });
-    const quote = normalizeGooglePlacesResponse({
+    const quotes = normalizeGooglePlacesResponse({
         origin,
         fuelType: 'regular',
         payload: {
@@ -192,6 +197,8 @@ test('Google nearby search request and payload normalize into a station quote', 
     assert.equal(request.url, 'https://places.googleapis.com/v1/places:searchNearby');
     assert.deepEqual(request.body.includedTypes, ['gas_station']);
     assert.ok(request.fieldMask.includes('places.fuelOptions'));
+    assert.ok(Array.isArray(quotes));
+    const quote = quotes[0];
     assert.equal(quote.providerId, 'google');
     assert.equal(quote.stationId, 'google-station-1');
     assert.equal(quote.price, 3.129);
@@ -402,4 +409,140 @@ test('cache keys are bucketed by search region and freshness respects the ttl', 
         ),
         false
     );
+});
+
+test('GasBuddy fuel type mapping covers all app fuel types', () => {
+    assert.ok(GASBUDDY_FUEL_MAP.regular);
+    assert.ok(GASBUDDY_FUEL_MAP.midgrade);
+    assert.ok(GASBUDDY_FUEL_MAP.premium);
+    assert.ok(GASBUDDY_FUEL_MAP.diesel);
+    assert.equal(GASBUDDY_FUEL_MAP.regular.fuelProduct, 'regular_gas');
+    assert.equal(GASBUDDY_FUEL_MAP.premium.fuelId, 3);
+});
+
+test('buildGasBuddyGraphQLRequest produces a valid GraphQL POST config', () => {
+    const config = buildGasBuddyGraphQLRequest({
+        latitude: origin.latitude,
+        longitude: origin.longitude,
+        fuelType: 'regular',
+    });
+
+    assert.equal(config.url, 'https://www.gasbuddy.com/graphql');
+    assert.equal(config.body.operationName, 'LocationBySearchTerm');
+    assert.equal(config.body.variables.fuel, 1);
+    assert.equal(config.body.variables.lat, origin.latitude);
+    assert.equal(config.body.variables.lng, origin.longitude);
+    assert.ok(config.headers['apollo-require-preflight']);
+    assert.ok(config.headers['Origin']);
+    assert.equal(config.fuelProduct, 'regular_gas');
+});
+
+test('GasBuddy GraphQL payload normalizes into station quotes with min(cash,credit)', () => {
+    const quotes = normalizeGasBuddyResponse({
+        origin,
+        fuelType: 'regular',
+        payload: {
+            data: {
+                locationBySearchTerm: {
+                    stations: {
+                        results: [
+                            {
+                                id: 13655,
+                                name: "Sam's Club",
+                                latitude: 40.71,
+                                longitude: -74.01,
+                                brands: [{ name: "Sam's Club" }],
+                                address: {
+                                    line1: '2575 Gulf-to-Bay Blvd',
+                                    locality: 'Clearwater',
+                                    region: 'FL',
+                                    postalCode: '33765',
+                                },
+                                starRating: 4.7,
+                                ratingsCount: 610,
+                                prices: [
+                                    {
+                                        fuelProduct: 'regular_gas',
+                                        cash: null,
+                                        credit: { price: 2.61, postedTime: '2026-03-01T00:16:02.750Z' },
+                                    },
+                                    {
+                                        fuelProduct: 'premium_gas',
+                                        cash: null,
+                                        credit: { price: 3.17, postedTime: '2026-03-01T00:16:02.781Z' },
+                                    },
+                                ],
+                            },
+                            {
+                                id: 281,
+                                name: 'Shell',
+                                latitude: 40.72,
+                                longitude: -74.02,
+                                brands: [{ name: 'Shell' }],
+                                address: {
+                                    line1: '24086 US-19 N',
+                                    locality: 'Clearwater',
+                                    region: 'FL',
+                                    postalCode: '33763',
+                                },
+                                starRating: 4.4,
+                                ratingsCount: 371,
+                                prices: [
+                                    {
+                                        fuelProduct: 'regular_gas',
+                                        cash: { price: 2.77, postedTime: '2026-02-28T17:07:41.189Z' },
+                                        credit: { price: 2.87, postedTime: '2026-02-28T17:07:41.189Z' },
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                },
+            },
+        },
+    });
+
+    assert.ok(Array.isArray(quotes));
+    assert.equal(quotes.length, 2);
+
+    // Sam's Club — credit only
+    assert.equal(quotes[0].providerId, 'gasbuddy');
+    assert.equal(quotes[0].providerTier, 'station');
+    assert.equal(quotes[0].stationName, "Sam's Club");
+    assert.equal(quotes[0].price, 2.61);
+    assert.equal(quotes[0].isEstimated, false);
+    assert.equal(quotes[0].rating, 4.7);
+    assert.equal(quotes[0].latitude, 40.71);
+    assert.equal(quotes[0].longitude, -74.01);
+    assert.ok(quotes[0].allPrices.regular);
+    assert.ok(quotes[0].allPrices.premium);
+
+    // Shell — min(cash, credit) = cash
+    assert.equal(quotes[1].stationName, 'Shell');
+    assert.equal(quotes[1].price, 2.77);
+    assert.equal(quotes[1].latitude, 40.72);
+    assert.equal(quotes[1].longitude, -74.02);
+});
+
+test('GasBuddy station quote wins preferred selection', () => {
+    const bestQuote = selectPreferredQuote([
+        {
+            providerId: 'bls',
+            providerTier: 'area',
+            stationId: null,
+            price: 2.961,
+            isEstimated: true,
+        },
+        {
+            providerId: 'gasbuddy',
+            providerTier: 'station',
+            stationId: '13655',
+            price: 2.61,
+            isEstimated: false,
+            distanceMiles: 1.2,
+        },
+    ]);
+
+    assert.equal(bestQuote.providerId, 'gasbuddy');
+    assert.equal(bestQuote.price, 2.61);
 });

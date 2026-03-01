@@ -4,9 +4,39 @@
     "slug": "fuel-up",
     "scheme": "fuelup",
     "version": "1.0.0",
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "buildReactNativeFromSource": true
+          }
+        }
+      ],
+      "expo-font",
+      "expo-notifications",
+      [
+        "expo-widgets",
+        {
+          "groupIdentifier": "group.com.anthonyh.fuelup",
+          "enablePushNotifications": true,
+          "widgets": [
+            {
+              "name": "PriceDropActivity",
+              "displayName": "Fuel Price Drop",
+              "description": "Live fuel price updates and timers",
+              "supportedFamilies": [
+                "systemSmall",
+                "systemMedium"
+              ]
+            }
+          ]
+        }
+      ]
+    ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -15,11 +45,17 @@
     "ios": {
       "icon": "./fuelup.icon",
       "supportsTablet": true,
-      "bundleIdentifier": "com.fuelup.app",
+      "bundleIdentifier": "com.anthonyh.fuelup",
+      "entitlements": {
+        "aps-environment": "development"
+      },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Fuel Up requires precise location access to function.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Fuel Up requires precise location access to function."
       }
+    },
+    "android": {
+      "package": "com.anthonyh.fuelup"
     }
   }
 }

@@ -48,7 +48,7 @@ function AnimatedMarkerOverlay({ quote, index, isCheapest, isActive, scrollX, it
             Extrapolate.CLAMP
         );
 
-        const activeBorderColor = isCheapest ? '#168B57' : (isDark ? '#FFFFFF' : '#000000');
+        const activeBorderColor = isCheapest ? '#007AFF' : (isDark ? '#FFFFFF' : '#000000');
         const borderColor = interpolateColor(
             scrollX.value,
             inputRange,
@@ -62,7 +62,7 @@ function AnimatedMarkerOverlay({ quote, index, isCheapest, isActive, scrollX, it
     });
 
     const animatedTextStyle = useAnimatedStyle(() => {
-        if (isCheapest) return { color: '#168B57' };
+        if (isCheapest) return { color: '#007AFF' };
         const inputRange = [(index - 1) * itemWidth, index * itemWidth, (index + 1) * itemWidth];
         const color = interpolateColor(
             scrollX.value,
@@ -93,7 +93,7 @@ function AnimatedMarkerOverlay({ quote, index, isCheapest, isActive, scrollX, it
                 <SymbolView
                     name="fuelpump.fill"
                     size={14}
-                    tintColor={isCheapest ? '#168B57' : (isActive ? themeColors.text : '#888888')}
+                    tintColor={isCheapest ? '#007AFF' : (isActive ? themeColors.text : '#888888')}
                     style={styles.priceIcon}
                 />
                 <Animated.Text
@@ -325,6 +325,7 @@ export default function HomeScreen() {
             longitude,
             radiusMiles: preferences.searchRadiusMiles || 10,
             fuelType: preferences.preferredOctane || 'regular',
+            preferredProvider: preferences.preferredProvider || 'gasbuddy',
         };
         const baseDebugState = {
             input: {
@@ -466,10 +467,42 @@ export default function HomeScreen() {
     const itemWidth = width - (peekPadding * 2);
     const sideInset = (width - itemWidth) / 2;
 
+    const lastDataHashRef = useRef('');
+    const isUserScrollingRef = useRef(false);
+    const prevIsFocusedRef = useRef(isFocused);
+
     useEffect(() => {
-        if (top3Quotes.length > 0 && activeIndex >= 0 && activeIndex < top3Quotes.length) {
+        const wasFocused = prevIsFocusedRef.current;
+        prevIsFocusedRef.current = isFocused;
+
+        if (!mapRef.current || top3Quotes.length === 0) return;
+
+        const currentHash = top3Quotes.map(q => q.stationId).join(',');
+        const isFocusGained = isFocused && !wasFocused;
+        const isNewData = currentHash !== lastDataHashRef.current;
+
+        if (isNewData || isFocusGained) {
+            lastDataHashRef.current = currentHash;
+            isUserScrollingRef.current = false;
+
+            const coords = [
+                { latitude: location.latitude, longitude: location.longitude },
+                ...top3Quotes
+                    .filter(q => q.latitude && q.longitude)
+                    .map(q => ({ latitude: q.latitude, longitude: q.longitude }))
+            ];
+
+            if (coords.length > 1) {
+                setTimeout(() => {
+                    mapRef.current?.fitToCoordinates(coords, {
+                        edgePadding: { top: 120, right: 60, bottom: bottomPadding + 160, left: 60 },
+                        animated: true,
+                    });
+                }, 100);
+            }
+        } else if (isUserScrollingRef.current && activeIndex >= 0 && activeIndex < top3Quotes.length) {
             const activeQuote = top3Quotes[activeIndex];
-            if (activeQuote.latitude && activeQuote.longitude && mapRef.current) {
+            if (activeQuote.latitude && activeQuote.longitude) {
                 mapRef.current.animateToRegion({
                     latitude: activeQuote.latitude,
                     longitude: activeQuote.longitude,
@@ -478,7 +511,7 @@ export default function HomeScreen() {
                 }, 400);
             }
         }
-    }, [activeIndex, top3Quotes]);
+    }, [activeIndex, top3Quotes, location, bottomPadding, isFocused]);
 
     const fallbackCoordinate = {
         latitude: location.latitude,
@@ -494,6 +527,7 @@ export default function HomeScreen() {
                 initialRegion={DEFAULT_REGION}
                 provider={PROVIDER_APPLE}
                 showsUserLocation={hasLocationPermission}
+                userInterfaceStyle={isDark ? 'dark' : 'light'}
             >
                 {top3Quotes.length > 0 ? (
                     top3Quotes.map((quote, index) => (
@@ -622,6 +656,7 @@ export default function HomeScreen() {
                         snapToOffsets={top3Quotes.map((_, i) => i * itemWidth)}
                         onViewableItemsChanged={onViewableItemsChanged}
                         viewabilityConfig={viewabilityConfig}
+                        onScrollBeginDrag={() => { isUserScrollingRef.current = true; }}
                         onScroll={scrollHandler}
                         scrollEventThrottle={16}
                         renderItem={({ item, index }) => (

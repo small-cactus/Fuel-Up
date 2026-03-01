@@ -2,7 +2,9 @@ const {
     buildBarchartUrl,
     buildCacheKey,
     buildCardogUrl,
+    buildGasBuddyGraphQLRequest,
     buildGoogleNearbySearchRequest,
+    calculateDistanceMiles,
     buildTomTomFuelPriceUrl,
     buildTomTomPlaceUrl,
     buildTomTomSearchUrl,
@@ -13,6 +15,7 @@ const {
     normalizeCardogResponse,
     normalizeEiaResponse,
     normalizeFredResponse,
+    normalizeGasBuddyResponse,
     normalizeGooglePlacesResponse,
     normalizeTomTomStationBundle,
     pickFirstDefined,
@@ -163,6 +166,10 @@ async function fetchTomTomQuote({ latitude, longitude, radiusMiles, fuelType, co
 
     try {
         const searchResponse = await fetchJson(searchUrl, config.requestTimeoutMs);
+
+        const { incrementApiStat } = require('../../lib/devCounter');
+        incrementApiStat('tomtom');
+
         debugEntry.requests.push(
             createDebugRequest({
                 step: 'categorySearch',
@@ -322,6 +329,10 @@ async function fetchBarchartQuote({ latitude, longitude, zipCode, radiusMiles, f
 
     try {
         const response = await fetchJson(requestUrl, config.requestTimeoutMs);
+
+        const { incrementApiStat } = require('../../lib/devCounter');
+        incrementApiStat('barchart');
+
         const quotes = normalizeBarchartResponse({
             origin: {
                 latitude,
@@ -392,6 +403,10 @@ async function fetchGoogleQuote({ latitude, longitude, radiusMiles, fuelType, co
             method: 'POST',
             timeoutMs: config.requestTimeoutMs,
         });
+
+        const { incrementApiStat } = require('../../lib/devCounter');
+        incrementApiStat('google');
+
         const quotes = normalizeGooglePlacesResponse({
             origin: {
                 latitude,
@@ -660,6 +675,168 @@ async function fetchFredQuote({ latitude, longitude, fuelType, config }) {
     }
 }
 
+async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config }) {
+    const debugEntry = createDebugEntry('gasbuddy', 'station', true);
+
+    try {
+        const { supabase } = require('../../lib/supabase');
+
+        const searchLat = Math.round(latitude * 10) / 10;
+        const searchLng = Math.round(longitude * 10) / 10;
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+        const { data, error } = await supabase
+            .from('station_prices')
+            .select('*')
+            .eq('search_latitude_rounded', searchLat)
+            .eq('search_longitude_rounded', searchLng)
+            .eq('fuel_type', fuelType)
+            .gte('created_at', oneHourAgo);
+
+        if (!error && data && data.length > 0) {
+            const { incrementApiStat } = require('../../lib/devCounter');
+            incrementApiStat('supabase');
+            const quotes = data.map(row => {
+                const origin = { latitude, longitude };
+                const distanceMiles = calculateDistanceMiles(origin, { latitude: row.latitude, longitude: row.longitude });
+                return {
+                    providerId: row.provider_id,
+                    providerTier: 'station',
+                    stationId: row.station_id,
+                    stationName: row.station_name,
+                    address: row.address,
+                    latitude: row.latitude,
+                    longitude: row.longitude,
+                    fuelType: row.fuel_type,
+                    price: row.price ? Number(row.price) : null,
+                    allPrices: row.all_prices || { [row.fuel_type]: Number(row.price) },
+                    currency: row.currency,
+                    priceUnit: 'gallon',
+                    distanceMiles,
+                    fetchedAt: new Date().toISOString(),
+                    updatedAt: row.updated_at_source || null,
+                    isEstimated: false,
+                    sourceLabel: row.source_label || PROVIDER_LABELS.gasbuddy,
+                    rating: row.rating ? Number(row.rating) : null,
+                    userRatingCount: row.user_rating_count ? Number(row.user_rating_count) : null,
+                };
+            });
+
+            debugEntry.summary.resultCount = quotes.length;
+            debugEntry.quoteReturned = true;
+            debugEntry.requests.push(
+                createDebugRequest({
+                    step: 'supabase_cache',
+                    url: 'supabase://station_prices',
+                    status: 200,
+                    output: `${quotes.length} cached prices retrieved`,
+                })
+            );
+            return { debugEntry, quotes };
+        }
+    } catch (err) {
+        console.error('Supabase caching check failed:', err);
+    }
+
+    const requestConfig = buildGasBuddyGraphQLRequest({
+        latitude,
+        longitude,
+        fuelType,
+    });
+
+    try {
+        const response = await fetchJson(requestConfig.url, {
+            body: requestConfig.body,
+            headers: requestConfig.headers,
+            method: 'POST',
+            timeoutMs: config.requestTimeoutMs,
+        });
+
+        const { incrementApiStat } = require('../../lib/devCounter');
+        incrementApiStat('gasbuddy');
+
+        const quotes = normalizeGasBuddyResponse({
+            origin: {
+                latitude,
+                longitude,
+            },
+            fuelType,
+            payload: response.payload,
+        });
+
+        debugEntry.requests.push(
+            createDebugRequest({
+                step: 'graphql',
+                url: requestConfig.url,
+                status: response.status,
+                output: response.payload,
+            })
+        );
+        const stationCount = response.payload?.data?.locationBySearchTerm?.stations?.results?.length || 0;
+        debugEntry.summary.resultCount = stationCount;
+        debugEntry.quoteReturned = Boolean(quotes && quotes.length > 0);
+
+        if (!quotes || quotes.length === 0) {
+            debugEntry.error = stationCount === 0
+                ? 'The search request returned no nearby stations.'
+                : 'No station returned a usable fuel price.';
+            debugEntry.failureCategory = stationCount === 0 ? 'location' : 'price';
+        } else {
+            (async () => {
+                try {
+                    const { supabase } = require('../../lib/supabase');
+                    const { getUserUuid } = require('../../lib/user');
+                    const userUuid = await getUserUuid();
+                    const searchLat = Math.round(latitude * 10) / 10;
+                    const searchLng = Math.round(longitude * 10) / 10;
+
+                    const rows = quotes.map(q => ({
+                        station_id: q.stationId,
+                        provider_id: q.providerId,
+                        fuel_type: q.fuelType,
+                        all_prices: q.allPrices || {},
+                        price: q.price,
+                        currency: q.currency,
+                        station_name: String(q.stationName).substring(0, 255),
+                        address: String(q.address).substring(0, 500),
+                        latitude: q.latitude,
+                        longitude: q.longitude,
+                        user_uuid: userUuid,
+                        search_latitude_rounded: searchLat,
+                        search_longitude_rounded: searchLng,
+                        source_label: q.sourceLabel,
+                        rating: q.rating,
+                        user_rating_count: q.userRatingCount,
+                        updated_at_source: q.updatedAt
+                    }));
+
+                    const { error: insertError } = await supabase.from('station_prices').insert(rows);
+                    if (insertError) {
+                        console.error('Supabase cache insert failed:', insertError);
+                    }
+                } catch (err) {
+                    console.error('Supabase async trend log error:', err);
+                }
+            })();
+        }
+
+        return { debugEntry, quotes };
+    } catch (error) {
+        debugEntry.error = describeFetchError(error);
+        debugEntry.failureCategory = 'network';
+        debugEntry.requests.push(
+            createDebugRequest({
+                step: 'graphql',
+                url: requestConfig.url,
+                status: error?.status,
+                output: error?.payload || null,
+                error: error?.message || 'GasBuddy request failed',
+            })
+        );
+        return { debugEntry, quotes: null };
+    }
+}
+
 function normalizeSnapshot({ quote, topStations, regionalQuotes, cacheKey }) {
     return {
         cacheKey,
@@ -692,7 +869,7 @@ async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fu
     };
 }
 
-async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMiles, fuelType }) {
+async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMiles, fuelType, preferredProvider }) {
     const config = getFuelServiceConfig();
     const normalizedFuelType = fuelType || config.defaultFuelType;
     const normalizedRadius = radiusMiles || config.defaultRadiusMiles;
@@ -720,54 +897,70 @@ async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMi
             requestedAt: new Date().toISOString(),
         };
 
-        const providerResults = await Promise.all([
-            fetchTomTomQuote({
-                latitude,
-                longitude,
-                radiusMiles: normalizedRadius,
-                fuelType: normalizedFuelType,
-                config,
-            }),
-            fetchBarchartQuote({
-                latitude,
-                longitude,
-                zipCode,
-                radiusMiles: normalizedRadius,
-                fuelType: normalizedFuelType,
-                config,
-            }),
-            fetchGoogleQuote({
-                latitude,
-                longitude,
-                radiusMiles: normalizedRadius,
-                fuelType: normalizedFuelType,
-                config,
-            }),
-            fetchCardogQuote({
-                latitude,
-                longitude,
-                fuelType: normalizedFuelType,
-                config,
-            }),
-            fetchBlsQuote({
-                latitude,
-                longitude,
-                fuelType: normalizedFuelType,
-                config,
-            }),
-            fetchEiaQuote({
-                latitude,
-                longitude,
-                fuelType: normalizedFuelType,
-                config,
-            }),
-            fetchFredQuote({
-                latitude,
-                longitude,
-                fuelType: normalizedFuelType,
-                config,
-            }),
-        ]);
+        const stationFetches = preferredProvider === 'gasbuddy'
+            ? [
+                fetchGasBuddyQuote({
+                    latitude,
+                    longitude,
+                    fuelType: normalizedFuelType,
+                    config,
+                }),
+            ]
+            : [
+                fetchTomTomQuote({
+                    latitude,
+                    longitude,
+                    radiusMiles: normalizedRadius,
+                    fuelType: normalizedFuelType,
+                    config,
+                }),
+                fetchBarchartQuote({
+                    latitude,
+                    longitude,
+                    zipCode,
+                    radiusMiles: normalizedRadius,
+                    fuelType: normalizedFuelType,
+                    config,
+                }),
+                fetchGoogleQuote({
+                    latitude,
+                    longitude,
+                    radiusMiles: normalizedRadius,
+                    fuelType: normalizedFuelType,
+                    config,
+                }),
+            ];
+
+        const areaFetches = preferredProvider === 'gasbuddy'
+            ? []
+            : [
+                fetchCardogQuote({
+                    latitude,
+                    longitude,
+                    fuelType: normalizedFuelType,
+                    config,
+                }),
+                fetchBlsQuote({
+                    latitude,
+                    longitude,
+                    fuelType: normalizedFuelType,
+                    config,
+                }),
+                fetchEiaQuote({
+                    latitude,
+                    longitude,
+                    fuelType: normalizedFuelType,
+                    config,
+                }),
+                fetchFredQuote({
+                    latitude,
+                    longitude,
+                    fuelType: normalizedFuelType,
+                    config,
+                }),
+            ];
+
+        const providerResults = await Promise.all([...stationFetches, ...areaFetches]);
 
         debugState.providers = providerResults.map(result => result.debugEntry);
 

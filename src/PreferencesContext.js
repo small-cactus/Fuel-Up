@@ -6,6 +6,7 @@ const STORAGE_KEY = '@fuelup/preferences';
 const DEFAULT_PREFERENCES = {
     searchRadiusMiles: 10,
     preferredOctane: 'regular', // 'regular' | 'midgrade' | 'premium'
+    preferredProvider: 'gasbuddy', // 'gasbuddy' | 'all'
     minimumRating: 0, // 0 = no filter
     excludedBrands: [],
     hasCompletedOnboarding: false,

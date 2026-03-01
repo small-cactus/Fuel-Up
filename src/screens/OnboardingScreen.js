@@ -13,6 +13,7 @@ import { usePreferences } from '../PreferencesContext';
 import { useTheme } from '../ThemeContext';
 import TopCanopy from '../components/TopCanopy';
 import BottomCanopy from '../components/BottomCanopy';
+import { registerForPushNotificationsAsync, savePushTokenToSupabase } from '../lib/notifications';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -73,6 +74,7 @@ function WelcomeStep({ isDark, themeColors, insets }) {
                 zoomEnabled={false}
                 rotateEnabled={false}
                 pitchEnabled={false}
+                userInterfaceStyle={isDark ? 'dark' : 'light'}
             >
                 {visibleStations.map((station, index) => {
                     const isCheapest = station.price === cheapestPrice;
@@ -86,7 +88,7 @@ function WelcomeStep({ isDark, themeColors, insets }) {
                     }
 
                     const chipTint = cheapestRevealed
-                        ? (isCheapest ? '#168B57' : '#E35D4F')
+                        ? (isCheapest ? '#007AFF' : '#E35D4F')
                         : (isDark ? '#000000' : '#FFFFFF');
 
                     return (
@@ -173,13 +175,14 @@ function RadiusStep({ isDark, themeColors, insets, value, onChange }) {
                 zoomEnabled={false}
                 rotateEnabled={false}
                 pitchEnabled={false}
+                userInterfaceStyle={isDark ? 'dark' : 'light'}
             >
                 <Circle
                     center={{ latitude: DEMO_REGION.latitude, longitude: DEMO_REGION.longitude }}
                     radius={radiusMeters}
-                    strokeColor="rgba(22, 139, 87, 0.5)"
+                    strokeColor="rgba(0, 122, 255, 0.5)"
                     strokeWidth={2}
-                    fillColor="rgba(22, 139, 87, 0.08)"
+                    fillColor="rgba(0, 122, 255, 0.08)"
                 />
             </MapView>
 
@@ -210,7 +213,7 @@ function RadiusStep({ isDark, themeColors, insets, value, onChange }) {
 
             {/* Hero value centered on map */}
             <View style={styles.radiusHeroCenter} pointerEvents="none">
-                <Text style={[styles.heroValue, { color: '#168B57', textShadowColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.8)', textShadowRadius: 12 }]}>{value} mi</Text>
+                <Text style={[styles.heroValue, { color: '#007AFF', textShadowColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.8)', textShadowRadius: 12 }]}>{value} mi</Text>
             </View>
 
             {/* Slider at bottom */}
@@ -232,9 +235,9 @@ function RadiusStep({ isDark, themeColors, insets, value, onChange }) {
                         step={1}
                         value={value}
                         onValueChange={onChange}
-                        minimumTrackTintColor="#168B57"
+                        minimumTrackTintColor="#007AFF"
                         maximumTrackTintColor={isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'}
-                        thumbTintColor="#168B57"
+                        thumbTintColor="#007AFF"
                     />
                 </GlassView>
             </View>
@@ -265,10 +268,10 @@ function OctaneStep({ isDark, themeColors, insets, value, onChange }) {
                                     key={isDark ? `oct-dark-${option.key}` : `oct-light-${option.key}`}
                                     style={[
                                         styles.octaneCard,
-                                        isSelected && { borderColor: '#168B57', borderWidth: 2 },
+                                        isSelected && { borderColor: '#007AFF', borderWidth: 2 },
                                     ]}
                                 >
-                                    <Text style={[styles.octaneNumber, { color: isSelected ? '#168B57' : themeColors.text }]}>
+                                    <Text style={[styles.octaneNumber, { color: isSelected ? '#007AFF' : themeColors.text }]}>
                                         {option.octane}
                                     </Text>
                                     <Text style={[styles.octaneLabel, { color: themeColors.text }]}>
@@ -355,8 +358,43 @@ function LocationStep({ isDark, themeColors, insets, permissionStatus }) {
 
                 {permissionStatus === 'granted' && (
                     <View style={styles.grantedRow}>
-                        <SymbolView name="checkmark.circle.fill" size={32} tintColor="#168B57" />
-                        <Text style={[styles.grantedText, { color: '#168B57' }]}>Access Granted</Text>
+                        <SymbolView name="checkmark.circle.fill" size={32} tintColor="#007AFF" />
+                        <Text style={[styles.grantedText, { color: '#007AFF' }]}>Access Granted</Text>
+                    </View>
+                )}
+            </View>
+        </View>
+    );
+}
+
+function NotificationStep({ isDark, themeColors, insets, permissionStatus }) {
+    return (
+        <View style={styles.stepContainer}>
+            <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
+                <SymbolView name="bell.badge.fill" size={44} tintColor="#FF3B30" />
+                <Text style={[styles.stepTitle, { color: themeColors.text }]}>Stay Updated</Text>
+                <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
+                    Enable notifications & Live Activities to get real-time price drops.
+                </Text>
+            </View>
+
+            <View style={styles.stepContent}>
+                <View style={styles.locationGraphicContainer}>
+                    <View style={[styles.locationGraphicCircle, { backgroundColor: isDark ? 'rgba(255, 59, 48, 0.15)' : 'rgba(255, 59, 48, 0.1)' }]}>
+                        <SymbolView name="bell.and.waves.left.and.right.fill" size={60} tintColor="#FF3B30" />
+                    </View>
+                    <View style={styles.locationExplanation}>
+                        <SymbolView name="info.circle.fill" size={16} tintColor={themeColors.text} style={{ opacity: 0.5 }} />
+                        <Text style={[styles.locationExplanationText, { color: themeColors.text }]}>
+                            We'll alert you when gas prices near you drop significantly.
+                        </Text>
+                    </View>
+                </View>
+
+                {permissionStatus === 'granted' && (
+                    <View style={styles.grantedRow}>
+                        <SymbolView name="checkmark.circle.fill" size={32} tintColor="#FF3B30" />
+                        <Text style={[styles.grantedText, { color: '#FF3B30' }]}>Notifications Enabled</Text>
                     </View>
                 )}
             </View>
@@ -369,12 +407,13 @@ export default function OnboardingScreen() {
     const { isDark, themeColors } = useTheme();
     const { preferences, updatePreference, completeOnboarding } = usePreferences();
     const [currentStep, setCurrentStep] = useState(0);
-    const totalSteps = 5;
+    const totalSteps = 6;
 
     const [radius, setRadius] = useState(preferences.searchRadiusMiles);
     const [octane, setOctane] = useState(preferences.preferredOctane);
     const [minRating, setMinRating] = useState(preferences.minimumRating);
     const [permissionStatus, setPermissionStatus] = useState(null);
+    const [notifPermissionStatus, setNotifPermissionStatus] = useState(null);
 
     const handleRequestPermission = async () => {
         const { status } = await Location.requestForegroundPermissionsAsync();
@@ -384,17 +423,33 @@ export default function OnboardingScreen() {
         }
     };
 
+    const handleRequestNotifications = async () => {
+        const token = await registerForPushNotificationsAsync();
+        if (token) {
+            setNotifPermissionStatus('granted');
+            savePushTokenToSupabase(token); // Fire and forget
+        } else {
+            setNotifPermissionStatus('denied');
+        }
+        setTimeout(() => setCurrentStep(currentStep + 1), 600);
+    };
+
     const handleContinue = () => {
         if (currentStep === 1 && permissionStatus !== 'granted') {
             handleRequestPermission();
             return;
         }
 
+        if (currentStep === 2 && notifPermissionStatus !== 'granted') {
+            handleRequestNotifications();
+            return;
+        }
+
         if (currentStep < totalSteps - 1) {
             // Save preferences as we go
-            if (currentStep === 2) updatePreference('searchRadiusMiles', radius);
-            if (currentStep === 3) updatePreference('preferredOctane', octane);
-            if (currentStep === 4) updatePreference('minimumRating', minRating);
+            if (currentStep === 3) updatePreference('searchRadiusMiles', radius);
+            if (currentStep === 4) updatePreference('preferredOctane', octane);
+            if (currentStep === 5) updatePreference('minimumRating', minRating);
             setCurrentStep(currentStep + 1);
         } else {
             // Final step
@@ -405,17 +460,18 @@ export default function OnboardingScreen() {
     const isLastStep = currentStep === totalSteps - 1;
 
     return (
-        <View style={[styles.container, { backgroundColor: (currentStep === 0 || currentStep === 2) ? 'transparent' : themeColors.background }]}>
+        <View style={[styles.container, { backgroundColor: (currentStep === 0 || currentStep === 3) ? 'transparent' : themeColors.background }]}>
             <View style={styles.content}>
                 {currentStep === 0 && <WelcomeStep isDark={isDark} themeColors={themeColors} insets={insets} />}
                 {currentStep === 1 && <LocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={permissionStatus} />}
-                {currentStep === 2 && <RadiusStep isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} />}
-                {currentStep === 3 && <OctaneStep isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} />}
-                {currentStep === 4 && <RatingStep isDark={isDark} themeColors={themeColors} insets={insets} value={minRating} onChange={setMinRating} />}
+                {currentStep === 2 && <NotificationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={notifPermissionStatus} />}
+                {currentStep === 3 && <RadiusStep isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} />}
+                {currentStep === 4 && <OctaneStep isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} />}
+                {currentStep === 5 && <RatingStep isDark={isDark} themeColors={themeColors} insets={insets} value={minRating} onChange={setMinRating} />}
             </View>
 
             {/* Progress dots + continue */}
-            {(currentStep === 0 || currentStep === 2) && (
+            {(currentStep === 0 || currentStep === 3) && (
                 <LinearGradient
                     colors={[isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)', isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)', isDark ? '#000000' : '#FFFFFF']}
                     locations={[0, 0.4, 1]}
@@ -423,7 +479,7 @@ export default function OnboardingScreen() {
                     pointerEvents="box-none"
                 />
             )}
-            <View style={[styles.footer, (currentStep === 0 || currentStep === 2) && styles.footerAbsolute, { paddingBottom: insets.bottom + 20 }]}>
+            <View style={[styles.footer, (currentStep === 0 || currentStep === 3) && styles.footerAbsolute, { paddingBottom: insets.bottom + 20 }]}>
                 <View style={styles.dotsRow}>
                     {Array.from({ length: totalSteps }).map((_, i) => (
                         <View
@@ -446,10 +502,12 @@ export default function OnboardingScreen() {
                             style={styles.continueGlass}
                         >
                             <Text style={styles.continueText}>
-                                {currentStep === 1 && permissionStatus !== 'granted' ? 'Enable Location' : 'Continue'}
+                                {currentStep === 1 && permissionStatus !== 'granted' ? 'Enable Location' :
+                                    currentStep === 2 && notifPermissionStatus !== 'granted' ? 'Enable Notifications' : 'Continue'}
                             </Text>
                             <SymbolView
-                                name={currentStep === 1 && permissionStatus !== 'granted' ? 'location.fill' : 'arrow.right'}
+                                name={currentStep === 1 && permissionStatus !== 'granted' ? 'location.fill' :
+                                    currentStep === 2 && notifPermissionStatus !== 'granted' ? 'bell.fill' : 'arrow.right'}
                                 size={18}
                                 tintColor="#FFFFFF"
                             />
@@ -461,7 +519,7 @@ export default function OnboardingScreen() {
                     <Pressable onPress={handleContinue} style={styles.continueButton}>
                         <GlassView
                             glassEffectStyle="regular"
-                            tintColor="#168B57"
+                            tintColor="#007AFF"
                             isInteractive
                             style={styles.continueGlass}
                         >
@@ -561,7 +619,7 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     demoChipCheapest: {
-        borderColor: '#168B57',
+        borderColor: '#007AFF',
         borderWidth: 2,
         transform: [{ scale: 1.2 }],
     },
@@ -602,7 +660,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     segmentButtonActive: {
-        borderColor: '#168B57',
+        borderColor: '#007AFF',
         borderWidth: 2,
     },
     segmentText: {
@@ -660,7 +718,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
-        backgroundColor: 'rgba(22, 139, 87, 0.1)',
+        backgroundColor: 'rgba(0, 122, 255, 0.1)',
         paddingHorizontal: 20,
         paddingVertical: 12,
         borderRadius: 100,

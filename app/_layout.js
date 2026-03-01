@@ -9,7 +9,7 @@ import OnboardingScreen from '../src/screens/OnboardingScreen';
 
 function AppGate() {
     const { preferences, isLoading } = usePreferences();
-    const { themeColors } = useTheme();
+    const { isDark, themeColors } = useTheme();
 
     if (isLoading) {
         return (
@@ -24,17 +24,20 @@ function AppGate() {
     }
 
     return (
-        <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen
-                name="prices-sheet"
-                options={{
-                    presentation: 'formSheet',
-                    sheetAllowedDetents: [0.45, 1],
-                    sheetGrabberVisible: true,
-                }}
-            />
-        </Stack>
+        <>
+            <StatusBar style={isDark ? 'light' : 'dark'} />
+            <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen
+                    name="prices-sheet"
+                    options={{
+                        presentation: 'formSheet',
+                        sheetAllowedDetents: [0.45, 1],
+                        sheetGrabberVisible: true,
+                    }}
+                />
+            </Stack>
+        </>
     );
 }
 
@@ -44,7 +47,6 @@ export default function RootLayout() {
             <ThemeProvider>
                 <PreferencesProvider>
                     <AppGate />
-                    <StatusBar style="auto" />
                 </PreferencesProvider>
             </ThemeProvider>
         </AppStateProvider>

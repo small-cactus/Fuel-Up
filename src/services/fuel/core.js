@@ -4,6 +4,7 @@ const USD = 'USD';
 const TOMTOM_PETROL_CATEGORY_ID = '7311';
 
 const PROVIDER_LABELS = {
+    gasbuddy: 'GasBuddy',
     tomtom: 'TomTom Fuel Prices',
     barchart: 'Barchart OnDemand',
     google: 'Google Places Fuel Options',
@@ -11,6 +12,13 @@ const PROVIDER_LABELS = {
     bls: 'BLS Average Price Data',
     eia: 'EIA Retail Gasoline',
     fred: 'FRED Retail Gasoline',
+};
+
+const GASBUDDY_FUEL_MAP = {
+    regular: { fuelProduct: 'regular_gas', fuelId: 1 },
+    midgrade: { fuelProduct: 'midgrade_gas', fuelId: 2 },
+    premium: { fuelProduct: 'premium_gas', fuelId: 3 },
+    diesel: { fuelProduct: 'diesel', fuelId: 5 },
 };
 
 const FUEL_NAME_MAP = {
@@ -579,6 +587,127 @@ function normalizeFredResponse({ origin, fuelType, payload }) {
     });
 }
 
+function buildGasBuddyGraphQLRequest({ latitude, longitude, fuelType = 'regular' }) {
+    const fuelEntry = GASBUDDY_FUEL_MAP[normalizeFuelTypeName(fuelType)] || GASBUDDY_FUEL_MAP.regular;
+
+    const query = `query LocationBySearchTerm($brandId: Int, $cursor: String, $fuel: Int, $lat: Float, $lng: Float, $maxAge: Int, $search: String) {
+  locationBySearchTerm(lat: $lat lng: $lng search: $search priority: "locality") {
+    countryCode displayName latitude longitude regionCode
+    stations(brandId: $brandId cursor: $cursor fuel: $fuel lat: $lat lng: $lng maxAge: $maxAge priority: "locality") {
+      count
+      results {
+        address { line1 locality region postalCode __typename }
+        brands { name __typename }
+        distance id name latitude longitude
+        prices {
+          cash { postedTime price __typename }
+          credit { postedTime price __typename }
+          fuelProduct __typename
+        }
+        ratingsCount starRating __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}`;
+
+    return {
+        url: 'https://www.gasbuddy.com/graphql',
+        body: {
+            operationName: 'LocationBySearchTerm',
+            variables: {
+                fuel: fuelEntry.fuelId,
+                maxAge: 0,
+                lat: Number(latitude),
+                lng: Number(longitude),
+            },
+            query,
+        },
+        headers: {
+            'Content-Type': 'application/json',
+            'Origin': 'https://www.gasbuddy.com',
+            'Referer': 'https://www.gasbuddy.com/home',
+            'apollo-require-preflight': 'true',
+            'gbcsrf': '1.Y2RjCddx4SvvGneh',
+        },
+        fuelProduct: fuelEntry.fuelProduct,
+    };
+}
+
+function normalizeGasBuddyResponse({ origin, fuelType, payload }) {
+    const stations = payload?.data?.locationBySearchTerm?.stations?.results;
+
+    if (!Array.isArray(stations) || !stations.length) {
+        return null;
+    }
+
+    const fuelEntry = GASBUDDY_FUEL_MAP[normalizeFuelTypeName(fuelType)] || GASBUDDY_FUEL_MAP.regular;
+    const targetProduct = fuelEntry.fuelProduct;
+
+    const quotes = stations
+        .map(station => {
+            const priceEntry = (station.prices || []).find(p => p.fuelProduct === targetProduct);
+
+            if (!priceEntry) {
+                return null;
+            }
+
+            const cashPrice = toFiniteNumber(priceEntry.cash?.price);
+            const creditPrice = toFiniteNumber(priceEntry.credit?.price);
+            const candidates = [cashPrice, creditPrice].filter(p => p !== null && p > 0);
+
+            if (!candidates.length) {
+                return null;
+            }
+
+            const bestPrice = Math.min(...candidates);
+            const postedTime = priceEntry.cash?.postedTime || priceEntry.credit?.postedTime || null;
+            const addr = station.address || {};
+            const addressLine = [addr.line1, addr.locality, addr.region, addr.postalCode]
+                .filter(Boolean)
+                .join(', ');
+
+            const allPrices = {};
+            for (const pe of (station.prices || [])) {
+                const cp = toFiniteNumber(pe.cash?.price);
+                const crp = toFiniteNumber(pe.credit?.price);
+                const vals = [cp, crp].filter(v => v !== null && v > 0);
+                if (vals.length) {
+                    const key = pe.fuelProduct === 'regular_gas' ? 'regular'
+                        : pe.fuelProduct === 'midgrade_gas' ? 'midgrade'
+                            : pe.fuelProduct === 'premium_gas' ? 'premium'
+                                : pe.fuelProduct === 'diesel' ? 'diesel'
+                                    : pe.fuelProduct;
+                    allPrices[key] = Math.min(...vals);
+                }
+            }
+
+            return createQuote({
+                providerId: 'gasbuddy',
+                providerTier: 'station',
+                stationId: String(station.id || ''),
+                stationName: station.name || (station.brands?.[0]?.name) || 'Gas station',
+                address: addressLine || 'Nearby fuel station',
+                latitude: toFiniteNumber(station.latitude) ?? origin.latitude,
+                longitude: toFiniteNumber(station.longitude) ?? origin.longitude,
+                fuelType,
+                price: bestPrice,
+                allPrices,
+                updatedAt: postedTime,
+                currency: USD,
+                isEstimated: false,
+                sourceLabel: PROVIDER_LABELS.gasbuddy,
+                origin,
+                rating: typeof station.starRating === 'number' ? station.starRating : null,
+                userRatingCount: typeof station.ratingsCount === 'number' ? station.ratingsCount : null,
+            });
+        })
+        .filter(Boolean);
+
+    return quotes;
+}
+
 function selectLowestPricedQuote(quotes) {
     return (quotes || [])
         .filter(quote => quote && toFiniteNumber(quote.price) !== null)
@@ -619,10 +748,12 @@ function getFuelFailureMessage({ reason, debugState } = {}) {
 }
 
 module.exports = {
+    GASBUDDY_FUEL_MAP,
     PROVIDER_LABELS,
     buildBarchartUrl,
     buildCacheKey,
     buildCardogUrl,
+    buildGasBuddyGraphQLRequest,
     buildGoogleNearbySearchRequest,
     buildTomTomFuelPriceUrl,
     buildTomTomPlaceUrl,
@@ -637,6 +768,7 @@ module.exports = {
     normalizeCardogResponse,
     normalizeEiaResponse,
     normalizeFredResponse,
+    normalizeGasBuddyResponse,
     normalizeGooglePlacesResponse,
     normalizeTomTomStationBundle,
     pickFirstDefined,

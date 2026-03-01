@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GlassView } from 'expo-glass-effect';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,7 +28,7 @@ function SettingsSection({ title, children }) {
 
 export default function SettingsScreen() {
     const insets = useSafeAreaInsets();
-    const { isDark, toggleTheme, themeColors } = useTheme();
+    const { isDark, themeMode, setThemeMode, themeColors } = useTheme();
     const { requestFuelReset, setFuelDebugState } = useAppState();
     const { preferences, updatePreference, resetOnboarding } = usePreferences();
     const [resetNotice, setResetNotice] = useState(null);
@@ -78,7 +78,7 @@ export default function SettingsScreen() {
                     <View style={styles.cardHeader}>
                         <SymbolView name="location.magnifyingglass" size={20} tintColor={themeColors.text} />
                         <Text style={[styles.cardTitle, { color: themeColors.text }]}>Search Radius</Text>
-                        <Text style={[styles.cardValue, { color: '#168B57' }]}>{preferences.searchRadiusMiles} mi</Text>
+                        <Text style={[styles.cardValue, { color: '#007AFF' }]}>{preferences.searchRadiusMiles} mi</Text>
                     </View>
                     <View style={styles.chipRow}>
                         {RADIUS_OPTIONS.map(r => (
@@ -86,7 +86,7 @@ export default function SettingsScreen() {
                                 <View style={[
                                     styles.chip,
                                     r === preferences.searchRadiusMiles && styles.chipActive,
-                                    { backgroundColor: r === preferences.searchRadiusMiles ? '#168B57' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)') },
+                                    { backgroundColor: r === preferences.searchRadiusMiles ? '#007AFF' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)') },
                                 ]}>
                                     <Text style={[
                                         styles.chipText,
@@ -116,12 +116,44 @@ export default function SettingsScreen() {
                                     styles.chip,
                                     styles.chipWide,
                                     opt.key === preferences.preferredOctane && styles.chipActive,
-                                    { backgroundColor: opt.key === preferences.preferredOctane ? '#168B57' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)') },
+                                    { backgroundColor: opt.key === preferences.preferredOctane ? '#007AFF' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)') },
                                 ]}>
                                     <Text style={[
                                         styles.chipText,
                                         { color: opt.key === preferences.preferredOctane ? '#FFFFFF' : themeColors.text },
                                     ]}>{opt.label} ({opt.octane})</Text>
+                                </View>
+                            </Pressable>
+                        ))}
+                    </View>
+                </GlassView>
+
+                {/* Price Source */}
+                <GlassView
+                    style={styles.card}
+                    tintColor={isDark ? '#000000' : '#FFFFFF'}
+                    glassEffectStyle="regular"
+                    key={isDark ? 'provider-dark' : 'provider-light'}
+                >
+                    <View style={styles.cardHeader}>
+                        <SymbolView name="antenna.radiowaves.left.and.right" size={20} tintColor={themeColors.text} />
+                        <Text style={[styles.cardTitle, { color: themeColors.text }]}>Price Source</Text>
+                    </View>
+                    <View style={styles.chipRow}>
+                        {[
+                            { key: 'gasbuddy', label: 'GasBuddy' },
+                            { key: 'all', label: 'Multi-Source' },
+                        ].map(opt => (
+                            <Pressable key={opt.key} onPress={() => updatePreference('preferredProvider', opt.key)} style={{ flex: 1 }}>
+                                <View style={[
+                                    styles.chip,
+                                    { backgroundColor: opt.key === preferences.preferredProvider ? '#007AFF' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)') },
+                                    { alignItems: 'center' },
+                                ]}>
+                                    <Text style={[
+                                        styles.chipText,
+                                        { color: opt.key === preferences.preferredProvider ? '#FFFFFF' : themeColors.text },
+                                    ]}>{opt.label}</Text>
                                 </View>
                             </Pressable>
                         ))}
@@ -164,20 +196,36 @@ export default function SettingsScreen() {
             {/* ── Appearance ── */}
             <SettingsSection title="APPEARANCE">
                 <GlassView
-                    style={[styles.card, styles.cardRow]}
+                    style={styles.card}
                     tintColor={isDark ? '#000000' : '#FFFFFF'}
                     glassEffectStyle="regular"
                     key={isDark ? 'theme-dark' : 'theme-light'}
                 >
                     <View style={styles.cardHeader}>
                         <SymbolView name={isDark ? 'moon.fill' : 'sun.max.fill'} size={20} tintColor={themeColors.text} />
-                        <Text style={[styles.cardTitle, { color: themeColors.text }]}>Dark Mode</Text>
+                        <Text style={[styles.cardTitle, { color: themeColors.text }]}>Appearance</Text>
                     </View>
-                    <Switch
-                        value={isDark}
-                        onValueChange={toggleTheme}
-                        trackColor={{ true: '#34C759', false: '#E5E5EA' }}
-                    />
+                    <View style={styles.chipRow}>
+                        {[
+                            { key: 'light', label: 'Light', icon: 'sun.max.fill' },
+                            { key: 'system', label: 'System', icon: 'gear' },
+                            { key: 'dark', label: 'Dark', icon: 'moon.fill' },
+                        ].map(opt => (
+                            <Pressable key={opt.key} onPress={() => setThemeMode(opt.key)} style={{ flex: 1 }}>
+                                <View style={[
+                                    styles.chip,
+                                    { backgroundColor: opt.key === themeMode ? '#007AFF' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)') },
+                                    { alignItems: 'center' },
+                                ]}>
+                                    <SymbolView name={opt.icon} size={16} tintColor={opt.key === themeMode ? '#FFFFFF' : themeColors.text} style={{ marginBottom: 4 }} />
+                                    <Text style={[
+                                        styles.chipText,
+                                        { color: opt.key === themeMode ? '#FFFFFF' : themeColors.text },
+                                    ]}>{opt.label}</Text>
+                                </View>
+                            </Pressable>
+                        ))}
+                    </View>
                 </GlassView>
             </SettingsSection>
 
