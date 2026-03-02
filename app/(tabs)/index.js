@@ -37,6 +37,12 @@ import Animated, {
 
 const AnimatedLiquidGlassView = Animated.createAnimatedComponent(LiquidGlassView);
 const AnimatedLiquidGlassContainer = Animated.createAnimatedComponent(LiquidGlassContainerView);
+const {
+    CLUSTER_MERGE_LAT_FACTOR,
+    CLUSTER_MERGE_LNG_FACTOR,
+    CLUSTER_SPLIT_MULTIPLIER,
+    CLUSTER_SPREAD_DEADZONE,
+} = require('../../src/lib/clusterAnimationMath.cjs');
 
 const DEFAULT_REGION = {
     latitude: 37.3346,
@@ -85,8 +91,8 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
 
     const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-    const lngThreshold = mapRegion?.longitudeDelta ? mapRegion.longitudeDelta * 0.16 : 0;
-    const latThreshold = mapRegion?.latitudeDelta ? mapRegion.latitudeDelta * 0.040 : 0;
+    const lngThreshold = mapRegion?.longitudeDelta ? mapRegion.longitudeDelta * CLUSTER_MERGE_LNG_FACTOR : 0;
+    const latThreshold = mapRegion?.latitudeDelta ? mapRegion.latitudeDelta * CLUSTER_MERGE_LAT_FACTOR : 0;
 
     const lngs = quotes.map(q => q.longitude);
     const lats = quotes.map(q => q.latitude);
@@ -123,22 +129,8 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     const collapsedSecondaryWidth = 44;
     const collapsedBubbleOverlap = 8;
     const collapsedBubbleOffset = ((collapsedPrimaryWidth + collapsedSecondaryWidth) / 2) - collapsedBubbleOverlap;
-    const splitLngThreshold = lngThreshold * 0.6;
-    const splitLatThreshold = latThreshold * 0.6;
-    const clamp01 = (value) => Math.max(0, Math.min(1, value));
-    const resolveSpreadProgress = (quotesToMeasure, centerLat, centerLng) => {
-        if (quotesToMeasure.length <= 1) return 0;
-
-        const nextMaxLngDiff = Math.max(...quotesToMeasure.map(quote => Math.abs(quote.longitude - centerLng)));
-        const nextMaxLatDiff = Math.max(...quotesToMeasure.map(quote => Math.abs(quote.latitude - centerLat)));
-        const ratioLng = splitLngThreshold > 0 ? nextMaxLngDiff / splitLngThreshold : 0;
-        const ratioLat = splitLatThreshold > 0 ? nextMaxLatDiff / splitLatThreshold : 0;
-        const ratio = clamp01(Math.max(ratioLng, ratioLat));
-
-        if (ratio <= 0.4) return 0;
-        return clamp01((ratio - 0.4) / 0.6);
-    };
-    const interpolateScalar = (progress, start, end) => start + ((end - start) * progress);
+    const splitLngThreshold = lngThreshold * CLUSTER_SPLIT_MULTIPLIER;
+    const splitLatThreshold = latThreshold * CLUSTER_SPLIT_MULTIPLIER;
 
     const nextClusterQuotes = emergingProjectedQuote
         ? [primaryQuote, ...remainingProjectedQuotes]
@@ -159,35 +151,23 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
             distanceFromCenter: Math.hypot(dx, dy),
         };
     });
-    const nextClusterSpread = resolveSpreadProgress(nextClusterQuotes, nextClusterAverageLat, nextClusterAverageLng);
-    const nextPrimaryLocalOffset = nextClusterProjectedQuotes.length > 0
-        ? {
-            dx: interpolateScalar(nextClusterSpread, 0, nextClusterProjectedQuotes[0].dx),
-            dy: interpolateScalar(nextClusterSpread, 0, nextClusterProjectedQuotes[0].dy),
-        }
-        : { dx: 0, dy: 0 };
-    const nextPrimaryOffset = {
-        dx: nextClusterCenterOffset.dx + nextPrimaryLocalOffset.dx,
-        dy: nextClusterCenterOffset.dy + nextPrimaryLocalOffset.dy,
-    };
+    const nextClusterPrimaryQuote = nextClusterProjectedQuotes[0] ?? null;
     const nextClusterEmergingQuote = nextClusterProjectedQuotes.length > 1
         ? nextClusterProjectedQuotes.slice(1).reduce((farthestQuote, quote) => (
             quote.distanceFromCenter > farthestQuote.distanceFromCenter ? quote : farthestQuote
         ), nextClusterProjectedQuotes[1])
         : null;
-    const nextRemainderOffset = nextClusterEmergingQuote
-        ? {
-            dx: nextClusterCenterOffset.dx + interpolateScalar(nextClusterSpread, collapsedBubbleOffset, nextClusterEmergingQuote.dx),
-            dy: nextClusterCenterOffset.dy + interpolateScalar(nextClusterSpread, 0, nextClusterEmergingQuote.dy),
-        }
-        : nextPrimaryOffset;
     const horizontalReach = Math.max(
         collapsedBubbleOffset,
-        ...projectedQuotes.map(quote => Math.abs(quote.dx))
+        ...projectedQuotes.map(quote => Math.abs(quote.dx)),
+        Math.abs(nextClusterCenterOffset.dx) + Math.abs(nextClusterEmergingQuote?.dx ?? 0),
+        Math.abs(nextClusterCenterOffset.dx) + Math.abs(nextClusterPrimaryQuote?.dx ?? 0)
     );
     const verticalReach = Math.max(
         0,
-        ...projectedQuotes.map(quote => Math.abs(quote.dy))
+        ...projectedQuotes.map(quote => Math.abs(quote.dy)),
+        Math.abs(nextClusterCenterOffset.dy) + Math.abs(nextClusterEmergingQuote?.dy ?? 0),
+        Math.abs(nextClusterCenterOffset.dy) + Math.abs(nextClusterPrimaryQuote?.dy ?? 0)
     );
     const containerWidth = Math.max(240, 132 + horizontalReach * 2);
     const containerHeight = Math.max(80, 52 + verticalReach * 2);
@@ -214,11 +194,6 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
             return;
         }
 
-        // The split threshold should maintain the exact physical distance as when merge was 0.12 (now 0.16)
-        // Increasing to 1.5x for stickier hysteresis
-        const splitLngThreshold = lngThreshold * 0.6;
-        const splitLatThreshold = latThreshold * 0.6;
-
         // Animate up to the split boundary, not the merge boundary
         let ratioLng = splitLngThreshold > 0 ? maxLngDiff / splitLngThreshold : 0;
         let ratioLat = splitLatThreshold > 0 ? maxLatDiff / splitLatThreshold : 0;
@@ -229,10 +204,10 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
         let ratio = Math.max(0, Math.min(1, maxRatio));
 
         // They should act like a magnet. Mostly merged unless pulled quite far.
-        // If ratio is < 0.3, they stay 0. If > 0.3 they start pulling away.
+        // Nothing opens until the shared deadzone has been crossed.
         let spread = 0;
-        if (ratio > 0.4) {
-            spread = (ratio - 0.4) / 0.6;
+        if (ratio > CLUSTER_SPREAD_DEADZONE) {
+            spread = (ratio - CLUSTER_SPREAD_DEADZONE) / (1 - CLUSTER_SPREAD_DEADZONE);
         }
 
         // Morph visually from +N to Price ONLY right before the split boundary (spread > 0.75).
@@ -272,11 +247,32 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
 
     // Style for the primary price bubble
     const leftBubbleStyle = useAnimatedStyle(() => {
+        const currentPrimaryDx = interpolate(spreadAnim.value, [0, 1], [0, primaryProjectedQuote.dx]);
+        const currentPrimaryDy = interpolate(spreadAnim.value, [0, 1], [0, primaryProjectedQuote.dy]);
+        const nextPrimaryLocalDx = nextClusterPrimaryQuote
+            ? interpolate(spreadAnim.value, [0, 1], [0, nextClusterPrimaryQuote.dx])
+            : 0;
+        const nextPrimaryLocalDy = nextClusterPrimaryQuote
+            ? interpolate(spreadAnim.value, [0, 1], [0, nextClusterPrimaryQuote.dy])
+            : 0;
+
         return {
             zIndex: 3,
             transform: [
-                { translateX: interpolate(spreadAnim.value, [0, 1], [0, nextPrimaryOffset.dx]) },
-                { translateY: interpolate(spreadAnim.value, [0, 1], [0, nextPrimaryOffset.dy]) }
+                {
+                    translateX: interpolate(
+                        spreadAnim.value,
+                        [0, 1],
+                        [currentPrimaryDx, nextClusterCenterOffset.dx + nextPrimaryLocalDx]
+                    )
+                },
+                {
+                    translateY: interpolate(
+                        spreadAnim.value,
+                        [0, 1],
+                        [currentPrimaryDy, nextClusterCenterOffset.dy + nextPrimaryLocalDy]
+                    )
+                }
             ]
         };
     });
@@ -302,12 +298,40 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
 
     // Style for the subgroup that stays clustered after one item peels away
     const remainderBubbleWrapperStyle = useAnimatedStyle(() => {
+        const currentSecondaryDx = interpolate(
+            spreadAnim.value,
+            [0, 1],
+            [collapsedBubbleOffset, emergingProjectedQuote?.dx ?? collapsedBubbleOffset]
+        );
+        const currentSecondaryDy = interpolate(
+            spreadAnim.value,
+            [0, 1],
+            [0, emergingProjectedQuote?.dy ?? 0]
+        );
+        const nextSecondaryLocalDx = nextClusterEmergingQuote
+            ? interpolate(spreadAnim.value, [0, 1], [collapsedBubbleOffset, nextClusterEmergingQuote.dx])
+            : collapsedBubbleOffset;
+        const nextSecondaryLocalDy = nextClusterEmergingQuote
+            ? interpolate(spreadAnim.value, [0, 1], [0, nextClusterEmergingQuote.dy])
+            : 0;
+
         return {
             zIndex: 1,
             transform: [
-                { translateX: interpolate(spreadAnim.value, [0, 1], [collapsedBubbleOffset, nextRemainderOffset.dx]) },
-                { translateY: interpolate(spreadAnim.value, [0, 1], [0, nextRemainderOffset.dy]) },
-                { scale: hasRemainderBubble ? interpolate(spreadAnim.value, [0.35, 0.75], [0.01, 1], Extrapolate.CLAMP) : 0.01 }
+                {
+                    translateX: interpolate(
+                        spreadAnim.value,
+                        [0, 1],
+                        [currentSecondaryDx, nextClusterCenterOffset.dx + nextSecondaryLocalDx]
+                    )
+                },
+                {
+                    translateY: interpolate(
+                        spreadAnim.value,
+                        [0, 1],
+                        [currentSecondaryDy, nextClusterCenterOffset.dy + nextSecondaryLocalDy]
+                    )
+                }
             ]
         };
     });
@@ -432,20 +456,45 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
                             effect="clear"
                             style={[
                                 styles.bubbleBase,
-                                { minWidth: collapsedSecondaryWidth, justifyContent: 'center' }
+                                rightBubbleShellStyle,
+                                { justifyContent: 'center' }
                             ]}
                         >
-                            <View style={[styles.rowItem, { justifyContent: 'center' }]}>
+                            <Animated.View style={[styles.rowItem, animatedContentStyle, plusNStyle, { justifyContent: 'center' }]}>
                                 <Text style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)', fontSize: 12, marginRight: 4 }}>|</Text>
-                                <Text
+                                <Animated.Text
                                     style={[
                                         styles.priceText,
-                                        { color: isActive ? themeColors.text : '#888888' }
+                                        animatedTextStyle,
                                     ]}
                                 >
-                                    +{remainingProjectedQuotes.length}
-                                </Text>
-                            </View>
+                                    +{nextClusterQuotes.length - 1}
+                                </Animated.Text>
+                            </Animated.View>
+
+                            {nextClusterEmergingQuote && (
+                                <Animated.View style={[styles.rowItem, escapingPriceStyle, { justifyContent: 'center', width: '100%' }]}>
+                                    <SymbolView
+                                        name="fuelpump.fill"
+                                        size={14}
+                                        tintColor={nextClusterEmergingQuote.originalIndex === 0 ? '#007AFF' : (nextClusterEmergingQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
+                                        style={styles.priceIcon}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.priceText,
+                                            nextClusterEmergingQuote.originalIndex === 0 && styles.bestPriceText,
+                                            {
+                                                color: nextClusterEmergingQuote.originalIndex === 0
+                                                    ? '#007AFF'
+                                                    : (nextClusterEmergingQuote.originalIndex === activeIndex ? themeColors.text : '#888888')
+                                            }
+                                        ]}
+                                    >
+                                        ${nextClusterEmergingQuote.price.toFixed(2)}
+                                    </Text>
+                                </Animated.View>
+                            )}
                         </AnimatedLiquidGlassView>
                     </Animated.View>
                 )}
@@ -824,13 +873,13 @@ export default function HomeScreen() {
         const lngDelta = mapRegion.longitudeDelta || 0.05;
 
         // Visual thresholds based on chip pixel dimensions
-        const mergeLatHeight = latDelta * 0.040;
-        const mergeLngWidth = lngDelta * 0.16;
+        const mergeLatHeight = latDelta * CLUSTER_MERGE_LAT_FACTOR;
+        const mergeLngWidth = lngDelta * CLUSTER_MERGE_LNG_FACTOR;
 
         // Hysteresis: Keep absolute separation distance significantly wider
-        // Use 1.5x to ensure chips don't split too easily
-        const splitLatHeight = mergeLatHeight * 1.5;
-        const splitLngWidth = mergeLngWidth * 1.5;
+        // Use the same hysteresis multiplier the overlay animation uses.
+        const splitLatHeight = mergeLatHeight * CLUSTER_SPLIT_MULTIPLIER;
+        const splitLngWidth = mergeLngWidth * CLUSTER_SPLIT_MULTIPLIER;
 
         const cheapestStation = stationQuotes[0];
         const others = stationQuotes.slice(1);
