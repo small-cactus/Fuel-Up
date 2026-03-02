@@ -173,12 +173,40 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
         return {
             position: 'absolute',
             zIndex: 1,
+            justifyContent: 'center',
+            // When merged (spread=0), keep it small and tight behind the main chip.
+            // When separated (spread=1), it needs to be identical size/padding to the main chip.
+            paddingHorizontal: interpolate(spreadAnim.value, [0.8, 0.95], [8, 10], Extrapolate.CLAMP),
+            paddingVertical: interpolate(spreadAnim.value, [0, 0.5, 1], [6, 6, 6]), // ensure stability
+            // Smoothly expand the width before cross-fading the text
+            minWidth: interpolate(spreadAnim.value, [0.8, 0.95], [40, 72], Extrapolate.CLAMP),
             transform: [
                 { translateX: interpolate(spreadAnim.value, [0, 1], [28, offsets.restDx]) },
                 { translateY: interpolate(spreadAnim.value, [0, 1], [0, offsets.restDy]) }
             ]
         };
     });
+
+    // Cross-fade styles for the text morphing
+    const plusNStyle = useAnimatedStyle(() => {
+        return {
+            // Fade out the "+N" as it stretches away
+            opacity: interpolate(spreadAnim.value, [0.85, 0.95], [1, 0], Extrapolate.CLAMP),
+            transform: [{ scale: interpolate(spreadAnim.value, [0.85, 0.95], [1, 0.5], Extrapolate.CLAMP) }]
+        }
+    });
+
+    const escapingPriceStyle = useAnimatedStyle(() => {
+        return {
+            position: 'absolute',
+            // Fade in the real price as it stretches away
+            opacity: interpolate(spreadAnim.value, [0.9, 1], [0, 1], Extrapolate.CLAMP),
+            transform: [{ scale: interpolate(spreadAnim.value, [0.9, 1], [0.8, 1], Extrapolate.CLAMP) }]
+        }
+    });
+
+    // The station that will physically emerge from the cluster
+    const emergingQuote = isMultiQuote ? quotes[1] : null;
 
     return (
         <Marker
@@ -233,11 +261,10 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
                         effect="clear"
                         style={[
                             styles.bubbleBase,
-                            { paddingHorizontal: 8 },
                             rightBubbleStyle,
                         ]}
                     >
-                        <Animated.View style={[styles.rowItem, animatedContentStyle]}>
+                        <Animated.View style={[styles.rowItem, animatedContentStyle, plusNStyle, { justifyContent: 'center' }]}>
                             <Text style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)', fontSize: 12, marginRight: 4 }}>|</Text>
                             <Animated.Text
                                 style={[
@@ -248,6 +275,27 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
                                 +{quotes.length - 1}
                             </Animated.Text>
                         </Animated.View>
+
+                        {/* The price it morphs into */}
+                        {emergingQuote && (
+                            <Animated.View style={[styles.rowItem, escapingPriceStyle, { justifyContent: 'center', width: '100%' }]}>
+                                <SymbolView
+                                    name="fuelpump.fill"
+                                    size={14}
+                                    tintColor={emergingQuote.originalIndex === 0 ? '#007AFF' : (emergingQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
+                                    style={styles.priceIcon}
+                                />
+                                <Animated.Text
+                                    style={[
+                                        styles.priceText,
+                                        emergingQuote.originalIndex === 0 && styles.bestPriceText,
+                                        animatedTextStyle,
+                                    ]}
+                                >
+                                    ${emergingQuote.price.toFixed(2)}
+                                </Animated.Text>
+                            </Animated.View>
+                        )}
                     </AnimatedLiquidGlassView>
                 )}
             </AnimatedLiquidGlassContainer>
