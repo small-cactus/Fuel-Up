@@ -162,7 +162,7 @@ function WelcomeStep({ isDark, themeColors, insets }) {
 
             <LinearGradient
                 colors={[isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)', isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)', isDark ? '#000000' : '#FFFFFF']}
-                locations={[0, 0.8, 1]}
+                locations={[0, 0.8, 1.2]}
                 style={[styles.footerGradient, { height: 280 }]}
                 pointerEvents="none"
             />
