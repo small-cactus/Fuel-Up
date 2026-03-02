@@ -32,7 +32,8 @@
             }
           ]
         }
-      ]
+      ],
+      "expo-video"
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",

@@ -1,0 +1,106 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "display-p3:0.00000,0.45180,0.53064,1.00000",
+      "display-p3:0.37569,0.76334,0.75178,1.00000"
+    ],
+    "orientation" : {
+      "start" : {
+        "x" : 0.5,
+        "y" : 0
+      },
+      "stop" : {
+        "x" : 0.5,
+        "y" : 0.7
+      }
+    }
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "unnamed-2 Background Removed.png",
+          "name" : "unnamed-2 Background Removed",
+          "position" : {
+            "scale" : 0.7,
+            "translation-in-points" : [
+              -102.46875,
+              78.625
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "layers" : [
+        {
+          "fill" : {
+            "solid" : "display-p3:1.00000,0.96017,0.98141,1.00000"
+          },
+          "glass" : true,
+          "image-name" : "image copy Background Removed.png",
+          "name" : "image copy Background Removed",
+          "position" : {
+            "scale" : 0.3,
+            "translation-in-points" : [
+              -21.590625000000045,
+              -348.5
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "display-p3:1.00000,0.96017,0.98141,1.00000"
+          },
+          "glass" : true,
+          "image-name" : "image copy Background Removed.png",
+          "name" : "image copy Background Removed",
+          "position" : {
+            "scale" : 0.2,
+            "translation-in-points" : [
+              304.48593749999986,
+              -9.284375000000011
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "display-p3:1.00000,0.96017,0.98141,1.00000"
+          },
+          "glass" : true,
+          "image-name" : "image copy Background Removed.png",
+          "name" : "image copy Background Removed",
+          "position" : {
+            "scale" : 0.5,
+            "translation-in-points" : [
+              224.609375,
+              -256.7
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

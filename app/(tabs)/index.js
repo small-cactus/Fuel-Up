@@ -79,16 +79,21 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     // Content fade-in animation
     const mountAnim = useSharedValue(0);
     // Animate relative bubble positions for "merging" effect
-    // Initialize just under 1 so it defaults to +N formatting on initial merge
-    const spreadAnim = useSharedValue(isMultiQuote ? 0.99 : 0);
+    const spreadAnim = useSharedValue(isMultiQuote ? 1 : 0);
+    // Animate visual properties (Price vs +N styling) independently
+    const morphAnim = useSharedValue(isMultiQuote ? 1 : 0);
 
     const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-    const threshold = mapRegion?.longitudeDelta ? mapRegion.longitudeDelta * 0.16 : 0;
+    const lngThreshold = mapRegion?.longitudeDelta ? mapRegion.longitudeDelta * 0.16 : 0;
+    const latThreshold = mapRegion?.latitudeDelta ? mapRegion.latitudeDelta * 0.040 : 0;
+
     const lngs = quotes.map(q => q.longitude);
     const lats = quotes.map(q => q.latitude);
-    const lngSpread = Math.max(...lngs) - Math.min(...lngs);
-    const latSpread = Math.max(...lats) - Math.min(...lats);
+
+    // Clustering boundary is a radius measured from average, not a diameter bounding box
+    const maxLngDiff = isMultiQuote ? Math.max(...lngs.map(lng => Math.abs(lng - averageLng))) : 0;
+    const maxLatDiff = isMultiQuote ? Math.max(...lats.map(lat => Math.abs(lat - averageLat))) : 0;
 
     const ptPerLng = mapRegion?.longitudeDelta ? SCREEN_WIDTH / mapRegion.longitudeDelta : 0;
     const ptPerLat = mapRegion?.latitudeDelta ? SCREEN_HEIGHT / mapRegion.latitudeDelta : 0;
@@ -106,8 +111,9 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
         restDy: -(restAvgLat - averageLat) * ptPerLat,
     };
 
-    // For the merge animation, we need to know if we JUST became multi-quote
+    // For the merge animation, we need to know if we JUST became multi-quote or added quotes
     const prevIsMultiQuote = useRef(isMultiQuote);
+    const prevQuotesLength = useRef(quotes.length);
 
     useEffect(() => {
         // Fade in content
@@ -117,20 +123,20 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     useEffect(() => {
         if (!isMultiQuote || !mapRegion?.longitudeDelta) {
             spreadAnim.value = 0; // Snap instantly on split, no animation
+            morphAnim.value = 0;
             prevIsMultiQuote.current = isMultiQuote;
+            prevQuotesLength.current = quotes.length;
             return;
         }
 
-        const latThreshold = mapRegion.latitudeDelta * 0.025;
         // The split threshold should maintain the exact physical distance as when merge was 0.12 (now 0.16)
-        // Previous split was 0.12 * 1.5 = 0.18. Current merge is 0.16. 
-        // 0.18 / 0.16 = 1.125
-        const splitLngThreshold = threshold * 1.125;
-        const splitLatThreshold = latThreshold * 1.125;
+        // Increasing to 1.5x for stickier hysteresis
+        const splitLngThreshold = lngThreshold * 0.6;
+        const splitLatThreshold = latThreshold * 0.6;
 
         // Animate up to the split boundary, not the merge boundary
-        let ratioLng = splitLngThreshold > 0 ? lngSpread / splitLngThreshold : 0;
-        let ratioLat = splitLatThreshold > 0 ? latSpread / splitLatThreshold : 0;
+        let ratioLng = splitLngThreshold > 0 ? maxLngDiff / splitLngThreshold : 0;
+        let ratioLat = splitLatThreshold > 0 ? maxLatDiff / splitLatThreshold : 0;
         let maxRatio = Math.max(ratioLng, ratioLat);
 
         // Constrain between 0 (perfectly merged) and 1 (ready to split)
@@ -141,21 +147,30 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
         // If ratio is < 0.3, they stay 0. If > 0.3 they start pulling away.
         let spread = 0;
         if (ratio > 0.4) {
-            // Cap the maximum spread at 0.99 while still a multi-quote cluster.
-            // This physically prevents the price text from ever flashing during any merge or re-merge.
-            // The unmount split happens dynamically when the spread crosses 1 in the parent map loop.
-            spread = Math.min(0.99, (ratio - 0.4) / 0.6);
+            spread = (ratio - 0.4) / 0.6;
         }
 
-        // If we just merged AND we are animating inward, we need to guarantee that it is 
-        // INSTANTLY in +N format. We skip any price formatting.
-        if (!prevIsMultiQuote.current && isMultiQuote) {
-            spreadAnim.value = spread; // Instantly snap to its pulled-in location so it doesn't animate from nowhere
+        // Morph visually from +N to Price ONLY right before the split boundary (spread > 0.75).
+        // Using a slightly wider window (0.25) to satisfy the need for "enough time to animate fully".
+        let targetMorph = 0;
+        if (spread > 0.75) {
+            targetMorph = (spread - 0.75) / 0.25;
+        }
+
+        const isNewCluster = !prevIsMultiQuote.current && isMultiQuote;
+        const isAddingToCluster = prevIsMultiQuote.current && quotes.length > prevQuotesLength.current;
+
+        if (isNewCluster || isAddingToCluster) {
+            // New chip joining! Start spread and morph at 1.0 to smoothly melt from Price to +N
+            spreadAnim.value = 1;
+            morphAnim.value = 1;
         }
 
         spreadAnim.value = withTiming(spread, { duration: 150 });
+        morphAnim.value = withTiming(targetMorph, { duration: 150 });
         prevIsMultiQuote.current = isMultiQuote;
-    }, [mapRegion?.longitudeDelta, mapRegion?.latitudeDelta, isMultiQuote, lngSpread, latSpread, threshold]);
+        prevQuotesLength.current = quotes.length;
+    }, [mapRegion?.longitudeDelta, mapRegion?.latitudeDelta, isMultiQuote, maxLngDiff, maxLatDiff, lngThreshold, latThreshold]);
 
     const animatedContentStyle = useAnimatedStyle(() => {
         return {};
@@ -179,12 +194,10 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
             position: 'absolute',
             zIndex: 1,
             justifyContent: 'center',
-            // When merged (spread=0), keep it small and tight behind the main chip.
-            // When separated (spread=1), it needs to be identical size/padding to the main chip.
-            paddingHorizontal: interpolate(spreadAnim.value, [0.99, 1], [8, 10], Extrapolate.CLAMP),
-            paddingVertical: interpolate(spreadAnim.value, [0, 0.5, 1], [6, 6, 6]), // ensure stability
-            // Snap to full width exactly when about to separate
-            minWidth: interpolate(spreadAnim.value, [0.99, 1], [40, 72], Extrapolate.CLAMP),
+            paddingHorizontal: interpolate(morphAnim.value, [0, 1], [8, 10], Extrapolate.CLAMP),
+            paddingVertical: interpolate(morphAnim.value, [0, 0.5, 1], [6, 6, 6]),
+            // Smoothly expand width earlier in the morph cycle
+            minWidth: interpolate(morphAnim.value, [0, 0.7], [40, 72], Extrapolate.CLAMP),
             transform: [
                 { translateX: interpolate(spreadAnim.value, [0, 1], [28, offsets.restDx]) },
                 { translateY: interpolate(spreadAnim.value, [0, 1], [0, offsets.restDy]) }
@@ -195,18 +208,18 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     // Cross-fade styles for the text morphing
     const plusNStyle = useAnimatedStyle(() => {
         return {
-            // Poof out the "+N" exactly at the split boundary
-            opacity: interpolate(spreadAnim.value, [0.99, 1], [1, 0], Extrapolate.CLAMP),
-            transform: [{ scale: interpolate(spreadAnim.value, [0.99, 1], [1, 0.5], Extrapolate.CLAMP) }]
+            // Fade out the "+N" format 
+            opacity: interpolate(morphAnim.value, [0.4, 0.8], [1, 0], Extrapolate.CLAMP),
+            transform: [{ scale: interpolate(morphAnim.value, [0.4, 0.8], [1, 0.5], Extrapolate.CLAMP) }]
         }
     });
 
     const escapingPriceStyle = useAnimatedStyle(() => {
         return {
             position: 'absolute',
-            // ONLY natively show the price if the spread is > 0.99, otherwise keep it at 0
-            opacity: spreadAnim.value > 0.99 ? 1 : 0,
-            transform: [{ scale: interpolate(spreadAnim.value, [0.99, 1], [0.8, 1], Extrapolate.CLAMP) }]
+            // Fade in the Price format
+            opacity: interpolate(morphAnim.value, [0.6, 1], [0, 1], Extrapolate.CLAMP),
+            transform: [{ scale: interpolate(morphAnim.value, [0.6, 1], [0.8, 1], Extrapolate.CLAMP) }]
         }
     });
 
@@ -230,7 +243,7 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
                 style={[
                     styles.clusterContainer,
                     animatedOverlayStyle,
-                    { minWidth: 160, minHeight: 70, justifyContent: 'center', alignItems: 'center' }
+                    { minWidth: 200, minHeight: 70, justifyContent: 'center', alignItems: 'center' }
                 ]}
             >
                 {/* Main bubble with price (Front) */}
@@ -674,11 +687,10 @@ export default function HomeScreen() {
         const mergeLatHeight = latDelta * 0.040;
         const mergeLngWidth = lngDelta * 0.16;
 
-        // Hysteresis: Keep absolute separation distance the same as before 
-        // (prev was 0.030 * 1.5 = 0.045, 0.045 / 0.040 = 1.125)
-        // (prev was 0.12 * 1.5 = 0.18, 0.18 / 0.16 = 1.125)
-        const splitLatHeight = mergeLatHeight * 1.125;
-        const splitLngWidth = mergeLngWidth * 1.125;
+        // Hysteresis: Keep absolute separation distance significantly wider
+        // Use 1.5x to ensure chips don't split too easily
+        const splitLatHeight = mergeLatHeight * 1.5;
+        const splitLngWidth = mergeLngWidth * 1.5;
 
         const cheapestStation = stationQuotes[0];
         const others = stationQuotes.slice(1);

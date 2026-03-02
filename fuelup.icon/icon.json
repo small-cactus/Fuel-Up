@@ -1,20 +1,43 @@
 {
-  "fill" : {
-    "linear-gradient" : [
-      "display-p3:0.56606,1.00000,0.86328,1.00000",
-      "display-p3:0.35543,0.33139,1.00000,1.00000"
-    ],
-    "orientation" : {
-      "start" : {
-        "x" : 0.5,
-        "y" : 0
-      },
-      "stop" : {
-        "x" : 0.5,
-        "y" : 0.7
+  "fill-specializations" : [
+    {
+      "value" : {
+        "linear-gradient" : [
+          "display-p3:1.00000,0.91514,0.22187,1.00000",
+          "display-p3:0.83900,0.41838,0.12793,1.00000"
+        ],
+        "orientation" : {
+          "start" : {
+            "x" : 0.5,
+            "y" : 0
+          },
+          "stop" : {
+            "x" : 0.5,
+            "y" : 0.7
+          }
+        }
+      }
+    },
+    {
+      "appearance" : "dark",
+      "value" : {
+        "linear-gradient" : [
+          "display-p3:0.18672,0.18834,0.17693,1.00000",
+          "display-p3:0.00000,0.00000,0.00000,1.00000"
+        ],
+        "orientation" : {
+          "start" : {
+            "x" : 0.5,
+            "y" : 0
+          },
+          "stop" : {
+            "x" : 0.5,
+            "y" : 0.7
+          }
+        }
       }
     }
-  },
+  ],
   "groups" : [
     {
       "layers" : [
@@ -38,24 +61,56 @@
       "layers" : [
         {
           "blend-mode" : "normal",
-          "fill" : {
-            "linear-gradient" : [
-              "display-p3:0.87159,0.87977,0.90404,1.00000",
-              "display-p3:0.96995,0.97753,1.00000,1.00000"
-            ],
-            "orientation" : {
-              "start" : {
-                "x" : 0.35511515067059246,
-                "y" : 1
-              },
-              "stop" : {
-                "x" : 0.5,
-                "y" : 0
+          "fill-specializations" : [
+            {
+              "value" : {
+                "linear-gradient" : [
+                  "extended-gray:1.00000,1.00000",
+                  "extended-gray:1.00000,1.00000"
+                ],
+                "orientation" : {
+                  "start" : {
+                    "x" : 0.7144323222337091,
+                    "y" : 1
+                  },
+                  "stop" : {
+                    "x" : 0.1910382750560203,
+                    "y" : 0
+                  }
+                }
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : {
+                "linear-gradient" : [
+                  "display-p3:1.00000,0.91514,0.22187,1.00000",
+                  "display-p3:0.83900,0.41838,0.12793,1.00000"
+                ],
+                "orientation" : {
+                  "start" : {
+                    "x" : 0.15598492804516473,
+                    "y" : 0
+                  },
+                  "stop" : {
+                    "x" : 0.6983548120602434,
+                    "y" : 1
+                  }
+                }
               }
             }
-          },
+          ],
+          "glass" : true,
+          "hidden" : false,
           "image-name" : "unnamed-2 Background Removed.png",
-          "name" : "unnamed-2 Background Removed"
+          "name" : "unnamed-2 Background Removed",
+          "position" : {
+            "scale" : 0.85,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
         }
       ],
       "shadow" : {

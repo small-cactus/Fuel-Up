@@ -1,13 +1,31 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import { GlassView } from 'expo-glass-effect';
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import MapView, { Circle, Marker, PROVIDER_APPLE } from 'react-native-maps';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import Slider from '@react-native-community/slider';
+import * as Haptics from 'expo-haptics';
+import { BlurView } from 'expo-blur';
+import Animated, {
+    FadeIn,
+    FadeInDown,
+    FadeInUp,
+    ZoomIn,
+    SlideInDown,
+    useSharedValue,
+    useAnimatedStyle,
+    useAnimatedProps,
+    withTiming,
+    withDelay,
+    runOnJS,
+    Easing
+} from 'react-native-reanimated';
+
+const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
 import { usePreferences } from '../PreferencesContext';
 import { useTheme } from '../ThemeContext';
@@ -42,11 +60,47 @@ const DEMO_STATIONS = [
 
 const MAP_MARGIN = 0.006; // Inset margin to avoid edge chips
 
+const OnboardingChip = ({ price, isCheapest, isDark, top, left }) => {
+    const chipTint = isCheapest ? 'rgba(0, 255, 47, 0.3)' : 'rgba(255, 25, 0, 0.3)';
+
+    return (
+        <View style={{
+            position: 'absolute',
+            top: `${top}%`,
+            left: `${left}%`,
+            zIndex: 10,
+        }}>
+            <GlassView
+                tintColor={chipTint}
+                glassEffectStyle="clear"
+                colorScheme={isDark ? 'dark' : 'light'}
+                isInteractive={false}
+                style={styles.demoChip}
+            >
+                <SymbolView
+                    name="fuelpump.fill"
+                    size={14}
+                    tintColor="#000000ff"
+                    style={styles.demoChipIcon}
+                />
+                <Text style={[
+                    styles.demoChipText,
+                    { color: '#000000ff' },
+                    isCheapest && styles.demoChipTextCheapest,
+                ]}>
+                    ${price.toFixed(2)}
+                </Text>
+            </GlassView>
+        </View>
+    );
+};
+
 function WelcomeStep({ isDark, themeColors, insets }) {
     const cheapestPrice = Math.min(...DEMO_STATIONS.map(s => s.price));
 
     return (
-        <View style={StyleSheet.absoluteFill}>
+        <View style={styles.stepContainer}>
+
             {/* Full-screen map */}
             <MapView
                 style={StyleSheet.absoluteFillObject}
@@ -77,31 +131,13 @@ function WelcomeStep({ isDark, themeColors, insets }) {
                             coordinate={{ latitude: station.lat, longitude: station.lng }}
                             tracksViewChanges={true}
                         >
-                            <GlassView
-                                tintColor={chipTint}
-                                glassEffectStyle="clear"
-                                colorScheme={isDark ? 'dark' : 'light'}
-                                isInteractive={false}
-                                key={`demo-${isDark ? 'dark' : 'light'}-${index}`}
-                                style={[
-                                    styles.demoChip,
-                                    isCheapest && styles.demoChipCheapest,
-                                ]}
-                            >
-                                <SymbolView
-                                    name="fuelpump.fill"
-                                    size={14}
-                                    tintColor="#000000ff"
-                                    style={styles.demoChipIcon}
-                                />
-                                <Text style={[
-                                    styles.demoChipText,
-                                    { color: '#000000ff' },
-                                    isCheapest && styles.demoChipTextCheapest,
-                                ]}>
-                                    ${station.price.toFixed(2)}
-                                </Text>
-                            </GlassView>
+                            <OnboardingChip
+                                price={station.price}
+                                isCheapest={isCheapest}
+                                isDark={isDark}
+                                top={0} // Not used in Marker
+                                left={0} // Not used in Marker
+                            />
                         </Marker>
                     );
                 })}
@@ -148,7 +184,8 @@ function RadiusStep({ isDark, themeColors, insets, value, onChange }) {
     };
 
     return (
-        <View style={StyleSheet.absoluteFill}>
+        <View style={styles.stepContainer}>
+
             {/* Full-screen map */}
             <MapView
                 style={StyleSheet.absoluteFillObject}
@@ -230,7 +267,8 @@ function RadiusStep({ isDark, themeColors, insets, value, onChange }) {
 
 function OctaneStep({ isDark, themeColors, insets, value, onChange }) {
     return (
-        <View style={styles.stepContainer}>
+        <View style={[styles.stepContainer, { backgroundColor: themeColors.background }]}>
+
             <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
                 <SymbolView name="gauge.with.dots.needle.33percent" size={44} tintColor={themeColors.text} />
                 <Text style={[styles.stepTitle, { color: themeColors.text }]}>Preferred Octane</Text>
@@ -273,7 +311,8 @@ function RatingStep({ isDark, themeColors, insets, value, onChange }) {
     const ratingValues = [0, 3, 3.5, 4, 4.5];
 
     return (
-        <View style={styles.stepContainer}>
+        <View style={[styles.stepContainer, { backgroundColor: themeColors.background }]}>
+
             <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
                 <SymbolView name="star.fill" size={44} tintColor="#FFB800" />
                 <Text style={[styles.stepTitle, { color: themeColors.text }]}>Minimum Rating</Text>
@@ -315,7 +354,8 @@ function RatingStep({ isDark, themeColors, insets, value, onChange }) {
 
 function LocationStep({ isDark, themeColors, insets, permissionStatus }) {
     return (
-        <View style={styles.stepContainer}>
+        <View style={[styles.stepContainer, { backgroundColor: themeColors.background }]}>
+
             <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
                 <SymbolView name="location.fill" size={44} tintColor="#007AFF" />
                 <Text style={[styles.stepTitle, { color: themeColors.text }]}>Enable Location</Text>
@@ -350,7 +390,8 @@ function LocationStep({ isDark, themeColors, insets, permissionStatus }) {
 
 function NotificationStep({ isDark, themeColors, insets, permissionStatus }) {
     return (
-        <View style={styles.stepContainer}>
+        <View style={[styles.stepContainer, { backgroundColor: themeColors.background }]}>
+            原则
             <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
                 <SymbolView name="bell.badge.fill" size={44} tintColor="#FF3B30" />
                 <Text style={[styles.stepTitle, { color: themeColors.text }]}>Stay Updated</Text>
@@ -383,12 +424,210 @@ function NotificationStep({ isDark, themeColors, insets, permissionStatus }) {
     );
 }
 
+const videoSource = require('../../assets/red_car_drives.mp4');
+
+function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }) {
+    const greenPos = { top: 28, left: 75 };
+    const redPos = { top: 15, left: 2 };
+
+    // --- Animation Trigger Points (in seconds) ---
+    // Easily configure when you want the 3 steps to animate in during the video playback
+    const redChipTriggerPoint = 0.7;
+    const liveActivityTriggerPoint = 1.8;
+    const greenChipTriggerPoint = 3.0;
+
+    const [showRed, setShowRed] = useState(false);
+    const [showLive, setShowLive] = useState(false);
+    const [showGreen, setShowGreen] = useState(false);
+
+    useEffect(() => {
+        if (isActive) {
+            player.currentTime = 0.0;
+            player.play();
+        } else {
+            player.pause();
+            setShowRed(false);
+            setShowLive(false);
+            setShowGreen(false);
+        }
+    }, [isActive, player]);
+
+    useEffect(() => {
+        if (!isActive) return;
+
+        // Check video time periodically to trigger animations
+        const interval = setInterval(() => {
+            const t = player.currentTime;
+            // Only set to true once the time is reached. They will remain true 
+            // even if the video loops, preventing them from disappearing.
+            setShowRed(prev => prev || t >= redChipTriggerPoint);
+
+            setShowLive(prev => {
+                if (!prev && t >= liveActivityTriggerPoint) {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    return true;
+                }
+                return prev;
+            });
+
+            setShowGreen(prev => prev || t >= greenChipTriggerPoint);
+        }, 50);
+
+        return () => clearInterval(interval);
+    }, [isActive, player]);
+
+
+
+
+    return (
+        <View style={[styles.stepContainer, { backgroundColor: themeColors.background }]}>
+            原则
+            <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
+                <Image
+                    source={require('../../assets/predictive-fueling.png')}
+                    style={{ width: 80, height: 80, borderRadius: 20 }}
+                    resizeMode="contain"
+                />
+                <Text style={[styles.stepTitle, { color: themeColors.text }]}>Predictive Fueling</Text>
+                <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
+                    We'll predict your gas stop and find a cheaper station on your way.
+                </Text>
+            </View>
+
+            <View style={[styles.stepContent, { paddingHorizontal: 0, justifyContent: 'flex-start', marginTop: 24 }]}>
+                <View style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH * 0.6 }}>
+                    <VideoView
+                        player={player}
+                        style={StyleSheet.absoluteFill}
+                        nativeControls={false}
+                        contentFit="cover"
+                    />
+                    {showGreen && (
+                        <Animated.View style={StyleSheet.absoluteFill} pointerEvents="none" entering={FadeIn.duration(800)}>
+                            <OnboardingChip
+                                price={3.89}
+                                isCheapest={true}
+                                isDark={isDark}
+                                top={greenPos.top}
+                                left={greenPos.left}
+                            />
+                        </Animated.View>
+                    )}
+
+                    {showRed && (
+                        <Animated.View style={StyleSheet.absoluteFill} pointerEvents="none" entering={FadeIn.duration(800)}>
+                            <OnboardingChip
+                                price={4.59}
+                                isCheapest={false}
+                                isDark={isDark}
+                                top={redPos.top}
+                                left={redPos.left}
+                            />
+                        </Animated.View>
+                    )}
+                </View>
+
+                {/* Mock Live Activity */}
+                <View style={[styles.mockLiveActivityContainer, { marginTop: 0 }]}>
+                    {showLive && (
+                        <Animated.View
+                            entering={FadeInUp.springify().mass(1).damping(16).stiffness(120)}
+                            style={{ width: '100%', alignItems: 'center' }}
+                        >
+                            <GlassView
+                                glassEffectStyle="regular"
+                                tintColor={isDark ? '#1C1C1E' : '#FFFFFF'}
+                                style={styles.mockLiveActivityGlass}
+                            >
+                                <View style={styles.mockLiveActivityHeader}>
+                                    <View style={styles.mockLiveActivityAppIcon}>
+                                        <Image
+                                            source={require('../../assets/predictive-fueling.png')}
+                                            style={{ width: 22, height: 22, borderRadius: 5 }}
+                                            resizeMode="contain"
+                                        />
+                                    </View>
+                                    <Text style={[styles.mockLiveActivityTitle, { color: themeColors.text }]}>Fuel Up</Text>
+                                    <Text style={[styles.mockLiveActivityTime, { color: themeColors.text, opacity: 0.5 }]}>now</Text>
+                                </View>
+
+                                <View style={styles.mockLiveActivityContent}>
+                                    <View style={styles.mockLiveActivityMain}>
+                                        <View style={styles.mockLiveActivityStationInfo}>
+                                            <Text style={[styles.mockLiveActivityStationName, { color: themeColors.text }]}>Save $8.93 at Mobil One</Text>
+                                            <View style={styles.mockLiveActivityBadge}>
+                                                <Text style={styles.mockLiveActivityBadgeText}>Cheapest</Text>
+                                            </View>
+                                        </View>
+                                        <View style={styles.mockLiveActivityPriceContainer}>
+                                            <Text style={[styles.mockLiveActivityPriceLabel, { color: themeColors.text, opacity: 0.6 }]}>Regular</Text>
+                                            <Text style={[styles.mockLiveActivityPrice, { color: '#007AFF' }]}>$3.89</Text>
+                                        </View>
+                                    </View>
+
+                                    <View style={[styles.mockLiveActivityDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]} />
+
+                                    <View style={styles.mockLiveActivityFooter}>
+                                        <SymbolView name="location.fill" size={12} tintColor={themeColors.text} style={{ opacity: 0.6 }} />
+                                        <Text style={[styles.mockLiveActivityDistance, { color: themeColors.text, opacity: 0.6 }]}>1.2 mi away • On your route</Text>
+                                    </View>
+                                </View>
+                            </GlassView>
+                            <Animated.View entering={FadeIn.delay(300).duration(800)}>
+                                <Text style={[styles.mockLiveActivityHint, { color: themeColors.text }]}>
+                                    Get real-time alerts as you drive
+                                </Text>
+                            </Animated.View>
+                        </Animated.View>
+                    )}
+                </View>
+            </View>
+        </View>
+    );
+}
+
 export default function OnboardingScreen() {
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
     const { preferences, updatePreference, completeOnboarding } = usePreferences();
     const [currentStep, setCurrentStep] = useState(0);
-    const totalSteps = 6;
+
+    const blurIntensity = useSharedValue(80);
+
+    const animatedBlurProps = useAnimatedProps(() => ({
+        intensity: blurIntensity.value,
+    }));
+
+    const animatedBlurStyle = useAnimatedStyle(() => ({
+        opacity: blurIntensity.value > 0.1 ? 1 : 0,
+        pointerEvents: blurIntensity.value > 10 ? 'auto' : 'none',
+    }));
+
+    useEffect(() => {
+        // Initial splash unblur (defocus)
+        blurIntensity.value = withDelay(500, withTiming(0, {
+            duration: 1000,
+            easing: Easing.out(Easing.exp)
+        }));
+    }, []);
+
+    const predictivePlayer = useVideoPlayer(videoSource, (player) => {
+        player.loop = true;
+        player.muted = true;
+        player.currentTime = 0.0;
+    });
+    const scrollViewRef = useRef(null);
+
+    const handleScroll = (event) => {
+        const offset = event.nativeEvent.contentOffset.x;
+        const index = Math.round(offset / SCREEN_WIDTH);
+        if (index !== currentStep && index >= 0 && index < totalSteps) {
+            setCurrentStep(index);
+        }
+    };
+
+
+    const totalSteps = 7;
 
     const [radius, setRadius] = useState(preferences.searchRadiusMiles);
     const [octane, setOctane] = useState(preferences.preferredOctane);
@@ -400,9 +639,12 @@ export default function OnboardingScreen() {
         const { status } = await Location.requestForegroundPermissionsAsync();
         setPermissionStatus(status);
         if (status === 'granted') {
-            setTimeout(() => setCurrentStep(currentStep + 1), 600);
+            setTimeout(() => {
+                scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * SCREEN_WIDTH, animated: true });
+            }, 600);
         }
     };
+
 
     const handleRequestNotifications = async () => {
         const token = await registerForPushNotificationsAsync();
@@ -412,55 +654,91 @@ export default function OnboardingScreen() {
         } else {
             setNotifPermissionStatus('denied');
         }
-        setTimeout(() => setCurrentStep(currentStep + 1), 600);
+        setTimeout(() => {
+            scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * SCREEN_WIDTH, animated: true });
+        }, 600);
     };
 
+
     const handleContinue = () => {
-        if (currentStep === 1 && permissionStatus !== 'granted') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+        if (currentStep === 2 && permissionStatus !== 'granted') {
             handleRequestPermission();
             return;
         }
 
-        if (currentStep === 2 && notifPermissionStatus !== 'granted') {
+        if (currentStep === 3 && notifPermissionStatus !== 'granted') {
             handleRequestNotifications();
             return;
         }
 
         if (currentStep < totalSteps - 1) {
             // Save preferences as we go
-            if (currentStep === 3) updatePreference('searchRadiusMiles', radius);
-            if (currentStep === 4) updatePreference('preferredOctane', octane);
-            if (currentStep === 5) updatePreference('minimumRating', minRating);
-            setCurrentStep(currentStep + 1);
+            if (currentStep === 4) updatePreference('searchRadiusMiles', radius);
+            if (currentStep === 5) updatePreference('preferredOctane', octane);
+            if (currentStep === 6) updatePreference('minimumRating', minRating);
+
+            scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * SCREEN_WIDTH, animated: true });
         } else {
             // Final step
             completeOnboarding();
         }
     };
 
+
     const isLastStep = currentStep === totalSteps - 1;
 
+    // Use full map for specific steps
+    const isTranslucentStep = currentStep === 0 || currentStep === 4;
+
+
     return (
-        <View style={[styles.container, { backgroundColor: (currentStep === 0 || currentStep === 3) ? 'transparent' : themeColors.background }]}>
+        <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+
             <View style={styles.content}>
-                {currentStep === 0 && <WelcomeStep isDark={isDark} themeColors={themeColors} insets={insets} />}
-                {currentStep === 1 && <LocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={permissionStatus} />}
-                {currentStep === 2 && <NotificationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={notifPermissionStatus} />}
-                {currentStep === 3 && <RadiusStep isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} />}
-                {currentStep === 4 && <OctaneStep isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} />}
-                {currentStep === 5 && <RatingStep isDark={isDark} themeColors={themeColors} insets={insets} value={minRating} onChange={setMinRating} />}
+                <ScrollView
+                    ref={scrollViewRef}
+                    horizontal
+                    pagingEnabled
+                    showsHorizontalScrollIndicator={false}
+                    onMomentumScrollEnd={handleScroll}
+                    scrollEventThrottle={16}
+                    style={styles.scrollView}
+                    removeClippedSubviews={false}
+                >
+
+                    <WelcomeStep isDark={isDark} themeColors={themeColors} insets={insets} />
+
+                    <PredictiveFuelingStep
+                        isDark={isDark}
+                        themeColors={themeColors}
+                        insets={insets}
+                        player={predictivePlayer}
+                        isActive={currentStep === 1}
+                    />
+
+
+                    <LocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={permissionStatus} />
+                    <NotificationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={notifPermissionStatus} />
+                    <RadiusStep isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} />
+                    <OctaneStep isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} />
+                    <RatingStep isDark={isDark} themeColors={themeColors} insets={insets} value={minRating} onChange={setMinRating} />
+                </ScrollView>
             </View>
 
-            {/* Progress dots + continue */}
-            {(currentStep === 0 || currentStep === 3) && (
+
+            {/* Progress dots + continue (Stay solid) */}
+            {isTranslucentStep && (
                 <LinearGradient
                     colors={[isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)', isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)', isDark ? '#000000' : '#FFFFFF']}
                     locations={[0, 0.4, 1]}
                     style={[styles.footerGradient, { paddingBottom: insets.bottom + 20 }]}
-                    pointerEvents="box-none"
+                    pointerEvents="none"
                 />
             )}
-            <View style={[styles.footer, (currentStep === 0 || currentStep === 3) && styles.footerAbsolute, { paddingBottom: insets.bottom + 20 }]}>
+
+            <View style={[styles.footer, isTranslucentStep && styles.footerAbsolute, { paddingBottom: insets.bottom + 20 }]}>
                 <View style={styles.dotsRow}>
                     {Array.from({ length: totalSteps }).map((_, i) => (
                         <View
@@ -474,7 +752,7 @@ export default function OnboardingScreen() {
                     ))}
                 </View>
 
-                {!isLastStep && (
+                {currentStep < totalSteps - 1 ? (
                     <Pressable onPress={handleContinue} style={styles.continueButton}>
                         <GlassView
                             glassEffectStyle="regular"
@@ -483,20 +761,18 @@ export default function OnboardingScreen() {
                             style={styles.continueGlass}
                         >
                             <Text style={styles.continueText}>
-                                {currentStep === 1 && permissionStatus !== 'granted' ? 'Enable Location' :
-                                    currentStep === 2 && notifPermissionStatus !== 'granted' ? 'Enable Notifications' : 'Continue'}
+                                {currentStep === 2 && permissionStatus !== 'granted' ? 'Enable Location' :
+                                    currentStep === 3 && notifPermissionStatus !== 'granted' ? 'Enable Notifications' : 'Continue'}
                             </Text>
                             <SymbolView
-                                name={currentStep === 1 && permissionStatus !== 'granted' ? 'location.fill' :
-                                    currentStep === 2 && notifPermissionStatus !== 'granted' ? 'bell.fill' : 'arrow.right'}
+                                name={currentStep === 2 && permissionStatus !== 'granted' ? 'location.fill' :
+                                    currentStep === 3 && notifPermissionStatus !== 'granted' ? 'bell.fill' : 'arrow.right'}
                                 size={18}
                                 tintColor="#FFFFFF"
                             />
                         </GlassView>
                     </Pressable>
-                )}
-
-                {isLastStep && (
+                ) : (
                     <Pressable onPress={handleContinue} style={styles.continueButton}>
                         <GlassView
                             glassEffectStyle="regular"
@@ -510,6 +786,18 @@ export default function OnboardingScreen() {
                     </Pressable>
                 )}
             </View>
+
+            {/* Full-screen transition blur overlay (Dynamic Intensity) */}
+            <Animated.View
+                style={[StyleSheet.absoluteFill, animatedBlurStyle]}
+                pointerEvents="none"
+            >
+                <AnimatedBlurView
+                    animatedProps={animatedBlurProps}
+                    tint={isDark ? 'dark' : 'light'}
+                    style={StyleSheet.absoluteFill}
+                />
+            </Animated.View>
         </View>
     );
 }
@@ -520,15 +808,23 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        paddingHorizontal: 24,
     },
-    stepContainer: {
+    scrollView: {
         flex: 1,
     },
+    stepContainer: {
+        width: SCREEN_WIDTH,
+        flex: 1,
+        backgroundColor: 'transparent', // Default to transparent as children will provide it or parent will
+    },
+
+
     stepHeader: {
         alignItems: 'center',
         gap: 12,
+        paddingHorizontal: 24,
     },
+
     stepContent: {
         flex: 1,
         alignItems: 'center',
@@ -540,6 +836,7 @@ const styles = StyleSheet.create({
         fontSize: 56,
         fontWeight: '800',
         letterSpacing: -1,
+        fontFamily: 'ui-rounded',
     },
     sliderCard: {
         width: '100%',
@@ -569,7 +866,9 @@ const styles = StyleSheet.create({
         right: 0,
         alignItems: 'center',
         gap: 12,
+        paddingHorizontal: 24,
     },
+
     appIconCircle: {
         width: 80,
         height: 80,
@@ -581,6 +880,7 @@ const styles = StyleSheet.create({
         fontSize: 34,
         fontWeight: '800',
         letterSpacing: -0.5,
+        fontFamily: 'ui-rounded',
     },
     welcomeSubtitle: {
         fontSize: 17,
@@ -615,6 +915,7 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         textAlign: 'center',
         letterSpacing: -0.3,
+        fontFamily: 'ui-rounded',
     },
     stepSubtitle: {
         fontSize: 16,
@@ -775,5 +1076,96 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 18,
         fontWeight: '700',
+    },
+    // Mock Live Activity
+    mockLiveActivityContainer: {
+        width: SCREEN_WIDTH - 48,
+        alignItems: 'center',
+    },
+    mockLiveActivityGlass: {
+        width: '100%',
+        borderRadius: 24,
+        padding: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.1,
+        shadowRadius: 200,
+    },
+    mockLiveActivityHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    mockLiveActivityAppIcon: {
+        marginRight: 8,
+    },
+    mockLiveActivityTitle: {
+        fontSize: 13,
+        fontWeight: '600',
+        flex: 1,
+    },
+    mockLiveActivityTime: {
+        fontSize: 12,
+    },
+    mockLiveActivityContent: {
+        gap: 12,
+    },
+    mockLiveActivityMain: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    mockLiveActivityStationInfo: {
+        gap: 4,
+    },
+    mockLiveActivityStationName: {
+        fontSize: 18,
+        fontWeight: '700',
+        fontFamily: 'ui-rounded',
+    },
+    mockLiveActivityBadge: {
+        backgroundColor: 'rgba(0, 255, 47, 0.15)',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+        alignSelf: 'flex-start',
+    },
+    mockLiveActivityBadgeText: {
+        color: '#00C838',
+        fontSize: 11,
+        fontWeight: '700',
+        textTransform: 'uppercase',
+    },
+    mockLiveActivityPriceContainer: {
+        alignItems: 'flex-end',
+    },
+    mockLiveActivityPriceLabel: {
+        fontSize: 11,
+        fontWeight: '600',
+        textTransform: 'uppercase',
+    },
+    mockLiveActivityPrice: {
+        fontSize: 24,
+        fontWeight: '800',
+        fontFamily: 'ui-rounded',
+    },
+    mockLiveActivityDivider: {
+        height: 1,
+        width: '100%',
+    },
+    mockLiveActivityFooter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    mockLiveActivityDistance: {
+        fontSize: 13,
+        fontWeight: '500',
+    },
+    mockLiveActivityHint: {
+        marginTop: 12,
+        fontSize: 13,
+        fontWeight: '600',
+        opacity: 0.4,
     },
 });
