@@ -115,7 +115,7 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
 
     useEffect(() => {
         if (!isMultiQuote || !mapRegion?.longitudeDelta) {
-            spreadAnim.value = withTiming(0, { duration: 300 });
+            spreadAnim.value = 0; // Snap instantly on split, no animation
             prevIsMultiQuote.current = isMultiQuote;
             return;
         }
@@ -158,10 +158,11 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
 
     // Style for the primary price bubble
     const leftBubbleStyle = useAnimatedStyle(() => {
-        // Appx flex offset of left bubble center from container center is -20
         return {
+            position: 'absolute',
+            zIndex: 2,
             transform: [
-                { translateX: interpolate(spreadAnim.value, [0, 1], [0, offsets.primaryDx + 20]) },
+                { translateX: interpolate(spreadAnim.value, [0, 1], [isMultiQuote ? -22 : 0, offsets.primaryDx]) },
                 { translateY: interpolate(spreadAnim.value, [0, 1], [0, offsets.primaryDy]) }
             ]
         };
@@ -169,10 +170,11 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
 
     // Style for the +N bubble
     const rightBubbleStyle = useAnimatedStyle(() => {
-        // Appx flex offset of right bubble center from container center is +30
         return {
+            position: 'absolute',
+            zIndex: 1,
             transform: [
-                { translateX: interpolate(spreadAnim.value, [0, 1], [0, offsets.restDx - 30]) },
+                { translateX: interpolate(spreadAnim.value, [0, 1], [28, offsets.restDx]) },
                 { translateY: interpolate(spreadAnim.value, [0, 1], [0, offsets.restDy]) }
             ]
         };
@@ -231,7 +233,7 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
                         effect="clear"
                         style={[
                             styles.bubbleBase,
-                            { paddingHorizontal: 8, marginLeft: -12 },
+                            { paddingHorizontal: 8 },
                             rightBubbleStyle,
                         ]}
                     >
