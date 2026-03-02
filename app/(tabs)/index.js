@@ -117,18 +117,70 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     const remainingProjectedQuotes = emergingProjectedQuote
         ? secondaryProjectedQuotes.filter(quote => quote.stationId !== emergingProjectedQuote.stationId)
         : [];
-    const remainderOffset = remainingProjectedQuotes.length > 0
-        ? {
-            dx: remainingProjectedQuotes.reduce((sum, quote) => sum + quote.dx, 0) / remainingProjectedQuotes.length,
-            dy: remainingProjectedQuotes.reduce((sum, quote) => sum + quote.dy, 0) / remainingProjectedQuotes.length,
-        }
-        : { dx: 0, dy: 0 };
     const hasRemainderBubble = remainingProjectedQuotes.length > 0;
 
     const collapsedPrimaryWidth = 84;
     const collapsedSecondaryWidth = 44;
     const collapsedBubbleOverlap = 8;
     const collapsedBubbleOffset = ((collapsedPrimaryWidth + collapsedSecondaryWidth) / 2) - collapsedBubbleOverlap;
+    const splitLngThreshold = lngThreshold * 0.6;
+    const splitLatThreshold = latThreshold * 0.6;
+    const clamp01 = (value) => Math.max(0, Math.min(1, value));
+    const resolveSpreadProgress = (quotesToMeasure, centerLat, centerLng) => {
+        if (quotesToMeasure.length <= 1) return 0;
+
+        const nextMaxLngDiff = Math.max(...quotesToMeasure.map(quote => Math.abs(quote.longitude - centerLng)));
+        const nextMaxLatDiff = Math.max(...quotesToMeasure.map(quote => Math.abs(quote.latitude - centerLat)));
+        const ratioLng = splitLngThreshold > 0 ? nextMaxLngDiff / splitLngThreshold : 0;
+        const ratioLat = splitLatThreshold > 0 ? nextMaxLatDiff / splitLatThreshold : 0;
+        const ratio = clamp01(Math.max(ratioLng, ratioLat));
+
+        if (ratio <= 0.4) return 0;
+        return clamp01((ratio - 0.4) / 0.6);
+    };
+    const interpolateScalar = (progress, start, end) => start + ((end - start) * progress);
+
+    const nextClusterQuotes = emergingProjectedQuote
+        ? [primaryQuote, ...remainingProjectedQuotes]
+        : [primaryQuote];
+    const nextClusterAverageLat = nextClusterQuotes.reduce((sum, quote) => sum + quote.latitude, 0) / nextClusterQuotes.length;
+    const nextClusterAverageLng = nextClusterQuotes.reduce((sum, quote) => sum + quote.longitude, 0) / nextClusterQuotes.length;
+    const nextClusterCenterOffset = {
+        dx: (nextClusterAverageLng - averageLng) * ptPerLng,
+        dy: -(nextClusterAverageLat - averageLat) * ptPerLat,
+    };
+    const nextClusterProjectedQuotes = nextClusterQuotes.map(quote => {
+        const dx = (quote.longitude - nextClusterAverageLng) * ptPerLng;
+        const dy = -(quote.latitude - nextClusterAverageLat) * ptPerLat;
+        return {
+            ...quote,
+            dx,
+            dy,
+            distanceFromCenter: Math.hypot(dx, dy),
+        };
+    });
+    const nextClusterSpread = resolveSpreadProgress(nextClusterQuotes, nextClusterAverageLat, nextClusterAverageLng);
+    const nextPrimaryLocalOffset = nextClusterProjectedQuotes.length > 0
+        ? {
+            dx: interpolateScalar(nextClusterSpread, 0, nextClusterProjectedQuotes[0].dx),
+            dy: interpolateScalar(nextClusterSpread, 0, nextClusterProjectedQuotes[0].dy),
+        }
+        : { dx: 0, dy: 0 };
+    const nextPrimaryOffset = {
+        dx: nextClusterCenterOffset.dx + nextPrimaryLocalOffset.dx,
+        dy: nextClusterCenterOffset.dy + nextPrimaryLocalOffset.dy,
+    };
+    const nextClusterEmergingQuote = nextClusterProjectedQuotes.length > 1
+        ? nextClusterProjectedQuotes.slice(1).reduce((farthestQuote, quote) => (
+            quote.distanceFromCenter > farthestQuote.distanceFromCenter ? quote : farthestQuote
+        ), nextClusterProjectedQuotes[1])
+        : null;
+    const nextRemainderOffset = nextClusterEmergingQuote
+        ? {
+            dx: nextClusterCenterOffset.dx + interpolateScalar(nextClusterSpread, collapsedBubbleOffset, nextClusterEmergingQuote.dx),
+            dy: nextClusterCenterOffset.dy + interpolateScalar(nextClusterSpread, 0, nextClusterEmergingQuote.dy),
+        }
+        : nextPrimaryOffset;
     const horizontalReach = Math.max(
         collapsedBubbleOffset,
         ...projectedQuotes.map(quote => Math.abs(quote.dx))
@@ -223,8 +275,8 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
         return {
             zIndex: 3,
             transform: [
-                { translateX: interpolate(spreadAnim.value, [0, 1], [0, primaryProjectedQuote.dx]) },
-                { translateY: interpolate(spreadAnim.value, [0, 1], [0, primaryProjectedQuote.dy]) }
+                { translateX: interpolate(spreadAnim.value, [0, 1], [0, nextPrimaryOffset.dx]) },
+                { translateY: interpolate(spreadAnim.value, [0, 1], [0, nextPrimaryOffset.dy]) }
             ]
         };
     });
@@ -252,13 +304,10 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     const remainderBubbleWrapperStyle = useAnimatedStyle(() => {
         return {
             zIndex: 1,
-            opacity: hasRemainderBubble
-                ? interpolate(spreadAnim.value, [0.35, 0.75], [0, 1], Extrapolate.CLAMP)
-                : 0,
             transform: [
-                { translateX: interpolate(spreadAnim.value, [0, 1], [collapsedBubbleOffset, remainderOffset.dx]) },
-                { translateY: interpolate(spreadAnim.value, [0, 1], [0, remainderOffset.dy]) },
-                { scale: interpolate(spreadAnim.value, [0.35, 0.75], [0.92, 1], Extrapolate.CLAMP) }
+                { translateX: interpolate(spreadAnim.value, [0, 1], [collapsedBubbleOffset, nextRemainderOffset.dx]) },
+                { translateY: interpolate(spreadAnim.value, [0, 1], [0, nextRemainderOffset.dy]) },
+                { scale: hasRemainderBubble ? interpolate(spreadAnim.value, [0.35, 0.75], [0.01, 1], Extrapolate.CLAMP) : 0.01 }
             ]
         };
     });
