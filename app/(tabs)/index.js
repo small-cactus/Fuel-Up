@@ -105,16 +105,28 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     const restAvgLng = isMultiQuote ? lngs.slice(1).reduce((sum, val) => sum + val, 0) / (lngs.length - 1) : primaryLng;
 
     const offsets = {
-        primaryDx: (primaryLng - averageLng) * ptPerLng,
-        primaryDy: -(primaryLat - averageLat) * ptPerLat, // Invert Y because screen Y goes down
-        restDx: (restAvgLng - averageLng) * ptPerLng,
-        restDy: -(restAvgLat - averageLat) * ptPerLat,
+        primaryDx: 0,
+        primaryDy: 0,
+        restDx: (restAvgLng - primaryLng) * ptPerLng,
+        restDy: -(restAvgLat - primaryLat) * ptPerLat, // Invert Y because screen Y goes down
     };
+    const collapsedPrimaryWidth = 84;
+    const collapsedSecondaryWidth = 44;
+    const collapsedBubbleHeight = 32;
+    const collapsedBubbleOverlap = 8;
+    const collapsedBubbleOffset = ((collapsedPrimaryWidth + collapsedSecondaryWidth) / 2) - collapsedBubbleOverlap;
+    const horizontalReach = Math.max(collapsedBubbleOffset, Math.abs(offsets.primaryDx), Math.abs(offsets.restDx));
+    const verticalReach = Math.max(0, Math.abs(offsets.primaryDy), Math.abs(offsets.restDy));
+    const containerWidth = Math.max(240, 132 + horizontalReach * 2);
+    const containerHeight = Math.max(80, 52 + verticalReach * 2);
+    const centeredSecondaryLeft = (containerWidth - collapsedSecondaryWidth) / 2;
+    const centeredBubbleTop = (containerHeight - collapsedBubbleHeight) / 2;
 
     // For the merge animation, we need to know if we JUST became multi-quote or added quotes
     const prevIsMultiQuote = useRef(isMultiQuote);
     const prevQuotesLength = useRef(quotes.length);
     const settleToPlusOnIdleRef = useRef(false);
+    const previousSpreadTargetRef = useRef(isMultiQuote ? 1 : 0);
 
     useEffect(() => {
         // Fade in content
@@ -126,6 +138,7 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
             spreadAnim.value = 0; // Snap instantly on split, no animation
             morphAnim.value = 0;
             settleToPlusOnIdleRef.current = false;
+            previousSpreadTargetRef.current = 0;
             prevIsMultiQuote.current = isMultiQuote;
             prevQuotesLength.current = quotes.length;
             return;
@@ -161,21 +174,24 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
 
         const isNewCluster = !prevIsMultiQuote.current && isMultiQuote;
         const isAddingToCluster = prevIsMultiQuote.current && quotes.length > prevQuotesLength.current;
+        const wasOpening = spread > previousSpreadTargetRef.current + 0.02;
 
         if (isNewCluster || isAddingToCluster) {
             // New chip joining! Start spread and morph at 1.0 to smoothly melt from Price to +N
             spreadAnim.value = 1;
             morphAnim.value = 1;
             settleToPlusOnIdleRef.current = true;
-        } else if (isMapMoving && targetMorph > 0) {
+        } else if (isMapMoving && wasOpening) {
             // Once the cluster starts resolving back toward a visible price, don't force it back on idle.
             settleToPlusOnIdleRef.current = false;
         }
 
+        const nextSpread = !isMapMoving && settleToPlusOnIdleRef.current ? 0 : spread;
         const nextMorph = !isMapMoving && settleToPlusOnIdleRef.current ? 0 : targetMorph;
 
-        spreadAnim.value = withTiming(spread, { duration: 150 });
+        spreadAnim.value = withTiming(nextSpread, { duration: 150 });
         morphAnim.value = withTiming(nextMorph, { duration: 150 });
+        previousSpreadTargetRef.current = spread;
         prevIsMultiQuote.current = isMultiQuote;
         prevQuotesLength.current = quotes.length;
     }, [mapRegion?.longitudeDelta, mapRegion?.latitudeDelta, isMultiQuote, maxLngDiff, maxLatDiff, lngThreshold, latThreshold, isMapMoving]);
@@ -187,11 +203,10 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     // Style for the primary price bubble
     const leftBubbleStyle = useAnimatedStyle(() => {
         return {
-            position: 'absolute',
             zIndex: 2,
             transform: [
-                { translateX: interpolate(spreadAnim.value, [0, 1], [isMultiQuote ? -22 : 0, offsets.primaryDx]) },
-                { translateY: interpolate(spreadAnim.value, [0, 1], [0, offsets.primaryDy]) }
+                { translateX: 0 },
+                { translateY: 0 }
             ]
         };
     });
@@ -200,6 +215,8 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     const rightBubbleStyle = useAnimatedStyle(() => {
         return {
             position: 'absolute',
+            left: centeredSecondaryLeft,
+            top: centeredBubbleTop,
             zIndex: 1,
             justifyContent: 'center',
             paddingHorizontal: interpolate(morphAnim.value, [0, 1], [8, 10], Extrapolate.CLAMP),
@@ -207,7 +224,7 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
             // Smoothly expand width earlier in the morph cycle
             minWidth: interpolate(morphAnim.value, [0, 0.7], [40, 72], Extrapolate.CLAMP),
             transform: [
-                { translateX: interpolate(spreadAnim.value, [0, 1], [28, offsets.restDx]) },
+                { translateX: interpolate(spreadAnim.value, [0, 1], [collapsedBubbleOffset, offsets.restDx]) },
                 { translateY: interpolate(spreadAnim.value, [0, 1], [0, offsets.restDy]) }
             ]
         };
@@ -238,8 +255,8 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
         <Marker
             key={quotes[0].stationId} // Ensure key is bound to primary station so it doesn't unmount
             coordinate={{
-                latitude: averageLat,
-                longitude: averageLng,
+                latitude: primaryLat,
+                longitude: primaryLng,
             }}
             anchor={{ x: 0.5, y: 0.5 }} // Keep anchor visually centered
             onPress={() => onMarkerPress(cluster)}
@@ -251,7 +268,7 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
                 style={[
                     styles.clusterContainer,
                     animatedOverlayStyle,
-                    { minWidth: 200, minHeight: 70, justifyContent: 'center', alignItems: 'center' }
+                    { minWidth: containerWidth, minHeight: containerHeight, justifyContent: 'center', alignItems: 'center' }
                 ]}
             >
                 {/* Main bubble with price (Front) */}
