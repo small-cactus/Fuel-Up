@@ -35,7 +35,7 @@ import TopCanopy from '../components/TopCanopy';
 import BottomCanopy from '../components/BottomCanopy';
 import { registerForPushNotificationsAsync, savePushTokenToSupabase } from '../lib/notifications';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const OCTANE_OPTIONS = [
     { key: 'regular', label: 'Regular', octane: '87' },
@@ -108,7 +108,7 @@ function WelcomeStep({ isDark, themeColors, insets }) {
 
             {/* Full-screen map */}
             <MapView
-                style={StyleSheet.absoluteFillObject}
+                style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
                 initialRegion={DEMO_REGION}
                 provider={PROVIDER_APPLE}
                 scrollEnabled={false}
@@ -149,7 +149,7 @@ function WelcomeStep({ isDark, themeColors, insets }) {
             </MapView>
 
             {/* Blur canopies — extend further than gradients */}
-            <TopCanopy edgeColor={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.42)'} height={insets.top + 300} isDark={isDark} topInset={0} />
+            <TopCanopy edgeColor={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.42)'} height={insets.top + 300} isDark={isDark} topInset={insets.top} />
             <BottomCanopy height={270} isDark={isDark} />
 
             {/* White gradients — shorter, sit inside the blur */}
@@ -200,7 +200,8 @@ function RadiusStep({ isDark, themeColors, insets, value, onChange }) {
 
             {/* Full-screen map */}
             <MapView
-                style={StyleSheet.absoluteFillObject}
+                style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+                initialRegion={region}
                 region={region}
                 provider={PROVIDER_APPLE}
                 scrollEnabled={false}
@@ -218,19 +219,23 @@ function RadiusStep({ isDark, themeColors, insets, value, onChange }) {
                 />
             </MapView>
 
-            {/* Light top gradient — just enough for readability */}
+            {/* Blur canopies — extend further than gradients */}
+            <TopCanopy edgeColor={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.42)'} height={insets.top + 300} isDark={isDark} topInset={insets.top} />
+            <BottomCanopy height={270} isDark={isDark} />
+
+            {/* White gradients — shorter, sit inside the blur */}
             <LinearGradient
-                colors={[isDark ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)', isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)']}
-                locations={[0, 1]}
-                style={[styles.topGradient, { height: insets.top + 140 }]}
+                colors={[isDark ? '#000000' : '#FFFFFF', isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)', isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)']}
+                locations={[0, 0.5, 1]}
+                style={[styles.topGradient, { height: insets.top + 220 }]}
                 pointerEvents="none"
             />
 
             {/* Light bottom gradient */}
             <LinearGradient
-                colors={[isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)', isDark ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)']}
-                locations={[0, 1]}
-                style={[styles.footerGradient, { height: 180 }]}
+                colors={[isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)', isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)', isDark ? '#000000' : '#FFFFFF']}
+                locations={[0, 0.5, 1]}
+                style={[styles.footerGradient, { height: 280 }]}
                 pointerEvents="none"
             />
 
@@ -239,7 +244,7 @@ function RadiusStep({ isDark, themeColors, insets, value, onChange }) {
                 <SymbolView name="location.magnifyingglass" size={44} tintColor={themeColors.text} />
                 <Text style={[styles.stepTitle, { color: themeColors.text }]}>Search Radius</Text>
                 <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
-                    How far should we look for gas stations?
+                    How far should we look for gas stations? This will affect the stations we recommend.
                 </Text>
             </View>
 

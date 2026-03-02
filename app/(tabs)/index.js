@@ -49,7 +49,7 @@ const CARD_GAP = 0;
 const SIDE_MARGIN = 16;
 const TOP_CANOPY_HEIGHT = 72;
 
-function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColors, activeIndex, onMarkerPress, mapRegion }) {
+function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColors, activeIndex, onMarkerPress, mapRegion, isMapMoving }) {
     const { quotes, averageLat, averageLng } = cluster;
 
     // A cluster is considered active if any of its station indices matches the activeIndex
@@ -114,6 +114,7 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     // For the merge animation, we need to know if we JUST became multi-quote or added quotes
     const prevIsMultiQuote = useRef(isMultiQuote);
     const prevQuotesLength = useRef(quotes.length);
+    const settleToPlusOnIdleRef = useRef(false);
 
     useEffect(() => {
         // Fade in content
@@ -124,6 +125,7 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
         if (!isMultiQuote || !mapRegion?.longitudeDelta) {
             spreadAnim.value = 0; // Snap instantly on split, no animation
             morphAnim.value = 0;
+            settleToPlusOnIdleRef.current = false;
             prevIsMultiQuote.current = isMultiQuote;
             prevQuotesLength.current = quotes.length;
             return;
@@ -164,13 +166,19 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
             // New chip joining! Start spread and morph at 1.0 to smoothly melt from Price to +N
             spreadAnim.value = 1;
             morphAnim.value = 1;
+            settleToPlusOnIdleRef.current = true;
+        } else if (isMapMoving && targetMorph > 0) {
+            // Once the cluster starts resolving back toward a visible price, don't force it back on idle.
+            settleToPlusOnIdleRef.current = false;
         }
 
+        const nextMorph = !isMapMoving && settleToPlusOnIdleRef.current ? 0 : targetMorph;
+
         spreadAnim.value = withTiming(spread, { duration: 150 });
-        morphAnim.value = withTiming(targetMorph, { duration: 150 });
+        morphAnim.value = withTiming(nextMorph, { duration: 150 });
         prevIsMultiQuote.current = isMultiQuote;
         prevQuotesLength.current = quotes.length;
-    }, [mapRegion?.longitudeDelta, mapRegion?.latitudeDelta, isMultiQuote, maxLngDiff, maxLatDiff, lngThreshold, latThreshold]);
+    }, [mapRegion?.longitudeDelta, mapRegion?.latitudeDelta, isMultiQuote, maxLngDiff, maxLatDiff, lngThreshold, latThreshold, isMapMoving]);
 
     const animatedContentStyle = useAnimatedStyle(() => {
         return {};
@@ -384,6 +392,7 @@ export default function HomeScreen() {
     const [hasLocationPermission, setHasLocationPermission] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     const [mapRegion, setMapRegion] = useState(DEFAULT_REGION);
+    const [isMapMoving, setIsMapMoving] = useState(false);
     const router = useRouter();
     const scrollX = useSharedValue(0);
 
@@ -465,7 +474,10 @@ export default function HomeScreen() {
             if (isMountedRef.current) {
                 setHasLocationPermission(false);
                 setLocation(manualRegion);
-                mapRef.current?.animateToRegion(manualRegion, 550);
+                if (mapRef.current) {
+                    setMapMotionState(true);
+                    mapRef.current.animateToRegion(manualRegion, 550);
+                }
                 setIsLoadingLocation(false);
             }
 
@@ -516,7 +528,10 @@ export default function HomeScreen() {
             };
 
             setLocation(nextRegion);
-            mapRef.current?.animateToRegion(nextRegion, 550);
+            if (mapRef.current) {
+                setMapMotionState(true);
+                mapRef.current.animateToRegion(nextRegion, 550);
+            }
 
             return nextRegion;
         } catch (error) {
@@ -786,6 +801,7 @@ export default function HomeScreen() {
             const targetLngDelta = Math.max(lngSpread * 6, 0.03);
 
             isAnimatingRef.current = true;
+            setMapMotionState(true);
             mapRef.current.animateToRegion({
                 latitude: cluster.averageLat,
                 longitude: cluster.averageLng,
@@ -805,7 +821,17 @@ export default function HomeScreen() {
     const lastDataHashRef = useRef('');
     const isUserScrollingRef = useRef(false);
     const isAnimatingRef = useRef(false);
+    const mapMotionRef = useRef(false);
     const prevIsFocusedRef = useRef(isFocused);
+
+    const setMapMotionState = (moving) => {
+        if (mapMotionRef.current === moving) {
+            return;
+        }
+
+        mapMotionRef.current = moving;
+        setIsMapMoving(moving);
+    };
 
     useEffect(() => {
         const wasFocused = prevIsFocusedRef.current;
@@ -831,7 +857,16 @@ export default function HomeScreen() {
             if (coords.length > 1) {
                 isAnimatingRef.current = true;
                 setTimeout(() => {
-                    mapRef.current?.fitToCoordinates(coords, {
+                    if (!mapRef.current) {
+                        isAnimatingRef.current = false;
+                        if (isMountedRef.current) {
+                            setMapMotionState(false);
+                        }
+                        return;
+                    }
+
+                    setMapMotionState(true);
+                    mapRef.current.fitToCoordinates(coords, {
                         edgePadding: { top: 120, right: 60, bottom: bottomPadding + 160, left: 60 },
                         animated: true,
                     });
@@ -841,6 +876,7 @@ export default function HomeScreen() {
             const activeQuote = stationQuotes[activeIndex];
             if (activeQuote.latitude && activeQuote.longitude) {
                 isAnimatingRef.current = true;
+                setMapMotionState(true);
                 mapRef.current.animateToRegion({
                     latitude: activeQuote.latitude,
                     longitude: activeQuote.longitude,
@@ -867,6 +903,7 @@ export default function HomeScreen() {
                 showsUserLocation={hasLocationPermission}
                 userInterfaceStyle={isDark ? 'dark' : 'light'}
                 onRegionChange={(region) => {
+                    setMapMotionState(true);
                     if (!isAnimatingRef.current) {
                         setMapRegion(region);
                     }
@@ -874,12 +911,13 @@ export default function HomeScreen() {
                 onRegionChangeComplete={(region) => {
                     setMapRegion(region);
                     isAnimatingRef.current = false;
+                    setMapMotionState(false);
                 }}
             >
                 {clusters.length > 0 ? (
-                    clusters.map((cluster, index) => (
+                    clusters.map(cluster => (
                         <AnimatedMarkerOverlay
-                            key={cluster.quotes.map(q => q.stationId).join('-')}
+                            key={cluster.quotes[0].stationId}
                             cluster={cluster}
                             scrollX={scrollX}
                             itemWidth={itemWidth}
@@ -888,6 +926,7 @@ export default function HomeScreen() {
                             activeIndex={activeIndex}
                             onMarkerPress={handleMarkerPress}
                             mapRegion={mapRegion}
+                            isMapMoving={isMapMoving}
                         />
                     ))
                 ) : (

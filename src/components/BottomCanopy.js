@@ -37,34 +37,29 @@ export function BottomCanopy({ height, isDark }) {
                     blurAmount={12}
                     direction="blurredBottomClearTop"
                     startOffset={0.0}
-                    style={StyleSheet.absoluteFillObject}
+                    style={{ height }}
                 />
             ) : HAS_NATIVE_MASK ? (
                 <MaskedView
-                    style={StyleSheet.absoluteFillObject}
+                    style={{ height }}
                     maskElement={
                         <LinearGradient
                             colors={MASK_GRADIENT}
-                            locations={[0, 0.2, 0.5, 0.9, 1]}
+                            locations={[0, 0.2, 0.5, 0.8, 1]}
                             style={StyleSheet.absoluteFillObject}
                         />
                     }
                 >
-                    <BlurView intensity={10} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFillObject} />
+                    <BlurView intensity={80} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFillObject} />
                 </MaskedView>
             ) : (
                 <LinearGradient
                     colors={isDark ? DARK_GRADIENT : LIGHT_GRADIENT}
-                    locations={[0, 0.18, 0.48, 0.78, 0.9, 1]}
-                    style={StyleSheet.absoluteFillObject}
+                    locations={[0, 0.2, 0.5, 0.8, 1]}
+                    style={{ height }}
                 />
             )}
 
-            <LinearGradient
-                colors={isDark ? DARK_GRADIENT : LIGHT_GRADIENT}
-                locations={[0, 0.18, 0.48, 0.78, 0.9, 1]}
-                style={StyleSheet.absoluteFillObject}
-            />
         </View>
     );
 }
