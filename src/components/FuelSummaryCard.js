@@ -61,7 +61,7 @@ export default function FuelSummaryCard({
                 style={styles.card}
                 tintColor={isDark ? '#000000' : '#FFFFFF'}
                 glassEffectStyle={{
-                    style: 'clear',
+                    style: 'regular',
                     animate: true,
                     animationDuration: 0.2,
                 }}

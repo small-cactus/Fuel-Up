@@ -3,8 +3,13 @@ import { FlatList, Pressable, StyleSheet, Text, View, Dimensions } from 'react-n
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { GlassView, GlassContainer } from 'expo-glass-effect';
+import {
+    LiquidGlassView,
+    LiquidGlassContainerView,
+    isLiquidGlassSupported
+} from '@callstack/liquid-glass';
 import { SymbolView } from 'expo-symbols';
+import { GlassView } from 'expo-glass-effect';
 import * as Location from 'expo-location';
 import MapView, { Marker, PROVIDER_APPLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,7 +35,8 @@ import Animated, {
     withTiming
 } from 'react-native-reanimated';
 
-const AnimatedGlassView = Animated.createAnimatedComponent(GlassView);
+const AnimatedLiquidGlassView = Animated.createAnimatedComponent(LiquidGlassView);
+const AnimatedLiquidGlassContainer = Animated.createAnimatedComponent(LiquidGlassContainerView);
 
 const DEFAULT_REGION = {
     latitude: 37.3346,
@@ -43,7 +49,7 @@ const CARD_GAP = 0;
 const SIDE_MARGIN = 16;
 const TOP_CANOPY_HEIGHT = 72;
 
-function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColors, activeIndex, onMarkerPress }) {
+function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColors, activeIndex, onMarkerPress, mapRegion }) {
     const { quotes, averageLat, averageLng } = cluster;
 
     // A cluster is considered active if any of its station indices matches the activeIndex
@@ -51,28 +57,7 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     const isCheapestAcrossAll = quotes.some(q => q.originalIndex === 0);
 
     const animatedOverlayStyle = useAnimatedStyle(() => {
-        // We use the first quote's index for the scroll interpolation base
-        const baseIndex = quotes[0].originalIndex;
-        const inputRange = [(baseIndex - 1) * itemWidth, baseIndex * itemWidth, (baseIndex + 1) * itemWidth];
-
-        const borderWidth = interpolate(
-            scrollX.value,
-            inputRange,
-            [0, 2, 0],
-            Extrapolate.CLAMP
-        );
-
-        const activeBorderColor = isCheapestAcrossAll ? '#007AFF' : (isDark ? '#FFFFFF' : '#000000');
-        const borderColor = interpolateColor(
-            scrollX.value,
-            inputRange,
-            ['transparent', activeBorderColor, 'transparent']
-        );
-
-        return {
-            borderWidth,
-            borderColor,
-        };
+        return {};
     });
 
     const animatedTextStyle = useAnimatedStyle(() => {
@@ -91,56 +76,135 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     const primaryQuote = quotes[0];
     const isMultiQuote = quotes.length > 1;
 
-    // Native Glass blur state
-    const [glassConfig, setGlassConfig] = useState({
-        style: 'none',
-        animate: false
-    });
-
     // Content fade-in animation
     const mountAnim = useSharedValue(0);
+    // Animate relative bubble positions for "merging" effect
+    const spreadAnim = useSharedValue(1);
+
+    const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+    const threshold = mapRegion?.longitudeDelta ? mapRegion.longitudeDelta * 0.12 : 0;
+    const lngs = quotes.map(q => q.longitude);
+    const lats = quotes.map(q => q.latitude);
+    const lngSpread = Math.max(...lngs) - Math.min(...lngs);
+    const latSpread = Math.max(...lats) - Math.min(...lats);
+
+    const ptPerLng = mapRegion?.longitudeDelta ? SCREEN_WIDTH / mapRegion.longitudeDelta : 0;
+    const ptPerLat = mapRegion?.latitudeDelta ? SCREEN_HEIGHT / mapRegion.latitudeDelta : 0;
+
+    const primaryLat = lats[0];
+    const primaryLng = lngs[0];
+
+    const restAvgLat = isMultiQuote ? lats.slice(1).reduce((sum, val) => sum + val, 0) / (lats.length - 1) : primaryLat;
+    const restAvgLng = isMultiQuote ? lngs.slice(1).reduce((sum, val) => sum + val, 0) / (lngs.length - 1) : primaryLng;
+
+    const offsets = {
+        primaryDx: (primaryLng - averageLng) * ptPerLng,
+        primaryDy: -(primaryLat - averageLat) * ptPerLat, // Invert Y because screen Y goes down
+        restDx: (restAvgLng - averageLng) * ptPerLng,
+        restDy: -(restAvgLat - averageLat) * ptPerLat,
+    };
+
+    // For the merge animation, we need to know if we JUST became multi-quote
+    const prevIsMultiQuote = useRef(isMultiQuote);
 
     useEffect(() => {
-        // Fade in text content
-        mountAnim.value = withTiming(1, { duration: 300 });
-
-        // Trigger native glass blur animation slightly after mount
-        const timer = setTimeout(() => {
-            setGlassConfig({
-                style: 'clear',
-                animate: true,
-                animationDuration: 0.3
-            });
-        }, 16);
-
-        return () => clearTimeout(timer);
+        // Fade in content
+        mountAnim.value = withTiming(1, { duration: 400 });
     }, []);
+
+    useEffect(() => {
+        if (!isMultiQuote || !mapRegion?.longitudeDelta) {
+            spreadAnim.value = withTiming(0, { duration: 300 });
+            prevIsMultiQuote.current = isMultiQuote;
+            return;
+        }
+
+        const latThreshold = mapRegion.latitudeDelta * 0.025;
+        // The split threshold is 1.5x the merge threshold
+        const splitLngThreshold = threshold * 1.5;
+        const splitLatThreshold = latThreshold * 1.5;
+
+        // Animate up to the split boundary, not the merge boundary
+        let ratioLng = splitLngThreshold > 0 ? lngSpread / splitLngThreshold : 0;
+        let ratioLat = splitLatThreshold > 0 ? latSpread / splitLatThreshold : 0;
+        let maxRatio = Math.max(ratioLng, ratioLat);
+
+        // Constrain between 0 (perfectly merged) and 1 (ready to split)
+        // Add a bit of non-linearity so they snap together quickly but pull away gradually
+        let ratio = Math.max(0, Math.min(1, maxRatio));
+
+        // They should act like a magnet. Mostly merged unless pulled quite far.
+        // If ratio is < 0.3, they stay 0. If > 0.3 they start pulling away.
+        let spread = 0;
+        if (ratio > 0.4) {
+            spread = (ratio - 0.4) / 0.6;
+        }
+
+        // If we just merged AND we are animating inward, snap to 1 so the animation pulls inward
+        if (!prevIsMultiQuote.current && isMultiQuote) {
+            spreadAnim.value = 1;
+        }
+
+        spreadAnim.value = withTiming(spread, { duration: 150 });
+        prevIsMultiQuote.current = isMultiQuote;
+    }, [mapRegion?.longitudeDelta, mapRegion?.latitudeDelta, isMultiQuote, lngSpread, latSpread, threshold]);
 
     const animatedContentStyle = useAnimatedStyle(() => {
         return {
             opacity: mountAnim.value,
-            transform: [{ scale: interpolate(mountAnim.value, [0, 1], [0.8, 1]) }]
+            transform: [{ scale: interpolate(mountAnim.value, [0, 1], [0.85, 1]) }]
+        };
+    });
+
+    // Style for the primary price bubble
+    const leftBubbleStyle = useAnimatedStyle(() => {
+        // Appx flex offset of left bubble center from container center is -20
+        return {
+            transform: [
+                { translateX: interpolate(spreadAnim.value, [0, 1], [0, offsets.primaryDx + 20]) },
+                { translateY: interpolate(spreadAnim.value, [0, 1], [0, offsets.primaryDy]) }
+            ]
+        };
+    });
+
+    // Style for the +N bubble
+    const rightBubbleStyle = useAnimatedStyle(() => {
+        // Appx flex offset of right bubble center from container center is +30
+        return {
+            transform: [
+                { translateX: interpolate(spreadAnim.value, [0, 1], [0, offsets.restDx - 30]) },
+                { translateY: interpolate(spreadAnim.value, [0, 1], [0, offsets.restDy]) }
+            ]
         };
     });
 
     return (
         <Marker
-            key={quotes.map(q => q.stationId).join('-')}
+            key={quotes[0].stationId} // Ensure key is bound to primary station so it doesn't unmount
             coordinate={{
                 latitude: averageLat,
                 longitude: averageLng,
             }}
+            anchor={{ x: 0.5, y: 0.5 }} // Keep anchor visually centered
             onPress={() => onMarkerPress(cluster)}
             style={{ zIndex: isActive ? 3 : isCheapestAcrossAll ? 2 : 1 }}
             tracksViewChanges={true}
         >
-            <GlassContainer spacing={10}>
-                <AnimatedGlassView
-                    glassEffectStyle={glassConfig}
-                    tintColor={isDark ? '#000000' : '#FFFFFF'}
+            <AnimatedLiquidGlassContainer
+                spacing={24}
+                style={[
+                    styles.clusterContainer,
+                    animatedOverlayStyle,
+                    { minWidth: 160, minHeight: 70, justifyContent: 'center', alignItems: 'center' }
+                ]}
+            >
+                {/* Main bubble with price (Front) */}
+                <AnimatedLiquidGlassView
+                    effect="clear"
                     style={[
-                        styles.priceOverlay,
-                        animatedOverlayStyle,
+                        styles.bubbleBase,
+                        leftBubbleStyle,
                     ]}
                 >
                     <Animated.View style={[styles.rowItem, animatedContentStyle]}>
@@ -159,22 +223,33 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
                         >
                             ${primaryQuote.price.toFixed(2)}
                         </Animated.Text>
+                    </Animated.View>
+                </AnimatedLiquidGlassView>
 
-                        {isMultiQuote && (
-                            <>
-                                <Text style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)', fontSize: 12, marginHorizontal: 6 }}>|</Text>
-                                <Animated.Text
-                                    style={[
-                                        styles.priceText,
-                                        animatedTextStyle,
-                                    ]}
-                                >
-                                    +{quotes.length - 1}
-                                </Animated.Text>
-                        )}
-                            </Animated.View>
-                </AnimatedGlassView>
-            </GlassContainer>
+                {/* Secondary merging bubble for clusters (Behind) */}
+                {isMultiQuote && (
+                    <AnimatedLiquidGlassView
+                        effect="clear"
+                        style={[
+                            styles.bubbleBase,
+                            { paddingHorizontal: 8, marginLeft: -12 },
+                            rightBubbleStyle,
+                        ]}
+                    >
+                        <Animated.View style={[styles.rowItem, animatedContentStyle]}>
+                            <Text style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)', fontSize: 12, marginRight: 4 }}>|</Text>
+                            <Animated.Text
+                                style={[
+                                    styles.priceText,
+                                    animatedTextStyle,
+                                ]}
+                            >
+                                +{quotes.length - 1}
+                            </Animated.Text>
+                        </Animated.View>
+                    </AnimatedLiquidGlassView>
+                )}
+            </AnimatedLiquidGlassContainer>
         </Marker>
     );
 }
@@ -533,16 +608,21 @@ export default function HomeScreen() {
         .filter(q => minRating === 0 || (q.rating != null && q.rating >= minRating))
         .map((q, idx) => ({ ...q, originalIndex: idx }));
 
+    const previousClustersRef = useRef([]);
+
     const clusters = useMemo(() => {
         if (stationQuotes.length === 0) return [];
 
         const latDelta = mapRegion.latitudeDelta || 0.05;
         const lngDelta = mapRegion.longitudeDelta || 0.05;
 
-        // Visual thresholds based on chip pixel dimensions (approx 120x40)
-        // More vertically sensitive
-        const chipLatHeight = latDelta * 0.04;
-        const chipLngWidth = lngDelta * 0.20;
+        // Visual thresholds based on chip pixel dimensions
+        const mergeLatHeight = latDelta * 0.030;
+        const mergeLngWidth = lngDelta * 0.12;
+
+        // Hysteresis: they can pull apart 50% further before actually splitting
+        const splitLatHeight = mergeLatHeight * 1.5;
+        const splitLngWidth = mergeLngWidth * 1.5;
 
         const cheapestStation = stationQuotes[0];
         const others = stationQuotes.slice(1);
@@ -563,11 +643,21 @@ export default function HomeScreen() {
                 // Don't group with the absolute cheapest standalone station
                 if (cluster.quotes[0].originalIndex === 0) continue;
 
+                // Check if they were already grouped together in the previous frame
+                const wasPreviouslyGrouped = previousClustersRef.current.some(prevCluster =>
+                    prevCluster.quotes.some(q => q.stationId === quote.stationId) &&
+                    prevCluster.quotes.some(q => q.stationId === cluster.quotes[0].stationId)
+                );
+
                 const latDiff = Math.abs(cluster.averageLat - quote.latitude);
                 const lngDiff = Math.abs(cluster.averageLng - quote.longitude);
 
                 // If within physical overlap bounds, swallow into cluster
-                if (latDiff < chipLatHeight && lngDiff < chipLngWidth) {
+                // Use the wider split threshold if they were already grouped, otherwise use the tighter merge threshold
+                const currentLatThreshold = wasPreviouslyGrouped ? splitLatHeight : mergeLatHeight;
+                const currentLngThreshold = wasPreviouslyGrouped ? splitLngWidth : mergeLngWidth;
+
+                if (latDiff < currentLatThreshold && lngDiff < currentLngThreshold) {
                     cluster.quotes.push(quote);
                     // Dynamically update center of mass
                     cluster.averageLat = cluster.quotes.reduce((sum, q) => sum + q.latitude, 0) / cluster.quotes.length;
@@ -593,6 +683,7 @@ export default function HomeScreen() {
             }
         });
 
+        previousClustersRef.current = finalClusters;
         return finalClusters;
     }, [stationQuotes, mapRegion.latitudeDelta, mapRegion.longitudeDelta]);
 
@@ -708,7 +799,6 @@ export default function HomeScreen() {
                 showsUserLocation={hasLocationPermission}
                 userInterfaceStyle={isDark ? 'dark' : 'light'}
                 onRegionChange={(region) => {
-                    // Precompute clusters during scroll for real-time combination, but don't save to state if animating
                     if (!isAnimatingRef.current) {
                         setMapRegion(region);
                     }
@@ -729,6 +819,7 @@ export default function HomeScreen() {
                             themeColors={themeColors}
                             activeIndex={activeIndex}
                             onMarkerPress={handleMarkerPress}
+                            mapRegion={mapRegion}
                         />
                     ))
                 ) : (
@@ -822,7 +913,7 @@ export default function HomeScreen() {
                     >
                         <GlassView
                             tintColor={isDark ? '#000000' : '#FFFFFF'}
-                            glassEffectStyle="regular"
+                            glassEffectStyle="clear"
                             style={styles.sheetTriggerButton}
                         >
                             <Text style={[styles.sheetTriggerText, { color: themeColors.text }]}>
@@ -945,6 +1036,19 @@ const styles = StyleSheet.create({
         borderWidth: StyleSheet.hairlineWidth,
         borderColor: 'rgba(150, 150, 150, 0.4)',
         overflow: 'hidden',
+    },
+    clusterContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: 16,
+    },
+    bubbleBase: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 16,
+        gap: 6,
     },
     rowItem: {
         flexDirection: 'row',
