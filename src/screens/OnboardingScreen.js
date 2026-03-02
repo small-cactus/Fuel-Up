@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { GlassView } from 'expo-glass-effect';
+import { LiquidGlassView as GlassView, LiquidGlassContainerView } from '@callstack/liquid-glass';
+
+
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
@@ -60,7 +62,8 @@ const DEMO_STATIONS = [
 
 const MAP_MARGIN = 0.006; // Inset margin to avoid edge chips
 
-const OnboardingChip = ({ price, isCheapest, isDark, top, left }) => {
+const OnboardingChip = ({ price, isCheapest, isDark, top, left, isActive }) => {
+
     const chipTint = isCheapest ? 'rgba(0, 255, 47, 0.3)' : 'rgba(255, 25, 0, 0.3)';
 
     return (
@@ -72,11 +75,13 @@ const OnboardingChip = ({ price, isCheapest, isDark, top, left }) => {
         }}>
             <GlassView
                 tintColor={chipTint}
-                glassEffectStyle="clear"
+                effect="clear"
                 colorScheme={isDark ? 'dark' : 'light'}
-                isInteractive={false}
+                interactive={false}
                 style={styles.demoChip}
+                key={isActive ? 'chip-active' : 'chip-inactive'}
             >
+
                 <SymbolView
                     name="fuelpump.fill"
                     size={14}
@@ -152,6 +157,13 @@ function WelcomeStep({ isDark, themeColors, insets }) {
                 colors={[isDark ? '#000000' : '#FFFFFF', isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)', isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)']}
                 locations={[0, 0.5, 1]}
                 style={[styles.topGradient, { height: insets.top + 220 }]}
+                pointerEvents="none"
+            />
+
+            <LinearGradient
+                colors={[isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)', isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)', isDark ? '#000000' : '#FFFFFF']}
+                locations={[0, 0.8, 1]}
+                style={[styles.footerGradient, { height: 280 }]}
                 pointerEvents="none"
             />
 
@@ -239,7 +251,7 @@ function RadiusStep({ isDark, themeColors, insets, value, onChange }) {
             {/* Slider at bottom */}
             <View style={[styles.radiusControls, { bottom: insets.bottom + 100 }]}>
                 <GlassView
-                    glassEffectStyle="regular"
+                    effect="regular"
                     tintColor={isDark ? '#000000' : '#FFFFFF'}
                     key={isDark ? 'slider-dark' : 'slider-light'}
                     style={styles.sliderCard}
@@ -353,6 +365,13 @@ function RatingStep({ isDark, themeColors, insets, value, onChange }) {
 }
 
 function LocationStep({ isDark, themeColors, insets, permissionStatus }) {
+    const highlights = [
+        { icon: 'location.magnifyingglass', text: 'Automatically find stations around you' },
+        { icon: 'shield.checkered', text: 'Your data will never be shared with anyone else' },
+        { icon: 'sparkles', text: 'Predictive Fueling needs Always Allow to predict when and where you fuel' },
+        { icon: 'cpu', text: 'We don\'t have servers, everything happens on your device' },
+    ];
+
     return (
         <View style={[styles.stepContainer, { backgroundColor: themeColors.background }]}>
 
@@ -364,61 +383,97 @@ function LocationStep({ isDark, themeColors, insets, permissionStatus }) {
                 </Text>
             </View>
 
-            <View style={styles.stepContent}>
-                <View style={styles.locationGraphicContainer}>
-                    <View style={[styles.locationGraphicCircle, { backgroundColor: isDark ? 'rgba(0,122,255,0.15)' : 'rgba(0,122,255,0.1)' }]}>
-                        <SymbolView name="mappin.and.ellipse" size={60} tintColor="#007AFF" />
-                    </View>
-                    <View style={styles.locationExplanation}>
-                        <SymbolView name="info.circle.fill" size={16} tintColor={themeColors.text} style={{ opacity: 0.5 }} />
-                        <Text style={[styles.locationExplanationText, { color: themeColors.text }]}>
-                            Without location, we can't show real-time prices at stations around you.
-                        </Text>
-                    </View>
+            <View style={[styles.stepContent, { justifyContent: 'flex-start', marginTop: 32 }]}>
+                <View style={styles.locationHighlightsContainer}>
+                    {highlights.map((item, index) => (
+                        <View key={index} style={styles.locationHighlightItem}>
+                            <View style={[styles.locationHighlightIconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
+                                <SymbolView name={item.icon} size={24} tintColor="#007AFF" />
+                            </View>
+                            <Text style={[styles.locationHighlightText, { color: themeColors.text }]}>
+                                {item.text}
+                            </Text>
+                        </View>
+                    ))}
                 </View>
-
-                {permissionStatus === 'granted' && (
-                    <View style={styles.grantedRow}>
-                        <SymbolView name="checkmark.circle.fill" size={32} tintColor="#007AFF" />
-                        <Text style={[styles.grantedText, { color: '#007AFF' }]}>Access Granted</Text>
-                    </View>
-                )}
             </View>
         </View>
     );
 }
 
 function NotificationStep({ isDark, themeColors, insets, permissionStatus }) {
+    const highlights = [
+        { icon: 'bell.slash.fill', text: 'We will rarely send you notifications' },
+        { icon: 'hourglass.bottomhalf.filled', text: 'Live Activities for your Dynamic Island, Lock Screen, and CarPlay' },
+        { icon: 'exclamationmark.shield.fill', text: 'Alerts when you\'re about to get a bad deal at a gas station' },
+    ];
+
     return (
         <View style={[styles.stepContainer, { backgroundColor: themeColors.background }]}>
-            原则
+
             <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
                 <SymbolView name="bell.badge.fill" size={44} tintColor="#FF3B30" />
-                <Text style={[styles.stepTitle, { color: themeColors.text }]}>Stay Updated</Text>
+                <Text style={[styles.stepTitle, { color: themeColors.text }]}>Allow Live Activities</Text>
                 <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
-                    Enable notifications & Live Activities to get real-time price drops.
+                    We'll identify when you're about to get a bad deal, and we'll redirect you in real time.
                 </Text>
             </View>
 
-            <View style={styles.stepContent}>
-                <View style={styles.locationGraphicContainer}>
-                    <View style={[styles.locationGraphicCircle, { backgroundColor: isDark ? 'rgba(255, 59, 48, 0.15)' : 'rgba(255, 59, 48, 0.1)' }]}>
-                        <SymbolView name="bell.and.waves.left.and.right.fill" size={60} tintColor="#FF3B30" />
-                    </View>
-                    <View style={styles.locationExplanation}>
-                        <SymbolView name="info.circle.fill" size={16} tintColor={themeColors.text} style={{ opacity: 0.5 }} />
-                        <Text style={[styles.locationExplanationText, { color: themeColors.text }]}>
-                            We'll alert you when gas prices near you drop significantly.
-                        </Text>
-                    </View>
+            <View style={[styles.stepContent, { gap: 40, justifyContent: 'flex-start', marginTop: 32 }]}>
+                <View style={styles.mockLiveActivityContainer}>
+                    <GlassView
+                        effect="regular"
+                        tintColor="#000000"
+                        style={styles.mockLiveActivityGlass}
+                    >
+                        <View style={styles.mockLiveActivityHeader}>
+                            <View style={styles.mockLiveActivityAppIcon}>
+                                <Image
+                                    source={require('../../assets/predictive-fueling.png')}
+                                    style={{ width: 22, height: 22, borderRadius: 5 }}
+                                    resizeMode="contain"
+                                />
+                            </View>
+                            <Text style={[styles.mockLiveActivityTitle, { color: '#FFFFFF' }]}>Predictive Fueling</Text>
+                            <Text style={[styles.mockLiveActivityTime, { color: '#FFFFFF', opacity: 0.5 }]}>now</Text>
+                        </View>
+
+                        <View style={styles.mockLiveActivityContent}>
+                            <View style={styles.mockLiveActivityMain}>
+                                <View style={styles.mockLiveActivityStationInfo}>
+                                    <Text style={[styles.mockLiveActivityStationName, { color: '#FFFFFF' }]}>Save $12.92 at Mobil One</Text>
+                                    <View style={styles.mockLiveActivityBadge}>
+                                        <Text style={styles.mockLiveActivityBadgeText}>on the way</Text>
+                                    </View>
+                                </View>
+                                <View style={styles.mockLiveActivityPriceContainer}>
+                                    <Text style={[styles.mockLiveActivityPriceLabel, { color: '#FFFFFF', opacity: 0.6 }]}>Regular</Text>
+                                    <Text style={[styles.mockLiveActivityPrice, { color: '#00cb36ff' }]}>$2.62</Text>
+                                </View>
+                            </View>
+
+                            <View style={[styles.mockLiveActivityDivider, { backgroundColor: 'rgba(255,255,255,0.1)' }]} />
+
+                            <View style={styles.mockLiveActivityFooter}>
+                                <SymbolView name="location.fill" size={12} tintColor="#FFFFFF" style={{ opacity: 0.6 }} />
+                                <Text style={[styles.mockLiveActivityDistance, { color: '#FFFFFF', opacity: 0.6 }]}>0.4 mi away • Take Next Left</Text>
+                            </View>
+                        </View>
+                    </GlassView>
                 </View>
 
-                {permissionStatus === 'granted' && (
-                    <View style={styles.grantedRow}>
-                        <SymbolView name="checkmark.circle.fill" size={32} tintColor="#FF3B30" />
-                        <Text style={[styles.grantedText, { color: '#FF3B30' }]}>Notifications Enabled</Text>
-                    </View>
-                )}
+                <View style={[styles.locationHighlightsContainer, { paddingBottom: 0 }]}>
+                    {highlights.map((item, index) => (
+                        <View key={index} style={styles.locationHighlightItem}>
+                            <View style={[styles.locationHighlightIconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
+                                <SymbolView name={item.icon} size={24} tintColor="#FF3B30" />
+                            </View>
+                            <Text style={[styles.locationHighlightText, { color: themeColors.text }]}>
+                                {item.text}
+                            </Text>
+                        </View>
+                    ))}
+                </View>
             </View>
         </View>
     );
@@ -446,11 +501,9 @@ function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }
             player.play();
         } else {
             player.pause();
-            setShowRed(false);
-            setShowLive(false);
-            setShowGreen(false);
         }
     }, [isActive, player]);
+
 
     useEffect(() => {
         if (!isActive) return;
@@ -481,7 +534,7 @@ function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }
 
     return (
         <View style={[styles.stepContainer, { backgroundColor: themeColors.background }]}>
-            原则
+
             <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
                 <Image
                     source={require('../../assets/predictive-fueling.png')}
@@ -510,7 +563,9 @@ function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }
                                 isDark={isDark}
                                 top={greenPos.top}
                                 left={greenPos.left}
+                                isActive={isActive}
                             />
+
                         </Animated.View>
                     )}
 
@@ -522,7 +577,9 @@ function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }
                                 isDark={isDark}
                                 top={redPos.top}
                                 left={redPos.left}
+                                isActive={isActive}
                             />
+
                         </Animated.View>
                     )}
                 </View>
@@ -535,10 +592,12 @@ function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }
                             style={{ width: '100%', alignItems: 'center' }}
                         >
                             <GlassView
-                                glassEffectStyle="regular"
-                                tintColor={isDark ? '#1C1C1E' : '#FFFFFF'}
+                                effect="regular"
+                                tintColor="#000000"
                                 style={styles.mockLiveActivityGlass}
+                                key={isActive ? 'glass-active' : 'glass-inactive'}
                             >
+
                                 <View style={styles.mockLiveActivityHeader}>
                                     <View style={styles.mockLiveActivityAppIcon}>
                                         <Image
@@ -547,29 +606,29 @@ function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }
                                             resizeMode="contain"
                                         />
                                     </View>
-                                    <Text style={[styles.mockLiveActivityTitle, { color: themeColors.text }]}>Fuel Up</Text>
-                                    <Text style={[styles.mockLiveActivityTime, { color: themeColors.text, opacity: 0.5 }]}>now</Text>
+                                    <Text style={[styles.mockLiveActivityTitle, { color: '#FFFFFF' }]}>Fuel Up</Text>
+                                    <Text style={[styles.mockLiveActivityTime, { color: '#FFFFFF', opacity: 0.5 }]}>now</Text>
                                 </View>
 
                                 <View style={styles.mockLiveActivityContent}>
                                     <View style={styles.mockLiveActivityMain}>
                                         <View style={styles.mockLiveActivityStationInfo}>
-                                            <Text style={[styles.mockLiveActivityStationName, { color: themeColors.text }]}>Save $8.93 at Mobil One</Text>
+                                            <Text style={[styles.mockLiveActivityStationName, { color: '#FFFFFF' }]}>Save $8.93 at Mobil One</Text>
                                             <View style={styles.mockLiveActivityBadge}>
                                                 <Text style={styles.mockLiveActivityBadgeText}>Cheapest</Text>
                                             </View>
                                         </View>
                                         <View style={styles.mockLiveActivityPriceContainer}>
-                                            <Text style={[styles.mockLiveActivityPriceLabel, { color: themeColors.text, opacity: 0.6 }]}>Regular</Text>
+                                            <Text style={[styles.mockLiveActivityPriceLabel, { color: '#FFFFFF', opacity: 0.6 }]}>Regular</Text>
                                             <Text style={[styles.mockLiveActivityPrice, { color: '#007AFF' }]}>$3.89</Text>
                                         </View>
                                     </View>
 
-                                    <View style={[styles.mockLiveActivityDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]} />
+                                    <View style={[styles.mockLiveActivityDivider, { backgroundColor: 'rgba(255,255,255,0.1)' }]} />
 
                                     <View style={styles.mockLiveActivityFooter}>
-                                        <SymbolView name="location.fill" size={12} tintColor={themeColors.text} style={{ opacity: 0.6 }} />
-                                        <Text style={[styles.mockLiveActivityDistance, { color: themeColors.text, opacity: 0.6 }]}>1.2 mi away • On your route</Text>
+                                        <SymbolView name="location.fill" size={12} tintColor="#FFFFFF" style={{ opacity: 0.6 }} />
+                                        <Text style={[styles.mockLiveActivityDistance, { color: '#FFFFFF', opacity: 0.6 }]}>1.2 mi away • On your route</Text>
                                     </View>
                                 </View>
                             </GlassView>
@@ -582,6 +641,44 @@ function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }
                     )}
                 </View>
             </View>
+        </View>
+    );
+}
+
+function AnimatedButtonContent({ text, icon, isDark }) {
+    const [currentText, setCurrentText] = useState(text);
+    const [currentIcon, setCurrentIcon] = useState(icon);
+    const opacity = useSharedValue(1);
+    const scale = useSharedValue(1);
+
+    useEffect(() => {
+        if (text !== currentText || icon !== currentIcon) {
+            // Smoothly transit via scale and opacity
+            scale.value = withTiming(0.95, { duration: 150 });
+            opacity.value = withTiming(0, { duration: 150 }, () => {
+                runOnJS(setCurrentText)(text);
+                runOnJS(setCurrentIcon)(icon);
+                opacity.value = withTiming(1, { duration: 250 });
+                scale.value = withTiming(1, { duration: 250, easing: Easing.out(Easing.back()) });
+            });
+        }
+    }, [text, icon, currentText, currentIcon]);
+
+    const animatedContentStyle = useAnimatedStyle(() => ({
+        opacity: opacity.value,
+        transform: [{ scale: scale.value }]
+    }));
+
+    return (
+        <View style={styles.continueButtonInnerWrapper}>
+            <Animated.View style={[styles.continueButtonInner, animatedContentStyle]}>
+                <Text style={styles.continueText}>{currentText}</Text>
+                <SymbolView
+                    name={currentIcon}
+                    size={18}
+                    tintColor="#FFFFFF"
+                />
+            </Animated.View>
         </View>
     );
 }
@@ -752,39 +849,26 @@ export default function OnboardingScreen() {
                     ))}
                 </View>
 
-                {currentStep < totalSteps - 1 ? (
-                    <Pressable onPress={handleContinue} style={styles.continueButton}>
-                        <GlassView
-                            glassEffectStyle="regular"
-                            tintColor="#007AFF"
-                            isInteractive
-                            style={styles.continueGlass}
-                        >
-                            <Text style={styles.continueText}>
-                                {currentStep === 2 && permissionStatus !== 'granted' ? 'Enable Location' :
-                                    currentStep === 3 && notifPermissionStatus !== 'granted' ? 'Enable Notifications' : 'Continue'}
-                            </Text>
-                            <SymbolView
-                                name={currentStep === 2 && permissionStatus !== 'granted' ? 'location.fill' :
-                                    currentStep === 3 && notifPermissionStatus !== 'granted' ? 'bell.fill' : 'arrow.right'}
-                                size={18}
-                                tintColor="#FFFFFF"
-                            />
-                        </GlassView>
-                    </Pressable>
-                ) : (
-                    <Pressable onPress={handleContinue} style={styles.continueButton}>
-                        <GlassView
-                            glassEffectStyle="regular"
-                            tintColor="#007AFF"
-                            isInteractive
-                            style={styles.continueGlass}
-                        >
-                            <Text style={styles.continueText}>Get Started</Text>
-                            <SymbolView name="checkmark" size={18} tintColor="#FFFFFF" />
-                        </GlassView>
-                    </Pressable>
-                )}
+                <Pressable onPress={handleContinue} style={styles.continueButton}>
+                    <GlassView
+                        effect="regular"
+                        tintColor="#007AFF"
+                        interactive
+                        style={styles.continueGlass}
+                    >
+                        <AnimatedButtonContent
+                            text={isLastStep ? 'Get Started' : (
+                                currentStep === 2 && permissionStatus !== 'granted' ? 'Enable Location' :
+                                    currentStep === 3 && notifPermissionStatus !== 'granted' ? 'Enable Notifications' : 'Continue'
+                            )}
+                            icon={isLastStep ? 'checkmark' : (
+                                currentStep === 2 && permissionStatus !== 'granted' ? 'location.fill' :
+                                    currentStep === 3 && notifPermissionStatus !== 'granted' ? 'bell.fill' : 'arrow.right'
+                            )}
+                            isDark={isDark}
+                        />
+                    </GlassView>
+                </Pressable>
             </View>
 
             {/* Full-screen transition blur overlay (Dynamic Intensity) */}
@@ -965,29 +1049,28 @@ const styles = StyleSheet.create({
         opacity: 0.7,
     },
     // Location
-    locationGraphicContainer: {
-        alignItems: 'center',
-        gap: 32,
+    locationHighlightsContainer: {
+        width: '100%',
+        gap: 20,
     },
-    locationGraphicCircle: {
-        width: 140,
-        height: 140,
-        borderRadius: 70,
+    locationHighlightItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 16,
+        paddingHorizontal: 12,
+    },
+    locationHighlightIconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 14,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    locationExplanation: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-        paddingHorizontal: 20,
-        maxWidth: 320,
-    },
-    locationExplanationText: {
-        fontSize: 15,
+    locationHighlightText: {
+        fontSize: 16,
         fontWeight: '500',
-        opacity: 0.6,
-        lineHeight: 20,
+        flex: 1,
+        lineHeight: 22,
     },
     grantedRow: {
         flexDirection: 'row',
@@ -1065,12 +1148,20 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     continueGlass: {
+        paddingVertical: 18,
+        borderRadius: 20,
+        overflow: 'hidden',
+    },
+    continueButtonInnerWrapper: {
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    continueButtonInner: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
-        paddingVertical: 18,
-        borderRadius: 20,
     },
     continueText: {
         color: '#FFFFFF',
