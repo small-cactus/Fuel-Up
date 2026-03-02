@@ -79,7 +79,8 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     // Content fade-in animation
     const mountAnim = useSharedValue(0);
     // Animate relative bubble positions for "merging" effect
-    const spreadAnim = useSharedValue(1);
+    // Initialize just under 1 so it defaults to +N formatting on initial merge
+    const spreadAnim = useSharedValue(isMultiQuote ? 0.99 : 0);
 
     const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -140,12 +141,16 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
         // If ratio is < 0.3, they stay 0. If > 0.3 they start pulling away.
         let spread = 0;
         if (ratio > 0.4) {
-            spread = (ratio - 0.4) / 0.6;
+            // Cap the maximum spread at 0.99 while still a multi-quote cluster.
+            // This physically prevents the price text from ever flashing during any merge or re-merge.
+            // The unmount split happens dynamically when the spread crosses 1 in the parent map loop.
+            spread = Math.min(0.99, (ratio - 0.4) / 0.6);
         }
 
-        // If we just merged AND we are animating inward, snap to 1 so the animation pulls inward
+        // If we just merged AND we are animating inward, we need to guarantee that it is 
+        // INSTANTLY in +N format. We skip any price formatting.
         if (!prevIsMultiQuote.current && isMultiQuote) {
-            spreadAnim.value = 1;
+            spreadAnim.value = spread; // Instantly snap to its pulled-in location so it doesn't animate from nowhere
         }
 
         spreadAnim.value = withTiming(spread, { duration: 150 });
@@ -176,10 +181,10 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
             justifyContent: 'center',
             // When merged (spread=0), keep it small and tight behind the main chip.
             // When separated (spread=1), it needs to be identical size/padding to the main chip.
-            paddingHorizontal: interpolate(spreadAnim.value, [0.8, 0.95], [8, 10], Extrapolate.CLAMP),
+            paddingHorizontal: interpolate(spreadAnim.value, [0.99, 1], [8, 10], Extrapolate.CLAMP),
             paddingVertical: interpolate(spreadAnim.value, [0, 0.5, 1], [6, 6, 6]), // ensure stability
-            // Smoothly expand the width before cross-fading the text
-            minWidth: interpolate(spreadAnim.value, [0.8, 0.95], [40, 72], Extrapolate.CLAMP),
+            // Snap to full width exactly when about to separate
+            minWidth: interpolate(spreadAnim.value, [0.99, 1], [40, 72], Extrapolate.CLAMP),
             transform: [
                 { translateX: interpolate(spreadAnim.value, [0, 1], [28, offsets.restDx]) },
                 { translateY: interpolate(spreadAnim.value, [0, 1], [0, offsets.restDy]) }
@@ -190,18 +195,18 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     // Cross-fade styles for the text morphing
     const plusNStyle = useAnimatedStyle(() => {
         return {
-            // Fade out the "+N" as it stretches away
-            opacity: interpolate(spreadAnim.value, [0.85, 0.95], [1, 0], Extrapolate.CLAMP),
-            transform: [{ scale: interpolate(spreadAnim.value, [0.85, 0.95], [1, 0.5], Extrapolate.CLAMP) }]
+            // Poof out the "+N" exactly at the split boundary
+            opacity: interpolate(spreadAnim.value, [0.99, 1], [1, 0], Extrapolate.CLAMP),
+            transform: [{ scale: interpolate(spreadAnim.value, [0.99, 1], [1, 0.5], Extrapolate.CLAMP) }]
         }
     });
 
     const escapingPriceStyle = useAnimatedStyle(() => {
         return {
             position: 'absolute',
-            // Fade in the real price as it stretches away
-            opacity: interpolate(spreadAnim.value, [0.9, 1], [0, 1], Extrapolate.CLAMP),
-            transform: [{ scale: interpolate(spreadAnim.value, [0.9, 1], [0.8, 1], Extrapolate.CLAMP) }]
+            // ONLY natively show the price if the spread is > 0.99, otherwise keep it at 0
+            opacity: spreadAnim.value > 0.99 ? 1 : 0,
+            transform: [{ scale: interpolate(spreadAnim.value, [0.99, 1], [0.8, 1], Extrapolate.CLAMP) }]
         }
     });
 
