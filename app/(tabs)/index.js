@@ -97,30 +97,48 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
 
     const ptPerLng = mapRegion?.longitudeDelta ? SCREEN_WIDTH / mapRegion.longitudeDelta : 0;
     const ptPerLat = mapRegion?.latitudeDelta ? SCREEN_HEIGHT / mapRegion.latitudeDelta : 0;
+    const projectedQuotes = quotes.map(quote => {
+        const dx = (quote.longitude - averageLng) * ptPerLng;
+        const dy = -(quote.latitude - averageLat) * ptPerLat;
+        return {
+            ...quote,
+            dx,
+            dy,
+            distanceFromCenter: Math.hypot(dx, dy),
+        };
+    });
+    const primaryProjectedQuote = projectedQuotes[0];
+    const secondaryProjectedQuotes = projectedQuotes.slice(1);
+    const emergingProjectedQuote = secondaryProjectedQuotes.length > 0
+        ? secondaryProjectedQuotes.reduce((farthestQuote, quote) => (
+            quote.distanceFromCenter > farthestQuote.distanceFromCenter ? quote : farthestQuote
+        ), secondaryProjectedQuotes[0])
+        : null;
+    const remainingProjectedQuotes = emergingProjectedQuote
+        ? secondaryProjectedQuotes.filter(quote => quote.stationId !== emergingProjectedQuote.stationId)
+        : [];
+    const remainderOffset = remainingProjectedQuotes.length > 0
+        ? {
+            dx: remainingProjectedQuotes.reduce((sum, quote) => sum + quote.dx, 0) / remainingProjectedQuotes.length,
+            dy: remainingProjectedQuotes.reduce((sum, quote) => sum + quote.dy, 0) / remainingProjectedQuotes.length,
+        }
+        : { dx: 0, dy: 0 };
+    const hasRemainderBubble = remainingProjectedQuotes.length > 0;
 
-    const primaryLat = lats[0];
-    const primaryLng = lngs[0];
-
-    const restAvgLat = isMultiQuote ? lats.slice(1).reduce((sum, val) => sum + val, 0) / (lats.length - 1) : primaryLat;
-    const restAvgLng = isMultiQuote ? lngs.slice(1).reduce((sum, val) => sum + val, 0) / (lngs.length - 1) : primaryLng;
-
-    const offsets = {
-        primaryDx: 0,
-        primaryDy: 0,
-        restDx: (restAvgLng - primaryLng) * ptPerLng,
-        restDy: -(restAvgLat - primaryLat) * ptPerLat, // Invert Y because screen Y goes down
-    };
     const collapsedPrimaryWidth = 84;
     const collapsedSecondaryWidth = 44;
-    const collapsedBubbleHeight = 32;
     const collapsedBubbleOverlap = 8;
     const collapsedBubbleOffset = ((collapsedPrimaryWidth + collapsedSecondaryWidth) / 2) - collapsedBubbleOverlap;
-    const horizontalReach = Math.max(collapsedBubbleOffset, Math.abs(offsets.primaryDx), Math.abs(offsets.restDx));
-    const verticalReach = Math.max(0, Math.abs(offsets.primaryDy), Math.abs(offsets.restDy));
+    const horizontalReach = Math.max(
+        collapsedBubbleOffset,
+        ...projectedQuotes.map(quote => Math.abs(quote.dx))
+    );
+    const verticalReach = Math.max(
+        0,
+        ...projectedQuotes.map(quote => Math.abs(quote.dy))
+    );
     const containerWidth = Math.max(240, 132 + horizontalReach * 2);
     const containerHeight = Math.max(80, 52 + verticalReach * 2);
-    const centeredSecondaryLeft = (containerWidth - collapsedSecondaryWidth) / 2;
-    const centeredBubbleTop = (containerHeight - collapsedBubbleHeight) / 2;
 
     // For the merge animation, we need to know if we JUST became multi-quote or added quotes
     const prevIsMultiQuote = useRef(isMultiQuote);
@@ -203,29 +221,44 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     // Style for the primary price bubble
     const leftBubbleStyle = useAnimatedStyle(() => {
         return {
-            zIndex: 2,
+            zIndex: 3,
             transform: [
-                { translateX: 0 },
-                { translateY: 0 }
+                { translateX: interpolate(spreadAnim.value, [0, 1], [0, primaryProjectedQuote.dx]) },
+                { translateY: interpolate(spreadAnim.value, [0, 1], [0, primaryProjectedQuote.dy]) }
             ]
         };
     });
 
-    // Style for the +N bubble
-    const rightBubbleStyle = useAnimatedStyle(() => {
+    // Style for the breaking-out +N bubble
+    const rightBubbleWrapperStyle = useAnimatedStyle(() => {
         return {
-            position: 'absolute',
-            left: centeredSecondaryLeft,
-            top: centeredBubbleTop,
-            zIndex: 1,
+            zIndex: 2,
+            transform: [
+                { translateX: interpolate(spreadAnim.value, [0, 1], [collapsedBubbleOffset, emergingProjectedQuote?.dx ?? 0]) },
+                { translateY: interpolate(spreadAnim.value, [0, 1], [0, emergingProjectedQuote?.dy ?? 0]) }
+            ]
+        };
+    });
+    const rightBubbleShellStyle = useAnimatedStyle(() => {
+        return {
             justifyContent: 'center',
             paddingHorizontal: interpolate(morphAnim.value, [0, 1], [8, 10], Extrapolate.CLAMP),
             paddingVertical: interpolate(morphAnim.value, [0, 0.5, 1], [6, 6, 6]),
-            // Smoothly expand width earlier in the morph cycle
             minWidth: interpolate(morphAnim.value, [0, 0.7], [40, 72], Extrapolate.CLAMP),
+        };
+    });
+
+    // Style for the subgroup that stays clustered after one item peels away
+    const remainderBubbleWrapperStyle = useAnimatedStyle(() => {
+        return {
+            zIndex: 1,
+            opacity: hasRemainderBubble
+                ? interpolate(spreadAnim.value, [0.35, 0.75], [0, 1], Extrapolate.CLAMP)
+                : 0,
             transform: [
-                { translateX: interpolate(spreadAnim.value, [0, 1], [collapsedBubbleOffset, offsets.restDx]) },
-                { translateY: interpolate(spreadAnim.value, [0, 1], [0, offsets.restDy]) }
+                { translateX: interpolate(spreadAnim.value, [0, 1], [collapsedBubbleOffset, remainderOffset.dx]) },
+                { translateY: interpolate(spreadAnim.value, [0, 1], [0, remainderOffset.dy]) },
+                { scale: interpolate(spreadAnim.value, [0.35, 0.75], [0.92, 1], Extrapolate.CLAMP) }
             ]
         };
     });
@@ -248,15 +281,12 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
         }
     });
 
-    // The station that will physically emerge from the cluster
-    const emergingQuote = isMultiQuote ? quotes[1] : null;
-
     return (
         <Marker
             key={quotes[0].stationId} // Ensure key is bound to primary station so it doesn't unmount
             coordinate={{
-                latitude: primaryLat,
-                longitude: primaryLng,
+                latitude: averageLat,
+                longitude: averageLng,
             }}
             anchor={{ x: 0.5, y: 0.5 }} // Keep anchor visually centered
             onPress={() => onMarkerPress(cluster)}
@@ -272,74 +302,103 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
                 ]}
             >
                 {/* Main bubble with price (Front) */}
-                <AnimatedLiquidGlassView
-                    effect="clear"
-                    style={[
-                        styles.bubbleBase,
-                        leftBubbleStyle,
-                    ]}
-                >
-                    <Animated.View style={[styles.rowItem, animatedContentStyle]}>
-                        <SymbolView
-                            name="fuelpump.fill"
-                            size={14}
-                            tintColor={primaryQuote.originalIndex === 0 ? '#007AFF' : (primaryQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
-                            style={styles.priceIcon}
-                        />
-                        <Animated.Text
-                            style={[
-                                styles.priceText,
-                                primaryQuote.originalIndex === 0 && styles.bestPriceText,
-                                animatedTextStyle,
-                            ]}
-                        >
-                            ${primaryQuote.price.toFixed(2)}
-                        </Animated.Text>
-                    </Animated.View>
-                </AnimatedLiquidGlassView>
-
-                {/* Secondary merging bubble for clusters (Behind) */}
-                {isMultiQuote && (
+                <Animated.View style={[styles.bubblePositioner, leftBubbleStyle]}>
                     <AnimatedLiquidGlassView
                         effect="clear"
-                        style={[
-                            styles.bubbleBase,
-                            rightBubbleStyle,
-                        ]}
+                        style={styles.bubbleBase}
                     >
-                        <Animated.View style={[styles.rowItem, animatedContentStyle, plusNStyle, { justifyContent: 'center' }]}>
-                            <Text style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)', fontSize: 12, marginRight: 4 }}>|</Text>
+                        <Animated.View style={[styles.rowItem, animatedContentStyle]}>
+                            <SymbolView
+                                name="fuelpump.fill"
+                                size={14}
+                                tintColor={primaryQuote.originalIndex === 0 ? '#007AFF' : (primaryQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
+                                style={styles.priceIcon}
+                            />
                             <Animated.Text
                                 style={[
                                     styles.priceText,
+                                    primaryQuote.originalIndex === 0 && styles.bestPriceText,
                                     animatedTextStyle,
                                 ]}
                             >
-                                +{quotes.length - 1}
+                                ${primaryQuote.price.toFixed(2)}
                             </Animated.Text>
                         </Animated.View>
+                    </AnimatedLiquidGlassView>
+                </Animated.View>
 
-                        {/* The price it morphs into */}
-                        {emergingQuote && (
-                            <Animated.View style={[styles.rowItem, escapingPriceStyle, { justifyContent: 'center', width: '100%' }]}>
-                                <SymbolView
-                                    name="fuelpump.fill"
-                                    size={14}
-                                    tintColor={emergingQuote.originalIndex === 0 ? '#007AFF' : (emergingQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
-                                    style={styles.priceIcon}
-                                />
+                {/* Secondary merging bubble for clusters (Behind) */}
+                {isMultiQuote && (
+                    <Animated.View style={[styles.bubblePositioner, rightBubbleWrapperStyle]}>
+                        <AnimatedLiquidGlassView
+                            effect="clear"
+                            style={[
+                                styles.bubbleBase,
+                                rightBubbleShellStyle,
+                            ]}
+                        >
+                            <Animated.View style={[styles.rowItem, animatedContentStyle, plusNStyle, { justifyContent: 'center' }]}>
+                                <Text style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)', fontSize: 12, marginRight: 4 }}>|</Text>
                                 <Animated.Text
                                     style={[
                                         styles.priceText,
-                                        emergingQuote.originalIndex === 0 && styles.bestPriceText,
                                         animatedTextStyle,
                                     ]}
                                 >
-                                    ${emergingQuote.price.toFixed(2)}
+                                    +{quotes.length - 1}
                                 </Animated.Text>
                             </Animated.View>
-                        )}
-                    </AnimatedLiquidGlassView>
+
+                            {/* The price it morphs into */}
+                            {emergingProjectedQuote && (
+                                <Animated.View style={[styles.rowItem, escapingPriceStyle, { justifyContent: 'center', width: '100%' }]}>
+                                    <SymbolView
+                                        name="fuelpump.fill"
+                                        size={14}
+                                        tintColor={emergingProjectedQuote.originalIndex === 0 ? '#007AFF' : (emergingProjectedQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
+                                        style={styles.priceIcon}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.priceText,
+                                            emergingProjectedQuote.originalIndex === 0 && styles.bestPriceText,
+                                            {
+                                                color: emergingProjectedQuote.originalIndex === 0
+                                                    ? '#007AFF'
+                                                    : (emergingProjectedQuote.originalIndex === activeIndex ? themeColors.text : '#888888')
+                                            }
+                                        ]}
+                                    >
+                                        ${emergingProjectedQuote.price.toFixed(2)}
+                                    </Text>
+                                </Animated.View>
+                            )}
+                        </AnimatedLiquidGlassView>
+                    </Animated.View>
+                )}
+
+                {hasRemainderBubble && (
+                    <Animated.View style={[styles.bubblePositioner, remainderBubbleWrapperStyle]}>
+                        <AnimatedLiquidGlassView
+                            effect="clear"
+                            style={[
+                                styles.bubbleBase,
+                                { minWidth: collapsedSecondaryWidth, justifyContent: 'center' }
+                            ]}
+                        >
+                            <View style={[styles.rowItem, { justifyContent: 'center' }]}>
+                                <Text style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)', fontSize: 12, marginRight: 4 }}>|</Text>
+                                <Text
+                                    style={[
+                                        styles.priceText,
+                                        { color: isActive ? themeColors.text : '#888888' }
+                                    ]}
+                                >
+                                    +{remainingProjectedQuotes.length}
+                                </Text>
+                            </View>
+                        </AnimatedLiquidGlassView>
+                    </Animated.View>
                 )}
             </AnimatedLiquidGlassContainer>
         </Marker>
@@ -1173,6 +1232,15 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
         borderRadius: 16,
         gap: 6,
+    },
+    bubblePositioner: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     rowItem: {
         flexDirection: 'row',
