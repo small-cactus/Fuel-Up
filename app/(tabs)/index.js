@@ -83,7 +83,7 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
 
     const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-    const threshold = mapRegion?.longitudeDelta ? mapRegion.longitudeDelta * 0.12 : 0;
+    const threshold = mapRegion?.longitudeDelta ? mapRegion.longitudeDelta * 0.16 : 0;
     const lngs = quotes.map(q => q.longitude);
     const lats = quotes.map(q => q.latitude);
     const lngSpread = Math.max(...lngs) - Math.min(...lngs);
@@ -121,9 +121,11 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
         }
 
         const latThreshold = mapRegion.latitudeDelta * 0.025;
-        // The split threshold is 1.5x the merge threshold
-        const splitLngThreshold = threshold * 1.5;
-        const splitLatThreshold = latThreshold * 1.5;
+        // The split threshold should maintain the exact physical distance as when merge was 0.12 (now 0.16)
+        // Previous split was 0.12 * 1.5 = 0.18. Current merge is 0.16. 
+        // 0.18 / 0.16 = 1.125
+        const splitLngThreshold = threshold * 1.125;
+        const splitLatThreshold = latThreshold * 1.125;
 
         // Animate up to the split boundary, not the merge boundary
         let ratioLng = splitLngThreshold > 0 ? lngSpread / splitLngThreshold : 0;
@@ -151,10 +153,7 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     }, [mapRegion?.longitudeDelta, mapRegion?.latitudeDelta, isMultiQuote, lngSpread, latSpread, threshold]);
 
     const animatedContentStyle = useAnimatedStyle(() => {
-        return {
-            opacity: mountAnim.value,
-            transform: [{ scale: interpolate(mountAnim.value, [0, 1], [0.85, 1]) }]
-        };
+        return {};
     });
 
     // Style for the primary price bubble
@@ -617,12 +616,14 @@ export default function HomeScreen() {
         const lngDelta = mapRegion.longitudeDelta || 0.05;
 
         // Visual thresholds based on chip pixel dimensions
-        const mergeLatHeight = latDelta * 0.030;
-        const mergeLngWidth = lngDelta * 0.12;
+        const mergeLatHeight = latDelta * 0.040;
+        const mergeLngWidth = lngDelta * 0.16;
 
-        // Hysteresis: they can pull apart 50% further before actually splitting
-        const splitLatHeight = mergeLatHeight * 1.5;
-        const splitLngWidth = mergeLngWidth * 1.5;
+        // Hysteresis: Keep absolute separation distance the same as before 
+        // (prev was 0.030 * 1.5 = 0.045, 0.045 / 0.040 = 1.125)
+        // (prev was 0.12 * 1.5 = 0.18, 0.18 / 0.16 = 1.125)
+        const splitLatHeight = mergeLatHeight * 1.125;
+        const splitLngWidth = mergeLngWidth * 1.125;
 
         const cheapestStation = stationQuotes[0];
         const others = stationQuotes.slice(1);
