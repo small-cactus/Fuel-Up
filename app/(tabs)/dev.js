@@ -2,11 +2,13 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useTheme } from '../../src/ThemeContext';
+import { usePreferences } from '../../src/PreferencesContext';
 import { getApiStats, resetApiStats } from '../../src/lib/devCounter';
 import { scheduleTestNotification, startLiveActivity, updateLiveActivity, endLiveActivity } from '../../src/lib/notifications';
 
 export default function DevStatsScreen() {
     const { isDark } = useTheme();
+    const { preferences, updatePreference } = usePreferences();
     const [stats, setStats] = useState({ gasbuddy: 0, google: 0, supabase: 0, barchart: 0, tomtom: 0 });
     const [testTitle, setTestTitle] = useState('Test Push');
     const [testBody, setTestBody] = useState('This is a local push notification test.');
@@ -26,6 +28,7 @@ export default function DevStatsScreen() {
     const textColor = isDark ? '#FFF' : '#000';
     const bgColor = isDark ? '#000' : '#FFF';
     const cardColor = isDark ? '#1A1A1A' : '#F5F5F5';
+    const debugEnabled = Boolean(preferences.debugClusterAnimations);
 
     const handleLocalPush = (delay) => {
         scheduleTestNotification(testTitle, testBody, delay);
@@ -64,6 +67,27 @@ export default function DevStatsScreen() {
             <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
                 <Text style={styles.resetButtonText}>Reset Counters</Text>
             </TouchableOpacity>
+
+            <Text style={[styles.title, { color: textColor, marginTop: 40 }]}>Cluster Animation Debug</Text>
+            <View style={[styles.card, { backgroundColor: cardColor }]}>
+                <Text style={[styles.label, { color: textColor, marginBottom: 8 }]}>
+                    Toggle the home-map cluster handoff diagnostics.
+                </Text>
+                <Text style={[styles.debugDescription, { color: textColor }]}>
+                    When enabled, the home screen replaces the bottom fuel card with cluster handoff diagnostics and can record one summarized debug log for the cluster nearest the map center.
+                </Text>
+                <TouchableOpacity
+                    style={[
+                        styles.actionButton,
+                        { backgroundColor: debugEnabled ? '#34C759' : '#3A3A3C', marginTop: 16 }
+                    ]}
+                    onPress={() => updatePreference('debugClusterAnimations', !debugEnabled)}
+                >
+                    <Text style={styles.actionButtonText}>
+                        {debugEnabled ? 'Disable Cluster Debug Overlay' : 'Enable Cluster Debug Overlay'}
+                    </Text>
+                </TouchableOpacity>
+            </View>
 
             <Text style={[styles.title, { color: textColor, marginTop: 40 }]}>Push Notifications</Text>
             <View style={[styles.card, { backgroundColor: cardColor }]}>
@@ -160,6 +184,11 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 16,
         fontWeight: '500',
+    },
+    debugDescription: {
+        fontSize: 13,
+        lineHeight: 18,
+        opacity: 0.8,
     },
     value: {
         fontSize: 18,

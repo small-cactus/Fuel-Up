@@ -8,6 +8,7 @@ const DEFAULT_PREFERENCES = {
     preferredOctane: 'regular', // 'regular' | 'midgrade' | 'premium'
     preferredProvider: 'gasbuddy', // 'gasbuddy' | 'all'
     minimumRating: 0, // 0 = no filter
+    debugClusterAnimations: false,
     excludedBrands: [],
     hasCompletedOnboarding: false,
 };

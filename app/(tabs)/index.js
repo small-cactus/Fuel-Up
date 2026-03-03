@@ -15,6 +15,7 @@ import MapView, { Marker, PROVIDER_APPLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppState } from '../../src/AppStateContext';
 import FuelSummaryCard from '../../src/components/FuelSummaryCard';
+import ClusterDebugCard from '../../src/components/ClusterDebugCard';
 import TopCanopy from '../../src/components/TopCanopy';
 import { getCachedFuelPriceSnapshot, getFuelFailureMessage, refreshFuelPriceSnapshot } from '../../src/services/fuel';
 import { useTheme } from '../../src/ThemeContext';
@@ -42,6 +43,12 @@ const {
     CLUSTER_MERGE_LNG_FACTOR,
     CLUSTER_SPLIT_MULTIPLIER,
     CLUSTER_SPREAD_DEADZONE,
+    COLLAPSED_PRIMARY_WIDTH,
+    COLLAPSED_SECONDARY_WIDTH,
+    COLLAPSED_BUBBLE_OFFSET,
+    computeClusterHandoffDiagnostic,
+    computeMorphProgress,
+    computeSpreadProgressFromCluster,
 } = require('../../src/lib/clusterAnimationMath.cjs');
 
 const DEFAULT_REGION = {
@@ -54,6 +61,191 @@ const TAB_BAR_CLEARANCE = 34;
 const CARD_GAP = 0;
 const SIDE_MARGIN = 16;
 const TOP_CANOPY_HEIGHT = 72;
+const CLUSTER_DEBUG_JUMP_THRESHOLD = 5;
+const MAP_REGION_EPSILON = 0.000001;
+const CHIP_ANIMATION_DURATION = 420;
+const CHIP_BRIDGE_CLEAR_DELAY = 480;
+
+function areRegionsEquivalent(currentRegion, nextRegion) {
+    if (!currentRegion || !nextRegion) {
+        return false;
+    }
+
+    return (
+        Math.abs((currentRegion.latitude || 0) - (nextRegion.latitude || 0)) <= MAP_REGION_EPSILON &&
+        Math.abs((currentRegion.longitude || 0) - (nextRegion.longitude || 0)) <= MAP_REGION_EPSILON &&
+        Math.abs((currentRegion.latitudeDelta || 0) - (nextRegion.latitudeDelta || 0)) <= MAP_REGION_EPSILON &&
+        Math.abs((currentRegion.longitudeDelta || 0) - (nextRegion.longitudeDelta || 0)) <= MAP_REGION_EPSILON
+    );
+}
+
+function formatDebugMetric(value, digits = 2) {
+    if (typeof value !== 'number' || Number.isNaN(value)) {
+        return '--';
+    }
+
+    return value.toFixed(digits);
+}
+
+function summarizeDebugSeries(samples, key) {
+    const values = samples
+        .map(sample => sample[key])
+        .filter(value => typeof value === 'number' && Number.isFinite(value));
+
+    if (values.length === 0) {
+        return null;
+    }
+
+    const start = values[0];
+    const end = values[values.length - 1];
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+
+    return {
+        start,
+        end,
+        min,
+        max,
+        delta: end - start,
+    };
+}
+
+function formatSeriesLine(label, series, unit = '', digits = 2) {
+    if (!series) {
+        return `${label}=--`;
+    }
+
+    const deltaPrefix = series.delta > 0 ? '+' : '';
+
+    return (
+        `${label} ${formatDebugMetric(series.start, digits)} -> ${formatDebugMetric(series.end, digits)} ` +
+        `(d ${deltaPrefix}${formatDebugMetric(series.delta, digits)}, min ${formatDebugMetric(series.min, digits)}, max ${formatDebugMetric(series.max, digits)})${unit}`
+    );
+}
+
+function buildClusterDebugJumpEvents(samples) {
+    const trackedMetrics = [
+        ['primarySwitchDistance', 'switch(primary)'],
+        ['secondarySwitchDistance', 'switch(secondary)'],
+        ['nextPrimarySettleDistance', 'settle(primary)'],
+        ['nextSecondarySettleDistance', 'settle(secondary)'],
+        ['centerShiftDistance', 'centerShift'],
+        ['shellWidthDelta', 'shellWidth'],
+        ['plannedPrimaryMoveMagnitude', 'move(primary)'],
+        ['plannedSecondaryMoveMagnitude', 'move(secondary)'],
+    ];
+    const events = [];
+
+    for (let index = 1; index < samples.length; index += 1) {
+        const previousSample = samples[index - 1];
+        const nextSample = samples[index];
+
+        for (const [metricKey, label] of trackedMetrics) {
+            const previousValue = previousSample[metricKey];
+            const nextValue = nextSample[metricKey];
+
+            if (!Number.isFinite(previousValue) || !Number.isFinite(nextValue)) {
+                continue;
+            }
+
+            const delta = nextValue - previousValue;
+            if (Math.abs(delta) <= CLUSTER_DEBUG_JUMP_THRESHOLD) {
+                continue;
+            }
+
+            const causes = [];
+            const rules = [];
+
+            if (previousSample.clusterKey !== nextSample.clusterKey) {
+                causes.push(`watched cluster changed (${previousSample.clusterKey} -> ${nextSample.clusterKey})`);
+            }
+            if (previousSample.summary !== nextSample.summary) {
+                causes.push(`summary changed ("${previousSample.summary}" -> "${nextSample.summary}")`);
+            }
+            if (
+                Math.abs(nextSample.nextMountSpread - nextSample.nextResolvedSpread) > 0.001 ||
+                Math.abs(previousSample.nextMountSpread - previousSample.nextResolvedSpread) > 0.001
+            ) {
+                causes.push(
+                    `incoming first-frame spread mismatch (${formatDebugMetric(previousSample.nextMountSpread)} -> ${formatDebugMetric(previousSample.nextResolvedSpread)} then ${formatDebugMetric(nextSample.nextMountSpread)} -> ${formatDebugMetric(nextSample.nextResolvedSpread)})`
+                );
+                rules.push('Carryover rule: a continuing multi-quote overlay keeps the previous spread/morph on the first frame, then animates to the new resolved values.');
+            }
+            if (Math.abs(delta) === Math.abs(nextSample.centerShiftDistance - previousSample.centerShiftDistance) || metricKey === 'centerShiftDistance') {
+                rules.push('Anchor rule: if the watched cluster changes to a different primary station, the marker anchor itself moves.');
+            }
+            if (metricKey === 'shellWidthDelta' || Math.abs(nextSample.shellWidthDelta - previousSample.shellWidthDelta) > CLUSTER_DEBUG_JUMP_THRESHOLD) {
+                rules.push('Shell width rule: secondary shell width interpolates from 44pt to the same 84pt width used by standalone price shells.');
+            }
+            if (metricKey !== 'shellWidthDelta') {
+                rules.push(`Spread rule: spread stays at 0 until overlap ratio clears the ${CLUSTER_SPREAD_DEADZONE.toFixed(2)} deadzone, using split thresholds = merge thresholds * 1.5.`);
+            }
+
+            const deltaPrefix = delta > 0 ? '+' : '';
+            events.push(
+                [
+                    `- ${label} jumped ${deltaPrefix}${formatDebugMetric(delta)}pt (${formatDebugMetric(previousValue)} -> ${formatDebugMetric(nextValue)})`,
+                    `  causes: ${causes.length > 0 ? causes.join('; ') : 'same watched cluster, metric moved due to threshold interpolation and map motion'}`,
+                    `  rules: ${Array.from(new Set(rules)).join(' | ')}`,
+                    `  factors: mapDelta ${formatDebugMetric(previousSample.mapLatitudeDelta, 4)}/${formatDebugMetric(previousSample.mapLongitudeDelta, 4)} -> ${formatDebugMetric(nextSample.mapLatitudeDelta, 4)}/${formatDebugMetric(nextSample.mapLongitudeDelta, 4)}, split ${formatDebugMetric(previousSample.splitLatThreshold, 4)}/${formatDebugMetric(previousSample.splitLngThreshold, 4)} -> ${formatDebugMetric(nextSample.splitLatThreshold, 4)}/${formatDebugMetric(nextSample.splitLngThreshold, 4)}, spread ${formatDebugMetric(previousSample.currentResolvedSpread)} -> ${formatDebugMetric(nextSample.currentResolvedSpread)}, next spread ${formatDebugMetric(previousSample.nextResolvedSpread)} -> ${formatDebugMetric(nextSample.nextResolvedSpread)}, morph ${formatDebugMetric(previousSample.currentResolvedMorph)} -> ${formatDebugMetric(nextSample.currentResolvedMorph)}, next morph ${formatDebugMetric(previousSample.nextResolvedMorph)} -> ${formatDebugMetric(nextSample.nextResolvedMorph)}, center shift ${formatDebugMetric(previousSample.centerShiftDistance)} -> ${formatDebugMetric(nextSample.centerShiftDistance)}, width ${formatDebugMetric(previousSample.shellWidthDelta)} -> ${formatDebugMetric(nextSample.shellWidthDelta)}, cluster size ${previousSample.clusterSize} -> ${nextSample.clusterSize}`
+                ].join('\n')
+            );
+        }
+    }
+
+    return events;
+}
+
+function buildClusterDebugRecordingLog(samples) {
+    if (!samples || samples.length === 0) {
+        return '[ClusterDebug Recording]\nNo samples captured.';
+    }
+
+    const startedAt = samples[0].timestamp;
+    const endedAt = samples[samples.length - 1].timestamp;
+    const durationMs = Math.max(0, endedAt - startedAt);
+    const clusterTransitions = samples.reduce((count, sample, index) => {
+        if (index === 0) {
+            return 0;
+        }
+
+        return count + (sample.clusterKey !== samples[index - 1].clusterKey ? 1 : 0);
+    }, 0);
+    const primarySwitchSeries = summarizeDebugSeries(samples, 'primarySwitchDistance');
+    const secondarySwitchSeries = summarizeDebugSeries(samples, 'secondarySwitchDistance');
+    const primarySettleSeries = summarizeDebugSeries(samples, 'nextPrimarySettleDistance');
+    const secondarySettleSeries = summarizeDebugSeries(samples, 'nextSecondarySettleDistance');
+    const centerShiftSeries = summarizeDebugSeries(samples, 'centerShiftDistance');
+    const spreadSeries = summarizeDebugSeries(samples, 'currentResolvedSpread');
+    const nextSpreadSeries = summarizeDebugSeries(samples, 'nextResolvedSpread');
+    const shellWidthSeries = summarizeDebugSeries(samples, 'shellWidthDelta');
+    const primaryMoveMagnitudeSeries = summarizeDebugSeries(samples, 'plannedPrimaryMoveMagnitude');
+    const secondaryMoveMagnitudeSeries = summarizeDebugSeries(samples, 'plannedSecondaryMoveMagnitude');
+    const jumpEvents = buildClusterDebugJumpEvents(samples);
+
+    return [
+        '[ClusterDebug Recording]',
+        `samples=${samples.length} duration=${durationMs}ms clusterChanges=${clusterTransitions}`,
+        `watchedStart=${samples[0].clusterKey}`,
+        `watchedEnd=${samples[samples.length - 1].clusterKey}`,
+        formatSeriesLine('spread(cur)', spreadSeries),
+        formatSeriesLine('spread(next)', nextSpreadSeries),
+        formatSeriesLine('switch(primary)', primarySwitchSeries, 'pt'),
+        formatSeriesLine('switch(secondary)', secondarySwitchSeries, 'pt'),
+        formatSeriesLine('settle(primary)', primarySettleSeries, 'pt'),
+        formatSeriesLine('settle(secondary)', secondarySettleSeries, 'pt'),
+        formatSeriesLine('centerShift', centerShiftSeries, 'pt'),
+        formatSeriesLine('shellWidth', shellWidthSeries, 'pt'),
+        formatSeriesLine('move(primary)', primaryMoveMagnitudeSeries, 'pt'),
+        formatSeriesLine('move(secondary)', secondaryMoveMagnitudeSeries, 'pt'),
+        `summaryStart=${samples[0].summary}`,
+        `summaryEnd=${samples[samples.length - 1].summary}`,
+        `largeStepChanges>${CLUSTER_DEBUG_JUMP_THRESHOLD}pt=${jumpEvents.length}`,
+        ...(jumpEvents.length > 0
+            ? ['Large step changes:', ...jumpEvents]
+            : ['Large step changes: none']),
+    ].join('\n');
+}
 
 function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColors, activeIndex, onMarkerPress, mapRegion, isMapMoving }) {
     const { quotes, averageLat, averageLng } = cluster;
@@ -82,164 +274,214 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
     const primaryQuote = quotes[0];
     const isMultiQuote = quotes.length > 1;
 
+    const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+    const resolvedSpread = isMultiQuote
+        ? computeSpreadProgressFromCluster({
+            quotes,
+            averageLat,
+            averageLng,
+            mapRegion,
+        })
+        : 0;
+    const resolvedMorph = computeMorphProgress(resolvedSpread);
+
     // Content fade-in animation
     const mountAnim = useSharedValue(0);
     // Animate relative bubble positions for "merging" effect
-    const spreadAnim = useSharedValue(isMultiQuote ? 1 : 0);
+    const spreadAnim = useSharedValue(resolvedSpread);
     // Animate visual properties (Price vs +N styling) independently
-    const morphAnim = useSharedValue(isMultiQuote ? 1 : 0);
-
-    const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-    const lngThreshold = mapRegion?.longitudeDelta ? mapRegion.longitudeDelta * CLUSTER_MERGE_LNG_FACTOR : 0;
-    const latThreshold = mapRegion?.latitudeDelta ? mapRegion.latitudeDelta * CLUSTER_MERGE_LAT_FACTOR : 0;
-
-    const lngs = quotes.map(q => q.longitude);
-    const lats = quotes.map(q => q.latitude);
-
-    // Clustering boundary is a radius measured from average, not a diameter bounding box
-    const maxLngDiff = isMultiQuote ? Math.max(...lngs.map(lng => Math.abs(lng - averageLng))) : 0;
-    const maxLatDiff = isMultiQuote ? Math.max(...lats.map(lat => Math.abs(lat - averageLat))) : 0;
+    const morphAnim = useSharedValue(resolvedMorph);
+    const splitBridgeProgress = useSharedValue(1);
+    const splitBridgeMorph = useSharedValue(1);
+    const [splitBridge, setSplitBridge] = useState(null);
+    const previousQuotesRef = useRef(quotes);
+    const splitBridgeTimeoutRef = useRef(null);
+    const splitSettleTimeoutRef = useRef(null);
+    const splitBridgeReadyToClearRef = useRef(false);
 
     const ptPerLng = mapRegion?.longitudeDelta ? SCREEN_WIDTH / mapRegion.longitudeDelta : 0;
     const ptPerLat = mapRegion?.latitudeDelta ? SCREEN_HEIGHT / mapRegion.latitudeDelta : 0;
-    const projectedQuotes = quotes.map(quote => {
-        const dx = (quote.longitude - averageLng) * ptPerLng;
-        const dy = -(quote.latitude - averageLat) * ptPerLat;
+    const primaryLat = primaryQuote.latitude;
+    const primaryLng = primaryQuote.longitude;
+    const anchoredQuotes = quotes.map(quote => {
+        const dx = (quote.longitude - primaryLng) * ptPerLng;
+        const dy = -(quote.latitude - primaryLat) * ptPerLat;
         return {
             ...quote,
             dx,
             dy,
-            distanceFromCenter: Math.hypot(dx, dy),
+            distanceFromPrimary: Math.hypot(dx, dy),
         };
     });
-    const primaryProjectedQuote = projectedQuotes[0];
-    const secondaryProjectedQuotes = projectedQuotes.slice(1);
-    const emergingProjectedQuote = secondaryProjectedQuotes.length > 0
-        ? secondaryProjectedQuotes.reduce((farthestQuote, quote) => (
-            quote.distanceFromCenter > farthestQuote.distanceFromCenter ? quote : farthestQuote
-        ), secondaryProjectedQuotes[0])
+    const secondaryAnchoredQuotes = anchoredQuotes.slice(1);
+    const emergingAnchoredQuote = secondaryAnchoredQuotes.length > 0
+        ? secondaryAnchoredQuotes.reduce((farthestQuote, quote) => (
+            quote.distanceFromPrimary > farthestQuote.distanceFromPrimary ? quote : farthestQuote
+        ), secondaryAnchoredQuotes[0])
         : null;
-    const remainingProjectedQuotes = emergingProjectedQuote
-        ? secondaryProjectedQuotes.filter(quote => quote.stationId !== emergingProjectedQuote.stationId)
+    const remainingQuotes = emergingAnchoredQuote
+        ? quotes.slice(1).filter(quote => quote.stationId !== emergingAnchoredQuote.stationId)
         : [];
-    const hasRemainderBubble = remainingProjectedQuotes.length > 0;
+    const hasRemainderBubble = remainingQuotes.length > 0;
 
-    const collapsedPrimaryWidth = 84;
-    const collapsedSecondaryWidth = 44;
-    const collapsedBubbleOverlap = 8;
-    const collapsedBubbleOffset = ((collapsedPrimaryWidth + collapsedSecondaryWidth) / 2) - collapsedBubbleOverlap;
-    const splitLngThreshold = lngThreshold * CLUSTER_SPLIT_MULTIPLIER;
-    const splitLatThreshold = latThreshold * CLUSTER_SPLIT_MULTIPLIER;
-
-    const nextClusterQuotes = emergingProjectedQuote
-        ? [primaryQuote, ...remainingProjectedQuotes]
+    const nextClusterQuotes = emergingAnchoredQuote
+        ? [primaryQuote, ...remainingQuotes]
         : [primaryQuote];
-    const nextClusterAverageLat = nextClusterQuotes.reduce((sum, quote) => sum + quote.latitude, 0) / nextClusterQuotes.length;
-    const nextClusterAverageLng = nextClusterQuotes.reduce((sum, quote) => sum + quote.longitude, 0) / nextClusterQuotes.length;
-    const nextClusterCenterOffset = {
-        dx: (nextClusterAverageLng - averageLng) * ptPerLng,
-        dy: -(nextClusterAverageLat - averageLat) * ptPerLat,
-    };
-    const nextClusterProjectedQuotes = nextClusterQuotes.map(quote => {
-        const dx = (quote.longitude - nextClusterAverageLng) * ptPerLng;
-        const dy = -(quote.latitude - nextClusterAverageLat) * ptPerLat;
+    const nextClusterAnchoredQuotes = nextClusterQuotes.map(quote => {
+        const dx = (quote.longitude - primaryLng) * ptPerLng;
+        const dy = -(quote.latitude - primaryLat) * ptPerLat;
         return {
             ...quote,
             dx,
             dy,
-            distanceFromCenter: Math.hypot(dx, dy),
+            distanceFromPrimary: Math.hypot(dx, dy),
         };
     });
-    const nextClusterPrimaryQuote = nextClusterProjectedQuotes[0] ?? null;
-    const nextClusterEmergingQuote = nextClusterProjectedQuotes.length > 1
-        ? nextClusterProjectedQuotes.slice(1).reduce((farthestQuote, quote) => (
-            quote.distanceFromCenter > farthestQuote.distanceFromCenter ? quote : farthestQuote
-        ), nextClusterProjectedQuotes[1])
+    const nextClusterEmergingQuote = nextClusterAnchoredQuotes.length > 1
+        ? nextClusterAnchoredQuotes.slice(1).reduce((farthestQuote, quote) => (
+            quote.distanceFromPrimary > farthestQuote.distanceFromPrimary ? quote : farthestQuote
+        ), nextClusterAnchoredQuotes[1])
         : null;
     const horizontalReach = Math.max(
-        collapsedBubbleOffset,
-        ...projectedQuotes.map(quote => Math.abs(quote.dx)),
-        Math.abs(nextClusterCenterOffset.dx) + Math.abs(nextClusterEmergingQuote?.dx ?? 0),
-        Math.abs(nextClusterCenterOffset.dx) + Math.abs(nextClusterPrimaryQuote?.dx ?? 0)
+        COLLAPSED_BUBBLE_OFFSET,
+        ...anchoredQuotes.map(quote => Math.abs(quote.dx)),
+        ...nextClusterAnchoredQuotes.map(quote => Math.abs(quote.dx))
     );
     const verticalReach = Math.max(
         0,
-        ...projectedQuotes.map(quote => Math.abs(quote.dy)),
-        Math.abs(nextClusterCenterOffset.dy) + Math.abs(nextClusterEmergingQuote?.dy ?? 0),
-        Math.abs(nextClusterCenterOffset.dy) + Math.abs(nextClusterPrimaryQuote?.dy ?? 0)
+        ...anchoredQuotes.map(quote => Math.abs(quote.dy)),
+        ...nextClusterAnchoredQuotes.map(quote => Math.abs(quote.dy))
     );
-    const containerWidth = Math.max(240, 132 + horizontalReach * 2);
+    const containerWidth = Math.max(240, 48 + COLLAPSED_PRIMARY_WIDTH + horizontalReach * 2);
     const containerHeight = Math.max(80, 52 + verticalReach * 2);
-
-    // For the merge animation, we need to know if we JUST became multi-quote or added quotes
-    const prevIsMultiQuote = useRef(isMultiQuote);
-    const prevQuotesLength = useRef(quotes.length);
-    const settleToPlusOnIdleRef = useRef(false);
-    const previousSpreadTargetRef = useRef(isMultiQuote ? 1 : 0);
 
     useEffect(() => {
         // Fade in content
         mountAnim.value = withTiming(1, { duration: 400 });
+
+        return () => {
+            if (splitBridgeTimeoutRef.current) {
+                clearTimeout(splitBridgeTimeoutRef.current);
+            }
+            if (splitSettleTimeoutRef.current) {
+                clearTimeout(splitSettleTimeoutRef.current);
+            }
+            splitBridgeReadyToClearRef.current = false;
+        };
     }, []);
 
     useEffect(() => {
-        if (!isMultiQuote || !mapRegion?.longitudeDelta) {
-            spreadAnim.value = 0; // Snap instantly on split, no animation
-            morphAnim.value = 0;
-            settleToPlusOnIdleRef.current = false;
-            previousSpreadTargetRef.current = 0;
-            prevIsMultiQuote.current = isMultiQuote;
-            prevQuotesLength.current = quotes.length;
+        const previousQuotes = previousQuotesRef.current;
+        const previousPrimaryStationId = previousQuotes?.[0]?.stationId;
+        const currentPrimaryStationId = quotes?.[0]?.stationId;
+        const isSamePrimary = previousPrimaryStationId && previousPrimaryStationId === currentPrimaryStationId;
+        const isConnectionTransition =
+            isSamePrimary &&
+            previousQuotes.length < quotes.length &&
+            quotes.length > 1;
+        const isSplitTransition =
+            isSamePrimary &&
+            previousQuotes.length > quotes.length &&
+            previousQuotes.length > 1;
+
+        if (isSplitTransition) {
+            const bridgePrimary = previousQuotes[0];
+            const bridgeAnchoredQuotes = previousQuotes.map(quote => {
+                const dx = (quote.longitude - bridgePrimary.longitude) * ptPerLng;
+                const dy = -(quote.latitude - bridgePrimary.latitude) * ptPerLat;
+                return {
+                    ...quote,
+                    dx,
+                    dy,
+                    distanceFromPrimary: Math.hypot(dx, dy),
+                };
+            });
+            const bridgeSecondaryQuotes = bridgeAnchoredQuotes.slice(1);
+            const bridgeStartQuote = bridgeSecondaryQuotes.length > 0
+                ? bridgeSecondaryQuotes.reduce((farthestQuote, quote) => (
+                    quote.distanceFromPrimary > farthestQuote.distanceFromPrimary ? quote : farthestQuote
+                ), bridgeSecondaryQuotes[0])
+                : null;
+            const currentStationIds = new Set(quotes.map(quote => quote.stationId));
+            const detachedBridgeQuote = bridgeSecondaryQuotes.find(quote => !currentStationIds.has(quote.stationId)) || bridgeStartQuote;
+
+            if (bridgeStartQuote && detachedBridgeQuote) {
+                const currentSpreadValue = spreadAnim.value;
+                const currentMorphValue = morphAnim.value;
+                const splitSettleDelay = Math.round(CHIP_ANIMATION_DURATION * 0.8);
+                const bridgeStartX = interpolate(
+                    currentSpreadValue,
+                    [0, 1],
+                    [COLLAPSED_BUBBLE_OFFSET, bridgeStartQuote.dx]
+                );
+                const bridgeStartY = interpolate(
+                    currentSpreadValue,
+                    [0, 1],
+                    [0, bridgeStartQuote.dy]
+                );
+
+                if (splitBridgeTimeoutRef.current) {
+                    clearTimeout(splitBridgeTimeoutRef.current);
+                }
+                if (splitSettleTimeoutRef.current) {
+                    clearTimeout(splitSettleTimeoutRef.current);
+                }
+                splitBridgeReadyToClearRef.current = false;
+
+                setSplitBridge({
+                    plusCount: Math.max(0, previousQuotes.length - 1),
+                    emergingQuote: detachedBridgeQuote,
+                    startX: bridgeStartX,
+                    startY: bridgeStartY,
+                });
+                splitBridgeProgress.value = 0;
+                splitBridgeMorph.value = currentMorphValue;
+                splitBridgeProgress.value = withTiming(1, { duration: CHIP_ANIMATION_DURATION });
+                splitBridgeMorph.value = withTiming(1, { duration: CHIP_ANIMATION_DURATION });
+                spreadAnim.value = currentSpreadValue;
+                morphAnim.value = currentMorphValue;
+                splitSettleTimeoutRef.current = setTimeout(() => {
+                    spreadAnim.value = withTiming(resolvedSpread, { duration: CHIP_ANIMATION_DURATION });
+                    morphAnim.value = withTiming(resolvedMorph, { duration: CHIP_ANIMATION_DURATION });
+                    splitSettleTimeoutRef.current = null;
+                }, splitSettleDelay);
+                splitBridgeTimeoutRef.current = setTimeout(() => {
+                    splitBridgeReadyToClearRef.current = true;
+                    if (!isMapMoving) {
+                        setSplitBridge(null);
+                        splitBridgeReadyToClearRef.current = false;
+                    }
+                    splitBridgeTimeoutRef.current = null;
+                }, CHIP_BRIDGE_CLEAR_DELAY);
+            }
+        }
+
+        if (isConnectionTransition) {
+            spreadAnim.value = 1;
+            morphAnim.value = 1;
+        }
+
+        if (!isSplitTransition) {
+            if (splitSettleTimeoutRef.current) {
+                clearTimeout(splitSettleTimeoutRef.current);
+                splitSettleTimeoutRef.current = null;
+            }
+
+            spreadAnim.value = withTiming(resolvedSpread, { duration: CHIP_ANIMATION_DURATION });
+            morphAnim.value = withTiming(resolvedMorph, { duration: CHIP_ANIMATION_DURATION });
+        }
+
+        previousQuotesRef.current = quotes;
+    }, [quotes, ptPerLng, ptPerLat, resolvedSpread, resolvedMorph, isMapMoving]);
+
+    useEffect(() => {
+        if (!splitBridge || isMapMoving || !splitBridgeReadyToClearRef.current) {
             return;
         }
 
-        // Animate up to the split boundary, not the merge boundary
-        let ratioLng = splitLngThreshold > 0 ? maxLngDiff / splitLngThreshold : 0;
-        let ratioLat = splitLatThreshold > 0 ? maxLatDiff / splitLatThreshold : 0;
-        let maxRatio = Math.max(ratioLng, ratioLat);
-
-        // Constrain between 0 (perfectly merged) and 1 (ready to split)
-        // Add a bit of non-linearity so they snap together quickly but pull away gradually
-        let ratio = Math.max(0, Math.min(1, maxRatio));
-
-        // They should act like a magnet. Mostly merged unless pulled quite far.
-        // Nothing opens until the shared deadzone has been crossed.
-        let spread = 0;
-        if (ratio > CLUSTER_SPREAD_DEADZONE) {
-            spread = (ratio - CLUSTER_SPREAD_DEADZONE) / (1 - CLUSTER_SPREAD_DEADZONE);
-        }
-
-        // Morph visually from +N to Price ONLY right before the split boundary (spread > 0.75).
-        // Using a slightly wider window (0.25) to satisfy the need for "enough time to animate fully".
-        let targetMorph = 0;
-        if (spread > 0.75) {
-            targetMorph = (spread - 0.75) / 0.25;
-        }
-
-        const isNewCluster = !prevIsMultiQuote.current && isMultiQuote;
-        const isAddingToCluster = prevIsMultiQuote.current && quotes.length > prevQuotesLength.current;
-        const wasOpening = spread > previousSpreadTargetRef.current + 0.02;
-
-        if (isNewCluster || isAddingToCluster) {
-            // New chip joining! Start spread and morph at 1.0 to smoothly melt from Price to +N
-            spreadAnim.value = 1;
-            morphAnim.value = 1;
-            settleToPlusOnIdleRef.current = true;
-        } else if (isMapMoving && wasOpening) {
-            // Once the cluster starts resolving back toward a visible price, don't force it back on idle.
-            settleToPlusOnIdleRef.current = false;
-        }
-
-        const nextSpread = !isMapMoving && settleToPlusOnIdleRef.current ? 0 : spread;
-        const nextMorph = !isMapMoving && settleToPlusOnIdleRef.current ? 0 : targetMorph;
-
-        spreadAnim.value = withTiming(nextSpread, { duration: 150 });
-        morphAnim.value = withTiming(nextMorph, { duration: 150 });
-        previousSpreadTargetRef.current = spread;
-        prevIsMultiQuote.current = isMultiQuote;
-        prevQuotesLength.current = quotes.length;
-    }, [mapRegion?.longitudeDelta, mapRegion?.latitudeDelta, isMultiQuote, maxLngDiff, maxLatDiff, lngThreshold, latThreshold, isMapMoving]);
+        setSplitBridge(null);
+        splitBridgeReadyToClearRef.current = false;
+    }, [splitBridge, isMapMoving]);
 
     const animatedContentStyle = useAnimatedStyle(() => {
         return {};
@@ -247,32 +489,11 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
 
     // Style for the primary price bubble
     const leftBubbleStyle = useAnimatedStyle(() => {
-        const currentPrimaryDx = interpolate(spreadAnim.value, [0, 1], [0, primaryProjectedQuote.dx]);
-        const currentPrimaryDy = interpolate(spreadAnim.value, [0, 1], [0, primaryProjectedQuote.dy]);
-        const nextPrimaryLocalDx = nextClusterPrimaryQuote
-            ? interpolate(spreadAnim.value, [0, 1], [0, nextClusterPrimaryQuote.dx])
-            : 0;
-        const nextPrimaryLocalDy = nextClusterPrimaryQuote
-            ? interpolate(spreadAnim.value, [0, 1], [0, nextClusterPrimaryQuote.dy])
-            : 0;
-
         return {
             zIndex: 3,
             transform: [
-                {
-                    translateX: interpolate(
-                        spreadAnim.value,
-                        [0, 1],
-                        [currentPrimaryDx, nextClusterCenterOffset.dx + nextPrimaryLocalDx]
-                    )
-                },
-                {
-                    translateY: interpolate(
-                        spreadAnim.value,
-                        [0, 1],
-                        [currentPrimaryDy, nextClusterCenterOffset.dy + nextPrimaryLocalDy]
-                    )
-                }
+                { translateX: 0 },
+                { translateY: 0 }
             ]
         };
     });
@@ -282,8 +503,8 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
         return {
             zIndex: 2,
             transform: [
-                { translateX: interpolate(spreadAnim.value, [0, 1], [collapsedBubbleOffset, emergingProjectedQuote?.dx ?? 0]) },
-                { translateY: interpolate(spreadAnim.value, [0, 1], [0, emergingProjectedQuote?.dy ?? 0]) }
+                { translateX: interpolate(spreadAnim.value, [0, 1], [COLLAPSED_BUBBLE_OFFSET, emergingAnchoredQuote?.dx ?? COLLAPSED_BUBBLE_OFFSET]) },
+                { translateY: interpolate(spreadAnim.value, [0, 1], [0, emergingAnchoredQuote?.dy ?? 0]) }
             ]
         };
     });
@@ -292,25 +513,15 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
             justifyContent: 'center',
             paddingHorizontal: interpolate(morphAnim.value, [0, 1], [8, 10], Extrapolate.CLAMP),
             paddingVertical: interpolate(morphAnim.value, [0, 0.5, 1], [6, 6, 6]),
-            minWidth: interpolate(morphAnim.value, [0, 0.7], [40, 72], Extrapolate.CLAMP),
+            minWidth: interpolate(morphAnim.value, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP),
         };
     });
 
     // Style for the subgroup that stays clustered after one item peels away
     const remainderBubbleWrapperStyle = useAnimatedStyle(() => {
-        const currentSecondaryDx = interpolate(
-            spreadAnim.value,
-            [0, 1],
-            [collapsedBubbleOffset, emergingProjectedQuote?.dx ?? collapsedBubbleOffset]
-        );
-        const currentSecondaryDy = interpolate(
-            spreadAnim.value,
-            [0, 1],
-            [0, emergingProjectedQuote?.dy ?? 0]
-        );
         const nextSecondaryLocalDx = nextClusterEmergingQuote
-            ? interpolate(spreadAnim.value, [0, 1], [collapsedBubbleOffset, nextClusterEmergingQuote.dx])
-            : collapsedBubbleOffset;
+            ? interpolate(spreadAnim.value, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextClusterEmergingQuote.dx])
+            : COLLAPSED_BUBBLE_OFFSET;
         const nextSecondaryLocalDy = nextClusterEmergingQuote
             ? interpolate(spreadAnim.value, [0, 1], [0, nextClusterEmergingQuote.dy])
             : 0;
@@ -318,20 +529,8 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
         return {
             zIndex: 1,
             transform: [
-                {
-                    translateX: interpolate(
-                        spreadAnim.value,
-                        [0, 1],
-                        [currentSecondaryDx, nextClusterCenterOffset.dx + nextSecondaryLocalDx]
-                    )
-                },
-                {
-                    translateY: interpolate(
-                        spreadAnim.value,
-                        [0, 1],
-                        [currentSecondaryDy, nextClusterCenterOffset.dy + nextSecondaryLocalDy]
-                    )
-                }
+                { translateX: nextSecondaryLocalDx },
+                { translateY: nextSecondaryLocalDy }
             ]
         };
     });
@@ -353,13 +552,66 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
             transform: [{ scale: interpolate(morphAnim.value, [0.6, 1], [0.8, 1], Extrapolate.CLAMP) }]
         }
     });
+    const liveSplitBridgeTargetX = splitBridge
+        ? (splitBridge.emergingQuote.longitude - primaryLng) * ptPerLng
+        : 0;
+    const liveSplitBridgeTargetY = splitBridge
+        ? -(splitBridge.emergingQuote.latitude - primaryLat) * ptPerLat
+        : 0;
+    const splitBridgeBubbleStyle = useAnimatedStyle(() => {
+        if (!splitBridge) {
+            return {
+                opacity: 0,
+            };
+        }
 
+        return {
+            zIndex: 4,
+            transform: [
+                {
+                    translateX: interpolate(
+                        splitBridgeProgress.value,
+                        [0, 1],
+                        [splitBridge.startX, liveSplitBridgeTargetX]
+                    )
+                },
+                {
+                    translateY: interpolate(
+                        splitBridgeProgress.value,
+                        [0, 1],
+                        [splitBridge.startY, liveSplitBridgeTargetY]
+                    )
+                }
+            ]
+        };
+    });
+    const splitBridgeShellStyle = useAnimatedStyle(() => {
+        return {
+            justifyContent: 'center',
+            paddingHorizontal: interpolate(splitBridgeMorph.value, [0, 1], [8, 10], Extrapolate.CLAMP),
+            paddingVertical: 6,
+            minWidth: interpolate(splitBridgeMorph.value, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP),
+        };
+    });
+    const splitBridgePlusStyle = useAnimatedStyle(() => {
+        return {
+            opacity: interpolate(splitBridgeMorph.value, [0.4, 0.8], [1, 0], Extrapolate.CLAMP),
+            transform: [{ scale: interpolate(splitBridgeMorph.value, [0.4, 0.8], [1, 0.5], Extrapolate.CLAMP) }]
+        };
+    });
+    const splitBridgePriceStyle = useAnimatedStyle(() => {
+        return {
+            position: 'absolute',
+            opacity: interpolate(splitBridgeMorph.value, [0.6, 1], [0, 1], Extrapolate.CLAMP),
+            transform: [{ scale: interpolate(splitBridgeMorph.value, [0.6, 1], [0.8, 1], Extrapolate.CLAMP) }]
+        };
+    });
     return (
         <Marker
             key={quotes[0].stationId} // Ensure key is bound to primary station so it doesn't unmount
             coordinate={{
-                latitude: averageLat,
-                longitude: averageLng,
+                latitude: primaryLat,
+                longitude: primaryLng,
             }}
             anchor={{ x: 0.5, y: 0.5 }} // Keep anchor visually centered
             onPress={() => onMarkerPress(cluster)}
@@ -378,9 +630,9 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
                 <Animated.View style={[styles.bubblePositioner, leftBubbleStyle]}>
                     <AnimatedLiquidGlassView
                         effect="clear"
-                        style={styles.bubbleBase}
+                        style={[styles.bubbleBase, styles.primaryBubbleShell]}
                     >
-                        <Animated.View style={[styles.rowItem, animatedContentStyle]}>
+                        <Animated.View style={[styles.rowItem, styles.bubbleContentRow, animatedContentStyle]}>
                             <SymbolView
                                 name="fuelpump.fill"
                                 size={14}
@@ -417,35 +669,35 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
                                         styles.priceText,
                                         animatedTextStyle,
                                     ]}
-                                >
-                                    +{quotes.length - 1}
-                                </Animated.Text>
-                            </Animated.View>
+                            >
+                                +{quotes.length - 1}
+                            </Animated.Text>
+                        </Animated.View>
 
-                            {/* The price it morphs into */}
-                            {emergingProjectedQuote && (
-                                <Animated.View style={[styles.rowItem, escapingPriceStyle, { justifyContent: 'center', width: '100%' }]}>
-                                    <SymbolView
-                                        name="fuelpump.fill"
-                                        size={14}
-                                        tintColor={emergingProjectedQuote.originalIndex === 0 ? '#007AFF' : (emergingProjectedQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
-                                        style={styles.priceIcon}
-                                    />
-                                    <Text
-                                        style={[
-                                            styles.priceText,
-                                            emergingProjectedQuote.originalIndex === 0 && styles.bestPriceText,
-                                            {
-                                                color: emergingProjectedQuote.originalIndex === 0
-                                                    ? '#007AFF'
-                                                    : (emergingProjectedQuote.originalIndex === activeIndex ? themeColors.text : '#888888')
-                                            }
-                                        ]}
-                                    >
-                                        ${emergingProjectedQuote.price.toFixed(2)}
-                                    </Text>
-                                </Animated.View>
-                            )}
+                        {/* The price it morphs into */}
+                        {emergingAnchoredQuote && (
+                            <Animated.View style={[styles.rowItem, styles.bubbleFillRow, escapingPriceStyle]}>
+                                <SymbolView
+                                    name="fuelpump.fill"
+                                    size={14}
+                                    tintColor={emergingAnchoredQuote.originalIndex === 0 ? '#007AFF' : (emergingAnchoredQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
+                                    style={styles.priceIcon}
+                                />
+                                <Text
+                                    style={[
+                                        styles.priceText,
+                                        emergingAnchoredQuote.originalIndex === 0 && styles.bestPriceText,
+                                        {
+                                            color: emergingAnchoredQuote.originalIndex === 0
+                                                ? '#007AFF'
+                                                : (emergingAnchoredQuote.originalIndex === activeIndex ? themeColors.text : '#888888')
+                                        }
+                                    ]}
+                                >
+                                    ${emergingAnchoredQuote.price.toFixed(2)}
+                                </Text>
+                            </Animated.View>
+                        )}
                         </AnimatedLiquidGlassView>
                     </Animated.View>
                 )}
@@ -473,7 +725,7 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
                             </Animated.View>
 
                             {nextClusterEmergingQuote && (
-                                <Animated.View style={[styles.rowItem, escapingPriceStyle, { justifyContent: 'center', width: '100%' }]}>
+                                <Animated.View style={[styles.rowItem, styles.bubbleFillRow, escapingPriceStyle]}>
                                     <SymbolView
                                         name="fuelpump.fill"
                                         size={14}
@@ -498,6 +750,53 @@ function AnimatedMarkerOverlay({ cluster, scrollX, itemWidth, isDark, themeColor
                         </AnimatedLiquidGlassView>
                     </Animated.View>
                 )}
+
+                {splitBridge?.emergingQuote && (
+                    <Animated.View style={[styles.bubblePositioner, splitBridgeBubbleStyle]}>
+                        <AnimatedLiquidGlassView
+                            effect="clear"
+                            style={[
+                                styles.bubbleBase,
+                                splitBridgeShellStyle,
+                            ]}
+                        >
+                            <Animated.View style={[styles.rowItem, animatedContentStyle, splitBridgePlusStyle, { justifyContent: 'center' }]}>
+                                <Text style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)', fontSize: 12, marginRight: 4 }}>|</Text>
+                                <Animated.Text
+                                    style={[
+                                        styles.priceText,
+                                        animatedTextStyle,
+                                    ]}
+                                >
+                                    +{splitBridge.plusCount}
+                                </Animated.Text>
+                            </Animated.View>
+
+                            <Animated.View style={[styles.rowItem, styles.bubbleFillRow, splitBridgePriceStyle]}>
+                                <SymbolView
+                                    name="fuelpump.fill"
+                                    size={14}
+                                    tintColor={splitBridge.emergingQuote.originalIndex === 0 ? '#007AFF' : (splitBridge.emergingQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
+                                    style={styles.priceIcon}
+                                />
+                                <Text
+                                    style={[
+                                        styles.priceText,
+                                        splitBridge.emergingQuote.originalIndex === 0 && styles.bestPriceText,
+                                        {
+                                            color: splitBridge.emergingQuote.originalIndex === 0
+                                                ? '#007AFF'
+                                                : (splitBridge.emergingQuote.originalIndex === activeIndex ? themeColors.text : '#888888')
+                                        }
+                                    ]}
+                                >
+                                    ${splitBridge.emergingQuote.price.toFixed(2)}
+                                </Text>
+                            </Animated.View>
+                        </AnimatedLiquidGlassView>
+                    </Animated.View>
+                )}
+
             </AnimatedLiquidGlassContainer>
         </Marker>
     );
@@ -551,10 +850,13 @@ export default function HomeScreen() {
     const mapRef = useRef(null);
     const flatListRef = useRef(null);
     const isMountedRef = useRef(true);
+    const lastClusterDebugSignatureRef = useRef('');
+    const clusterDebugSamplesRef = useRef([]);
     const isFocused = useIsFocused();
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
     const { preferences } = usePreferences();
+    const debugClusterAnimations = __DEV__ && Boolean(preferences.debugClusterAnimations);
     const { fuelResetToken, manualLocationOverride, setFuelDebugState } = useAppState();
     const [location, setLocation] = useState(DEFAULT_REGION);
     const [bestQuote, setBestQuote] = useState(null);
@@ -567,6 +869,7 @@ export default function HomeScreen() {
     const [activeIndex, setActiveIndex] = useState(0);
     const [mapRegion, setMapRegion] = useState(DEFAULT_REGION);
     const [isMapMoving, setIsMapMoving] = useState(false);
+    const [isClusterDebugRecording, setIsClusterDebugRecording] = useState(false);
     const router = useRouter();
     const scrollX = useSharedValue(0);
 
@@ -985,7 +1288,7 @@ export default function HomeScreen() {
         }
     };
 
-    const { width } = Dimensions.get('window');
+    const { width, height } = Dimensions.get('window');
 
     // We want the card to be almost full width, minus some padding to peek the next card.
     const peekPadding = 16;
@@ -1005,6 +1308,18 @@ export default function HomeScreen() {
 
         mapMotionRef.current = moving;
         setIsMapMoving(moving);
+    };
+
+    const setMapRegionIfNeeded = (nextRegion) => {
+        if (!nextRegion) {
+            return;
+        }
+
+        setMapRegion(currentRegion => (
+            areRegionsEquivalent(currentRegion, nextRegion)
+                ? currentRegion
+                : nextRegion
+        ));
     };
 
     useEffect(() => {
@@ -1066,6 +1381,148 @@ export default function HomeScreen() {
         longitude: location.longitude,
     };
     const benchmarkQuote = regionalQuotes.find(quote => quote.providerId !== bestQuote?.providerId) || regionalQuotes[0] || null;
+    const watchedCluster = useMemo(() => {
+        if (!debugClusterAnimations) {
+            return null;
+        }
+
+        const multiQuoteClusters = clusters.filter(cluster => cluster.quotes.length > 1);
+        if (multiQuoteClusters.length === 0) {
+            return null;
+        }
+
+        const latScale = mapRegion.latitudeDelta || 1;
+        const lngScale = mapRegion.longitudeDelta || 1;
+
+        return multiQuoteClusters.reduce((closestCluster, cluster) => {
+            if (!closestCluster) {
+                return cluster;
+            }
+
+            const clusterDistance = Math.hypot(
+                (cluster.averageLat - mapRegion.latitude) / latScale,
+                (cluster.averageLng - mapRegion.longitude) / lngScale
+            );
+            const closestDistance = Math.hypot(
+                (closestCluster.averageLat - mapRegion.latitude) / latScale,
+                (closestCluster.averageLng - mapRegion.longitude) / lngScale
+            );
+
+            return clusterDistance < closestDistance ? cluster : closestCluster;
+        }, null);
+    }, [debugClusterAnimations, clusters, mapRegion.latitude, mapRegion.longitude, mapRegion.latitudeDelta, mapRegion.longitudeDelta]);
+    const watchedClusterDiagnostic = useMemo(() => {
+        if (!debugClusterAnimations || !watchedCluster) {
+            return null;
+        }
+
+        return computeClusterHandoffDiagnostic({
+            quotes: watchedCluster.quotes,
+            averageLat: watchedCluster.averageLat,
+            averageLng: watchedCluster.averageLng,
+            mapRegion,
+            screenWidth: width,
+            screenHeight: height,
+        });
+    }, [debugClusterAnimations, watchedCluster, mapRegion, width, height]);
+
+    const pushClusterDebugSample = (cluster, diagnostic) => {
+        if (!cluster || !diagnostic) {
+            return false;
+        }
+
+        const clusterKey = cluster.quotes.map(quote => quote.stationId).join(', ');
+        const signature = [
+            clusterKey,
+            diagnostic.summary,
+            diagnostic.currentResolvedSpread.toFixed(3),
+            diagnostic.nextResolvedSpread.toFixed(3),
+            diagnostic.primarySwitchDistance.toFixed(3),
+            diagnostic.secondarySwitchDistance.toFixed(3),
+            diagnostic.nextPrimarySettleDistance.toFixed(3),
+            diagnostic.nextSecondarySettleDistance.toFixed(3),
+        ].join('|');
+
+        if (signature === lastClusterDebugSignatureRef.current) {
+            return false;
+        }
+
+        const plannedPrimaryMoveMagnitude = Math.hypot(
+            diagnostic.plannedPrimaryMove?.dx || 0,
+            diagnostic.plannedPrimaryMove?.dy || 0
+        );
+        const plannedSecondaryMoveMagnitude = Math.hypot(
+            diagnostic.plannedSecondaryMove?.dx || 0,
+            diagnostic.plannedSecondaryMove?.dy || 0
+        );
+        const mapLatitudeDelta = mapRegion?.latitudeDelta || 0;
+        const mapLongitudeDelta = mapRegion?.longitudeDelta || 0;
+
+        clusterDebugSamplesRef.current = [
+            ...clusterDebugSamplesRef.current,
+            {
+                timestamp: Date.now(),
+                clusterKey,
+                clusterSize: cluster.quotes.length,
+                summary: diagnostic.summary,
+                causes: diagnostic.causes,
+                currentResolvedSpread: diagnostic.currentResolvedSpread,
+                currentResolvedMorph: diagnostic.currentResolvedMorph,
+                nextMountSpread: diagnostic.nextMountSpread,
+                nextMountMorph: diagnostic.nextMountMorph,
+                nextResolvedSpread: diagnostic.nextResolvedSpread,
+                nextResolvedMorph: diagnostic.nextResolvedMorph,
+                primarySwitchDistance: diagnostic.primarySwitchDistance,
+                secondarySwitchDistance: diagnostic.secondarySwitchDistance,
+                nextPrimarySettleDistance: diagnostic.nextPrimarySettleDistance,
+                nextSecondarySettleDistance: diagnostic.nextSecondarySettleDistance,
+                centerShiftDistance: diagnostic.centerShiftDistance,
+                shellWidthDelta: diagnostic.shellWidthDelta,
+                plannedPrimaryMoveMagnitude,
+                plannedSecondaryMoveMagnitude,
+                mapLatitudeDelta,
+                mapLongitudeDelta,
+                splitLatThreshold: mapLatitudeDelta * CLUSTER_MERGE_LAT_FACTOR * CLUSTER_SPLIT_MULTIPLIER,
+                splitLngThreshold: mapLongitudeDelta * CLUSTER_MERGE_LNG_FACTOR * CLUSTER_SPLIT_MULTIPLIER,
+            },
+        ];
+        lastClusterDebugSignatureRef.current = signature;
+        return true;
+    };
+
+    const handleStartClusterDebugRecording = () => {
+        clusterDebugSamplesRef.current = [];
+        lastClusterDebugSignatureRef.current = '';
+        setIsClusterDebugRecording(true);
+
+        if (watchedCluster && watchedClusterDiagnostic) {
+            pushClusterDebugSample(watchedCluster, watchedClusterDiagnostic);
+        }
+    };
+
+    const handleStopClusterDebugRecording = () => {
+        const recordedSamples = clusterDebugSamplesRef.current;
+
+        setIsClusterDebugRecording(false);
+        lastClusterDebugSignatureRef.current = '';
+        clusterDebugSamplesRef.current = [];
+        console.debug(buildClusterDebugRecordingLog(recordedSamples));
+    };
+
+    useEffect(() => {
+        if (!debugClusterAnimations) {
+            setIsClusterDebugRecording(false);
+            lastClusterDebugSignatureRef.current = '';
+            clusterDebugSamplesRef.current = [];
+            return;
+        }
+
+        if (!isClusterDebugRecording || !watchedCluster || !watchedClusterDiagnostic) {
+            return;
+        }
+
+        pushClusterDebugSample(watchedCluster, watchedClusterDiagnostic);
+    }, [debugClusterAnimations, isClusterDebugRecording, watchedCluster, watchedClusterDiagnostic]);
 
     return (
         <View style={[styles.container, { backgroundColor: themeColors.background }]}>
@@ -1079,11 +1536,11 @@ export default function HomeScreen() {
                 onRegionChange={(region) => {
                     setMapMotionState(true);
                     if (!isAnimatingRef.current) {
-                        setMapRegion(region);
+                        setMapRegionIfNeeded(region);
                     }
                 }}
                 onRegionChangeComplete={(region) => {
-                    setMapRegion(region);
+                    setMapRegionIfNeeded(region);
                     isAnimatingRef.current = false;
                     setMapMotionState(false);
                 }}
@@ -1203,6 +1660,18 @@ export default function HomeScreen() {
                             <Ionicons name="chevron-up" size={20} color={themeColors.text} />
                         </GlassView>
                     </Pressable>
+                ) : debugClusterAnimations ? (
+                    <View style={{ width: width, paddingHorizontal: sideInset }}>
+                        <ClusterDebugCard
+                            cluster={watchedCluster}
+                            diagnostic={watchedClusterDiagnostic}
+                            isDark={isDark}
+                            isRecording={isClusterDebugRecording}
+                            onStartRecording={handleStartClusterDebugRecording}
+                            onStopRecording={handleStopClusterDebugRecording}
+                            themeColors={themeColors}
+                        />
+                    </View>
                 ) : stationQuotes.length > 0 ? (
                     <Animated.FlatList
                         ref={flatListRef}
@@ -1331,6 +1800,10 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         gap: 6,
     },
+    primaryBubbleShell: {
+        minWidth: COLLAPSED_PRIMARY_WIDTH,
+        justifyContent: 'center',
+    },
     bubblePositioner: {
         position: 'absolute',
         top: 0,
@@ -1343,6 +1816,14 @@ const styles = StyleSheet.create({
     rowItem: {
         flexDirection: 'row',
         alignItems: 'center',
+    },
+    bubbleContentRow: {
+        justifyContent: 'center',
+    },
+    bubbleFillRow: {
+        justifyContent: 'center',
+        left: 0,
+        right: 0,
     },
     priceText: {
         fontSize: 15,

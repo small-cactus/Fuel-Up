@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const {
     CLUSTER_MERGE_LNG_FACTOR,
     CLUSTER_SPLIT_MULTIPLIER,
+    computeClusterHandoffDiagnostic,
     computeClusterTransitionSnapshot,
     computeMorphProgress,
     computeSpreadProgressFromCluster,
@@ -90,7 +91,7 @@ test('cluster transition hits the exact incoming frame at the switch boundary ac
         assertAlmostEqual(snapshot.outgoingRemainder.x, snapshot.incomingSecondary.x, 'remainder x continuity');
         assertAlmostEqual(snapshot.outgoingRemainder.y, snapshot.incomingSecondary.y, 'remainder y continuity');
         assert.equal(snapshot.outgoingRemainderPlusCount, snapshot.incomingSecondaryPlusCount);
-        assert.equal(snapshot.secondaryShellMinWidth, 72);
+        assert.equal(snapshot.secondaryShellMinWidth, 84);
         assert.equal(snapshot.escapingPriceOpacity, 1);
         assert.equal(snapshot.nextClusterQuoteCount, 2);
     }
@@ -120,7 +121,7 @@ test('cluster transition bridge stays inside the current and incoming endpoints 
             assertBetween(snapshot.outgoingPrimary.y, snapshot.currentPrimary.y, snapshot.incomingPrimary.y, 'primary y bridge');
             assertBetween(snapshot.outgoingRemainder.x, snapshot.currentBreakout.x, snapshot.incomingSecondary.x, 'remainder x bridge');
             assertBetween(snapshot.outgoingRemainder.y, snapshot.currentBreakout.y, snapshot.incomingSecondary.y, 'remainder y bridge');
-            assert.ok(snapshot.secondaryShellMinWidth >= 40 && snapshot.secondaryShellMinWidth <= 72);
+            assert.ok(snapshot.secondaryShellMinWidth >= 44 && snapshot.secondaryShellMinWidth <= 84);
         }
     }
 });
@@ -161,4 +162,27 @@ test('spread normalization reaches 1.0 at the split threshold regardless of zoom
 
         assertAlmostEqual(spreadProgress, 1, 'spread at split boundary');
     }
+});
+
+test('handoff diagnostic uses the carried-over animation state and a stable primary anchor', () => {
+    const diagnostic = computeClusterHandoffDiagnostic({
+        quotes: baseQuotes,
+        averageLat,
+        averageLng,
+        mapRegion: mapRegions[1],
+        screenWidth: SCREEN_WIDTH,
+        screenHeight: SCREEN_HEIGHT,
+    });
+
+    assert.ok(diagnostic);
+    assertAlmostEqual(diagnostic.nextMountSpread, diagnostic.currentResolvedSpread, 'next spread should carry over');
+    assertAlmostEqual(diagnostic.nextMountMorph, diagnostic.currentResolvedMorph, 'next morph should carry over');
+    assertAlmostEqual(diagnostic.centerShiftDistance, 0, 'primary anchor should stay fixed');
+    assertAlmostEqual(diagnostic.primarySwitchDistance, 0, 'primary handoff should stay aligned');
+    assert.equal(diagnostic.currentContainerCenter.latitude, baseQuotes[0].latitude);
+    assert.equal(diagnostic.currentContainerCenter.longitude, baseQuotes[0].longitude);
+    assert.ok(
+        !diagnostic.causes.some(cause => cause.includes('incoming overlay mounts at spread')),
+        'legacy mount-at-1 mismatch should no longer be reported'
+    );
 });
