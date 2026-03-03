@@ -66,6 +66,138 @@ const TOP_CANOPY_HEIGHT = 72;
 const CLUSTER_DEBUG_JUMP_THRESHOLD = 5;
 const MAP_REGION_EPSILON = 0.000001;
 const CHIP_ANIMATION_DURATION = 420;
+const CLUSTER_DEBUG_PROBE_ANIMATION_DURATION = 650;
+const CLUSTER_DEBUG_PROBE_IDLE_TIMEOUT = 2400;
+const CLUSTER_DEBUG_PROBE_SETTLE_DURATION = 180;
+const CLUSTER_DEBUG_PROBE_STAGE_SETTLE_DURATION = 520;
+
+function waitForMilliseconds(duration) {
+    return new Promise(resolve => {
+        setTimeout(resolve, duration);
+    });
+}
+
+function buildClusterDebugProbePlan(cluster, currentRegion) {
+    if (!cluster?.quotes?.length) {
+        return null;
+    }
+
+    const fallbackLatDelta = currentRegion?.latitudeDelta || DEFAULT_REGION.latitudeDelta;
+    const fallbackLngDelta = currentRegion?.longitudeDelta || DEFAULT_REGION.longitudeDelta;
+    const maxLatOffset = Math.max(
+        0,
+        ...cluster.quotes.map(quote => Math.abs((quote.latitude || 0) - (cluster.averageLat || 0)))
+    );
+    const maxLngOffset = Math.max(
+        0,
+        ...cluster.quotes.map(quote => Math.abs((quote.longitude || 0) - (cluster.averageLng || 0)))
+    );
+    const mergeLatThresholdDelta = maxLatOffset > 0
+        ? maxLatOffset / CLUSTER_MERGE_LAT_FACTOR
+        : fallbackLatDelta;
+    const mergeLngThresholdDelta = maxLngOffset > 0
+        ? maxLngOffset / CLUSTER_MERGE_LNG_FACTOR
+        : fallbackLngDelta;
+    const splitLatThresholdDelta = maxLatOffset > 0
+        ? maxLatOffset / (CLUSTER_MERGE_LAT_FACTOR * CLUSTER_SPLIT_MULTIPLIER)
+        : fallbackLatDelta * 0.45;
+    const splitLngThresholdDelta = maxLngOffset > 0
+        ? maxLngOffset / (CLUSTER_MERGE_LNG_FACTOR * CLUSTER_SPLIT_MULTIPLIER)
+        : fallbackLngDelta * 0.45;
+
+    const mergeLatDelta = Math.max(
+        0.02,
+        mergeLatThresholdDelta * 1.2,
+        splitLatThresholdDelta * 1.8
+    );
+    const mergeLngDelta = Math.max(
+        0.02,
+        mergeLngThresholdDelta * 1.2,
+        splitLngThresholdDelta * 1.8
+    );
+    const resolvedSplitLatDelta = Math.max(
+        0.0025,
+        Math.min(mergeLatDelta * 0.45, splitLatThresholdDelta * 0.72)
+    );
+    const resolvedSplitLngDelta = Math.max(
+        0.0025,
+        Math.min(mergeLngDelta * 0.45, splitLngThresholdDelta * 0.72)
+    );
+    const splitLatDelta = resolvedSplitLatDelta < mergeLatDelta
+        ? resolvedSplitLatDelta
+        : Math.max(0.0025, mergeLatDelta * 0.45);
+    const splitLngDelta = resolvedSplitLngDelta < mergeLngDelta
+        ? resolvedSplitLngDelta
+        : Math.max(0.0025, mergeLngDelta * 0.45);
+
+    return {
+        clusterKey: buildClusterMembershipKey(cluster),
+        mergeRegion: {
+            latitude: cluster.averageLat,
+            longitude: cluster.averageLng,
+            latitudeDelta: mergeLatDelta,
+            longitudeDelta: mergeLngDelta,
+        },
+        splitRegion: {
+            latitude: cluster.averageLat,
+            longitude: cluster.averageLng,
+            latitudeDelta: splitLatDelta,
+            longitudeDelta: splitLngDelta,
+        },
+        metrics: {
+            maxLatOffset,
+            maxLngOffset,
+            mergeLatThresholdDelta,
+            mergeLngThresholdDelta,
+            splitLatThresholdDelta,
+            splitLngThresholdDelta,
+        },
+    };
+}
+
+function buildClusterDebugProbeSummary(report) {
+    if (!report) {
+        return '';
+    }
+
+    if (report.status !== 'completed') {
+        return report.message || 'Probe did not complete.';
+    }
+
+    return (
+        `Probe ${report.sampleCount} samples, ${report.transitionCount} transitions, ` +
+        `max step ${formatDebugMetric(report.maxFrameDelta)}pt.`
+    );
+}
+
+function formatDebugCoordinate(latitude, longitude) {
+    if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+        return '--';
+    }
+
+    return `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+}
+
+function buildClusterDebugProbeLog(report, samples, transitionEvents) {
+    const metrics = report?.plan?.metrics || {};
+    const mergeRegion = report?.plan?.mergeRegion || {};
+    const splitRegion = report?.plan?.splitRegion || {};
+
+    return [
+        '[ClusterDebug Probe]',
+        `status=${report?.status || 'unknown'}`,
+        `message=${report?.message || 'none'}`,
+        `cluster=${report?.clusterKey || 'unknown'}`,
+        `samples=${report?.sampleCount ?? samples.length}`,
+        `transitions=${report?.transitionCount ?? transitionEvents.length}`,
+        `maxStep=${formatDebugMetric(report?.maxFrameDelta || 0)}pt`,
+        `timedOutStages=${report?.timedOutStages?.join(',') || 'none'}`,
+        `mergeRegion=${formatDebugCoordinate(mergeRegion.latitude, mergeRegion.longitude)} d=${formatDebugMetric(mergeRegion.latitudeDelta, 4)},${formatDebugMetric(mergeRegion.longitudeDelta, 4)}`,
+        `splitRegion=${formatDebugCoordinate(splitRegion.latitude, splitRegion.longitude)} d=${formatDebugMetric(splitRegion.latitudeDelta, 4)},${formatDebugMetric(splitRegion.longitudeDelta, 4)}`,
+        `thresholds merge=${formatDebugMetric(metrics.mergeLatThresholdDelta, 4)},${formatDebugMetric(metrics.mergeLngThresholdDelta, 4)} split=${formatDebugMetric(metrics.splitLatThresholdDelta, 4)},${formatDebugMetric(metrics.splitLngThresholdDelta, 4)}`,
+        buildClusterDebugRecordingLog(samples, transitionEvents),
+    ].join('\n');
+}
 
 function buildClusterMembershipKey(cluster) {
     if (!cluster?.quotes?.length) {
@@ -87,6 +219,26 @@ function getDetachedStationIdsForSplit(fromCluster, toCluster) {
         .filter(quote => quote.stationId !== primaryStationId)
         .filter(quote => !nextStationIds.has(quote.stationId))
         .map(quote => quote.stationId);
+}
+
+function pickAnchoredSecondaryQuote(anchoredQuotes, preferredStationId = null) {
+    const secondaryQuotes = anchoredQuotes.slice(1);
+
+    if (secondaryQuotes.length === 0) {
+        return null;
+    }
+
+    if (preferredStationId) {
+        const preferredQuote = secondaryQuotes.find(quote => quote.stationId === preferredStationId);
+
+        if (preferredQuote) {
+            return preferredQuote;
+        }
+    }
+
+    return secondaryQuotes.reduce((farthestQuote, quote) => (
+        quote.distanceFromPrimary > farthestQuote.distanceFromPrimary ? quote : farthestQuote
+    ), secondaryQuotes[0]);
 }
 
 function buildHeldSplitRecordSignature(record) {
@@ -514,6 +666,7 @@ function AnimatedMarkerOverlay({
     const [splitBridge, setSplitBridge] = useState(null);
     const [splitCarry, setSplitCarry] = useState(null);
     const previousQuotesRef = useRef(quotes);
+    const preferredBreakoutStationIdRef = useRef(null);
     const splitBridgeSignatureRef = useRef(null);
     const splitStageTokenRef = useRef('');
     const splitStageReadyTokenRef = useRef(null);
@@ -555,12 +708,10 @@ function AnimatedMarkerOverlay({
             distanceFromPrimary: Math.hypot(dx, dy),
         };
     });
-    const secondaryAnchoredQuotes = anchoredQuotes.slice(1);
-    const emergingAnchoredQuote = secondaryAnchoredQuotes.length > 0
-        ? secondaryAnchoredQuotes.reduce((farthestQuote, quote) => (
-            quote.distanceFromPrimary > farthestQuote.distanceFromPrimary ? quote : farthestQuote
-        ), secondaryAnchoredQuotes[0])
-        : null;
+    const emergingAnchoredQuote = pickAnchoredSecondaryQuote(
+        anchoredQuotes,
+        preferredBreakoutStationIdRef.current
+    );
     const nextClusterQuotes = pendingCluster?.quotes || (
         emergingAnchoredQuote
             ? [primaryQuote, ...quotes.slice(1).filter(quote => quote.stationId !== emergingAnchoredQuote.stationId)]
@@ -697,11 +848,10 @@ function AnimatedMarkerOverlay({
                     };
                 });
                 const bridgeSecondaryQuotes = bridgeAnchoredQuotes.slice(1);
-                const bridgeStartQuote = bridgeSecondaryQuotes.length > 0
-                    ? bridgeSecondaryQuotes.reduce((farthestQuote, quote) => (
-                        quote.distanceFromPrimary > farthestQuote.distanceFromPrimary ? quote : farthestQuote
-                    ), bridgeSecondaryQuotes[0])
-                    : null;
+                const bridgeStartQuote = pickAnchoredSecondaryQuote(
+                    bridgeAnchoredQuotes,
+                    preferredBreakoutStationIdRef.current
+                );
                 const pendingStationIds = new Set(pendingQuotes.map(quote => quote.stationId));
                 const detachedBridgeQuote = bridgeSecondaryQuotes.find(quote => !pendingStationIds.has(quote.stationId)) || bridgeStartQuote;
 
@@ -829,20 +979,53 @@ function AnimatedMarkerOverlay({
             isSamePrimary &&
             previousQuotes.length < quotes.length &&
             quotes.length > 1;
+        const previousAnchoredQuotes = previousQuotes.map(quote => {
+            const dx = (quote.longitude - previousQuotes[0].longitude) * ptPerLng;
+            const dy = -(quote.latitude - previousQuotes[0].latitude) * ptPerLat;
+
+            return {
+                ...quote,
+                dx,
+                dy,
+                distanceFromPrimary: Math.hypot(dx, dy),
+            };
+        });
+        const previousBreakoutStationId = pickAnchoredSecondaryQuote(
+            previousAnchoredQuotes,
+            preferredBreakoutStationIdRef.current
+        )?.stationId ?? null;
+        const currentSecondaryStationIds = new Set(quotes.slice(1).map(quote => quote.stationId));
+
+        if (currentSecondaryStationIds.size === 0) {
+            preferredBreakoutStationIdRef.current = null;
+        } else if (
+            isConnectionTransition &&
+            previousBreakoutStationId &&
+            currentSecondaryStationIds.has(previousBreakoutStationId)
+        ) {
+            // Keep the already-visible shell tied to the same quote while the cluster grows.
+            preferredBreakoutStationIdRef.current = previousBreakoutStationId;
+        } else if (
+            !preferredBreakoutStationIdRef.current ||
+            !currentSecondaryStationIds.has(preferredBreakoutStationIdRef.current)
+        ) {
+            preferredBreakoutStationIdRef.current = emergingAnchoredQuote?.stationId ?? null;
+        }
 
         if (isConnectionTransition) {
+            const currentSpreadValue = spreadAnim.value;
+            const currentMorphValue = morphAnim.value;
+
             onDebugTransitionEvent?.({
                 type: 'merge-start',
                 primaryStationId: primaryQuote.stationId,
                 fromClusterKey: previousQuotes.map(quote => quote.stationId).join(','),
                 toClusterKey: buildClusterMembershipKey(cluster),
-                fromSpread: 1,
+                fromSpread: currentSpreadValue,
                 toSpread: resolvedSpread,
-                fromMorph: 1,
+                fromMorph: currentMorphValue,
                 toMorph: resolvedMorph,
             });
-            spreadAnim.value = 1;
-            morphAnim.value = 1;
         }
 
         spreadAnim.value = withTiming(resolvedSpread, { duration: CHIP_ANIMATION_DURATION });
@@ -1581,11 +1764,14 @@ export default function HomeScreen() {
     const mapRef = useRef(null);
     const flatListRef = useRef(null);
     const isMountedRef = useRef(true);
+    const mapIdleWaitersRef = useRef([]);
+    const mapRegionRef = useRef(DEFAULT_REGION);
     const lastClusterDebugSignatureRef = useRef('');
     const clusterDebugSamplesRef = useRef([]);
     const clusterDebugTransitionEventsRef = useRef([]);
     const clusterDebugTransitionEventKeysRef = useRef(new Set());
     const clusterDebugWatchedPrimaryIdRef = useRef(null);
+    const clusterDebugProbeRunIdRef = useRef(0);
     const isFocused = useIsFocused();
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
@@ -1604,6 +1790,8 @@ export default function HomeScreen() {
     const [mapRegion, setMapRegion] = useState(DEFAULT_REGION);
     const [isMapMoving, setIsMapMoving] = useState(false);
     const [isClusterDebugRecording, setIsClusterDebugRecording] = useState(false);
+    const [isClusterDebugProbeRunning, setIsClusterDebugProbeRunning] = useState(false);
+    const [clusterDebugProbeSummary, setClusterDebugProbeSummary] = useState('');
     const router = useRouter();
     const scrollX = useSharedValue(0);
 
@@ -1858,6 +2046,12 @@ export default function HomeScreen() {
     useEffect(() => {
         return () => {
             isMountedRef.current = false;
+            const pendingMapIdleWaiters = mapIdleWaitersRef.current;
+
+            mapIdleWaitersRef.current = [];
+            pendingMapIdleWaiters.forEach(waiter => {
+                waiter.resolve(false);
+            });
         };
     }, []);
 
@@ -2301,11 +2495,51 @@ export default function HomeScreen() {
             return;
         }
 
+        mapRegionRef.current = nextRegion;
+
         setMapRegion(currentRegion => (
             areRegionsEquivalent(currentRegion, nextRegion)
                 ? currentRegion
                 : nextRegion
         ));
+    };
+
+    const flushMapIdleWaiters = (didReachIdle) => {
+        if (mapIdleWaitersRef.current.length === 0) {
+            return;
+        }
+
+        const pendingMapIdleWaiters = mapIdleWaitersRef.current;
+        mapIdleWaitersRef.current = [];
+        pendingMapIdleWaiters.forEach(waiter => {
+            waiter.resolve(didReachIdle);
+        });
+    };
+
+    const waitForMapIdle = (timeoutMs = CLUSTER_DEBUG_PROBE_IDLE_TIMEOUT) => {
+        if (!mapMotionRef.current && !isAnimatingRef.current) {
+            return Promise.resolve(true);
+        }
+
+        return new Promise(resolve => {
+            const waiter = {
+                resolve: (didReachIdle) => {
+                    clearTimeout(waiter.timeoutId);
+                    mapIdleWaitersRef.current = mapIdleWaitersRef.current.filter(candidate => candidate !== waiter);
+                    resolve(didReachIdle);
+                },
+                timeoutId: null,
+            };
+
+            waiter.timeoutId = setTimeout(() => {
+                waiter.resolve(false);
+            }, timeoutMs);
+
+            mapIdleWaitersRef.current = [
+                ...mapIdleWaitersRef.current,
+                waiter,
+            ];
+        });
     };
 
     useEffect(() => {
@@ -2478,16 +2712,16 @@ export default function HomeScreen() {
         return true;
     };
 
-    const handleStartClusterDebugRecording = () => {
+    const startClusterDebugCapture = (primaryStationId = null) => {
         clusterDebugSamplesRef.current = [];
         clusterDebugTransitionEventsRef.current = [];
         clusterDebugTransitionEventKeysRef.current = new Set();
         lastClusterDebugSignatureRef.current = '';
-        clusterDebugWatchedPrimaryIdRef.current = watchedCluster?.quotes?.[0]?.stationId || null;
+        clusterDebugWatchedPrimaryIdRef.current = primaryStationId;
         setIsClusterDebugRecording(true);
     };
 
-    const handleStopClusterDebugRecording = () => {
+    const stopClusterDebugCapture = () => {
         const recordedSamples = clusterDebugSamplesRef.current;
         const recordedTransitionEvents = clusterDebugTransitionEventsRef.current;
 
@@ -2497,17 +2731,179 @@ export default function HomeScreen() {
         clusterDebugSamplesRef.current = [];
         clusterDebugTransitionEventsRef.current = [];
         clusterDebugTransitionEventKeysRef.current = new Set();
-        console.debug(buildClusterDebugRecordingLog(recordedSamples, recordedTransitionEvents));
+
+        return {
+            recordedSamples,
+            recordedTransitionEvents,
+            logText: buildClusterDebugRecordingLog(recordedSamples, recordedTransitionEvents),
+        };
+    };
+
+    const handleStartClusterDebugRecording = () => {
+        if (isClusterDebugProbeRunning) {
+            return;
+        }
+
+        startClusterDebugCapture(watchedCluster?.quotes?.[0]?.stationId || null);
+    };
+
+    const handleStopClusterDebugRecording = () => {
+        if (isClusterDebugProbeRunning) {
+            return;
+        }
+
+        const { logText } = stopClusterDebugCapture();
+        console.debug(logText);
+    };
+
+    const animateClusterDebugProbeToRegion = async (nextRegion, runId) => {
+        if (!mapRef.current || !nextRegion || clusterDebugProbeRunIdRef.current !== runId) {
+            return false;
+        }
+
+        if (areRegionsEquivalent(mapRegionRef.current, nextRegion)) {
+            setMapRegionIfNeeded(nextRegion);
+            await waitForMilliseconds(CLUSTER_DEBUG_PROBE_SETTLE_DURATION);
+            return true;
+        }
+
+        isAnimatingRef.current = true;
+        setMapMotionState(true);
+        mapRef.current.animateToRegion(nextRegion, CLUSTER_DEBUG_PROBE_ANIMATION_DURATION);
+
+        const didReachIdle = await waitForMapIdle(
+            CLUSTER_DEBUG_PROBE_ANIMATION_DURATION + CLUSTER_DEBUG_PROBE_IDLE_TIMEOUT
+        );
+
+        if (!didReachIdle && isMountedRef.current && clusterDebugProbeRunIdRef.current === runId) {
+            isAnimatingRef.current = false;
+            setMapMotionState(false);
+            setMapRegionIfNeeded(nextRegion);
+        }
+
+        await waitForMilliseconds(CLUSTER_DEBUG_PROBE_SETTLE_DURATION);
+        return didReachIdle;
+    };
+
+    const handleRunClusterDebugProbe = async () => {
+        if (!debugClusterAnimations || isClusterDebugProbeRunning || isClusterDebugRecording) {
+            return;
+        }
+
+        if (!watchedCluster || !mapRef.current) {
+            setClusterDebugProbeSummary('Move the map until a multi-station cluster is near center, then run Probe.');
+            return;
+        }
+
+        const probePlan = buildClusterDebugProbePlan(watchedCluster, mapRegion);
+
+        if (!probePlan) {
+            setClusterDebugProbeSummary('Unable to build a probe plan for the current cluster.');
+            return;
+        }
+
+        const runId = clusterDebugProbeRunIdRef.current + 1;
+        let didStartCapture = false;
+
+        clusterDebugProbeRunIdRef.current = runId;
+        setIsClusterDebugProbeRunning(true);
+        setClusterDebugProbeSummary('Probe: locking onto the nearest cluster.');
+
+        try {
+            startClusterDebugCapture(watchedCluster.quotes[0].stationId);
+            didStartCapture = true;
+
+            await waitForMilliseconds(80);
+            if (clusterDebugProbeRunIdRef.current !== runId) {
+                return;
+            }
+
+            const timedOutStages = [];
+
+            setClusterDebugProbeSummary('Probe: centering and widening to force a merged baseline.');
+            if (!await animateClusterDebugProbeToRegion(probePlan.mergeRegion, runId)) {
+                timedOutStages.push('merge-prime');
+            }
+
+            await waitForMilliseconds(CHIP_ANIMATION_DURATION + CLUSTER_DEBUG_PROBE_STAGE_SETTLE_DURATION);
+            if (clusterDebugProbeRunIdRef.current !== runId) {
+                return;
+            }
+
+            setClusterDebugProbeSummary('Probe: zooming in to trigger the split.');
+            if (!await animateClusterDebugProbeToRegion(probePlan.splitRegion, runId)) {
+                timedOutStages.push('split');
+            }
+
+            await waitForMilliseconds(CHIP_ANIMATION_DURATION + CLUSTER_DEBUG_PROBE_STAGE_SETTLE_DURATION);
+            if (clusterDebugProbeRunIdRef.current !== runId) {
+                return;
+            }
+
+            setClusterDebugProbeSummary('Probe: zooming back out to trigger the merge.');
+            if (!await animateClusterDebugProbeToRegion(probePlan.mergeRegion, runId)) {
+                timedOutStages.push('merge-return');
+            }
+
+            await waitForMilliseconds(CHIP_ANIMATION_DURATION + CLUSTER_DEBUG_PROBE_STAGE_SETTLE_DURATION);
+
+            const {
+                recordedSamples,
+                recordedTransitionEvents,
+            } = stopClusterDebugCapture();
+
+            didStartCapture = false;
+
+            const maxFrameDelta = recordedSamples.reduce((maxDelta, sample) => (
+                Math.max(maxDelta, sample?.maxFrameDelta || 0)
+            ), 0);
+            const report = {
+                status: 'completed',
+                message: timedOutStages.length > 0
+                    ? `Completed with idle timeouts in ${timedOutStages.join(', ')}.`
+                    : 'Completed without timeouts.',
+                clusterKey: probePlan.clusterKey,
+                sampleCount: recordedSamples.length,
+                transitionCount: recordedTransitionEvents.length,
+                maxFrameDelta,
+                timedOutStages,
+                plan: probePlan,
+            };
+
+            console.debug(buildClusterDebugProbeLog(report, recordedSamples, recordedTransitionEvents));
+            if (isMountedRef.current && clusterDebugProbeRunIdRef.current === runId) {
+                setClusterDebugProbeSummary(buildClusterDebugProbeSummary(report));
+            }
+        } catch (error) {
+            if (didStartCapture) {
+                stopClusterDebugCapture();
+            }
+
+            const message = error instanceof Error ? error.message : 'Unexpected probe failure.';
+
+            console.debug(`[ClusterDebug Probe]\nstatus=failed\nmessage=${message}`);
+            if (isMountedRef.current && clusterDebugProbeRunIdRef.current === runId) {
+                setClusterDebugProbeSummary(`Probe failed: ${message}`);
+            }
+        } finally {
+            if (isMountedRef.current && clusterDebugProbeRunIdRef.current === runId) {
+                setIsClusterDebugProbeRunning(false);
+            }
+        }
     };
 
     useEffect(() => {
         if (!debugClusterAnimations) {
+            clusterDebugProbeRunIdRef.current += 1;
             setIsClusterDebugRecording(false);
+            setIsClusterDebugProbeRunning(false);
+            setClusterDebugProbeSummary('');
             lastClusterDebugSignatureRef.current = '';
             clusterDebugWatchedPrimaryIdRef.current = null;
             clusterDebugSamplesRef.current = [];
             clusterDebugTransitionEventsRef.current = [];
             clusterDebugTransitionEventKeysRef.current = new Set();
+            flushMapIdleWaiters(false);
             return;
         }
     }, [debugClusterAnimations]);
@@ -2545,6 +2941,7 @@ export default function HomeScreen() {
                     setMapRegionIfNeeded(region);
                     isAnimatingRef.current = false;
                     setMapMotionState(false);
+                    flushMapIdleWaiters(true);
                 }}
             >
                 {hasRenderableClusters ? (
@@ -2696,8 +3093,13 @@ export default function HomeScreen() {
                             diagnostic={watchedClusterDiagnostic}
                             isDark={isDark}
                             isRecording={isClusterDebugRecording}
+                            isProbeRunning={isClusterDebugProbeRunning}
                             onStartRecording={handleStartClusterDebugRecording}
                             onStopRecording={handleStopClusterDebugRecording}
+                            onRunProbe={() => {
+                                void handleRunClusterDebugProbe();
+                            }}
+                            probeSummary={clusterDebugProbeSummary}
                             themeColors={themeColors}
                         />
                     </View>

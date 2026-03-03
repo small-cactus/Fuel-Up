@@ -56,12 +56,16 @@ export default function ClusterDebugCard({
     cluster,
     isDark,
     isRecording,
+    isProbeRunning,
     onStartRecording,
     onStopRecording,
+    onRunProbe,
+    probeSummary = '',
     themeColors,
 }) {
     const hasDiagnostic = Boolean(diagnostic && cluster);
     const title = hasDiagnostic ? formatClusterLabel(cluster) : 'Nearest Cluster';
+    const isBusy = isRecording || isProbeRunning;
 
     return (
         <GlassContainer spacing={0} style={styles.cardGroup}>
@@ -106,10 +110,17 @@ export default function ClusterDebugCard({
                             themeColors={themeColors}
                         />
                         <Text style={[styles.footnote, { color: themeColors.text }]}>
-                            {isRecording
+                            {isProbeRunning
+                                ? 'Running a live zoom probe. The map will animate, record, then emit one report.'
+                                : isRecording
                                 ? 'Recording samples. Stop to emit one summary log.'
                                 : 'Use Record to capture samples, then Stop to emit one summary log.'}
                         </Text>
+                        {probeSummary ? (
+                            <Text style={[styles.footnote, { color: themeColors.text }]}>
+                                {probeSummary}
+                            </Text>
+                        ) : null}
                     </>
                 ) : (
                     <Text style={[styles.summary, { color: themeColors.text }]}>
@@ -119,26 +130,39 @@ export default function ClusterDebugCard({
 
                 <View style={styles.actionRow}>
                     <Pressable
-                        disabled={isRecording}
+                        disabled={isBusy}
                         onPress={onStartRecording}
                         style={[
                             styles.actionButton,
                             styles.recordButton,
-                            isRecording && styles.actionButtonDisabled,
+                            isBusy && styles.actionButtonDisabled,
                         ]}
                     >
                         <Text style={styles.actionButtonText}>Record</Text>
                     </Pressable>
                     <Pressable
-                        disabled={!isRecording}
+                        disabled={!isRecording || isProbeRunning}
                         onPress={onStopRecording}
                         style={[
                             styles.actionButton,
                             styles.stopButton,
-                            !isRecording && styles.actionButtonDisabled,
+                            (!isRecording || isProbeRunning) && styles.actionButtonDisabled,
                         ]}
                     >
                         <Text style={styles.actionButtonText}>Stop</Text>
+                    </Pressable>
+                    <Pressable
+                        disabled={!hasDiagnostic || isBusy}
+                        onPress={onRunProbe}
+                        style={[
+                            styles.actionButton,
+                            styles.probeButton,
+                            (!hasDiagnostic || isBusy) && styles.actionButtonDisabled,
+                        ]}
+                    >
+                        <Text style={styles.actionButtonText}>
+                            {isProbeRunning ? 'Running' : 'Probe'}
+                        </Text>
                     </Pressable>
                 </View>
             </GlassView>
@@ -200,6 +224,9 @@ const styles = StyleSheet.create({
     },
     stopButton: {
         backgroundColor: '#FF3B30',
+    },
+    probeButton: {
+        backgroundColor: '#007AFF',
     },
     actionButtonDisabled: {
         opacity: 0.35,
