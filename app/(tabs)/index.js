@@ -67,7 +67,7 @@ const SIDE_MARGIN = 16;
 const TOP_CANOPY_HEIGHT = 72;
 const CLUSTER_DEBUG_JUMP_THRESHOLD = 5;
 const MAP_REGION_EPSILON = 0.000001;
-const CLUSTER_LIVE_ANIMATION_DURATION = 1500;
+const CLUSTER_LIVE_MIN_DURATION = 1500;
 const CLUSTER_GEOMETRY_ANIMATION_DURATION = 220;
 const CLUSTER_SPLIT_MIN_DURATION = 420;
 const CLUSTER_SPLIT_MILLISECONDS_PER_POINT = 55;
@@ -655,18 +655,28 @@ function getClusterDebugVisibleLayers(sample) {
         return [];
     }
 
+    const isVisible = (layerKey) => {
+        const isRendered = Boolean(sample[`${layerKey}Visible`]);
+        const rawOpacity = sample[`${layerKey}Opacity`];
+        const resolvedOpacity = Number.isFinite(rawOpacity)
+            ? rawOpacity
+            : (isRendered ? 1 : 0);
+
+        return isRendered && resolvedOpacity > 0.001;
+    };
+
     const layers = [];
 
-    if (sample.breakoutVisible) {
+    if (isVisible('breakout')) {
         layers.push('breakout');
     }
-    if (sample.remainderVisible) {
+    if (isVisible('remainder')) {
         layers.push('remainder');
     }
-    if (sample.carryVisible) {
+    if (isVisible('carry')) {
         layers.push('carry');
     }
-    if (sample.bridgeVisible) {
+    if (isVisible('bridge')) {
         layers.push('bridge');
     }
 
@@ -691,10 +701,16 @@ function computeClusterDebugLayerMotion(previousSample, nextSample, layerKey) {
     }
 
     const visibleKey = `${layerKey}Visible`;
+    const opacityKey = `${layerKey}Opacity`;
     const xKey = `${layerKey}X`;
     const yKey = `${layerKey}Y`;
+    const nextVisible = Boolean(nextSample[visibleKey]);
+    const nextOpacityRaw = nextSample[opacityKey];
+    const nextOpacity = Number.isFinite(nextOpacityRaw)
+        ? nextOpacityRaw
+        : (nextVisible ? 1 : 0);
 
-    if (!previousSample[visibleKey] || !nextSample[visibleKey]) {
+    if (!nextVisible || nextOpacity <= 0.001) {
         return 0;
     }
 
@@ -1405,11 +1421,11 @@ function AnimatedMarkerOverlay({
         }
 
         spreadAnim.value = withTiming(resolvedSpread, {
-            duration: CLUSTER_LIVE_ANIMATION_DURATION,
+            duration: CLUSTER_LIVE_MIN_DURATION,
             easing: Easing.linear,
         });
         morphAnim.value = withTiming(resolvedMorph, {
-            duration: CLUSTER_LIVE_ANIMATION_DURATION,
+            duration: CLUSTER_LIVE_MIN_DURATION,
             easing: Easing.linear,
         });
 
@@ -1642,6 +1658,10 @@ function AnimatedMarkerOverlay({
         !(pendingCluster && activeSplitCarry?.emergingQuote) &&
         !(pendingCluster && !activeSplitCarry && !activeSplitBridge)
     );
+    const breakoutOpacity = breakoutVisible ? 1 : 0;
+    const remainderOpacity = shouldRenderStaticRemainderBubble ? 1 : 0;
+    const carryOpacity = carryVisible ? 1 : 0;
+    const bridgeOpacity = bridgeVisible ? 1 : 0;
 
     const emitDebugRenderFrame = () => {
         if (!isDebugWatched || !isDebugRecording || !onDebugRenderFrame) {
@@ -1719,15 +1739,19 @@ function AnimatedMarkerOverlay({
             ),
             secondaryShellWidth: Math.max(breakoutWidth, remainderWidth, carryWidth, bridgeWidth),
             breakoutVisible,
+            breakoutOpacity,
             breakoutX,
             breakoutY,
             remainderVisible: shouldRenderStaticRemainderBubble,
+            remainderOpacity,
             remainderX,
             remainderY,
             carryVisible,
+            carryOpacity,
             carryX,
             carryY,
             bridgeVisible,
+            bridgeOpacity,
             bridgeX,
             bridgeY,
         });
@@ -1821,15 +1845,19 @@ function AnimatedMarkerOverlay({
                 ),
                 secondaryShellWidth: Math.max(breakoutWidth, remainderWidth, carryWidth, bridgeWidth),
                 breakoutVisible,
+                breakoutOpacity,
                 breakoutX,
                 breakoutY,
                 remainderVisible: shouldRenderStaticRemainderBubble,
+                remainderOpacity,
                 remainderX,
                 remainderY,
                 carryVisible,
+                carryOpacity,
                 carryX,
                 carryY,
                 bridgeVisible,
+                bridgeOpacity,
                 bridgeX,
                 bridgeY,
             };

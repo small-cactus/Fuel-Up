@@ -128,6 +128,7 @@ async function waitForProbeReport(reportFilePath, token) {
 
 async function runClusterProbeIntegration(options = {}) {
     const maxFrameDeltaThreshold = options.maxFrameDeltaThreshold ?? 2;
+    const throwOnThresholdExceeded = options.throwOnThresholdExceeded ?? true;
     const token = options.token || `probe-test-${Date.now()}`;
     const reportFilePath = getProbeReportFilePath();
 
@@ -141,7 +142,9 @@ async function runClusterProbeIntegration(options = {}) {
         throw new Error(`Probe reported a non-numeric maxFrameDelta: ${report.maxFrameDelta}`);
     }
 
-    if (report.maxFrameDelta > maxFrameDeltaThreshold) {
+    const exceededThreshold = report.maxFrameDelta > maxFrameDeltaThreshold;
+
+    if (exceededThreshold && throwOnThresholdExceeded) {
         throw new Error(
             `Probe maxFrameDelta ${report.maxFrameDelta.toFixed(2)}px exceeded ${maxFrameDeltaThreshold.toFixed(2)}px. ` +
             `Report: ${reportFilePath}`
@@ -152,6 +155,8 @@ async function runClusterProbeIntegration(options = {}) {
         report,
         reportFilePath,
         token,
+        exceededThreshold,
+        maxFrameDeltaThreshold,
     };
 }
 

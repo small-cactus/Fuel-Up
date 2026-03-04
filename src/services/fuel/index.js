@@ -69,6 +69,48 @@ function describeFetchError(error) {
     return error?.message || 'Request failed';
 }
 
+function mapStationPriceRowToQuote({ row, origin, fallbackSourceLabel }) {
+    if (!row) {
+        return null;
+    }
+
+    const parsedPrice = Number(row.price);
+    const hasValidPrice = Number.isFinite(parsedPrice) && parsedPrice > 0;
+
+    if (!hasValidPrice) {
+        return null;
+    }
+
+    const latitude = Number(row.latitude);
+    const longitude = Number(row.longitude);
+    const hasCoordinates = Number.isFinite(latitude) && Number.isFinite(longitude);
+    const stationCoords = hasCoordinates
+        ? { latitude, longitude }
+        : { latitude: origin.latitude, longitude: origin.longitude };
+
+    return {
+        providerId: row.provider_id || 'gasbuddy',
+        providerTier: 'station',
+        stationId: row.station_id ? String(row.station_id) : '',
+        stationName: row.station_name,
+        address: row.address,
+        latitude: stationCoords.latitude,
+        longitude: stationCoords.longitude,
+        fuelType: row.fuel_type,
+        price: parsedPrice,
+        allPrices: row.all_prices || { [row.fuel_type]: parsedPrice },
+        currency: row.currency,
+        priceUnit: 'gallon',
+        distanceMiles: calculateDistanceMiles(origin, stationCoords),
+        fetchedAt: new Date().toISOString(),
+        updatedAt: row.updated_at_source || null,
+        isEstimated: false,
+        sourceLabel: fallbackSourceLabel || row.source_label || PROVIDER_LABELS.gasbuddy,
+        rating: row.rating ? Number(row.rating) : null,
+        userRatingCount: row.user_rating_count ? Number(row.user_rating_count) : null,
+    };
+}
+
 function buildBlsUrl({ fuelType }) {
     const seriesId = BLS_SERIES_BY_FUEL[fuelType] || BLS_SERIES_BY_FUEL.regular;
     return `https://api.bls.gov/publicAPI/v2/timeseries/data/${seriesId}?latest=true`;
@@ -677,6 +719,7 @@ async function fetchFredQuote({ latitude, longitude, fuelType, config }) {
 
 async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config }) {
     const debugEntry = createDebugEntry('gasbuddy', 'station', true);
+    const origin = { latitude, longitude };
 
     try {
         const { supabase } = require('../../lib/supabase');
@@ -696,31 +739,9 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config }) {
         if (!error && data && data.length > 0) {
             const { incrementApiStat } = require('../../lib/devCounter');
             incrementApiStat('supabase');
-            const quotes = data.map(row => {
-                const origin = { latitude, longitude };
-                const distanceMiles = calculateDistanceMiles(origin, { latitude: row.latitude, longitude: row.longitude });
-                return {
-                    providerId: row.provider_id,
-                    providerTier: 'station',
-                    stationId: row.station_id,
-                    stationName: row.station_name,
-                    address: row.address,
-                    latitude: row.latitude,
-                    longitude: row.longitude,
-                    fuelType: row.fuel_type,
-                    price: row.price ? Number(row.price) : null,
-                    allPrices: row.all_prices || { [row.fuel_type]: Number(row.price) },
-                    currency: row.currency,
-                    priceUnit: 'gallon',
-                    distanceMiles,
-                    fetchedAt: new Date().toISOString(),
-                    updatedAt: row.updated_at_source || null,
-                    isEstimated: false,
-                    sourceLabel: row.source_label || PROVIDER_LABELS.gasbuddy,
-                    rating: row.rating ? Number(row.rating) : null,
-                    userRatingCount: row.user_rating_count ? Number(row.user_rating_count) : null,
-                };
-            });
+            const quotes = data
+                .map(row => mapStationPriceRowToQuote({ row, origin }))
+                .filter(Boolean);
 
             debugEntry.summary.resultCount = quotes.length;
             debugEntry.quoteReturned = true;
@@ -755,14 +776,71 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config }) {
         const { incrementApiStat } = require('../../lib/devCounter');
         incrementApiStat('gasbuddy');
 
-        const quotes = normalizeGasBuddyResponse({
+        const liveQuotes = normalizeGasBuddyResponse({
             origin: {
                 latitude,
                 longitude,
             },
             fuelType,
             payload: response.payload,
-        });
+        }) || [];
+
+        let fallbackQuotes = [];
+
+        try {
+            const { supabase } = require('../../lib/supabase');
+            const allStations = response.payload?.data?.locationBySearchTerm?.stations?.results || [];
+            const liveQuoteStationIds = new Set(
+                liveQuotes
+                    .map(quote => (quote?.stationId ? String(quote.stationId) : ''))
+                    .filter(Boolean)
+            );
+
+            const missingPriceStationIds = allStations
+                .map(station => station?.id)
+                .filter(Boolean)
+                .map(stationId => String(stationId))
+                .filter(stationId => !liveQuoteStationIds.has(stationId));
+
+            const uniqueMissingPriceStationIds = Array.from(new Set(missingPriceStationIds));
+            debugEntry.summary.missingPriceStationCount = uniqueMissingPriceStationIds.length;
+
+            if (uniqueMissingPriceStationIds.length > 0) {
+                const { data: fallbackRows, error: fallbackError } = await supabase
+                    .from('station_prices')
+                    .select('*')
+                    .eq('fuel_type', fuelType)
+                    .in('station_id', uniqueMissingPriceStationIds)
+                    .order('created_at', { ascending: false });
+
+                if (!fallbackError && Array.isArray(fallbackRows) && fallbackRows.length > 0) {
+                    const fallbackByStationId = new Map();
+
+                    for (const row of fallbackRows) {
+                        const stationId = row?.station_id ? String(row.station_id) : '';
+                        if (!stationId || fallbackByStationId.has(stationId)) {
+                            continue;
+                        }
+
+                        const mapped = mapStationPriceRowToQuote({
+                            row,
+                            origin,
+                            fallbackSourceLabel: 'GasBuddy (fallback)',
+                        });
+
+                        if (mapped) {
+                            fallbackByStationId.set(stationId, mapped);
+                        }
+                    }
+
+                    fallbackQuotes = Array.from(fallbackByStationId.values());
+                }
+            }
+        } catch (fallbackLookupError) {
+            console.error('GasBuddy fallback lookup failed:', fallbackLookupError);
+        }
+
+        const quotes = [...liveQuotes, ...fallbackQuotes];
 
         debugEntry.requests.push(
             createDebugRequest({
@@ -774,6 +852,8 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config }) {
         );
         const stationCount = response.payload?.data?.locationBySearchTerm?.stations?.results?.length || 0;
         debugEntry.summary.resultCount = stationCount;
+        debugEntry.summary.liveQuoteCount = liveQuotes.length;
+        debugEntry.summary.fallbackQuoteCount = fallbackQuotes.length;
         debugEntry.quoteReturned = Boolean(quotes && quotes.length > 0);
 
         if (!quotes || quotes.length === 0) {
@@ -790,7 +870,7 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config }) {
                     const searchLat = Math.round(latitude * 10) / 10;
                     const searchLng = Math.round(longitude * 10) / 10;
 
-                    const rows = quotes.map(q => ({
+                    const rows = liveQuotes.map(q => ({
                         station_id: q.stationId,
                         provider_id: q.providerId,
                         fuel_type: q.fuelType,
@@ -810,9 +890,11 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config }) {
                         updated_at_source: q.updatedAt
                     }));
 
-                    const { error: insertError } = await supabase.from('station_prices').insert(rows);
-                    if (insertError) {
-                        console.error('Supabase cache insert failed:', insertError);
+                    if (rows.length > 0) {
+                        const { error: insertError } = await supabase.from('station_prices').insert(rows);
+                        if (insertError) {
+                            console.error('Supabase cache insert failed:', insertError);
+                        }
                     }
                 } catch (err) {
                     console.error('Supabase async trend log error:', err);
