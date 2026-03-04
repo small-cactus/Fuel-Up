@@ -1,4 +1,4 @@
-import React, { startTransition, useEffect, useRef, useState, useMemo } from 'react';
+import React, { startTransition, useEffect, useLayoutEffect, useRef, useState, useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
@@ -11,6 +11,7 @@ import {
 import { SymbolView } from 'expo-symbols';
 import { GlassView } from 'expo-glass-effect';
 import * as Location from 'expo-location';
+import * as FileSystem from 'expo-file-system/legacy';
 import MapView, { Marker, PROVIDER_APPLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppState } from '../../src/AppStateContext';
@@ -34,6 +35,7 @@ import Animated, {
     FadeOut,
     ZoomIn,
     ZoomOut,
+    Easing,
     withTiming,
     runOnJS
 } from 'react-native-reanimated';
@@ -65,11 +67,25 @@ const SIDE_MARGIN = 16;
 const TOP_CANOPY_HEIGHT = 72;
 const CLUSTER_DEBUG_JUMP_THRESHOLD = 5;
 const MAP_REGION_EPSILON = 0.000001;
-const CHIP_ANIMATION_DURATION = 420;
+const CLUSTER_LIVE_ANIMATION_DURATION = 1500;
+const CLUSTER_GEOMETRY_ANIMATION_DURATION = 220;
+const CLUSTER_SPLIT_MIN_DURATION = 420;
+const CLUSTER_SPLIT_MILLISECONDS_PER_POINT = 55;
+const CLUSTER_SPLIT_MAX_DURATION = 2800;
 const CLUSTER_DEBUG_PROBE_ANIMATION_DURATION = 650;
 const CLUSTER_DEBUG_PROBE_IDLE_TIMEOUT = 2400;
 const CLUSTER_DEBUG_PROBE_SETTLE_DURATION = 180;
-const CLUSTER_DEBUG_PROBE_STAGE_SETTLE_DURATION = 520;
+const CLUSTER_DEBUG_PROBE_INITIAL_LOAD_WAIT = 3000;
+const CLUSTER_DEBUG_PROBE_RECORDING_DELAY = 150;
+const CLUSTER_DEBUG_PROBE_ZOOM_IN_STEP_COUNT = 10;
+const CLUSTER_DEBUG_PROBE_ZOOM_OUT_EXTRA_STEPS = 5;
+const CLUSTER_DEBUG_PROBE_BETWEEN_STEP_DELAY = 100;
+const CLUSTER_DEBUG_PROBE_ZOOM_IN_DISTANCE_MULTIPLIER = 1.3;
+const CLUSTER_DEBUG_PROBE_ZOOM_OUT_DISTANCE_MULTIPLIER = 1.3;
+const CLUSTER_DEBUG_PROBE_MIN_DELTA = 0.0005;
+const CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME = 'cluster-debug-probe.json';
+const CLUSTER_DEBUG_PROBE_REPORT_RELATIVE_PATH = `Documents/${CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME}`;
+const CLUSTER_DEBUG_PROBE_REPORT_CACHE_RELATIVE_PATH = `Library/Caches/${CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME}`;
 
 function waitForMilliseconds(duration) {
     return new Promise(resolve => {
@@ -77,11 +93,133 @@ function waitForMilliseconds(duration) {
     });
 }
 
-function buildClusterDebugProbePlan(cluster, currentRegion) {
+function computeSplitStageDuration(segments) {
+    const maxDistance = (segments || []).reduce((currentMax, segment) => {
+        if (!segment) {
+            return currentMax;
+        }
+
+        const distance = Math.hypot(
+            (segment.endX || 0) - (segment.startX || 0),
+            (segment.endY || 0) - (segment.startY || 0)
+        );
+
+        return Math.max(currentMax, distance);
+    }, 0);
+
+    return Math.max(
+        CLUSTER_SPLIT_MIN_DURATION,
+        Math.min(
+            CLUSTER_SPLIT_MAX_DURATION,
+            Math.round(maxDistance * CLUSTER_SPLIT_MILLISECONDS_PER_POINT)
+        )
+    );
+}
+
+function interpolateZoomDelta(startDelta, endDelta, stepNumber, totalSteps, distanceMultiplier = 1) {
+    if (
+        totalSteps <= 0 ||
+        !Number.isFinite(startDelta) ||
+        !Number.isFinite(endDelta) ||
+        startDelta <= 0 ||
+        endDelta <= 0
+    ) {
+        return endDelta;
+    }
+
+    const progress = (stepNumber / totalSteps) * distanceMultiplier;
+
+    return startDelta * Math.pow(endDelta / startDelta, progress);
+}
+
+function buildClusterDebugAutomationSeedRegion(quotes, fallbackRegion) {
+    const validQuotes = (quotes || []).filter(quote => (
+        typeof quote?.latitude === 'number' &&
+        typeof quote?.longitude === 'number'
+    ));
+
+    if (validQuotes.length < 2) {
+        return null;
+    }
+
+    let closestPair = null;
+
+    for (let index = 0; index < validQuotes.length - 1; index += 1) {
+        const currentQuote = validQuotes[index];
+
+        for (let compareIndex = index + 1; compareIndex < validQuotes.length; compareIndex += 1) {
+            const candidateQuote = validQuotes[compareIndex];
+            const distance = Math.hypot(
+                currentQuote.latitude - candidateQuote.latitude,
+                currentQuote.longitude - candidateQuote.longitude
+            );
+
+            if (!closestPair || distance < closestPair.distance) {
+                closestPair = {
+                    distance,
+                    firstQuote: currentQuote,
+                    secondQuote: candidateQuote,
+                };
+            }
+        }
+    }
+
+    if (!closestPair) {
+        return null;
+    }
+
+    const latDiff = Math.abs(closestPair.firstQuote.latitude - closestPair.secondQuote.latitude);
+    const lngDiff = Math.abs(closestPair.firstQuote.longitude - closestPair.secondQuote.longitude);
+    const fallbackLatDelta = fallbackRegion?.latitudeDelta || DEFAULT_REGION.latitudeDelta;
+    const fallbackLngDelta = fallbackRegion?.longitudeDelta || DEFAULT_REGION.longitudeDelta;
+
+    return {
+        latitude: (closestPair.firstQuote.latitude + closestPair.secondQuote.latitude) / 2,
+        longitude: (closestPair.firstQuote.longitude + closestPair.secondQuote.longitude) / 2,
+        latitudeDelta: Math.max(
+            0.02,
+            fallbackLatDelta,
+            latDiff > 0 ? (latDiff / CLUSTER_MERGE_LAT_FACTOR) * 1.35 : fallbackLatDelta
+        ),
+        longitudeDelta: Math.max(
+            0.02,
+            fallbackLngDelta,
+            lngDiff > 0 ? (lngDiff / CLUSTER_MERGE_LNG_FACTOR) * 1.35 : fallbackLngDelta
+        ),
+    };
+}
+
+function buildClusterDebugProbePlan(cluster, currentRegion, focusRegion = null) {
     if (!cluster?.quotes?.length) {
         return null;
     }
 
+    const focusLatitude = typeof focusRegion?.latitude === 'number'
+        ? focusRegion.latitude
+        : currentRegion?.latitude;
+    const focusLongitude = typeof focusRegion?.longitude === 'number'
+        ? focusRegion.longitude
+        : currentRegion?.longitude;
+    const startLatitude = typeof currentRegion?.latitude === 'number'
+        ? currentRegion.latitude
+        : (
+            typeof focusLatitude === 'number'
+                ? focusLatitude
+                : cluster.averageLat
+        );
+    const startLongitude = typeof currentRegion?.longitude === 'number'
+        ? currentRegion.longitude
+        : (
+            typeof focusLongitude === 'number'
+                ? focusLongitude
+                : cluster.averageLng
+        );
+    const splitLatitude = typeof focusLatitude === 'number'
+        ? focusLatitude
+        : cluster.averageLat;
+    const splitLongitude = typeof focusLongitude === 'number'
+        ? focusLongitude
+        : cluster.averageLng;
     const fallbackLatDelta = currentRegion?.latitudeDelta || DEFAULT_REGION.latitudeDelta;
     const fallbackLngDelta = currentRegion?.longitudeDelta || DEFAULT_REGION.longitudeDelta;
     const maxLatOffset = Math.max(
@@ -129,21 +267,86 @@ function buildClusterDebugProbePlan(cluster, currentRegion) {
     const splitLngDelta = resolvedSplitLngDelta < mergeLngDelta
         ? resolvedSplitLngDelta
         : Math.max(0.0025, mergeLngDelta * 0.45);
+    const startRegion = {
+        latitude: startLatitude,
+        longitude: startLongitude,
+        latitudeDelta: fallbackLatDelta,
+        longitudeDelta: fallbackLngDelta,
+    };
+    const focusStartRegion = {
+        latitude: splitLatitude,
+        longitude: splitLongitude,
+        latitudeDelta: fallbackLatDelta,
+        longitudeDelta: fallbackLngDelta,
+    };
+    const splitRegion = {
+        latitude: splitLatitude,
+        longitude: splitLongitude,
+        latitudeDelta: splitLatDelta,
+        longitudeDelta: splitLngDelta,
+    };
+    const zoomOutStepCount = CLUSTER_DEBUG_PROBE_ZOOM_IN_STEP_COUNT + CLUSTER_DEBUG_PROBE_ZOOM_OUT_EXTRA_STEPS;
+    const zoomInRegions = Array.from({ length: CLUSTER_DEBUG_PROBE_ZOOM_IN_STEP_COUNT }, (_, index) => {
+        return {
+            latitude: splitRegion.latitude,
+            longitude: splitRegion.longitude,
+            latitudeDelta: Math.max(
+                CLUSTER_DEBUG_PROBE_MIN_DELTA,
+                interpolateZoomDelta(
+                    focusStartRegion.latitudeDelta,
+                    splitRegion.latitudeDelta,
+                    index + 1,
+                    CLUSTER_DEBUG_PROBE_ZOOM_IN_STEP_COUNT,
+                    CLUSTER_DEBUG_PROBE_ZOOM_IN_DISTANCE_MULTIPLIER
+                )
+            ),
+            longitudeDelta: Math.max(
+                CLUSTER_DEBUG_PROBE_MIN_DELTA,
+                interpolateZoomDelta(
+                    focusStartRegion.longitudeDelta,
+                    splitRegion.longitudeDelta,
+                    index + 1,
+                    CLUSTER_DEBUG_PROBE_ZOOM_IN_STEP_COUNT,
+                    CLUSTER_DEBUG_PROBE_ZOOM_IN_DISTANCE_MULTIPLIER
+                )
+            ),
+        };
+    });
+
+    const zoomOutRegions = Array.from({ length: zoomOutStepCount }, (_, index) => {
+        return {
+            latitude: splitRegion.latitude,
+            longitude: splitRegion.longitude,
+            latitudeDelta: interpolateZoomDelta(
+                splitRegion.latitudeDelta,
+                focusStartRegion.latitudeDelta,
+                index + 1,
+                zoomOutStepCount,
+                CLUSTER_DEBUG_PROBE_ZOOM_OUT_DISTANCE_MULTIPLIER
+            ),
+            longitudeDelta: interpolateZoomDelta(
+                splitRegion.longitudeDelta,
+                focusStartRegion.longitudeDelta,
+                index + 1,
+                zoomOutStepCount,
+                CLUSTER_DEBUG_PROBE_ZOOM_OUT_DISTANCE_MULTIPLIER
+            ),
+        };
+    });
 
     return {
         clusterKey: buildClusterMembershipKey(cluster),
+        startRegion,
+        focusStartRegion,
         mergeRegion: {
-            latitude: cluster.averageLat,
-            longitude: cluster.averageLng,
+            latitude: startLatitude,
+            longitude: startLongitude,
             latitudeDelta: mergeLatDelta,
             longitudeDelta: mergeLngDelta,
         },
-        splitRegion: {
-            latitude: cluster.averageLat,
-            longitude: cluster.averageLng,
-            latitudeDelta: splitLatDelta,
-            longitudeDelta: splitLngDelta,
-        },
+        splitRegion,
+        zoomInRegions,
+        zoomOutRegions,
         metrics: {
             maxLatOffset,
             maxLngOffset,
@@ -180,23 +383,136 @@ function formatDebugCoordinate(latitude, longitude) {
 
 function buildClusterDebugProbeLog(report, samples, transitionEvents) {
     const metrics = report?.plan?.metrics || {};
+    const startRegion = report?.plan?.startRegion || {};
+    const focusStartRegion = report?.plan?.focusStartRegion || {};
     const mergeRegion = report?.plan?.mergeRegion || {};
     const splitRegion = report?.plan?.splitRegion || {};
+    const zoomInRegions = report?.plan?.zoomInRegions || [];
+    const zoomOutRegions = report?.plan?.zoomOutRegions || [];
 
     return [
         '[ClusterDebug Probe]',
         `status=${report?.status || 'unknown'}`,
+        `trigger=${report?.trigger || 'manual'}`,
         `message=${report?.message || 'none'}`,
         `cluster=${report?.clusterKey || 'unknown'}`,
         `samples=${report?.sampleCount ?? samples.length}`,
         `transitions=${report?.transitionCount ?? transitionEvents.length}`,
         `maxStep=${formatDebugMetric(report?.maxFrameDelta || 0)}pt`,
         `timedOutStages=${report?.timedOutStages?.join(',') || 'none'}`,
+        `startRegion=${formatDebugCoordinate(startRegion.latitude, startRegion.longitude)} d=${formatDebugMetric(startRegion.latitudeDelta, 4)},${formatDebugMetric(startRegion.longitudeDelta, 4)}`,
+        `focusStartRegion=${formatDebugCoordinate(focusStartRegion.latitude, focusStartRegion.longitude)} d=${formatDebugMetric(focusStartRegion.latitudeDelta, 4)},${formatDebugMetric(focusStartRegion.longitudeDelta, 4)}`,
         `mergeRegion=${formatDebugCoordinate(mergeRegion.latitude, mergeRegion.longitude)} d=${formatDebugMetric(mergeRegion.latitudeDelta, 4)},${formatDebugMetric(mergeRegion.longitudeDelta, 4)}`,
         `splitRegion=${formatDebugCoordinate(splitRegion.latitude, splitRegion.longitude)} d=${formatDebugMetric(splitRegion.latitudeDelta, 4)},${formatDebugMetric(splitRegion.longitudeDelta, 4)}`,
+        `steps=${zoomInRegions.length} in / ${zoomOutRegions.length} out`,
         `thresholds merge=${formatDebugMetric(metrics.mergeLatThresholdDelta, 4)},${formatDebugMetric(metrics.mergeLngThresholdDelta, 4)} split=${formatDebugMetric(metrics.splitLatThresholdDelta, 4)},${formatDebugMetric(metrics.splitLngThresholdDelta, 4)}`,
         buildClusterDebugRecordingLog(samples, transitionEvents),
     ].join('\n');
+}
+
+async function writeClusterDebugProbeArtifact(payload) {
+    const artifactTargets = [
+        FileSystem.documentDirectory
+            ? {
+                uri: `${FileSystem.documentDirectory}${CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME}`,
+                relativePath: CLUSTER_DEBUG_PROBE_REPORT_RELATIVE_PATH,
+                label: 'documents',
+            }
+            : null,
+        FileSystem.cacheDirectory
+            ? {
+                uri: `${FileSystem.cacheDirectory}${CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME}`,
+                relativePath: CLUSTER_DEBUG_PROBE_REPORT_CACHE_RELATIVE_PATH,
+                label: 'cache',
+            }
+            : null,
+    ].filter(Boolean);
+
+    if (artifactTargets.length === 0) {
+        console.error('[ClusterDebug Probe Export] no writable file-system directory is available.');
+        return null;
+    }
+
+    const basePayload = {
+        ...payload,
+        persistedAt: new Date().toISOString(),
+        artifactTargets: artifactTargets.map(target => ({
+            label: target.label,
+            uri: target.uri,
+            relativePath: target.relativePath,
+        })),
+    };
+    const writeResults = [];
+
+    for (const target of artifactTargets) {
+        try {
+            const persistedPayload = {
+                ...basePayload,
+                fileUri: target.uri,
+                relativePath: target.relativePath,
+                artifactLabel: target.label,
+            };
+
+            await FileSystem.writeAsStringAsync(
+                target.uri,
+                JSON.stringify(persistedPayload, null, 2)
+            );
+
+            const fileInfo = await FileSystem.getInfoAsync(target.uri);
+
+            writeResults.push({
+                label: target.label,
+                uri: target.uri,
+                relativePath: target.relativePath,
+                exists: Boolean(fileInfo.exists),
+                size: fileInfo.size || 0,
+            });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unknown file write failure.';
+
+            writeResults.push({
+                label: target.label,
+                uri: target.uri,
+                relativePath: target.relativePath,
+                exists: false,
+                size: 0,
+                error: message,
+            });
+        }
+    }
+
+    const successfulWrites = writeResults.filter(result => result.exists);
+
+    if (successfulWrites.length > 0) {
+        successfulWrites.forEach(result => {
+            console.log(
+                `[ClusterDebug Probe Export] ${result.label} ${result.relativePath} exists=${result.exists ? '1' : '0'} size=${result.size}`
+            );
+        });
+    }
+
+    const failedWrites = writeResults.filter(result => result.error);
+
+    if (failedWrites.length > 0) {
+        failedWrites.forEach(result => {
+            console.error(
+                `[ClusterDebug Probe Export] ${result.label} failed: ${result.error}`
+            );
+        });
+    }
+
+    if (successfulWrites.length === 0) {
+        return null;
+    }
+
+    const primaryWrite = successfulWrites[0];
+
+    return {
+        ...basePayload,
+        fileUri: primaryWrite.uri,
+        relativePath: primaryWrite.relativePath,
+        writeResults,
+    };
 }
 
 function buildClusterMembershipKey(cluster) {
@@ -686,12 +1002,8 @@ function AnimatedMarkerOverlay({
     const ptPerLat = mapRegion?.latitudeDelta ? SCREEN_HEIGHT / mapRegion.latitudeDelta : 0;
     const primaryLat = primaryQuote.latitude;
     const primaryLng = primaryQuote.longitude;
-    const liveSplitBridgeTargetX = activeSplitBridge
-        ? (activeSplitBridge.emergingQuote.longitude - primaryLng) * ptPerLng
-        : 0;
-    const liveSplitBridgeTargetY = activeSplitBridge
-        ? -(activeSplitBridge.emergingQuote.latitude - primaryLat) * ptPerLat
-        : 0;
+    const liveSplitBridgeTargetX = activeSplitBridge?.endX ?? 0;
+    const liveSplitBridgeTargetY = activeSplitBridge?.endY ?? 0;
     const splitBridgeHorizontalReach = activeSplitBridge
         ? Math.max(Math.abs(activeSplitBridge.startX), Math.abs(liveSplitBridgeTargetX))
         : 0;
@@ -733,11 +1045,19 @@ function AnimatedMarkerOverlay({
             quote.distanceFromPrimary > farthestQuote.distanceFromPrimary ? quote : farthestQuote
         ), nextClusterAnchoredQuotes[1])
         : null;
+    const breakoutProjectedTargetX = emergingAnchoredQuote?.dx ?? COLLAPSED_BUBBLE_OFFSET;
+    const breakoutProjectedTargetY = emergingAnchoredQuote?.dy ?? 0;
+    const nextEmergingProjectedTargetX = nextClusterEmergingQuote?.dx ?? COLLAPSED_BUBBLE_OFFSET;
+    const nextEmergingProjectedTargetY = nextClusterEmergingQuote?.dy ?? 0;
+    const breakoutTargetXAnim = useSharedValue(breakoutProjectedTargetX);
+    const breakoutTargetYAnim = useSharedValue(breakoutProjectedTargetY);
+    const nextEmergingTargetXAnim = useSharedValue(nextEmergingProjectedTargetX);
+    const nextEmergingTargetYAnim = useSharedValue(nextEmergingProjectedTargetY);
     const pendingStaticSecondaryX = nextClusterEmergingQuote
-        ? interpolate(pendingResolvedSpread, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextClusterEmergingQuote.dx])
+        ? interpolate(pendingResolvedSpread, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingProjectedTargetX])
         : COLLAPSED_BUBBLE_OFFSET;
     const pendingStaticSecondaryY = nextClusterEmergingQuote
-        ? interpolate(pendingResolvedSpread, [0, 1], [0, nextClusterEmergingQuote.dy])
+        ? interpolate(pendingResolvedSpread, [0, 1], [0, nextEmergingProjectedTargetY])
         : 0;
     const horizontalReach = Math.max(
         COLLAPSED_BUBBLE_OFFSET,
@@ -753,6 +1073,30 @@ function AnimatedMarkerOverlay({
     );
     const containerWidth = Math.max(240, 48 + COLLAPSED_PRIMARY_WIDTH + horizontalReach * 2);
     const containerHeight = Math.max(80, 52 + verticalReach * 2);
+
+    useEffect(() => {
+        breakoutTargetXAnim.value = withTiming(breakoutProjectedTargetX, {
+            duration: CLUSTER_GEOMETRY_ANIMATION_DURATION,
+            easing: Easing.linear,
+        });
+        breakoutTargetYAnim.value = withTiming(breakoutProjectedTargetY, {
+            duration: CLUSTER_GEOMETRY_ANIMATION_DURATION,
+            easing: Easing.linear,
+        });
+        nextEmergingTargetXAnim.value = withTiming(nextEmergingProjectedTargetX, {
+            duration: CLUSTER_GEOMETRY_ANIMATION_DURATION,
+            easing: Easing.linear,
+        });
+        nextEmergingTargetYAnim.value = withTiming(nextEmergingProjectedTargetY, {
+            duration: CLUSTER_GEOMETRY_ANIMATION_DURATION,
+            easing: Easing.linear,
+        });
+    }, [
+        breakoutProjectedTargetX,
+        breakoutProjectedTargetY,
+        nextEmergingProjectedTargetX,
+        nextEmergingProjectedTargetY,
+    ]);
 
     useEffect(() => {
         // Fade in content
@@ -817,7 +1161,7 @@ function AnimatedMarkerOverlay({
         }
     };
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (pendingCluster) {
             const pendingQuotes = pendingCluster.quotes;
             const currentClusterKey = buildClusterMembershipKey(cluster);
@@ -872,6 +1216,24 @@ function AnimatedMarkerOverlay({
                     const bridgeStartY = carriedShellState?.secondaryY ?? resolvedBridgeStartY;
                     const bridgeTargetX = (detachedBridgeQuote.longitude - primaryQuote.longitude) * ptPerLng;
                     const bridgeTargetY = -(detachedBridgeQuote.latitude - primaryQuote.latitude) * ptPerLat;
+                    const carryTargetX = pendingStaticSecondaryX;
+                    const carryTargetY = pendingStaticSecondaryY;
+                    const splitStageDuration = computeSplitStageDuration([
+                        {
+                            startX: bridgeStartX,
+                            startY: bridgeStartY,
+                            endX: bridgeTargetX,
+                            endY: bridgeTargetY,
+                        },
+                        pendingQuotes.length > 1 && nextClusterEmergingQuote
+                            ? {
+                                startX: bridgeStartX,
+                                startY: bridgeStartY,
+                                endX: carryTargetX,
+                                endY: carryTargetY,
+                            }
+                            : null,
+                    ]);
 
                     setSplitBridge({
                         transitionKey: splitBridgeSignature,
@@ -879,6 +1241,8 @@ function AnimatedMarkerOverlay({
                         emergingQuote: detachedBridgeQuote,
                         startX: bridgeStartX,
                         startY: bridgeStartY,
+                        endX: bridgeTargetX,
+                        endY: bridgeTargetY,
                     });
                     if (pendingQuotes.length > 1 && nextClusterEmergingQuote) {
                         setSplitCarry({
@@ -887,9 +1251,14 @@ function AnimatedMarkerOverlay({
                             emergingQuote: nextClusterEmergingQuote,
                             startX: bridgeStartX,
                             startY: bridgeStartY,
+                            endX: carryTargetX,
+                            endY: carryTargetY,
                         });
                         splitCarryMorph.value = currentMorphValue;
-                        splitCarryMorph.value = withTiming(pendingResolvedMorph, { duration: CHIP_ANIMATION_DURATION });
+                        splitCarryMorph.value = withTiming(pendingResolvedMorph, {
+                            duration: splitStageDuration,
+                            easing: Easing.linear,
+                        });
                         splitStageShellCompleteRef.current = false;
                         splitShellTimeoutRef.current = setTimeout(() => {
                             splitShellTimeoutRef.current = null;
@@ -898,7 +1267,7 @@ function AnimatedMarkerOverlay({
                                 splitBridgeSignature,
                                 splitBridgeSignature
                             );
-                        }, CHIP_ANIMATION_DURATION);
+                        }, splitStageDuration);
                     } else {
                         setSplitCarry(null);
                         splitStageShellCompleteRef.current = true;
@@ -921,15 +1290,21 @@ function AnimatedMarkerOverlay({
                     });
                     splitBridgeProgress.value = 0;
                     splitBridgeMorph.value = currentMorphValue;
-                    splitBridgeProgress.value = withTiming(1, { duration: CHIP_ANIMATION_DURATION });
-                    splitBridgeMorph.value = withTiming(1, { duration: CHIP_ANIMATION_DURATION });
+                    splitBridgeProgress.value = withTiming(1, {
+                        duration: splitStageDuration,
+                        easing: Easing.linear,
+                    });
+                    splitBridgeMorph.value = withTiming(1, {
+                        duration: splitStageDuration,
+                        easing: Easing.linear,
+                    });
                     splitBridgePathTimeoutRef.current = setTimeout(() => {
                         splitBridgePathTimeoutRef.current = null;
                         handleSplitBridgePathComplete(
                             splitBridgeSignature,
                             splitBridgeSignature
                         );
-                    }, CHIP_ANIMATION_DURATION);
+                    }, splitStageDuration);
                 } else if (onPendingClusterBridgeComplete) {
                     setSplitBridge(null);
                     setSplitCarry(null);
@@ -948,6 +1323,7 @@ function AnimatedMarkerOverlay({
                 }
                 : null;
 
+            // During splits, the held shell is rendered directly in the pending cluster geometry.
             // During splits, the held shell is rendered directly in the pending cluster geometry.
             // A static target stays underneath, while a carry shell may animate into it.
             spreadAnim.value = pendingResolvedSpread;
@@ -1028,8 +1404,14 @@ function AnimatedMarkerOverlay({
             });
         }
 
-        spreadAnim.value = withTiming(resolvedSpread, { duration: CHIP_ANIMATION_DURATION });
-        morphAnim.value = withTiming(resolvedMorph, { duration: CHIP_ANIMATION_DURATION });
+        spreadAnim.value = withTiming(resolvedSpread, {
+            duration: CLUSTER_LIVE_ANIMATION_DURATION,
+            easing: Easing.linear,
+        });
+        morphAnim.value = withTiming(resolvedMorph, {
+            duration: CLUSTER_LIVE_ANIMATION_DURATION,
+            easing: Easing.linear,
+        });
 
         previousQuotesRef.current = quotes;
     }, [quotes, pendingCluster, ptPerLng, ptPerLat, resolvedSpread, resolvedMorph, pendingResolvedSpread, pendingResolvedMorph, splitBridge, onPendingClusterBridgeComplete, onDebugTransitionEvent, primaryQuote.stationId, cluster]);
@@ -1054,8 +1436,8 @@ function AnimatedMarkerOverlay({
         return {
             zIndex: 2,
             transform: [
-                { translateX: interpolate(spreadAnim.value, [0, 1], [COLLAPSED_BUBBLE_OFFSET, emergingAnchoredQuote?.dx ?? COLLAPSED_BUBBLE_OFFSET]) },
-                { translateY: interpolate(spreadAnim.value, [0, 1], [0, emergingAnchoredQuote?.dy ?? 0]) }
+                { translateX: interpolate(spreadAnim.value, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]) },
+                { translateY: interpolate(spreadAnim.value, [0, 1], [0, breakoutTargetYAnim.value]) }
             ]
         };
     });
@@ -1071,18 +1453,26 @@ function AnimatedMarkerOverlay({
     // Style for the subgroup that stays clustered after one item peels away
     const remainderBubbleWrapperStyle = useAnimatedStyle(() => {
         const nextSecondaryLocalDx = pendingCluster
-            ? pendingStaticSecondaryX
-            : (
-                nextClusterEmergingQuote
-                    ? interpolate(spreadAnim.value, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextClusterEmergingQuote.dx])
-                    : COLLAPSED_BUBBLE_OFFSET
+            ? interpolate(
+                pendingResolvedSpread,
+                [0, 1],
+                [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]
+            )
+            : interpolate(
+                spreadAnim.value,
+                [0, 1],
+                [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]
             );
         const nextSecondaryLocalDy = pendingCluster
-            ? pendingStaticSecondaryY
-            : (
-                nextClusterEmergingQuote
-                    ? interpolate(spreadAnim.value, [0, 1], [0, nextClusterEmergingQuote.dy])
-                    : 0
+            ? interpolate(
+                pendingResolvedSpread,
+                [0, 1],
+                [0, nextEmergingTargetYAnim.value]
+            )
+            : interpolate(
+                spreadAnim.value,
+                [0, 1],
+                [0, nextEmergingTargetYAnim.value]
             );
 
         return {
@@ -1179,14 +1569,14 @@ function AnimatedMarkerOverlay({
                     translateX: interpolate(
                         splitBridgeProgress.value,
                         [0, 1],
-                        [activeSplitCarry.startX, pendingStaticSecondaryX]
+                        [activeSplitCarry.startX, activeSplitCarry.endX]
                     )
                 },
                 {
                     translateY: interpolate(
                         splitBridgeProgress.value,
                         [0, 1],
-                        [activeSplitCarry.startY, pendingStaticSecondaryY]
+                        [activeSplitCarry.startY, activeSplitCarry.endY]
                     )
                 }
             ]
@@ -1234,21 +1624,24 @@ function AnimatedMarkerOverlay({
             transform: [{ scale: interpolate(splitCarryMorph.value, [0.6, 1], [0.8, 1], Extrapolate.CLAMP) }]
         };
     });
-    const breakoutTargetX = emergingAnchoredQuote?.dx ?? COLLAPSED_BUBBLE_OFFSET;
-    const breakoutTargetY = emergingAnchoredQuote?.dy ?? 0;
     const hasPendingCluster = Boolean(pendingCluster);
     const renderedClusterSize = hasPendingCluster ? pendingCluster.quotes.length : quotes.length;
-    const hasNextClusterEmerging = Boolean(nextClusterEmergingQuote);
-    const nextEmergingX = nextClusterEmergingQuote?.dx ?? 0;
-    const nextEmergingY = nextClusterEmergingQuote?.dy ?? 0;
     const breakoutVisible = isMultiQuote && !pendingCluster;
     const carryVisible = Boolean(activeSplitCarry);
     const bridgeVisible = Boolean(activeSplitBridge);
     const bridgeStartX = activeSplitBridge?.startX ?? 0;
     const bridgeStartY = activeSplitBridge?.startY ?? 0;
+    const bridgeTargetX = activeSplitBridge?.endX ?? 0;
+    const bridgeTargetY = activeSplitBridge?.endY ?? 0;
     const carryStartX = activeSplitCarry?.startX ?? 0;
     const carryStartY = activeSplitCarry?.startY ?? 0;
-    const shouldRenderStaticRemainderBubble = hasRemainderBubble && !(pendingCluster && activeSplitCarry?.emergingQuote);
+    const carryTargetX = activeSplitCarry?.endX ?? pendingStaticSecondaryX;
+    const carryTargetY = activeSplitCarry?.endY ?? pendingStaticSecondaryY;
+    const shouldRenderStaticRemainderBubble = (
+        hasRemainderBubble &&
+        !(pendingCluster && activeSplitCarry?.emergingQuote) &&
+        !(pendingCluster && !activeSplitCarry && !activeSplitBridge)
+    );
 
     const emitDebugRenderFrame = () => {
         if (!isDebugWatched || !isDebugRecording || !onDebugRenderFrame) {
@@ -1261,41 +1654,33 @@ function AnimatedMarkerOverlay({
         const bridgeMorphValue = splitBridgeMorph.value;
         const carryMorphValue = splitCarryMorph.value;
         const breakoutX = breakoutVisible
-            ? interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetX])
+            ? interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value])
             : 0;
         const breakoutY = breakoutVisible
-            ? interpolate(spreadValue, [0, 1], [0, breakoutTargetY])
+            ? interpolate(spreadValue, [0, 1], [0, breakoutTargetYAnim.value])
             : 0;
         const remainderShellMorph = hasPendingCluster ? pendingResolvedMorph : morphValue;
         const remainderX = shouldRenderStaticRemainderBubble
             ? (hasPendingCluster
-                ? pendingStaticSecondaryX
-                : (
-                    hasNextClusterEmerging
-                        ? interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingX])
-                        : COLLAPSED_BUBBLE_OFFSET
-                ))
+                ? interpolate(pendingResolvedSpread, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value])
+                : interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]))
             : 0;
         const remainderY = shouldRenderStaticRemainderBubble
             ? (hasPendingCluster
-                ? pendingStaticSecondaryY
-                : (
-                    hasNextClusterEmerging
-                        ? interpolate(spreadValue, [0, 1], [0, nextEmergingY])
-                        : 0
-                ))
+                ? interpolate(pendingResolvedSpread, [0, 1], [0, nextEmergingTargetYAnim.value])
+                : interpolate(spreadValue, [0, 1], [0, nextEmergingTargetYAnim.value]))
             : 0;
         const carryX = carryVisible
-            ? interpolate(bridgeProgressValue, [0, 1], [carryStartX, pendingStaticSecondaryX])
+            ? interpolate(bridgeProgressValue, [0, 1], [carryStartX, carryTargetX])
             : 0;
         const carryY = carryVisible
-            ? interpolate(bridgeProgressValue, [0, 1], [carryStartY, pendingStaticSecondaryY])
+            ? interpolate(bridgeProgressValue, [0, 1], [carryStartY, carryTargetY])
             : 0;
         const bridgeX = bridgeVisible
-            ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartX, liveSplitBridgeTargetX])
+            ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartX, bridgeTargetX])
             : 0;
         const bridgeY = bridgeVisible
-            ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartY, liveSplitBridgeTargetY])
+            ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartY, bridgeTargetY])
             : 0;
         const breakoutWidth = breakoutVisible
             ? interpolate(morphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
@@ -1371,41 +1756,33 @@ function AnimatedMarkerOverlay({
             const bridgeMorphValue = splitBridgeMorph.value;
             const carryMorphValue = splitCarryMorph.value;
             const breakoutX = breakoutVisible
-                ? interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetX])
+                ? interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value])
                 : 0;
             const breakoutY = breakoutVisible
-                ? interpolate(spreadValue, [0, 1], [0, breakoutTargetY])
+                ? interpolate(spreadValue, [0, 1], [0, breakoutTargetYAnim.value])
                 : 0;
             const remainderShellMorph = hasPendingCluster ? pendingResolvedMorph : morphValue;
             const remainderX = shouldRenderStaticRemainderBubble
                 ? (hasPendingCluster
-                    ? pendingStaticSecondaryX
-                    : (
-                        hasNextClusterEmerging
-                            ? interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingX])
-                            : COLLAPSED_BUBBLE_OFFSET
-                    ))
+                    ? interpolate(pendingResolvedSpread, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value])
+                    : interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]))
                 : 0;
             const remainderY = shouldRenderStaticRemainderBubble
                 ? (hasPendingCluster
-                    ? pendingStaticSecondaryY
-                    : (
-                        hasNextClusterEmerging
-                            ? interpolate(spreadValue, [0, 1], [0, nextEmergingY])
-                            : 0
-                    ))
+                    ? interpolate(pendingResolvedSpread, [0, 1], [0, nextEmergingTargetYAnim.value])
+                    : interpolate(spreadValue, [0, 1], [0, nextEmergingTargetYAnim.value]))
                 : 0;
             const carryX = carryVisible
-                ? interpolate(bridgeProgressValue, [0, 1], [carryStartX, pendingStaticSecondaryX])
+                ? interpolate(bridgeProgressValue, [0, 1], [carryStartX, carryTargetX])
                 : 0;
             const carryY = carryVisible
-                ? interpolate(bridgeProgressValue, [0, 1], [carryStartY, pendingStaticSecondaryY])
+                ? interpolate(bridgeProgressValue, [0, 1], [carryStartY, carryTargetY])
                 : 0;
             const bridgeX = bridgeVisible
-                ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartX, liveSplitBridgeTargetX])
+                ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartX, bridgeTargetX])
                 : 0;
             const bridgeY = bridgeVisible
-                ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartY, liveSplitBridgeTargetY])
+                ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartY, bridgeTargetY])
                 : 0;
             const breakoutWidth = breakoutVisible
                 ? interpolate(morphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
@@ -1772,12 +2149,28 @@ export default function HomeScreen() {
     const clusterDebugTransitionEventKeysRef = useRef(new Set());
     const clusterDebugWatchedPrimaryIdRef = useRef(null);
     const clusterDebugProbeRunIdRef = useRef(0);
+    const clusterDebugAutoProbeHandledKeyRef = useRef('');
+    const clusterDebugAutoProbeSeededKeyRef = useRef('');
     const isFocused = useIsFocused();
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
     const { preferences } = usePreferences();
-    const debugClusterAnimations = __DEV__ && Boolean(preferences.debugClusterAnimations);
-    const { fuelResetToken, manualLocationOverride, setFuelDebugState } = useAppState();
+    const {
+        fuelResetToken,
+        manualLocationOverride,
+        setFuelDebugState,
+        clusterProbeRequest,
+        isClusterProbeSessionActive,
+        finishClusterProbeSession,
+    } = useAppState();
+    const resolvedAutoClusterProbeRequest = __DEV__ ? clusterProbeRequest : null;
+    const autoClusterProbeRequested = Boolean(resolvedAutoClusterProbeRequest) || Boolean(isClusterProbeSessionActive);
+    const autoClusterProbeRequestKey = resolvedAutoClusterProbeRequest?.token || '';
+    const autoClusterProbeRequestSource = resolvedAutoClusterProbeRequest?.source || '';
+    const debugClusterAnimations = __DEV__ && (
+        Boolean(preferences.debugClusterAnimations) ||
+        autoClusterProbeRequested
+    );
     const [location, setLocation] = useState(DEFAULT_REGION);
     const [bestQuote, setBestQuote] = useState(null);
     const [topStations, setTopStations] = useState([]);
@@ -2065,14 +2458,14 @@ export default function HomeScreen() {
     }, [fuelResetToken]);
 
     useEffect(() => {
-        if (!isFocused) {
+        if (!isFocused && !autoClusterProbeRequested) {
             return;
         }
 
         void refreshForCurrentView({
             preferCached: true,
         });
-    }, [isFocused, manualLocationOverride]);
+    }, [isFocused, manualLocationOverride, autoClusterProbeRequested]);
 
     const onViewableItemsChanged = useRef(({ viewableItems }) => {
         if (viewableItems.length > 0) {
@@ -2182,7 +2575,7 @@ export default function HomeScreen() {
         clusters.map(buildClusterMembershipKey).join('|')
     ), [clusters]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const previousClustersByPrimary = new Map(
             previousRenderedClustersRef.current.map(cluster => [cluster.quotes[0].stationId, cluster])
         );
@@ -2253,14 +2646,12 @@ export default function HomeScreen() {
                             };
                         }
 
-                        if (!isMapMoving) {
-                            recordClusterDebugTransitionEvent({
-                                type: 'split-handoff-cleared',
-                                primaryStationId: heldCluster.primaryStationId,
-                                transitionKey: heldCluster.transitionKey,
-                            });
-                            return null;
-                        }
+                        recordClusterDebugTransitionEvent({
+                            type: 'split-handoff-cleared',
+                            primaryStationId: heldCluster.primaryStationId,
+                            transitionKey: heldCluster.transitionKey,
+                        });
+                        return null;
                     }
 
                     return nextHeldCluster;
@@ -2375,19 +2766,12 @@ export default function HomeScreen() {
                         };
                     }
 
-                    if (!mapMotionRef.current) {
-                        recordClusterDebugTransitionEvent({
-                            type: 'split-handoff-cleared',
-                            primaryStationId,
-                            transitionKey: heldCluster.transitionKey,
-                        });
-                        return null;
-                    }
-
-                    return {
-                        ...heldCluster,
-                        bridgeComplete: true,
-                    };
+                    recordClusterDebugTransitionEvent({
+                        type: 'split-handoff-cleared',
+                        primaryStationId,
+                        transitionKey: heldCluster.transitionKey,
+                    });
+                    return null;
                 })
                 .filter(Boolean);
 
@@ -2785,20 +3169,48 @@ export default function HomeScreen() {
         return didReachIdle;
     };
 
-    const handleRunClusterDebugProbe = async () => {
+    const handleRunClusterDebugProbe = async (trigger = 'manual') => {
         if (!debugClusterAnimations || isClusterDebugProbeRunning || isClusterDebugRecording) {
             return;
         }
 
         if (!watchedCluster || !mapRef.current) {
-            setClusterDebugProbeSummary('Move the map until a multi-station cluster is near center, then run Probe.');
+            const message = 'Move the map until a multi-station cluster is near center, then run Probe.';
+
+            setClusterDebugProbeSummary(message);
+            await writeClusterDebugProbeArtifact({
+                status: 'blocked',
+                trigger,
+                message,
+                clusterKey: watchedCluster ? buildClusterMembershipKey(watchedCluster) : '',
+                sampleCount: 0,
+                transitionCount: 0,
+                maxFrameDelta: 0,
+                timedOutStages: [],
+                plan: watchedCluster ? buildClusterDebugProbePlan(watchedCluster, mapRegion, location) : null,
+                logText: '',
+            });
             return;
         }
 
-        const probePlan = buildClusterDebugProbePlan(watchedCluster, mapRegion);
+        const probePlan = buildClusterDebugProbePlan(watchedCluster, mapRegion, location);
 
         if (!probePlan) {
-            setClusterDebugProbeSummary('Unable to build a probe plan for the current cluster.');
+            const message = 'Unable to build a probe plan for the current cluster.';
+
+            setClusterDebugProbeSummary(message);
+            await writeClusterDebugProbeArtifact({
+                status: 'blocked',
+                trigger,
+                message,
+                clusterKey: buildClusterMembershipKey(watchedCluster),
+                sampleCount: 0,
+                transitionCount: 0,
+                maxFrameDelta: 0,
+                timedOutStages: [],
+                plan: null,
+                logText: '',
+            });
             return;
         }
 
@@ -2810,42 +3222,88 @@ export default function HomeScreen() {
         setClusterDebugProbeSummary('Probe: locking onto the nearest cluster.');
 
         try {
+            await writeClusterDebugProbeArtifact({
+                status: 'running',
+                trigger,
+                message: 'Probe is waiting for the map to settle before recording.',
+                clusterKey: probePlan.clusterKey,
+                sampleCount: 0,
+                transitionCount: 0,
+                maxFrameDelta: 0,
+                timedOutStages: [],
+                plan: probePlan,
+                logText: '',
+            });
+
+            setClusterDebugProbeSummary('Probe: waiting 3 seconds for the map to load.');
+            await waitForMilliseconds(CLUSTER_DEBUG_PROBE_INITIAL_LOAD_WAIT);
+            if (clusterDebugProbeRunIdRef.current !== runId) {
+                return;
+            }
+
+            if (!areRegionsEquivalent(mapRegionRef.current, probePlan.focusStartRegion)) {
+                setClusterDebugProbeSummary('Probe: centering on your current location before recording.');
+                await animateClusterDebugProbeToRegion(probePlan.focusStartRegion, runId);
+                if (clusterDebugProbeRunIdRef.current !== runId) {
+                    return;
+                }
+            }
+
             startClusterDebugCapture(watchedCluster.quotes[0].stationId);
             didStartCapture = true;
 
-            await waitForMilliseconds(80);
+            setClusterDebugProbeSummary('Probe: recording started. Holding for 150ms.');
+            await waitForMilliseconds(CLUSTER_DEBUG_PROBE_RECORDING_DELAY);
             if (clusterDebugProbeRunIdRef.current !== runId) {
                 return;
             }
 
             const timedOutStages = [];
+            const totalZoomInSteps = probePlan.zoomInRegions.length;
 
-            setClusterDebugProbeSummary('Probe: centering and widening to force a merged baseline.');
-            if (!await animateClusterDebugProbeToRegion(probePlan.mergeRegion, runId)) {
-                timedOutStages.push('merge-prime');
+            for (let stepIndex = 0; stepIndex < totalZoomInSteps; stepIndex += 1) {
+                if (clusterDebugProbeRunIdRef.current !== runId) {
+                    return;
+                }
+
+                setClusterDebugProbeSummary(
+                    `Probe: zooming in ${stepIndex + 1}/${totalZoomInSteps}.`
+                );
+
+                if (!await animateClusterDebugProbeToRegion(probePlan.zoomInRegions[stepIndex], runId)) {
+                    timedOutStages.push(`zoom-in-${stepIndex + 1}`);
+                }
+
+                if (stepIndex < totalZoomInSteps - 1) {
+                    await waitForMilliseconds(CLUSTER_DEBUG_PROBE_BETWEEN_STEP_DELAY);
+                }
             }
 
-            await waitForMilliseconds(CHIP_ANIMATION_DURATION + CLUSTER_DEBUG_PROBE_STAGE_SETTLE_DURATION);
+            const totalZoomOutSteps = probePlan.zoomOutRegions.length;
+
+            for (let stepIndex = 0; stepIndex < totalZoomOutSteps; stepIndex += 1) {
+                if (clusterDebugProbeRunIdRef.current !== runId) {
+                    return;
+                }
+
+                setClusterDebugProbeSummary(
+                    `Probe: zooming out ${stepIndex + 1}/${totalZoomOutSteps}.`
+                );
+
+                if (!await animateClusterDebugProbeToRegion(probePlan.zoomOutRegions[stepIndex], runId)) {
+                    timedOutStages.push(`zoom-out-${stepIndex + 1}`);
+                }
+
+                if (stepIndex < totalZoomOutSteps - 1) {
+                    await waitForMilliseconds(CLUSTER_DEBUG_PROBE_BETWEEN_STEP_DELAY);
+                }
+            }
+
+            setClusterDebugProbeSummary('Probe: final 150ms hold before stopping recording.');
+            await waitForMilliseconds(CLUSTER_DEBUG_PROBE_RECORDING_DELAY);
             if (clusterDebugProbeRunIdRef.current !== runId) {
                 return;
             }
-
-            setClusterDebugProbeSummary('Probe: zooming in to trigger the split.');
-            if (!await animateClusterDebugProbeToRegion(probePlan.splitRegion, runId)) {
-                timedOutStages.push('split');
-            }
-
-            await waitForMilliseconds(CHIP_ANIMATION_DURATION + CLUSTER_DEBUG_PROBE_STAGE_SETTLE_DURATION);
-            if (clusterDebugProbeRunIdRef.current !== runId) {
-                return;
-            }
-
-            setClusterDebugProbeSummary('Probe: zooming back out to trigger the merge.');
-            if (!await animateClusterDebugProbeToRegion(probePlan.mergeRegion, runId)) {
-                timedOutStages.push('merge-return');
-            }
-
-            await waitForMilliseconds(CHIP_ANIMATION_DURATION + CLUSTER_DEBUG_PROBE_STAGE_SETTLE_DURATION);
 
             const {
                 recordedSamples,
@@ -2854,11 +3312,17 @@ export default function HomeScreen() {
 
             didStartCapture = false;
 
+            if (!areRegionsEquivalent(probePlan.zoomOutRegions[probePlan.zoomOutRegions.length - 1], probePlan.startRegion)) {
+                setClusterDebugProbeSummary('Probe: restoring the original map view.');
+                await animateClusterDebugProbeToRegion(probePlan.startRegion, runId);
+            }
+
             const maxFrameDelta = recordedSamples.reduce((maxDelta, sample) => (
                 Math.max(maxDelta, sample?.maxFrameDelta || 0)
             ), 0);
             const report = {
                 status: 'completed',
+                trigger,
                 message: timedOutStages.length > 0
                     ? `Completed with idle timeouts in ${timedOutStages.join(', ')}.`
                     : 'Completed without timeouts.',
@@ -2869,23 +3333,52 @@ export default function HomeScreen() {
                 timedOutStages,
                 plan: probePlan,
             };
+            const logText = buildClusterDebugProbeLog(report, recordedSamples, recordedTransitionEvents);
 
-            console.debug(buildClusterDebugProbeLog(report, recordedSamples, recordedTransitionEvents));
+            await writeClusterDebugProbeArtifact({
+                ...report,
+                samples: recordedSamples,
+                transitionEvents: recordedTransitionEvents,
+                logText,
+            });
+            console.debug(logText);
             if (isMountedRef.current && clusterDebugProbeRunIdRef.current === runId) {
                 setClusterDebugProbeSummary(buildClusterDebugProbeSummary(report));
             }
         } catch (error) {
             if (didStartCapture) {
                 stopClusterDebugCapture();
+                didStartCapture = false;
             }
 
             const message = error instanceof Error ? error.message : 'Unexpected probe failure.';
+            const logText = `[ClusterDebug Probe]\nstatus=failed\ntrigger=${trigger}\nmessage=${message}`;
 
-            console.debug(`[ClusterDebug Probe]\nstatus=failed\nmessage=${message}`);
+            await writeClusterDebugProbeArtifact({
+                status: 'failed',
+                trigger,
+                message,
+                clusterKey: probePlan.clusterKey,
+                sampleCount: 0,
+                transitionCount: 0,
+                maxFrameDelta: 0,
+                timedOutStages: [],
+                plan: probePlan,
+                logText,
+            });
+            console.debug(logText);
             if (isMountedRef.current && clusterDebugProbeRunIdRef.current === runId) {
                 setClusterDebugProbeSummary(`Probe failed: ${message}`);
             }
         } finally {
+            if (didStartCapture) {
+                stopClusterDebugCapture();
+            }
+
+            if (trigger.startsWith('automation:')) {
+                finishClusterProbeSession();
+            }
+
             if (isMountedRef.current && clusterDebugProbeRunIdRef.current === runId) {
                 setIsClusterDebugProbeRunning(false);
             }
@@ -2893,11 +3386,118 @@ export default function HomeScreen() {
     };
 
     useEffect(() => {
+        if (!autoClusterProbeRequested) {
+            clusterDebugAutoProbeHandledKeyRef.current = '';
+            clusterDebugAutoProbeSeededKeyRef.current = '';
+        }
+    }, [autoClusterProbeRequested]);
+
+    useEffect(() => {
+        if (
+            !autoClusterProbeRequested ||
+            !debugClusterAnimations ||
+            isClusterDebugProbeRunning ||
+            isClusterDebugRecording ||
+            watchedCluster ||
+            !mapRef.current ||
+            isAnimatingRef.current ||
+            isMapMoving
+        ) {
+            return;
+        }
+
+        if (clusterDebugAutoProbeSeededKeyRef.current === autoClusterProbeRequestKey) {
+            return;
+        }
+
+        const seedRegion = buildClusterDebugAutomationSeedRegion(stationQuotes, mapRegion);
+
+        if (!seedRegion) {
+            setClusterDebugProbeSummary('Probe automation is waiting for enough stations to form a cluster.');
+            return;
+        }
+
+        clusterDebugAutoProbeSeededKeyRef.current = autoClusterProbeRequestKey;
+        setClusterDebugProbeSummary('Probe automation is preparing a cluster.');
+        console.log(`[ClusterDebug Probe Automation] seeding cluster ${autoClusterProbeRequestKey}`);
+        isAnimatingRef.current = true;
+        setMapMotionState(true);
+        mapRef.current.animateToRegion(seedRegion, CLUSTER_DEBUG_PROBE_ANIMATION_DURATION);
+    }, [
+        autoClusterProbeRequested,
+        autoClusterProbeRequestKey,
+        debugClusterAnimations,
+        isClusterDebugProbeRunning,
+        isClusterDebugRecording,
+        watchedCluster,
+        stationQuotes,
+        mapRegion,
+        isMapMoving,
+    ]);
+
+    useEffect(() => {
+        if (
+            !autoClusterProbeRequested ||
+            !debugClusterAnimations ||
+            isClusterDebugProbeRunning ||
+            isClusterDebugRecording
+        ) {
+            return;
+        }
+
+        if (clusterDebugAutoProbeHandledKeyRef.current === autoClusterProbeRequestKey) {
+            return;
+        }
+
+        if (!watchedCluster || !mapRef.current) {
+            setClusterDebugProbeSummary('Probe automation is waiting for a cluster near the map center.');
+            const waitingTrigger = autoClusterProbeRequestSource === 'file'
+                ? `automation:file:${autoClusterProbeRequestKey}`
+                : `automation:${autoClusterProbeRequestKey}`;
+
+            void writeClusterDebugProbeArtifact({
+                status: 'waiting',
+                trigger: waitingTrigger,
+                message: 'Waiting for a multi-station cluster near the map center.',
+                clusterKey: watchedCluster ? buildClusterMembershipKey(watchedCluster) : '',
+                sampleCount: 0,
+                transitionCount: 0,
+                maxFrameDelta: 0,
+                timedOutStages: [],
+                plan: watchedCluster ? buildClusterDebugProbePlan(watchedCluster, mapRegion, location) : null,
+                logText: '',
+            });
+            return;
+        }
+
+        clusterDebugAutoProbeHandledKeyRef.current = autoClusterProbeRequestKey;
+        clusterDebugAutoProbeSeededKeyRef.current = '';
+        setClusterDebugProbeSummary(`Probe automation requested (${autoClusterProbeRequestKey}).`);
+
+        const automationTrigger = autoClusterProbeRequestSource === 'file'
+            ? `automation:file:${autoClusterProbeRequestKey}`
+            : `automation:${autoClusterProbeRequestKey}`;
+
+        console.log(`[ClusterDebug Probe Automation] starting ${automationTrigger}`);
+        void handleRunClusterDebugProbe(automationTrigger);
+    }, [
+        autoClusterProbeRequested,
+        autoClusterProbeRequestKey,
+        autoClusterProbeRequestSource,
+        debugClusterAnimations,
+        isClusterDebugProbeRunning,
+        isClusterDebugRecording,
+        finishClusterProbeSession,
+        watchedCluster,
+    ]);
+
+    useEffect(() => {
         if (!debugClusterAnimations) {
             clusterDebugProbeRunIdRef.current += 1;
             setIsClusterDebugRecording(false);
             setIsClusterDebugProbeRunning(false);
             setClusterDebugProbeSummary('');
+            clusterDebugAutoProbeHandledKeyRef.current = '';
             lastClusterDebugSignatureRef.current = '';
             clusterDebugWatchedPrimaryIdRef.current = null;
             clusterDebugSamplesRef.current = [];
@@ -2933,9 +3533,7 @@ export default function HomeScreen() {
                 userInterfaceStyle={isDark ? 'dark' : 'light'}
                 onRegionChange={(region) => {
                     setMapMotionState(true);
-                    if (!isAnimatingRef.current) {
-                        setMapRegionIfNeeded(region);
-                    }
+                    setMapRegionIfNeeded(region);
                 }}
                 onRegionChangeComplete={(region) => {
                     setMapRegionIfNeeded(region);
