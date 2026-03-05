@@ -46,6 +46,7 @@ export default function FuelSummaryCard({
     benchmarkQuote,
     themeColors,
     rank,
+    glassTintColor,
 }) {
     const hasFailureState = !quote && Boolean(errorMsg);
     const title = hasFailureState ? 'No Prices Returned' : quote?.stationName || 'Cheapest Nearby';
@@ -59,7 +60,7 @@ export default function FuelSummaryCard({
         <GlassContainer spacing={0} style={styles.cardGroup}>
             <GlassView
                 style={styles.card}
-                tintColor={isDark ? '#000000' : '#FFFFFF'}
+                tintColor={glassTintColor ?? (isDark ? '#000000' : '#FFFFFF')}
                 glassEffectStyle={{
                     style: 'regular',
                     animate: true,
@@ -162,6 +163,11 @@ const styles = StyleSheet.create({
         borderRadius: 32,
         overflow: 'hidden',
         justifyContent: 'space-between',
+        shadowColor: 'transparent',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0,
+        shadowRadius: 0,
+        elevation: 0,
     },
     headerRow: {
         flexDirection: 'row',
@@ -247,8 +253,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderTopWidth: StyleSheet.hairlineWidth,
-        borderTopColor: 'rgba(150, 150, 150, 0.3)',
         paddingTop: 12,
     },
     timeRow: {

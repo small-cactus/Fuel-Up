@@ -33,6 +33,7 @@ import { usePreferences } from '../PreferencesContext';
 import { useTheme } from '../ThemeContext';
 import TopCanopy from '../components/TopCanopy';
 import BottomCanopy from '../components/BottomCanopy';
+import FuelUpHeaderLogo from '../components/FuelUpHeaderLogo';
 import { registerForPushNotificationsAsync, savePushTokenToSupabase } from '../lib/notifications';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -85,12 +86,12 @@ const OnboardingChip = ({ price, isCheapest, isDark, top, left, isActive }) => {
                 <SymbolView
                     name="fuelpump.fill"
                     size={14}
-                    tintColor="#000000ff"
+                    tintColor={isDark ? '#FFFFFF' : '#000000'}
                     style={styles.demoChipIcon}
                 />
                 <Text style={[
                     styles.demoChipText,
-                    { color: '#000000ff' },
+                    { color: isDark ? '#FFFFFF' : '#000000' },
                     isCheapest && styles.demoChipTextCheapest,
                 ]}>
                     ${price.toFixed(2)}
@@ -174,7 +175,7 @@ function WelcomeStep({ isDark, themeColors, insets }) {
                     style={{ width: 64, height: 64, borderRadius: 14 }}
                     resizeMode="contain"
                 />
-                <Text style={[styles.appName, { color: themeColors.text }]}>Fuel Up</Text>
+                <FuelUpHeaderLogo isDark={isDark} />
                 <Text style={[styles.welcomeSubtitle, { color: themeColors.text }]}>
                     Find the cheapest gas near you, instantly.
                 </Text>
@@ -964,12 +965,6 @@ const styles = StyleSheet.create({
         borderRadius: 40,
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    appName: {
-        fontSize: 34,
-        fontWeight: '800',
-        letterSpacing: -0.5,
-        fontFamily: 'ui-rounded',
     },
     welcomeSubtitle: {
         fontSize: 17,

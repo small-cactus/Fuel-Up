@@ -10,6 +10,9 @@ const HAS_NATIVE_PROGRESSIVE_BLUR =
 const HAS_NATIVE_MASK =
     Platform.OS === 'ios' && Boolean(UIManager.hasViewManagerConfig?.('RNCMaskedView'));
 
+const DEFAULT_MASK_GRADIENT = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.06)', 'rgba(0, 0, 0, 0.28)', 'rgba(0, 0, 0, 0.7)', 'rgba(0, 0, 0, 1)'];
+const DEFAULT_MASK_LOCATIONS = [0, 0.2, 0.5, 0.8, 1];
+
 const LIGHT_GRADIENT = [
     'rgba(248, 250, 252, 0)',
     'rgba(248, 250, 252, 0.08)',
@@ -26,15 +29,53 @@ const DARK_GRADIENT = [
     'rgba(10, 14, 20, 0.5)',
     'rgba(10, 14, 20, 0.8)',
 ];
-const MASK_GRADIENT = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.06)', 'rgba(0, 0, 0, 0.28)', 'rgba(0, 0, 0, 0.7)', 'rgba(0, 0, 0, 1)'];
 
-export function BottomCanopy({ height, isDark }) {
+const HOME_LIGHT_GRADIENT = [
+    'rgba(248, 250, 252, 0)',
+    'rgba(248, 250, 252, 0.03)',
+    'rgba(248, 250, 252, 0.09)',
+    'rgba(248, 250, 252, 0.18)',
+    'rgba(248, 250, 252, 0.32)',
+    'rgba(248, 250, 252, 0.5)',
+    'rgba(248, 250, 252, 0.72)',
+    'rgba(248, 250, 252, 0.9)',
+];
+const HOME_DARK_GRADIENT = [
+    'rgba(10, 14, 20, 0)',
+    'rgba(10, 14, 20, 0.02)',
+    'rgba(10, 14, 20, 0.06)',
+    'rgba(10, 14, 20, 0.14)',
+    'rgba(10, 14, 20, 0.24)',
+    'rgba(10, 14, 20, 0.38)',
+    'rgba(10, 14, 20, 0.56)',
+    'rgba(10, 14, 20, 0.8)',
+];
+const HOME_MASK_GRADIENT = [
+    'rgba(0, 0, 0, 0)',
+    'rgba(0, 0, 0, 0.02)',
+    'rgba(0, 0, 0, 0.08)',
+    'rgba(0, 0, 0, 0.18)',
+    'rgba(0, 0, 0, 0.36)',
+    'rgba(0, 0, 0, 0.58)',
+    'rgba(0, 0, 0, 0.82)',
+    'rgba(0, 0, 0, 1)',
+];
+const HOME_MASK_LOCATIONS = [0, 0.08, 0.18, 0.32, 0.5, 0.68, 0.84, 1];
+
+export function BottomCanopy({ height, isDark, variant = 'default' }) {
+    const isHomeVariant = variant === 'home';
+    const canopyGradient = isHomeVariant
+        ? (isDark ? HOME_DARK_GRADIENT : HOME_LIGHT_GRADIENT)
+        : (isDark ? DARK_GRADIENT : LIGHT_GRADIENT);
+    const maskGradient = isHomeVariant ? HOME_MASK_GRADIENT : DEFAULT_MASK_GRADIENT;
+    const maskLocations = isHomeVariant ? HOME_MASK_LOCATIONS : DEFAULT_MASK_LOCATIONS;
+
     return (
         <View pointerEvents="none" style={[styles.shell, { height }]}>
             {HAS_NATIVE_PROGRESSIVE_BLUR ? (
                 <ProgressiveBlurView
                     blurType={isDark ? 'dark' : 'light'}
-                    blurAmount={12}
+                    blurAmount={isHomeVariant ? 16 : 12}
                     direction="blurredBottomClearTop"
                     startOffset={0.0}
                     style={{ height }}
@@ -44,8 +85,8 @@ export function BottomCanopy({ height, isDark }) {
                     style={{ height }}
                     maskElement={
                         <LinearGradient
-                            colors={MASK_GRADIENT}
-                            locations={[0, 0.2, 0.5, 0.8, 1]}
+                            colors={maskGradient}
+                            locations={maskLocations}
                             style={StyleSheet.absoluteFillObject}
                         />
                     }
@@ -54,8 +95,8 @@ export function BottomCanopy({ height, isDark }) {
                 </MaskedView>
             ) : (
                 <LinearGradient
-                    colors={isDark ? DARK_GRADIENT : LIGHT_GRADIENT}
-                    locations={[0, 0.2, 0.5, 0.8, 1]}
+                    colors={canopyGradient}
+                    locations={maskLocations}
                     style={{ height }}
                 />
             )}

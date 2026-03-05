@@ -14,6 +14,7 @@ import { useAppState } from '../../src/AppStateContext';
 import FuelSummaryCard from '../../src/components/FuelSummaryCard';
 import ClusterDebugCard from '../../src/components/ClusterDebugCard';
 import TopCanopy from '../../src/components/TopCanopy';
+import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
 import { getCachedFuelPriceSnapshot, getFuelFailureMessage, refreshFuelPriceSnapshot } from '../../src/services/fuel';
 import { useTheme } from '../../src/ThemeContext';
 import { usePreferences } from '../../src/PreferencesContext';
@@ -87,6 +88,7 @@ const STATIONS_FIT_BOTTOM_CONTENT_PADDING = 140;
 const STATIONS_FIT_SIDE_EXTRA_PADDING = 12;
 const STATIONS_FIT_SETTLE_PASS_DELAY_MS = 260;
 const ENABLE_CLUSTER_MERGE_TRANSITIONS = false;
+const HOME_DARK_GLASS_TINT = '#101010ff';
 
 function waitForMilliseconds(duration) {
     return new Promise(resolve => {
@@ -1080,7 +1082,7 @@ function buildClusterDebugRecordingLog(samples, transitionEvents = []) {
     ].join('\n');
 }
 
-function AnimatedCardItem({ item, index, scrollX, itemWidth, isDark, benchmarkQuote, errorMsg, isRefreshing, themeColors }) {
+function AnimatedCardItem({ item, index, scrollX, itemWidth, isDark, benchmarkQuote, errorMsg, isRefreshing, themeColors, glassTintColor }) {
     const animatedDimStyle = useAnimatedStyle(() => {
         if (isDark) return { opacity: 0 };
 
@@ -1100,6 +1102,7 @@ function AnimatedCardItem({ item, index, scrollX, itemWidth, isDark, benchmarkQu
             <FuelSummaryCard
                 benchmarkQuote={benchmarkQuote}
                 errorMsg={errorMsg}
+                glassTintColor={glassTintColor}
                 isDark={isDark}
                 isRefreshing={isRefreshing}
                 quote={item}
@@ -1143,6 +1146,7 @@ export default function HomeScreen() {
     const isFocused = useIsFocused();
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
+    const homeGlassTintColor = isDark ? HOME_DARK_GLASS_TINT : '#FFFFFF';
     const { preferences } = usePreferences();
     const {
         fuelResetToken,
@@ -1677,6 +1681,11 @@ export default function HomeScreen() {
             animated: true,
         });
         setActiveIndex(index);
+        if (index === 0) {
+            fitMapToStations();
+            return;
+        }
+
         zoomToStation(primaryQuote);
     };
 
@@ -1696,6 +1705,45 @@ export default function HomeScreen() {
             clearTimeout(mapIdleSettleTimeoutRef.current);
             mapIdleSettleTimeoutRef.current = null;
         }
+    };
+
+    const fitMapToStations = () => {
+        if (!mapRef.current) {
+            return;
+        }
+
+        // Frame all visible stations without forcing the user-location bubble into the fit bounds.
+        const coords = stationQuotes
+            .filter(q => Number.isFinite(q?.latitude) && Number.isFinite(q?.longitude))
+            .map(q => ({ latitude: q.latitude, longitude: q.longitude }));
+
+        if (coords.length === 0) {
+            return;
+        }
+
+        isAnimatingRef.current = true;
+        setMapMotionState(true);
+        const fitEdgePadding = {
+            top: topCanopyHeight + STATIONS_FIT_TOP_EXTRA_PADDING,
+            right: Math.max(horizontalPadding.right, sideInset) + STATIONS_FIT_SIDE_EXTRA_PADDING,
+            bottom: bottomPadding + STATIONS_FIT_BOTTOM_CONTENT_PADDING,
+            left: Math.max(horizontalPadding.left, sideInset) + STATIONS_FIT_SIDE_EXTRA_PADDING,
+        };
+
+        mapRef.current.fitToCoordinates(coords, {
+            edgePadding: fitEdgePadding,
+            animated: true,
+        });
+        setTimeout(() => {
+            if (!mapRef.current) {
+                return;
+            }
+
+            mapRef.current.fitToCoordinates(coords, {
+                edgePadding: fitEdgePadding,
+                animated: false,
+            });
+        }, STATIONS_FIT_SETTLE_PASS_DELAY_MS);
     };
 
     const setMapMotionState = (moving) => {
@@ -1779,49 +1827,16 @@ export default function HomeScreen() {
             lastDataHashRef.current = currentHash;
             isUserScrollingRef.current = false;
 
-            // Frame all visible stations without forcing the user-location bubble into the fit bounds.
-            const coords = stationQuotes
-                .filter(q => q.latitude && q.longitude)
-                .map(q => ({ latitude: q.latitude, longitude: q.longitude }));
-
-            if (coords.length > 0) {
-                isAnimatingRef.current = true;
-                setTimeout(() => {
-                    if (!mapRef.current) {
-                        isAnimatingRef.current = false;
-                        if (isMountedRef.current) {
-                            setMapMotionState(false);
-                        }
-                        return;
-                    }
-
-                    setMapMotionState(true);
-                    const fitEdgePadding = {
-                        top: topCanopyHeight + STATIONS_FIT_TOP_EXTRA_PADDING,
-                        right: Math.max(horizontalPadding.right, sideInset) + STATIONS_FIT_SIDE_EXTRA_PADDING,
-                        bottom: bottomPadding + STATIONS_FIT_BOTTOM_CONTENT_PADDING,
-                        left: Math.max(horizontalPadding.left, sideInset) + STATIONS_FIT_SIDE_EXTRA_PADDING,
-                    };
-
-                    mapRef.current.fitToCoordinates(coords, {
-                        edgePadding: fitEdgePadding,
-                        animated: true,
-                    });
-                    setTimeout(() => {
-                        if (!mapRef.current) {
-                            return;
-                        }
-
-                        mapRef.current.fitToCoordinates(coords, {
-                            edgePadding: fitEdgePadding,
-                            animated: false,
-                        });
-                    }, STATIONS_FIT_SETTLE_PASS_DELAY_MS);
-                }, 100);
-            }
+            setTimeout(() => {
+                fitMapToStations();
+            }, 100);
         } else if (isUserScrollingRef.current && activeIndex >= 0 && activeIndex < stationQuotes.length) {
             const activeQuote = stationQuotes[activeIndex];
-            zoomToStation(activeQuote);
+            if (activeIndex === 0) {
+                fitMapToStations();
+            } else {
+                zoomToStation(activeQuote);
+            }
         }
     }, [activeIndex, stationQuotes, bottomPadding, topCanopyHeight, horizontalPadding.left, horizontalPadding.right, sideInset, isFocused]);
 
@@ -2558,7 +2573,7 @@ export default function HomeScreen() {
             ) : null}
 
             <TopCanopy edgeColor={canopyEdgeLine} height={topCanopyHeight} isDark={isDark} topInset={insets.top} />
-            <BottomCanopy height={bottomPadding + 140} isDark={isDark} />
+            <BottomCanopy height={bottomPadding + 220} isDark={isDark} variant="home" />
 
             <View
                 style={[
@@ -2582,7 +2597,7 @@ export default function HomeScreen() {
                             styles.reloadButton,
                             isRefreshingPrices || isLoadingLocation ? styles.reloadButtonDisabled : null,
                         ]}
-                        tintColor={isDark ? '#000000' : '#FFFFFF'}
+                        tintColor={homeGlassTintColor}
                         glassEffectStyle="clear"
                         key={isDark ? 'reload-dark' : 'reload-light'}
                     >
@@ -2603,7 +2618,7 @@ export default function HomeScreen() {
                     },
                 ]}
             >
-                <Text style={[styles.headerTitle, { color: themeColors.text }]}>Fuel Up</Text>
+                <FuelUpHeaderLogo isDark={isDark} style={styles.headerLogo} />
             </View>
 
             <View
@@ -2689,6 +2704,7 @@ export default function HomeScreen() {
                                 errorMsg={errorMsg}
                                 isRefreshing={isRefreshingPrices || isLoadingLocation}
                                 themeColors={themeColors}
+                                glassTintColor={homeGlassTintColor}
                             />
                         )}
                     />
@@ -2697,6 +2713,7 @@ export default function HomeScreen() {
                         <FuelSummaryCard
                             benchmarkQuote={benchmarkQuote}
                             errorMsg={errorMsg}
+                            glassTintColor={homeGlassTintColor}
                             isDark={isDark}
                             isRefreshing={isRefreshingPrices || isLoadingLocation}
                             quote={bestQuote}
@@ -2720,9 +2737,7 @@ const styles = StyleSheet.create({
         right: 0,
         alignItems: 'center',
     },
-    headerTitle: {
-        fontSize: 24,
-        fontWeight: '700',
+    headerLogo: {
         marginBottom: 10,
     },
     contentOverlay: {

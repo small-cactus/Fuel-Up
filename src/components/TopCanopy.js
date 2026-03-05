@@ -10,6 +10,11 @@ const HAS_NATIVE_PROGRESSIVE_BLUR =
 const HAS_NATIVE_MASK =
     Platform.OS === 'ios' && Boolean(UIManager.hasViewManagerConfig?.('RNCMaskedView'));
 
+const TOP_CANOPY_BLUR_STRENGTH = 0.8; // 0 = no blur, 1 = default, >1 = stronger
+const TOP_CANOPY_BLUR_SPREAD = 1.4; // 1 = default height, >1 = spreads further down
+const BASE_PROGRESSIVE_BLUR_AMOUNT = 5;
+const BASE_MASK_BLUR_INTENSITY = 80;
+
 const LIGHT_GRADIENT = [
     'rgba(248, 250, 252, 0.68)',
     'rgba(248, 250, 252, 0.46)',
@@ -26,20 +31,24 @@ const DARK_GRADIENT = [
 ];
 const MASK_GRADIENT = ['rgba(0, 0, 0, 1)', 'rgba(0, 0, 0, 0.7)', 'rgba(0, 0, 0, 0.28)', 'rgba(0, 0, 0, 0.06)', 'rgba(0, 0, 0, 0)'];
 
-export function TopCanopy({ edgeColor, height, isDark, topInset }) {
+export function TopCanopy({ height, isDark }) {
+    const canopyHeight = Math.max(0, height * Math.max(0, TOP_CANOPY_BLUR_SPREAD));
+    const progressiveBlurAmount = Math.max(0, BASE_PROGRESSIVE_BLUR_AMOUNT * TOP_CANOPY_BLUR_STRENGTH);
+    const maskBlurIntensity = Math.min(100, Math.max(0, BASE_MASK_BLUR_INTENSITY * TOP_CANOPY_BLUR_STRENGTH));
+
     return (
-        <View pointerEvents="none" style={[styles.shell, { height }]}>
+        <View pointerEvents="none" style={[styles.shell, { height: canopyHeight }]}>
             {HAS_NATIVE_PROGRESSIVE_BLUR ? (
                 <ProgressiveBlurView
                     blurType={isDark ? 'dark' : 'light'}
-                    blurAmount={24}
+                    blurAmount={progressiveBlurAmount}
                     direction="blurredTopClearBottom"
                     startOffset={0.0}
-                    style={{ height }}
+                    style={{ height: canopyHeight }}
                 />
             ) : HAS_NATIVE_MASK ? (
                 <MaskedView
-                    style={{ height }}
+                    style={{ height: canopyHeight }}
                     maskElement={
                         <LinearGradient
                             colors={MASK_GRADIENT}
@@ -48,26 +57,15 @@ export function TopCanopy({ edgeColor, height, isDark, topInset }) {
                         />
                     }
                 >
-                    <BlurView intensity={80} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFillObject} />
+                    <BlurView intensity={maskBlurIntensity} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFillObject} />
                 </MaskedView>
             ) : (
                 <LinearGradient
                     colors={isDark ? DARK_GRADIENT : LIGHT_GRADIENT}
                     locations={[0, 0.3, 0.6, 0.9, 1]}
-                    style={{ height }}
+                    style={{ height: canopyHeight }}
                 />
             )}
-
-
-            <View
-                style={[
-                    styles.edge,
-                    {
-                        top: topInset + 10,
-                        backgroundColor: edgeColor,
-                    },
-                ]}
-            />
         </View>
     );
 }
@@ -78,12 +76,6 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
-    },
-    edge: {
-        position: 'absolute',
-        left: 20,
-        right: 20,
-        height: StyleSheet.hairlineWidth,
     },
 });
 

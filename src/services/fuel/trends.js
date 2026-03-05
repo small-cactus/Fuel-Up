@@ -107,12 +107,13 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
 
     const stations = Object.values(stationAggregation);
 
-    // Calculate max delta per station
+    // Calculate max delta per station and distance to user
     stations.forEach(st => {
         const pricesOnly = st.prices.map(p => p.price);
         st.minPrice = Math.min(...pricesOnly);
         st.maxPrice = Math.max(...pricesOnly);
         st.delta = st.maxPrice - st.minPrice;
+        st.distanceMiles = getDistanceMiles(latitude, longitude, st.latitude, st.longitude);
 
         const avgPrice = pricesOnly.reduce((a, b) => a + b, 0) / pricesOnly.length;
         mapHeatmapPoints.push({
