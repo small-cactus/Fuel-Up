@@ -114,3 +114,21 @@ The goal is to prove:
 4. Movement pacing is fast enough to finish promptly while still visually smooth.
 5. Probe coverage is broad enough to catch regressions across stepped zoom and one-shot zoom scenarios.
 6. After probe reset, map-visible station geometry is consistent with where it started.
+
+---
+
+# Cluster Transition Contract (User-Defined)
+
+The split/merge behavior must follow this exact model:
+
+1. Glass containers in the same parent container can merge with a morphing effect when they are touching.
+2. The parent container must encapsulate the full range of pills that can merge.
+3. During connection/merge:
+   - Instantly replace the existing outside-parent price container with a parent-contained duplicate that is 1:1 in style/position.
+   - Animate that duplicate into a `+1` capsule moving toward the main cluster shown price.
+   - For more than one extra price, convert to `+n`, move toward existing `+1`, assume exact same position/style, then disappear while existing `+1` becomes `+2`.
+4. During disconnection/zoom-in:
+   - Parent container remains large enough to contain existing outside-parent price locations.
+   - Parent container stays pinned/scaled to the map.
+   - Instantly duplicate `+n` exactly where it is (same text/container/position), then move duplicates inside parent bounds toward their outside-parent target positions using quick eased motion.
+   - When aligned, transition to exact text/styles of the outside-parent price containers, then instantly remove the parent-contained duplicates so there is zero pixel delta at handoff.

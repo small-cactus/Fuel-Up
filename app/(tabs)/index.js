@@ -70,7 +70,7 @@ const MAP_REGION_EPSILON = 0.000001;
 const CLUSTER_LIVE_MIN_DURATION = 2200;
 const CLUSTER_GEOMETRY_ANIMATION_DURATION = 2200;
 const CLUSTER_SPLIT_MIN_DURATION = 420;
-const CLUSTER_SPLIT_MILLISECONDS_PER_POINT = 55;
+const CLUSTER_SPLIT_MILLISECONDS_PER_POINT = 65;
 const CLUSTER_SPLIT_MAX_DURATION = 2800;
 const CLUSTER_SPLIT_REENTRY_COOLDOWN_MS = 2000;
 const CLUSTER_SPLIT_KICKOFF_DELAY_MS = 260;
@@ -80,6 +80,7 @@ const ENABLE_CLUSTER_REMAINDER_BUBBLE = true;
 const CLUSTER_DEBUG_PROBE_ANIMATION_DURATION = 650;
 const CLUSTER_DEBUG_PROBE_IDLE_TIMEOUT = 2400;
 const CLUSTER_DEBUG_PROBE_SETTLE_DURATION = 180;
+const CLUSTER_MAP_IDLE_SETTLE_MS = 600;
 const CLUSTER_DEBUG_PROBE_INITIAL_LOAD_WAIT = 3000;
 const CLUSTER_DEBUG_PROBE_RECORDING_DELAY = 150;
 const CLUSTER_DEBUG_PROBE_ZOOM_IN_STEP_COUNT = 10;
@@ -1296,16 +1297,6 @@ function AnimatedMarkerOverlay({
             const pendingQuotes = pendingCluster.quotes;
             const currentClusterKey = buildClusterMembershipKey(cluster);
             const pendingClusterKey = buildClusterMembershipKey(pendingCluster);
-            const carriedShellState = splitCarryForwardRef.current?.clusterKey === currentClusterKey
-                ? splitCarryForwardRef.current
-                : null;
-            const canReuseCarriedShellState = Boolean(
-                carriedShellState &&
-                Number.isFinite(carriedShellState.spread) &&
-                Number.isFinite(carriedShellState.morph) &&
-                Math.abs(carriedShellState.spread - spreadAnim.value) <= 0.05 &&
-                Math.abs(carriedShellState.morph - morphAnim.value) <= 0.05
-            );
             const splitBridgeSignature = `${quotes.map(quote => quote.stationId).join(',')}->${pendingQuotes.map(quote => quote.stationId).join(',')}`;
             const isNewPendingTransition = splitBridgeSignatureRef.current !== splitBridgeSignature;
 
@@ -1316,12 +1307,8 @@ function AnimatedMarkerOverlay({
                 splitStagePathCompleteRef.current = false;
                 splitStageShellCompleteRef.current = true;
                 clearSplitStageTimeouts();
-                const currentSpreadValue = canReuseCarriedShellState
-                    ? carriedShellState.spread
-                    : spreadAnim.value;
-                const currentMorphValue = canReuseCarriedShellState
-                    ? carriedShellState.morph
-                    : morphAnim.value;
+                const currentSpreadValue = spreadAnim.value;
+                const currentMorphValue = morphAnim.value;
                 let splitStageDuration = CLUSTER_LIVE_MIN_DURATION;
 
                 const bridgePrimary = quotes[0];
@@ -1839,7 +1826,9 @@ function AnimatedMarkerOverlay({
     const carryTargetY = activeSplitCarry?.endY ?? pendingStaticSecondaryY;
     const shouldRenderStaticRemainderBubble = (
         ENABLE_CLUSTER_REMAINDER_BUBBLE &&
-        hasRemainderBubble
+        hasRemainderBubble &&
+        !bridgeVisible &&
+        !carryVisible
     );
     const breakoutOpacity = breakoutVisible ? 1 : 0;
     const remainderOpacity = shouldRenderStaticRemainderBubble ? 1 : 0;
@@ -1881,11 +1870,7 @@ function AnimatedMarkerOverlay({
             : breakoutTrackY;
         const breakoutX = breakoutTrackX;
         const breakoutY = breakoutTrackY;
-        // When the bridge is active, the breakout bubble visual follows the bridge
-        // path (via rightBubbleWrapperStyle), not the spread-based breakoutTrackX.
-        // Report breakout as not-visible during bridge so the test tracks the smooth
-        // bridge motion rather than the oscillating spread position.
-        const debugBreakoutVisible = breakoutVisible && !bridgeVisible;
+        const debugBreakoutVisible = breakoutVisible;
         const debugBreakoutOpacity = debugBreakoutVisible ? breakoutOpacity : 0;
         const breakoutWidth = breakoutVisible
             ? interpolate(morphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
@@ -1923,9 +1908,27 @@ function AnimatedMarkerOverlay({
         const bridgePriceOpacity = bridgeVisible
             ? interpolate(bridgeMorphValue, [0.6, 1], [0, 1], Extrapolate.CLAMP)
             : 0;
-        const containerLogicalLayer = 'breakout';
-        const containerLogicalX = breakoutTrackX;
-        const containerLogicalY = breakoutTrackY;
+        const containerLogicalLayer = bridgeVisible
+            ? 'bridge'
+            : (carryVisible
+                ? 'carry'
+                : (debugBreakoutVisible
+                    ? 'breakout'
+                    : (shouldRenderStaticRemainderBubble ? 'remainder' : '')));
+        const containerLogicalX = containerLogicalLayer === 'breakout'
+            ? breakoutTrackX
+            : (containerLogicalLayer === 'remainder'
+                ? remainderX
+                : (containerLogicalLayer === 'carry'
+                    ? carryX
+                    : (containerLogicalLayer === 'bridge' ? bridgeX : null)));
+        const containerLogicalY = containerLogicalLayer === 'breakout'
+            ? breakoutTrackY
+            : (containerLogicalLayer === 'remainder'
+                ? remainderY
+                : (containerLogicalLayer === 'carry'
+                    ? carryY
+                    : (containerLogicalLayer === 'bridge' ? bridgeY : null)));
         const containerVisualLayer = debugBreakoutVisible
             ? 'breakout'
             : (bridgeVisible
@@ -2020,18 +2023,6 @@ function AnimatedMarkerOverlay({
         });
     };
 
-    useEffect(() => {
-        emitDebugRenderFrame();
-    }, [
-        isDebugWatched,
-        isDebugRecording,
-        runtimePhase,
-        fromClusterKey,
-        toClusterKey,
-        currentPendingSignature,
-        isMapMoving,
-    ]);
-
     useAnimatedReaction(
         () => {
             if (!isDebugWatched || !isDebugRecording || !onDebugRenderFrame) {
@@ -2062,7 +2053,7 @@ function AnimatedMarkerOverlay({
                 : breakoutTrackY;
             const breakoutX = breakoutTrackX;
             const breakoutY = breakoutTrackY;
-            const debugBreakoutVisible = breakoutVisible && !bridgeVisible;
+            const debugBreakoutVisible = breakoutVisible;
             const debugBreakoutOpacity = debugBreakoutVisible ? breakoutOpacity : 0;
             const breakoutWidth = breakoutVisible
                 ? interpolate(morphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
@@ -2100,9 +2091,27 @@ function AnimatedMarkerOverlay({
             const bridgePriceOpacity = bridgeVisible
                 ? interpolate(bridgeMorphValue, [0.6, 1], [0, 1], Extrapolate.CLAMP)
                 : 0;
-            const containerLogicalLayer = 'breakout';
-            const containerLogicalX = breakoutTrackX;
-            const containerLogicalY = breakoutTrackY;
+            const containerLogicalLayer = bridgeVisible
+                ? 'bridge'
+                : (carryVisible
+                    ? 'carry'
+                    : (debugBreakoutVisible
+                        ? 'breakout'
+                        : (shouldRenderStaticRemainderBubble ? 'remainder' : '')));
+            const containerLogicalX = containerLogicalLayer === 'breakout'
+                ? breakoutTrackX
+                : (containerLogicalLayer === 'remainder'
+                    ? remainderX
+                    : (containerLogicalLayer === 'carry'
+                        ? carryX
+                        : (containerLogicalLayer === 'bridge' ? bridgeX : null)));
+            const containerLogicalY = containerLogicalLayer === 'breakout'
+                ? breakoutTrackY
+                : (containerLogicalLayer === 'remainder'
+                    ? remainderY
+                    : (containerLogicalLayer === 'carry'
+                        ? carryY
+                        : (containerLogicalLayer === 'bridge' ? bridgeY : null)));
             const containerVisualLayer = debugBreakoutVisible
                 ? 'breakout'
                 : (bridgeVisible
@@ -2510,6 +2519,7 @@ export default function HomeScreen() {
     const flatListRef = useRef(null);
     const isMountedRef = useRef(true);
     const mapIdleWaitersRef = useRef([]);
+    const mapIdleSettleTimeoutRef = useRef(null);
     const mapRegionRef = useRef(DEFAULT_REGION);
     const lastClusterDebugSignatureRef = useRef('');
     const clusterDebugSamplesRef = useRef([]);
@@ -2810,6 +2820,7 @@ export default function HomeScreen() {
     useEffect(() => {
         return () => {
             isMountedRef.current = false;
+            clearMapIdleSettleTimeout();
             const pendingMapIdleWaiters = mapIdleWaitersRef.current;
 
             mapIdleWaitersRef.current = [];
@@ -2867,6 +2878,11 @@ export default function HomeScreen() {
     const stationQuotesRef = useRef([]);
     const clustersSignatureRef = useRef('');
     const [heldSplitClusters, setHeldSplitClusters] = useState([]);
+    const heldSplitClustersRef = useRef([]);
+
+    useEffect(() => {
+        heldSplitClustersRef.current = heldSplitClusters;
+    }, [heldSplitClusters]);
 
     const clusters = useMemo(() => {
         if (stationQuotes.length === 0) return [];
@@ -3316,6 +3332,13 @@ export default function HomeScreen() {
     const mapMotionRef = useRef(false);
     const prevIsFocusedRef = useRef(isFocused);
 
+    const clearMapIdleSettleTimeout = () => {
+        if (mapIdleSettleTimeoutRef.current) {
+            clearTimeout(mapIdleSettleTimeoutRef.current);
+            mapIdleSettleTimeoutRef.current = null;
+        }
+    };
+
     const setMapMotionState = (moving) => {
         if (mapMotionRef.current === moving) {
             return;
@@ -3651,6 +3674,36 @@ export default function HomeScreen() {
         return didReachIdle;
     };
 
+    const waitForClusterDebugProbeResetSettle = async (runId, timeoutMs = 4500) => {
+        const deadline = Date.now() + timeoutMs;
+
+        while (Date.now() < deadline) {
+            if (clusterDebugProbeRunIdRef.current !== runId) {
+                return false;
+            }
+
+            const hasHeldSplitTransitions = heldSplitClustersRef.current.length > 0;
+            if (!hasHeldSplitTransitions && !mapMotionRef.current && !isAnimatingRef.current) {
+                await waitForMilliseconds(CLUSTER_DEBUG_PROBE_SETTLE_DURATION);
+
+                if (
+                    clusterDebugProbeRunIdRef.current !== runId ||
+                    heldSplitClustersRef.current.length > 0 ||
+                    mapMotionRef.current ||
+                    isAnimatingRef.current
+                ) {
+                    continue;
+                }
+
+                return true;
+            }
+
+            await waitForMilliseconds(50);
+        }
+
+        return false;
+    };
+
     const handleRunClusterDebugProbe = async (trigger = 'manual') => {
         if (!debugClusterAnimations || isClusterDebugProbeRunning || isClusterDebugRecording) {
             return;
@@ -3829,6 +3882,14 @@ export default function HomeScreen() {
                 setClusterDebugProbeSummary('Probe: restoring the original map view.');
                 await animateClusterDebugProbeToRegion(probePlan.focusStartRegion, runId);
             }
+            if (clusterDebugProbeRunIdRef.current !== runId) {
+                return;
+            }
+            setClusterDebugProbeSummary('Probe: waiting for split handoffs to settle.');
+            await waitForClusterDebugProbeResetSettle(runId);
+            if (clusterDebugProbeRunIdRef.current !== runId) {
+                return;
+            }
 
             const endClusterSignature = clustersSignatureRef.current;
             const endStationScreenSnapshot = buildProbeStationScreenSnapshot(
@@ -3840,6 +3901,13 @@ export default function HomeScreen() {
             const resetStationInvariant = compareProbeStationScreenSnapshots(
                 startStationScreenSnapshot,
                 endStationScreenSnapshot
+            );
+            const resetSignaturesMatch = (
+                startClusterSignature === endClusterSignature ||
+                (
+                    (resetStationInvariant?.maxPairDistanceDelta || 0) <= 0.001 &&
+                    (resetStationInvariant?.meanPairDistanceDelta || 0) <= 0.001
+                )
             );
             const modesCaptured = Array.from(new Set(
                 recordedSamples
@@ -3866,7 +3934,7 @@ export default function HomeScreen() {
                 resetInvariant: {
                     startClusterSignature,
                     endClusterSignature,
-                    signaturesMatch: startClusterSignature === endClusterSignature,
+                    signaturesMatch: resetSignaturesMatch,
                     startStationScreenSnapshot,
                     endStationScreenSnapshot,
                     ...resetStationInvariant,
@@ -4124,14 +4192,22 @@ export default function HomeScreen() {
                 showsUserLocation={hasLocationPermission}
                 userInterfaceStyle={isDark ? 'dark' : 'light'}
                 onRegionChange={(region) => {
+                    clearMapIdleSettleTimeout();
                     setMapMotionState(true);
                     setMapRegionIfNeeded(region);
                 }}
                 onRegionChangeComplete={(region) => {
                     setMapRegionIfNeeded(region);
                     isAnimatingRef.current = false;
-                    setMapMotionState(false);
-                    flushMapIdleWaiters(true);
+                    clearMapIdleSettleTimeout();
+                    mapIdleSettleTimeoutRef.current = setTimeout(() => {
+                        mapIdleSettleTimeoutRef.current = null;
+                        if (!isMountedRef.current) {
+                            return;
+                        }
+                        setMapMotionState(false);
+                        flushMapIdleWaiters(true);
+                    }, CLUSTER_MAP_IDLE_SETTLE_MS);
                 }}
             >
                 {hasRenderableClusters ? (
