@@ -1,15 +1,20 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput } from 'react-native';
 import { useFocusEffect } from 'expo-router';
+import * as Location from 'expo-location';
 import { useTheme } from '../../src/ThemeContext';
+import { useAppState } from '../../src/AppStateContext';
 import { usePreferences } from '../../src/PreferencesContext';
 import { getApiStats, resetApiStats } from '../../src/lib/devCounter';
 import { scheduleTestNotification, startLiveActivity, updateLiveActivity, endLiveActivity } from '../../src/lib/notifications';
+import { refreshFuelPriceSnapshot } from '../../src/services/fuel';
 
 export default function DevStatsScreen() {
     const { isDark } = useTheme();
+    const { manualLocationOverride, setFuelDebugState } = useAppState();
     const { preferences, updatePreference } = usePreferences();
     const [stats, setStats] = useState({ gasbuddy: 0, google: 0, supabase: 0, barchart: 0, tomtom: 0 });
+    const [isRefreshingFuel, setIsRefreshingFuel] = useState(false);
     const [testTitle, setTestTitle] = useState('Test Push');
     const [testBody, setTestBody] = useState('This is a local push notification test.');
     const [liveActivityInstance, setLiveActivityInstance] = useState(null);
@@ -23,6 +28,93 @@ export default function DevStatsScreen() {
     const handleReset = async () => {
         const fresh = await resetApiStats();
         setStats(fresh);
+    };
+
+    const resolveActiveCoordinates = async () => {
+        if (
+            manualLocationOverride &&
+            Number.isFinite(Number(manualLocationOverride.latitude)) &&
+            Number.isFinite(Number(manualLocationOverride.longitude))
+        ) {
+            return {
+                latitude: Number(manualLocationOverride.latitude),
+                longitude: Number(manualLocationOverride.longitude),
+                source: 'manual',
+            };
+        }
+
+        let permission = await Location.getForegroundPermissionsAsync();
+        if (permission.status !== 'granted') {
+            permission = await Location.requestForegroundPermissionsAsync();
+        }
+
+        if (permission.status !== 'granted') {
+            throw new Error('Location permission denied.');
+        }
+
+        const loc = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+        });
+
+        return {
+            latitude: loc.coords.latitude,
+            longitude: loc.coords.longitude,
+            source: 'device',
+        };
+    };
+
+    const handleRunHourlyRefreshPath = async () => {
+        if (isRefreshingFuel) {
+            return;
+        }
+
+        setIsRefreshingFuel(true);
+        try {
+            const coords = await resolveActiveCoordinates();
+            const query = {
+                latitude: coords.latitude,
+                longitude: coords.longitude,
+                radiusMiles: preferences.searchRadiusMiles || 10,
+                fuelType: preferences.preferredOctane || 'regular',
+                preferredProvider: 'gasbuddy',
+                forceLiveGasBuddy: true,
+            };
+
+            const result = await refreshFuelPriceSnapshot(query);
+            if (result?.debugState) {
+                setFuelDebugState(result.debugState);
+            }
+
+            const latestStats = await getApiStats();
+            setStats(latestStats);
+
+            const quote = result?.snapshot?.quote || null;
+            const gasBuddyDebug = (result?.debugState?.providers || []).find(
+                provider => provider?.providerId === 'gasbuddy'
+            );
+            const persistedCount = gasBuddyDebug?.summary?.persistedLiveRowCount;
+            const persistError = gasBuddyDebug?.summary?.persistError;
+            const persistLine = typeof persistedCount === 'number'
+                ? `\nDB persisted rows: ${persistedCount}`
+                : '';
+            const persistErrorLine = persistError ? `\nDB write error: ${persistError}` : '';
+            Alert.alert(
+                'Hourly Refresh Complete',
+                quote
+                    ? `${quote.stationName}: $${Number(quote.price).toFixed(2)} (${coords.source}, gasbuddy live)${persistLine}${persistErrorLine}`
+                    : `No station quote returned (${coords.source}).${persistLine}${persistErrorLine}`
+            );
+        } catch (error) {
+            if (error?.debugState) {
+                setFuelDebugState(error.debugState);
+            }
+            Alert.alert(
+                'Hourly Refresh Failed',
+                error?.userMessage || error?.message || 'Unable to run hourly refresh path.'
+            );
+        } finally {
+            setIsRefreshingFuel(false);
+        }
     };
 
     const textColor = isDark ? '#FFF' : '#000';
@@ -62,6 +154,19 @@ export default function DevStatsScreen() {
                     <Text style={[styles.label, { color: textColor }]}>Barchart Live Request:</Text>
                     <Text style={[styles.value, { color: textColor }]}>{stats.barchart || 0}</Text>
                 </View>
+
+                <TouchableOpacity
+                    style={[
+                        styles.actionButton,
+                        { backgroundColor: '#007AFF', marginTop: 16, opacity: isRefreshingFuel ? 0.7 : 1 },
+                    ]}
+                    onPress={handleRunHourlyRefreshPath}
+                    disabled={isRefreshingFuel}
+                >
+                    <Text style={styles.actionButtonText}>
+                        {isRefreshingFuel ? 'Running Hourly Fuel Refresh...' : 'Run Hourly Fuel Refresh Path'}
+                    </Text>
+                </TouchableOpacity>
             </View>
 
             <TouchableOpacity style={styles.resetButton} onPress={handleReset}>

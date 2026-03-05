@@ -437,7 +437,7 @@ test('buildGasBuddyGraphQLRequest produces a valid GraphQL POST config', () => {
     assert.equal(config.fuelProduct, 'regular_gas');
 });
 
-test('GasBuddy GraphQL payload normalizes into station quotes with min(cash,credit)', () => {
+test('GasBuddy GraphQL payload normalizes into station quotes with credit-first fallback to cash', () => {
     const quotes = normalizeGasBuddyResponse({
         origin,
         fuelType: 'regular',
@@ -517,11 +517,15 @@ test('GasBuddy GraphQL payload normalizes into station quotes with min(cash,cred
     assert.ok(quotes[0].allPrices.regular);
     assert.ok(quotes[0].allPrices.premium);
 
-    // Shell — min(cash, credit) = cash
+    // Shell — credit preferred over cash when both are present
     assert.equal(quotes[1].stationName, 'Shell');
-    assert.equal(quotes[1].price, 2.77);
+    assert.equal(quotes[1].price, 2.87);
     assert.equal(quotes[1].latitude, 40.72);
     assert.equal(quotes[1].longitude, -74.02);
+    assert.equal(quotes[1].allPrices.regular, 2.87);
+    assert.equal(quotes[1].allPrices._payment.regular.credit, 2.87);
+    assert.equal(quotes[1].allPrices._payment.regular.cash, 2.77);
+    assert.equal(quotes[1].allPrices._payment.regular.selected, 'credit');
 });
 
 test('GasBuddy station quote wins preferred selection', () => {

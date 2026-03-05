@@ -68,10 +68,13 @@ const TOP_CANOPY_HEIGHT = 72;
 const CLUSTER_DEBUG_JUMP_THRESHOLD = 5;
 const MAP_REGION_EPSILON = 0.000001;
 const CLUSTER_LIVE_MIN_DURATION = 1500;
-const CLUSTER_GEOMETRY_ANIMATION_DURATION = 220;
+const CLUSTER_GEOMETRY_ANIMATION_DURATION = 1500;
 const CLUSTER_SPLIT_MIN_DURATION = 420;
 const CLUSTER_SPLIT_MILLISECONDS_PER_POINT = 55;
 const CLUSTER_SPLIT_MAX_DURATION = 2800;
+const CLUSTER_SPLIT_REENTRY_COOLDOWN_MS = 500;
+const ENABLE_CLUSTER_SPLIT_HANDOFF = false;
+const ENABLE_CLUSTER_REMAINDER_BUBBLE = false;
 const CLUSTER_DEBUG_PROBE_ANIMATION_DURATION = 650;
 const CLUSTER_DEBUG_PROBE_IDLE_TIMEOUT = 2400;
 const CLUSTER_DEBUG_PROBE_SETTLE_DURATION = 180;
@@ -1018,14 +1021,6 @@ function AnimatedMarkerOverlay({
     const ptPerLat = mapRegion?.latitudeDelta ? SCREEN_HEIGHT / mapRegion.latitudeDelta : 0;
     const primaryLat = primaryQuote.latitude;
     const primaryLng = primaryQuote.longitude;
-    const liveSplitBridgeTargetX = activeSplitBridge?.endX ?? 0;
-    const liveSplitBridgeTargetY = activeSplitBridge?.endY ?? 0;
-    const splitBridgeHorizontalReach = activeSplitBridge
-        ? Math.max(Math.abs(activeSplitBridge.startX), Math.abs(liveSplitBridgeTargetX))
-        : 0;
-    const splitBridgeVerticalReach = activeSplitBridge
-        ? Math.max(Math.abs(activeSplitBridge.startY), Math.abs(liveSplitBridgeTargetY))
-        : 0;
     const anchoredQuotes = quotes.map(quote => {
         const dx = (quote.longitude - primaryLng) * ptPerLng;
         const dy = -(quote.latitude - primaryLat) * ptPerLat;
@@ -1036,6 +1031,14 @@ function AnimatedMarkerOverlay({
             distanceFromPrimary: Math.hypot(dx, dy),
         };
     });
+    const liveSplitBridgeTargetX = activeSplitBridge?.endX ?? 0;
+    const liveSplitBridgeTargetY = activeSplitBridge?.endY ?? 0;
+    const splitBridgeHorizontalReach = activeSplitBridge
+        ? Math.max(Math.abs(activeSplitBridge.startX), Math.abs(liveSplitBridgeTargetX))
+        : 0;
+    const splitBridgeVerticalReach = activeSplitBridge
+        ? Math.max(Math.abs(activeSplitBridge.startY), Math.abs(liveSplitBridgeTargetY))
+        : 0;
     const emergingAnchoredQuote = pickAnchoredSecondaryQuote(
         anchoredQuotes,
         preferredBreakoutStationIdRef.current
@@ -1558,14 +1561,14 @@ function AnimatedMarkerOverlay({
                     translateX: interpolate(
                         splitBridgeProgress.value,
                         [0, 1],
-                        [activeSplitBridge.startX, liveSplitBridgeTargetX]
+                        [activeSplitBridge.startX, activeSplitBridge.endX]
                     )
                 },
                 {
                     translateY: interpolate(
                         splitBridgeProgress.value,
                         [0, 1],
-                        [activeSplitBridge.startY, liveSplitBridgeTargetY]
+                        [activeSplitBridge.startY, activeSplitBridge.endY]
                     )
                 }
             ]
@@ -1647,13 +1650,14 @@ function AnimatedMarkerOverlay({
     const bridgeVisible = Boolean(activeSplitBridge);
     const bridgeStartX = activeSplitBridge?.startX ?? 0;
     const bridgeStartY = activeSplitBridge?.startY ?? 0;
-    const bridgeTargetX = activeSplitBridge?.endX ?? 0;
-    const bridgeTargetY = activeSplitBridge?.endY ?? 0;
+    const bridgeTargetX = liveSplitBridgeTargetX;
+    const bridgeTargetY = liveSplitBridgeTargetY;
     const carryStartX = activeSplitCarry?.startX ?? 0;
     const carryStartY = activeSplitCarry?.startY ?? 0;
     const carryTargetX = activeSplitCarry?.endX ?? pendingStaticSecondaryX;
     const carryTargetY = activeSplitCarry?.endY ?? pendingStaticSecondaryY;
     const shouldRenderStaticRemainderBubble = (
+        ENABLE_CLUSTER_REMAINDER_BUBBLE &&
         hasRemainderBubble &&
         !(pendingCluster && activeSplitCarry?.emergingQuote) &&
         !(pendingCluster && !activeSplitCarry && !activeSplitBridge)
@@ -1673,35 +1677,27 @@ function AnimatedMarkerOverlay({
         const bridgeProgressValue = splitBridgeProgress.value;
         const bridgeMorphValue = splitBridgeMorph.value;
         const carryMorphValue = splitCarryMorph.value;
-        const breakoutX = breakoutVisible
-            ? interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value])
-            : 0;
-        const breakoutY = breakoutVisible
-            ? interpolate(spreadValue, [0, 1], [0, breakoutTargetYAnim.value])
-            : 0;
+        const breakoutX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]);
+        const breakoutY = interpolate(spreadValue, [0, 1], [0, breakoutTargetYAnim.value]);
         const remainderShellMorph = hasPendingCluster ? pendingResolvedMorph : morphValue;
-        const remainderX = shouldRenderStaticRemainderBubble
-            ? (hasPendingCluster
-                ? interpolate(pendingResolvedSpread, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value])
-                : interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]))
-            : 0;
-        const remainderY = shouldRenderStaticRemainderBubble
-            ? (hasPendingCluster
-                ? interpolate(pendingResolvedSpread, [0, 1], [0, nextEmergingTargetYAnim.value])
-                : interpolate(spreadValue, [0, 1], [0, nextEmergingTargetYAnim.value]))
-            : 0;
+        const remainderX = hasPendingCluster
+            ? interpolate(pendingResolvedSpread, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value])
+            : interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]);
+        const remainderY = hasPendingCluster
+            ? interpolate(pendingResolvedSpread, [0, 1], [0, nextEmergingTargetYAnim.value])
+            : interpolate(spreadValue, [0, 1], [0, nextEmergingTargetYAnim.value]);
         const carryX = carryVisible
             ? interpolate(bridgeProgressValue, [0, 1], [carryStartX, carryTargetX])
-            : 0;
+            : breakoutX;
         const carryY = carryVisible
             ? interpolate(bridgeProgressValue, [0, 1], [carryStartY, carryTargetY])
-            : 0;
+            : breakoutY;
         const bridgeX = bridgeVisible
             ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartX, bridgeTargetX])
-            : 0;
+            : breakoutX;
         const bridgeY = bridgeVisible
             ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartY, bridgeTargetY])
-            : 0;
+            : breakoutY;
         const breakoutWidth = breakoutVisible
             ? interpolate(morphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
             : 0;
@@ -1779,35 +1775,27 @@ function AnimatedMarkerOverlay({
             const bridgeProgressValue = splitBridgeProgress.value;
             const bridgeMorphValue = splitBridgeMorph.value;
             const carryMorphValue = splitCarryMorph.value;
-            const breakoutX = breakoutVisible
-                ? interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value])
-                : 0;
-            const breakoutY = breakoutVisible
-                ? interpolate(spreadValue, [0, 1], [0, breakoutTargetYAnim.value])
-                : 0;
+            const breakoutX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]);
+            const breakoutY = interpolate(spreadValue, [0, 1], [0, breakoutTargetYAnim.value]);
             const remainderShellMorph = hasPendingCluster ? pendingResolvedMorph : morphValue;
-            const remainderX = shouldRenderStaticRemainderBubble
-                ? (hasPendingCluster
-                    ? interpolate(pendingResolvedSpread, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value])
-                    : interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]))
-                : 0;
-            const remainderY = shouldRenderStaticRemainderBubble
-                ? (hasPendingCluster
-                    ? interpolate(pendingResolvedSpread, [0, 1], [0, nextEmergingTargetYAnim.value])
-                    : interpolate(spreadValue, [0, 1], [0, nextEmergingTargetYAnim.value]))
-                : 0;
+            const remainderX = hasPendingCluster
+                ? interpolate(pendingResolvedSpread, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value])
+                : interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]);
+            const remainderY = hasPendingCluster
+                ? interpolate(pendingResolvedSpread, [0, 1], [0, nextEmergingTargetYAnim.value])
+                : interpolate(spreadValue, [0, 1], [0, nextEmergingTargetYAnim.value]);
             const carryX = carryVisible
                 ? interpolate(bridgeProgressValue, [0, 1], [carryStartX, carryTargetX])
-                : 0;
+                : breakoutX;
             const carryY = carryVisible
                 ? interpolate(bridgeProgressValue, [0, 1], [carryStartY, carryTargetY])
-                : 0;
+                : breakoutY;
             const bridgeX = bridgeVisible
                 ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartX, bridgeTargetX])
-                : 0;
+                : breakoutX;
             const bridgeY = bridgeVisible
                 ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartY, bridgeTargetY])
-                : 0;
+                : breakoutY;
             const breakoutWidth = breakoutVisible
                 ? interpolate(morphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
                 : 0;
@@ -2520,6 +2508,7 @@ export default function HomeScreen() {
 
     const previousClustersRef = useRef([]);
     const previousRenderedClustersRef = useRef([]);
+    const splitTransitionCooldownRef = useRef(new Map());
     const [heldSplitClusters, setHeldSplitClusters] = useState([]);
 
     const clusters = useMemo(() => {
@@ -2603,7 +2592,49 @@ export default function HomeScreen() {
         clusters.map(buildClusterMembershipKey).join('|')
     ), [clusters]);
 
+    const pruneSplitTransitionCooldowns = (now = Date.now()) => {
+        for (const [transitionKey, expiresAt] of splitTransitionCooldownRef.current.entries()) {
+            if (!Number.isFinite(expiresAt) || expiresAt <= now) {
+                splitTransitionCooldownRef.current.delete(transitionKey);
+            }
+        }
+    };
+
+    const markSplitTransitionCooldown = (transitionKey) => {
+        if (!transitionKey) {
+            return;
+        }
+
+        const now = Date.now();
+        pruneSplitTransitionCooldowns(now);
+        splitTransitionCooldownRef.current.set(
+            transitionKey,
+            now + CLUSTER_SPLIT_REENTRY_COOLDOWN_MS
+        );
+    };
+
+    const isSplitTransitionCoolingDown = (transitionKey) => {
+        if (!transitionKey) {
+            return false;
+        }
+
+        const now = Date.now();
+        pruneSplitTransitionCooldowns(now);
+        const expiresAt = splitTransitionCooldownRef.current.get(transitionKey);
+
+        return Number.isFinite(expiresAt) && expiresAt > now;
+    };
+
     useLayoutEffect(() => {
+        if (!ENABLE_CLUSTER_SPLIT_HANDOFF) {
+            setHeldSplitClusters(currentHeldClusters => (
+                currentHeldClusters.length === 0 ? currentHeldClusters : []
+            ));
+            previousRenderedClustersRef.current = clusters;
+            return;
+        }
+
+        pruneSplitTransitionCooldowns();
         const previousClustersByPrimary = new Map(
             previousRenderedClustersRef.current.map(cluster => [cluster.quotes[0].stationId, cluster])
         );
@@ -2617,11 +2648,11 @@ export default function HomeScreen() {
                     const currentCluster = currentClustersByPrimary.get(heldCluster.primaryStationId);
 
                     if (!currentCluster) {
-                        return null;
+                        return isMapMoving ? heldCluster : null;
                     }
 
                     if (currentCluster.quotes.length >= heldCluster.fromCluster.quotes.length) {
-                        return null;
+                        return isMapMoving ? heldCluster : null;
                     }
 
                     let nextHeldCluster = heldCluster;
@@ -2647,7 +2678,11 @@ export default function HomeScreen() {
                         };
                     }
 
-                    if (heldCluster.bridgeComplete) {
+                    if (nextHeldCluster.bridgeComplete) {
+                        if (isMapMoving) {
+                            return nextHeldCluster;
+                        }
+
                         const queuedCluster = nextHeldCluster.queuedToCluster;
 
                         if (queuedCluster && queuedCluster.quotes.length < nextHeldCluster.toCluster.quotes.length) {
@@ -2676,9 +2711,10 @@ export default function HomeScreen() {
 
                         recordClusterDebugTransitionEvent({
                             type: 'split-handoff-cleared',
-                            primaryStationId: heldCluster.primaryStationId,
-                            transitionKey: heldCluster.transitionKey,
+                            primaryStationId: nextHeldCluster.primaryStationId,
+                            transitionKey: nextHeldCluster.transitionKey,
                         });
+                        markSplitTransitionCooldown(nextHeldCluster.transitionKey);
                         return null;
                     }
 
@@ -2706,6 +2742,12 @@ export default function HomeScreen() {
                 }
 
                 const detachedStationIds = getDetachedStationIdsForSplit(previousCluster, cluster);
+                const transitionKey = `${buildClusterMembershipKey(previousCluster)}->${buildClusterMembershipKey(cluster)}`;
+
+                if (isSplitTransitionCoolingDown(transitionKey)) {
+                    return;
+                }
+
                 recordClusterDebugTransitionEvent({
                     type: 'split-held-created',
                     primaryStationId,
@@ -2722,7 +2764,7 @@ export default function HomeScreen() {
                         toCluster: cluster,
                         queuedToCluster: null,
                         detachedStationIds,
-                        transitionKey: `${buildClusterMembershipKey(previousCluster)}->${buildClusterMembershipKey(cluster)}`,
+                        transitionKey,
                         bridgeComplete: false,
                     },
                 ];
@@ -2739,6 +2781,10 @@ export default function HomeScreen() {
     }, [clustersSignature, isMapMoving]);
 
     const handleHeldSplitBridgeComplete = (primaryStationId, transitionKey) => {
+        if (!ENABLE_CLUSTER_SPLIT_HANDOFF) {
+            return;
+        }
+
         if (debugClusterAnimations && isClusterDebugRecording) {
             const eventKey = `split-stage-ready|${primaryStationId}|${transitionKey}|${mapMotionRef.current ? '1' : '0'}`;
             if (!clusterDebugTransitionEventKeysRef.current.has(eventKey)) {
@@ -2767,7 +2813,25 @@ export default function HomeScreen() {
                         return heldCluster;
                     }
 
+                    if (heldCluster.bridgeComplete) {
+                        return heldCluster;
+                    }
+
                     didChange = true;
+
+                    if (mapMotionRef.current) {
+                        recordClusterDebugTransitionEvent({
+                            type: 'split-bridge-complete',
+                            primaryStationId,
+                            transitionKey: heldCluster.transitionKey,
+                            mapMoving: true,
+                        });
+
+                        return {
+                            ...heldCluster,
+                            bridgeComplete: true,
+                        };
+                    }
 
                     const queuedCluster = heldCluster.queuedToCluster;
                     if (queuedCluster && queuedCluster.quotes.length < heldCluster.toCluster.quotes.length) {
@@ -2799,6 +2863,7 @@ export default function HomeScreen() {
                         primaryStationId,
                         transitionKey: heldCluster.transitionKey,
                     });
+                    markSplitTransitionCooldown(heldCluster.transitionKey);
                     return null;
                 })
                 .filter(Boolean);

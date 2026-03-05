@@ -655,32 +655,50 @@ function normalizeGasBuddyResponse({ origin, fuelType, payload }) {
 
             const cashPrice = toFiniteNumber(priceEntry.cash?.price);
             const creditPrice = toFiniteNumber(priceEntry.credit?.price);
-            const candidates = [cashPrice, creditPrice].filter(p => p !== null && p > 0);
+            const bestPrice = creditPrice && creditPrice > 0
+                ? creditPrice
+                : cashPrice && cashPrice > 0
+                    ? cashPrice
+                    : null;
 
-            if (!candidates.length) {
+            if (bestPrice === null) {
                 return null;
             }
 
-            const bestPrice = Math.min(...candidates);
-            const postedTime = priceEntry.cash?.postedTime || priceEntry.credit?.postedTime || null;
+            const postedTime = priceEntry.credit?.postedTime || priceEntry.cash?.postedTime || null;
             const addr = station.address || {};
             const addressLine = [addr.line1, addr.locality, addr.region, addr.postalCode]
                 .filter(Boolean)
                 .join(', ');
 
             const allPrices = {};
+            const paymentByFuel = {};
             for (const pe of (station.prices || [])) {
                 const cp = toFiniteNumber(pe.cash?.price);
                 const crp = toFiniteNumber(pe.credit?.price);
-                const vals = [cp, crp].filter(v => v !== null && v > 0);
-                if (vals.length) {
+                const displayPrice = crp && crp > 0
+                    ? crp
+                    : cp && cp > 0
+                        ? cp
+                        : null;
+
+                if (displayPrice !== null) {
                     const key = pe.fuelProduct === 'regular_gas' ? 'regular'
                         : pe.fuelProduct === 'midgrade_gas' ? 'midgrade'
                             : pe.fuelProduct === 'premium_gas' ? 'premium'
                                 : pe.fuelProduct === 'diesel' ? 'diesel'
                                     : pe.fuelProduct;
-                    allPrices[key] = Math.min(...vals);
+                    allPrices[key] = displayPrice;
+                    paymentByFuel[key] = {
+                        credit: crp && crp > 0 ? crp : null,
+                        cash: cp && cp > 0 ? cp : null,
+                        selected: crp && crp > 0 ? 'credit' : 'cash',
+                    };
                 }
+            }
+
+            if (Object.keys(paymentByFuel).length > 0) {
+                allPrices._payment = paymentByFuel;
             }
 
             return createQuote({
