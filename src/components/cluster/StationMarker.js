@@ -23,6 +23,9 @@ const SUPPRESSED_SCALE = 0.005;
 const APPEAR_START_SCALE = 0.84;
 const APPEAR_DURATION_MS = 220;
 const INITIAL_SHRINK_DELAY_WINDOW_MS = 2500;
+const BEST_PRICE_BLUE_LIGHT = '#007AFF';
+const BEST_PRICE_BLUE_DARK = '#11f050ff';
+const INACTIVE_TEXT_DARK = '#F5F7FA';
 const AnimatedView = Animated.createAnimatedComponent(View);
 let isInitialShrinkDelayWindowOpen = true;
 let hasStartedInitialShrinkDelayWindowTimer = false;
@@ -43,6 +46,7 @@ export default function StationMarker({
   isSuppressed = false,
   isActive = false,
   isBest = false,
+  isDark = false,
   themeColors,
   onPress,
 }) {
@@ -90,18 +94,24 @@ export default function StationMarker({
             [APPEAR_START_SCALE, 1],
             Extrapolate.CLAMP
           ) * interpolate(
-          suppressionProgress.value,
-          [0, 1],
-          [1, SUPPRESSED_SCALE],
-          Extrapolate.CLAMP
-        )),
+            suppressionProgress.value,
+            [0, 1],
+            [1, SUPPRESSED_SCALE],
+            Extrapolate.CLAMP
+          )),
       },
     ],
   }), [appearProgress, suppressionProgress]);
 
-  const tintColor = isBest
-    ? '#007AFF'
-    : (isActive ? themeColors.text : '#888888');
+  const inactiveIconTintColor = isDark ? '#D3D6DE' : '#888888';
+  const inactiveTextColor = isDark ? INACTIVE_TEXT_DARK : '#888888';
+  const bestTintColor = isDark ? BEST_PRICE_BLUE_DARK : BEST_PRICE_BLUE_LIGHT;
+  const iconTintColor = isBest
+    ? bestTintColor
+    : (isActive ? themeColors.text : inactiveIconTintColor);
+  const textColor = isBest
+    ? bestTintColor
+    : (isActive ? themeColors.text : inactiveTextColor);
 
   return (
     <Marker
@@ -120,10 +130,10 @@ export default function StationMarker({
             <SymbolView
               name="fuelpump.fill"
               size={14}
-              tintColor={tintColor}
+              tintColor={iconTintColor}
               style={styles.priceIcon}
             />
-            <Text style={[styles.priceText, isBest && styles.bestPriceText, { color: tintColor }]}>
+            <Text style={[styles.priceText, isBest && styles.bestPriceText, { color: textColor }]}>
               ${quote.price.toFixed(2)}
             </Text>
           </View>
@@ -157,6 +167,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   bestPriceText: {
-    color: '#007AFF',
+    color: BEST_PRICE_BLUE_LIGHT,
   },
 });

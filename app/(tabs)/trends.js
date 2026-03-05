@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { StyleSheet, Text, View, ScrollView, Dimensions, ActivityIndicator } from 'react-native';
-import { GlassView, GlassContainer } from 'expo-glass-effect';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { StyleSheet, Text, View, ScrollView, Dimensions, ActivityIndicator, RefreshControl } from 'react-native';
+import { GlassView } from 'expo-glass-effect';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/ThemeContext';
 import * as Location from 'expo-location';
@@ -9,15 +9,22 @@ import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'reac
 import * as d3Shape from 'd3-shape';
 import * as d3Scale from 'd3-scale';
 import { SymbolView } from 'expo-symbols';
+import { useFocusEffect } from 'expo-router';
 import { fetchTrendData } from '../../src/services/fuel/trends';
+import { usePreferences } from '../../src/PreferencesContext';
 import TopCanopy from '../../src/components/TopCanopy';
 import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
+import { getFuelGradeMeta, normalizeFuelGrade } from '../../src/lib/fuelGrade';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CHART_HEIGHT = 220;
 const TOP_CANOPY_HEIGHT = 44;
+const VIEW_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const TREND_BACKGROUND_GRADIENT_STRENGTH = 10; // 0 = off, 1 = default, >1 = stronger
 const TREND_BACKGROUND_GRADIENT_SPREAD = 0.35; // 0 = tighter/closer, 1 = wider/spread out
+
+const cachedTrendDataByFuelType = {};
+const lastTrendsScreenViewedAtMsByFuelType = {};
 
 const COLORS = {
     GREEN: '#51CF66',
@@ -47,6 +54,24 @@ function hexToRgba(hex, alpha) {
     const g = parseInt(fullHex.slice(2, 4), 16);
     const b = parseInt(fullHex.slice(4, 6), 16);
     return `rgba(${r}, ${g}, ${b}, ${clamp01(alpha)})`;
+}
+
+function formatRelativeTime(updatedAt) {
+    if (!updatedAt) return '—';
+    const updated = new Date(updatedAt).getTime();
+    if (!Number.isFinite(updated)) return '—';
+
+    const diffMins = Math.floor((Date.now() - updated) / 60000);
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays}d ago`;
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function ContainerlessAreaChart({ data, width, height, isDark, trendColor }) {
@@ -104,36 +129,140 @@ function ContainerlessAreaChart({ data, width, height, isDark, trendColor }) {
 export default function TrendsScreen() {
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
-
-    const [loading, setLoading] = useState(true);
-    const [trendData, setTrendData] = useState(null);
+    const { preferences } = usePreferences();
+    const selectedFuelGrade = normalizeFuelGrade(preferences.preferredOctane);
+    const selectedFuelGradeMeta = getFuelGradeMeta(selectedFuelGrade);
+    const cachedTrendData = cachedTrendDataByFuelType[selectedFuelGrade] || null;
+    const [loading, setLoading] = useState(!cachedTrendData);
+    const [refreshing, setRefreshing] = useState(false);
+    const [trendData, setTrendData] = useState(cachedTrendData);
+    const isMountedRef = useRef(true);
+    const selectedFuelGradeRef = useRef(selectedFuelGrade);
+    const activeFetchRef = useRef({
+        fuelGrade: null,
+        promise: null,
+    });
 
     useEffect(() => {
-        let mounted = true;
-        async function loadData() {
+        return () => {
+            isMountedRef.current = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        selectedFuelGradeRef.current = selectedFuelGrade;
+    }, [selectedFuelGrade]);
+
+    useEffect(() => {
+        const nextCachedData = cachedTrendDataByFuelType[selectedFuelGrade] || null;
+        setTrendData(nextCachedData);
+        setLoading(!nextCachedData);
+    }, [selectedFuelGrade]);
+
+    const loadTrendData = useCallback(({ showLoading = false } = {}) => {
+        const requestFuelGrade = selectedFuelGrade;
+
+        if (
+            activeFetchRef.current.promise &&
+            activeFetchRef.current.fuelGrade === requestFuelGrade
+        ) {
+            return activeFetchRef.current.promise;
+        }
+
+        if (showLoading && isMountedRef.current) {
+            setLoading(true);
+        }
+
+        const request = (async () => {
             try {
-                let { status } = await Location.requestForegroundPermissionsAsync();
+                let permission = await Location.getForegroundPermissionsAsync();
+                if (permission.status !== 'granted') {
+                    permission = await Location.requestForegroundPermissionsAsync();
+                }
+
                 let loc = null;
-                if (status === 'granted') {
+                if (permission.status === 'granted') {
                     loc = await Location.getCurrentPositionAsync({});
                 }
 
                 const lat = loc?.coords?.latitude || 37.3346;
                 const lng = loc?.coords?.longitude || -122.009;
+                const data = await fetchTrendData({
+                    latitude: lat,
+                    longitude: lng,
+                    fuelType: requestFuelGrade,
+                });
 
-                const data = await fetchTrendData({ latitude: lat, longitude: lng });
-                if (mounted) {
-                    setTrendData(data);
-                    setLoading(false);
+                cachedTrendDataByFuelType[requestFuelGrade] = data;
+
+                if (isMountedRef.current) {
+                    if (selectedFuelGradeRef.current === requestFuelGrade) {
+                        setTrendData(data);
+                    }
                 }
             } catch (err) {
                 console.warn('Error loading trends data', err);
-                if (mounted) setLoading(false);
+            } finally {
+                if (isMountedRef.current) {
+                    if (selectedFuelGradeRef.current === requestFuelGrade) {
+                        setLoading(false);
+                    }
+                }
+                if (activeFetchRef.current.fuelGrade === requestFuelGrade) {
+                    activeFetchRef.current = {
+                        fuelGrade: null,
+                        promise: null,
+                    };
+                }
             }
-        }
-        loadData();
-        return () => { mounted = false; };
-    }, []);
+        })();
+
+        activeFetchRef.current = {
+            fuelGrade: requestFuelGrade,
+            promise: request,
+        };
+        return request;
+    }, [selectedFuelGrade]);
+
+    useFocusEffect(
+        useCallback(() => {
+            const now = Date.now();
+            const cachedDataForFuelType = cachedTrendDataByFuelType[selectedFuelGrade] || null;
+            const lastViewedAtForFuelType = lastTrendsScreenViewedAtMsByFuelType[selectedFuelGrade] || 0;
+            const hasExpired = (now - lastViewedAtForFuelType) > VIEW_REFRESH_INTERVAL_MS;
+            const shouldFetch = !cachedDataForFuelType || hasExpired;
+
+            lastTrendsScreenViewedAtMsByFuelType[selectedFuelGrade] = now;
+
+            if (cachedDataForFuelType && trendData !== cachedDataForFuelType) {
+                setTrendData(cachedDataForFuelType);
+            }
+
+            if (shouldFetch) {
+                void loadTrendData({ showLoading: !cachedDataForFuelType });
+            }
+        }, [loadTrendData, selectedFuelGrade, trendData])
+    );
+
+    const onPullToRefresh = useCallback(() => {
+        setRefreshing(true);
+        lastTrendsScreenViewedAtMsByFuelType[selectedFuelGrade] = Date.now();
+
+        const refreshStartedAt = Date.now();
+        void (async () => {
+            try {
+                await loadTrendData({ showLoading: false });
+            } finally {
+                const elapsed = Date.now() - refreshStartedAt;
+                if (elapsed < 550) {
+                    await sleep(550 - elapsed);
+                }
+                if (isMountedRef.current) {
+                    setRefreshing(false);
+                }
+            }
+        })();
+    }, [loadTrendData, selectedFuelGrade]);
 
     const isPriceDrop = trendData?.overallTrend?.isDecrease;
     // Better = Green, Worse = Red
@@ -171,6 +300,10 @@ export default function TrendsScreen() {
     const topCanopyHeight = insets.top + TOP_CANOPY_HEIGHT;
     const gradientSpread = clamp01(TREND_BACKGROUND_GRADIENT_SPREAD);
     const numericTextStyle = styles.numericRounded;
+    const leaderboardUpdatedLabel = useMemo(
+        () => formatRelativeTime(trendData?.leaderboardLastChangedAt),
+        [trendData?.leaderboardLastChangedAt]
+    );
     const darkModeWeightStyle = useMemo(() => ({
         heroSub: { fontWeight: isDark ? '600' : '700' },
         heroPrice: { fontWeight: isDark ? '700' : '800' },
@@ -203,6 +336,16 @@ export default function TrendsScreen() {
                     contentContainerStyle={{ paddingTop: insets.top + 44, paddingBottom: insets.bottom + 80 }}
                     showsVerticalScrollIndicator={false}
                     bounces={true}
+                    refreshControl={(
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onPullToRefresh}
+                            tintColor={themeColors.text}
+                            colors={[themeColors.text]}
+                            progressBackgroundColor={isDark ? '#111111' : '#FFFFFF'}
+                            progressViewOffset={topCanopyHeight + 8}
+                        />
+                    )}
                 >
                     {loading ? (
                         <View style={{ marginTop: 100 }}>
@@ -214,7 +357,9 @@ export default function TrendsScreen() {
                             {trendData?.averagePricesByDay?.length > 1 && (
                                 <View style={styles.heroGraphSection}>
                                     <View style={styles.heroGraphPad}>
-                                        <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>Your Local Average</Text>
+                                        <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>
+                                            Your {selectedFuelGradeMeta.label} Local Average
+                                        </Text>
                                         <View style={styles.heroPriceRow}>
                                             <Text style={[styles.heroPrice, numericTextStyle, darkModeWeightStyle.heroPrice, { color: themeColors.text }]}>
                                                 ${trendData.averagePricesByDay[trendData.averagePricesByDay.length - 1].price.toFixed(2)}
@@ -252,7 +397,14 @@ export default function TrendsScreen() {
                                         glassEffectStyle="regular"
                                         tintColor={glassTintColor}
                                     >
-                                        <Text style={[styles.cardTitle, darkModeWeightStyle.cardTitle, { color: themeColors.text, marginBottom: 16 }]}>Leaderboard</Text>
+                                        <View style={styles.cardHeaderRow}>
+                                            <Text style={[styles.cardTitle, darkModeWeightStyle.cardTitle, { color: themeColors.text }]}>
+                                                {selectedFuelGradeMeta.label} Leaderboard
+                                            </Text>
+                                            <Text style={[styles.cardMeta, numericTextStyle, darkModeWeightStyle.itemSub, { color: themeColors.textOpacity }]}>
+                                                Updated {leaderboardUpdatedLabel}
+                                            </Text>
+                                        </View>
                                         {trendData.leaderboard.map((st, idx) => {
                                             const rankLabel = idx === 0 ? '1st' : idx === 1 ? '2nd' : idx === 2 ? '3rd' : `${idx + 1}th`;
                                             const medalColor = idx === 0 ? themeColors.text : idx === 1 ? '#8f8f8fff' : idx === 2 ? '#CD7F32' : 'transparent';
@@ -479,6 +631,16 @@ const styles = StyleSheet.create({
         fontSize: 19,
         fontWeight: '800',
         letterSpacing: -0.5,
+    },
+    cardHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 16,
+    },
+    cardMeta: {
+        fontSize: 13,
+        fontWeight: '500',
     },
     cardSubTitle: {
         fontSize: 14,

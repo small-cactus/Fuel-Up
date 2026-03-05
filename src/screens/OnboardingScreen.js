@@ -62,6 +62,10 @@ const DEMO_STATIONS = [
 ];
 
 const MAP_MARGIN = 0.006; // Inset margin to avoid edge chips
+const LIGHT_SCREEN_BACKGROUND = '#f2f1f6';
+const LIGHT_SCREEN_BACKGROUND_85 = 'rgba(242,241,246,0.85)';
+const LIGHT_SCREEN_BACKGROUND_42 = 'rgba(242,241,246,0.42)';
+const LIGHT_SCREEN_BACKGROUND_0 = 'rgba(242,241,246,0)';
 
 const OnboardingChip = ({ price, isCheapest, isDark, top, left, isActive }) => {
 
@@ -150,19 +154,19 @@ function WelcomeStep({ isDark, themeColors, insets }) {
             </MapView>
 
             {/* Blur canopies — extend further than gradients */}
-            <TopCanopy edgeColor={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.42)'} height={insets.top + 300} isDark={isDark} topInset={insets.top} />
+            <TopCanopy edgeColor={isDark ? 'rgba(255,255,255,0.08)' : LIGHT_SCREEN_BACKGROUND_42} height={insets.top + 300} isDark={isDark} topInset={insets.top} />
             <BottomCanopy height={270} isDark={isDark} />
 
             {/* White gradients — shorter, sit inside the blur */}
             <LinearGradient
-                colors={[isDark ? '#000000' : '#FFFFFF', isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)', isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)']}
+                colors={[isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND, isDark ? 'rgba(0,0,0,0.85)' : LIGHT_SCREEN_BACKGROUND_85, isDark ? 'rgba(0,0,0,0)' : LIGHT_SCREEN_BACKGROUND_0]}
                 locations={[0, 0.5, 1]}
                 style={[styles.topGradient, { height: insets.top + 220 }]}
                 pointerEvents="none"
             />
 
             <LinearGradient
-                colors={[isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)', isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)', isDark ? '#000000' : '#FFFFFF']}
+                colors={[isDark ? 'rgba(0,0,0,0)' : LIGHT_SCREEN_BACKGROUND_0, isDark ? 'rgba(0,0,0,0.85)' : LIGHT_SCREEN_BACKGROUND_85, isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND]}
                 locations={[0, 0.8, 1.2]}
                 style={[styles.footerGradient, { height: 280 }]}
                 pointerEvents="none"
@@ -221,12 +225,12 @@ function RadiusStep({ isDark, themeColors, insets, value, onChange }) {
             </MapView>
 
             {/* Blur canopies — extend further than gradients */}
-            <TopCanopy edgeColor={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.42)'} height={insets.top + 300} isDark={isDark} topInset={insets.top} />
+            <TopCanopy edgeColor={isDark ? 'rgba(255,255,255,0.08)' : LIGHT_SCREEN_BACKGROUND_42} height={insets.top + 300} isDark={isDark} topInset={insets.top} />
             <BottomCanopy height={270} isDark={isDark} />
 
             {/* White gradients — shorter, sit inside the blur */}
             <LinearGradient
-                colors={[isDark ? '#000000' : '#FFFFFF', isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)', isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)']}
+                colors={[isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND, isDark ? 'rgba(0,0,0,0.85)' : LIGHT_SCREEN_BACKGROUND_85, isDark ? 'rgba(0,0,0,0)' : LIGHT_SCREEN_BACKGROUND_0]}
                 locations={[0, 0.5, 1]}
                 style={[styles.topGradient, { height: insets.top + 220 }]}
                 pointerEvents="none"
@@ -234,7 +238,7 @@ function RadiusStep({ isDark, themeColors, insets, value, onChange }) {
 
             {/* Light bottom gradient */}
             <LinearGradient
-                colors={[isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)', isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)', isDark ? '#000000' : '#FFFFFF']}
+                colors={[isDark ? 'rgba(0,0,0,0)' : LIGHT_SCREEN_BACKGROUND_0, isDark ? 'rgba(0,0,0,0.85)' : LIGHT_SCREEN_BACKGROUND_85, isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND]}
                 locations={[0, 0.5, 1]}
                 style={[styles.footerGradient, { height: 280 }]}
                 pointerEvents="none"
@@ -834,7 +838,7 @@ export default function OnboardingScreen() {
             {/* Progress dots + continue (Stay solid) */}
             {isTranslucentStep && (
                 <LinearGradient
-                    colors={[isDark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)', isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)', isDark ? '#000000' : '#FFFFFF']}
+                    colors={[isDark ? 'rgba(0,0,0,0)' : LIGHT_SCREEN_BACKGROUND_0, isDark ? 'rgba(0,0,0,0.85)' : LIGHT_SCREEN_BACKGROUND_85, isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND]}
                     locations={[0, 0.4, 1]}
                     style={[styles.footerGradient, { paddingBottom: insets.bottom + 20 }]}
                     pointerEvents="none"

@@ -2,11 +2,17 @@ import React from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import FuelSummaryCard from '../src/components/FuelSummaryCard';
+import { usePreferences } from '../src/PreferencesContext';
 import { useTheme } from '../src/ThemeContext';
+import { normalizeFuelGrade } from '../src/lib/fuelGrade';
 
 export default function PricesSheet() {
     const { isDark, themeColors } = useTheme();
-    const { quotesData, benchmarkData, errorMsg } = useLocalSearchParams();
+    const { preferences } = usePreferences();
+    const { quotesData, benchmarkData, errorMsg, fuelGrade } = useLocalSearchParams();
+    const selectedFuelGrade = normalizeFuelGrade(
+        typeof fuelGrade === 'string' ? fuelGrade : preferences.preferredOctane
+    );
 
     // Parse incoming data strings
     const quotes = quotesData ? JSON.parse(quotesData) : [];
@@ -24,6 +30,7 @@ export default function PricesSheet() {
                         <FuelSummaryCard
                             benchmarkQuote={benchmarkQuote}
                             errorMsg={error}
+                            fuelGrade={selectedFuelGrade}
                             isDark={isDark}
                             isRefreshing={false}
                             quote={item}

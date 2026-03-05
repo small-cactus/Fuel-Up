@@ -31,11 +31,20 @@ import {
 
 const AnimatedLiquidGlassView = Animated.createAnimatedComponent(LiquidGlassView);
 const AnimatedText = Animated.createAnimatedComponent(Text);
+const BEST_PRICE_BLUE_LIGHT = '#007AFF';
+const BEST_PRICE_BLUE_DARK = '#11f050ff';
+const INACTIVE_TEXT_DARK = '#F5F7FA';
 
 function PricePill({ quote, isActive, isBest, isDark, themeColors, animatedTextStyle, showDivider = false, plusCount = null, plusOpacity = 1, priceOpacity = 1 }) {
-  const tintColor = isBest
-    ? '#007AFF'
-    : (isActive ? themeColors.text : '#888888');
+  const inactiveIconTintColor = isDark ? '#D3D6DE' : '#888888';
+  const inactiveTextColor = isDark ? INACTIVE_TEXT_DARK : '#888888';
+  const bestTintColor = isDark ? BEST_PRICE_BLUE_DARK : BEST_PRICE_BLUE_LIGHT;
+  const iconTintColor = isBest
+    ? bestTintColor
+    : (isActive ? themeColors.text : inactiveIconTintColor);
+  const textColor = isBest
+    ? bestTintColor
+    : (isActive ? themeColors.text : inactiveTextColor);
 
   return (
     <AnimatedLiquidGlassView effect="clear" style={styles.pillShell}>
@@ -53,10 +62,10 @@ function PricePill({ quote, isActive, isBest, isDark, themeColors, animatedTextS
           <SymbolView
             name="fuelpump.fill"
             size={14}
-            tintColor={tintColor}
+            tintColor={iconTintColor}
             style={styles.priceIcon}
           />
-          <Text style={[styles.priceText, isBest && styles.bestPriceText, { color: tintColor }]}>${quote.price.toFixed(2)}</Text>
+          <Text style={[styles.priceText, isBest && styles.bestPriceText, { color: textColor }]}>${quote.price.toFixed(2)}</Text>
         </Animated.View>
       ) : null}
     </AnimatedLiquidGlassView>
@@ -171,13 +180,16 @@ export default function ClusterMarkerOverlay({
   }, [baseOffsetX, baseOffsetY, splitMover]);
 
   const animatedTextStyle = useAnimatedStyle(() => {
-    if (primaryQuote.originalIndex === 0) return { color: '#007AFF' };
+    if (primaryQuote.originalIndex === 0) {
+      return { color: isDark ? BEST_PRICE_BLUE_DARK : BEST_PRICE_BLUE_LIGHT };
+    }
 
     const baseIndex = primaryQuote.originalIndex;
     const inputRange = [(baseIndex - 1) * itemWidth, baseIndex * itemWidth, (baseIndex + 1) * itemWidth];
-    const color = interpolateColor(scrollX.value, inputRange, ['#888888', themeColors.text, '#888888']);
+    const inactiveTextColor = isDark ? INACTIVE_TEXT_DARK : '#888888';
+    const color = interpolateColor(scrollX.value, inputRange, [inactiveTextColor, themeColors.text, inactiveTextColor]);
     return { color };
-  });
+  }, [isDark, itemWidth, primaryQuote.originalIndex, scrollX, themeColors.text]);
 
   const suppressionStyle = useAnimatedStyle(() => ({
     transform: [
@@ -769,6 +781,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   bestPriceText: {
-    color: '#007AFF',
+    color: BEST_PRICE_BLUE_LIGHT,
   },
 });

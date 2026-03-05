@@ -30,10 +30,35 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
             overallTrend: null,
             averagePricesByDay: [],
             stationsWithLargestDelta: [],
+            leaderboard: [],
+            leaderboardLastChangedAt: null,
             competitorClusters: [],
             mapHeatmapPoints: [],
         };
     }
+
+    // Tracks when the visible top-5 leaderboard snapshot last changed.
+    let leaderboardLastChangedAt = null;
+    const latestPriceByStation = new Map();
+    let previousLeaderboardSnapshotKey = null;
+
+    rows.forEach(row => {
+        latestPriceByStation.set(row.station_id, row.price);
+
+        const rankingSnapshot = [...latestPriceByStation.entries()]
+            .sort((a, b) => {
+                if (a[1] === b[1]) return String(a[0]).localeCompare(String(b[0]));
+                return a[1] - b[1];
+            })
+            .slice(0, 5)
+            .map(([stationId, price], index) => `${index + 1}:${stationId}:${Number(price).toFixed(3)}`)
+            .join('|');
+
+        if (rankingSnapshot !== previousLeaderboardSnapshotKey) {
+            previousLeaderboardSnapshotKey = rankingSnapshot;
+            leaderboardLastChangedAt = row.created_at;
+        }
+    });
 
     // 1. Average prices grouped by day (for the main chart)
     const dayAggregation = {};
@@ -211,6 +236,7 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
         overallTrend,
         averagePricesByDay,
         leaderboard,
+        leaderboardLastChangedAt,
         competitorClusters: competitorClusters.slice(0, 5), // Top 5 competitive blocks
         mapHeatmapPoints
     };

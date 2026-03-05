@@ -3,6 +3,15 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { GlassContainer, GlassView } from 'expo-glass-effect';
 
 import { SymbolView } from 'expo-symbols';
+import {
+    FUEL_GRADE_ORDER,
+    getFuelGradeMeta,
+    normalizeFuelGrade,
+    resolveQuotePriceForFuelGrade,
+} from '../lib/fuelGrade';
+
+const BEST_PRICE_LIGHT = '#007AFF';
+const BEST_PRICE_DARK = '#11f050ff';
 
 function formatPrice(price) {
     if (typeof price !== 'number' || Number.isNaN(price)) {
@@ -47,7 +56,32 @@ export default function FuelSummaryCard({
     themeColors,
     rank,
     glassTintColor,
+    fuelGrade = 'regular',
 }) {
+    const selectedFuelGrade = normalizeFuelGrade(fuelGrade);
+    const selectedGradeMeta = getFuelGradeMeta(selectedFuelGrade);
+    const selectedGradePrice = resolveQuotePriceForFuelGrade(quote, selectedFuelGrade);
+    const additionalGradePrices = FUEL_GRADE_ORDER
+        .filter(grade => grade !== selectedFuelGrade)
+        .map(grade => {
+            const price = resolveQuotePriceForFuelGrade(
+                quote,
+                grade,
+                { allowFallbackToQuotePrice: false }
+            );
+
+            if (price === null) {
+                return null;
+            }
+
+            return {
+                grade,
+                price,
+                meta: getFuelGradeMeta(grade),
+            };
+        })
+        .filter(Boolean);
+    const bestPriceColor = isDark ? BEST_PRICE_DARK : BEST_PRICE_LIGHT;
     const hasFailureState = !quote && Boolean(errorMsg);
     const title = hasFailureState ? 'No Prices Returned' : quote?.stationName || 'Cheapest Nearby';
     const subtitle = quote ? formatDistance(quote?.distanceMiles) : null;
@@ -60,9 +94,9 @@ export default function FuelSummaryCard({
         <GlassContainer spacing={0} style={styles.cardGroup}>
             <GlassView
                 style={styles.card}
-                tintColor={glassTintColor ?? (isDark ? '#000000' : '#FFFFFF')}
+                tintColor={glassTintColor ?? (isDark ? '#101010ff' : '#FFFFFF')}
                 glassEffectStyle={{
-                    style: 'regular',
+                    style: 'clear',
                     animate: true,
                     animationDuration: 0.2,
                 }}
@@ -96,37 +130,25 @@ export default function FuelSummaryCard({
                 <View style={styles.pricesRow}>
                     <View style={styles.priceColumn}>
                         <View style={styles.gradeLabelRow}>
-                            <Text style={[styles.priceLabel, { color: themeColors.text }]}>Regular</Text>
-                            <Text style={[styles.octaneLabel, { color: themeColors.text }]}>87</Text>
+                            <Text style={[styles.priceLabel, { color: themeColors.text }]}>{selectedGradeMeta.label}</Text>
+                            <Text style={[styles.octaneLabel, { color: themeColors.text }]}>{selectedGradeMeta.octane}</Text>
                         </View>
-                        <Text style={[styles.cardPrice, { color: '#007AFF' }]}>
-                            ${formatPrice(quote?.price)}
+                        <Text style={[styles.cardPrice, { color: bestPriceColor }]}>
+                            ${formatPrice(selectedGradePrice ?? quote?.price)}
                         </Text>
                     </View>
 
-                    {quote?.allPrices?.midgrade && (
-                        <View style={styles.priceColumn}>
+                    {additionalGradePrices.map(({ grade, meta, price }) => (
+                        <View key={grade} style={styles.priceColumn}>
                             <View style={styles.gradeLabelRow}>
-                                <Text style={[styles.priceLabel, { color: themeColors.text }]}>Mid</Text>
-                                <Text style={[styles.octaneLabel, { color: themeColors.text }]}>89</Text>
+                                <Text style={[styles.priceLabel, { color: themeColors.text }]}>{meta.shortLabel}</Text>
+                                <Text style={[styles.octaneLabel, { color: themeColors.text }]}>{meta.octane}</Text>
                             </View>
                             <Text style={[styles.cardPrice, { color: themeColors.text }]}>
-                                ${formatPrice(quote.allPrices.midgrade)}
+                                ${formatPrice(price)}
                             </Text>
                         </View>
-                    )}
-
-                    {quote?.allPrices?.premium && (
-                        <View style={styles.priceColumn}>
-                            <View style={styles.gradeLabelRow}>
-                                <Text style={[styles.priceLabel, { color: themeColors.text }]}>Prem</Text>
-                                <Text style={[styles.octaneLabel, { color: themeColors.text }]}>93</Text>
-                            </View>
-                            <Text style={[styles.cardPrice, { color: themeColors.text }]}>
-                                ${formatPrice(quote.allPrices.premium)}
-                            </Text>
-                        </View>
-                    )}
+                    ))}
                 </View>
 
                 <Text style={[styles.cardAddress, { color: themeColors.text }]}>

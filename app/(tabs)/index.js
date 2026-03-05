@@ -21,6 +21,11 @@ import { usePreferences } from '../../src/PreferencesContext';
 import BottomCanopy from '../../src/components/BottomCanopy';
 import ClusterMarkerOverlay from '../../src/components/cluster/ClusterMarkerOverlay';
 import StationMarker from '../../src/components/cluster/StationMarker';
+import {
+    applyFuelGradeToQuote,
+    normalizeFuelGrade,
+    rankQuotesForFuelGrade,
+} from '../../src/lib/fuelGrade';
 import { groupStationsIntoClusters } from '../../src/cluster/grouping';
 import {
     CLUSTER_PILL_HEIGHT,
@@ -88,7 +93,7 @@ const STATIONS_FIT_BOTTOM_CONTENT_PADDING = 140;
 const STATIONS_FIT_SIDE_EXTRA_PADDING = 12;
 const STATIONS_FIT_SETTLE_PASS_DELAY_MS = 260;
 const ENABLE_CLUSTER_MERGE_TRANSITIONS = false;
-const HOME_DARK_GLASS_TINT = '#101010ff';
+const HOME_DARK_GLASS_TINT = '#373737ff';
 
 function waitForMilliseconds(duration) {
     return new Promise(resolve => {
@@ -1082,7 +1087,19 @@ function buildClusterDebugRecordingLog(samples, transitionEvents = []) {
     ].join('\n');
 }
 
-function AnimatedCardItem({ item, index, scrollX, itemWidth, isDark, benchmarkQuote, errorMsg, isRefreshing, themeColors, glassTintColor }) {
+function AnimatedCardItem({
+    item,
+    index,
+    scrollX,
+    itemWidth,
+    isDark,
+    benchmarkQuote,
+    errorMsg,
+    isRefreshing,
+    themeColors,
+    glassTintColor,
+    fuelGrade,
+}) {
     const animatedDimStyle = useAnimatedStyle(() => {
         if (isDark) return { opacity: 0 };
 
@@ -1102,6 +1119,7 @@ function AnimatedCardItem({ item, index, scrollX, itemWidth, isDark, benchmarkQu
             <FuelSummaryCard
                 benchmarkQuote={benchmarkQuote}
                 errorMsg={errorMsg}
+                fuelGrade={fuelGrade}
                 glassTintColor={glassTintColor}
                 isDark={isDark}
                 isRefreshing={isRefreshing}
@@ -1118,7 +1136,6 @@ function AnimatedCardItem({ item, index, scrollX, itemWidth, isDark, benchmarkQu
                         bottom: 0,
                         left: 4,
                         right: 4,
-                        backgroundColor: '#000000',
                         borderRadius: 32
                     }, animatedDimStyle]}
                 />
@@ -1192,6 +1209,7 @@ export default function HomeScreen() {
     };
     const topCanopyHeight = insets.top + TOP_CANOPY_HEIGHT;
     const canopyEdgeLine = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.42)';
+    const selectedFuelGrade = normalizeFuelGrade(preferences.preferredOctane);
 
     const applySnapshot = snapshot => {
         if (!snapshot?.quote || !isMountedRef.current) {
@@ -1236,7 +1254,7 @@ export default function HomeScreen() {
 
                     setFuelDebugState({
                         input: {
-                            fuelType: 'regular',
+                            fuelType: selectedFuelGrade,
                             latitude: manualLocationOverride.latitude,
                             longitude: manualLocationOverride.longitude,
                             locationSource: 'manual',
@@ -1403,7 +1421,7 @@ export default function HomeScreen() {
             latitude,
             longitude,
             radiusMiles: preferences.searchRadiusMiles || 10,
-            fuelType: preferences.preferredOctane || 'regular',
+            fuelType: selectedFuelGrade,
             preferredProvider: preferences.preferredProvider || 'gasbuddy',
         };
         const baseDebugState = {
@@ -1525,7 +1543,14 @@ export default function HomeScreen() {
         void refreshForCurrentView({
             preferCached: true,
         });
-    }, [isFocused, manualLocationOverride, autoClusterProbeRequested]);
+    }, [
+        autoClusterProbeRequested,
+        isFocused,
+        manualLocationOverride,
+        preferences.preferredProvider,
+        preferences.searchRadiusMiles,
+        selectedFuelGrade,
+    ]);
 
     const onViewableItemsChanged = useRef(({ viewableItems }) => {
         if (viewableItems.length > 0) {
@@ -1546,11 +1571,21 @@ export default function HomeScreen() {
     const { width, height } = Dimensions.get('window');
 
     const minRating = preferences.minimumRating || 0;
+    const rankedStationQuotes = useMemo(() => {
+        const baseQuotes = topStations.length > 0
+            ? topStations
+            : [bestQuote].filter(Boolean);
+
+        return rankQuotesForFuelGrade(baseQuotes, selectedFuelGrade);
+    }, [topStations, bestQuote, selectedFuelGrade]);
+    const displayBestQuote = useMemo(() => (
+        applyFuelGradeToQuote(bestQuote, selectedFuelGrade)
+    ), [bestQuote, selectedFuelGrade]);
     const stationQuotes = useMemo(() => (
-        (topStations.length > 0 ? topStations : (bestQuote ? [bestQuote] : []))
+        rankedStationQuotes
             .filter(q => minRating === 0 || (q.rating != null && q.rating >= minRating))
             .map((q, idx) => ({ ...q, originalIndex: idx }))
-    ), [topStations, bestQuote, minRating]);
+    ), [rankedStationQuotes, minRating]);
 
     const stationQuotesRef = useRef([]);
     const clustersSignatureRef = useRef('');
@@ -1611,6 +1646,12 @@ export default function HomeScreen() {
     useEffect(() => {
         stationQuotesRef.current = stationQuotes;
     }, [stationQuotes]);
+
+    useEffect(() => {
+        if (activeIndex >= stationQuotes.length) {
+            setActiveIndex(0);
+        }
+    }, [activeIndex, stationQuotes.length]);
 
     useEffect(() => {
         clustersSignatureRef.current = clustersSignature;
@@ -2637,9 +2678,10 @@ export default function HomeScreen() {
                             router.push({
                                 pathname: '/prices-sheet',
                                 params: {
-                                    quotesData: stationQuotes.length > 0 ? JSON.stringify(stationQuotes) : JSON.stringify([bestQuote].filter(Boolean)),
+                                    quotesData: stationQuotes.length > 0 ? JSON.stringify(stationQuotes) : JSON.stringify([displayBestQuote].filter(Boolean)),
                                     benchmarkData: benchmarkQuote ? JSON.stringify(benchmarkQuote) : null,
                                     errorMsg: errorMsg || '',
+                                    fuelGrade: selectedFuelGrade,
                                 },
                             });
                         }}
@@ -2702,6 +2744,7 @@ export default function HomeScreen() {
                                 isDark={isDark}
                                 benchmarkQuote={benchmarkQuote}
                                 errorMsg={errorMsg}
+                                fuelGrade={selectedFuelGrade}
                                 isRefreshing={isRefreshingPrices || isLoadingLocation}
                                 themeColors={themeColors}
                                 glassTintColor={homeGlassTintColor}
@@ -2713,10 +2756,11 @@ export default function HomeScreen() {
                         <FuelSummaryCard
                             benchmarkQuote={benchmarkQuote}
                             errorMsg={errorMsg}
+                            fuelGrade={selectedFuelGrade}
                             glassTintColor={homeGlassTintColor}
                             isDark={isDark}
                             isRefreshing={isRefreshingPrices || isLoadingLocation}
-                            quote={bestQuote}
+                            quote={displayBestQuote}
                             themeColors={themeColors}
                         />
                     </View>
@@ -2790,8 +2834,6 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
         borderRadius: 16,
         gap: 6,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: 'rgba(150, 150, 150, 0.4)',
         overflow: 'hidden',
     },
     clusterContainer: {

@@ -9,7 +9,7 @@ const ThemeContext = createContext({
     themeMode: 'light', // 'light' | 'dark' | 'system'
     setThemeMode: () => { },
     themeColors: {
-        background: '#FFFFFF',
+        background: '#f2f1f6',
         text: '#000000',
         textOpacity: 'rgba(0,0,0,0.6)',
         headerText: '#000000',
@@ -63,7 +63,7 @@ export const ThemeProvider = ({ children }) => {
         /* system */ systemScheme === 'dark';
 
     const themeColors = {
-        background: isDark ? '#000000' : '#FFFFFF',
+        background: isDark ? '#000000' : '#f2f1f6',
         text: isDark ? '#FFFFFF' : '#000000',
         textOpacity: isDark ? 'rgba(255,255,255,0.64)' : 'rgba(0,0,0,0.6)',
         headerText: isDark ? '#FFFFFF' : '#000000',

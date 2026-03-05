@@ -36,15 +36,15 @@
       "expo-video"
     ],
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/fuelup-icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/fuelup-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
     "ios": {
-      "icon": "./fuelup.icon",
+      "icon": "./assets/fuelup-icon.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.anthonyh.fuelup",
       "entitlements": {
@@ -52,11 +52,34 @@
       },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Fuel Up requires precise location access to function.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Fuel Up requires precise location access to function."
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Fuel Up requires precise location access to function.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "com.anthonyh.fuelup"
+    },
+    "extra": {
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "ExpoWidgetsTarget",
+                  "bundleIdentifier": "com.anthonyh.fuelup.ExpoWidgetsTarget",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.anthonyh.fuelup"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "ba30e199-db8a-4094-b10b-230e5fdf8cc3"
+      }
     }
   }
 }
