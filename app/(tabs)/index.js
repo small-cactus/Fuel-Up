@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { GlassView } from 'expo-glass-effect';
+import { LiquidGlassContainerView } from '@callstack/liquid-glass';
 import * as Location from 'expo-location';
 import * as FileSystem from 'expo-file-system/legacy';
 import MapView, { Marker, PROVIDER_APPLE } from 'react-native-maps';
@@ -1241,26 +1242,28 @@ export default function HomeScreen() {
             .map((q, idx) => ({ ...q, originalIndex: idx }))
     ), [topStations, bestQuote, minRating]);
 
-    const previousClustersRef = useRef([]);
     const stationQuotesRef = useRef([]);
     const clustersSignatureRef = useRef('');
 
-    const clusters = useMemo(() => {
+    const computedClusters = useMemo(() => {
         if (stationQuotes.length === 0) {
             return [];
         }
 
-        const nextClusters = groupStationsIntoClusters({
+        return groupStationsIntoClusters({
             stationQuotes,
             mapRegion,
             screenWidth: width,
             screenHeight: height,
-            previousClusters: previousClustersRef.current,
         });
-
-        previousClustersRef.current = nextClusters;
-        return nextClusters;
     }, [stationQuotes, mapRegion, width, height]);
+    const [clusters, setClusters] = useState(computedClusters);
+
+    useEffect(() => {
+        if (!isMapMoving) {
+            setClusters(computedClusters);
+        }
+    }, [computedClusters, isMapMoving]);
     const clustersSignature = useMemo(() => (
         clusters.map(buildClusterMembershipKey).join('|')
     ), [clusters]);
@@ -2104,8 +2107,29 @@ export default function HomeScreen() {
                     }, CLUSTER_MAP_IDLE_SETTLE_MS);
                 }}
             >
-                {hasRenderableClusters ? (
-                    <>
+                {!hasRenderableClusters ? (
+                    <Marker
+                        coordinate={fallbackCoordinate}
+                        title="No Prices Returned"
+                        description={
+                            errorMsg
+                                ? 'No live station price available'
+                                : isLoadingLocation
+                                    ? 'Finding your location'
+                                    : 'Checking fuel providers'
+                        }
+                        pinColor="#D46A4C"
+                    />
+                ) : null}
+            </MapView>
+
+            {hasRenderableClusters ? (
+                <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
+                    <LiquidGlassContainerView
+                        pointerEvents="none"
+                        spacing={24}
+                        style={styles.clusterMapParentContainer}
+                    >
                         {renderClusterEntries.map(entry => (
                             <ClusterMarkerOverlay
                                 key={entry.key}
@@ -2124,22 +2148,9 @@ export default function HomeScreen() {
                                 isMapMoving={isMapMoving}
                             />
                         ))}
-                    </>
-                ) : (
-                    <Marker
-                        coordinate={fallbackCoordinate}
-                        title="No Prices Returned"
-                        description={
-                            errorMsg
-                                ? 'No live station price available'
-                                : isLoadingLocation
-                                    ? 'Finding your location'
-                                    : 'Checking fuel providers'
-                        }
-                        pinColor="#D46A4C"
-                    />
-                )}
-            </MapView>
+                    </LiquidGlassContainerView>
+                </View>
+            ) : null}
 
             <TopCanopy edgeColor={canopyEdgeLine} height={topCanopyHeight} isDark={isDark} topInset={insets.top} />
             <BottomCanopy height={bottomPadding + 140} isDark={isDark} />
@@ -2312,6 +2323,12 @@ const styles = StyleSheet.create({
     contentOverlay: {
         position: 'absolute',
         width: '100%',
+        alignItems: 'center',
+    },
+    clusterMapParentContainer: {
+        ...StyleSheet.absoluteFillObject,
+        overflow: 'visible',
+        justifyContent: 'center',
         alignItems: 'center',
     },
     sheetTriggerButton: {

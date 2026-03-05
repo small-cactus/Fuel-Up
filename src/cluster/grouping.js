@@ -1,19 +1,15 @@
 import {
-  CLUSTER_GROUP_HYSTERESIS_MULTIPLIER,
-  CLUSTER_GROUP_TOUCH_PADDING,
   CLUSTER_PRIMARY_PILL_WIDTH,
   CLUSTER_PILL_HEIGHT,
 } from './constants';
 
-function buildQuoteRect(quote, mapRegion, screenWidth, screenHeight, padding = 0) {
+function buildQuoteRect(quote, mapRegion, screenWidth, screenHeight) {
   const safeScreenWidth = Number.isFinite(screenWidth) ? screenWidth : 0;
   const safeScreenHeight = Number.isFinite(screenHeight) ? screenHeight : 0;
   const ptPerLng = mapRegion?.longitudeDelta ? safeScreenWidth / mapRegion.longitudeDelta : 0;
   const ptPerLat = mapRegion?.latitudeDelta ? safeScreenHeight / mapRegion.latitudeDelta : 0;
   const centerLng = mapRegion?.longitude || 0;
   const centerLat = mapRegion?.latitude || 0;
-  const width = CLUSTER_PRIMARY_PILL_WIDTH + padding * 2;
-  const height = CLUSTER_PILL_HEIGHT + padding * 2;
   const x = (quote.longitude - centerLng) * ptPerLng;
   const y = -(quote.latitude - centerLat) * ptPerLat;
 
@@ -21,12 +17,10 @@ function buildQuoteRect(quote, mapRegion, screenWidth, screenHeight, padding = 0
     stationId: quote.stationId,
     x,
     y,
-    left: x - width / 2,
-    right: x + width / 2,
-    top: y - height / 2,
-    bottom: y + height / 2,
-    width,
-    height,
+    left: x - CLUSTER_PRIMARY_PILL_WIDTH / 2,
+    right: x + CLUSTER_PRIMARY_PILL_WIDTH / 2,
+    top: y - CLUSTER_PILL_HEIGHT / 2,
+    bottom: y + CLUSTER_PILL_HEIGHT / 2,
   };
 }
 
@@ -39,20 +33,16 @@ function doRectsTouch(left, right) {
   );
 }
 
-function buildPreviousPairs(previousClusters) {
-  const pairs = new Set();
+function isFullyInsideMap(rect, screenWidth, screenHeight) {
+  const halfWidth = (Number.isFinite(screenWidth) ? screenWidth : 0) / 2;
+  const halfHeight = (Number.isFinite(screenHeight) ? screenHeight : 0) / 2;
 
-  (previousClusters || []).forEach(cluster => {
-    const ids = (cluster?.quotes || []).map(quote => String(quote.stationId));
-    for (let i = 0; i < ids.length; i += 1) {
-      for (let j = i + 1; j < ids.length; j += 1) {
-        const pairKey = ids[i] < ids[j] ? `${ids[i]}|${ids[j]}` : `${ids[j]}|${ids[i]}`;
-        pairs.add(pairKey);
-      }
-    }
-  });
-
-  return pairs;
+  return (
+    rect.left >= -halfWidth &&
+    rect.right <= halfWidth &&
+    rect.top >= -halfHeight &&
+    rect.bottom <= halfHeight
+  );
 }
 
 function findRoot(parentByIndex, index) {
@@ -84,21 +74,40 @@ function unionRoots(parentByIndex, rankByIndex, leftIndex, rightIndex) {
   rankByIndex[leftRoot] += 1;
 }
 
+function buildCluster(groupQuotes) {
+  const sortedQuotes = [...groupQuotes].sort((left, right) => left.price - right.price);
+  const averageLat = sortedQuotes.reduce((sum, quote) => sum + quote.latitude, 0) / sortedQuotes.length;
+  const averageLng = sortedQuotes.reduce((sum, quote) => sum + quote.longitude, 0) / sortedQuotes.length;
+
+  return {
+    quotes: sortedQuotes,
+    averageLat,
+    averageLng,
+  };
+}
+
 export function groupStationsIntoClusters({
   stationQuotes,
   mapRegion,
   screenWidth,
   screenHeight,
-  previousClusters,
 }) {
   if (!Array.isArray(stationQuotes) || stationQuotes.length === 0) {
     return [];
   }
 
-  const previousPairs = buildPreviousPairs(previousClusters);
   const quotes = [...stationQuotes].sort((left, right) => left.price - right.price);
+  const rectById = new Map();
+  const fullyInsideById = new Map();
   const parentByIndex = quotes.map((_, index) => index);
   const rankByIndex = quotes.map(() => 0);
+
+  quotes.forEach(quote => {
+    const id = String(quote.stationId);
+    const rect = buildQuoteRect(quote, mapRegion, screenWidth, screenHeight);
+    rectById.set(id, rect);
+    fullyInsideById.set(id, isFullyInsideMap(rect, screenWidth, screenHeight));
+  });
 
   for (let i = 0; i < quotes.length; i += 1) {
     for (let j = i + 1; j < quotes.length; j += 1) {
@@ -106,11 +115,16 @@ export function groupStationsIntoClusters({
       const rightQuote = quotes[j];
       const leftId = String(leftQuote.stationId);
       const rightId = String(rightQuote.stationId);
-      const pairKey = leftId < rightId ? `${leftId}|${rightId}` : `${rightId}|${leftId}`;
-      const wasPairedBefore = previousPairs.has(pairKey);
-      const padding = CLUSTER_GROUP_TOUCH_PADDING * (wasPairedBefore ? CLUSTER_GROUP_HYSTERESIS_MULTIPLIER : 1);
-      const leftRect = buildQuoteRect(leftQuote, mapRegion, screenWidth, screenHeight, padding);
-      const rightRect = buildQuoteRect(rightQuote, mapRegion, screenWidth, screenHeight, padding);
+      const leftRect = rectById.get(leftId);
+      const rightRect = rectById.get(rightId);
+
+      if (!leftRect || !rightRect) {
+        continue;
+      }
+
+      if (!fullyInsideById.get(leftId) || !fullyInsideById.get(rightId)) {
+        continue;
+      }
 
       if (doRectsTouch(leftRect, rightRect)) {
         unionRoots(parentByIndex, rankByIndex, i, j);
@@ -125,27 +139,17 @@ export function groupStationsIntoClusters({
     groupsByRoot.set(rootIndex, [...existingGroup, quote]);
   });
 
-  return Array.from(groupsByRoot.values())
-    .map(groupQuotes => {
-      const sortedQuotes = [...groupQuotes].sort((left, right) => left.price - right.price);
-      const averageLat = sortedQuotes.reduce((sum, quote) => sum + quote.latitude, 0) / sortedQuotes.length;
-      const averageLng = sortedQuotes.reduce((sum, quote) => sum + quote.longitude, 0) / sortedQuotes.length;
+  const clusters = Array.from(groupsByRoot.values()).map(buildCluster);
 
-      return {
-        quotes: sortedQuotes,
-        averageLat,
-        averageLng,
-      };
-    })
-    .sort((left, right) => {
-      const leftPrice = left.quotes[0]?.price ?? Number.POSITIVE_INFINITY;
-      const rightPrice = right.quotes[0]?.price ?? Number.POSITIVE_INFINITY;
-      if (leftPrice !== rightPrice) {
-        return leftPrice - rightPrice;
-      }
+  return clusters.sort((left, right) => {
+    const leftPrice = left.quotes[0]?.price ?? Number.POSITIVE_INFINITY;
+    const rightPrice = right.quotes[0]?.price ?? Number.POSITIVE_INFINITY;
+    if (leftPrice !== rightPrice) {
+      return leftPrice - rightPrice;
+    }
 
-      const leftId = String(left.quotes[0]?.stationId || '');
-      const rightId = String(right.quotes[0]?.stationId || '');
-      return leftId.localeCompare(rightId);
-    });
+    const leftId = String(left.quotes[0]?.stationId || '');
+    const rightId = String(right.quotes[0]?.stationId || '');
+    return leftId.localeCompare(rightId);
+  });
 }
