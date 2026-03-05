@@ -7,6 +7,7 @@ import * as Location from 'expo-location';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import * as d3Shape from 'd3-shape';
 import * as d3Scale from 'd3-scale';
+import { SymbolView } from 'expo-symbols';
 import { fetchTrendData } from '../../src/services/fuel/trends';
 import TopCanopy from '../../src/components/TopCanopy';
 
@@ -165,33 +166,66 @@ export default function TrendsScreen() {
                         )}
 
                         <View style={styles.contentPad}>
-                            {/* 2. Stations with Largest Delta */}
-                            {trendData?.stationsWithLargestDelta?.length > 0 && (
+                            {/* 2. Leaderboard */}
+                            {trendData?.leaderboard?.length > 0 && (
                                 <GlassView
                                     style={styles.glassCard}
                                     glassEffectStyle="regular"
                                     tintColor={glassTintColor}
                                 >
-                                    <Text style={[styles.cardTitle, { color: themeColors.text, marginBottom: 16 }]}>Largest Price Jumps</Text>
-                                    {trendData.stationsWithLargestDelta.map((st, idx) => {
-                                        // A big delta signifies a big change. Whether the most recent change was up or down determines the color.
-                                        // For simplicity, we highlight changes in red if they jumped UP lately, green if DOWN.
-                                        const lastJumpAmt = st.prices.length >= 2
-                                            ? st.prices[st.prices.length - 1].price - st.prices[st.prices.length - 2].price
-                                            : st.delta;
+                                    <Text style={[styles.cardTitle, { color: themeColors.text, marginBottom: 16 }]}>Leaderboard</Text>
+                                    {trendData.leaderboard.map((st, idx) => {
+                                        const rankLabel = idx === 0 ? '1st' : idx === 1 ? '2nd' : idx === 2 ? '3rd' : `${idx + 1}th`;
+                                        const medalColor = idx === 0 ? '#FBEC5D' : idx === 1 ? '#C0C0C0' : idx === 2 ? '#CD7F32' : 'transparent';
 
-                                        const isHike = lastJumpAmt > 0;
-                                        const deltaColor = isHike ? COLORS.RED : COLORS.GREEN;
+                                        const shift = st.rankShift;
+                                        const shiftText = shift > 0 ? `▲ ${shift}` : shift < 0 ? `▼ ${Math.abs(shift)}` : '—';
+                                        const shiftColor = shift > 0 ? COLORS.GREEN : shift < 0 ? COLORS.RED : themeColors.textOpacity;
 
                                         return (
                                             <View key={st.stationId} style={[styles.listItem, idx > 0 && { borderTopWidth: 1, borderTopColor: isDark ? '#333' : '#EEE' }]}>
                                                 <View style={styles.listTextCol}>
-                                                    <Text style={[styles.itemName, { color: themeColors.text }]}>{st.name || 'Unknown Station'}</Text>
+                                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
+                                                        <Text style={[styles.itemName, { color: themeColors.text }]}>{st.name || 'Unknown Station'}</Text>
+                                                        {idx <= 2 ? (
+                                                            <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
+                                                                <SymbolView
+                                                                    name="laurel.leading"
+                                                                    tintColor={medalColor}
+                                                                    size={30}
+                                                                    resizeMode="scaleAspectFit"
+                                                                    type="monochrome"
+                                                                />
+                                                                <Text style={{
+                                                                    color: medalColor,
+                                                                    fontWeight: '800',
+                                                                    fontSize: 20,
+                                                                    marginHorizontal: 2
+                                                                }}>
+                                                                    {rankLabel}
+                                                                </Text>
+                                                                <SymbolView
+                                                                    name="laurel.trailing"
+                                                                    tintColor={medalColor}
+                                                                    size={30}
+                                                                    resizeMode="scaleAspectFit"
+                                                                    type="monochrome"
+                                                                />
+                                                            </View>
+                                                        ) : (
+                                                            <Text style={{ color: themeColors.textOpacity, fontWeight: '600', fontSize: 13, marginLeft: 8 }}>
+                                                                {rankLabel}
+                                                            </Text>
+                                                        )}
+                                                    </View>
                                                     <Text style={[styles.itemSub, { color: themeColors.textOpacity }]}>{st.address?.split(',')[0]}</Text>
                                                 </View>
-                                                <View style={styles.valPill}>
-                                                    <Text style={[styles.itemVal, { color: deltaColor }]}>
-                                                        {isHike ? '+' : ''}{lastJumpAmt.toFixed(2)}¢
+                                                <View style={{ alignItems: 'flex-end', justifyContent: 'center' }}>
+                                                    <Text style={[styles.itemVal, { color: themeColors.text }]}>
+                                                        ${st.latestPrice.toFixed(2)}
+                                                    </Text>
+                                                    <Text style={{ fontSize: 13, fontWeight: '600', color: shiftColor, marginTop: 4 }}>
+                                                        {shiftText}
                                                     </Text>
                                                 </View>
                                             </View>
@@ -231,7 +265,7 @@ export default function TrendsScreen() {
                             )}
 
                             {/* Empty/No Data Fallback */}
-                            {!loading && !trendData?.averagePricesByDay?.length && !trendData?.stationsWithLargestDelta?.length && (
+                            {!loading && !trendData?.averagePricesByDay?.length && !trendData?.leaderboard?.length && (
                                 <View style={styles.emptyState}>
                                     <Text style={[styles.emptyText, { color: themeColors.textOpacity }]}>Not enough historical data collected yet to render trends. Check back soon.</Text>
                                 </View>

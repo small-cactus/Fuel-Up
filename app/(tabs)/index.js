@@ -7,6 +7,7 @@ import { GlassView } from 'expo-glass-effect';
 import { LiquidGlassContainerView } from '@callstack/liquid-glass';
 import * as Location from 'expo-location';
 import * as FileSystem from 'expo-file-system/legacy';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import MapView, { Marker, PROVIDER_APPLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppState } from '../../src/AppStateContext';
@@ -18,7 +19,13 @@ import { useTheme } from '../../src/ThemeContext';
 import { usePreferences } from '../../src/PreferencesContext';
 import BottomCanopy from '../../src/components/BottomCanopy';
 import ClusterMarkerOverlay from '../../src/components/cluster/ClusterMarkerOverlay';
+import StationMarker from '../../src/components/cluster/StationMarker';
 import { groupStationsIntoClusters } from '../../src/cluster/grouping';
+import {
+    CLUSTER_PILL_HEIGHT,
+    CLUSTER_PRIMARY_PILL_WIDTH,
+    CLUSTER_TOUCH_PILL_HEIGHT,
+} from '../../src/cluster/constants';
 import { buildClusterMembershipKey } from '../../src/cluster/layout';
 import { finalizeDebugSample } from '../../src/cluster/telemetry';
 import Animated, {
@@ -66,6 +73,20 @@ const CLUSTER_DEBUG_PROBE_MIN_DELTA = 0.0005;
 const CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME = 'cluster-debug-probe.json';
 const CLUSTER_DEBUG_PROBE_REPORT_RELATIVE_PATH = `Documents/${CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME}`;
 const CLUSTER_DEBUG_PROBE_REPORT_CACHE_RELATIVE_PATH = `Library/Caches/${CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME}`;
+const LAST_DEVICE_LOCATION_STORAGE_KEY = 'fuelup:last-device-location';
+const USER_LOCATION_BUBBLE_SIZE = 14;
+const USER_LOCATION_OVERLAP_PILL_WIDTH = CLUSTER_PRIMARY_PILL_WIDTH - 28;
+const USER_LOCATION_OVERLAP_PILL_HEIGHT = CLUSTER_PILL_HEIGHT - 14;
+const STATION_FOCUS_MIN_LATITUDE_DELTA = 0.002;
+const STATION_FOCUS_MIN_LONGITUDE_DELTA = 0.002;
+const STATION_FOCUS_ZOOM_STEP_MULTIPLIER = 0.82;
+const STATION_FOCUS_MAX_STEPS = 18;
+const STATION_FOCUS_ANIMATION_MS = 420;
+const STATIONS_FIT_TOP_EXTRA_PADDING = 16;
+const STATIONS_FIT_BOTTOM_CONTENT_PADDING = 140;
+const STATIONS_FIT_SIDE_EXTRA_PADDING = 12;
+const STATIONS_FIT_SETTLE_PASS_DELAY_MS = 260;
+const ENABLE_CLUSTER_MERGE_TRANSITIONS = false;
 
 function waitForMilliseconds(duration) {
     return new Promise(resolve => {
@@ -576,6 +597,225 @@ function areRegionsEquivalent(currentRegion, nextRegion) {
     );
 }
 
+function parseCachedDeviceLocation(rawValue) {
+    if (!rawValue) {
+        return null;
+    }
+
+    try {
+        const parsedValue = JSON.parse(rawValue);
+        const latitude = Number(parsedValue?.latitude);
+        const longitude = Number(parsedValue?.longitude);
+        const latitudeDelta = Number(parsedValue?.latitudeDelta);
+        const longitudeDelta = Number(parsedValue?.longitudeDelta);
+
+        if (
+            !Number.isFinite(latitude) ||
+            !Number.isFinite(longitude) ||
+            !Number.isFinite(latitudeDelta) ||
+            !Number.isFinite(longitudeDelta)
+        ) {
+            return null;
+        }
+
+        return {
+            latitude,
+            longitude,
+            latitudeDelta,
+            longitudeDelta,
+        };
+    } catch (error) {
+        return null;
+    }
+}
+
+function buildSingleQuoteClusters(stationQuotes) {
+    return (stationQuotes || []).map(quote => ({
+        quotes: [quote],
+        averageLat: quote.latitude,
+        averageLng: quote.longitude,
+    }));
+}
+
+function doRectsTouch(left, right) {
+    return (
+        left.left <= right.right &&
+        left.right >= right.left &&
+        left.top <= right.bottom &&
+        left.bottom >= right.top
+    );
+}
+
+function buildSuppressedOverlapStationIds(stationQuotes, mapRegion, screenWidth, screenHeight, userLocation = null) {
+    if (!Array.isArray(stationQuotes) || stationQuotes.length <= 1 || !mapRegion) {
+        return new Set();
+    }
+
+    const ptPerLng = mapRegion.longitudeDelta ? screenWidth / mapRegion.longitudeDelta : 0;
+    const ptPerLat = mapRegion.latitudeDelta ? screenHeight / mapRegion.latitudeDelta : 0;
+    const centerLng = mapRegion.longitude || 0;
+    const centerLat = mapRegion.latitude || 0;
+    const orderedQuotes = [...stationQuotes].sort((left, right) => {
+        if (left.price !== right.price) {
+            return left.price - right.price;
+        }
+        return String(left.stationId).localeCompare(String(right.stationId));
+    });
+
+    const visibleRects = [];
+    const suppressedIds = new Set();
+    const hasValidUserLocation = (
+        typeof userLocation?.latitude === 'number' &&
+        typeof userLocation?.longitude === 'number'
+    );
+    const userLocationRect = hasValidUserLocation
+        ? {
+            left: (userLocation.longitude - centerLng) * ptPerLng - USER_LOCATION_BUBBLE_SIZE / 2,
+            right: (userLocation.longitude - centerLng) * ptPerLng + USER_LOCATION_BUBBLE_SIZE / 2,
+            top: -((userLocation.latitude - centerLat) * ptPerLat) - USER_LOCATION_BUBBLE_SIZE / 2,
+            bottom: -((userLocation.latitude - centerLat) * ptPerLat) + USER_LOCATION_BUBBLE_SIZE / 2,
+        }
+        : null;
+
+    orderedQuotes.forEach(quote => {
+        const x = (quote.longitude - centerLng) * ptPerLng;
+        const y = -(quote.latitude - centerLat) * ptPerLat;
+        const rect = {
+            left: x - CLUSTER_PRIMARY_PILL_WIDTH / 2,
+            right: x + CLUSTER_PRIMARY_PILL_WIDTH / 2,
+            top: y - CLUSTER_TOUCH_PILL_HEIGHT / 2,
+            bottom: y + CLUSTER_TOUCH_PILL_HEIGHT / 2,
+        };
+        const userOverlapRect = {
+            left: x - USER_LOCATION_OVERLAP_PILL_WIDTH / 2,
+            right: x + USER_LOCATION_OVERLAP_PILL_WIDTH / 2,
+            top: y - USER_LOCATION_OVERLAP_PILL_HEIGHT / 2,
+            bottom: y + USER_LOCATION_OVERLAP_PILL_HEIGHT / 2,
+        };
+
+        const overlapsVisible = visibleRects.some(visibleRect => doRectsTouch(rect, visibleRect));
+        const overlapsUserLocationBubble = userLocationRect
+            ? doRectsTouch(userOverlapRect, userLocationRect)
+            : false;
+        if (overlapsVisible || overlapsUserLocationBubble) {
+            suppressedIds.add(String(quote.stationId));
+            return;
+        }
+
+        visibleRects.push(rect);
+    });
+
+    return suppressedIds;
+}
+
+function resolveStationFocusZoom({
+    targetQuote,
+    stationQuotes,
+    baseFitRegion,
+    screenWidth,
+    screenHeight,
+    userLocation = null,
+}) {
+    if (
+        !targetQuote ||
+        !Array.isArray(stationQuotes) ||
+        stationQuotes.length === 0
+    ) {
+        return {
+            latitudeDelta: STATION_FOCUS_MIN_LATITUDE_DELTA,
+            longitudeDelta: STATION_FOCUS_MIN_LONGITUDE_DELTA,
+        };
+    }
+
+    const targetStationId = String(targetQuote.stationId);
+    let latitudeDelta = Math.max(
+        STATION_FOCUS_MIN_LATITUDE_DELTA,
+        Number(baseFitRegion?.latitudeDelta) || STATION_FOCUS_MIN_LATITUDE_DELTA
+    );
+    let longitudeDelta = Math.max(
+        STATION_FOCUS_MIN_LONGITUDE_DELTA,
+        Number(baseFitRegion?.longitudeDelta) || STATION_FOCUS_MIN_LONGITUDE_DELTA
+    );
+
+    for (let step = 0; step < STATION_FOCUS_MAX_STEPS; step += 1) {
+        const candidateRegion = {
+            latitude: targetQuote.latitude,
+            longitude: targetQuote.longitude,
+            latitudeDelta,
+            longitudeDelta,
+        };
+        const suppressedIds = buildSuppressedOverlapStationIds(
+            stationQuotes,
+            candidateRegion,
+            screenWidth,
+            screenHeight,
+            userLocation
+        );
+
+        if (!suppressedIds.has(targetStationId)) {
+            return { latitudeDelta, longitudeDelta };
+        }
+
+        const nextLatitudeDelta = Math.max(
+            STATION_FOCUS_MIN_LATITUDE_DELTA,
+            latitudeDelta * STATION_FOCUS_ZOOM_STEP_MULTIPLIER
+        );
+        const nextLongitudeDelta = Math.max(
+            STATION_FOCUS_MIN_LONGITUDE_DELTA,
+            longitudeDelta * STATION_FOCUS_ZOOM_STEP_MULTIPLIER
+        );
+
+        if (nextLatitudeDelta === latitudeDelta && nextLongitudeDelta === longitudeDelta) {
+            break;
+        }
+
+        latitudeDelta = nextLatitudeDelta;
+        longitudeDelta = nextLongitudeDelta;
+    }
+
+    return { latitudeDelta, longitudeDelta };
+}
+
+function buildStationsFitZoomRegion(stationQuotes, fallbackRegion = null) {
+    const validQuotes = (stationQuotes || []).filter(quote => (
+        Number.isFinite(quote?.latitude) &&
+        Number.isFinite(quote?.longitude)
+    ));
+
+    if (validQuotes.length === 0) {
+        return {
+            latitudeDelta: Math.max(
+                STATION_FOCUS_MIN_LATITUDE_DELTA,
+                Number(fallbackRegion?.latitudeDelta) || STATION_FOCUS_MIN_LATITUDE_DELTA
+            ),
+            longitudeDelta: Math.max(
+                STATION_FOCUS_MIN_LONGITUDE_DELTA,
+                Number(fallbackRegion?.longitudeDelta) || STATION_FOCUS_MIN_LONGITUDE_DELTA
+            ),
+        };
+    }
+
+    let minLat = validQuotes[0].latitude;
+    let maxLat = validQuotes[0].latitude;
+    let minLng = validQuotes[0].longitude;
+    let maxLng = validQuotes[0].longitude;
+
+    validQuotes.forEach(quote => {
+        minLat = Math.min(minLat, quote.latitude);
+        maxLat = Math.max(maxLat, quote.latitude);
+        minLng = Math.min(minLng, quote.longitude);
+        maxLng = Math.max(maxLng, quote.longitude);
+    });
+
+    const latSpan = Math.max(0, maxLat - minLat);
+    const lngSpan = Math.max(0, maxLng - minLng);
+
+    return {
+        latitudeDelta: Math.max(STATION_FOCUS_MIN_LATITUDE_DELTA, latSpan * 1.55, 0.008),
+        longitudeDelta: Math.max(STATION_FOCUS_MIN_LONGITUDE_DELTA, lngSpan * 1.55, 0.008),
+    };
+}
+
 function formatDebugMetric(value, digits = 2) {
     if (typeof value !== 'number' || Number.isNaN(value)) {
         return '--';
@@ -930,6 +1170,8 @@ export default function HomeScreen() {
     const [hasLocationPermission, setHasLocationPermission] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     const [mapRegion, setMapRegion] = useState(DEFAULT_REGION);
+    const [mapRenderRegion, setMapRenderRegion] = useState(DEFAULT_REGION);
+    const [userLocationBubble, setUserLocationBubble] = useState(null);
     const [isMapMoving, setIsMapMoving] = useState(false);
     const [isClusterDebugRecording, setIsClusterDebugRecording] = useState(false);
     const [isClusterDebugProbeRunning, setIsClusterDebugProbeRunning] = useState(false);
@@ -1015,10 +1257,7 @@ export default function HomeScreen() {
             if (isMountedRef.current) {
                 setHasLocationPermission(false);
                 setLocation(manualRegion);
-                if (mapRef.current) {
-                    setMapMotionState(true);
-                    mapRef.current.animateToRegion(manualRegion, 550);
-                }
+                setMapRegionIfNeeded(manualRegion);
                 setIsLoadingLocation(false);
             }
 
@@ -1053,7 +1292,74 @@ export default function HomeScreen() {
                 setHasLocationPermission(true);
             }
 
-            const loc = await Location.getCurrentPositionAsync({
+            const persistLastDeviceLocation = async (nextRegion) => {
+                try {
+                    await AsyncStorage.setItem(
+                        LAST_DEVICE_LOCATION_STORAGE_KEY,
+                        JSON.stringify(nextRegion)
+                    );
+                } catch (error) {
+                    // Best-effort cache write for faster next launch.
+                }
+            };
+            const applyResolvedRegion = (nextRegion) => {
+                if (!isMountedRef.current) {
+                    return;
+                }
+
+                setLocation(nextRegion);
+                setMapRegionIfNeeded(nextRegion);
+            };
+
+            const cachedLocationRaw = await AsyncStorage.getItem(LAST_DEVICE_LOCATION_STORAGE_KEY);
+            const cachedRegion = parseCachedDeviceLocation(cachedLocationRaw);
+
+            if (cachedRegion) {
+                applyResolvedRegion(cachedRegion);
+                if (isMountedRef.current) {
+                    setIsLoadingLocation(false);
+                }
+
+                void (async () => {
+                    try {
+                        const freshLocation = await Location.getCurrentPositionAsync({
+                            accuracy: Location.Accuracy.Balanced,
+                        });
+
+                        if (!isMountedRef.current) {
+                            return;
+                        }
+
+                        const freshRegion = {
+                            latitude: freshLocation.coords.latitude,
+                            longitude: freshLocation.coords.longitude,
+                            latitudeDelta: 0.05,
+                            longitudeDelta: 0.05,
+                        };
+
+                        await persistLastDeviceLocation(freshRegion);
+
+                        if (!areRegionsEquivalent(cachedRegion, freshRegion)) {
+                            applyResolvedRegion(freshRegion);
+                            await loadFuelData({
+                                latitude: freshRegion.latitude,
+                                longitude: freshRegion.longitude,
+                                locationSource: 'device',
+                                preferCached: true,
+                            });
+                        }
+                    } catch (error) {
+                        // Cached location is already applied; ignore background refresh failures.
+                    }
+                })();
+
+                return {
+                    ...cachedRegion,
+                    locationSource: 'device-cache',
+                };
+            }
+
+            const freshLocation = await Location.getCurrentPositionAsync({
                 accuracy: Location.Accuracy.Balanced,
             });
 
@@ -1062,19 +1368,19 @@ export default function HomeScreen() {
             }
 
             const nextRegion = {
-                latitude: loc.coords.latitude,
-                longitude: loc.coords.longitude,
+                latitude: freshLocation.coords.latitude,
+                longitude: freshLocation.coords.longitude,
                 latitudeDelta: 0.05,
                 longitudeDelta: 0.05,
             };
 
-            setLocation(nextRegion);
-            if (mapRef.current) {
-                setMapMotionState(true);
-                mapRef.current.animateToRegion(nextRegion, 550);
-            }
+            applyResolvedRegion(nextRegion);
+            await persistLastDeviceLocation(nextRegion);
 
-            return nextRegion;
+            return {
+                ...nextRegion,
+                locationSource: 'device',
+            };
         } catch (error) {
             if (isMountedRef.current) {
                 setHasLocationPermission(false);
@@ -1250,6 +1556,10 @@ export default function HomeScreen() {
             return [];
         }
 
+        if (!ENABLE_CLUSTER_MERGE_TRANSITIONS) {
+            return buildSingleQuoteClusters(stationQuotes);
+        }
+
         return groupStationsIntoClusters({
             stationQuotes,
             mapRegion,
@@ -1257,6 +1567,32 @@ export default function HomeScreen() {
             screenHeight: height,
         });
     }, [stationQuotes, mapRegion, width, height]);
+    const suppressedOverlapStationIds = useMemo(() => {
+        if (ENABLE_CLUSTER_MERGE_TRANSITIONS) {
+            return new Set();
+        }
+
+        return buildSuppressedOverlapStationIds(
+            stationQuotes,
+            mapRenderRegion,
+            width,
+            height,
+            hasLocationPermission ? userLocationBubble : null
+        );
+    }, [stationQuotes, mapRenderRegion, width, height, hasLocationPermission, userLocationBubble]);
+    const visibleSuppressedStationIds = useMemo(() => {
+        const nextSuppressed = new Set(suppressedOverlapStationIds);
+        const activeQuote = stationQuotes[activeIndex];
+
+        if (activeQuote?.stationId != null) {
+            nextSuppressed.delete(String(activeQuote.stationId));
+        }
+
+        return nextSuppressed;
+    }, [suppressedOverlapStationIds, stationQuotes, activeIndex]);
+    const allStationsFitZoomRegion = useMemo(() => (
+        buildStationsFitZoomRegion(stationQuotes, mapRenderRegion)
+    ), [stationQuotes, mapRenderRegion]);
     const [clusters, setClusters] = useState(computedClusters);
 
     useEffect(() => {
@@ -1304,6 +1640,33 @@ export default function HomeScreen() {
         ];
     };
 
+    const zoomToStation = (quote) => {
+        if (
+            !mapRef.current ||
+            !Number.isFinite(quote?.latitude) ||
+            !Number.isFinite(quote?.longitude)
+        ) {
+            return;
+        }
+
+        const resolvedFocusZoom = resolveStationFocusZoom({
+            targetQuote: quote,
+            stationQuotes,
+            baseFitRegion: allStationsFitZoomRegion,
+            screenWidth: width,
+            screenHeight: height,
+            userLocation: hasLocationPermission ? userLocationBubble : null,
+        });
+        isAnimatingRef.current = true;
+        setMapMotionState(true);
+        mapRef.current.animateToRegion({
+            latitude: quote.latitude,
+            longitude: quote.longitude,
+            latitudeDelta: resolvedFocusZoom.latitudeDelta,
+            longitudeDelta: resolvedFocusZoom.longitudeDelta,
+        }, STATION_FOCUS_ANIMATION_MS);
+    };
+
     const handleMarkerPress = (cluster) => {
         const primaryQuote = cluster.quotes[0];
         const index = primaryQuote.originalIndex;
@@ -1314,35 +1677,7 @@ export default function HomeScreen() {
             animated: true,
         });
         setActiveIndex(index);
-
-        // If it's a cluster, zoom in to naturally separate them
-        if (cluster.quotes.length > 1 && mapRef.current) {
-            // Find the maximum spread of the cluster to determine how far to zoom in
-            const lats = cluster.quotes.map(q => q.latitude);
-            const lngs = cluster.quotes.map(q => q.longitude);
-
-            const maxLat = Math.max(...lats);
-            const minLat = Math.min(...lats);
-            const maxLng = Math.max(...lngs);
-            const minLng = Math.min(...lngs);
-
-            const latSpread = maxLat - minLat;
-            const lngSpread = maxLng - minLng;
-
-            // Zoom out far enough so we can comfortably see all separated icons around the center
-            // A multiplier of 5-6 ensures the cluster spread occupies only a fraction of the screen, safely unmerging them
-            const targetLatDelta = Math.max(latSpread * 6, 0.03);
-            const targetLngDelta = Math.max(lngSpread * 6, 0.03);
-
-            isAnimatingRef.current = true;
-            setMapMotionState(true);
-            mapRef.current.animateToRegion({
-                latitude: cluster.averageLat,
-                longitude: cluster.averageLng,
-                latitudeDelta: targetLatDelta,
-                longitudeDelta: targetLngDelta,
-            }, 600);
-        }
+        zoomToStation(primaryQuote);
     };
 
     // We want the card to be almost full width, minus some padding to peek the next card.
@@ -1378,6 +1713,11 @@ export default function HomeScreen() {
         }
 
         mapRegionRef.current = nextRegion;
+        setMapRenderRegion(currentRegion => (
+            areRegionsEquivalent(currentRegion, nextRegion)
+                ? currentRegion
+                : nextRegion
+        ));
 
         setMapRegion(currentRegion => (
             areRegionsEquivalent(currentRegion, nextRegion)
@@ -1439,13 +1779,12 @@ export default function HomeScreen() {
             lastDataHashRef.current = currentHash;
             isUserScrollingRef.current = false;
 
-            // Frame all stations (since clusters are dynamic and zoom-dependent)
-            const coords = [
-                { latitude: location.latitude, longitude: location.longitude },
-                ...stationQuotes.filter(q => q.latitude && q.longitude).map(q => ({ latitude: q.latitude, longitude: q.longitude }))
-            ];
+            // Frame all visible stations without forcing the user-location bubble into the fit bounds.
+            const coords = stationQuotes
+                .filter(q => q.latitude && q.longitude)
+                .map(q => ({ latitude: q.latitude, longitude: q.longitude }));
 
-            if (coords.length > 1) {
+            if (coords.length > 0) {
                 isAnimatingRef.current = true;
                 setTimeout(() => {
                     if (!mapRef.current) {
@@ -1457,26 +1796,34 @@ export default function HomeScreen() {
                     }
 
                     setMapMotionState(true);
+                    const fitEdgePadding = {
+                        top: topCanopyHeight + STATIONS_FIT_TOP_EXTRA_PADDING,
+                        right: Math.max(horizontalPadding.right, sideInset) + STATIONS_FIT_SIDE_EXTRA_PADDING,
+                        bottom: bottomPadding + STATIONS_FIT_BOTTOM_CONTENT_PADDING,
+                        left: Math.max(horizontalPadding.left, sideInset) + STATIONS_FIT_SIDE_EXTRA_PADDING,
+                    };
+
                     mapRef.current.fitToCoordinates(coords, {
-                        edgePadding: { top: 120, right: 60, bottom: bottomPadding + 160, left: 60 },
+                        edgePadding: fitEdgePadding,
                         animated: true,
                     });
+                    setTimeout(() => {
+                        if (!mapRef.current) {
+                            return;
+                        }
+
+                        mapRef.current.fitToCoordinates(coords, {
+                            edgePadding: fitEdgePadding,
+                            animated: false,
+                        });
+                    }, STATIONS_FIT_SETTLE_PASS_DELAY_MS);
                 }, 100);
             }
         } else if (isUserScrollingRef.current && activeIndex >= 0 && activeIndex < stationQuotes.length) {
             const activeQuote = stationQuotes[activeIndex];
-            if (activeQuote.latitude && activeQuote.longitude) {
-                isAnimatingRef.current = true;
-                setMapMotionState(true);
-                mapRef.current.animateToRegion({
-                    latitude: activeQuote.latitude,
-                    longitude: activeQuote.longitude,
-                    latitudeDelta: 0.05,
-                    longitudeDelta: 0.05,
-                }, 400);
-            }
+            zoomToStation(activeQuote);
         }
-    }, [activeIndex, stationQuotes, location, bottomPadding, isFocused]);
+    }, [activeIndex, stationQuotes, bottomPadding, topCanopyHeight, horizontalPadding.left, horizontalPadding.right, sideInset, isFocused]);
 
     const fallbackCoordinate = {
         latitude: location.latitude,
@@ -2087,13 +2434,36 @@ export default function HomeScreen() {
                 initialRegion={DEFAULT_REGION}
                 provider={PROVIDER_APPLE}
                 showsUserLocation={hasLocationPermission}
+                onUserLocationChange={(event) => {
+                    const coordinate = event?.nativeEvent?.coordinate;
+                    const latitude = Number(coordinate?.latitude);
+                    const longitude = Number(coordinate?.longitude);
+
+                    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+                        return;
+                    }
+
+                    setUserLocationBubble(currentValue => {
+                        if (
+                            currentValue &&
+                            Math.abs(currentValue.latitude - latitude) <= MAP_REGION_EPSILON &&
+                            Math.abs(currentValue.longitude - longitude) <= MAP_REGION_EPSILON
+                        ) {
+                            return currentValue;
+                        }
+
+                        return { latitude, longitude };
+                    });
+                }}
                 userInterfaceStyle={isDark ? 'dark' : 'light'}
                 onRegionChange={(region) => {
                     clearMapIdleSettleTimeout();
                     setMapMotionState(true);
-                    setMapRegionIfNeeded(region);
+                    mapRegionRef.current = region;
+                    setMapRenderRegion(region);
                 }}
                 onRegionChangeComplete={(region) => {
+                    setMapRenderRegion(region);
                     setMapRegionIfNeeded(region);
                     isAnimatingRef.current = false;
                     clearMapIdleSettleTimeout();
@@ -2107,23 +2477,56 @@ export default function HomeScreen() {
                     }, CLUSTER_MAP_IDLE_SETTLE_MS);
                 }}
             >
-                {!hasRenderableClusters ? (
-                    <Marker
-                        coordinate={fallbackCoordinate}
-                        title="No Prices Returned"
-                        description={
-                            errorMsg
-                                ? 'No live station price available'
-                                : isLoadingLocation
-                                    ? 'Finding your location'
-                                    : 'Checking fuel providers'
-                        }
-                        pinColor="#D46A4C"
-                    />
-                ) : null}
+                {ENABLE_CLUSTER_MERGE_TRANSITIONS
+                    ? (!hasRenderableClusters ? (
+                        <Marker
+                            coordinate={fallbackCoordinate}
+                            title="No Prices Returned"
+                            description={
+                                errorMsg
+                                    ? 'No live station price available'
+                                    : isLoadingLocation
+                                        ? 'Finding your location'
+                                        : 'Checking fuel providers'
+                            }
+                            pinColor="#D46A4C"
+                        />
+                    ) : null)
+                    : (hasRenderableClusters ? (
+                        <>
+                            {renderClusterEntries.map(entry => {
+                                const quote = entry.cluster.quotes[0];
+                                return (
+                                    <StationMarker
+                                        key={entry.key}
+                                        quote={quote}
+                                        isSuppressed={visibleSuppressedStationIds.has(String(entry.primaryStationId))}
+                                        isActive={quote.originalIndex === activeIndex}
+                                        isBest={quote.originalIndex === 0}
+                                        isDark={isDark}
+                                        themeColors={themeColors}
+                                        onPress={() => handleMarkerPress(entry.cluster)}
+                                    />
+                                );
+                            })}
+                        </>
+                    ) : (
+                        <Marker
+                            coordinate={fallbackCoordinate}
+                            title="No Prices Returned"
+                            description={
+                                errorMsg
+                                    ? 'No live station price available'
+                                    : isLoadingLocation
+                                        ? 'Finding your location'
+                                        : 'Checking fuel providers'
+                            }
+                            pinColor="#D46A4C"
+                        />
+                    ))}
             </MapView>
 
-            {hasRenderableClusters ? (
+            {ENABLE_CLUSTER_MERGE_TRANSITIONS && hasRenderableClusters ? (
                 <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
                     <LiquidGlassContainerView
                         pointerEvents="none"
@@ -2134,6 +2537,8 @@ export default function HomeScreen() {
                             <ClusterMarkerOverlay
                                 key={entry.key}
                                 cluster={entry.cluster}
+                                anchorCoordinate={location}
+                                isSuppressed={visibleSuppressedStationIds.has(String(entry.primaryStationId))}
                                 scrollX={scrollX}
                                 itemWidth={itemWidth}
                                 isDark={isDark}
@@ -2144,7 +2549,7 @@ export default function HomeScreen() {
                                 onDebugRenderFrame={recordClusterDebugRenderFrame}
                                 isDebugWatched={entry.primaryStationId === activeClusterDebugPrimaryId}
                                 isDebugRecording={isClusterDebugRecording}
-                                mapRegion={mapRegion}
+                                mapRegion={mapRenderRegion}
                                 isMapMoving={isMapMoving}
                             />
                         ))}

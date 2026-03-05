@@ -124,10 +124,48 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
         });
     });
 
-    const stationsWithLargestDelta = [...stations]
-        .filter(st => st.delta > 0)
-        .sort((a, b) => b.delta - a.delta)
-        .slice(0, 5);
+    // Leaderboard logic instead of max delta
+    // 1. Get earliest known price and latest known price for each station
+    // 2. Rank stations based on earliest price
+    // 3. Rank stations based on latest price
+    // 4. Calculate rank delta
+    stations.forEach(st => {
+        const prices = st.prices;
+        if (prices.length > 0) {
+            st.earliestPrice = prices[0].price;
+            st.latestPrice = prices[prices.length - 1].price;
+        } else {
+            st.earliestPrice = Infinity;
+            st.latestPrice = Infinity;
+        }
+    });
+
+    const earliestRanking = [...stations].sort((a, b) => {
+        if (a.earliestPrice === b.earliestPrice) return String(a.stationId).localeCompare(String(b.stationId));
+        return a.earliestPrice - b.earliestPrice;
+    });
+
+    // Assign earliest rank
+    earliestRanking.forEach((st, idx) => {
+        st.earliestRank = idx;
+    });
+
+    const latestRanking = [...stations].sort((a, b) => {
+        if (a.latestPrice === b.latestPrice) return String(a.stationId).localeCompare(String(b.stationId));
+        return a.latestPrice - b.latestPrice;
+    });
+
+    // Assign latest rank and calculate shift
+    latestRanking.forEach((st, idx) => {
+        st.latestRank = idx;
+        // Positive means they improved (moved up the leaderboard to a smaller index)
+        // e.g. from rank 5 (index 4) to rank 2 (index 1) -> 4 - 1 = +3
+        st.rankShift = st.earliestRank - st.latestRank;
+    });
+
+    const leaderboard = latestRanking
+        .filter(st => st.prices.length > 0)
+        .slice(0, 5); // Return top 5 currently cheapest
 
     // 3. Competitor Clusters (Stations within 0.5 miles of each other)
     const processedPairs = new Set();
@@ -171,7 +209,7 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
     return {
         overallTrend,
         averagePricesByDay,
-        stationsWithLargestDelta,
+        leaderboard,
         competitorClusters: competitorClusters.slice(0, 5), // Top 5 competitive blocks
         mapHeatmapPoints
     };

@@ -65,6 +65,8 @@ function PricePill({ quote, isActive, isBest, isDark, themeColors, animatedTextS
 
 export default function ClusterMarkerOverlay({
   cluster,
+  anchorCoordinate,
+  isSuppressed = false,
   scrollX,
   itemWidth,
   isDark,
@@ -95,19 +97,42 @@ export default function ClusterMarkerOverlay({
   const [splitRevealTargets, setSplitRevealTargets] = useState([]);
   const mergeProgress = useSharedValue(0);
   const splitProgress = useSharedValue(0);
+  const suppressionProgress = useSharedValue(isSuppressed ? 1 : 0);
 
   useEffect(() => {
     accumulatorCountRef.current = accumulatorCount;
   }, [accumulatorCount]);
 
+  useEffect(() => {
+    suppressionProgress.value = withTiming(isSuppressed ? 1 : 0, {
+      duration: 140,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [isSuppressed, suppressionProgress]);
+
   const quotes = cluster.quotes;
   const primaryQuote = quotes[0];
+  const anchorLat = typeof anchorCoordinate?.latitude === 'number'
+    ? anchorCoordinate.latitude
+    : (mapRegion?.latitude || 0);
+  const anchorLng = typeof anchorCoordinate?.longitude === 'number'
+    ? anchorCoordinate.longitude
+    : (mapRegion?.longitude || 0);
   const projection = useMemo(() => buildMapProjection(mapRegion, screenWidth, screenHeight), [mapRegion, screenWidth, screenHeight]);
   const outsideTargets = useMemo(() => buildOutsideTargets(quotes, projection), [quotes, projection]);
   const accumulatorAnchor = computeAccumulatorAnchor();
-  const primaryOffsetX = (primaryQuote.longitude - (mapRegion?.longitude || 0)) * projection.ptPerLng;
-  const primaryOffsetY = -(primaryQuote.latitude - (mapRegion?.latitude || 0)) * projection.ptPerLat;
-  const hasValidPrimaryOffset = Number.isFinite(primaryOffsetX) && Number.isFinite(primaryOffsetY);
+  const anchorOffsetX = (anchorLng - (mapRegion?.longitude || 0)) * projection.ptPerLng;
+  const anchorOffsetY = -(anchorLat - (mapRegion?.latitude || 0)) * projection.ptPerLat;
+  const primaryOffsetX = (primaryQuote.longitude - anchorLng) * projection.ptPerLng;
+  const primaryOffsetY = -(primaryQuote.latitude - anchorLat) * projection.ptPerLat;
+  const baseOffsetX = anchorOffsetX + primaryOffsetX;
+  const baseOffsetY = anchorOffsetY + primaryOffsetY;
+  const hasValidPrimaryOffset = (
+    Number.isFinite(anchorOffsetX) &&
+    Number.isFinite(anchorOffsetY) &&
+    Number.isFinite(primaryOffsetX) &&
+    Number.isFinite(primaryOffsetY)
+  );
 
   const mergeMoverStyle = useAnimatedStyle(() => {
     if (!mergeMover) {
@@ -118,14 +143,14 @@ export default function ClusterMarkerOverlay({
       opacity: 1,
       transform: [
         {
-          translateX: primaryOffsetX + interpolate(mergeProgress.value, [0, 1], [mergeMover.startX, mergeMover.endX]),
+          translateX: baseOffsetX + interpolate(mergeProgress.value, [0, 1], [mergeMover.startX, mergeMover.endX]),
         },
         {
-          translateY: primaryOffsetY + interpolate(mergeProgress.value, [0, 1], [mergeMover.startY, mergeMover.endY]),
+          translateY: baseOffsetY + interpolate(mergeProgress.value, [0, 1], [mergeMover.startY, mergeMover.endY]),
         },
       ],
     };
-  }, [mergeMover, primaryOffsetX, primaryOffsetY]);
+  }, [baseOffsetX, baseOffsetY, mergeMover]);
 
   const splitMoverStyle = useAnimatedStyle(() => {
     if (!splitMover) {
@@ -136,14 +161,14 @@ export default function ClusterMarkerOverlay({
       opacity: 1,
       transform: [
         {
-          translateX: primaryOffsetX + interpolate(splitProgress.value, [0, 1], [splitMover.startX, splitMover.endX]),
+          translateX: baseOffsetX + interpolate(splitProgress.value, [0, 1], [splitMover.startX, splitMover.endX]),
         },
         {
-          translateY: primaryOffsetY + interpolate(splitProgress.value, [0, 1], [splitMover.startY, splitMover.endY]),
+          translateY: baseOffsetY + interpolate(splitProgress.value, [0, 1], [splitMover.startY, splitMover.endY]),
         },
       ],
     };
-  }, [splitMover, primaryOffsetX, primaryOffsetY]);
+  }, [baseOffsetX, baseOffsetY, splitMover]);
 
   const animatedTextStyle = useAnimatedStyle(() => {
     if (primaryQuote.originalIndex === 0) return { color: '#007AFF' };
@@ -153,6 +178,12 @@ export default function ClusterMarkerOverlay({
     const color = interpolateColor(scrollX.value, inputRange, ['#888888', themeColors.text, '#888888']);
     return { color };
   });
+
+  const suppressionStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: interpolate(suppressionProgress.value, [0, 1], [1, 0.72], Extrapolate.CLAMP) },
+    ],
+  }));
 
   const emitTransitionEvent = (event) => {
     onDebugTransitionEvent?.({
@@ -561,22 +592,24 @@ export default function ClusterMarkerOverlay({
           styles.primaryPill,
           {
             transform: [
-              { translateX: primaryOffsetX },
-              { translateY: primaryOffsetY },
+              { translateX: baseOffsetX },
+              { translateY: baseOffsetY },
             ],
             zIndex: isActive ? 3 : isBest ? 2 : 1,
           },
         ]}
       >
-        <PricePill
-          quote={primaryQuote}
-          isActive={primaryQuote.originalIndex === activeIndex}
-          isBest={primaryQuote.originalIndex === 0}
-          isDark={isDark}
-          themeColors={themeColors}
-          animatedTextStyle={animatedTextStyle}
-          priceOpacity={1}
-        />
+        <Animated.View style={suppressionStyle}>
+          <PricePill
+            quote={primaryQuote}
+            isActive={primaryQuote.originalIndex === activeIndex}
+            isBest={primaryQuote.originalIndex === 0}
+            isDark={isDark}
+            themeColors={themeColors}
+            animatedTextStyle={animatedTextStyle}
+            priceOpacity={1}
+          />
+        </Animated.View>
       </Animated.View>
 
       {renderedOutsideTargets.map(target => (
@@ -587,8 +620,8 @@ export default function ClusterMarkerOverlay({
             styles.pillPositioner,
             {
               transform: [
-                { translateX: primaryOffsetX + target.x },
-                { translateY: primaryOffsetY + target.y },
+                { translateX: baseOffsetX + target.x },
+                { translateY: baseOffsetY + target.y },
               ],
             },
           ]}
@@ -613,8 +646,8 @@ export default function ClusterMarkerOverlay({
             styles.pillPositioner,
             {
               transform: [
-                { translateX: primaryOffsetX + target.endX },
-                { translateY: primaryOffsetY + target.endY },
+                { translateX: baseOffsetX + target.endX },
+                { translateY: baseOffsetY + target.endY },
               ],
             },
           ]}
@@ -638,8 +671,8 @@ export default function ClusterMarkerOverlay({
             styles.pillPositioner,
             {
               transform: [
-                { translateX: primaryOffsetX + accumulatorAnchor.x },
-                { translateY: primaryOffsetY + accumulatorAnchor.y },
+                { translateX: baseOffsetX + accumulatorAnchor.x },
+                { translateY: baseOffsetY + accumulatorAnchor.y },
               ],
             },
           ]}

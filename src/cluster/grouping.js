@@ -1,6 +1,6 @@
 import {
   CLUSTER_PRIMARY_PILL_WIDTH,
-  CLUSTER_PILL_HEIGHT,
+  CLUSTER_TOUCH_PILL_HEIGHT,
 } from './constants';
 
 function buildQuoteRect(quote, mapRegion, screenWidth, screenHeight) {
@@ -19,8 +19,8 @@ function buildQuoteRect(quote, mapRegion, screenWidth, screenHeight) {
     y,
     left: x - CLUSTER_PRIMARY_PILL_WIDTH / 2,
     right: x + CLUSTER_PRIMARY_PILL_WIDTH / 2,
-    top: y - CLUSTER_PILL_HEIGHT / 2,
-    bottom: y + CLUSTER_PILL_HEIGHT / 2,
+    top: y - CLUSTER_TOUCH_PILL_HEIGHT / 2,
+    bottom: y + CLUSTER_TOUCH_PILL_HEIGHT / 2,
   };
 }
 
