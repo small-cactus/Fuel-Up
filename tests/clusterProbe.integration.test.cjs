@@ -28,6 +28,12 @@ const GATES = {
     minBreakoutDistancePx: 25,
     minRemainderDistancePx: 15,
     minBridgeDistancePx: 20,
+    maxContainerVisualTrackDeltaPx: 2,
+    maxContainerLogicalVisualOffsetDeltaPx: 2,
+    maxIdleContinuousMovementTotalMs: 500,
+    maxDisconnectHandoffPositionDeltaPx: 2,
+    maxDisconnectHandoffSizeDeltaPx: 2,
+    maxDisconnectHandoffContentDelta: 0.05,
 };
 
 function formatMetric(value, digits = 2) {
@@ -82,6 +88,28 @@ function computeLayerDelta(previousSample, currentSample, layerKey) {
     return Math.hypot(
         currentPosition.x - previousPosition.x,
         currentPosition.y - previousPosition.y
+    );
+}
+
+function getContainerTrackPosition(sample, prefix) {
+    const x = sample?.[`${prefix}X`];
+    const y = sample?.[`${prefix}Y`];
+
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+        return null;
+    }
+
+    return { x, y };
+}
+
+function computePointDelta(previousPoint, currentPoint) {
+    if (!previousPoint || !currentPoint) {
+        return null;
+    }
+
+    return Math.hypot(
+        currentPoint.x - previousPoint.x,
+        currentPoint.y - previousPoint.y
     );
 }
 
@@ -157,9 +185,18 @@ function summarizeSmoothness(report) {
     const activationJumps = [];
     const stageSwitchJumps = [];
     const animatedStepDurationsMs = [];
+    const containerLogicalTrackDeltas = [];
+    const containerVisualTrackDeltas = [];
+    const containerLogicalVisualOffsetMagnitudes = [];
+    const containerLogicalVisualOffsetDeltas = [];
+    const topContainerOffsetFrames = [];
+    const topContainerOffsetDeltaFrames = [];
+    const idleMovementRuns = [];
+    const disconnectHandoffEvents = [];
 
     let veryLongAnimatedStepCount = 0;
     let nonSmoothFrameCount = 0;
+    let activeIdleMovementRun = null;
 
     transitions.forEach(event => {
         if (!event?.type) {
@@ -180,6 +217,40 @@ function summarizeSmoothness(report) {
             0,
             (currentSample?.timestamp || 0) - (previousSample?.timestamp || 0)
         );
+        const previousContainerLogicalPosition = getContainerTrackPosition(previousSample, 'containerLogical');
+        const currentContainerLogicalPosition = getContainerTrackPosition(currentSample, 'containerLogical');
+        const previousContainerVisualPosition = getContainerTrackPosition(previousSample, 'containerVisual');
+        const currentContainerVisualPosition = getContainerTrackPosition(currentSample, 'containerVisual');
+        const containerLogicalDelta = computePointDelta(
+            previousContainerLogicalPosition,
+            currentContainerLogicalPosition
+        );
+        const containerVisualDelta = computePointDelta(
+            previousContainerVisualPosition,
+            currentContainerVisualPosition
+        );
+        const previousOffsetPosition = (
+            previousContainerLogicalPosition &&
+            previousContainerVisualPosition
+        )
+            ? {
+                x: previousContainerVisualPosition.x - previousContainerLogicalPosition.x,
+                y: previousContainerVisualPosition.y - previousContainerLogicalPosition.y,
+            }
+            : null;
+        const currentOffsetPosition = (
+            currentContainerLogicalPosition &&
+            currentContainerVisualPosition
+        )
+            ? {
+                x: currentContainerVisualPosition.x - currentContainerLogicalPosition.x,
+                y: currentContainerVisualPosition.y - currentContainerLogicalPosition.y,
+            }
+            : null;
+        const currentOffsetMagnitude = currentOffsetPosition
+            ? Math.hypot(currentOffsetPosition.x, currentOffsetPosition.y)
+            : null;
+        const currentOffsetDelta = computePointDelta(previousOffsetPosition, currentOffsetPosition);
 
         phaseMaxima.set(phase, Math.max(phaseMax, delta));
         phaseCounts.set(phase, (phaseCounts.get(phase) || 0) + 1);
@@ -187,6 +258,106 @@ function summarizeSmoothness(report) {
         reportedLayerMaxima.remainder = Math.max(reportedLayerMaxima.remainder, currentSample?.remainderFrameDelta || 0);
         reportedLayerMaxima.carry = Math.max(reportedLayerMaxima.carry, currentSample?.carryFrameDelta || 0);
         reportedLayerMaxima.bridge = Math.max(reportedLayerMaxima.bridge, currentSample?.bridgeFrameDelta || 0);
+
+        if (Number.isFinite(containerLogicalDelta)) {
+            containerLogicalTrackDeltas.push(containerLogicalDelta);
+        }
+
+        if (Number.isFinite(containerVisualDelta)) {
+            containerVisualTrackDeltas.push(containerVisualDelta);
+        }
+
+        if (Number.isFinite(currentOffsetMagnitude)) {
+            containerLogicalVisualOffsetMagnitudes.push(currentOffsetMagnitude);
+            topContainerOffsetFrames.push({
+                index,
+                offset: currentOffsetMagnitude,
+                phase,
+                stageSignature: currentSample?.stageSignature || '',
+                logicalLayer: currentSample?.containerLogicalLayer || '',
+                visualLayer: currentSample?.containerVisualLayer || '',
+            });
+        }
+
+        if (Number.isFinite(currentOffsetDelta)) {
+            containerLogicalVisualOffsetDeltas.push(currentOffsetDelta);
+            topContainerOffsetDeltaFrames.push({
+                index,
+                delta: currentOffsetDelta,
+                phase,
+                stageSignature: currentSample?.stageSignature || '',
+                logicalLayer: currentSample?.containerLogicalLayer || '',
+                visualLayer: currentSample?.containerVisualLayer || '',
+            });
+        }
+
+        const bridgeActivated = (
+            !isRenderedVisibleLayer(previousSample, 'bridge') &&
+            isRenderedVisibleLayer(currentSample, 'bridge')
+        );
+
+        if (bridgeActivated) {
+            const breakoutWasVisible = isRenderedVisibleLayer(previousSample, 'breakout');
+            const sourcePosition = breakoutWasVisible
+                ? getLayerPosition(previousSample, 'breakout')
+                : null;
+            const targetPosition = getLayerPosition(currentSample, 'bridge');
+            const positionDelta = sourcePosition
+                ? Math.hypot(
+                    targetPosition.x - sourcePosition.x,
+                    targetPosition.y - sourcePosition.y
+                )
+                : Number.POSITIVE_INFINITY;
+            const sourceWidth = Number.isFinite(previousSample?.breakoutShellWidth)
+                ? previousSample.breakoutShellWidth
+                : null;
+            const targetWidth = Number.isFinite(currentSample?.bridgeShellWidth)
+                ? currentSample.bridgeShellWidth
+                : null;
+            const sizeDelta = (
+                Number.isFinite(sourceWidth) &&
+                Number.isFinite(targetWidth)
+            )
+                ? Math.abs(targetWidth - sourceWidth)
+                : Number.POSITIVE_INFINITY;
+            const sourcePlusOpacity = Number.isFinite(previousSample?.breakoutPlusOpacity)
+                ? previousSample.breakoutPlusOpacity
+                : null;
+            const sourcePriceOpacity = Number.isFinite(previousSample?.breakoutPriceOpacity)
+                ? previousSample.breakoutPriceOpacity
+                : null;
+            const targetPlusOpacity = Number.isFinite(currentSample?.bridgePlusOpacity)
+                ? currentSample.bridgePlusOpacity
+                : null;
+            const targetPriceOpacity = Number.isFinite(currentSample?.bridgePriceOpacity)
+                ? currentSample.bridgePriceOpacity
+                : null;
+            const contentDelta = (
+                Number.isFinite(sourcePlusOpacity) &&
+                Number.isFinite(sourcePriceOpacity) &&
+                Number.isFinite(targetPlusOpacity) &&
+                Number.isFinite(targetPriceOpacity)
+            )
+                ? Math.max(
+                    Math.abs(targetPlusOpacity - sourcePlusOpacity),
+                    Math.abs(targetPriceOpacity - sourcePriceOpacity)
+                )
+                : Number.POSITIVE_INFINITY;
+
+            disconnectHandoffEvents.push({
+                index,
+                phase,
+                stageSignature: currentSample?.stageSignature || '',
+                sourceVisible: breakoutWasVisible,
+                positionDelta,
+                sizeDelta,
+                contentDelta,
+                sourcePlusOpacity,
+                sourcePriceOpacity,
+                targetPlusOpacity,
+                targetPriceOpacity,
+            });
+        }
 
         LAYER_KEYS.forEach(layerKey => {
             const wasVisible = isRenderedVisibleLayer(previousSample, layerKey);
@@ -229,6 +400,43 @@ function summarizeSmoothness(report) {
             }
         });
 
+        const isIdleMap = currentSample?.mapMoving === false;
+        const trackedContainerDelta = Number.isFinite(containerVisualDelta)
+            ? containerVisualDelta
+            : frameVisibleContainerMaxDelta;
+        const isContainerMovingOnIdleMap = isIdleMap && trackedContainerDelta > MOTION_EPSILON_PX;
+
+        if (isContainerMovingOnIdleMap) {
+            if (!activeIdleMovementRun) {
+                activeIdleMovementRun = {
+                    startIndex: index,
+                    endIndex: index,
+                    startTimestamp: previousSample?.timestamp || currentSample?.timestamp || 0,
+                    endTimestamp: currentSample?.timestamp || previousSample?.timestamp || 0,
+                    maxDelta: trackedContainerDelta,
+                    maxDeltaIndex: index,
+                    phase: currentSample?.runtimePhase || 'unknown',
+                    stageSignature: currentSample?.stageSignature || '',
+                };
+            } else {
+                activeIdleMovementRun.endIndex = index;
+                activeIdleMovementRun.endTimestamp = currentSample?.timestamp || activeIdleMovementRun.endTimestamp;
+                if (trackedContainerDelta > activeIdleMovementRun.maxDelta) {
+                    activeIdleMovementRun.maxDelta = trackedContainerDelta;
+                    activeIdleMovementRun.maxDeltaIndex = index;
+                }
+            }
+        } else if (activeIdleMovementRun) {
+            idleMovementRuns.push({
+                ...activeIdleMovementRun,
+                durationMs: Math.max(
+                    0,
+                    (activeIdleMovementRun.endTimestamp || 0) - (activeIdleMovementRun.startTimestamp || 0)
+                ),
+            });
+            activeIdleMovementRun = null;
+        }
+
         if (frameVisibleContainerMaxDelta > GATES.maxFrameDeltaPx) {
             nonSmoothFrameCount += 1;
         }
@@ -261,10 +469,33 @@ function summarizeSmoothness(report) {
         });
     }
 
+    if (activeIdleMovementRun) {
+        idleMovementRuns.push({
+            ...activeIdleMovementRun,
+            durationMs: Math.max(
+                0,
+                (activeIdleMovementRun.endTimestamp || 0) - (activeIdleMovementRun.startTimestamp || 0)
+            ),
+        });
+        activeIdleMovementRun = null;
+    }
+
     topFrames.sort((left, right) => right.delta - left.delta);
     topLayerFrames.sort((left, right) => right.delta - left.delta);
     activationJumps.sort((left, right) => right.jump - left.jump);
     stageSwitchJumps.sort((left, right) => right.jump - left.jump);
+    topContainerOffsetFrames.sort((left, right) => right.offset - left.offset);
+    topContainerOffsetDeltaFrames.sort((left, right) => right.delta - left.delta);
+    idleMovementRuns.sort((left, right) => right.durationMs - left.durationMs);
+    disconnectHandoffEvents.sort((left, right) => {
+        const leftWorst = Math.max(left.positionDelta || 0, left.sizeDelta || 0, left.contentDelta || 0);
+        const rightWorst = Math.max(right.positionDelta || 0, right.sizeDelta || 0, right.contentDelta || 0);
+        return rightWorst - leftWorst;
+    });
+
+    const totalIdleMovementDurationMs = idleMovementRuns.reduce((sum, run) => (
+        sum + (run.durationMs || 0)
+    ), 0);
 
     return {
         sampleCount: samples.length,
@@ -287,12 +518,71 @@ function summarizeSmoothness(report) {
             p95: computePercentile(visibleContainerDeltas, 0.95),
             p99: computePercentile(visibleContainerDeltas, 0.99),
         },
+        containerTracks: {
+            logical: {
+                count: containerLogicalTrackDeltas.length,
+                max: containerLogicalTrackDeltas.length > 0 ? Math.max(...containerLogicalTrackDeltas) : 0,
+                mean: containerLogicalTrackDeltas.length > 0
+                    ? containerLogicalTrackDeltas.reduce((sum, value) => sum + value, 0) / containerLogicalTrackDeltas.length
+                    : 0,
+                p95: computePercentile(containerLogicalTrackDeltas, 0.95),
+                p99: computePercentile(containerLogicalTrackDeltas, 0.99),
+            },
+            visual: {
+                count: containerVisualTrackDeltas.length,
+                max: containerVisualTrackDeltas.length > 0 ? Math.max(...containerVisualTrackDeltas) : 0,
+                mean: containerVisualTrackDeltas.length > 0
+                    ? containerVisualTrackDeltas.reduce((sum, value) => sum + value, 0) / containerVisualTrackDeltas.length
+                    : 0,
+                p95: computePercentile(containerVisualTrackDeltas, 0.95),
+                p99: computePercentile(containerVisualTrackDeltas, 0.99),
+            },
+            logicalVsVisualOffset: {
+                count: containerLogicalVisualOffsetMagnitudes.length,
+                max: containerLogicalVisualOffsetMagnitudes.length > 0 ? Math.max(...containerLogicalVisualOffsetMagnitudes) : 0,
+                mean: containerLogicalVisualOffsetMagnitudes.length > 0
+                    ? containerLogicalVisualOffsetMagnitudes.reduce((sum, value) => sum + value, 0) / containerLogicalVisualOffsetMagnitudes.length
+                    : 0,
+                p95: computePercentile(containerLogicalVisualOffsetMagnitudes, 0.95),
+                p99: computePercentile(containerLogicalVisualOffsetMagnitudes, 0.99),
+            },
+            logicalVsVisualOffsetDelta: {
+                count: containerLogicalVisualOffsetDeltas.length,
+                max: containerLogicalVisualOffsetDeltas.length > 0 ? Math.max(...containerLogicalVisualOffsetDeltas) : 0,
+                mean: containerLogicalVisualOffsetDeltas.length > 0
+                    ? containerLogicalVisualOffsetDeltas.reduce((sum, value) => sum + value, 0) / containerLogicalVisualOffsetDeltas.length
+                    : 0,
+                p95: computePercentile(containerLogicalVisualOffsetDeltas, 0.95),
+                p99: computePercentile(containerLogicalVisualOffsetDeltas, 0.99),
+            },
+            topOffsetFrames: topContainerOffsetFrames.slice(0, 8),
+            topOffsetDeltaFrames: topContainerOffsetDeltaFrames.slice(0, 8),
+        },
         pacing: {
             animatedStepCount: animatedStepDurationsMs.length,
             maxStepMs: animatedStepDurationsMs.length > 0 ? Math.max(...animatedStepDurationsMs) : 0,
             p95StepMs: computePercentile(animatedStepDurationsMs, 0.95),
             p99StepMs: computePercentile(animatedStepDurationsMs, 0.99),
             veryLongAnimatedStepCount,
+        },
+        idleMovement: {
+            runCount: idleMovementRuns.length,
+            totalDurationMs: totalIdleMovementDurationMs,
+            longestRunMs: idleMovementRuns.length > 0 ? idleMovementRuns[0].durationMs : 0,
+            topRuns: idleMovementRuns.slice(0, 6),
+        },
+        disconnectHandoff: {
+            eventCount: disconnectHandoffEvents.length,
+            maxPositionDelta: disconnectHandoffEvents.length > 0
+                ? Math.max(...disconnectHandoffEvents.map(event => event.positionDelta || 0))
+                : 0,
+            maxSizeDelta: disconnectHandoffEvents.length > 0
+                ? Math.max(...disconnectHandoffEvents.map(event => event.sizeDelta || 0))
+                : 0,
+            maxContentDelta: disconnectHandoffEvents.length > 0
+                ? Math.max(...disconnectHandoffEvents.map(event => event.contentDelta || 0))
+                : 0,
+            topEvents: disconnectHandoffEvents.slice(0, 8),
         },
         continuity: {
             maxActivationJumpPx: activationJumps.length > 0 ? activationJumps[0].jump : 0,
@@ -479,6 +769,52 @@ function validateProbeStrictness({
         );
     }
 
+    if (smoothness.containerTracks.visual.max > GATES.maxContainerVisualTrackDeltaPx) {
+        failures.push(
+            `visible container track delta too high: expected <= ${GATES.maxContainerVisualTrackDeltaPx}px, ` +
+            `received ${formatMetric(smoothness.containerTracks.visual.max, 3)}px.`
+        );
+    }
+
+    if (smoothness.containerTracks.logicalVsVisualOffsetDelta.max > GATES.maxContainerLogicalVisualOffsetDeltaPx) {
+        failures.push(
+            `logical vs visible offset delta track too high: expected <= ${GATES.maxContainerLogicalVisualOffsetDeltaPx}px, ` +
+            `received ${formatMetric(smoothness.containerTracks.logicalVsVisualOffsetDelta.max, 3)}px.`
+        );
+    }
+
+    if (smoothness.idleMovement.totalDurationMs > GATES.maxIdleContinuousMovementTotalMs) {
+        failures.push(
+            `idle-map total moving duration too high: expected <= ${GATES.maxIdleContinuousMovementTotalMs}ms, ` +
+            `received ${formatMetric(smoothness.idleMovement.totalDurationMs, 0)}ms.`
+        );
+    }
+
+    if (smoothness.disconnectHandoff.eventCount <= 0) {
+        failures.push('disconnect handoff coverage missing: no +N -> price handoff events captured.');
+    }
+
+    if (smoothness.disconnectHandoff.maxPositionDelta > GATES.maxDisconnectHandoffPositionDeltaPx) {
+        failures.push(
+            `disconnect handoff position delta too high: expected <= ${GATES.maxDisconnectHandoffPositionDeltaPx}px, ` +
+            `received ${formatMetric(smoothness.disconnectHandoff.maxPositionDelta, 3)}px.`
+        );
+    }
+
+    if (smoothness.disconnectHandoff.maxSizeDelta > GATES.maxDisconnectHandoffSizeDeltaPx) {
+        failures.push(
+            `disconnect handoff size delta too high: expected <= ${GATES.maxDisconnectHandoffSizeDeltaPx}px, ` +
+            `received ${formatMetric(smoothness.disconnectHandoff.maxSizeDelta, 3)}px.`
+        );
+    }
+
+    if (smoothness.disconnectHandoff.maxContentDelta > GATES.maxDisconnectHandoffContentDelta) {
+        failures.push(
+            `disconnect handoff content delta too high: expected <= ${GATES.maxDisconnectHandoffContentDelta}, ` +
+            `received ${formatMetric(smoothness.disconnectHandoff.maxContentDelta, 3)}.`
+        );
+    }
+
     return failures.map(message => `${message} Report: ${reportFilePath}`);
 }
 
@@ -511,11 +847,50 @@ test('cluster probe integration enforces strict smoothness, continuity, and tran
         `p99=${formatMetric(smoothness.visibleContainers.p99, 3)}px`
     );
     t.diagnostic(
+        `container track(logical): count=${smoothness.containerTracks.logical.count} ` +
+        `max=${formatMetric(smoothness.containerTracks.logical.max, 3)}px ` +
+        `mean=${formatMetric(smoothness.containerTracks.logical.mean, 3)}px ` +
+        `p95=${formatMetric(smoothness.containerTracks.logical.p95, 3)}px ` +
+        `p99=${formatMetric(smoothness.containerTracks.logical.p99, 3)}px`
+    );
+    t.diagnostic(
+        `container track(visible): count=${smoothness.containerTracks.visual.count} ` +
+        `max=${formatMetric(smoothness.containerTracks.visual.max, 3)}px ` +
+        `mean=${formatMetric(smoothness.containerTracks.visual.mean, 3)}px ` +
+        `p95=${formatMetric(smoothness.containerTracks.visual.p95, 3)}px ` +
+        `p99=${formatMetric(smoothness.containerTracks.visual.p99, 3)}px`
+    );
+    t.diagnostic(
+        `container logical->visible offset: count=${smoothness.containerTracks.logicalVsVisualOffset.count} ` +
+        `max=${formatMetric(smoothness.containerTracks.logicalVsVisualOffset.max, 3)}px ` +
+        `mean=${formatMetric(smoothness.containerTracks.logicalVsVisualOffset.mean, 3)}px ` +
+        `p95=${formatMetric(smoothness.containerTracks.logicalVsVisualOffset.p95, 3)}px ` +
+        `p99=${formatMetric(smoothness.containerTracks.logicalVsVisualOffset.p99, 3)}px`
+    );
+    t.diagnostic(
+        `container logical->visible offset delta track: count=${smoothness.containerTracks.logicalVsVisualOffsetDelta.count} ` +
+        `max=${formatMetric(smoothness.containerTracks.logicalVsVisualOffsetDelta.max, 3)}px ` +
+        `mean=${formatMetric(smoothness.containerTracks.logicalVsVisualOffsetDelta.mean, 3)}px ` +
+        `p95=${formatMetric(smoothness.containerTracks.logicalVsVisualOffsetDelta.p95, 3)}px ` +
+        `p99=${formatMetric(smoothness.containerTracks.logicalVsVisualOffsetDelta.p99, 3)}px`
+    );
+    t.diagnostic(
         `pacing: animatedSteps=${smoothness.pacing.animatedStepCount} ` +
         `p95=${formatMetric(smoothness.pacing.p95StepMs, 3)}ms ` +
         `p99=${formatMetric(smoothness.pacing.p99StepMs, 3)}ms ` +
         `max=${formatMetric(smoothness.pacing.maxStepMs, 3)}ms ` +
         `veryLong(>${GATES.animatedStepMaxMs}ms)=${smoothness.pacing.veryLongAnimatedStepCount}`
+    );
+    t.diagnostic(
+        `idle-map continuous movement: runs=${smoothness.idleMovement.runCount} ` +
+        `total=${formatMetric(smoothness.idleMovement.totalDurationMs, 0)}ms ` +
+        `longest=${formatMetric(smoothness.idleMovement.longestRunMs, 0)}ms`
+    );
+    t.diagnostic(
+        `disconnect handoff(+N->price): events=${smoothness.disconnectHandoff.eventCount} ` +
+        `maxPosition=${formatMetric(smoothness.disconnectHandoff.maxPositionDelta, 3)}px ` +
+        `maxSize=${formatMetric(smoothness.disconnectHandoff.maxSizeDelta, 3)}px ` +
+        `maxContent=${formatMetric(smoothness.disconnectHandoff.maxContentDelta, 3)}`
     );
     t.diagnostic(
         `continuity: activationMax=${formatMetric(smoothness.continuity.maxActivationJumpPx, 3)}px ` +
@@ -561,6 +936,41 @@ test('cluster probe integration enforces strict smoothness, continuity, and tran
         t.diagnostic(
             `top layer frame #${frame.index}: layer=${frame.layer} delta=${formatMetric(frame.delta, 3)}px ` +
             `phase=${frame.phase} stage=${frame.stageSignature || 'none'} opacity=${formatMetric(frame.opacity, 3)}`
+        );
+    });
+
+    smoothness.containerTracks.topOffsetFrames.forEach(frame => {
+        t.diagnostic(
+            `container offset #${frame.index}: offset=${formatMetric(frame.offset, 3)}px ` +
+            `phase=${frame.phase} stage=${frame.stageSignature || 'none'} ` +
+            `logical=${frame.logicalLayer || 'none'} visual=${frame.visualLayer || 'none'}`
+        );
+    });
+
+    smoothness.containerTracks.topOffsetDeltaFrames.forEach(frame => {
+        t.diagnostic(
+            `container offset delta #${frame.index}: delta=${formatMetric(frame.delta, 3)}px ` +
+            `phase=${frame.phase} stage=${frame.stageSignature || 'none'} ` +
+            `logical=${frame.logicalLayer || 'none'} visual=${frame.visualLayer || 'none'}`
+        );
+    });
+
+    smoothness.idleMovement.topRuns.forEach(run => {
+        t.diagnostic(
+            `idle movement run #${run.startIndex}-${run.endIndex}: duration=${formatMetric(run.durationMs, 0)}ms ` +
+            `maxDelta=${formatMetric(run.maxDelta, 3)}px@${run.maxDeltaIndex} ` +
+            `phase=${run.phase} stage=${run.stageSignature || 'none'}`
+        );
+    });
+
+    smoothness.disconnectHandoff.topEvents.forEach(event => {
+        t.diagnostic(
+            `disconnect handoff #${event.index}: position=${formatMetric(event.positionDelta, 3)}px ` +
+            `size=${formatMetric(event.sizeDelta, 3)}px content=${formatMetric(event.contentDelta, 3)} ` +
+            `srcVisible=${event.sourceVisible ? 'yes' : 'no'} phase=${event.phase} ` +
+            `stage=${event.stageSignature || 'none'} ` +
+            `+ ${formatMetric(event.sourcePlusOpacity, 3)} -> ${formatMetric(event.targetPlusOpacity, 3)} ` +
+            `price ${formatMetric(event.sourcePriceOpacity, 3)} -> ${formatMetric(event.targetPriceOpacity, 3)}`
         );
     });
 

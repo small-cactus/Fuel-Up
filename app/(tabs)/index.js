@@ -67,13 +67,14 @@ const SIDE_MARGIN = 16;
 const TOP_CANOPY_HEIGHT = 72;
 const CLUSTER_DEBUG_JUMP_THRESHOLD = 5;
 const MAP_REGION_EPSILON = 0.000001;
-const CLUSTER_LIVE_MIN_DURATION = 5000;
-const CLUSTER_GEOMETRY_ANIMATION_DURATION = 5000;
+const CLUSTER_LIVE_MIN_DURATION = 2200;
+const CLUSTER_GEOMETRY_ANIMATION_DURATION = 2200;
 const CLUSTER_SPLIT_MIN_DURATION = 420;
 const CLUSTER_SPLIT_MILLISECONDS_PER_POINT = 55;
 const CLUSTER_SPLIT_MAX_DURATION = 2800;
 const CLUSTER_SPLIT_REENTRY_COOLDOWN_MS = 2000;
 const CLUSTER_SPLIT_KICKOFF_DELAY_MS = 260;
+const CLUSTER_SPLIT_ACTIVATION_SETTLE_MS = 140;
 const ENABLE_CLUSTER_SPLIT_HANDOFF = true;
 const ENABLE_CLUSTER_REMAINDER_BUBBLE = true;
 const CLUSTER_DEBUG_PROBE_ANIMATION_DURATION = 650;
@@ -937,6 +938,7 @@ function AnimatedMarkerOverlay({
     isDebugRecording = false,
     runtimePhase = 'live',
     mapRegion,
+    isMapMoving = false,
 }) {
     const { quotes, averageLat, averageLng } = cluster;
 
@@ -1314,7 +1316,7 @@ function AnimatedMarkerOverlay({
                             );
                             return;
                         }
-                        if ((Date.now() - activeBridgeObservedAt) < 140) {
+                        if ((Date.now() - activeBridgeObservedAt) < CLUSTER_SPLIT_ACTIVATION_SETTLE_MS) {
                             splitAnimationKickoffTimeoutRef.current = setTimeout(
                                 kickoffSplitStageAnimation,
                                 16
@@ -1757,23 +1759,25 @@ function AnimatedMarkerOverlay({
         const bridgeProgressValue = splitBridgeProgress.value;
         const bridgeMorphValue = splitBridgeMorph.value;
         const carryMorphValue = splitCarryMorph.value;
-        const breakoutX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]);
-        const breakoutY = interpolate(spreadValue, [0, 1], [0, breakoutTargetYAnim.value]);
+        const breakoutTrackX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]);
+        const breakoutTrackY = interpolate(spreadValue, [0, 1], [0, breakoutTargetYAnim.value]);
         const remainderShellMorph = morphValue;
         const remainderX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]);
         const remainderY = interpolate(spreadValue, [0, 1], [0, nextEmergingTargetYAnim.value]);
-        const carryX = carryVisible
-            ? interpolate(bridgeProgressValue, [0, 1], [carryStartX, carryTargetX])
-            : breakoutX;
-        const carryY = carryVisible
-            ? interpolate(bridgeProgressValue, [0, 1], [carryStartY, carryTargetY])
-            : breakoutY;
         const bridgeX = bridgeVisible
             ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartX, bridgeTargetX])
-            : breakoutX;
+            : breakoutTrackX;
         const bridgeY = bridgeVisible
             ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartY, bridgeTargetY])
-            : breakoutY;
+            : breakoutTrackY;
+        const carryX = carryVisible
+            ? interpolate(bridgeProgressValue, [0, 1], [carryStartX, carryTargetX])
+            : breakoutTrackX;
+        const carryY = carryVisible
+            ? interpolate(bridgeProgressValue, [0, 1], [carryStartY, carryTargetY])
+            : breakoutTrackY;
+        const breakoutX = breakoutTrackX;
+        const breakoutY = breakoutTrackY;
         const breakoutWidth = breakoutVisible
             ? interpolate(morphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
             : 0;
@@ -1786,6 +1790,36 @@ function AnimatedMarkerOverlay({
         const bridgeWidth = bridgeVisible
             ? interpolate(bridgeMorphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
             : 0;
+        const breakoutPlusOpacity = breakoutVisible
+            ? interpolate(morphValue, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
+            : 0;
+        const breakoutPriceOpacity = breakoutVisible
+            ? interpolate(morphValue, [0.6, 1], [0, 1], Extrapolate.CLAMP)
+            : 0;
+        const remainderPlusOpacity = shouldRenderStaticRemainderBubble
+            ? interpolate(remainderShellMorph, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
+            : 0;
+        const remainderPriceOpacity = shouldRenderStaticRemainderBubble
+            ? interpolate(remainderShellMorph, [0.6, 1], [0, 1], Extrapolate.CLAMP)
+            : 0;
+        const carryPlusOpacity = carryVisible
+            ? interpolate(carryMorphValue, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
+            : 0;
+        const carryPriceOpacity = carryVisible
+            ? interpolate(carryMorphValue, [0.6, 1], [0, 1], Extrapolate.CLAMP)
+            : 0;
+        const bridgePlusOpacity = bridgeVisible
+            ? interpolate(bridgeMorphValue, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
+            : 0;
+        const bridgePriceOpacity = bridgeVisible
+            ? interpolate(bridgeMorphValue, [0.6, 1], [0, 1], Extrapolate.CLAMP)
+            : 0;
+        const containerLogicalLayer = 'anchor';
+        const containerLogicalX = 0;
+        const containerLogicalY = 0;
+        const containerVisualLayer = containerLogicalLayer;
+        const containerVisualX = containerLogicalLayer ? containerLogicalX : null;
+        const containerVisualY = containerLogicalLayer ? containerLogicalY : null;
 
         onDebugRenderFrame({
             frameTimestamp: Date.now(),
@@ -1815,18 +1849,45 @@ function AnimatedMarkerOverlay({
             breakoutOpacity,
             breakoutX,
             breakoutY,
+            breakoutShellWidth: breakoutWidth,
+            breakoutPlusOpacity,
+            breakoutPriceOpacity,
             remainderVisible: shouldRenderStaticRemainderBubble,
             remainderOpacity,
             remainderX,
             remainderY,
+            remainderShellWidth: remainderWidth,
+            remainderPlusOpacity,
+            remainderPriceOpacity,
             carryVisible,
             carryOpacity,
             carryX,
             carryY,
+            carryShellWidth: carryWidth,
+            carryPlusOpacity,
+            carryPriceOpacity,
             bridgeVisible,
             bridgeOpacity,
             bridgeX,
             bridgeY,
+            bridgeShellWidth: bridgeWidth,
+            bridgePlusOpacity,
+            bridgePriceOpacity,
+            mapMoving: Boolean(isMapMoving),
+            containerLogicalLayer,
+            containerLogicalX,
+            containerLogicalY,
+            breakoutVisualX: breakoutVisible ? breakoutX : null,
+            breakoutVisualY: breakoutVisible ? breakoutY : null,
+            remainderVisualX: shouldRenderStaticRemainderBubble ? remainderX : null,
+            remainderVisualY: shouldRenderStaticRemainderBubble ? remainderY : null,
+            carryVisualX: carryVisible ? carryX : null,
+            carryVisualY: carryVisible ? carryY : null,
+            bridgeVisualX: bridgeVisible ? bridgeX : null,
+            bridgeVisualY: bridgeVisible ? bridgeY : null,
+            containerVisualLayer,
+            containerVisualX: containerVisualLayer ? containerVisualX : null,
+            containerVisualY: containerVisualLayer ? containerVisualY : null,
         });
     };
 
@@ -1839,6 +1900,7 @@ function AnimatedMarkerOverlay({
         fromClusterKey,
         toClusterKey,
         currentPendingSignature,
+        isMapMoving,
     ]);
 
     useAnimatedReaction(
@@ -1852,23 +1914,25 @@ function AnimatedMarkerOverlay({
             const bridgeProgressValue = splitBridgeProgress.value;
             const bridgeMorphValue = splitBridgeMorph.value;
             const carryMorphValue = splitCarryMorph.value;
-            const breakoutX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]);
-            const breakoutY = interpolate(spreadValue, [0, 1], [0, breakoutTargetYAnim.value]);
+            const breakoutTrackX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]);
+            const breakoutTrackY = interpolate(spreadValue, [0, 1], [0, breakoutTargetYAnim.value]);
             const remainderShellMorph = morphValue;
             const remainderX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]);
             const remainderY = interpolate(spreadValue, [0, 1], [0, nextEmergingTargetYAnim.value]);
-            const carryX = carryVisible
-                ? interpolate(bridgeProgressValue, [0, 1], [carryStartX, carryTargetX])
-                : breakoutX;
-            const carryY = carryVisible
-                ? interpolate(bridgeProgressValue, [0, 1], [carryStartY, carryTargetY])
-                : breakoutY;
             const bridgeX = bridgeVisible
                 ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartX, bridgeTargetX])
-                : breakoutX;
+                : breakoutTrackX;
             const bridgeY = bridgeVisible
                 ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartY, bridgeTargetY])
-                : breakoutY;
+                : breakoutTrackY;
+            const carryX = carryVisible
+                ? interpolate(bridgeProgressValue, [0, 1], [carryStartX, carryTargetX])
+                : breakoutTrackX;
+            const carryY = carryVisible
+                ? interpolate(bridgeProgressValue, [0, 1], [carryStartY, carryTargetY])
+                : breakoutTrackY;
+            const breakoutX = breakoutTrackX;
+            const breakoutY = breakoutTrackY;
             const breakoutWidth = breakoutVisible
                 ? interpolate(morphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
                 : 0;
@@ -1881,6 +1945,36 @@ function AnimatedMarkerOverlay({
             const bridgeWidth = bridgeVisible
                 ? interpolate(bridgeMorphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
                 : 0;
+            const breakoutPlusOpacity = breakoutVisible
+                ? interpolate(morphValue, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
+                : 0;
+            const breakoutPriceOpacity = breakoutVisible
+                ? interpolate(morphValue, [0.6, 1], [0, 1], Extrapolate.CLAMP)
+                : 0;
+            const remainderPlusOpacity = shouldRenderStaticRemainderBubble
+                ? interpolate(remainderShellMorph, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
+                : 0;
+            const remainderPriceOpacity = shouldRenderStaticRemainderBubble
+                ? interpolate(remainderShellMorph, [0.6, 1], [0, 1], Extrapolate.CLAMP)
+                : 0;
+            const carryPlusOpacity = carryVisible
+                ? interpolate(carryMorphValue, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
+                : 0;
+            const carryPriceOpacity = carryVisible
+                ? interpolate(carryMorphValue, [0.6, 1], [0, 1], Extrapolate.CLAMP)
+                : 0;
+            const bridgePlusOpacity = bridgeVisible
+                ? interpolate(bridgeMorphValue, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
+                : 0;
+            const bridgePriceOpacity = bridgeVisible
+                ? interpolate(bridgeMorphValue, [0.6, 1], [0, 1], Extrapolate.CLAMP)
+                : 0;
+            const containerLogicalLayer = 'anchor';
+            const containerLogicalX = 0;
+            const containerLogicalY = 0;
+            const containerVisualLayer = containerLogicalLayer;
+            const containerVisualX = containerLogicalLayer ? containerLogicalX : null;
+            const containerVisualY = containerLogicalLayer ? containerLogicalY : null;
 
             return {
                 frameTimestamp: Date.now(),
@@ -1910,18 +2004,45 @@ function AnimatedMarkerOverlay({
                 breakoutOpacity,
                 breakoutX,
                 breakoutY,
+                breakoutShellWidth: breakoutWidth,
+                breakoutPlusOpacity,
+                breakoutPriceOpacity,
                 remainderVisible: shouldRenderStaticRemainderBubble,
                 remainderOpacity,
                 remainderX,
                 remainderY,
+                remainderShellWidth: remainderWidth,
+                remainderPlusOpacity,
+                remainderPriceOpacity,
                 carryVisible,
                 carryOpacity,
                 carryX,
                 carryY,
+                carryShellWidth: carryWidth,
+                carryPlusOpacity,
+                carryPriceOpacity,
                 bridgeVisible,
                 bridgeOpacity,
                 bridgeX,
                 bridgeY,
+                bridgeShellWidth: bridgeWidth,
+                bridgePlusOpacity,
+                bridgePriceOpacity,
+                mapMoving: Boolean(isMapMoving),
+                containerLogicalLayer,
+                containerLogicalX,
+                containerLogicalY,
+                breakoutVisualX: breakoutVisible ? breakoutX : null,
+                breakoutVisualY: breakoutVisible ? breakoutY : null,
+                remainderVisualX: shouldRenderStaticRemainderBubble ? remainderX : null,
+                remainderVisualY: shouldRenderStaticRemainderBubble ? remainderY : null,
+                carryVisualX: carryVisible ? carryX : null,
+                carryVisualY: carryVisible ? carryY : null,
+                bridgeVisualX: bridgeVisible ? bridgeX : null,
+                bridgeVisualY: bridgeVisible ? bridgeY : null,
+                containerVisualLayer,
+                containerVisualX: containerVisualLayer ? containerVisualX : null,
+                containerVisualY: containerVisualLayer ? containerVisualY : null,
             };
         },
         (sample) => {
@@ -1940,6 +2061,7 @@ function AnimatedMarkerOverlay({
             fromClusterKey,
             toClusterKey,
             currentPendingSignature,
+            isMapMoving,
         ]
     );
     return (
@@ -3803,6 +3925,7 @@ export default function HomeScreen() {
                                 isDebugRecording={isClusterDebugRecording}
                                 runtimePhase={entry.runtimePhase}
                                 mapRegion={mapRegion}
+                                isMapMoving={isMapMoving}
                             />
                         ))}
                     </>
