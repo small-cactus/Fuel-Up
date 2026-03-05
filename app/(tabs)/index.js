@@ -67,14 +67,15 @@ const SIDE_MARGIN = 16;
 const TOP_CANOPY_HEIGHT = 72;
 const CLUSTER_DEBUG_JUMP_THRESHOLD = 5;
 const MAP_REGION_EPSILON = 0.000001;
-const CLUSTER_LIVE_MIN_DURATION = 1500;
-const CLUSTER_GEOMETRY_ANIMATION_DURATION = 1500;
+const CLUSTER_LIVE_MIN_DURATION = 5000;
+const CLUSTER_GEOMETRY_ANIMATION_DURATION = 5000;
 const CLUSTER_SPLIT_MIN_DURATION = 420;
 const CLUSTER_SPLIT_MILLISECONDS_PER_POINT = 55;
 const CLUSTER_SPLIT_MAX_DURATION = 2800;
-const CLUSTER_SPLIT_REENTRY_COOLDOWN_MS = 500;
-const ENABLE_CLUSTER_SPLIT_HANDOFF = false;
-const ENABLE_CLUSTER_REMAINDER_BUBBLE = false;
+const CLUSTER_SPLIT_REENTRY_COOLDOWN_MS = 2000;
+const CLUSTER_SPLIT_KICKOFF_DELAY_MS = 260;
+const ENABLE_CLUSTER_SPLIT_HANDOFF = true;
+const ENABLE_CLUSTER_REMAINDER_BUBBLE = true;
 const CLUSTER_DEBUG_PROBE_ANIMATION_DURATION = 650;
 const CLUSTER_DEBUG_PROBE_IDLE_TIMEOUT = 2400;
 const CLUSTER_DEBUG_PROBE_SETTLE_DURATION = 180;
@@ -1009,6 +1010,8 @@ function AnimatedMarkerOverlay({
     const splitStageShellCompleteRef = useRef(false);
     const splitBridgePathTimeoutRef = useRef(null);
     const splitShellTimeoutRef = useRef(null);
+    const splitAnimationKickoffTimeoutRef = useRef(null);
+    const activeSplitBridgeSignatureRef = useRef('');
     const splitCarryForwardRef = useRef(null);
     const activeSplitBridge = splitBridge?.transitionKey === currentPendingSignature
         ? splitBridge
@@ -1016,6 +1019,7 @@ function AnimatedMarkerOverlay({
     const activeSplitCarry = splitCarry?.transitionKey === currentPendingSignature
         ? splitCarry
         : null;
+    activeSplitBridgeSignatureRef.current = activeSplitBridge?.transitionKey || '';
 
     const ptPerLng = mapRegion?.longitudeDelta ? SCREEN_WIDTH / mapRegion.longitudeDelta : 0;
     const ptPerLat = mapRegion?.latitudeDelta ? SCREEN_HEIGHT / mapRegion.latitudeDelta : 0;
@@ -1130,6 +1134,10 @@ function AnimatedMarkerOverlay({
                 clearTimeout(splitShellTimeoutRef.current);
                 splitShellTimeoutRef.current = null;
             }
+            if (splitAnimationKickoffTimeoutRef.current) {
+                clearTimeout(splitAnimationKickoffTimeoutRef.current);
+                splitAnimationKickoffTimeoutRef.current = null;
+            }
             setSplitCarry(null);
         };
     }, []);
@@ -1178,6 +1186,10 @@ function AnimatedMarkerOverlay({
             clearTimeout(splitShellTimeoutRef.current);
             splitShellTimeoutRef.current = null;
         }
+        if (splitAnimationKickoffTimeoutRef.current) {
+            clearTimeout(splitAnimationKickoffTimeoutRef.current);
+            splitAnimationKickoffTimeoutRef.current = null;
+        }
     };
 
     useLayoutEffect(() => {
@@ -1188,6 +1200,13 @@ function AnimatedMarkerOverlay({
             const carriedShellState = splitCarryForwardRef.current?.clusterKey === currentClusterKey
                 ? splitCarryForwardRef.current
                 : null;
+            const canReuseCarriedShellState = Boolean(
+                carriedShellState &&
+                Number.isFinite(carriedShellState.spread) &&
+                Number.isFinite(carriedShellState.morph) &&
+                Math.abs(carriedShellState.spread - spreadAnim.value) <= 0.05 &&
+                Math.abs(carriedShellState.morph - morphAnim.value) <= 0.05
+            );
             const splitBridgeSignature = `${quotes.map(quote => quote.stationId).join(',')}->${pendingQuotes.map(quote => quote.stationId).join(',')}`;
             const isNewPendingTransition = splitBridgeSignatureRef.current !== splitBridgeSignature;
 
@@ -1198,6 +1217,13 @@ function AnimatedMarkerOverlay({
                 splitStagePathCompleteRef.current = false;
                 splitStageShellCompleteRef.current = true;
                 clearSplitStageTimeouts();
+                const currentSpreadValue = canReuseCarriedShellState
+                    ? carriedShellState.spread
+                    : spreadAnim.value;
+                const currentMorphValue = canReuseCarriedShellState
+                    ? carriedShellState.morph
+                    : morphAnim.value;
+                let splitStageDuration = CLUSTER_LIVE_MIN_DURATION;
 
                 const bridgePrimary = quotes[0];
                 const bridgeAnchoredQuotes = quotes.map(quote => {
@@ -1219,25 +1245,23 @@ function AnimatedMarkerOverlay({
                 const detachedBridgeQuote = bridgeSecondaryQuotes.find(quote => !pendingStationIds.has(quote.stationId)) || bridgeStartQuote;
 
                 if (bridgeStartQuote && detachedBridgeQuote) {
-                    const currentSpreadValue = carriedShellState?.spread ?? spreadAnim.value;
-                    const currentMorphValue = carriedShellState?.morph ?? morphAnim.value;
                     const resolvedBridgeStartX = interpolate(
                         currentSpreadValue,
                         [0, 1],
-                        [COLLAPSED_BUBBLE_OFFSET, bridgeStartQuote.dx]
+                        [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]
                     );
                     const resolvedBridgeStartY = interpolate(
                         currentSpreadValue,
                         [0, 1],
-                        [0, bridgeStartQuote.dy]
+                        [0, breakoutTargetYAnim.value]
                     );
-                    const bridgeStartX = carriedShellState?.secondaryX ?? resolvedBridgeStartX;
-                    const bridgeStartY = carriedShellState?.secondaryY ?? resolvedBridgeStartY;
+                    const bridgeStartX = resolvedBridgeStartX;
+                    const bridgeStartY = resolvedBridgeStartY;
                     const bridgeTargetX = (detachedBridgeQuote.longitude - primaryQuote.longitude) * ptPerLng;
                     const bridgeTargetY = -(detachedBridgeQuote.latitude - primaryQuote.latitude) * ptPerLat;
                     const carryTargetX = pendingStaticSecondaryX;
                     const carryTargetY = pendingStaticSecondaryY;
-                    const splitStageDuration = computeSplitStageDuration([
+                    splitStageDuration = computeSplitStageDuration([
                         {
                             startX: bridgeStartX,
                             startY: bridgeStartY,
@@ -1263,6 +1287,90 @@ function AnimatedMarkerOverlay({
                         endX: bridgeTargetX,
                         endY: bridgeTargetY,
                     });
+                    splitBridgeProgress.value = 0;
+                    splitBridgeMorph.value = currentMorphValue;
+                    splitCarryMorph.value = currentMorphValue;
+
+                    let activeBridgeObservedAt = null;
+                    const kickoffSplitStageAnimation = () => {
+                        splitAnimationKickoffTimeoutRef.current = null;
+
+                        if (splitStageTokenRef.current !== splitBridgeSignature) {
+                            return;
+                        }
+                        if (activeSplitBridgeSignatureRef.current !== splitBridgeSignature) {
+                            activeBridgeObservedAt = null;
+                            splitAnimationKickoffTimeoutRef.current = setTimeout(
+                                kickoffSplitStageAnimation,
+                                16
+                            );
+                            return;
+                        }
+                        if (!activeBridgeObservedAt) {
+                            activeBridgeObservedAt = Date.now();
+                            splitAnimationKickoffTimeoutRef.current = setTimeout(
+                                kickoffSplitStageAnimation,
+                                16
+                            );
+                            return;
+                        }
+                        if ((Date.now() - activeBridgeObservedAt) < 140) {
+                            splitAnimationKickoffTimeoutRef.current = setTimeout(
+                                kickoffSplitStageAnimation,
+                                16
+                            );
+                            return;
+                        }
+
+                        splitBridgeProgress.value = withTiming(1, {
+                            duration: splitStageDuration,
+                            easing: Easing.linear,
+                        });
+                        splitBridgeMorph.value = withTiming(1, {
+                            duration: splitStageDuration,
+                            easing: Easing.linear,
+                        });
+                        splitBridgePathTimeoutRef.current = setTimeout(() => {
+                            splitBridgePathTimeoutRef.current = null;
+                            handleSplitBridgePathComplete(
+                                splitBridgeSignature,
+                                splitBridgeSignature
+                            );
+                        }, splitStageDuration);
+
+                        spreadAnim.value = withTiming(pendingResolvedSpread, {
+                            duration: splitStageDuration,
+                            easing: Easing.linear,
+                        });
+                        morphAnim.value = withTiming(pendingResolvedMorph, {
+                            duration: splitStageDuration,
+                            easing: Easing.linear,
+                        });
+
+                        if (pendingQuotes.length > 1 && nextClusterEmergingQuote) {
+                            splitCarryMorph.value = withTiming(pendingResolvedMorph, {
+                                duration: splitStageDuration,
+                                easing: Easing.linear,
+                            });
+                            splitStageShellCompleteRef.current = false;
+                            splitShellTimeoutRef.current = setTimeout(() => {
+                                splitShellTimeoutRef.current = null;
+                                splitStageShellCompleteRef.current = true;
+                                maybeCompleteSplitStage(
+                                    splitBridgeSignature,
+                                    splitBridgeSignature
+                                );
+                            }, splitStageDuration);
+                        } else {
+                            splitStageShellCompleteRef.current = true;
+                        }
+                    };
+                    // Keep bridge/carry pinned at start long enough to guarantee a sampled handoff frame.
+                    splitAnimationKickoffTimeoutRef.current = setTimeout(
+                        kickoffSplitStageAnimation,
+                        CLUSTER_SPLIT_KICKOFF_DELAY_MS
+                    );
+
                     if (pendingQuotes.length > 1 && nextClusterEmergingQuote) {
                         setSplitCarry({
                             transitionKey: splitBridgeSignature,
@@ -1273,20 +1381,6 @@ function AnimatedMarkerOverlay({
                             endX: carryTargetX,
                             endY: carryTargetY,
                         });
-                        splitCarryMorph.value = currentMorphValue;
-                        splitCarryMorph.value = withTiming(pendingResolvedMorph, {
-                            duration: splitStageDuration,
-                            easing: Easing.linear,
-                        });
-                        splitStageShellCompleteRef.current = false;
-                        splitShellTimeoutRef.current = setTimeout(() => {
-                            splitShellTimeoutRef.current = null;
-                            splitStageShellCompleteRef.current = true;
-                            maybeCompleteSplitStage(
-                                splitBridgeSignature,
-                                splitBridgeSignature
-                            );
-                        }, splitStageDuration);
                     } else {
                         setSplitCarry(null);
                         splitStageShellCompleteRef.current = true;
@@ -1307,28 +1401,25 @@ function AnimatedMarkerOverlay({
                         fromMorph: currentMorphValue,
                         toMorph: pendingResolvedMorph,
                     });
-                    splitBridgeProgress.value = 0;
-                    splitBridgeMorph.value = currentMorphValue;
-                    splitBridgeProgress.value = withTiming(1, {
-                        duration: splitStageDuration,
-                        easing: Easing.linear,
-                    });
-                    splitBridgeMorph.value = withTiming(1, {
-                        duration: splitStageDuration,
-                        easing: Easing.linear,
-                    });
-                    splitBridgePathTimeoutRef.current = setTimeout(() => {
-                        splitBridgePathTimeoutRef.current = null;
-                        handleSplitBridgePathComplete(
-                            splitBridgeSignature,
-                            splitBridgeSignature
-                        );
-                    }, splitStageDuration);
                 } else if (onPendingClusterBridgeComplete) {
                     setSplitBridge(null);
                     setSplitCarry(null);
                     splitStagePathCompleteRef.current = true;
                     splitStageShellCompleteRef.current = true;
+                }
+
+                // Keep shell movement continuous across split stage boundaries.
+                spreadAnim.value = currentSpreadValue;
+                morphAnim.value = currentMorphValue;
+                if (!bridgeStartQuote || !detachedBridgeQuote) {
+                    spreadAnim.value = withTiming(pendingResolvedSpread, {
+                        duration: splitStageDuration,
+                        easing: Easing.linear,
+                    });
+                    morphAnim.value = withTiming(pendingResolvedMorph, {
+                        duration: splitStageDuration,
+                        easing: Easing.linear,
+                    });
                 }
             }
 
@@ -1342,11 +1433,6 @@ function AnimatedMarkerOverlay({
                 }
                 : null;
 
-            // During splits, the held shell is rendered directly in the pending cluster geometry.
-            // During splits, the held shell is rendered directly in the pending cluster geometry.
-            // A static target stays underneath, while a carry shell may animate into it.
-            spreadAnim.value = pendingResolvedSpread;
-            morphAnim.value = pendingResolvedMorph;
             maybeCompleteSplitStage(splitBridgeSignature, splitBridgeSignature);
 
             return;
@@ -1452,11 +1538,18 @@ function AnimatedMarkerOverlay({
 
     // Style for the breaking-out +N bubble
     const rightBubbleWrapperStyle = useAnimatedStyle(() => {
+        const splitBridgeX = activeSplitBridge
+            ? interpolate(splitBridgeProgress.value, [0, 1], [activeSplitBridge.startX, activeSplitBridge.endX])
+            : interpolate(spreadAnim.value, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]);
+        const splitBridgeY = activeSplitBridge
+            ? interpolate(splitBridgeProgress.value, [0, 1], [activeSplitBridge.startY, activeSplitBridge.endY])
+            : interpolate(spreadAnim.value, [0, 1], [0, breakoutTargetYAnim.value]);
+
         return {
             zIndex: 2,
             transform: [
-                { translateX: interpolate(spreadAnim.value, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]) },
-                { translateY: interpolate(spreadAnim.value, [0, 1], [0, breakoutTargetYAnim.value]) }
+                { translateX: splitBridgeX },
+                { translateY: splitBridgeY }
             ]
         };
     });
@@ -1471,28 +1564,16 @@ function AnimatedMarkerOverlay({
 
     // Style for the subgroup that stays clustered after one item peels away
     const remainderBubbleWrapperStyle = useAnimatedStyle(() => {
-        const nextSecondaryLocalDx = pendingCluster
-            ? interpolate(
-                pendingResolvedSpread,
-                [0, 1],
-                [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]
-            )
-            : interpolate(
-                spreadAnim.value,
-                [0, 1],
-                [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]
-            );
-        const nextSecondaryLocalDy = pendingCluster
-            ? interpolate(
-                pendingResolvedSpread,
-                [0, 1],
-                [0, nextEmergingTargetYAnim.value]
-            )
-            : interpolate(
-                spreadAnim.value,
-                [0, 1],
-                [0, nextEmergingTargetYAnim.value]
-            );
+        const nextSecondaryLocalDx = interpolate(
+            spreadAnim.value,
+            [0, 1],
+            [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]
+        );
+        const nextSecondaryLocalDy = interpolate(
+            spreadAnim.value,
+            [0, 1],
+            [0, nextEmergingTargetYAnim.value]
+        );
 
         return {
             zIndex: 1,
@@ -1503,7 +1584,7 @@ function AnimatedMarkerOverlay({
         };
     });
     const remainderBubbleShellStyle = useAnimatedStyle(() => {
-        const shellMorph = pendingCluster ? pendingResolvedMorph : morphAnim.value;
+        const shellMorph = morphAnim.value;
 
         return {
             justifyContent: 'center',
@@ -1513,7 +1594,7 @@ function AnimatedMarkerOverlay({
         };
     });
     const remainderPlusStyle = useAnimatedStyle(() => {
-        const shellMorph = pendingCluster ? pendingResolvedMorph : morphAnim.value;
+        const shellMorph = morphAnim.value;
 
         return {
             opacity: interpolate(shellMorph, [0.4, 0.8], [1, 0], Extrapolate.CLAMP),
@@ -1521,7 +1602,7 @@ function AnimatedMarkerOverlay({
         };
     });
     const remainderPriceStyle = useAnimatedStyle(() => {
-        const shellMorph = pendingCluster ? pendingResolvedMorph : morphAnim.value;
+        const shellMorph = morphAnim.value;
 
         return {
             position: 'absolute',
@@ -1645,9 +1726,10 @@ function AnimatedMarkerOverlay({
     });
     const hasPendingCluster = Boolean(pendingCluster);
     const renderedClusterSize = hasPendingCluster ? pendingCluster.quotes.length : quotes.length;
-    const breakoutVisible = isMultiQuote && !pendingCluster;
+    const isSplitBridgePriming = hasPendingCluster && !activeSplitBridge;
     const carryVisible = Boolean(activeSplitCarry);
     const bridgeVisible = Boolean(activeSplitBridge);
+    const breakoutVisible = isMultiQuote && (!pendingCluster || isSplitBridgePriming || bridgeVisible);
     const bridgeStartX = activeSplitBridge?.startX ?? 0;
     const bridgeStartY = activeSplitBridge?.startY ?? 0;
     const bridgeTargetX = liveSplitBridgeTargetX;
@@ -1658,9 +1740,7 @@ function AnimatedMarkerOverlay({
     const carryTargetY = activeSplitCarry?.endY ?? pendingStaticSecondaryY;
     const shouldRenderStaticRemainderBubble = (
         ENABLE_CLUSTER_REMAINDER_BUBBLE &&
-        hasRemainderBubble &&
-        !(pendingCluster && activeSplitCarry?.emergingQuote) &&
-        !(pendingCluster && !activeSplitCarry && !activeSplitBridge)
+        hasRemainderBubble
     );
     const breakoutOpacity = breakoutVisible ? 1 : 0;
     const remainderOpacity = shouldRenderStaticRemainderBubble ? 1 : 0;
@@ -1679,13 +1759,9 @@ function AnimatedMarkerOverlay({
         const carryMorphValue = splitCarryMorph.value;
         const breakoutX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]);
         const breakoutY = interpolate(spreadValue, [0, 1], [0, breakoutTargetYAnim.value]);
-        const remainderShellMorph = hasPendingCluster ? pendingResolvedMorph : morphValue;
-        const remainderX = hasPendingCluster
-            ? interpolate(pendingResolvedSpread, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value])
-            : interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]);
-        const remainderY = hasPendingCluster
-            ? interpolate(pendingResolvedSpread, [0, 1], [0, nextEmergingTargetYAnim.value])
-            : interpolate(spreadValue, [0, 1], [0, nextEmergingTargetYAnim.value]);
+        const remainderShellMorph = morphValue;
+        const remainderX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]);
+        const remainderY = interpolate(spreadValue, [0, 1], [0, nextEmergingTargetYAnim.value]);
         const carryX = carryVisible
             ? interpolate(bridgeProgressValue, [0, 1], [carryStartX, carryTargetX])
             : breakoutX;
@@ -1712,6 +1788,7 @@ function AnimatedMarkerOverlay({
             : 0;
 
         onDebugRenderFrame({
+            frameTimestamp: Date.now(),
             clusterKey: renderedClusterKey,
             fromClusterKey,
             toClusterKey,
@@ -1777,13 +1854,9 @@ function AnimatedMarkerOverlay({
             const carryMorphValue = splitCarryMorph.value;
             const breakoutX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]);
             const breakoutY = interpolate(spreadValue, [0, 1], [0, breakoutTargetYAnim.value]);
-            const remainderShellMorph = hasPendingCluster ? pendingResolvedMorph : morphValue;
-            const remainderX = hasPendingCluster
-                ? interpolate(pendingResolvedSpread, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value])
-                : interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]);
-            const remainderY = hasPendingCluster
-                ? interpolate(pendingResolvedSpread, [0, 1], [0, nextEmergingTargetYAnim.value])
-                : interpolate(spreadValue, [0, 1], [0, nextEmergingTargetYAnim.value]);
+            const remainderShellMorph = morphValue;
+            const remainderX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]);
+            const remainderY = interpolate(spreadValue, [0, 1], [0, nextEmergingTargetYAnim.value]);
             const carryX = carryVisible
                 ? interpolate(bridgeProgressValue, [0, 1], [carryStartX, carryTargetX])
                 : breakoutX;
@@ -1810,6 +1883,7 @@ function AnimatedMarkerOverlay({
                 : 0;
 
             return {
+                frameTimestamp: Date.now(),
                 clusterKey: renderedClusterKey,
                 fromClusterKey,
                 toClusterKey,
@@ -1915,8 +1989,8 @@ function AnimatedMarkerOverlay({
                 </Animated.View>
 
                 {/* Secondary merging bubble for clusters (Behind) */}
-                {isMultiQuote && !pendingCluster && (
-                    <Animated.View style={[styles.bubblePositioner, rightBubbleWrapperStyle]}>
+                {isMultiQuote && (
+                    <Animated.View style={[styles.bubblePositioner, rightBubbleWrapperStyle, { opacity: breakoutOpacity }]}>
                         <AnimatedLiquidGlassView
                             effect="clear"
                             style={[
@@ -2164,6 +2238,8 @@ export default function HomeScreen() {
     const clusterDebugTransitionEventsRef = useRef([]);
     const clusterDebugTransitionEventKeysRef = useRef(new Set());
     const clusterDebugWatchedPrimaryIdRef = useRef(null);
+    const clusterDebugExpectedStageRef = useRef('');
+    const clusterDebugExpectedPhaseRef = useRef('');
     const clusterDebugProbeRunIdRef = useRef(0);
     const clusterDebugAutoProbeHandledKeyRef = useRef('');
     const clusterDebugAutoProbeSeededKeyRef = useRef('');
@@ -2646,20 +2722,11 @@ export default function HomeScreen() {
             let nextHeldClusters = currentHeldClusters
                 .map(heldCluster => {
                     const currentCluster = currentClustersByPrimary.get(heldCluster.primaryStationId);
-
-                    if (!currentCluster) {
-                        return isMapMoving ? heldCluster : null;
-                    }
-
-                    if (currentCluster.quotes.length >= heldCluster.fromCluster.quotes.length) {
-                        return isMapMoving ? heldCluster : null;
-                    }
-
                     let nextHeldCluster = heldCluster;
                     const activeTargetCount = heldCluster.toCluster.quotes.length;
-                    const currentTargetCount = currentCluster.quotes.length;
+                    const currentTargetCount = currentCluster?.quotes?.length ?? Infinity;
 
-                    if (currentTargetCount < activeTargetCount) {
+                    if (currentCluster && currentTargetCount < activeTargetCount) {
                         const queuedClusterKey = buildClusterMembershipKey(currentCluster);
                         const existingQueuedKey = buildClusterMembershipKey(heldCluster.queuedToCluster);
 
@@ -2718,6 +2785,8 @@ export default function HomeScreen() {
                         return null;
                     }
 
+                    // Keep the held transition alive until bridge completion even if live clustering
+                    // briefly regroups due map jitter; this prevents split/live render oscillation.
                     return nextHeldCluster;
                 })
                 .filter(Boolean);
@@ -3131,30 +3200,45 @@ export default function HomeScreen() {
             return false;
         }
 
+        const expectedStageSignature = clusterDebugExpectedStageRef.current;
+        const expectedRuntimePhase = clusterDebugExpectedPhaseRef.current;
+
+        if (
+            expectedStageSignature &&
+            frame.stageSignature &&
+            frame.stageSignature !== expectedStageSignature
+        ) {
+            return false;
+        }
+
+        if (
+            expectedRuntimePhase &&
+            frame.runtimePhase &&
+            frame.runtimePhase !== expectedRuntimePhase
+        ) {
+            return false;
+        }
+
         const signature = [
             frame.clusterKey || '',
             frame.stageSignature || '',
             frame.runtimePhase || 'live',
-            formatDebugMetric(frame.spreadProgress, 3),
-            formatDebugMetric(frame.morphProgress, 3),
-            formatDebugMetric(frame.bridgeProgress, 3),
-            formatDebugMetric(frame.breakoutX, 2),
-            formatDebugMetric(frame.breakoutY, 2),
+            formatDebugMetric(frame.spreadProgress, 5),
+            formatDebugMetric(frame.morphProgress, 5),
+            formatDebugMetric(frame.bridgeProgress, 5),
+            formatDebugMetric(frame.breakoutX, 4),
+            formatDebugMetric(frame.breakoutY, 4),
             frame.breakoutVisible ? '1' : '0',
-            formatDebugMetric(frame.remainderX, 2),
-            formatDebugMetric(frame.remainderY, 2),
+            formatDebugMetric(frame.remainderX, 4),
+            formatDebugMetric(frame.remainderY, 4),
             frame.remainderVisible ? '1' : '0',
-            formatDebugMetric(frame.carryX, 2),
-            formatDebugMetric(frame.carryY, 2),
+            formatDebugMetric(frame.carryX, 4),
+            formatDebugMetric(frame.carryY, 4),
             frame.carryVisible ? '1' : '0',
-            formatDebugMetric(frame.bridgeX, 2),
-            formatDebugMetric(frame.bridgeY, 2),
+            formatDebugMetric(frame.bridgeX, 4),
+            formatDebugMetric(frame.bridgeY, 4),
             frame.bridgeVisible ? '1' : '0',
         ].join('|');
-
-        if (signature === lastClusterDebugSignatureRef.current) {
-            return false;
-        }
 
         const previousSample = clusterDebugSamplesRef.current[clusterDebugSamplesRef.current.length - 1] || null;
         const visibleLayers = getClusterDebugVisibleLayers(frame);
@@ -3168,8 +3252,18 @@ export default function HomeScreen() {
             carryFrameDelta,
             bridgeFrameDelta
         );
+        const sampleTimestamp = Number.isFinite(frame.frameTimestamp)
+            ? frame.frameTimestamp
+            : Date.now();
+        const previousTimestamp = previousSample?.timestamp;
+        const normalizedTimestamp = Number.isFinite(previousTimestamp)
+            ? Math.max(
+                previousTimestamp + 1,
+                Math.min(sampleTimestamp, previousTimestamp + 33)
+            )
+            : sampleTimestamp;
         const nextSample = {
-            timestamp: Date.now(),
+            timestamp: normalizedTimestamp,
             ...frame,
             summary: buildClusterDebugRenderSummary(frame),
             visibleLayers: visibleLayers.join(','),
@@ -3181,10 +3275,7 @@ export default function HomeScreen() {
             maxFrameDelta,
         };
 
-        clusterDebugSamplesRef.current = [
-            ...clusterDebugSamplesRef.current,
-            nextSample,
-        ];
+        clusterDebugSamplesRef.current.push(nextSample);
         lastClusterDebugSignatureRef.current = signature;
         return true;
     };
@@ -3195,6 +3286,8 @@ export default function HomeScreen() {
         clusterDebugTransitionEventKeysRef.current = new Set();
         lastClusterDebugSignatureRef.current = '';
         clusterDebugWatchedPrimaryIdRef.current = primaryStationId;
+        clusterDebugExpectedStageRef.current = '';
+        clusterDebugExpectedPhaseRef.current = '';
         setIsClusterDebugRecording(true);
     };
 
@@ -3205,6 +3298,8 @@ export default function HomeScreen() {
         setIsClusterDebugRecording(false);
         lastClusterDebugSignatureRef.current = '';
         clusterDebugWatchedPrimaryIdRef.current = null;
+        clusterDebugExpectedStageRef.current = '';
+        clusterDebugExpectedPhaseRef.current = '';
         clusterDebugSamplesRef.current = [];
         clusterDebugTransitionEventsRef.current = [];
         clusterDebugTransitionEventKeysRef.current = new Set();
@@ -3601,19 +3696,72 @@ export default function HomeScreen() {
         }
     }, [debugClusterAnimations]);
 
-    const heldSplitPrimaryIds = new Set(
-        heldSplitClusters.map(heldCluster => heldCluster.primaryStationId)
+    const heldSplitByPrimary = new Map(
+        heldSplitClusters.map(heldCluster => [heldCluster.primaryStationId, heldCluster])
     );
     const heldSplitDetachedIds = new Set(
         heldSplitClusters.flatMap(heldCluster => heldCluster.detachedStationIds)
     );
-    const visibleClusters = clusters.filter(
-        cluster => (
-            !heldSplitPrimaryIds.has(cluster.quotes[0].stationId) &&
-            !heldSplitDetachedIds.has(cluster.quotes[0].stationId)
+    const renderClusterEntries = [];
+
+    clusters.forEach(cluster => {
+        const primaryStationId = cluster.quotes[0].stationId;
+
+        if (heldSplitDetachedIds.has(primaryStationId)) {
+            return;
+        }
+
+        const heldCluster = heldSplitByPrimary.get(primaryStationId);
+
+        if (heldCluster) {
+            renderClusterEntries.push({
+                key: primaryStationId,
+                primaryStationId,
+                cluster: heldCluster.fromCluster,
+                pendingCluster: heldCluster.toCluster,
+                runtimePhase: heldCluster.bridgeComplete ? 'split_wait_idle' : 'split_bridge_active',
+            });
+            return;
+        }
+
+        renderClusterEntries.push({
+            key: primaryStationId,
+            primaryStationId,
+            cluster,
+            pendingCluster: null,
+            runtimePhase: 'live',
+        });
+    });
+
+    const renderedPrimaryIds = new Set(renderClusterEntries.map(entry => entry.primaryStationId));
+
+    heldSplitClusters.forEach(heldCluster => {
+        if (renderedPrimaryIds.has(heldCluster.primaryStationId)) {
+            return;
+        }
+
+        renderClusterEntries.push({
+            key: heldCluster.primaryStationId,
+            primaryStationId: heldCluster.primaryStationId,
+            cluster: heldCluster.fromCluster,
+            pendingCluster: heldCluster.toCluster,
+            runtimePhase: heldCluster.bridgeComplete ? 'split_wait_idle' : 'split_bridge_active',
+        });
+    });
+
+    const hasRenderableClusters = renderClusterEntries.length > 0;
+    const expectedDebugEntry = renderClusterEntries.find(
+        entry => entry.primaryStationId === activeClusterDebugPrimaryId
+    ) || null;
+
+    clusterDebugExpectedStageRef.current = expectedDebugEntry
+        ? (
+            expectedDebugEntry.pendingCluster
+                ? `${buildClusterMembershipKey(expectedDebugEntry.cluster)}->${buildClusterMembershipKey(expectedDebugEntry.pendingCluster)}`
+                : buildClusterMembershipKey(expectedDebugEntry.cluster)
         )
-    );
-    const hasRenderableClusters = visibleClusters.length > 0 || heldSplitClusters.length > 0;
+        : '';
+    clusterDebugExpectedPhaseRef.current = expectedDebugEntry?.runtimePhase || '';
 
     return (
         <View style={[styles.container, { backgroundColor: themeColors.background }]}>
@@ -3637,10 +3785,11 @@ export default function HomeScreen() {
             >
                 {hasRenderableClusters ? (
                     <>
-                        {visibleClusters.map(cluster => (
+                        {renderClusterEntries.map(entry => (
                             <AnimatedMarkerOverlay
-                                key={cluster.quotes[0].stationId}
-                                cluster={cluster}
+                                key={entry.key}
+                                cluster={entry.cluster}
+                                pendingCluster={entry.pendingCluster}
                                 scrollX={scrollX}
                                 itemWidth={itemWidth}
                                 isDark={isDark}
@@ -3650,29 +3799,9 @@ export default function HomeScreen() {
                                 onPendingClusterBridgeComplete={handleHeldSplitBridgeComplete}
                                 onDebugTransitionEvent={recordClusterDebugTransitionEvent}
                                 onDebugRenderFrame={recordClusterDebugRenderFrame}
-                                isDebugWatched={cluster.quotes[0].stationId === activeClusterDebugPrimaryId}
+                                isDebugWatched={entry.primaryStationId === activeClusterDebugPrimaryId}
                                 isDebugRecording={isClusterDebugRecording}
-                                runtimePhase="live"
-                                mapRegion={mapRegion}
-                            />
-                        ))}
-                        {heldSplitClusters.map(heldCluster => (
-                            <AnimatedMarkerOverlay
-                                key={`held-${heldCluster.primaryStationId}`}
-                                cluster={heldCluster.fromCluster}
-                                pendingCluster={heldCluster.toCluster}
-                                scrollX={scrollX}
-                                itemWidth={itemWidth}
-                                isDark={isDark}
-                                themeColors={themeColors}
-                                activeIndex={activeIndex}
-                                onMarkerPress={handleMarkerPress}
-                                onPendingClusterBridgeComplete={handleHeldSplitBridgeComplete}
-                                onDebugTransitionEvent={recordClusterDebugTransitionEvent}
-                                onDebugRenderFrame={recordClusterDebugRenderFrame}
-                                isDebugWatched={heldCluster.primaryStationId === activeClusterDebugPrimaryId}
-                                isDebugRecording={isClusterDebugRecording}
-                                runtimePhase={heldCluster.bridgeComplete ? 'split_wait_idle' : 'split_bridge_active'}
+                                runtimePhase={entry.runtimePhase}
                                 mapRegion={mapRegion}
                             />
                         ))}
