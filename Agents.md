@@ -33,7 +33,7 @@ The primary objectives of this app are fiercely prioritized as follows:
 
 # Cluster Probe Test Spec
 
-The cluster animation has a live simulator integration test. This is the required smoothness gate for cluster split/merge animation work.
+The cluster animation has a live iOS simulator integration test. This is the required quality gate for cluster split/merge behavior.
 
 ## How To Run It
 
@@ -43,22 +43,21 @@ The cluster animation has a live simulator integration test. This is the require
 4. Run the probe-only test with `node --test ./tests/clusterProbe.integration.test.cjs`.
 5. Run the full suite with `npm test` when you need the normal unit tests plus the live probe gate.
 
-The test launches the booted simulator app, waits for it to load, triggers the in-app cluster probe deep link, waits for the app to export the probe report to the app container, and then validates the exported metrics.
+The integration runner reloads the app, launches the in-app probe using deep link automation, waits for report export, then validates strict animation gates.
 
 ## What The Test Does
 
-The live probe uses the real Apple map, not fake math.
+The probe runs on the real Apple map and captures live rendered animation behavior.
 
-It currently:
-1. Waits for the map to load.
-2. Re-centers on the current location before recording.
-3. Starts recording cluster debug frames.
-4. Runs the automated stepped zoom sequence.
-5. Stops recording.
-6. Restores the prior map view after recording.
-7. Exports a JSON report to the simulator app container at `Documents/cluster-debug-probe.json`.
-
-The integration runner reads that JSON file and fails if the probe did not complete or if the smoothness metric is over the threshold.
+Execution flow:
+1. Reload the app before probe start (terminate + relaunch).
+2. Wait for load and trigger `fuelup:///?clusterProbe=1&clusterProbeToken=<token>`.
+3. Build a probe plan from the current watched cluster and map region.
+4. Center to the probe start region and begin frame recording.
+5. Run stepped zoom-in and stepped zoom-out sequences.
+6. Run one-shot zoom-in and one-shot zoom-out sequences.
+7. Stop recording and restore the original map region.
+8. Export probe artifact JSON to the app container at `Documents/cluster-debug-probe.json`.
 
 ## Do Not Change
 
@@ -74,26 +73,44 @@ Specifically, do not:
 
 If the test fails, fix the animation or the real probe path. Do not redefine success downward.
 
-## Smoothness Metric
+## How Metrics Are Captured
 
-Smoothness is measured from the exported probe JSON, not from visual guesswork alone.
+Numbers are captured from the live render path and exported as structured JSON.
 
-Primary field:
-1. `maxFrameDelta`
+Capture sources:
+1. Per-frame render samples emitted from the animated cluster overlay (UI-thread + JS-thread instrumentation).
+2. Transition events emitted when split/merge runtime phases and bridge/carry state changes occur.
+3. Probe run metadata (`status`, `message`, `timedOutStages`, plan, token trigger, mode coverage).
+4. Map reset invariants captured at probe start/end (cluster signature and station-on-screen geometry snapshot).
+5. Probe log text that includes a recording timeline and summarized motion context.
 
-This value is the maximum per-frame on-screen movement, in pixels/points, observed across the tracked overlay layers during the recorded probe.
+Artifact location:
+1. Simulator app container: `Documents/cluster-debug-probe.json`.
+2. Integration runner reads this file and computes strict telemetry summaries and gates.
 
-Pass condition:
-1. `maxFrameDelta <= 2`
+## What The Test Measures
 
-Interpretation:
-1. Lower is smoother.
-2. Values above `2` mean at least one recorded frame jumped too far on screen.
-3. The integration test enforces only the hard gate (`<= 2`), but the exported report also includes supporting context such as `sampleCount`, `transitionCount`, `timedOutStages`, `steps`, and the full `logText`.
+The test computes strict, multi-axis diagnostics from recorded samples and transitions.
 
-When debugging a failure:
-1. Read `Documents/cluster-debug-probe.json` from the simulator app container.
-2. Check `status`, `message`, and `timedOutStages` first to confirm the probe actually ran.
-3. Compare `maxFrameDelta` against the `2` threshold.
-4. Use `logText` and the embedded `[ClusterDebug Recording]` section to see which layer jumped and during which split/merge phase.
-5. Treat the test result as the source of truth for whether the animation is smooth enough to ship.
+Primary measurement families:
+1. Frame smoothness: per-frame movement deltas (`maxFrameDelta`, percentiles, maxima).
+2. Visible continuity: visible-layer frame deltas and jump detection at activation/stage switches.
+3. Container tracking: logical container path, visible container path, and logical-vs-visible offset delta over time.
+4. Timing/pacing: animated frame-step durations and very-long-step detection.
+5. Idle-map movement duration: total continuous motion time while map is otherwise idle.
+6. Disconnect handoff integrity: +N-to-price handoff checks for position, size, and content continuity.
+7. Motion and state coverage: layer visibility/travel coverage, runtime phase coverage, transition-type coverage, probe mode coverage (stepped and one-shot), and map-motion state coverage.
+8. Reset invariants: start/end map-state consistency for cluster signature, station count, pair count, and pair-distance geometry.
+9. Deep telemetry export: numeric field series summaries, per-layer kinematics, layer-pair distance traces, top jump frames/events.
+
+## Goal Of The Outputs
+
+The outputs are meant to represent real, user-visible animation quality and correctness on device.
+
+The goal is to prove:
+1. Movement is smooth frame-to-frame, without pops or discontinuous jumps.
+2. Logical animation state and visible on-screen position remain aligned.
+3. Split/merge transitions preserve identity and visual continuity across layer handoffs.
+4. Movement pacing is fast enough to finish promptly while still visually smooth.
+5. Probe coverage is broad enough to catch regressions across stepped zoom and one-shot zoom scenarios.
+6. After probe reset, map-visible station geometry is consistent with where it started.

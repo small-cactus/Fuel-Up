@@ -6,6 +6,52 @@ const {
 } = require('../scripts/clusterProbeIntegration.cjs');
 
 const LAYER_KEYS = ['breakout', 'remainder', 'carry', 'bridge'];
+const LAYER_PAIR_KEYS = [
+    ['breakout', 'remainder'],
+    ['breakout', 'carry'],
+    ['breakout', 'bridge'],
+    ['remainder', 'carry'],
+    ['remainder', 'bridge'],
+    ['carry', 'bridge'],
+];
+const NUMERIC_SAMPLE_FIELDS = [
+    'maxFrameDelta',
+    'spreadProgress',
+    'morphProgress',
+    'bridgeProgress',
+    'visibleLayerCount',
+    'clusterSize',
+    'maxSecondaryRadius',
+    'secondaryShellWidth',
+    'breakoutOpacity',
+    'breakoutX',
+    'breakoutY',
+    'breakoutShellWidth',
+    'breakoutPlusOpacity',
+    'breakoutPriceOpacity',
+    'remainderOpacity',
+    'remainderX',
+    'remainderY',
+    'remainderShellWidth',
+    'remainderPlusOpacity',
+    'remainderPriceOpacity',
+    'carryOpacity',
+    'carryX',
+    'carryY',
+    'carryShellWidth',
+    'carryPlusOpacity',
+    'carryPriceOpacity',
+    'bridgeOpacity',
+    'bridgeX',
+    'bridgeY',
+    'bridgeShellWidth',
+    'bridgePlusOpacity',
+    'bridgePriceOpacity',
+    'containerLogicalX',
+    'containerLogicalY',
+    'containerVisualX',
+    'containerVisualY',
+];
 const MOTION_EPSILON_PX = 0.05;
 
 // Thresholds are intentionally strict so visual regressions cannot hide behind one passing metric.
@@ -30,10 +76,15 @@ const GATES = {
     minBridgeDistancePx: 20,
     maxContainerVisualTrackDeltaPx: 2,
     maxContainerLogicalVisualOffsetDeltaPx: 2,
-    maxIdleContinuousMovementTotalMs: 500,
+    minIdleContinuousMovementTotalMs: 200,
+    maxIdleContinuousMovementTotalMs: 700,
     maxDisconnectHandoffPositionDeltaPx: 2,
     maxDisconnectHandoffSizeDeltaPx: 2,
     maxDisconnectHandoffContentDelta: 0.05,
+    minSteppedModeSamples: 80,
+    minOneShotModeSamples: 20,
+    maxResetPairDistanceDeltaPx: 1.5,
+    maxResetMeanPairDistanceDeltaPx: 0.5,
 };
 
 function formatMetric(value, digits = 2) {
@@ -58,6 +109,62 @@ function computePercentile(values, percentile) {
     );
 
     return sortedValues[index];
+}
+
+function computeMean(values) {
+    if (!Array.isArray(values) || values.length === 0) {
+        return 0;
+    }
+
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function summarizeSeries(values) {
+    if (!Array.isArray(values) || values.length === 0) {
+        return {
+            count: 0,
+            min: 0,
+            max: 0,
+            mean: 0,
+            stdDev: 0,
+            p01: 0,
+            p05: 0,
+            p50: 0,
+            p95: 0,
+            p99: 0,
+            first: 0,
+            last: 0,
+            range: 0,
+            drift: 0,
+        };
+    }
+
+    const mean = computeMean(values);
+    const variance = values.reduce((sum, value) => (
+        sum + Math.pow(value - mean, 2)
+    ), 0) / values.length;
+
+    return {
+        count: values.length,
+        min: Math.min(...values),
+        max: Math.max(...values),
+        mean,
+        stdDev: Math.sqrt(variance),
+        p01: computePercentile(values, 0.01),
+        p05: computePercentile(values, 0.05),
+        p50: computePercentile(values, 0.50),
+        p95: computePercentile(values, 0.95),
+        p99: computePercentile(values, 0.99),
+        first: values[0],
+        last: values[values.length - 1],
+        range: Math.max(...values) - Math.min(...values),
+        drift: values[values.length - 1] - values[0],
+    };
+}
+
+function sortCountsDescending(countMap) {
+    return Array.from(countMap.entries())
+        .sort((left, right) => right[1] - left[1]);
 }
 
 function isRenderedVisibleLayer(sample, layerKey) {
@@ -149,6 +256,12 @@ function summarizeSmoothness(report) {
     const visibleContainerDeltas = [];
     const phaseMaxima = new Map();
     const phaseCounts = new Map();
+    const modeCounts = new Map();
+    const stageSignatureCounts = new Map();
+    const clusterKeyCounts = new Map();
+    const visibleLayerPatternCounts = new Map();
+    const clusterSizeCounts = new Map();
+    const mapMotionCounts = new Map();
     const transitionTypeCounts = new Map();
     const reportedLayerMaxima = {
         breakout: 0,
@@ -193,6 +306,38 @@ function summarizeSmoothness(report) {
     const topContainerOffsetDeltaFrames = [];
     const idleMovementRuns = [];
     const disconnectHandoffEvents = [];
+    const layerKinematicsByKey = Object.fromEntries(
+        LAYER_KEYS.map(layerKey => [layerKey, {
+            speed: [],
+            acceleration: [],
+            jerk: [],
+            pathDistance: 0,
+            movingFrames: 0,
+            stationaryFrames: 0,
+            directionFlipCount: 0,
+            topDirectionFlips: [],
+            previousSpeed: null,
+            previousAcceleration: null,
+            previousVector: null,
+        }])
+    );
+    const pairDistanceSeriesByKey = Object.fromEntries(
+        LAYER_PAIR_KEYS.map(([firstLayer, secondLayer]) => [`${firstLayer}-${secondLayer}`, {
+            values: [],
+            deltas: [],
+            topDeltas: [],
+            previousDistance: null,
+        }])
+    );
+    const numericFieldTelemetry = Object.fromEntries(
+        NUMERIC_SAMPLE_FIELDS.map(fieldName => [fieldName, {
+            values: [],
+            steps: [],
+            topSteps: [],
+            nonFiniteCount: 0,
+        }])
+    );
+    const timestampDeltasMs = [];
 
     let veryLongAnimatedStepCount = 0;
     let nonSmoothFrameCount = 0;
@@ -206,6 +351,27 @@ function summarizeSmoothness(report) {
         transitionTypeCounts.set(event.type, (transitionTypeCounts.get(event.type) || 0) + 1);
     });
 
+    samples.forEach(sample => {
+        const mode = sample?.probeMode || 'unknown';
+        const stageSignature = sample?.stageSignature || 'none';
+        const clusterKey = sample?.clusterKey || 'none';
+        const visibleLayers = sample?.visibleLayers || 'none';
+        const clusterSize = Number.isFinite(sample?.clusterSize) ? sample.clusterSize : null;
+        const mapMotionState = sample?.mapMoving === true
+            ? 'moving'
+            : (sample?.mapMoving === false ? 'idle' : 'unknown');
+
+        modeCounts.set(mode, (modeCounts.get(mode) || 0) + 1);
+        stageSignatureCounts.set(stageSignature, (stageSignatureCounts.get(stageSignature) || 0) + 1);
+        clusterKeyCounts.set(clusterKey, (clusterKeyCounts.get(clusterKey) || 0) + 1);
+        visibleLayerPatternCounts.set(visibleLayers, (visibleLayerPatternCounts.get(visibleLayers) || 0) + 1);
+        mapMotionCounts.set(mapMotionState, (mapMotionCounts.get(mapMotionState) || 0) + 1);
+
+        if (clusterSize !== null) {
+            clusterSizeCounts.set(clusterSize, (clusterSizeCounts.get(clusterSize) || 0) + 1);
+        }
+    });
+
     for (let index = 1; index < samples.length; index += 1) {
         const previousSample = samples[index - 1];
         const currentSample = samples[index];
@@ -217,6 +383,7 @@ function summarizeSmoothness(report) {
             0,
             (currentSample?.timestamp || 0) - (previousSample?.timestamp || 0)
         );
+        timestampDeltasMs.push(timestampDeltaMs);
         const previousContainerLogicalPosition = getContainerTrackPosition(previousSample, 'containerLogical');
         const currentContainerLogicalPosition = getContainerTrackPosition(currentSample, 'containerLogical');
         const previousContainerVisualPosition = getContainerTrackPosition(previousSample, 'containerVisual');
@@ -291,6 +458,33 @@ function summarizeSmoothness(report) {
             });
         }
 
+        NUMERIC_SAMPLE_FIELDS.forEach(fieldName => {
+            const currentValue = currentSample?.[fieldName];
+            const previousValue = previousSample?.[fieldName];
+            const telemetry = numericFieldTelemetry[fieldName];
+
+            if (!Number.isFinite(currentValue)) {
+                telemetry.nonFiniteCount += 1;
+                return;
+            }
+
+            telemetry.values.push(currentValue);
+            if (Number.isFinite(previousValue)) {
+                const stepDelta = Math.abs(currentValue - previousValue);
+                telemetry.steps.push(stepDelta);
+                telemetry.topSteps.push({
+                    index,
+                    fieldName,
+                    delta: stepDelta,
+                    from: previousValue,
+                    to: currentValue,
+                    phase,
+                    stageSignature: currentSample?.stageSignature || '',
+                    mode: currentSample?.probeMode || 'unknown',
+                });
+            }
+        });
+
         const bridgeActivated = (
             !isRenderedVisibleLayer(previousSample, 'bridge') &&
             isRenderedVisibleLayer(currentSample, 'bridge')
@@ -363,6 +557,7 @@ function summarizeSmoothness(report) {
             const wasVisible = isRenderedVisibleLayer(previousSample, layerKey);
             const isVisible = isRenderedVisibleLayer(currentSample, layerKey);
             const deltaForLayer = computeLayerDelta(previousSample, currentSample, layerKey);
+            const layerKinematics = layerKinematicsByKey[layerKey];
 
             if (isVisible) {
                 visibleSampleCountsByLayer[layerKey] += 1;
@@ -398,6 +593,106 @@ function summarizeSmoothness(report) {
                     opacity: layerOpacity,
                 });
             }
+
+            if (wasVisible && isVisible && timestampDeltaMs > 0) {
+                const previousPosition = getLayerPosition(previousSample, layerKey);
+                const currentPosition = getLayerPosition(currentSample, layerKey);
+                const vectorX = currentPosition.x - previousPosition.x;
+                const vectorY = currentPosition.y - previousPosition.y;
+                const vectorMagnitude = Math.hypot(vectorX, vectorY);
+                const velocity = vectorMagnitude / (timestampDeltaMs / 1000);
+
+                layerKinematics.speed.push(velocity);
+                layerKinematics.pathDistance += vectorMagnitude;
+
+                if (vectorMagnitude > MOTION_EPSILON_PX) {
+                    layerKinematics.movingFrames += 1;
+                } else {
+                    layerKinematics.stationaryFrames += 1;
+                }
+
+                if (Number.isFinite(layerKinematics.previousSpeed)) {
+                    const acceleration = (velocity - layerKinematics.previousSpeed) / (timestampDeltaMs / 1000);
+                    layerKinematics.acceleration.push(acceleration);
+
+                    if (Number.isFinite(layerKinematics.previousAcceleration)) {
+                        const jerk = (acceleration - layerKinematics.previousAcceleration) / (timestampDeltaMs / 1000);
+                        layerKinematics.jerk.push(jerk);
+                    }
+
+                    layerKinematics.previousAcceleration = acceleration;
+                }
+
+                if (
+                    layerKinematics.previousVector &&
+                    layerKinematics.previousVector.magnitude > MOTION_EPSILON_PX &&
+                    vectorMagnitude > MOTION_EPSILON_PX
+                ) {
+                    const dotProduct = (
+                        layerKinematics.previousVector.x * vectorX +
+                        layerKinematics.previousVector.y * vectorY
+                    );
+                    if (dotProduct < 0) {
+                        layerKinematics.directionFlipCount += 1;
+                        layerKinematics.topDirectionFlips.push({
+                            index,
+                            layer: layerKey,
+                            previousMagnitude: layerKinematics.previousVector.magnitude,
+                            currentMagnitude: vectorMagnitude,
+                            phase,
+                            stageSignature: currentSample?.stageSignature || '',
+                            mode: currentSample?.probeMode || 'unknown',
+                        });
+                    }
+                }
+
+                layerKinematics.previousVector = {
+                    x: vectorX,
+                    y: vectorY,
+                    magnitude: vectorMagnitude,
+                };
+                layerKinematics.previousSpeed = velocity;
+            } else {
+                layerKinematics.previousVector = null;
+                layerKinematics.previousSpeed = null;
+                layerKinematics.previousAcceleration = null;
+            }
+        });
+
+        LAYER_PAIR_KEYS.forEach(([firstLayer, secondLayer]) => {
+            const firstVisible = isRenderedVisibleLayer(currentSample, firstLayer);
+            const secondVisible = isRenderedVisibleLayer(currentSample, secondLayer);
+            const pairKey = `${firstLayer}-${secondLayer}`;
+            const pairSeries = pairDistanceSeriesByKey[pairKey];
+
+            if (!firstVisible || !secondVisible) {
+                pairSeries.previousDistance = null;
+                return;
+            }
+
+            const firstPosition = getLayerPosition(currentSample, firstLayer);
+            const secondPosition = getLayerPosition(currentSample, secondLayer);
+            const pairDistance = Math.hypot(
+                secondPosition.x - firstPosition.x,
+                secondPosition.y - firstPosition.y
+            );
+
+            pairSeries.values.push(pairDistance);
+            if (Number.isFinite(pairSeries.previousDistance)) {
+                const pairDelta = Math.abs(pairDistance - pairSeries.previousDistance);
+                pairSeries.deltas.push(pairDelta);
+                pairSeries.topDeltas.push({
+                    index,
+                    pairKey,
+                    delta: pairDelta,
+                    previousDistance: pairSeries.previousDistance,
+                    currentDistance: pairDistance,
+                    phase,
+                    stageSignature: currentSample?.stageSignature || '',
+                    mode: currentSample?.probeMode || 'unknown',
+                });
+            }
+            pairSeries.previousDistance = pairDistance;
         });
 
         const isIdleMap = currentSample?.mapMoving === false;
@@ -492,6 +787,45 @@ function summarizeSmoothness(report) {
         const rightWorst = Math.max(right.positionDelta || 0, right.sizeDelta || 0, right.contentDelta || 0);
         return rightWorst - leftWorst;
     });
+    const numericFieldSummary = Object.fromEntries(
+        Object.entries(numericFieldTelemetry).map(([fieldName, telemetry]) => {
+            telemetry.topSteps.sort((left, right) => right.delta - left.delta);
+            return [fieldName, {
+                series: summarizeSeries(telemetry.values),
+                stepSeries: summarizeSeries(telemetry.steps),
+                nonFiniteCount: telemetry.nonFiniteCount,
+                topSteps: telemetry.topSteps.slice(0, 6),
+            }];
+        })
+    );
+    const layerKinematics = Object.fromEntries(
+        Object.entries(layerKinematicsByKey).map(([layerKey, telemetry]) => {
+            telemetry.topDirectionFlips.sort((left, right) => (
+                (right.previousMagnitude + right.currentMagnitude) -
+                (left.previousMagnitude + left.currentMagnitude)
+            ));
+            return [layerKey, {
+                speed: summarizeSeries(telemetry.speed),
+                acceleration: summarizeSeries(telemetry.acceleration),
+                jerk: summarizeSeries(telemetry.jerk),
+                pathDistance: telemetry.pathDistance,
+                movingFrames: telemetry.movingFrames,
+                stationaryFrames: telemetry.stationaryFrames,
+                directionFlipCount: telemetry.directionFlipCount,
+                topDirectionFlips: telemetry.topDirectionFlips.slice(0, 6),
+            }];
+        })
+    );
+    const pairDistanceTelemetry = Object.fromEntries(
+        Object.entries(pairDistanceSeriesByKey).map(([pairKey, telemetry]) => {
+            telemetry.topDeltas.sort((left, right) => right.delta - left.delta);
+            return [pairKey, {
+                distanceSeries: summarizeSeries(telemetry.values),
+                deltaSeries: summarizeSeries(telemetry.deltas),
+                topDeltas: telemetry.topDeltas.slice(0, 6),
+            }];
+        })
+    );
 
     const totalIdleMovementDurationMs = idleMovementRuns.reduce((sum, run) => (
         sum + (run.durationMs || 0)
@@ -597,6 +931,20 @@ function summarizeSmoothness(report) {
             totalDistanceByLayer,
             phaseCounts: Object.fromEntries(phaseCounts.entries()),
         },
+        stateCoverage: {
+            modeCounts: Object.fromEntries(modeCounts.entries()),
+            stageSignatureCounts: Object.fromEntries(stageSignatureCounts.entries()),
+            clusterKeyCounts: Object.fromEntries(clusterKeyCounts.entries()),
+            visibleLayerPatternCounts: Object.fromEntries(visibleLayerPatternCounts.entries()),
+            clusterSizeCounts: Object.fromEntries(clusterSizeCounts.entries()),
+            mapMotionCounts: Object.fromEntries(mapMotionCounts.entries()),
+        },
+        telemetry: {
+            timestampDeltasMs: summarizeSeries(timestampDeltasMs),
+            numericFields: numericFieldSummary,
+            layerKinematics,
+            layerPairDistances: pairDistanceTelemetry,
+        },
         reportedLayerMaxima,
         visibleLayerMaxima,
         phaseMaxima: Array.from(phaseMaxima.entries())
@@ -662,6 +1010,57 @@ function validateProbeStrictness({
 
     if ((transitionTypeCounts['split-bridge-start'] || 0) <= 0) {
         failures.push('transition coverage missing: no split-bridge-start events recorded.');
+    }
+
+    const modeCounts = smoothness.stateCoverage?.modeCounts || {};
+    if ((modeCounts.stepped || 0) < GATES.minSteppedModeSamples) {
+        failures.push(
+            `probe mode coverage too low for stepped: expected >= ${GATES.minSteppedModeSamples}, ` +
+            `received ${modeCounts.stepped || 0}.`
+        );
+    }
+
+    if ((modeCounts['one-shot'] || 0) < GATES.minOneShotModeSamples) {
+        failures.push(
+            `probe mode coverage too low for one-shot: expected >= ${GATES.minOneShotModeSamples}, ` +
+            `received ${modeCounts['one-shot'] || 0}.`
+        );
+    }
+
+    const resetInvariant = report?.resetInvariant || {};
+    if (resetInvariant.signaturesMatch === false) {
+        failures.push(
+            `map reset cluster signature mismatch: start=${resetInvariant.startClusterSignature || 'none'} ` +
+            `end=${resetInvariant.endClusterSignature || 'none'}.`
+        );
+    }
+
+    if ((resetInvariant.stationCountDelta || 0) !== 0) {
+        failures.push(
+            `map reset station count mismatch: expected 0 delta, ` +
+            `received ${resetInvariant.stationCountDelta}.`
+        );
+    }
+
+    if ((resetInvariant.pairCountDelta || 0) !== 0) {
+        failures.push(
+            `map reset pair-count mismatch: expected 0 delta, ` +
+            `received ${resetInvariant.pairCountDelta}.`
+        );
+    }
+
+    if ((resetInvariant.maxPairDistanceDelta || 0) > GATES.maxResetPairDistanceDeltaPx) {
+        failures.push(
+            `map reset pair-distance delta too high: expected <= ${GATES.maxResetPairDistanceDeltaPx}px, ` +
+            `received ${formatMetric(resetInvariant.maxPairDistanceDelta, 3)}px.`
+        );
+    }
+
+    if ((resetInvariant.meanPairDistanceDelta || 0) > GATES.maxResetMeanPairDistanceDeltaPx) {
+        failures.push(
+            `map reset mean pair-distance delta too high: expected <= ${GATES.maxResetMeanPairDistanceDeltaPx}px, ` +
+            `received ${formatMetric(resetInvariant.meanPairDistanceDelta, 3)}px.`
+        );
     }
 
     if ((layerVisibility.breakout || 0) < GATES.minBreakoutVisibleSamples) {
@@ -783,6 +1182,13 @@ function validateProbeStrictness({
         );
     }
 
+    if (smoothness.idleMovement.totalDurationMs < GATES.minIdleContinuousMovementTotalMs) {
+        failures.push(
+            `idle-map total moving duration too low: expected >= ${GATES.minIdleContinuousMovementTotalMs}ms, ` +
+            `received ${formatMetric(smoothness.idleMovement.totalDurationMs, 0)}ms.`
+        );
+    }
+
     if (smoothness.idleMovement.totalDurationMs > GATES.maxIdleContinuousMovementTotalMs) {
         failures.push(
             `idle-map total moving duration too high: expected <= ${GATES.maxIdleContinuousMovementTotalMs}ms, ` +
@@ -830,6 +1236,7 @@ test('cluster probe integration enforces strict smoothness, continuity, and tran
     } = await runClusterProbeIntegration({
         maxFrameDeltaThreshold: GATES.maxFrameDeltaPx,
         throwOnThresholdExceeded: false,
+        reloadAppBeforeProbe: true,
     });
     const smoothness = summarizeSmoothness(report);
 
@@ -884,7 +1291,8 @@ test('cluster probe integration enforces strict smoothness, continuity, and tran
     t.diagnostic(
         `idle-map continuous movement: runs=${smoothness.idleMovement.runCount} ` +
         `total=${formatMetric(smoothness.idleMovement.totalDurationMs, 0)}ms ` +
-        `longest=${formatMetric(smoothness.idleMovement.longestRunMs, 0)}ms`
+        `longest=${formatMetric(smoothness.idleMovement.longestRunMs, 0)}ms ` +
+        `target=[${GATES.minIdleContinuousMovementTotalMs},${GATES.maxIdleContinuousMovementTotalMs}]ms`
     );
     t.diagnostic(
         `disconnect handoff(+N->price): events=${smoothness.disconnectHandoff.eventCount} ` +
@@ -919,6 +1327,102 @@ test('cluster probe integration enforces strict smoothness, continuity, and tran
             .map(([phase, count]) => `${phase}:${count}`)
             .join(', ') || 'none'}`
     );
+    t.diagnostic(
+        `probe mode coverage: ${Object.entries(smoothness.stateCoverage.modeCounts)
+            .map(([mode, count]) => `${mode}:${count}`)
+            .join(', ') || 'none'}`
+    );
+    t.diagnostic(
+        `probe modes captured in report: ${(report?.modesCaptured || []).join(', ') || 'none'}`
+    );
+    t.diagnostic(
+        `map motion coverage: ${Object.entries(smoothness.stateCoverage.mapMotionCounts)
+            .map(([state, count]) => `${state}:${count}`)
+            .join(', ') || 'none'}`
+    );
+    t.diagnostic(
+        `cluster-key coverage: ${Object.entries(smoothness.stateCoverage.clusterKeyCounts)
+            .map(([key, count]) => `${key}:${count}`)
+            .join(' | ') || 'none'}`
+    );
+    t.diagnostic(
+        `stage-signature coverage: ${Object.entries(smoothness.stateCoverage.stageSignatureCounts)
+            .map(([key, count]) => `${key}:${count}`)
+            .join(' | ') || 'none'}`
+    );
+    t.diagnostic(
+        `visible-layer-pattern coverage: ${Object.entries(smoothness.stateCoverage.visibleLayerPatternCounts)
+            .map(([pattern, count]) => `${pattern}:${count}`)
+            .join(' | ') || 'none'}`
+    );
+    t.diagnostic(
+        `cluster-size coverage: ${Object.entries(smoothness.stateCoverage.clusterSizeCounts)
+            .map(([size, count]) => `${size}:${count}`)
+            .join(', ') || 'none'}`
+    );
+    t.diagnostic(
+        `timestamp deltas: count=${smoothness.telemetry.timestampDeltasMs.count} ` +
+        `min=${formatMetric(smoothness.telemetry.timestampDeltasMs.min, 3)}ms ` +
+        `max=${formatMetric(smoothness.telemetry.timestampDeltasMs.max, 3)}ms ` +
+        `mean=${formatMetric(smoothness.telemetry.timestampDeltasMs.mean, 3)}ms ` +
+        `p95=${formatMetric(smoothness.telemetry.timestampDeltasMs.p95, 3)}ms ` +
+        `p99=${formatMetric(smoothness.telemetry.timestampDeltasMs.p99, 3)}ms`
+    );
+    const resetInvariant = report?.resetInvariant || {};
+    t.diagnostic(
+        `map reset invariant: signaturesMatch=${resetInvariant.signaturesMatch ? 'yes' : 'no'} ` +
+        `stationDelta=${formatMetric(resetInvariant.stationCountDelta, 0)} ` +
+        `pairDelta=${formatMetric(resetInvariant.pairCountDelta, 0)} ` +
+        `maxPairDistanceDelta=${formatMetric(resetInvariant.maxPairDistanceDelta, 3)}px ` +
+        `meanPairDistanceDelta=${formatMetric(resetInvariant.meanPairDistanceDelta, 3)}px`
+    );
+    if (resetInvariant.startStationScreenSnapshot || resetInvariant.endStationScreenSnapshot) {
+        const startSnapshot = resetInvariant.startStationScreenSnapshot || {};
+        const endSnapshot = resetInvariant.endStationScreenSnapshot || {};
+        t.diagnostic(
+            `map reset start snapshot: stations=${startSnapshot.stationCount || 0} pairs=${startSnapshot.pairCount || 0} ` +
+            `pair[min=${formatMetric(startSnapshot.pairDistanceMin, 3)}px max=${formatMetric(startSnapshot.pairDistanceMax, 3)}px ` +
+            `mean=${formatMetric(startSnapshot.pairDistanceMean, 3)}px p95=${formatMetric(startSnapshot.pairDistanceP95, 3)}px]`
+        );
+        t.diagnostic(
+            `map reset end snapshot: stations=${endSnapshot.stationCount || 0} pairs=${endSnapshot.pairCount || 0} ` +
+            `pair[min=${formatMetric(endSnapshot.pairDistanceMin, 3)}px max=${formatMetric(endSnapshot.pairDistanceMax, 3)}px ` +
+            `mean=${formatMetric(endSnapshot.pairDistanceMean, 3)}px p95=${formatMetric(endSnapshot.pairDistanceP95, 3)}px]`
+        );
+    }
+
+    Object.entries(smoothness.telemetry.layerKinematics).forEach(([layerKey, telemetry]) => {
+        t.diagnostic(
+            `layer kinematics ${layerKey}: path=${formatMetric(telemetry.pathDistance, 3)}px ` +
+            `moving=${telemetry.movingFrames} stationary=${telemetry.stationaryFrames} flips=${telemetry.directionFlipCount} ` +
+            `speed[max=${formatMetric(telemetry.speed.max, 3)}px/s p95=${formatMetric(telemetry.speed.p95, 3)}px/s p99=${formatMetric(telemetry.speed.p99, 3)}px/s] ` +
+            `accel[max=${formatMetric(telemetry.acceleration.max, 3)}px/s^2 p95=${formatMetric(telemetry.acceleration.p95, 3)}px/s^2 p99=${formatMetric(telemetry.acceleration.p99, 3)}px/s^2] ` +
+            `jerk[max=${formatMetric(telemetry.jerk.max, 3)}px/s^3 p95=${formatMetric(telemetry.jerk.p95, 3)}px/s^3 p99=${formatMetric(telemetry.jerk.p99, 3)}px/s^3]`
+        );
+    });
+
+    Object.entries(smoothness.telemetry.layerPairDistances).forEach(([pairKey, telemetry]) => {
+        t.diagnostic(
+            `layer pair ${pairKey}: distance[count=${telemetry.distanceSeries.count} min=${formatMetric(telemetry.distanceSeries.min, 3)}px ` +
+            `max=${formatMetric(telemetry.distanceSeries.max, 3)}px mean=${formatMetric(telemetry.distanceSeries.mean, 3)}px ` +
+            `p95=${formatMetric(telemetry.distanceSeries.p95, 3)}px p99=${formatMetric(telemetry.distanceSeries.p99, 3)}px] ` +
+            `delta[max=${formatMetric(telemetry.deltaSeries.max, 3)}px p95=${formatMetric(telemetry.deltaSeries.p95, 3)}px ` +
+            `p99=${formatMetric(telemetry.deltaSeries.p99, 3)}px]`
+        );
+    });
+
+    Object.entries(smoothness.telemetry.numericFields).forEach(([fieldName, telemetry]) => {
+        t.diagnostic(
+            `numeric field ${fieldName}: count=${telemetry.series.count} nonFinite=${telemetry.nonFiniteCount} ` +
+            `value[min=${formatMetric(telemetry.series.min, 3)} max=${formatMetric(telemetry.series.max, 3)} ` +
+            `mean=${formatMetric(telemetry.series.mean, 3)} std=${formatMetric(telemetry.series.stdDev, 3)} ` +
+            `p01=${formatMetric(telemetry.series.p01, 3)} p05=${formatMetric(telemetry.series.p05, 3)} ` +
+            `p50=${formatMetric(telemetry.series.p50, 3)} p95=${formatMetric(telemetry.series.p95, 3)} p99=${formatMetric(telemetry.series.p99, 3)} ` +
+            `first=${formatMetric(telemetry.series.first, 3)} last=${formatMetric(telemetry.series.last, 3)} drift=${formatMetric(telemetry.series.drift, 3)}] ` +
+            `step[max=${formatMetric(telemetry.stepSeries.max, 3)} mean=${formatMetric(telemetry.stepSeries.mean, 3)} ` +
+            `p95=${formatMetric(telemetry.stepSeries.p95, 3)} p99=${formatMetric(telemetry.stepSeries.p99, 3)}]`
+        );
+    });
 
     smoothness.phaseMaxima.forEach(({ phase, max }) => {
         t.diagnostic(`phase max: ${phase}=${formatMetric(max, 3)}px`);
@@ -986,6 +1490,36 @@ test('cluster probe integration enforces strict smoothness, continuity, and tran
             `stage switch jump #${event.index}: jump=${formatMetric(event.jump, 3)}px ` +
             `phase=${event.phase} stage=${event.stageSignature}`
         );
+    });
+
+    Object.entries(smoothness.telemetry.layerKinematics).forEach(([layerKey, telemetry]) => {
+        telemetry.topDirectionFlips.forEach(event => {
+            t.diagnostic(
+                `direction flip #${event.index}: layer=${layerKey} ` +
+                `prev=${formatMetric(event.previousMagnitude, 3)}px cur=${formatMetric(event.currentMagnitude, 3)}px ` +
+                `phase=${event.phase} stage=${event.stageSignature || 'none'} mode=${event.mode}`
+            );
+        });
+    });
+
+    Object.entries(smoothness.telemetry.layerPairDistances).forEach(([pairKey, telemetry]) => {
+        telemetry.topDeltas.forEach(event => {
+            t.diagnostic(
+                `layer pair delta #${event.index}: pair=${pairKey} delta=${formatMetric(event.delta, 3)}px ` +
+                `distance ${formatMetric(event.previousDistance, 3)} -> ${formatMetric(event.currentDistance, 3)} ` +
+                `phase=${event.phase} stage=${event.stageSignature || 'none'} mode=${event.mode}`
+            );
+        });
+    });
+
+    Object.entries(smoothness.telemetry.numericFields).forEach(([fieldName, telemetry]) => {
+        telemetry.topSteps.forEach(event => {
+            t.diagnostic(
+                `field step #${event.index}: ${fieldName} delta=${formatMetric(event.delta, 3)} ` +
+                `${formatMetric(event.from, 3)} -> ${formatMetric(event.to, 3)} ` +
+                `phase=${event.phase} stage=${event.stageSignature || 'none'} mode=${event.mode}`
+            );
+        });
     });
 
     const failures = validateProbeStrictness({

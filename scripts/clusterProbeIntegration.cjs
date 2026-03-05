@@ -79,6 +79,43 @@ function launchAppIfNeeded() {
     throw new Error(`Unable to launch ${APP_BUNDLE_ID}: ${details}`);
 }
 
+function terminateAppIfRunning() {
+    const result = spawnSync('xcrun', [
+        'simctl',
+        'terminate',
+        'booted',
+        APP_BUNDLE_ID,
+    ], {
+        encoding: 'utf8',
+    });
+
+    if (result.error) {
+        throw result.error;
+    }
+
+    if (result.status === 0) {
+        return;
+    }
+
+    const stderr = (result.stderr || '').trim();
+    if (
+        stderr.includes('found nothing to terminate') ||
+        stderr.includes('not running') ||
+        stderr.includes('No such process')
+    ) {
+        return;
+    }
+
+    const stdout = (result.stdout || '').trim();
+    const details = stderr || stdout || `exit ${result.status}`;
+    throw new Error(`Unable to terminate ${APP_BUNDLE_ID}: ${details}`);
+}
+
+function reloadApp() {
+    terminateAppIfRunning();
+    launchAppIfNeeded();
+}
+
 function triggerProbe(token) {
     runCommand('xcrun', [
         'simctl',
@@ -129,10 +166,15 @@ async function waitForProbeReport(reportFilePath, token) {
 async function runClusterProbeIntegration(options = {}) {
     const maxFrameDeltaThreshold = options.maxFrameDeltaThreshold ?? 2;
     const throwOnThresholdExceeded = options.throwOnThresholdExceeded ?? true;
+    const reloadAppBeforeProbe = options.reloadAppBeforeProbe ?? true;
     const token = options.token || `probe-test-${Date.now()}`;
     const reportFilePath = getProbeReportFilePath();
 
-    launchAppIfNeeded();
+    if (reloadAppBeforeProbe) {
+        reloadApp();
+    } else {
+        launchAppIfNeeded();
+    }
     await sleep(APP_LAUNCH_WAIT_MS);
     triggerProbe(token);
 
