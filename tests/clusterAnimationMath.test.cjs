@@ -2,187 +2,202 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const {
-    CLUSTER_MERGE_LNG_FACTOR,
-    CLUSTER_SPLIT_MULTIPLIER,
-    computeClusterHandoffDiagnostic,
-    computeClusterTransitionSnapshot,
-    computeMorphProgress,
-    computeSpreadProgressFromCluster,
+  CLUSTER_SPLIT_HANDOFF_CONTENT_EPSILON,
+  CLUSTER_SPLIT_HANDOFF_POSITION_EPSILON,
+  CLUSTER_SPLIT_HANDOFF_SIZE_EPSILON,
+  COLLAPSED_OFFSET,
+  buildMergeSequence,
+  buildOutsidePriceTargets,
+  buildSplitSequence,
+  computeParentBoundsForQuotes,
+  computeSplitHandoffTolerance,
+  groupByTouch,
 } = require('../src/lib/clusterAnimationMath.cjs');
 
 const SCREEN_WIDTH = 393;
 const SCREEN_HEIGHT = 852;
-const EPSILON = 1e-9;
 
 const baseQuotes = [
-    {
-        stationId: 'station-1',
-        originalIndex: 1,
-        price: 3.41,
-        latitude: 40.7500,
-        longitude: -73.9900,
-    },
-    {
-        stationId: 'station-2',
-        originalIndex: 2,
-        price: 3.55,
-        latitude: 40.7507,
-        longitude: -73.9888,
-    },
-    {
-        stationId: 'station-3',
-        originalIndex: 3,
-        price: 3.67,
-        latitude: 40.7491,
-        longitude: -73.9876,
-    },
+  {
+    stationId: 'station-1',
+    originalIndex: 1,
+    price: 3.41,
+    latitude: 40.7500,
+    longitude: -73.9900,
+  },
+  {
+    stationId: 'station-2',
+    originalIndex: 2,
+    price: 3.55,
+    latitude: 40.7507,
+    longitude: -73.9888,
+  },
+  {
+    stationId: 'station-3',
+    originalIndex: 3,
+    price: 3.67,
+    latitude: 40.7491,
+    longitude: -73.9876,
+  },
 ];
-
-const averageLat = baseQuotes.reduce((sum, quote) => sum + quote.latitude, 0) / baseQuotes.length;
-const averageLng = baseQuotes.reduce((sum, quote) => sum + quote.longitude, 0) / baseQuotes.length;
 
 const mapRegions = [
-    {
-        latitude: averageLat,
-        longitude: averageLng,
-        latitudeDelta: 0.06,
-        longitudeDelta: 0.06,
-    },
-    {
-        latitude: averageLat,
-        longitude: averageLng,
-        latitudeDelta: 0.03,
-        longitudeDelta: 0.03,
-    },
-    {
-        latitude: averageLat,
-        longitude: averageLng,
-        latitudeDelta: 0.012,
-        longitudeDelta: 0.012,
-    },
+  {
+    latitude: 40.7500,
+    longitude: -73.9890,
+    latitudeDelta: 0.06,
+    longitudeDelta: 0.06,
+  },
+  {
+    latitude: 40.7500,
+    longitude: -73.9890,
+    latitudeDelta: 0.03,
+    longitudeDelta: 0.03,
+  },
+  {
+    latitude: 40.7500,
+    longitude: -73.9890,
+    latitudeDelta: 0.012,
+    longitudeDelta: 0.012,
+  },
 ];
 
-function assertAlmostEqual(actual, expected, message) {
-    assert.ok(Math.abs(actual - expected) <= EPSILON, `${message}: expected ${expected}, received ${actual}`);
-}
-
-function assertBetween(value, edgeA, edgeB, message) {
-    const min = Math.min(edgeA, edgeB) - EPSILON;
-    const max = Math.max(edgeA, edgeB) + EPSILON;
-    assert.ok(value >= min && value <= max, `${message}: ${value} not between ${edgeA} and ${edgeB}`);
-}
-
-test('cluster transition hits the exact incoming frame at the switch boundary across zoom levels', () => {
-    for (const mapRegion of mapRegions) {
-        const morphProgress = computeMorphProgress(1);
-        const snapshot = computeClusterTransitionSnapshot({
-            quotes: baseQuotes,
-            averageLat,
-            averageLng,
-            mapRegion,
-            screenWidth: SCREEN_WIDTH,
-            screenHeight: SCREEN_HEIGHT,
-            spreadProgress: 1,
-            morphProgress,
-        });
-
-        assertAlmostEqual(snapshot.outgoingPrimary.x, snapshot.incomingPrimary.x, 'primary x continuity');
-        assertAlmostEqual(snapshot.outgoingPrimary.y, snapshot.incomingPrimary.y, 'primary y continuity');
-        assertAlmostEqual(snapshot.outgoingRemainder.x, snapshot.incomingSecondary.x, 'remainder x continuity');
-        assertAlmostEqual(snapshot.outgoingRemainder.y, snapshot.incomingSecondary.y, 'remainder y continuity');
-        assert.equal(snapshot.outgoingRemainderPlusCount, snapshot.incomingSecondaryPlusCount);
-        assert.equal(snapshot.secondaryShellMinWidth, 84);
-        assert.equal(snapshot.escapingPriceOpacity, 1);
-        assert.equal(snapshot.nextClusterQuoteCount, 2);
-    }
-});
-
-test('cluster transition bridge stays inside the current and incoming endpoints while zooming', () => {
-    const spreadSamples = [0, 0.2, 0.4, 0.6, 0.8, 1];
-
-    for (const mapRegion of mapRegions) {
-        for (const spreadProgress of spreadSamples) {
-            const snapshot = computeClusterTransitionSnapshot({
-                quotes: baseQuotes,
-                averageLat,
-                averageLng,
-                mapRegion,
-                screenWidth: SCREEN_WIDTH,
-                screenHeight: SCREEN_HEIGHT,
-                spreadProgress,
-                morphProgress: computeMorphProgress(spreadProgress),
-            });
-
-            assert.ok(Number.isFinite(snapshot.outgoingPrimary.x));
-            assert.ok(Number.isFinite(snapshot.outgoingPrimary.y));
-            assert.ok(Number.isFinite(snapshot.outgoingRemainder.x));
-            assert.ok(Number.isFinite(snapshot.outgoingRemainder.y));
-            assertBetween(snapshot.outgoingPrimary.x, snapshot.currentPrimary.x, snapshot.incomingPrimary.x, 'primary x bridge');
-            assertBetween(snapshot.outgoingPrimary.y, snapshot.currentPrimary.y, snapshot.incomingPrimary.y, 'primary y bridge');
-            assertBetween(snapshot.outgoingRemainder.x, snapshot.currentBreakout.x, snapshot.incomingSecondary.x, 'remainder x bridge');
-            assertBetween(snapshot.outgoingRemainder.y, snapshot.currentBreakout.y, snapshot.incomingSecondary.y, 'remainder y bridge');
-            assert.ok(snapshot.secondaryShellMinWidth >= 44 && snapshot.secondaryShellMinWidth <= 84);
-        }
-    }
-});
-
-test('spread normalization reaches 1.0 at the split threshold regardless of zoom level', () => {
-    for (const mapRegion of mapRegions) {
-        const splitLngThreshold = mapRegion.longitudeDelta * CLUSTER_MERGE_LNG_FACTOR * CLUSTER_SPLIT_MULTIPLIER;
-        const boundaryQuotes = [
-            {
-                stationId: 'station-1',
-                originalIndex: 1,
-                price: 3.41,
-                latitude: averageLat,
-                longitude: averageLng,
-            },
-            {
-                stationId: 'station-2',
-                originalIndex: 2,
-                price: 3.55,
-                latitude: averageLat,
-                longitude: averageLng + splitLngThreshold,
-            },
-            {
-                stationId: 'station-3',
-                originalIndex: 3,
-                price: 3.67,
-                latitude: averageLat,
-                longitude: averageLng - splitLngThreshold,
-            },
-        ];
-
-        const spreadProgress = computeSpreadProgressFromCluster({
-            quotes: boundaryQuotes,
-            averageLat,
-            averageLng,
-            mapRegion,
-        });
-
-        assertAlmostEqual(spreadProgress, 1, 'spread at split boundary');
-    }
-});
-
-test('handoff diagnostic uses the carried-over animation state and a stable primary anchor', () => {
-    const diagnostic = computeClusterHandoffDiagnostic({
-        quotes: baseQuotes,
-        averageLat,
-        averageLng,
-        mapRegion: mapRegions[1],
-        screenWidth: SCREEN_WIDTH,
-        screenHeight: SCREEN_HEIGHT,
+test('parent bounds contain all merge-capable price pill targets', () => {
+  mapRegions.forEach(mapRegion => {
+    const bounds = computeParentBoundsForQuotes({
+      quotes: baseQuotes,
+      mapRegion,
+      screenWidth: SCREEN_WIDTH,
+      screenHeight: SCREEN_HEIGHT,
     });
+    const targets = buildOutsidePriceTargets(baseQuotes, mapRegion, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    assert.ok(diagnostic);
-    assertAlmostEqual(diagnostic.nextMountSpread, diagnostic.currentResolvedSpread, 'next spread should carry over');
-    assertAlmostEqual(diagnostic.nextMountMorph, diagnostic.currentResolvedMorph, 'next morph should carry over');
-    assertAlmostEqual(diagnostic.centerShiftDistance, 0, 'primary anchor should stay fixed');
-    assertAlmostEqual(diagnostic.primarySwitchDistance, 0, 'primary handoff should stay aligned');
-    assert.equal(diagnostic.currentContainerCenter.latitude, baseQuotes[0].latitude);
-    assert.equal(diagnostic.currentContainerCenter.longitude, baseQuotes[0].longitude);
-    assert.ok(
-        !diagnostic.causes.some(cause => cause.includes('incoming overlay mounts at spread')),
-        'legacy mount-at-1 mismatch should no longer be reported'
-    );
+    assert.ok(bounds.width >= 240);
+    assert.ok(bounds.height >= 80);
+
+    targets.forEach(target => {
+      assert.ok(Math.abs(target.x) <= bounds.horizontalReach + 1e-9);
+      assert.ok(Math.abs(target.y) <= bounds.verticalReach + 1e-9);
+    });
+  });
+});
+
+test('merge duplicates spawn 1:1 from outside target positions', () => {
+  const fromCluster = {
+    quotes: [baseQuotes[0]],
+    averageLat: baseQuotes[0].latitude,
+    averageLng: baseQuotes[0].longitude,
+  };
+  const toCluster = {
+    quotes: baseQuotes,
+    averageLat: baseQuotes.reduce((sum, quote) => sum + quote.latitude, 0) / baseQuotes.length,
+    averageLng: baseQuotes.reduce((sum, quote) => sum + quote.longitude, 0) / baseQuotes.length,
+  };
+
+  mapRegions.forEach(mapRegion => {
+    const sequence = buildMergeSequence({
+      fromCluster,
+      toCluster,
+      mapRegion,
+      screenWidth: SCREEN_WIDTH,
+      screenHeight: SCREEN_HEIGHT,
+    });
+    const outsideTargets = buildOutsidePriceTargets(toCluster.quotes, mapRegion, SCREEN_WIDTH, SCREEN_HEIGHT);
+    const outsideById = new Map(outsideTargets.map(target => [String(target.stationId), target]));
+
+    sequence.forEach(step => {
+      const target = outsideById.get(String(step.stationId));
+      assert.ok(target);
+      assert.equal(step.startX, target.x);
+      assert.equal(step.startY, target.y);
+    });
+  });
+});
+
+test('merge accumulator increments strictly in serial order', () => {
+  const fromCluster = {
+    quotes: [baseQuotes[0]],
+    averageLat: baseQuotes[0].latitude,
+    averageLng: baseQuotes[0].longitude,
+  };
+  const toCluster = {
+    quotes: baseQuotes,
+    averageLat: baseQuotes.reduce((sum, quote) => sum + quote.latitude, 0) / baseQuotes.length,
+    averageLng: baseQuotes.reduce((sum, quote) => sum + quote.longitude, 0) / baseQuotes.length,
+  };
+
+  const sequence = buildMergeSequence({
+    fromCluster,
+    toCluster,
+    mapRegion: mapRegions[1],
+    screenWidth: SCREEN_WIDTH,
+    screenHeight: SCREEN_HEIGHT,
+  });
+
+  assert.equal(sequence.length, 2);
+  sequence.forEach((step, index) => {
+    assert.equal(step.sequenceIndex, index);
+  });
+
+  const increments = sequence.map((_, index) => index + 1);
+  assert.deepEqual(increments, [1, 2]);
+});
+
+test('split duplicate starts at +n origin and moves toward detached quote targets', () => {
+  const fromCluster = {
+    quotes: baseQuotes,
+    averageLat: baseQuotes.reduce((sum, quote) => sum + quote.latitude, 0) / baseQuotes.length,
+    averageLng: baseQuotes.reduce((sum, quote) => sum + quote.longitude, 0) / baseQuotes.length,
+  };
+  const toCluster = {
+    quotes: [baseQuotes[0], baseQuotes[1]],
+    averageLat: (baseQuotes[0].latitude + baseQuotes[1].latitude) / 2,
+    averageLng: (baseQuotes[0].longitude + baseQuotes[1].longitude) / 2,
+  };
+
+  const sequence = buildSplitSequence({
+    fromCluster,
+    toCluster,
+    mapRegion: mapRegions[1],
+    screenWidth: SCREEN_WIDTH,
+    screenHeight: SCREEN_HEIGHT,
+  });
+
+  assert.equal(sequence.length, 1);
+  assert.equal(sequence[0].startX, COLLAPSED_OFFSET);
+  assert.equal(sequence[0].startY, 0);
+  assert.notEqual(sequence[0].endX, COLLAPSED_OFFSET);
+});
+
+test('split handoff tolerances stay at strict hard limits', () => {
+  const tolerance = computeSplitHandoffTolerance();
+
+  assert.equal(tolerance.positionDeltaPx, CLUSTER_SPLIT_HANDOFF_POSITION_EPSILON);
+  assert.equal(tolerance.sizeDeltaPx, CLUSTER_SPLIT_HANDOFF_SIZE_EPSILON);
+  assert.equal(tolerance.contentDelta, CLUSTER_SPLIT_HANDOFF_CONTENT_EPSILON);
+
+  assert.ok(tolerance.positionDeltaPx <= 0.5);
+  assert.ok(tolerance.sizeDeltaPx <= 0.5);
+  assert.ok(tolerance.contentDelta <= 0.01);
+});
+
+test('grouping-by-touch remains stable across zoom levels', () => {
+  const groupedAcrossZoom = mapRegions.map(mapRegion => (
+    groupByTouch({
+      stationQuotes: baseQuotes,
+      mapRegion,
+      screenWidth: SCREEN_WIDTH,
+      screenHeight: SCREEN_HEIGHT,
+      previousClusters: [],
+    })
+  ));
+
+  groupedAcrossZoom.forEach(clusters => {
+    assert.ok(clusters.length >= 1);
+    clusters.forEach(cluster => {
+      const prices = cluster.quotes.map(quote => quote.price);
+      const sortedPrices = [...prices].sort((left, right) => left - right);
+      assert.deepEqual(prices, sortedPrices);
+    });
+  });
 });

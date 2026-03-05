@@ -1,14 +1,8 @@
-import React, { startTransition, useEffect, useLayoutEffect, useRef, useState, useMemo } from 'react';
+import React, { startTransition, useEffect, useRef, useState, useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import {
-    LiquidGlassView,
-    LiquidGlassContainerView,
-    isLiquidGlassSupported
-} from '@callstack/liquid-glass';
-import { SymbolView } from 'expo-symbols';
 import { GlassView } from 'expo-glass-effect';
 import * as Location from 'expo-location';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -22,12 +16,14 @@ import { getCachedFuelPriceSnapshot, getFuelFailureMessage, refreshFuelPriceSnap
 import { useTheme } from '../../src/ThemeContext';
 import { usePreferences } from '../../src/PreferencesContext';
 import BottomCanopy from '../../src/components/BottomCanopy';
+import ClusterMarkerOverlay from '../../src/components/cluster/ClusterMarkerOverlay';
+import { groupStationsIntoClusters } from '../../src/cluster/grouping';
+import { buildClusterMembershipKey } from '../../src/cluster/layout';
+import { finalizeDebugSample } from '../../src/cluster/telemetry';
 import Animated, {
     useSharedValue,
     useAnimatedScrollHandler,
     useAnimatedStyle,
-    useAnimatedReaction,
-    useAnimatedProps,
     interpolate,
     Extrapolate,
     interpolateColor,
@@ -35,24 +31,11 @@ import Animated, {
     FadeOut,
     ZoomIn,
     ZoomOut,
-    Easing,
-    withTiming,
-    runOnJS
 } from 'react-native-reanimated';
-
-const AnimatedLiquidGlassView = Animated.createAnimatedComponent(LiquidGlassView);
-const AnimatedLiquidGlassContainer = Animated.createAnimatedComponent(LiquidGlassContainerView);
 const {
     CLUSTER_MERGE_LAT_FACTOR,
     CLUSTER_MERGE_LNG_FACTOR,
     CLUSTER_SPLIT_MULTIPLIER,
-    CLUSTER_SPREAD_DEADZONE,
-    COLLAPSED_PRIMARY_WIDTH,
-    COLLAPSED_SECONDARY_WIDTH,
-    COLLAPSED_BUBBLE_OFFSET,
-    computeClusterHandoffDiagnostic,
-    computeMorphProgress,
-    computeSpreadProgressFromCluster,
 } = require('../../src/lib/clusterAnimationMath.cjs');
 
 const DEFAULT_REGION = {
@@ -67,16 +50,6 @@ const SIDE_MARGIN = 16;
 const TOP_CANOPY_HEIGHT = 72;
 const CLUSTER_DEBUG_JUMP_THRESHOLD = 5;
 const MAP_REGION_EPSILON = 0.000001;
-const CLUSTER_LIVE_MIN_DURATION = 2200;
-const CLUSTER_GEOMETRY_ANIMATION_DURATION = 2200;
-const CLUSTER_SPLIT_MIN_DURATION = 420;
-const CLUSTER_SPLIT_MILLISECONDS_PER_POINT = 65;
-const CLUSTER_SPLIT_MAX_DURATION = 2800;
-const CLUSTER_SPLIT_REENTRY_COOLDOWN_MS = 2000;
-const CLUSTER_SPLIT_KICKOFF_DELAY_MS = 260;
-const CLUSTER_SPLIT_ACTIVATION_SETTLE_MS = 140;
-const ENABLE_CLUSTER_SPLIT_HANDOFF = true;
-const ENABLE_CLUSTER_REMAINDER_BUBBLE = true;
 const CLUSTER_DEBUG_PROBE_ANIMATION_DURATION = 650;
 const CLUSTER_DEBUG_PROBE_IDLE_TIMEOUT = 2400;
 const CLUSTER_DEBUG_PROBE_SETTLE_DURATION = 180;
@@ -97,29 +70,6 @@ function waitForMilliseconds(duration) {
     return new Promise(resolve => {
         setTimeout(resolve, duration);
     });
-}
-
-function computeSplitStageDuration(segments) {
-    const maxDistance = (segments || []).reduce((currentMax, segment) => {
-        if (!segment) {
-            return currentMax;
-        }
-
-        const distance = Math.hypot(
-            (segment.endX || 0) - (segment.startX || 0),
-            (segment.endY || 0) - (segment.startY || 0)
-        );
-
-        return Math.max(currentMax, distance);
-    }, 0);
-
-    return Math.max(
-        CLUSTER_SPLIT_MIN_DURATION,
-        Math.min(
-            CLUSTER_SPLIT_MAX_DURATION,
-            Math.round(maxDistance * CLUSTER_SPLIT_MILLISECONDS_PER_POINT)
-        )
-    );
 }
 
 function interpolateZoomDelta(startDelta, endDelta, stepNumber, totalSteps, distanceMultiplier = 1) {
@@ -612,80 +562,6 @@ async function writeClusterDebugProbeArtifact(payload) {
     };
 }
 
-function buildClusterMembershipKey(cluster) {
-    if (!cluster?.quotes?.length) {
-        return '';
-    }
-
-    return cluster.quotes.map(quote => quote.stationId).join(',');
-}
-
-function getDetachedStationIdsForSplit(fromCluster, toCluster) {
-    if (!fromCluster?.quotes?.length || !toCluster?.quotes?.length) {
-        return [];
-    }
-
-    const primaryStationId = fromCluster.quotes[0].stationId;
-    const nextStationIds = new Set(toCluster.quotes.map(quote => quote.stationId));
-
-    return fromCluster.quotes
-        .filter(quote => quote.stationId !== primaryStationId)
-        .filter(quote => !nextStationIds.has(quote.stationId))
-        .map(quote => quote.stationId);
-}
-
-function pickAnchoredSecondaryQuote(anchoredQuotes, preferredStationId = null) {
-    const secondaryQuotes = anchoredQuotes.slice(1);
-
-    if (secondaryQuotes.length === 0) {
-        return null;
-    }
-
-    if (preferredStationId) {
-        const preferredQuote = secondaryQuotes.find(quote => quote.stationId === preferredStationId);
-
-        if (preferredQuote) {
-            return preferredQuote;
-        }
-    }
-
-    return secondaryQuotes.reduce((farthestQuote, quote) => (
-        quote.distanceFromPrimary > farthestQuote.distanceFromPrimary ? quote : farthestQuote
-    ), secondaryQuotes[0]);
-}
-
-function buildHeldSplitRecordSignature(record) {
-    if (!record) {
-        return '';
-    }
-
-    return [
-        record.primaryStationId,
-        buildClusterMembershipKey(record.fromCluster),
-        buildClusterMembershipKey(record.toCluster),
-        buildClusterMembershipKey(record.queuedToCluster),
-        record.bridgeComplete ? '1' : '0',
-    ].join('|');
-}
-
-function areHeldSplitRecordsEquivalent(currentRecords, nextRecords) {
-    if (currentRecords === nextRecords) {
-        return true;
-    }
-
-    if (!Array.isArray(currentRecords) || !Array.isArray(nextRecords)) {
-        return false;
-    }
-
-    if (currentRecords.length !== nextRecords.length) {
-        return false;
-    }
-
-    return currentRecords.every((record, index) => (
-        buildHeldSplitRecordSignature(record) === buildHeldSplitRecordSignature(nextRecords[index])
-    ));
-}
-
 function areRegionsEquivalent(currentRegion, nextRegion) {
     if (!currentRegion || !nextRegion) {
         return false;
@@ -764,17 +640,17 @@ function getClusterDebugVisibleLayers(sample) {
 
     const layers = [];
 
-    if (isVisible('breakout')) {
-        layers.push('breakout');
+    if (isVisible('outside')) {
+        layers.push('outside');
     }
-    if (isVisible('remainder')) {
-        layers.push('remainder');
+    if (isVisible('accumulator')) {
+        layers.push('accumulator');
     }
-    if (isVisible('carry')) {
-        layers.push('carry');
+    if (isVisible('mergeMover')) {
+        layers.push('mergeMover');
     }
-    if (isVisible('bridge')) {
-        layers.push('bridge');
+    if (isVisible('splitMover')) {
+        layers.push('splitMover');
     }
 
     return layers;
@@ -828,72 +704,21 @@ function buildClusterDebugTransitionTimeline(events, startedAt) {
             const offsetMs = Math.max(0, Math.round((event.timestamp || startedAt) - startedAt));
             const prefix = `- t+${offsetMs}ms ${event.type}`;
 
-            switch (event.type) {
-                case 'split-held-created':
-                    return (
-                        `${prefix} primary=${event.primaryStationId} ` +
-                        `from=[${event.fromClusterKey}] to=[${event.toClusterKey}] detached=[${event.detachedStationIds.join(', ') || 'none'}]`
-                    );
-                case 'split-queued-update':
-                    return (
-                        `${prefix} primary=${event.primaryStationId} ` +
-                        `active=[${event.activeToClusterKey}] queued=[${event.queuedToClusterKey}]`
-                    );
-                case 'split-stage-advance':
-                    return (
-                        `${prefix} primary=${event.primaryStationId} ` +
-                        `from=[${event.fromClusterKey}] to=[${event.toClusterKey}] detached=[${event.detachedStationIds.join(', ') || 'none'}]`
-                    );
-                case 'split-bridge-start':
-                    return (
-                        `${prefix} primary=${event.primaryStationId} ` +
-                        `from=[${event.fromClusterKey}] to=[${event.toClusterKey}] ` +
-                        `bridgeQuote=${event.bridgeQuoteStationId} start=${formatDebugPoint(event.startX, event.startY)} ` +
-                        `target=${formatDebugPoint(event.targetX, event.targetY)} ` +
-                        `shell=${event.shellMode || 'animated'} ` +
-                        `spread ${formatDebugMetric(event.fromSpread)} -> ${formatDebugMetric(event.toSpread)} ` +
-                        `morph ${formatDebugMetric(event.fromMorph)} -> ${formatDebugMetric(event.toMorph)}`
-                    );
-                case 'split-bridge-path-complete':
-                    return (
-                        `${prefix} primary=${event.primaryStationId} ` +
-                        `transition=[${event.transitionKey}]`
-                    );
-                case 'split-stage-ready':
-                    return (
-                        `${prefix} primary=${event.primaryStationId} ` +
-                        `transition=[${event.transitionKey}] mapMoving=${event.mapMoving ? 'yes' : 'no'}`
-                    );
-                case 'split-bridge-complete':
-                    return (
-                        `${prefix} primary=${event.primaryStationId} ` +
-                        `transition=[${event.transitionKey}] mapMoving=${event.mapMoving ? 'yes' : 'no'}`
-                    );
-                case 'split-handoff-cleared':
-                    return (
-                        `${prefix} primary=${event.primaryStationId} ` +
-                        `transition=[${event.transitionKey}] mapIdle=yes`
-                    );
-                case 'merge-start':
-                    return (
-                        `${prefix} primary=${event.primaryStationId} ` +
-                        `from=[${event.fromClusterKey}] to=[${event.toClusterKey}] ` +
-                        `spread ${formatDebugMetric(event.fromSpread)} -> ${formatDebugMetric(event.toSpread)} ` +
-                        `morph ${formatDebugMetric(event.fromMorph)} -> ${formatDebugMetric(event.toMorph)}`
-                    );
-                default:
-                    return `${prefix} ${event.label || ''}`.trim();
-            }
+            return (
+                `${prefix} primary=${event.primaryStationId || 'n/a'} ` +
+                `from=[${event.fromClusterKey || ''}] to=[${event.toClusterKey || ''}] ` +
+                `transition=[${event.transitionKey || ''}]`
+            ).trim();
         }),
     ];
 }
 
 function buildClusterDebugJumpEvents(samples) {
     const trackedMetrics = [
-        ['breakoutFrameDelta', 'move(breakout)'],
-        ['remainderFrameDelta', 'move(remainder)'],
-        ['carryFrameDelta', 'move(carry)'],
-        ['bridgeFrameDelta', 'move(bridge)'],
+        ['outsideFrameDelta', 'move(outside)'],
+        ['accumulatorFrameDelta', 'move(accumulator)'],
+        ['mergeMoverFrameDelta', 'move(mergeMover)'],
+        ['splitMoverFrameDelta', 'move(splitMover)'],
         ['maxFrameDelta', 'move(max)'],
     ];
     const events = [];
@@ -978,10 +803,10 @@ function buildClusterDebugRecordingLog(samples, transitionEvents = []) {
     const visibleLayerCountSeries = summarizeDebugSeries(samples, 'visibleLayerCount');
     const maxReachSeries = summarizeDebugSeries(samples, 'maxSecondaryRadius');
     const shellWidthSeries = summarizeDebugSeries(samples, 'secondaryShellWidth');
-    const breakoutMoveSeries = summarizeDebugSeries(samples, 'breakoutFrameDelta');
-    const remainderMoveSeries = summarizeDebugSeries(samples, 'remainderFrameDelta');
-    const carryMoveSeries = summarizeDebugSeries(samples, 'carryFrameDelta');
-    const bridgeMoveSeries = summarizeDebugSeries(samples, 'bridgeFrameDelta');
+    const outsideMoveSeries = summarizeDebugSeries(samples, 'outsideFrameDelta');
+    const accumulatorMoveSeries = summarizeDebugSeries(samples, 'accumulatorFrameDelta');
+    const mergeMoverMoveSeries = summarizeDebugSeries(samples, 'mergeMoverFrameDelta');
+    const splitMoverMoveSeries = summarizeDebugSeries(samples, 'splitMoverFrameDelta');
     const maxMoveSeries = summarizeDebugSeries(samples, 'maxFrameDelta');
     const jumpEvents = buildClusterDebugJumpEvents(samples);
 
@@ -999,10 +824,10 @@ function buildClusterDebugRecordingLog(samples, transitionEvents = []) {
         formatSeriesLine('layers(visible)', visibleLayerCountSeries),
         formatSeriesLine('reach(max)', maxReachSeries, 'pt'),
         formatSeriesLine('shellWidth', shellWidthSeries, 'pt'),
-        formatSeriesLine('move(breakout)', breakoutMoveSeries, 'pt'),
-        formatSeriesLine('move(remainder)', remainderMoveSeries, 'pt'),
-        formatSeriesLine('move(carry)', carryMoveSeries, 'pt'),
-        formatSeriesLine('move(bridge)', bridgeMoveSeries, 'pt'),
+        formatSeriesLine('move(outside)', outsideMoveSeries, 'pt'),
+        formatSeriesLine('move(accumulator)', accumulatorMoveSeries, 'pt'),
+        formatSeriesLine('move(mergeMover)', mergeMoverMoveSeries, 'pt'),
+        formatSeriesLine('move(splitMover)', splitMoverMoveSeries, 'pt'),
         formatSeriesLine('move(max)', maxMoveSeries, 'pt'),
         `summaryStart=${samples[0].summary}`,
         `summaryEnd=${samples[samples.length - 1].summary}`,
@@ -1012,1462 +837,6 @@ function buildClusterDebugRecordingLog(samples, transitionEvents = []) {
             ? ['Large step changes:', ...jumpEvents]
             : ['Large step changes: none']),
     ].join('\n');
-}
-
-function AnimatedMarkerOverlay({
-    cluster,
-    pendingCluster = null,
-    scrollX,
-    itemWidth,
-    isDark,
-    themeColors,
-    activeIndex,
-    onMarkerPress,
-    onPendingClusterBridgeComplete,
-    onDebugTransitionEvent,
-    onDebugRenderFrame,
-    isDebugWatched = false,
-    isDebugRecording = false,
-    runtimePhase = 'live',
-    mapRegion,
-    isMapMoving = false,
-}) {
-    const { quotes, averageLat, averageLng } = cluster;
-
-    // Dedup guard: both emitDebugRenderFrame (JS thread) and useAnimatedReaction (UI thread)
-    // emit samples that interleave with 1ms gaps, causing phantom progress oscillations.
-    // Skip emission if within 10ms of the last emitted frame.
-    // Uses useSharedValue so it works from both JS and UI threads.
-    const lastDebugFrameTimestamp = useSharedValue(0);
-
-    // A cluster is considered active if any of its station indices matches the activeIndex
-    const isActive = quotes.some(q => q.originalIndex === activeIndex);
-    const isCheapestAcrossAll = quotes.some(q => q.originalIndex === 0);
-
-    const animatedOverlayStyle = useAnimatedStyle(() => {
-        return {};
-    });
-
-    const animatedTextStyle = useAnimatedStyle(() => {
-        if (isCheapestAcrossAll) return { color: '#007AFF' };
-        const baseIndex = quotes[0].originalIndex;
-        const inputRange = [(baseIndex - 1) * itemWidth, baseIndex * itemWidth, (baseIndex + 1) * itemWidth];
-        const color = interpolateColor(
-            scrollX.value,
-            inputRange,
-            ['#888888', themeColors.text, '#888888']
-        );
-        return { color };
-    });
-
-    // Determine what to render inside the chip
-    const primaryQuote = quotes[0];
-    const isMultiQuote = quotes.length > 1;
-
-    const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-    const resolvedSpread = isMultiQuote
-        ? computeSpreadProgressFromCluster({
-            quotes,
-            averageLat,
-            averageLng,
-            mapRegion,
-        })
-        : 0;
-    const resolvedMorph = computeMorphProgress(resolvedSpread);
-    const pendingResolvedSpread = pendingCluster?.quotes?.length > 1
-        ? computeSpreadProgressFromCluster({
-            quotes: pendingCluster.quotes,
-            averageLat: pendingCluster.averageLat,
-            averageLng: pendingCluster.averageLng,
-            mapRegion,
-        })
-        : 0;
-    const pendingResolvedMorph = computeMorphProgress(pendingResolvedSpread);
-    const currentPendingSignature = pendingCluster
-        ? `${buildClusterMembershipKey(cluster)}->${buildClusterMembershipKey(pendingCluster)}`
-        : null;
-    const fromClusterKey = buildClusterMembershipKey(cluster);
-    const toClusterKey = pendingCluster ? buildClusterMembershipKey(pendingCluster) : '';
-    const renderedClusterKey = toClusterKey || fromClusterKey;
-
-    // Content fade-in animation
-    const mountAnim = useSharedValue(0);
-    // Animate relative bubble positions for "merging" effect
-    const spreadAnim = useSharedValue(resolvedSpread);
-    // Animate visual properties (Price vs +N styling) independently
-    const morphAnim = useSharedValue(resolvedMorph);
-    const splitBridgeProgress = useSharedValue(1);
-    const splitBridgeMorph = useSharedValue(1);
-    const splitCarryMorph = useSharedValue(resolvedMorph);
-    const [splitBridge, setSplitBridge] = useState(null);
-    const [splitCarry, setSplitCarry] = useState(null);
-    const previousQuotesRef = useRef(quotes);
-    const preferredBreakoutStationIdRef = useRef(null);
-    const splitBridgeSignatureRef = useRef(null);
-    const splitStageTokenRef = useRef('');
-    const splitStageReadyTokenRef = useRef(null);
-    const splitStagePathCompleteRef = useRef(false);
-    const splitStageShellCompleteRef = useRef(false);
-    const splitBridgePathTimeoutRef = useRef(null);
-    const splitShellTimeoutRef = useRef(null);
-    const splitAnimationKickoffTimeoutRef = useRef(null);
-    const activeSplitBridgeSignatureRef = useRef('');
-    const splitCarryForwardRef = useRef(null);
-    const activeSplitBridge = splitBridge?.transitionKey === currentPendingSignature
-        ? splitBridge
-        : null;
-    const activeSplitCarry = splitCarry?.transitionKey === currentPendingSignature
-        ? splitCarry
-        : null;
-    activeSplitBridgeSignatureRef.current = activeSplitBridge?.transitionKey || '';
-
-    const ptPerLng = mapRegion?.longitudeDelta ? SCREEN_WIDTH / mapRegion.longitudeDelta : 0;
-    const ptPerLat = mapRegion?.latitudeDelta ? SCREEN_HEIGHT / mapRegion.latitudeDelta : 0;
-    const primaryLat = primaryQuote.latitude;
-    const primaryLng = primaryQuote.longitude;
-    const anchoredQuotes = quotes.map(quote => {
-        const dx = (quote.longitude - primaryLng) * ptPerLng;
-        const dy = -(quote.latitude - primaryLat) * ptPerLat;
-        return {
-            ...quote,
-            dx,
-            dy,
-            distanceFromPrimary: Math.hypot(dx, dy),
-        };
-    });
-    const liveSplitBridgeTargetX = activeSplitBridge?.endX ?? 0;
-    const liveSplitBridgeTargetY = activeSplitBridge?.endY ?? 0;
-    const splitBridgeHorizontalReach = activeSplitBridge
-        ? Math.max(Math.abs(activeSplitBridge.startX), Math.abs(liveSplitBridgeTargetX))
-        : 0;
-    const splitBridgeVerticalReach = activeSplitBridge
-        ? Math.max(Math.abs(activeSplitBridge.startY), Math.abs(liveSplitBridgeTargetY))
-        : 0;
-    const emergingAnchoredQuote = pickAnchoredSecondaryQuote(
-        anchoredQuotes,
-        preferredBreakoutStationIdRef.current
-    );
-    const nextClusterQuotes = pendingCluster?.quotes || (
-        emergingAnchoredQuote
-            ? [primaryQuote, ...quotes.slice(1).filter(quote => quote.stationId !== emergingAnchoredQuote.stationId)]
-            : [primaryQuote]
-    );
-    const hasRemainderBubble = nextClusterQuotes.length > 1;
-    const nextClusterAnchoredQuotes = nextClusterQuotes.map(quote => {
-        const dx = (quote.longitude - primaryLng) * ptPerLng;
-        const dy = -(quote.latitude - primaryLat) * ptPerLat;
-        return {
-            ...quote,
-            dx,
-            dy,
-            distanceFromPrimary: Math.hypot(dx, dy),
-        };
-    });
-    const nextClusterEmergingQuote = nextClusterAnchoredQuotes.length > 1
-        ? nextClusterAnchoredQuotes.slice(1).reduce((farthestQuote, quote) => (
-            quote.distanceFromPrimary > farthestQuote.distanceFromPrimary ? quote : farthestQuote
-        ), nextClusterAnchoredQuotes[1])
-        : null;
-    const breakoutProjectedTargetX = emergingAnchoredQuote?.dx ?? COLLAPSED_BUBBLE_OFFSET;
-    const breakoutProjectedTargetY = emergingAnchoredQuote?.dy ?? 0;
-    const nextEmergingProjectedTargetX = nextClusterEmergingQuote?.dx ?? COLLAPSED_BUBBLE_OFFSET;
-    const nextEmergingProjectedTargetY = nextClusterEmergingQuote?.dy ?? 0;
-    const breakoutTargetXAnim = useSharedValue(breakoutProjectedTargetX);
-    const breakoutTargetYAnim = useSharedValue(breakoutProjectedTargetY);
-    const nextEmergingTargetXAnim = useSharedValue(nextEmergingProjectedTargetX);
-    const nextEmergingTargetYAnim = useSharedValue(nextEmergingProjectedTargetY);
-    const pendingStaticSecondaryX = nextClusterEmergingQuote
-        ? interpolate(pendingResolvedSpread, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingProjectedTargetX])
-        : COLLAPSED_BUBBLE_OFFSET;
-    const pendingStaticSecondaryY = nextClusterEmergingQuote
-        ? interpolate(pendingResolvedSpread, [0, 1], [0, nextEmergingProjectedTargetY])
-        : 0;
-    const horizontalReach = Math.max(
-        COLLAPSED_BUBBLE_OFFSET,
-        splitBridgeHorizontalReach,
-        ...anchoredQuotes.map(quote => Math.abs(quote.dx)),
-        ...nextClusterAnchoredQuotes.map(quote => Math.abs(quote.dx))
-    );
-    const verticalReach = Math.max(
-        0,
-        splitBridgeVerticalReach,
-        ...anchoredQuotes.map(quote => Math.abs(quote.dy)),
-        ...nextClusterAnchoredQuotes.map(quote => Math.abs(quote.dy))
-    );
-    const containerWidth = Math.max(240, 48 + COLLAPSED_PRIMARY_WIDTH + horizontalReach * 2);
-    const containerHeight = Math.max(80, 52 + verticalReach * 2);
-
-    useEffect(() => {
-        breakoutTargetXAnim.value = withTiming(breakoutProjectedTargetX, {
-            duration: CLUSTER_GEOMETRY_ANIMATION_DURATION,
-            easing: Easing.linear,
-        });
-        breakoutTargetYAnim.value = withTiming(breakoutProjectedTargetY, {
-            duration: CLUSTER_GEOMETRY_ANIMATION_DURATION,
-            easing: Easing.linear,
-        });
-        nextEmergingTargetXAnim.value = withTiming(nextEmergingProjectedTargetX, {
-            duration: CLUSTER_GEOMETRY_ANIMATION_DURATION,
-            easing: Easing.linear,
-        });
-        nextEmergingTargetYAnim.value = withTiming(nextEmergingProjectedTargetY, {
-            duration: CLUSTER_GEOMETRY_ANIMATION_DURATION,
-            easing: Easing.linear,
-        });
-    }, [
-        breakoutProjectedTargetX,
-        breakoutProjectedTargetY,
-        nextEmergingProjectedTargetX,
-        nextEmergingProjectedTargetY,
-    ]);
-
-    useEffect(() => {
-        // Fade in content
-        mountAnim.value = withTiming(1, { duration: 400 });
-
-        return () => {
-            if (splitBridgePathTimeoutRef.current) {
-                clearTimeout(splitBridgePathTimeoutRef.current);
-                splitBridgePathTimeoutRef.current = null;
-            }
-            if (splitShellTimeoutRef.current) {
-                clearTimeout(splitShellTimeoutRef.current);
-                splitShellTimeoutRef.current = null;
-            }
-            if (splitAnimationKickoffTimeoutRef.current) {
-                clearTimeout(splitAnimationKickoffTimeoutRef.current);
-                splitAnimationKickoffTimeoutRef.current = null;
-            }
-            setSplitCarry(null);
-        };
-    }, []);
-
-    const maybeCompleteSplitStage = (stageToken, transitionKey) => {
-        if (!onPendingClusterBridgeComplete) {
-            return;
-        }
-
-        if (
-            splitStageTokenRef.current !== stageToken ||
-            splitStageReadyTokenRef.current === stageToken ||
-            !splitStagePathCompleteRef.current ||
-            !splitStageShellCompleteRef.current
-        ) {
-            return;
-        }
-
-        splitStageReadyTokenRef.current = stageToken;
-        onPendingClusterBridgeComplete(
-            primaryQuote.stationId,
-            transitionKey
-        );
-    };
-
-    const handleSplitBridgePathComplete = (stageToken, transitionKey) => {
-        if (splitStageTokenRef.current !== stageToken) {
-            return;
-        }
-
-        splitStagePathCompleteRef.current = true;
-        onDebugTransitionEvent?.({
-            type: 'split-bridge-path-complete',
-            primaryStationId: primaryQuote.stationId,
-            transitionKey,
-        });
-        maybeCompleteSplitStage(stageToken, transitionKey);
-    };
-
-    const clearSplitStageTimeouts = () => {
-        if (splitBridgePathTimeoutRef.current) {
-            clearTimeout(splitBridgePathTimeoutRef.current);
-            splitBridgePathTimeoutRef.current = null;
-        }
-        if (splitShellTimeoutRef.current) {
-            clearTimeout(splitShellTimeoutRef.current);
-            splitShellTimeoutRef.current = null;
-        }
-        if (splitAnimationKickoffTimeoutRef.current) {
-            clearTimeout(splitAnimationKickoffTimeoutRef.current);
-            splitAnimationKickoffTimeoutRef.current = null;
-        }
-    };
-
-    useLayoutEffect(() => {
-        if (pendingCluster) {
-            const pendingQuotes = pendingCluster.quotes;
-            const currentClusterKey = buildClusterMembershipKey(cluster);
-            const pendingClusterKey = buildClusterMembershipKey(pendingCluster);
-            const splitBridgeSignature = `${quotes.map(quote => quote.stationId).join(',')}->${pendingQuotes.map(quote => quote.stationId).join(',')}`;
-            const isNewPendingTransition = splitBridgeSignatureRef.current !== splitBridgeSignature;
-
-            if (isNewPendingTransition) {
-                splitBridgeSignatureRef.current = splitBridgeSignature;
-                splitStageTokenRef.current = splitBridgeSignature;
-                splitStageReadyTokenRef.current = null;
-                splitStagePathCompleteRef.current = false;
-                splitStageShellCompleteRef.current = true;
-                clearSplitStageTimeouts();
-                const currentSpreadValue = spreadAnim.value;
-                const currentMorphValue = morphAnim.value;
-                let splitStageDuration = CLUSTER_LIVE_MIN_DURATION;
-
-                const bridgePrimary = quotes[0];
-                const bridgeAnchoredQuotes = quotes.map(quote => {
-                    const dx = (quote.longitude - bridgePrimary.longitude) * ptPerLng;
-                    const dy = -(quote.latitude - bridgePrimary.latitude) * ptPerLat;
-                    return {
-                        ...quote,
-                        dx,
-                        dy,
-                        distanceFromPrimary: Math.hypot(dx, dy),
-                    };
-                });
-                const bridgeSecondaryQuotes = bridgeAnchoredQuotes.slice(1);
-                const bridgeStartQuote = pickAnchoredSecondaryQuote(
-                    bridgeAnchoredQuotes,
-                    preferredBreakoutStationIdRef.current
-                );
-                const pendingStationIds = new Set(pendingQuotes.map(quote => quote.stationId));
-                const detachedBridgeQuote = bridgeSecondaryQuotes.find(quote => !pendingStationIds.has(quote.stationId)) || bridgeStartQuote;
-
-                if (bridgeStartQuote && detachedBridgeQuote) {
-                    const resolvedBridgeStartX = interpolate(
-                        currentSpreadValue,
-                        [0, 1],
-                        [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]
-                    );
-                    const resolvedBridgeStartY = interpolate(
-                        currentSpreadValue,
-                        [0, 1],
-                        [0, breakoutTargetYAnim.value]
-                    );
-                    const bridgeStartX = resolvedBridgeStartX;
-                    const bridgeStartY = resolvedBridgeStartY;
-                    const bridgeTargetX = (detachedBridgeQuote.longitude - primaryQuote.longitude) * ptPerLng;
-                    const bridgeTargetY = -(detachedBridgeQuote.latitude - primaryQuote.latitude) * ptPerLat;
-                    const carryTargetX = pendingStaticSecondaryX;
-                    const carryTargetY = pendingStaticSecondaryY;
-                    splitStageDuration = computeSplitStageDuration([
-                        {
-                            startX: bridgeStartX,
-                            startY: bridgeStartY,
-                            endX: bridgeTargetX,
-                            endY: bridgeTargetY,
-                        },
-                        pendingQuotes.length > 1 && nextClusterEmergingQuote
-                            ? {
-                                startX: bridgeStartX,
-                                startY: bridgeStartY,
-                                endX: carryTargetX,
-                                endY: carryTargetY,
-                            }
-                            : null,
-                    ]);
-
-                    setSplitBridge({
-                        transitionKey: splitBridgeSignature,
-                        plusCount: Math.max(0, quotes.length - 1),
-                        emergingQuote: detachedBridgeQuote,
-                        startX: bridgeStartX,
-                        startY: bridgeStartY,
-                        endX: bridgeTargetX,
-                        endY: bridgeTargetY,
-                    });
-                    splitBridgeProgress.value = 0;
-                    splitBridgeMorph.value = currentMorphValue;
-                    splitCarryMorph.value = currentMorphValue;
-
-                    let activeBridgeObservedAt = null;
-                    const kickoffSplitStageAnimation = () => {
-                        splitAnimationKickoffTimeoutRef.current = null;
-
-                        if (splitStageTokenRef.current !== splitBridgeSignature) {
-                            return;
-                        }
-                        if (activeSplitBridgeSignatureRef.current !== splitBridgeSignature) {
-                            activeBridgeObservedAt = null;
-                            splitAnimationKickoffTimeoutRef.current = setTimeout(
-                                kickoffSplitStageAnimation,
-                                16
-                            );
-                            return;
-                        }
-                        if (!activeBridgeObservedAt) {
-                            activeBridgeObservedAt = Date.now();
-                            splitAnimationKickoffTimeoutRef.current = setTimeout(
-                                kickoffSplitStageAnimation,
-                                16
-                            );
-                            return;
-                        }
-                        if ((Date.now() - activeBridgeObservedAt) < CLUSTER_SPLIT_ACTIVATION_SETTLE_MS) {
-                            splitAnimationKickoffTimeoutRef.current = setTimeout(
-                                kickoffSplitStageAnimation,
-                                16
-                            );
-                            return;
-                        }
-
-                        splitBridgeProgress.value = withTiming(1, {
-                            duration: splitStageDuration,
-                            easing: Easing.linear,
-                        });
-                        splitBridgeMorph.value = withTiming(1, {
-                            duration: splitStageDuration,
-                            easing: Easing.linear,
-                        });
-                        splitBridgePathTimeoutRef.current = setTimeout(() => {
-                            splitBridgePathTimeoutRef.current = null;
-                            handleSplitBridgePathComplete(
-                                splitBridgeSignature,
-                                splitBridgeSignature
-                            );
-                        }, splitStageDuration);
-
-                        spreadAnim.value = withTiming(pendingResolvedSpread, {
-                            duration: splitStageDuration,
-                            easing: Easing.linear,
-                        });
-                        morphAnim.value = withTiming(pendingResolvedMorph, {
-                            duration: splitStageDuration,
-                            easing: Easing.linear,
-                        });
-
-                        if (pendingQuotes.length > 1 && nextClusterEmergingQuote) {
-                            splitCarryMorph.value = withTiming(pendingResolvedMorph, {
-                                duration: splitStageDuration,
-                                easing: Easing.linear,
-                            });
-                            splitStageShellCompleteRef.current = false;
-                            splitShellTimeoutRef.current = setTimeout(() => {
-                                splitShellTimeoutRef.current = null;
-                                splitStageShellCompleteRef.current = true;
-                                maybeCompleteSplitStage(
-                                    splitBridgeSignature,
-                                    splitBridgeSignature
-                                );
-                            }, splitStageDuration);
-                        } else {
-                            splitStageShellCompleteRef.current = true;
-                        }
-                    };
-                    // Keep bridge/carry pinned at start long enough to guarantee a sampled handoff frame.
-                    splitAnimationKickoffTimeoutRef.current = setTimeout(
-                        kickoffSplitStageAnimation,
-                        CLUSTER_SPLIT_KICKOFF_DELAY_MS
-                    );
-
-                    if (pendingQuotes.length > 1 && nextClusterEmergingQuote) {
-                        setSplitCarry({
-                            transitionKey: splitBridgeSignature,
-                            plusCount: Math.max(0, pendingQuotes.length - 1),
-                            emergingQuote: nextClusterEmergingQuote,
-                            startX: bridgeStartX,
-                            startY: bridgeStartY,
-                            endX: carryTargetX,
-                            endY: carryTargetY,
-                        });
-                    } else {
-                        setSplitCarry(null);
-                        splitStageShellCompleteRef.current = true;
-                    }
-                    onDebugTransitionEvent?.({
-                        type: 'split-bridge-start',
-                        primaryStationId: primaryQuote.stationId,
-                        fromClusterKey: buildClusterMembershipKey(cluster),
-                        toClusterKey: buildClusterMembershipKey(pendingCluster),
-                        bridgeQuoteStationId: detachedBridgeQuote.stationId,
-                        startX: bridgeStartX,
-                        startY: bridgeStartY,
-                        targetX: bridgeTargetX,
-                        targetY: bridgeTargetY,
-                        shellMode: pendingQuotes.length > 1 && nextClusterEmergingQuote ? 'carry-animated' : 'static-target',
-                        fromSpread: currentSpreadValue,
-                        toSpread: pendingResolvedSpread,
-                        fromMorph: currentMorphValue,
-                        toMorph: pendingResolvedMorph,
-                    });
-                } else if (onPendingClusterBridgeComplete) {
-                    setSplitBridge(null);
-                    setSplitCarry(null);
-                    splitStagePathCompleteRef.current = true;
-                    splitStageShellCompleteRef.current = true;
-                }
-
-                // Keep shell movement continuous across split stage boundaries.
-                spreadAnim.value = currentSpreadValue;
-                morphAnim.value = currentMorphValue;
-                if (!bridgeStartQuote || !detachedBridgeQuote) {
-                    spreadAnim.value = withTiming(pendingResolvedSpread, {
-                        duration: splitStageDuration,
-                        easing: Easing.linear,
-                    });
-                    morphAnim.value = withTiming(pendingResolvedMorph, {
-                        duration: splitStageDuration,
-                        easing: Easing.linear,
-                    });
-                }
-            }
-
-            splitCarryForwardRef.current = pendingQuotes.length > 1 && nextClusterEmergingQuote
-                ? {
-                    clusterKey: pendingClusterKey,
-                    secondaryX: pendingStaticSecondaryX,
-                    secondaryY: pendingStaticSecondaryY,
-                    spread: pendingResolvedSpread,
-                    morph: pendingResolvedMorph,
-                }
-                : null;
-
-            maybeCompleteSplitStage(splitBridgeSignature, splitBridgeSignature);
-
-            return;
-        }
-
-        clearSplitStageTimeouts();
-        splitBridgeSignatureRef.current = null;
-        splitStageTokenRef.current = '';
-        splitStageReadyTokenRef.current = null;
-        splitStagePathCompleteRef.current = false;
-        splitStageShellCompleteRef.current = false;
-        if (splitBridge) {
-            setSplitBridge(null);
-        }
-        if (splitCarry) {
-            setSplitCarry(null);
-        }
-        splitCarryForwardRef.current = null;
-
-        const previousQuotes = previousQuotesRef.current;
-        const previousPrimaryStationId = previousQuotes?.[0]?.stationId;
-        const currentPrimaryStationId = quotes?.[0]?.stationId;
-        const isSamePrimary = previousPrimaryStationId && previousPrimaryStationId === currentPrimaryStationId;
-        const isConnectionTransition =
-            isSamePrimary &&
-            previousQuotes.length < quotes.length &&
-            quotes.length > 1;
-        const previousAnchoredQuotes = previousQuotes.map(quote => {
-            const dx = (quote.longitude - previousQuotes[0].longitude) * ptPerLng;
-            const dy = -(quote.latitude - previousQuotes[0].latitude) * ptPerLat;
-
-            return {
-                ...quote,
-                dx,
-                dy,
-                distanceFromPrimary: Math.hypot(dx, dy),
-            };
-        });
-        const previousBreakoutStationId = pickAnchoredSecondaryQuote(
-            previousAnchoredQuotes,
-            preferredBreakoutStationIdRef.current
-        )?.stationId ?? null;
-        const currentSecondaryStationIds = new Set(quotes.slice(1).map(quote => quote.stationId));
-
-        if (currentSecondaryStationIds.size === 0) {
-            preferredBreakoutStationIdRef.current = null;
-        } else if (
-            isConnectionTransition &&
-            previousBreakoutStationId &&
-            currentSecondaryStationIds.has(previousBreakoutStationId)
-        ) {
-            // Keep the already-visible shell tied to the same quote while the cluster grows.
-            preferredBreakoutStationIdRef.current = previousBreakoutStationId;
-        } else if (
-            !preferredBreakoutStationIdRef.current ||
-            !currentSecondaryStationIds.has(preferredBreakoutStationIdRef.current)
-        ) {
-            preferredBreakoutStationIdRef.current = emergingAnchoredQuote?.stationId ?? null;
-        }
-
-        if (isConnectionTransition) {
-            const currentSpreadValue = spreadAnim.value;
-            const currentMorphValue = morphAnim.value;
-
-            onDebugTransitionEvent?.({
-                type: 'merge-start',
-                primaryStationId: primaryQuote.stationId,
-                fromClusterKey: previousQuotes.map(quote => quote.stationId).join(','),
-                toClusterKey: buildClusterMembershipKey(cluster),
-                fromSpread: currentSpreadValue,
-                toSpread: resolvedSpread,
-                fromMorph: currentMorphValue,
-                toMorph: resolvedMorph,
-            });
-        }
-
-        spreadAnim.value = withTiming(resolvedSpread, {
-            duration: CLUSTER_LIVE_MIN_DURATION,
-            easing: Easing.linear,
-        });
-        morphAnim.value = withTiming(resolvedMorph, {
-            duration: CLUSTER_LIVE_MIN_DURATION,
-            easing: Easing.linear,
-        });
-
-        previousQuotesRef.current = quotes;
-    }, [quotes, pendingCluster, ptPerLng, ptPerLat, resolvedSpread, resolvedMorph, pendingResolvedSpread, pendingResolvedMorph, splitBridge, onPendingClusterBridgeComplete, onDebugTransitionEvent, primaryQuote.stationId, cluster]);
-
-    const animatedContentStyle = useAnimatedStyle(() => {
-        return {};
-    });
-
-    // Style for the primary price bubble
-    const leftBubbleStyle = useAnimatedStyle(() => {
-        return {
-            zIndex: 3,
-            transform: [
-                { translateX: 0 },
-                { translateY: 0 }
-            ]
-        };
-    });
-
-    // Style for the breaking-out +N bubble
-    const rightBubbleWrapperStyle = useAnimatedStyle(() => {
-        const splitBridgeX = activeSplitBridge
-            ? interpolate(splitBridgeProgress.value, [0, 1], [activeSplitBridge.startX, activeSplitBridge.endX])
-            : interpolate(spreadAnim.value, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]);
-        const splitBridgeY = activeSplitBridge
-            ? interpolate(splitBridgeProgress.value, [0, 1], [activeSplitBridge.startY, activeSplitBridge.endY])
-            : interpolate(spreadAnim.value, [0, 1], [0, breakoutTargetYAnim.value]);
-
-        return {
-            zIndex: 2,
-            transform: [
-                { translateX: splitBridgeX },
-                { translateY: splitBridgeY }
-            ]
-        };
-    });
-    const rightBubbleShellStyle = useAnimatedStyle(() => {
-        return {
-            justifyContent: 'center',
-            paddingHorizontal: interpolate(morphAnim.value, [0, 1], [8, 10], Extrapolate.CLAMP),
-            paddingVertical: interpolate(morphAnim.value, [0, 0.5, 1], [6, 6, 6]),
-            minWidth: interpolate(morphAnim.value, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP),
-        };
-    });
-
-    // Style for the subgroup that stays clustered after one item peels away
-    const remainderBubbleWrapperStyle = useAnimatedStyle(() => {
-        const nextSecondaryLocalDx = interpolate(
-            spreadAnim.value,
-            [0, 1],
-            [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]
-        );
-        const nextSecondaryLocalDy = interpolate(
-            spreadAnim.value,
-            [0, 1],
-            [0, nextEmergingTargetYAnim.value]
-        );
-
-        return {
-            zIndex: 1,
-            transform: [
-                { translateX: nextSecondaryLocalDx },
-                { translateY: nextSecondaryLocalDy }
-            ]
-        };
-    });
-    const remainderBubbleShellStyle = useAnimatedStyle(() => {
-        const shellMorph = morphAnim.value;
-
-        return {
-            justifyContent: 'center',
-            paddingHorizontal: interpolate(shellMorph, [0, 1], [8, 10], Extrapolate.CLAMP),
-            paddingVertical: 6,
-            minWidth: interpolate(shellMorph, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP),
-        };
-    });
-    const remainderPlusStyle = useAnimatedStyle(() => {
-        const shellMorph = morphAnim.value;
-
-        return {
-            opacity: interpolate(shellMorph, [0.4, 0.8], [1, 0], Extrapolate.CLAMP),
-            transform: [{ scale: interpolate(shellMorph, [0.4, 0.8], [1, 0.5], Extrapolate.CLAMP) }]
-        };
-    });
-    const remainderPriceStyle = useAnimatedStyle(() => {
-        const shellMorph = morphAnim.value;
-
-        return {
-            position: 'absolute',
-            opacity: interpolate(shellMorph, [0.6, 1], [0, 1], Extrapolate.CLAMP),
-            transform: [{ scale: interpolate(shellMorph, [0.6, 1], [0.8, 1], Extrapolate.CLAMP) }]
-        };
-    });
-
-    // Cross-fade styles for the text morphing
-    const plusNStyle = useAnimatedStyle(() => {
-        return {
-            // Fade out the "+N" format 
-            opacity: interpolate(morphAnim.value, [0.4, 0.8], [1, 0], Extrapolate.CLAMP),
-            transform: [{ scale: interpolate(morphAnim.value, [0.4, 0.8], [1, 0.5], Extrapolate.CLAMP) }]
-        }
-    });
-
-    const escapingPriceStyle = useAnimatedStyle(() => {
-        return {
-            position: 'absolute',
-            // Fade in the Price format
-            opacity: interpolate(morphAnim.value, [0.6, 1], [0, 1], Extrapolate.CLAMP),
-            transform: [{ scale: interpolate(morphAnim.value, [0.6, 1], [0.8, 1], Extrapolate.CLAMP) }]
-        }
-    });
-    const splitBridgeBubbleStyle = useAnimatedStyle(() => {
-        if (!activeSplitBridge) {
-            return {
-                opacity: 0,
-            };
-        }
-
-        return {
-            zIndex: 4,
-            transform: [
-                {
-                    translateX: interpolate(
-                        splitBridgeProgress.value,
-                        [0, 1],
-                        [activeSplitBridge.startX, activeSplitBridge.endX]
-                    )
-                },
-                {
-                    translateY: interpolate(
-                        splitBridgeProgress.value,
-                        [0, 1],
-                        [activeSplitBridge.startY, activeSplitBridge.endY]
-                    )
-                }
-            ]
-        };
-    });
-    const splitCarryBubbleStyle = useAnimatedStyle(() => {
-        if (!activeSplitCarry) {
-            return {
-                opacity: 0,
-            };
-        }
-
-        return {
-            zIndex: 3,
-            transform: [
-                {
-                    translateX: interpolate(
-                        splitBridgeProgress.value,
-                        [0, 1],
-                        [activeSplitCarry.startX, activeSplitCarry.endX]
-                    )
-                },
-                {
-                    translateY: interpolate(
-                        splitBridgeProgress.value,
-                        [0, 1],
-                        [activeSplitCarry.startY, activeSplitCarry.endY]
-                    )
-                }
-            ]
-        };
-    });
-    const splitBridgeShellStyle = useAnimatedStyle(() => {
-        return {
-            justifyContent: 'center',
-            paddingHorizontal: interpolate(splitBridgeMorph.value, [0, 1], [8, 10], Extrapolate.CLAMP),
-            paddingVertical: 6,
-            minWidth: interpolate(splitBridgeMorph.value, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP),
-        };
-    });
-    const splitBridgePlusStyle = useAnimatedStyle(() => {
-        return {
-            opacity: interpolate(splitBridgeMorph.value, [0.4, 0.8], [1, 0], Extrapolate.CLAMP),
-            transform: [{ scale: interpolate(splitBridgeMorph.value, [0.4, 0.8], [1, 0.5], Extrapolate.CLAMP) }]
-        };
-    });
-    const splitBridgePriceStyle = useAnimatedStyle(() => {
-        return {
-            position: 'absolute',
-            opacity: interpolate(splitBridgeMorph.value, [0.6, 1], [0, 1], Extrapolate.CLAMP),
-            transform: [{ scale: interpolate(splitBridgeMorph.value, [0.6, 1], [0.8, 1], Extrapolate.CLAMP) }]
-        };
-    });
-    const splitCarryShellStyle = useAnimatedStyle(() => {
-        return {
-            justifyContent: 'center',
-            paddingHorizontal: interpolate(splitCarryMorph.value, [0, 1], [8, 10], Extrapolate.CLAMP),
-            paddingVertical: 6,
-            minWidth: interpolate(splitCarryMorph.value, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP),
-        };
-    });
-    const splitCarryPlusStyle = useAnimatedStyle(() => {
-        return {
-            opacity: interpolate(splitCarryMorph.value, [0.4, 0.8], [1, 0], Extrapolate.CLAMP),
-            transform: [{ scale: interpolate(splitCarryMorph.value, [0.4, 0.8], [1, 0.5], Extrapolate.CLAMP) }]
-        };
-    });
-    const splitCarryPriceStyle = useAnimatedStyle(() => {
-        return {
-            position: 'absolute',
-            opacity: interpolate(splitCarryMorph.value, [0.6, 1], [0, 1], Extrapolate.CLAMP),
-            transform: [{ scale: interpolate(splitCarryMorph.value, [0.6, 1], [0.8, 1], Extrapolate.CLAMP) }]
-        };
-    });
-    const hasPendingCluster = Boolean(pendingCluster);
-    const renderedClusterSize = hasPendingCluster ? pendingCluster.quotes.length : quotes.length;
-    const isSplitBridgePriming = hasPendingCluster && !activeSplitBridge;
-    const carryVisible = Boolean(activeSplitCarry);
-    const bridgeVisible = Boolean(activeSplitBridge);
-    const breakoutVisible = isMultiQuote && (!pendingCluster || isSplitBridgePriming || bridgeVisible);
-    const bridgeStartX = activeSplitBridge?.startX ?? 0;
-    const bridgeStartY = activeSplitBridge?.startY ?? 0;
-    const bridgeTargetX = liveSplitBridgeTargetX;
-    const bridgeTargetY = liveSplitBridgeTargetY;
-    const carryStartX = activeSplitCarry?.startX ?? 0;
-    const carryStartY = activeSplitCarry?.startY ?? 0;
-    const carryTargetX = activeSplitCarry?.endX ?? pendingStaticSecondaryX;
-    const carryTargetY = activeSplitCarry?.endY ?? pendingStaticSecondaryY;
-    const shouldRenderStaticRemainderBubble = (
-        ENABLE_CLUSTER_REMAINDER_BUBBLE &&
-        hasRemainderBubble &&
-        !bridgeVisible &&
-        !carryVisible
-    );
-    const breakoutOpacity = breakoutVisible ? 1 : 0;
-    const remainderOpacity = shouldRenderStaticRemainderBubble ? 1 : 0;
-    const carryOpacity = carryVisible ? 1 : 0;
-    const bridgeOpacity = bridgeVisible ? 1 : 0;
-
-    const emitDebugRenderFrame = () => {
-        if (!isDebugWatched || !isDebugRecording || !onDebugRenderFrame) {
-            return;
-        }
-
-        const now = Date.now();
-        if (now - lastDebugFrameTimestamp.value < 10) {
-            return;
-        }
-        lastDebugFrameTimestamp.value = now;
-
-        const spreadValue = spreadAnim.value;
-        const morphValue = morphAnim.value;
-        const bridgeProgressValue = splitBridgeProgress.value;
-        const bridgeMorphValue = splitBridgeMorph.value;
-        const carryMorphValue = splitCarryMorph.value;
-        const breakoutTrackX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]);
-        const breakoutTrackY = interpolate(spreadValue, [0, 1], [0, breakoutTargetYAnim.value]);
-        const remainderShellMorph = morphValue;
-        const remainderX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]);
-        const remainderY = interpolate(spreadValue, [0, 1], [0, nextEmergingTargetYAnim.value]);
-        const bridgeX = bridgeVisible
-            ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartX, bridgeTargetX])
-            : breakoutTrackX;
-        const bridgeY = bridgeVisible
-            ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartY, bridgeTargetY])
-            : breakoutTrackY;
-        const carryX = carryVisible
-            ? interpolate(bridgeProgressValue, [0, 1], [carryStartX, carryTargetX])
-            : breakoutTrackX;
-        const carryY = carryVisible
-            ? interpolate(bridgeProgressValue, [0, 1], [carryStartY, carryTargetY])
-            : breakoutTrackY;
-        const breakoutX = breakoutTrackX;
-        const breakoutY = breakoutTrackY;
-        const debugBreakoutVisible = breakoutVisible;
-        const debugBreakoutOpacity = debugBreakoutVisible ? breakoutOpacity : 0;
-        const breakoutWidth = breakoutVisible
-            ? interpolate(morphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
-            : 0;
-        const remainderWidth = shouldRenderStaticRemainderBubble
-            ? interpolate(remainderShellMorph, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
-            : 0;
-        const carryWidth = carryVisible
-            ? interpolate(carryMorphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
-            : 0;
-        const bridgeWidth = bridgeVisible
-            ? interpolate(bridgeMorphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
-            : 0;
-        const breakoutPlusOpacity = breakoutVisible
-            ? interpolate(morphValue, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
-            : 0;
-        const breakoutPriceOpacity = breakoutVisible
-            ? interpolate(morphValue, [0.6, 1], [0, 1], Extrapolate.CLAMP)
-            : 0;
-        const remainderPlusOpacity = shouldRenderStaticRemainderBubble
-            ? interpolate(remainderShellMorph, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
-            : 0;
-        const remainderPriceOpacity = shouldRenderStaticRemainderBubble
-            ? interpolate(remainderShellMorph, [0.6, 1], [0, 1], Extrapolate.CLAMP)
-            : 0;
-        const carryPlusOpacity = carryVisible
-            ? interpolate(carryMorphValue, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
-            : 0;
-        const carryPriceOpacity = carryVisible
-            ? interpolate(carryMorphValue, [0.6, 1], [0, 1], Extrapolate.CLAMP)
-            : 0;
-        const bridgePlusOpacity = bridgeVisible
-            ? interpolate(bridgeMorphValue, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
-            : 0;
-        const bridgePriceOpacity = bridgeVisible
-            ? interpolate(bridgeMorphValue, [0.6, 1], [0, 1], Extrapolate.CLAMP)
-            : 0;
-        const containerLogicalLayer = bridgeVisible
-            ? 'bridge'
-            : (carryVisible
-                ? 'carry'
-                : (debugBreakoutVisible
-                    ? 'breakout'
-                    : (shouldRenderStaticRemainderBubble ? 'remainder' : '')));
-        const containerLogicalX = containerLogicalLayer === 'breakout'
-            ? breakoutTrackX
-            : (containerLogicalLayer === 'remainder'
-                ? remainderX
-                : (containerLogicalLayer === 'carry'
-                    ? carryX
-                    : (containerLogicalLayer === 'bridge' ? bridgeX : null)));
-        const containerLogicalY = containerLogicalLayer === 'breakout'
-            ? breakoutTrackY
-            : (containerLogicalLayer === 'remainder'
-                ? remainderY
-                : (containerLogicalLayer === 'carry'
-                    ? carryY
-                    : (containerLogicalLayer === 'bridge' ? bridgeY : null)));
-        const containerVisualLayer = debugBreakoutVisible
-            ? 'breakout'
-            : (bridgeVisible
-                ? 'bridge'
-                : (shouldRenderStaticRemainderBubble
-                    ? 'remainder'
-                    : (carryVisible
-                        ? 'carry'
-                        : '')));
-        const containerVisualX = containerVisualLayer === 'breakout'
-            ? breakoutTrackX
-            : (containerVisualLayer === 'remainder'
-                ? remainderX
-                : (containerVisualLayer === 'carry'
-                    ? carryX
-                    : (containerVisualLayer === 'bridge' ? bridgeX : null)));
-        const containerVisualY = containerVisualLayer === 'breakout'
-            ? breakoutTrackY
-            : (containerVisualLayer === 'remainder'
-                ? remainderY
-                : (containerVisualLayer === 'carry'
-                    ? carryY
-                    : (containerVisualLayer === 'bridge' ? bridgeY : null)));
-
-        onDebugRenderFrame({
-            frameTimestamp: Date.now(),
-            clusterKey: renderedClusterKey,
-            fromClusterKey,
-            toClusterKey,
-            stageSignature: currentPendingSignature || fromClusterKey,
-            runtimePhase,
-            clusterSize: renderedClusterSize,
-            spreadProgress: spreadValue,
-            morphProgress: morphValue,
-            bridgeProgress: (bridgeVisible || carryVisible) ? bridgeProgressValue : 0,
-            visibleLayerCount: [
-                debugBreakoutVisible,
-                shouldRenderStaticRemainderBubble,
-                carryVisible,
-                bridgeVisible,
-            ].filter(Boolean).length,
-            maxSecondaryRadius: Math.max(
-                debugBreakoutVisible ? Math.hypot(breakoutX, breakoutY) : 0,
-                shouldRenderStaticRemainderBubble ? Math.hypot(remainderX, remainderY) : 0,
-                carryVisible ? Math.hypot(carryX, carryY) : 0,
-                bridgeVisible ? Math.hypot(bridgeX, bridgeY) : 0
-            ),
-            secondaryShellWidth: Math.max(breakoutWidth, remainderWidth, carryWidth, bridgeWidth),
-            breakoutVisible: debugBreakoutVisible,
-            breakoutOpacity: debugBreakoutOpacity,
-            breakoutX,
-            breakoutY,
-            breakoutShellWidth: breakoutWidth,
-            breakoutPlusOpacity,
-            breakoutPriceOpacity,
-            remainderVisible: shouldRenderStaticRemainderBubble,
-            remainderOpacity,
-            remainderX,
-            remainderY,
-            remainderShellWidth: remainderWidth,
-            remainderPlusOpacity,
-            remainderPriceOpacity,
-            carryVisible,
-            carryOpacity,
-            carryX,
-            carryY,
-            carryShellWidth: carryWidth,
-            carryPlusOpacity,
-            carryPriceOpacity,
-            bridgeVisible,
-            bridgeOpacity,
-            bridgeX,
-            bridgeY,
-            bridgeShellWidth: bridgeWidth,
-            bridgePlusOpacity,
-            bridgePriceOpacity,
-            mapMoving: Boolean(isMapMoving),
-            containerLogicalLayer,
-            containerLogicalX,
-            containerLogicalY,
-            breakoutVisualX: debugBreakoutVisible ? breakoutX : null,
-            breakoutVisualY: debugBreakoutVisible ? breakoutY : null,
-            remainderVisualX: shouldRenderStaticRemainderBubble ? remainderX : null,
-            remainderVisualY: shouldRenderStaticRemainderBubble ? remainderY : null,
-            carryVisualX: carryVisible ? carryX : null,
-            carryVisualY: carryVisible ? carryY : null,
-            bridgeVisualX: bridgeVisible ? bridgeX : null,
-            bridgeVisualY: bridgeVisible ? bridgeY : null,
-            containerVisualLayer,
-            containerVisualX: containerVisualLayer ? containerVisualX : null,
-            containerVisualY: containerVisualLayer ? containerVisualY : null,
-        });
-    };
-
-    useAnimatedReaction(
-        () => {
-            if (!isDebugWatched || !isDebugRecording || !onDebugRenderFrame) {
-                return null;
-            }
-
-            const spreadValue = spreadAnim.value;
-            const morphValue = morphAnim.value;
-            const bridgeProgressValue = splitBridgeProgress.value;
-            const bridgeMorphValue = splitBridgeMorph.value;
-            const carryMorphValue = splitCarryMorph.value;
-            const breakoutTrackX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, breakoutTargetXAnim.value]);
-            const breakoutTrackY = interpolate(spreadValue, [0, 1], [0, breakoutTargetYAnim.value]);
-            const remainderShellMorph = morphValue;
-            const remainderX = interpolate(spreadValue, [0, 1], [COLLAPSED_BUBBLE_OFFSET, nextEmergingTargetXAnim.value]);
-            const remainderY = interpolate(spreadValue, [0, 1], [0, nextEmergingTargetYAnim.value]);
-            const bridgeX = bridgeVisible
-                ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartX, bridgeTargetX])
-                : breakoutTrackX;
-            const bridgeY = bridgeVisible
-                ? interpolate(bridgeProgressValue, [0, 1], [bridgeStartY, bridgeTargetY])
-                : breakoutTrackY;
-            const carryX = carryVisible
-                ? interpolate(bridgeProgressValue, [0, 1], [carryStartX, carryTargetX])
-                : breakoutTrackX;
-            const carryY = carryVisible
-                ? interpolate(bridgeProgressValue, [0, 1], [carryStartY, carryTargetY])
-                : breakoutTrackY;
-            const breakoutX = breakoutTrackX;
-            const breakoutY = breakoutTrackY;
-            const debugBreakoutVisible = breakoutVisible;
-            const debugBreakoutOpacity = debugBreakoutVisible ? breakoutOpacity : 0;
-            const breakoutWidth = breakoutVisible
-                ? interpolate(morphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
-                : 0;
-            const remainderWidth = shouldRenderStaticRemainderBubble
-                ? interpolate(remainderShellMorph, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
-                : 0;
-            const carryWidth = carryVisible
-                ? interpolate(carryMorphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
-                : 0;
-            const bridgeWidth = bridgeVisible
-                ? interpolate(bridgeMorphValue, [0, 0.7], [COLLAPSED_SECONDARY_WIDTH, COLLAPSED_PRIMARY_WIDTH], Extrapolate.CLAMP)
-                : 0;
-            const breakoutPlusOpacity = breakoutVisible
-                ? interpolate(morphValue, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
-                : 0;
-            const breakoutPriceOpacity = breakoutVisible
-                ? interpolate(morphValue, [0.6, 1], [0, 1], Extrapolate.CLAMP)
-                : 0;
-            const remainderPlusOpacity = shouldRenderStaticRemainderBubble
-                ? interpolate(remainderShellMorph, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
-                : 0;
-            const remainderPriceOpacity = shouldRenderStaticRemainderBubble
-                ? interpolate(remainderShellMorph, [0.6, 1], [0, 1], Extrapolate.CLAMP)
-                : 0;
-            const carryPlusOpacity = carryVisible
-                ? interpolate(carryMorphValue, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
-                : 0;
-            const carryPriceOpacity = carryVisible
-                ? interpolate(carryMorphValue, [0.6, 1], [0, 1], Extrapolate.CLAMP)
-                : 0;
-            const bridgePlusOpacity = bridgeVisible
-                ? interpolate(bridgeMorphValue, [0.4, 0.8], [1, 0], Extrapolate.CLAMP)
-                : 0;
-            const bridgePriceOpacity = bridgeVisible
-                ? interpolate(bridgeMorphValue, [0.6, 1], [0, 1], Extrapolate.CLAMP)
-                : 0;
-            const containerLogicalLayer = bridgeVisible
-                ? 'bridge'
-                : (carryVisible
-                    ? 'carry'
-                    : (debugBreakoutVisible
-                        ? 'breakout'
-                        : (shouldRenderStaticRemainderBubble ? 'remainder' : '')));
-            const containerLogicalX = containerLogicalLayer === 'breakout'
-                ? breakoutTrackX
-                : (containerLogicalLayer === 'remainder'
-                    ? remainderX
-                    : (containerLogicalLayer === 'carry'
-                        ? carryX
-                        : (containerLogicalLayer === 'bridge' ? bridgeX : null)));
-            const containerLogicalY = containerLogicalLayer === 'breakout'
-                ? breakoutTrackY
-                : (containerLogicalLayer === 'remainder'
-                    ? remainderY
-                    : (containerLogicalLayer === 'carry'
-                        ? carryY
-                        : (containerLogicalLayer === 'bridge' ? bridgeY : null)));
-            const containerVisualLayer = debugBreakoutVisible
-                ? 'breakout'
-                : (bridgeVisible
-                    ? 'bridge'
-                    : (shouldRenderStaticRemainderBubble
-                        ? 'remainder'
-                        : (carryVisible
-                            ? 'carry'
-                            : '')));
-            const containerVisualX = containerVisualLayer === 'breakout'
-                ? breakoutTrackX
-                : (containerVisualLayer === 'remainder'
-                    ? remainderX
-                    : (containerVisualLayer === 'carry'
-                        ? carryX
-                        : (containerVisualLayer === 'bridge' ? bridgeX : null)));
-            const containerVisualY = containerVisualLayer === 'breakout'
-                ? breakoutTrackY
-                : (containerVisualLayer === 'remainder'
-                    ? remainderY
-                    : (containerVisualLayer === 'carry'
-                        ? carryY
-                        : (containerVisualLayer === 'bridge' ? bridgeY : null)));
-
-            return {
-                frameTimestamp: Date.now(),
-                clusterKey: renderedClusterKey,
-                fromClusterKey,
-                toClusterKey,
-                stageSignature: currentPendingSignature || fromClusterKey,
-                runtimePhase,
-                clusterSize: renderedClusterSize,
-                spreadProgress: spreadValue,
-                morphProgress: morphValue,
-                bridgeProgress: (bridgeVisible || carryVisible) ? bridgeProgressValue : 0,
-                visibleLayerCount: [
-                    debugBreakoutVisible,
-                    shouldRenderStaticRemainderBubble,
-                    carryVisible,
-                    bridgeVisible,
-                ].filter(Boolean).length,
-                maxSecondaryRadius: Math.max(
-                    debugBreakoutVisible ? Math.hypot(breakoutX, breakoutY) : 0,
-                    shouldRenderStaticRemainderBubble ? Math.hypot(remainderX, remainderY) : 0,
-                    carryVisible ? Math.hypot(carryX, carryY) : 0,
-                    bridgeVisible ? Math.hypot(bridgeX, bridgeY) : 0
-                ),
-                secondaryShellWidth: Math.max(breakoutWidth, remainderWidth, carryWidth, bridgeWidth),
-                breakoutVisible: debugBreakoutVisible,
-                breakoutOpacity: debugBreakoutOpacity,
-                breakoutX,
-                breakoutY,
-                breakoutShellWidth: breakoutWidth,
-                breakoutPlusOpacity,
-                breakoutPriceOpacity,
-                remainderVisible: shouldRenderStaticRemainderBubble,
-                remainderOpacity,
-                remainderX,
-                remainderY,
-                remainderShellWidth: remainderWidth,
-                remainderPlusOpacity,
-                remainderPriceOpacity,
-                carryVisible,
-                carryOpacity,
-                carryX,
-                carryY,
-                carryShellWidth: carryWidth,
-                carryPlusOpacity,
-                carryPriceOpacity,
-                bridgeVisible,
-                bridgeOpacity,
-                bridgeX,
-                bridgeY,
-                bridgeShellWidth: bridgeWidth,
-                bridgePlusOpacity,
-                bridgePriceOpacity,
-                mapMoving: Boolean(isMapMoving),
-                containerLogicalLayer,
-                containerLogicalX,
-                containerLogicalY,
-                breakoutVisualX: debugBreakoutVisible ? breakoutX : null,
-                breakoutVisualY: debugBreakoutVisible ? breakoutY : null,
-                remainderVisualX: shouldRenderStaticRemainderBubble ? remainderX : null,
-                remainderVisualY: shouldRenderStaticRemainderBubble ? remainderY : null,
-                carryVisualX: carryVisible ? carryX : null,
-                carryVisualY: carryVisible ? carryY : null,
-                bridgeVisualX: bridgeVisible ? bridgeX : null,
-                bridgeVisualY: bridgeVisible ? bridgeY : null,
-                containerVisualLayer,
-                containerVisualX: containerVisualLayer ? containerVisualX : null,
-                containerVisualY: containerVisualLayer ? containerVisualY : null,
-            };
-        },
-        (sample) => {
-            if (!sample) {
-                return;
-            }
-
-            const now = Date.now();
-            if (now - lastDebugFrameTimestamp.value < 10) {
-                return;
-            }
-            lastDebugFrameTimestamp.value = now;
-            runOnJS(onDebugRenderFrame)(sample);
-        },
-        [
-            isDebugWatched,
-            isDebugRecording,
-            onDebugRenderFrame,
-            runtimePhase,
-            renderedClusterKey,
-            fromClusterKey,
-            toClusterKey,
-            currentPendingSignature,
-            isMapMoving,
-        ]
-    );
-    return (
-        <Marker
-            key={quotes[0].stationId} // Ensure key is bound to primary station so it doesn't unmount
-            coordinate={{
-                latitude: primaryLat,
-                longitude: primaryLng,
-            }}
-            anchor={{ x: 0.5, y: 0.5 }} // Keep anchor visually centered
-            onPress={() => onMarkerPress(cluster)}
-            style={{ zIndex: isActive ? 3 : isCheapestAcrossAll ? 2 : 1 }}
-            tracksViewChanges={true}
-        >
-            <AnimatedLiquidGlassContainer
-                spacing={24}
-                style={[
-                    styles.clusterContainer,
-                    animatedOverlayStyle,
-                    { minWidth: containerWidth, minHeight: containerHeight, justifyContent: 'center', alignItems: 'center' }
-                ]}
-            >
-                {/* Main bubble with price (Front) */}
-                <Animated.View style={[styles.bubblePositioner, leftBubbleStyle]}>
-                    <AnimatedLiquidGlassView
-                        effect="clear"
-                        style={[styles.bubbleBase, styles.primaryBubbleShell]}
-                    >
-                        <Animated.View style={[styles.rowItem, styles.bubbleContentRow, animatedContentStyle]}>
-                            <SymbolView
-                                name="fuelpump.fill"
-                                size={14}
-                                tintColor={primaryQuote.originalIndex === 0 ? '#007AFF' : (primaryQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
-                                style={styles.priceIcon}
-                            />
-                            <Animated.Text
-                                style={[
-                                    styles.priceText,
-                                    primaryQuote.originalIndex === 0 && styles.bestPriceText,
-                                    animatedTextStyle,
-                                ]}
-                            >
-                                ${primaryQuote.price.toFixed(2)}
-                            </Animated.Text>
-                        </Animated.View>
-                    </AnimatedLiquidGlassView>
-                </Animated.View>
-
-                {/* Secondary merging bubble for clusters (Behind) */}
-                {isMultiQuote && (
-                    <Animated.View style={[styles.bubblePositioner, rightBubbleWrapperStyle, { opacity: breakoutOpacity }]}>
-                        <AnimatedLiquidGlassView
-                            effect="clear"
-                            style={[
-                                styles.bubbleBase,
-                                rightBubbleShellStyle,
-                            ]}
-                        >
-                            <Animated.View style={[styles.rowItem, animatedContentStyle, plusNStyle, { justifyContent: 'center' }]}>
-                                <Text style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)', fontSize: 12, marginRight: 4 }}>|</Text>
-                                <Animated.Text
-                                    style={[
-                                        styles.priceText,
-                                        animatedTextStyle,
-                                    ]}
-                                >
-                                    +{quotes.length - 1}
-                                </Animated.Text>
-                            </Animated.View>
-
-                            {/* The price it morphs into */}
-                            {emergingAnchoredQuote && (
-                                <Animated.View style={[styles.rowItem, styles.bubbleFillRow, escapingPriceStyle]}>
-                                    <SymbolView
-                                        name="fuelpump.fill"
-                                        size={14}
-                                        tintColor={emergingAnchoredQuote.originalIndex === 0 ? '#007AFF' : (emergingAnchoredQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
-                                        style={styles.priceIcon}
-                                    />
-                                    <Text
-                                        style={[
-                                            styles.priceText,
-                                            emergingAnchoredQuote.originalIndex === 0 && styles.bestPriceText,
-                                            {
-                                                color: emergingAnchoredQuote.originalIndex === 0
-                                                    ? '#007AFF'
-                                                    : (emergingAnchoredQuote.originalIndex === activeIndex ? themeColors.text : '#888888')
-                                            }
-                                        ]}
-                                    >
-                                        ${emergingAnchoredQuote.price.toFixed(2)}
-                                    </Text>
-                                </Animated.View>
-                            )}
-                        </AnimatedLiquidGlassView>
-                    </Animated.View>
-                )}
-
-                {shouldRenderStaticRemainderBubble && (
-                    <Animated.View style={[styles.bubblePositioner, remainderBubbleWrapperStyle]}>
-                        <AnimatedLiquidGlassView
-                            effect="clear"
-                            style={[
-                                styles.bubbleBase,
-                                remainderBubbleShellStyle,
-                            ]}
-                        >
-                            <Animated.View style={[styles.rowItem, animatedContentStyle, remainderPlusStyle, { justifyContent: 'center' }]}>
-                                <Text style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)', fontSize: 12, marginRight: 4 }}>|</Text>
-                                <Animated.Text
-                                    style={[
-                                        styles.priceText,
-                                        animatedTextStyle,
-                                    ]}
-                                >
-                                    +{nextClusterQuotes.length - 1}
-                                </Animated.Text>
-                            </Animated.View>
-
-                            {nextClusterEmergingQuote && (
-                                <Animated.View style={[styles.rowItem, styles.bubbleFillRow, remainderPriceStyle]}>
-                                    <SymbolView
-                                        name="fuelpump.fill"
-                                        size={14}
-                                        tintColor={nextClusterEmergingQuote.originalIndex === 0 ? '#007AFF' : (nextClusterEmergingQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
-                                        style={styles.priceIcon}
-                                    />
-                                    <Text
-                                        style={[
-                                            styles.priceText,
-                                            nextClusterEmergingQuote.originalIndex === 0 && styles.bestPriceText,
-                                            {
-                                                color: nextClusterEmergingQuote.originalIndex === 0
-                                                    ? '#007AFF'
-                                                    : (nextClusterEmergingQuote.originalIndex === activeIndex ? themeColors.text : '#888888')
-                                            }
-                                        ]}
-                                    >
-                                        ${nextClusterEmergingQuote.price.toFixed(2)}
-                                    </Text>
-                                </Animated.View>
-                            )}
-                        </AnimatedLiquidGlassView>
-                    </Animated.View>
-                )}
-
-                {activeSplitCarry?.emergingQuote && (
-                    <Animated.View style={[styles.bubblePositioner, splitCarryBubbleStyle]}>
-                        <AnimatedLiquidGlassView
-                            effect="clear"
-                            style={[
-                                styles.bubbleBase,
-                                splitCarryShellStyle,
-                            ]}
-                        >
-                            <Animated.View style={[styles.rowItem, animatedContentStyle, splitCarryPlusStyle, { justifyContent: 'center' }]}>
-                                <Text style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)', fontSize: 12, marginRight: 4 }}>|</Text>
-                                <Animated.Text
-                                    style={[
-                                        styles.priceText,
-                                        animatedTextStyle,
-                                    ]}
-                                >
-                                    +{activeSplitCarry.plusCount}
-                                </Animated.Text>
-                            </Animated.View>
-
-                            <Animated.View style={[styles.rowItem, styles.bubbleFillRow, splitCarryPriceStyle]}>
-                                <SymbolView
-                                    name="fuelpump.fill"
-                                    size={14}
-                                    tintColor={activeSplitCarry.emergingQuote.originalIndex === 0 ? '#007AFF' : (activeSplitCarry.emergingQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
-                                    style={styles.priceIcon}
-                                />
-                                <Text
-                                    style={[
-                                        styles.priceText,
-                                        activeSplitCarry.emergingQuote.originalIndex === 0 && styles.bestPriceText,
-                                        {
-                                            color: activeSplitCarry.emergingQuote.originalIndex === 0
-                                                ? '#007AFF'
-                                                : (activeSplitCarry.emergingQuote.originalIndex === activeIndex ? themeColors.text : '#888888')
-                                        }
-                                    ]}
-                                >
-                                    ${activeSplitCarry.emergingQuote.price.toFixed(2)}
-                                </Text>
-                            </Animated.View>
-                        </AnimatedLiquidGlassView>
-                    </Animated.View>
-                )}
-
-                {activeSplitBridge?.emergingQuote && (
-                    <Animated.View style={[styles.bubblePositioner, splitBridgeBubbleStyle]}>
-                        <AnimatedLiquidGlassView
-                            effect="clear"
-                            style={[
-                                styles.bubbleBase,
-                                splitBridgeShellStyle,
-                            ]}
-                        >
-                            <Animated.View style={[styles.rowItem, animatedContentStyle, splitBridgePlusStyle, { justifyContent: 'center' }]}>
-                                <Text style={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)', fontSize: 12, marginRight: 4 }}>|</Text>
-                                <Animated.Text
-                                    style={[
-                                        styles.priceText,
-                                        animatedTextStyle,
-                                    ]}
-                                >
-                                    +{activeSplitBridge.plusCount}
-                                </Animated.Text>
-                            </Animated.View>
-
-                            <Animated.View style={[styles.rowItem, styles.bubbleFillRow, splitBridgePriceStyle]}>
-                                <SymbolView
-                                    name="fuelpump.fill"
-                                    size={14}
-                                    tintColor={activeSplitBridge.emergingQuote.originalIndex === 0 ? '#007AFF' : (activeSplitBridge.emergingQuote.originalIndex === activeIndex ? themeColors.text : '#888888')}
-                                    style={styles.priceIcon}
-                                />
-                                <Text
-                                    style={[
-                                        styles.priceText,
-                                        activeSplitBridge.emergingQuote.originalIndex === 0 && styles.bestPriceText,
-                                        {
-                                            color: activeSplitBridge.emergingQuote.originalIndex === 0
-                                                ? '#007AFF'
-                                                : (activeSplitBridge.emergingQuote.originalIndex === activeIndex ? themeColors.text : '#888888')
-                                        }
-                                    ]}
-                                >
-                                    ${activeSplitBridge.emergingQuote.price.toFixed(2)}
-                                </Text>
-                            </Animated.View>
-                        </AnimatedLiquidGlassView>
-                    </Animated.View>
-                )}
-
-            </AnimatedLiquidGlassContainer>
-        </Marker>
-    );
 }
 
 function AnimatedCardItem({ item, index, scrollX, itemWidth, isDark, benchmarkQuote, errorMsg, isRefreshing, themeColors }) {
@@ -2526,8 +895,6 @@ export default function HomeScreen() {
     const clusterDebugTransitionEventsRef = useRef([]);
     const clusterDebugTransitionEventKeysRef = useRef(new Set());
     const clusterDebugWatchedPrimaryIdRef = useRef(null);
-    const clusterDebugExpectedStageRef = useRef('');
-    const clusterDebugExpectedPhaseRef = useRef('');
     const clusterDebugProbeModeRef = useRef('idle');
     const clusterDebugProbeRunIdRef = useRef(0);
     const clusterDebugAutoProbeHandledKeyRef = useRef('');
@@ -2865,6 +1232,8 @@ export default function HomeScreen() {
         itemVisiblePercentThreshold: 50,
     }).current;
 
+    const { width, height } = Dimensions.get('window');
+
     const minRating = preferences.minimumRating || 0;
     const stationQuotes = useMemo(() => (
         (topStations.length > 0 ? topStations : (bestQuote ? [bestQuote] : []))
@@ -2873,94 +1242,25 @@ export default function HomeScreen() {
     ), [topStations, bestQuote, minRating]);
 
     const previousClustersRef = useRef([]);
-    const previousRenderedClustersRef = useRef([]);
-    const splitTransitionCooldownRef = useRef(new Map());
     const stationQuotesRef = useRef([]);
     const clustersSignatureRef = useRef('');
-    const [heldSplitClusters, setHeldSplitClusters] = useState([]);
-    const heldSplitClustersRef = useRef([]);
-
-    useEffect(() => {
-        heldSplitClustersRef.current = heldSplitClusters;
-    }, [heldSplitClusters]);
 
     const clusters = useMemo(() => {
-        if (stationQuotes.length === 0) return [];
+        if (stationQuotes.length === 0) {
+            return [];
+        }
 
-        const latDelta = mapRegion.latitudeDelta || 0.05;
-        const lngDelta = mapRegion.longitudeDelta || 0.05;
-
-        // Visual thresholds based on chip pixel dimensions
-        const mergeLatHeight = latDelta * CLUSTER_MERGE_LAT_FACTOR;
-        const mergeLngWidth = lngDelta * CLUSTER_MERGE_LNG_FACTOR;
-
-        // Hysteresis: Keep absolute separation distance significantly wider
-        // Use the same hysteresis multiplier the overlay animation uses.
-        const splitLatHeight = mergeLatHeight * CLUSTER_SPLIT_MULTIPLIER;
-        const splitLngWidth = mergeLngWidth * CLUSTER_SPLIT_MULTIPLIER;
-
-        const cheapestStation = stationQuotes[0];
-        const others = stationQuotes.slice(1);
-
-        const finalClusters = [];
-
-        // 1. Cheapest station is always standalone
-        finalClusters.push({
-            quotes: [cheapestStation],
-            averageLat: cheapestStation.latitude,
-            averageLng: cheapestStation.longitude,
+        const nextClusters = groupStationsIntoClusters({
+            stationQuotes,
+            mapRegion,
+            screenWidth: width,
+            screenHeight: height,
+            previousClusters: previousClustersRef.current,
         });
 
-        // 2. Group all other overlapping stations together
-        others.forEach(quote => {
-            let grouped = false;
-            for (const cluster of finalClusters) {
-                // Don't group with the absolute cheapest standalone station
-                if (cluster.quotes[0].originalIndex === 0) continue;
-
-                // Check if they were already grouped together in the previous frame
-                const wasPreviouslyGrouped = previousClustersRef.current.some(prevCluster =>
-                    prevCluster.quotes.some(q => q.stationId === quote.stationId) &&
-                    prevCluster.quotes.some(q => q.stationId === cluster.quotes[0].stationId)
-                );
-
-                const latDiff = Math.abs(cluster.averageLat - quote.latitude);
-                const lngDiff = Math.abs(cluster.averageLng - quote.longitude);
-
-                // If within physical overlap bounds, swallow into cluster
-                // Use the wider split threshold if they were already grouped, otherwise use the tighter merge threshold
-                const currentLatThreshold = wasPreviouslyGrouped ? splitLatHeight : mergeLatHeight;
-                const currentLngThreshold = wasPreviouslyGrouped ? splitLngWidth : mergeLngWidth;
-
-                if (latDiff < currentLatThreshold && lngDiff < currentLngThreshold) {
-                    cluster.quotes.push(quote);
-                    // Dynamically update center of mass
-                    cluster.averageLat = cluster.quotes.reduce((sum, q) => sum + q.latitude, 0) / cluster.quotes.length;
-                    cluster.averageLng = cluster.quotes.reduce((sum, q) => sum + q.longitude, 0) / cluster.quotes.length;
-                    grouped = true;
-                    break;
-                }
-            }
-
-            if (!grouped) {
-                finalClusters.push({
-                    quotes: [quote],
-                    averageLat: quote.latitude,
-                    averageLng: quote.longitude,
-                });
-            }
-        });
-
-        // Ensure quotes inside clusters are sorted by price ascending (just in case)
-        finalClusters.forEach(cluster => {
-            if (cluster.quotes.length > 1) {
-                cluster.quotes.sort((a, b) => a.price - b.price);
-            }
-        });
-
-        previousClustersRef.current = finalClusters;
-        return finalClusters;
-    }, [stationQuotes, mapRegion.latitudeDelta, mapRegion.longitudeDelta]);
+        previousClustersRef.current = nextClusters;
+        return nextClusters;
+    }, [stationQuotes, mapRegion, width, height]);
     const clustersSignature = useMemo(() => (
         clusters.map(buildClusterMembershipKey).join('|')
     ), [clusters]);
@@ -2973,283 +1273,6 @@ export default function HomeScreen() {
         clustersSignatureRef.current = clustersSignature;
     }, [clustersSignature]);
 
-    const pruneSplitTransitionCooldowns = (now = Date.now()) => {
-        for (const [transitionKey, expiresAt] of splitTransitionCooldownRef.current.entries()) {
-            if (!Number.isFinite(expiresAt) || expiresAt <= now) {
-                splitTransitionCooldownRef.current.delete(transitionKey);
-            }
-        }
-    };
-
-    const markSplitTransitionCooldown = (transitionKey) => {
-        if (!transitionKey) {
-            return;
-        }
-
-        const now = Date.now();
-        pruneSplitTransitionCooldowns(now);
-        splitTransitionCooldownRef.current.set(
-            transitionKey,
-            now + CLUSTER_SPLIT_REENTRY_COOLDOWN_MS
-        );
-    };
-
-    const isSplitTransitionCoolingDown = (transitionKey) => {
-        if (!transitionKey) {
-            return false;
-        }
-
-        const now = Date.now();
-        pruneSplitTransitionCooldowns(now);
-        const expiresAt = splitTransitionCooldownRef.current.get(transitionKey);
-
-        return Number.isFinite(expiresAt) && expiresAt > now;
-    };
-
-    useLayoutEffect(() => {
-        if (!ENABLE_CLUSTER_SPLIT_HANDOFF) {
-            setHeldSplitClusters(currentHeldClusters => (
-                currentHeldClusters.length === 0 ? currentHeldClusters : []
-            ));
-            previousRenderedClustersRef.current = clusters;
-            return;
-        }
-
-        pruneSplitTransitionCooldowns();
-        const previousClustersByPrimary = new Map(
-            previousRenderedClustersRef.current.map(cluster => [cluster.quotes[0].stationId, cluster])
-        );
-        const currentClustersByPrimary = new Map(
-            clusters.map(cluster => [cluster.quotes[0].stationId, cluster])
-        );
-
-        setHeldSplitClusters(currentHeldClusters => {
-            let nextHeldClusters = currentHeldClusters
-                .map(heldCluster => {
-                    const currentCluster = currentClustersByPrimary.get(heldCluster.primaryStationId);
-                    let nextHeldCluster = heldCluster;
-                    const activeTargetCount = heldCluster.toCluster.quotes.length;
-                    const currentTargetCount = currentCluster?.quotes?.length ?? Infinity;
-
-                    if (currentCluster && currentTargetCount < activeTargetCount) {
-                        const queuedClusterKey = buildClusterMembershipKey(currentCluster);
-                        const existingQueuedKey = buildClusterMembershipKey(heldCluster.queuedToCluster);
-
-                        if (queuedClusterKey !== existingQueuedKey) {
-                            recordClusterDebugTransitionEvent({
-                                type: 'split-queued-update',
-                                primaryStationId: heldCluster.primaryStationId,
-                                activeToClusterKey: buildClusterMembershipKey(heldCluster.toCluster),
-                                queuedToClusterKey: queuedClusterKey,
-                            });
-                        }
-
-                        nextHeldCluster = {
-                            ...heldCluster,
-                            queuedToCluster: currentCluster,
-                        };
-                    }
-
-                    if (nextHeldCluster.bridgeComplete) {
-                        if (isMapMoving) {
-                            return nextHeldCluster;
-                        }
-
-                        const queuedCluster = nextHeldCluster.queuedToCluster;
-
-                        if (queuedCluster && queuedCluster.quotes.length < nextHeldCluster.toCluster.quotes.length) {
-                            const advancedFromCluster = nextHeldCluster.toCluster;
-                            const advancedToCluster = queuedCluster;
-                            const detachedStationIds = getDetachedStationIdsForSplit(advancedFromCluster, advancedToCluster);
-
-                            recordClusterDebugTransitionEvent({
-                                type: 'split-stage-advance',
-                                primaryStationId: heldCluster.primaryStationId,
-                                fromClusterKey: buildClusterMembershipKey(advancedFromCluster),
-                                toClusterKey: buildClusterMembershipKey(advancedToCluster),
-                                detachedStationIds,
-                            });
-
-                            return {
-                                primaryStationId: heldCluster.primaryStationId,
-                                fromCluster: advancedFromCluster,
-                                toCluster: advancedToCluster,
-                                queuedToCluster: null,
-                                detachedStationIds,
-                                transitionKey: `${buildClusterMembershipKey(advancedFromCluster)}->${buildClusterMembershipKey(advancedToCluster)}`,
-                                bridgeComplete: false,
-                            };
-                        }
-
-                        recordClusterDebugTransitionEvent({
-                            type: 'split-handoff-cleared',
-                            primaryStationId: nextHeldCluster.primaryStationId,
-                            transitionKey: nextHeldCluster.transitionKey,
-                        });
-                        markSplitTransitionCooldown(nextHeldCluster.transitionKey);
-                        return null;
-                    }
-
-                    // Keep the held transition alive until bridge completion even if live clustering
-                    // briefly regroups due map jitter; this prevents split/live render oscillation.
-                    return nextHeldCluster;
-                })
-                .filter(Boolean);
-
-            clusters.forEach(cluster => {
-                const primaryStationId = cluster.quotes[0].stationId;
-                const previousCluster = previousClustersByPrimary.get(primaryStationId);
-
-                if (!previousCluster) {
-                    return;
-                }
-
-                const isSplitTransition =
-                    previousCluster.quotes.length > cluster.quotes.length &&
-                    previousCluster.quotes.length > 1;
-                const alreadyHeld = nextHeldClusters.some(
-                    heldCluster => heldCluster.primaryStationId === primaryStationId
-                );
-
-                if (!isSplitTransition || alreadyHeld) {
-                    return;
-                }
-
-                const detachedStationIds = getDetachedStationIdsForSplit(previousCluster, cluster);
-                const transitionKey = `${buildClusterMembershipKey(previousCluster)}->${buildClusterMembershipKey(cluster)}`;
-
-                if (isSplitTransitionCoolingDown(transitionKey)) {
-                    return;
-                }
-
-                recordClusterDebugTransitionEvent({
-                    type: 'split-held-created',
-                    primaryStationId,
-                    fromClusterKey: buildClusterMembershipKey(previousCluster),
-                    toClusterKey: buildClusterMembershipKey(cluster),
-                    detachedStationIds,
-                });
-
-                nextHeldClusters = [
-                    ...nextHeldClusters,
-                    {
-                        primaryStationId,
-                        fromCluster: previousCluster,
-                        toCluster: cluster,
-                        queuedToCluster: null,
-                        detachedStationIds,
-                        transitionKey,
-                        bridgeComplete: false,
-                    },
-                ];
-            });
-
-            if (areHeldSplitRecordsEquivalent(currentHeldClusters, nextHeldClusters)) {
-                return currentHeldClusters;
-            }
-
-            return nextHeldClusters;
-        });
-
-        previousRenderedClustersRef.current = clusters;
-    }, [clustersSignature, isMapMoving]);
-
-    const handleHeldSplitBridgeComplete = (primaryStationId, transitionKey) => {
-        if (!ENABLE_CLUSTER_SPLIT_HANDOFF) {
-            return;
-        }
-
-        if (debugClusterAnimations && isClusterDebugRecording) {
-            const eventKey = `split-stage-ready|${primaryStationId}|${transitionKey}|${mapMotionRef.current ? '1' : '0'}`;
-            if (!clusterDebugTransitionEventKeysRef.current.has(eventKey)) {
-                clusterDebugTransitionEventKeysRef.current.add(eventKey);
-                clusterDebugTransitionEventsRef.current = [
-                    ...clusterDebugTransitionEventsRef.current,
-                    {
-                        timestamp: Date.now(),
-                        type: 'split-stage-ready',
-                        primaryStationId,
-                        transitionKey,
-                        mapMoving: mapMotionRef.current,
-                    },
-                ];
-            }
-        }
-
-        setHeldSplitClusters(currentHeldClusters => {
-            let didChange = false;
-            const nextHeldClusters = currentHeldClusters
-                .map(heldCluster => {
-                    if (
-                        heldCluster.primaryStationId !== primaryStationId ||
-                        heldCluster.transitionKey !== transitionKey
-                    ) {
-                        return heldCluster;
-                    }
-
-                    if (heldCluster.bridgeComplete) {
-                        return heldCluster;
-                    }
-
-                    didChange = true;
-
-                    if (mapMotionRef.current) {
-                        recordClusterDebugTransitionEvent({
-                            type: 'split-bridge-complete',
-                            primaryStationId,
-                            transitionKey: heldCluster.transitionKey,
-                            mapMoving: true,
-                        });
-
-                        return {
-                            ...heldCluster,
-                            bridgeComplete: true,
-                        };
-                    }
-
-                    const queuedCluster = heldCluster.queuedToCluster;
-                    if (queuedCluster && queuedCluster.quotes.length < heldCluster.toCluster.quotes.length) {
-                        const advancedFromCluster = heldCluster.toCluster;
-                        const advancedToCluster = queuedCluster;
-                        const detachedStationIds = getDetachedStationIdsForSplit(advancedFromCluster, advancedToCluster);
-
-                        recordClusterDebugTransitionEvent({
-                            type: 'split-stage-advance',
-                            primaryStationId,
-                            fromClusterKey: buildClusterMembershipKey(advancedFromCluster),
-                            toClusterKey: buildClusterMembershipKey(advancedToCluster),
-                            detachedStationIds,
-                        });
-
-                        return {
-                            primaryStationId,
-                            fromCluster: advancedFromCluster,
-                            toCluster: advancedToCluster,
-                            queuedToCluster: null,
-                            detachedStationIds,
-                            transitionKey: `${buildClusterMembershipKey(advancedFromCluster)}->${buildClusterMembershipKey(advancedToCluster)}`,
-                            bridgeComplete: false,
-                        };
-                    }
-
-                    recordClusterDebugTransitionEvent({
-                        type: 'split-handoff-cleared',
-                        primaryStationId,
-                        transitionKey: heldCluster.transitionKey,
-                    });
-                    markSplitTransitionCooldown(heldCluster.transitionKey);
-                    return null;
-                })
-                .filter(Boolean);
-
-            if (!didChange || areHeldSplitRecordsEquivalent(currentHeldClusters, nextHeldClusters)) {
-                return currentHeldClusters;
-            }
-
-            return nextHeldClusters;
-        });
-    };
-
     const recordClusterDebugTransitionEvent = (event) => {
         if (!debugClusterAnimations || !isClusterDebugRecording || !event?.type) {
             return;
@@ -3261,7 +1284,7 @@ export default function HomeScreen() {
             event.fromClusterKey || '',
             event.toClusterKey || '',
             event.transitionKey || '',
-            event.bridgeQuoteStationId || '',
+            event.moverStationId || '',
         ].join('|');
 
         if (clusterDebugTransitionEventKeysRef.current.has(eventKey)) {
@@ -3318,8 +1341,6 @@ export default function HomeScreen() {
             }, 600);
         }
     };
-
-    const { width, height } = Dimensions.get('window');
 
     // We want the card to be almost full width, minus some padding to peek the next card.
     const peekPadding = 16;
@@ -3489,45 +1510,13 @@ export default function HomeScreen() {
             return clusterDistance < closestDistance ? cluster : closestCluster;
         }, null);
     }, [debugClusterAnimations, clusters, mapRegion.latitude, mapRegion.longitude, mapRegion.latitudeDelta, mapRegion.longitudeDelta]);
-    const watchedClusterDiagnostic = useMemo(() => {
-        if (!debugClusterAnimations || !watchedCluster) {
-            return null;
-        }
-
-        return computeClusterHandoffDiagnostic({
-            quotes: watchedCluster.quotes,
-            averageLat: watchedCluster.averageLat,
-            averageLng: watchedCluster.averageLng,
-            mapRegion,
-            screenWidth: width,
-            screenHeight: height,
-        });
-    }, [debugClusterAnimations, watchedCluster, mapRegion, width, height]);
+    const watchedClusterDiagnostic = null;
     const activeClusterDebugPrimaryId = isClusterDebugRecording
         ? clusterDebugWatchedPrimaryIdRef.current
         : (watchedCluster?.quotes?.[0]?.stationId || null);
 
     const recordClusterDebugRenderFrame = (frame) => {
         if (!debugClusterAnimations || !isClusterDebugRecording || !frame) {
-            return false;
-        }
-
-        const expectedStageSignature = clusterDebugExpectedStageRef.current;
-        const expectedRuntimePhase = clusterDebugExpectedPhaseRef.current;
-
-        if (
-            expectedStageSignature &&
-            frame.stageSignature &&
-            frame.stageSignature !== expectedStageSignature
-        ) {
-            return false;
-        }
-
-        if (
-            expectedRuntimePhase &&
-            frame.runtimePhase &&
-            frame.runtimePhase !== expectedRuntimePhase
-        ) {
             return false;
         }
 
@@ -3540,55 +1529,22 @@ export default function HomeScreen() {
             formatDebugMetric(frame.spreadProgress, 5),
             formatDebugMetric(frame.morphProgress, 5),
             formatDebugMetric(frame.bridgeProgress, 5),
-            formatDebugMetric(frame.breakoutX, 4),
-            formatDebugMetric(frame.breakoutY, 4),
-            frame.breakoutVisible ? '1' : '0',
-            formatDebugMetric(frame.remainderX, 4),
-            formatDebugMetric(frame.remainderY, 4),
-            frame.remainderVisible ? '1' : '0',
-            formatDebugMetric(frame.carryX, 4),
-            formatDebugMetric(frame.carryY, 4),
-            frame.carryVisible ? '1' : '0',
-            formatDebugMetric(frame.bridgeX, 4),
-            formatDebugMetric(frame.bridgeY, 4),
-            frame.bridgeVisible ? '1' : '0',
+            formatDebugMetric(frame.outsideX, 4),
+            formatDebugMetric(frame.outsideY, 4),
+            frame.outsideVisible ? '1' : '0',
+            formatDebugMetric(frame.accumulatorX, 4),
+            formatDebugMetric(frame.accumulatorY, 4),
+            frame.accumulatorVisible ? '1' : '0',
+            formatDebugMetric(frame.mergeMoverX, 4),
+            formatDebugMetric(frame.mergeMoverY, 4),
+            frame.mergeMoverVisible ? '1' : '0',
+            formatDebugMetric(frame.splitMoverX, 4),
+            formatDebugMetric(frame.splitMoverY, 4),
+            frame.splitMoverVisible ? '1' : '0',
         ].join('|');
 
         const previousSample = clusterDebugSamplesRef.current[clusterDebugSamplesRef.current.length - 1] || null;
-        const visibleLayers = getClusterDebugVisibleLayers(frame);
-        const breakoutFrameDelta = computeClusterDebugLayerMotion(previousSample, frame, 'breakout');
-        const remainderFrameDelta = computeClusterDebugLayerMotion(previousSample, frame, 'remainder');
-        const carryFrameDelta = computeClusterDebugLayerMotion(previousSample, frame, 'carry');
-        const bridgeFrameDelta = computeClusterDebugLayerMotion(previousSample, frame, 'bridge');
-        const maxFrameDelta = Math.max(
-            breakoutFrameDelta,
-            remainderFrameDelta,
-            carryFrameDelta,
-            bridgeFrameDelta
-        );
-        const sampleTimestamp = Number.isFinite(frame.frameTimestamp)
-            ? frame.frameTimestamp
-            : Date.now();
-        const previousTimestamp = previousSample?.timestamp;
-        const normalizedTimestamp = Number.isFinite(previousTimestamp)
-            ? Math.max(
-                previousTimestamp + 1,
-                Math.min(sampleTimestamp, previousTimestamp + 33)
-            )
-            : sampleTimestamp;
-        const nextSample = {
-            timestamp: normalizedTimestamp,
-            ...frame,
-            probeMode,
-            summary: buildClusterDebugRenderSummary(frame),
-            visibleLayers: visibleLayers.join(','),
-            visibleLayerCount: visibleLayers.length,
-            breakoutFrameDelta,
-            remainderFrameDelta,
-            carryFrameDelta,
-            bridgeFrameDelta,
-            maxFrameDelta,
-        };
+        const nextSample = finalizeDebugSample(frame, previousSample, probeMode);
 
         clusterDebugSamplesRef.current.push(nextSample);
         lastClusterDebugSignatureRef.current = signature;
@@ -3601,8 +1557,6 @@ export default function HomeScreen() {
         clusterDebugTransitionEventKeysRef.current = new Set();
         lastClusterDebugSignatureRef.current = '';
         clusterDebugWatchedPrimaryIdRef.current = primaryStationId;
-        clusterDebugExpectedStageRef.current = '';
-        clusterDebugExpectedPhaseRef.current = '';
         clusterDebugProbeModeRef.current = 'warmup';
         setIsClusterDebugRecording(true);
     };
@@ -3614,8 +1568,6 @@ export default function HomeScreen() {
         setIsClusterDebugRecording(false);
         lastClusterDebugSignatureRef.current = '';
         clusterDebugWatchedPrimaryIdRef.current = null;
-        clusterDebugExpectedStageRef.current = '';
-        clusterDebugExpectedPhaseRef.current = '';
         clusterDebugProbeModeRef.current = 'idle';
         clusterDebugSamplesRef.current = [];
         clusterDebugTransitionEventsRef.current = [];
@@ -3682,13 +1634,11 @@ export default function HomeScreen() {
                 return false;
             }
 
-            const hasHeldSplitTransitions = heldSplitClustersRef.current.length > 0;
-            if (!hasHeldSplitTransitions && !mapMotionRef.current && !isAnimatingRef.current) {
+            if (!mapMotionRef.current && !isAnimatingRef.current) {
                 await waitForMilliseconds(CLUSTER_DEBUG_PROBE_SETTLE_DURATION);
 
                 if (
                     clusterDebugProbeRunIdRef.current !== runId ||
-                    heldSplitClustersRef.current.length > 0 ||
                     mapMotionRef.current ||
                     isAnimatingRef.current
                 ) {
@@ -4115,72 +2065,16 @@ export default function HomeScreen() {
         }
     }, [debugClusterAnimations]);
 
-    const heldSplitByPrimary = new Map(
-        heldSplitClusters.map(heldCluster => [heldCluster.primaryStationId, heldCluster])
-    );
-    const heldSplitDetachedIds = new Set(
-        heldSplitClusters.flatMap(heldCluster => heldCluster.detachedStationIds)
-    );
-    const renderClusterEntries = [];
-
-    clusters.forEach(cluster => {
+    const renderClusterEntries = clusters.map(cluster => {
         const primaryStationId = cluster.quotes[0].stationId;
-
-        if (heldSplitDetachedIds.has(primaryStationId)) {
-            return;
-        }
-
-        const heldCluster = heldSplitByPrimary.get(primaryStationId);
-
-        if (heldCluster) {
-            renderClusterEntries.push({
-                key: primaryStationId,
-                primaryStationId,
-                cluster: heldCluster.fromCluster,
-                pendingCluster: heldCluster.toCluster,
-                runtimePhase: heldCluster.bridgeComplete ? 'split_wait_idle' : 'split_bridge_active',
-            });
-            return;
-        }
-
-        renderClusterEntries.push({
+        return {
             key: primaryStationId,
             primaryStationId,
             cluster,
-            pendingCluster: null,
-            runtimePhase: 'live',
-        });
-    });
-
-    const renderedPrimaryIds = new Set(renderClusterEntries.map(entry => entry.primaryStationId));
-
-    heldSplitClusters.forEach(heldCluster => {
-        if (renderedPrimaryIds.has(heldCluster.primaryStationId)) {
-            return;
-        }
-
-        renderClusterEntries.push({
-            key: heldCluster.primaryStationId,
-            primaryStationId: heldCluster.primaryStationId,
-            cluster: heldCluster.fromCluster,
-            pendingCluster: heldCluster.toCluster,
-            runtimePhase: heldCluster.bridgeComplete ? 'split_wait_idle' : 'split_bridge_active',
-        });
+        };
     });
 
     const hasRenderableClusters = renderClusterEntries.length > 0;
-    const expectedDebugEntry = renderClusterEntries.find(
-        entry => entry.primaryStationId === activeClusterDebugPrimaryId
-    ) || null;
-
-    clusterDebugExpectedStageRef.current = expectedDebugEntry
-        ? (
-            expectedDebugEntry.pendingCluster
-                ? `${buildClusterMembershipKey(expectedDebugEntry.cluster)}->${buildClusterMembershipKey(expectedDebugEntry.pendingCluster)}`
-                : buildClusterMembershipKey(expectedDebugEntry.cluster)
-        )
-        : '';
-    clusterDebugExpectedPhaseRef.current = expectedDebugEntry?.runtimePhase || '';
 
     return (
         <View style={[styles.container, { backgroundColor: themeColors.background }]}>
@@ -4213,22 +2107,19 @@ export default function HomeScreen() {
                 {hasRenderableClusters ? (
                     <>
                         {renderClusterEntries.map(entry => (
-                            <AnimatedMarkerOverlay
+                            <ClusterMarkerOverlay
                                 key={entry.key}
                                 cluster={entry.cluster}
-                                pendingCluster={entry.pendingCluster}
                                 scrollX={scrollX}
                                 itemWidth={itemWidth}
                                 isDark={isDark}
                                 themeColors={themeColors}
                                 activeIndex={activeIndex}
                                 onMarkerPress={handleMarkerPress}
-                                onPendingClusterBridgeComplete={handleHeldSplitBridgeComplete}
                                 onDebugTransitionEvent={recordClusterDebugTransitionEvent}
                                 onDebugRenderFrame={recordClusterDebugRenderFrame}
                                 isDebugWatched={entry.primaryStationId === activeClusterDebugPrimaryId}
                                 isDebugRecording={isClusterDebugRecording}
-                                runtimePhase={entry.runtimePhase}
                                 mapRegion={mapRegion}
                                 isMapMoving={isMapMoving}
                             />
@@ -4480,7 +2371,7 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     primaryBubbleShell: {
-        minWidth: COLLAPSED_PRIMARY_WIDTH,
+        minWidth: 84,
         justifyContent: 'center',
     },
     bubblePositioner: {
