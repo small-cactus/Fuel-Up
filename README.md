@@ -1,19 +1,17 @@
-<p align="center"><img src="./assets/fuelup-icon.png" alt="Fuel Up App Icon" width="120" /></p>
-
-<h1 align="center">Fuel Up</h1>
+<p align="center">
+  <img src="./assets/fuelup-icon.png" alt="Fuel Up App Icon" width="64" />
+  &nbsp;&nbsp;
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/FuelUp-text-logo-dark.png" />
+    <source media="(prefers-color-scheme: light)" srcset="./assets/FuelUp-text-logo-light.png" />
+    <img src="./assets/FuelUp-text-logo-dark.png" alt="Fuel Up Logo" width="240" />
+  </picture>
+</p>
 
 <p align="center">
   Native iOS-first gas discovery focused on one thing:
   <br />
   <strong>the fastest, closest, cheapest fuel price near you.</strong>
-</p>
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/FuelUp-text-logo-dark.png" />
-    <source media="(prefers-color-scheme: light)" srcset="./assets/FuelUp-text-logo-light.png" />
-    <img src="./assets/FuelUp-text-logo-dark.png" alt="Fuel Up Logo" width="320" />
-  </picture>
 </p>
 
 <p align="center">
