@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { LiquidGlassView as GlassView, LiquidGlassContainerView } from '@callstack/liquid-glass';
@@ -35,6 +35,11 @@ import TopCanopy from '../components/TopCanopy';
 import BottomCanopy from '../components/BottomCanopy';
 import FuelUpHeaderLogo from '../components/FuelUpHeaderLogo';
 import { registerForPushNotificationsAsync, savePushTokenToSupabase } from '../lib/notifications';
+import {
+    getLastDeviceLocationRegion,
+    persistLastDeviceLocationRegion,
+} from '../lib/deviceLocationCache';
+import { consumeFreshLaunchMapBootstrap } from '../lib/appLaunchState';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -60,6 +65,12 @@ const DEMO_STATIONS = [
     { lat: 37.7710, lng: -122.4380, price: 4.49, name: 'Arco' },
     { lat: 37.7600, lng: -122.4180, price: 4.72, name: 'Valero' },
 ];
+
+const DEMO_STATION_OFFSETS = DEMO_STATIONS.map(station => ({
+    ...station,
+    latOffset: station.lat - DEMO_REGION.latitude,
+    lngOffset: station.lng - DEMO_REGION.longitude,
+}));
 
 const MAP_MARGIN = 0.006; // Inset margin to avoid edge chips
 const LIGHT_SCREEN_BACKGROUND = '#f2f1f6';
@@ -105,8 +116,16 @@ const OnboardingChip = ({ price, isCheapest, isDark, top, left, isActive }) => {
     );
 };
 
-function WelcomeStep({ isDark, themeColors, insets }) {
+function WelcomeStep({ isDark, themeColors, insets, mapRegion }) {
+    const [hasMapLoaded, setHasMapLoaded] = useState(false);
     const cheapestPrice = Math.min(...DEMO_STATIONS.map(s => s.price));
+    const demoStations = useMemo(() => (
+        DEMO_STATION_OFFSETS.map(station => ({
+            ...station,
+            lat: mapRegion.latitude + station.latOffset,
+            lng: mapRegion.longitude + station.lngOffset,
+        }))
+    ), [mapRegion.latitude, mapRegion.longitude]);
 
     return (
         <View style={styles.stepContainer}>
@@ -114,26 +133,30 @@ function WelcomeStep({ isDark, themeColors, insets }) {
             {/* Full-screen map */}
             <MapView
                 style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
-                initialRegion={DEMO_REGION}
+                initialRegion={mapRegion}
+                region={mapRegion}
                 provider={PROVIDER_APPLE}
                 scrollEnabled={false}
                 zoomEnabled={false}
                 rotateEnabled={false}
                 pitchEnabled={false}
                 userInterfaceStyle={isDark ? 'dark' : 'light'}
+                onMapLoaded={() => {
+                    setHasMapLoaded(true);
+                }}
+                onRegionChangeComplete={() => {
+                    setHasMapLoaded(currentValue => currentValue || true);
+                }}
             >
-                {DEMO_STATIONS.map((station, index) => {
+                {hasMapLoaded ? demoStations.map((station, index) => {
                     const isCheapest = station.price === cheapestPrice;
-                    // Skip off-screen stations
-                    const latMin = DEMO_REGION.latitude - DEMO_REGION.latitudeDelta / 2 + MAP_MARGIN;
-                    const latMax = DEMO_REGION.latitude + DEMO_REGION.latitudeDelta / 2 - MAP_MARGIN;
-                    const lngMin = DEMO_REGION.longitude - DEMO_REGION.longitudeDelta / 2 + MAP_MARGIN;
-                    const lngMax = DEMO_REGION.longitude + DEMO_REGION.longitudeDelta / 2 - MAP_MARGIN;
+                    const latMin = mapRegion.latitude - mapRegion.latitudeDelta / 2 + MAP_MARGIN;
+                    const latMax = mapRegion.latitude + mapRegion.latitudeDelta / 2 - MAP_MARGIN;
+                    const lngMin = mapRegion.longitude - mapRegion.longitudeDelta / 2 + MAP_MARGIN;
+                    const lngMax = mapRegion.longitude + mapRegion.longitudeDelta / 2 - MAP_MARGIN;
                     if (station.lat < latMin || station.lat > latMax || station.lng < lngMin || station.lng > lngMax) {
                         return null;
                     }
-
-                    const chipTint = isCheapest ? 'rgba(0, 255, 47, 0.3)' : 'rgba(255, 25, 0, 0.3)';
 
                     return (
                         <Marker
@@ -145,12 +168,12 @@ function WelcomeStep({ isDark, themeColors, insets }) {
                                 price={station.price}
                                 isCheapest={isCheapest}
                                 isDark={isDark}
-                                top={0} // Not used in Marker
-                                left={0} // Not used in Marker
+                                top={0}
+                                left={0}
                             />
                         </Marker>
                     );
-                })}
+                }) : null}
             </MapView>
 
             {/* Blur canopies — extend further than gradients */}
@@ -188,14 +211,15 @@ function WelcomeStep({ isDark, themeColors, insets }) {
     );
 }
 
-function RadiusStep({ isDark, themeColors, insets, value, onChange }) {
+function RadiusStep({ isDark, themeColors, insets, value, onChange, mapRegion }) {
+    const [hasMapLoaded, setHasMapLoaded] = useState(false);
     const MILES_TO_METERS = 1609.34;
     const radiusMeters = value * MILES_TO_METERS;
 
     // Calculate map delta to fit the radius nicely (1 degree lat ≈ 111km)
     const latDelta = (radiusMeters / 111000) * 3.5;
     const region = {
-        ...DEMO_REGION,
+        ...mapRegion,
         latitudeDelta: Math.max(latDelta, 0.02),
         longitudeDelta: Math.max(latDelta, 0.02),
     };
@@ -214,14 +238,22 @@ function RadiusStep({ isDark, themeColors, insets, value, onChange }) {
                 rotateEnabled={false}
                 pitchEnabled={false}
                 userInterfaceStyle={isDark ? 'dark' : 'light'}
+                onMapLoaded={() => {
+                    setHasMapLoaded(true);
+                }}
+                onRegionChangeComplete={() => {
+                    setHasMapLoaded(currentValue => currentValue || true);
+                }}
             >
-                <Circle
-                    center={{ latitude: DEMO_REGION.latitude, longitude: DEMO_REGION.longitude }}
-                    radius={radiusMeters}
-                    strokeColor="rgba(0, 122, 255, 0.5)"
-                    strokeWidth={2}
-                    fillColor="rgba(0, 122, 255, 0.08)"
-                />
+                {hasMapLoaded ? (
+                    <Circle
+                        center={{ latitude: region.latitude, longitude: region.longitude }}
+                        radius={radiusMeters}
+                        strokeColor="rgba(0, 122, 255, 0.5)"
+                        strokeWidth={2}
+                        fillColor="rgba(0, 122, 255, 0.08)"
+                    />
+                ) : null}
             </MapView>
 
             {/* Blur canopies — extend further than gradients */}
@@ -697,6 +729,7 @@ export default function OnboardingScreen() {
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
     const { preferences, updatePreference, completeOnboarding } = usePreferences();
+    const shouldUseFreshLaunchBootstrapRef = useRef(consumeFreshLaunchMapBootstrap());
     const [currentStep, setCurrentStep] = useState(0);
 
     const blurIntensity = useSharedValue(80);
@@ -741,6 +774,65 @@ export default function OnboardingScreen() {
     const [minRating, setMinRating] = useState(preferences.minimumRating);
     const [permissionStatus, setPermissionStatus] = useState(null);
     const [notifPermissionStatus, setNotifPermissionStatus] = useState(null);
+    const [onboardingMapRegion, setOnboardingMapRegion] = useState(DEMO_REGION);
+
+    useEffect(() => {
+        let isActive = true;
+
+        void (async () => {
+            if (!shouldUseFreshLaunchBootstrapRef.current) {
+                return;
+            }
+
+            const cachedRegion = await getLastDeviceLocationRegion();
+
+            if (!isActive) {
+                return;
+            }
+
+            if (cachedRegion) {
+                setOnboardingMapRegion(cachedRegion);
+            }
+
+            const permissionState = await Location.getForegroundPermissionsAsync();
+
+            if (!isActive) {
+                return;
+            }
+
+            setPermissionStatus(permissionState.status);
+
+            if (permissionState.status !== 'granted') {
+                return;
+            }
+
+            try {
+                const freshLocation = await Location.getCurrentPositionAsync({
+                    accuracy: Location.Accuracy.Balanced,
+                });
+
+                if (!isActive) {
+                    return;
+                }
+
+                const freshRegion = {
+                    latitude: freshLocation.coords.latitude,
+                    longitude: freshLocation.coords.longitude,
+                    latitudeDelta: cachedRegion?.latitudeDelta || DEMO_REGION.latitudeDelta,
+                    longitudeDelta: cachedRegion?.longitudeDelta || DEMO_REGION.longitudeDelta,
+                };
+
+                setOnboardingMapRegion(freshRegion);
+                await persistLastDeviceLocationRegion(freshRegion);
+            } catch (error) {
+                // Keep the cached region if GPS is still unavailable.
+            }
+        })();
+
+        return () => {
+            isActive = false;
+        };
+    }, []);
 
     const handleRequestPermission = async () => {
         const { status } = await Location.requestForegroundPermissionsAsync();
@@ -815,7 +907,7 @@ export default function OnboardingScreen() {
                     removeClippedSubviews={false}
                 >
 
-                    <WelcomeStep isDark={isDark} themeColors={themeColors} insets={insets} />
+                    <WelcomeStep isDark={isDark} themeColors={themeColors} insets={insets} mapRegion={onboardingMapRegion} />
 
                     <PredictiveFuelingStep
                         isDark={isDark}
@@ -828,7 +920,7 @@ export default function OnboardingScreen() {
 
                     <LocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={permissionStatus} />
                     <NotificationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={notifPermissionStatus} />
-                    <RadiusStep isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} />
+                    <RadiusStep isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} mapRegion={onboardingMapRegion} />
                     <OctaneStep isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} />
                     <RatingStep isDark={isDark} themeColors={themeColors} insets={insets} value={minRating} onChange={setMinRating} />
                 </ScrollView>

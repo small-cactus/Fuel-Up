@@ -1069,6 +1069,19 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, force
                 const { supabase } = require('../../lib/supabase');
                 const { getUserUuid } = require('../../lib/user');
                 const userUuid = await getUserUuid();
+                if (!supabase) {
+                    debugEntry.summary.persistedLiveRowCount = 0;
+                    debugEntry.summary.persistError = 'Supabase client is not configured';
+                    debugEntry.requests.push(
+                        createDebugRequest({
+                            step: 'supabase_write',
+                            url: 'supabase://station_prices',
+                            status: 200,
+                            output: 'Skipped: Supabase credentials are missing.',
+                        })
+                    );
+                    return { debugEntry, quotes };
+                }
 
                 const rows = liveQuotes.map(q => ({
                     station_id: q.stationId,

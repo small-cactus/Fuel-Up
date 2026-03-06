@@ -7,7 +7,6 @@ import { GlassView } from 'expo-glass-effect';
 import { LiquidGlassContainerView } from '@callstack/liquid-glass';
 import * as Location from 'expo-location';
 import * as FileSystem from 'expo-file-system/legacy';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import MapView, { Marker, PROVIDER_APPLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppState } from '../../src/AppStateContext';
@@ -21,6 +20,11 @@ import { usePreferences } from '../../src/PreferencesContext';
 import BottomCanopy from '../../src/components/BottomCanopy';
 import ClusterMarkerOverlay from '../../src/components/cluster/ClusterMarkerOverlay';
 import StationMarker from '../../src/components/cluster/StationMarker';
+import { consumeFreshLaunchMapBootstrap } from '../../src/lib/appLaunchState';
+import {
+    getLastDeviceLocationRegion,
+    persistLastDeviceLocationRegion,
+} from '../../src/lib/deviceLocationCache';
 import {
     applyFuelGradeToQuote,
     normalizeFuelGrade,
@@ -79,7 +83,6 @@ const CLUSTER_DEBUG_PROBE_MIN_DELTA = 0.0005;
 const CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME = 'cluster-debug-probe.json';
 const CLUSTER_DEBUG_PROBE_REPORT_RELATIVE_PATH = `Documents/${CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME}`;
 const CLUSTER_DEBUG_PROBE_REPORT_CACHE_RELATIVE_PATH = `Library/Caches/${CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME}`;
-const LAST_DEVICE_LOCATION_STORAGE_KEY = 'fuelup:last-device-location';
 const USER_LOCATION_BUBBLE_SIZE = 14;
 const USER_LOCATION_OVERLAP_PILL_WIDTH = CLUSTER_PRIMARY_PILL_WIDTH - 28;
 const USER_LOCATION_OVERLAP_PILL_HEIGHT = CLUSTER_PILL_HEIGHT - 14;
@@ -88,10 +91,12 @@ const STATION_FOCUS_MIN_LONGITUDE_DELTA = 0.002;
 const STATION_FOCUS_ZOOM_STEP_MULTIPLIER = 0.82;
 const STATION_FOCUS_MAX_STEPS = 18;
 const STATION_FOCUS_ANIMATION_MS = 420;
+const FOREGROUND_RECENTER_ANIMATION_MS = 420;
 const STATIONS_FIT_TOP_EXTRA_PADDING = 16;
 const STATIONS_FIT_BOTTOM_CONTENT_PADDING = 140;
 const STATIONS_FIT_SIDE_EXTRA_PADDING = 12;
 const STATIONS_FIT_SETTLE_PASS_DELAY_MS = 260;
+const STATIONS_FIT_UPWARD_BIAS_FACTOR = 0.03;
 const ENABLE_CLUSTER_MERGE_TRANSITIONS = false;
 const HOME_DARK_GLASS_TINT = '#373737ff';
 
@@ -602,38 +607,6 @@ function areRegionsEquivalent(currentRegion, nextRegion) {
         Math.abs((currentRegion.latitudeDelta || 0) - (nextRegion.latitudeDelta || 0)) <= MAP_REGION_EPSILON &&
         Math.abs((currentRegion.longitudeDelta || 0) - (nextRegion.longitudeDelta || 0)) <= MAP_REGION_EPSILON
     );
-}
-
-function parseCachedDeviceLocation(rawValue) {
-    if (!rawValue) {
-        return null;
-    }
-
-    try {
-        const parsedValue = JSON.parse(rawValue);
-        const latitude = Number(parsedValue?.latitude);
-        const longitude = Number(parsedValue?.longitude);
-        const latitudeDelta = Number(parsedValue?.latitudeDelta);
-        const longitudeDelta = Number(parsedValue?.longitudeDelta);
-
-        if (
-            !Number.isFinite(latitude) ||
-            !Number.isFinite(longitude) ||
-            !Number.isFinite(latitudeDelta) ||
-            !Number.isFinite(longitudeDelta)
-        ) {
-            return null;
-        }
-
-        return {
-            latitude,
-            longitude,
-            latitudeDelta,
-            longitudeDelta,
-        };
-    } catch (error) {
-        return null;
-    }
 }
 
 function buildSingleQuoteClusters(stationQuotes) {
@@ -1148,6 +1121,9 @@ export default function HomeScreen() {
     const mapRef = useRef(null);
     const flatListRef = useRef(null);
     const isMountedRef = useRef(true);
+    const shouldUseLaunchLocationBootstrapRef = useRef(consumeFreshLaunchMapBootstrap());
+    const launchCachedRegionRef = useRef(null);
+    const pendingInstantMapRegionRef = useRef(null);
     const mapIdleWaitersRef = useRef([]);
     const mapIdleSettleTimeoutRef = useRef(null);
     const mapRegionRef = useRef(DEFAULT_REGION);
@@ -1189,6 +1165,9 @@ export default function HomeScreen() {
     const [isLoadingLocation, setIsLoadingLocation] = useState(true);
     const [isRefreshingPrices, setIsRefreshingPrices] = useState(false);
     const [hasLocationPermission, setHasLocationPermission] = useState(false);
+    const [initialMapRegion, setInitialMapRegion] = useState(DEFAULT_REGION);
+    const [isInitialMapRegionReady, setIsInitialMapRegionReady] = useState(false);
+    const [isMapLoaded, setIsMapLoaded] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     const [mapRegion, setMapRegion] = useState(DEFAULT_REGION);
     const [mapRenderRegion, setMapRenderRegion] = useState(DEFAULT_REGION);
@@ -1210,6 +1189,9 @@ export default function HomeScreen() {
     const topCanopyHeight = insets.top + TOP_CANOPY_HEIGHT;
     const canopyEdgeLine = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.42)';
     const selectedFuelGrade = normalizeFuelGrade(preferences.preferredOctane);
+    const markMapLoaded = () => {
+        setIsMapLoaded(currentValue => currentValue || true);
+    };
 
     const applySnapshot = snapshot => {
         if (!snapshot?.quote || !isMountedRef.current) {
@@ -1234,7 +1216,89 @@ export default function HomeScreen() {
         setIsLoadingLocation(false);
     };
 
-    const resolveCurrentLocation = async () => {
+    const applyResolvedRegion = (nextRegion) => {
+        if (!isMountedRef.current || !nextRegion) {
+            return;
+        }
+
+        setLocation(nextRegion);
+        setMapRegionIfNeeded(nextRegion);
+    };
+
+    const popMapToRegionWithoutAnimation = (nextRegion) => {
+        if (!nextRegion) {
+            return;
+        }
+
+        pendingInstantMapRegionRef.current = nextRegion;
+
+        if (!mapRef.current || !isMapLoaded) {
+            return;
+        }
+
+        mapRef.current.animateToRegion(nextRegion, 0);
+        pendingInstantMapRegionRef.current = null;
+    };
+
+    const animateMapToRegion = (nextRegion, duration = FOREGROUND_RECENTER_ANIMATION_MS) => {
+        if (
+            !nextRegion ||
+            !mapRef.current ||
+            !isMapLoaded ||
+            areRegionsEquivalent(mapRegionRef.current, nextRegion)
+        ) {
+            return;
+        }
+
+        isAnimatingRef.current = true;
+        setMapMotionState(true);
+        mapRef.current.animateToRegion(nextRegion, duration);
+    };
+
+    useEffect(() => {
+        let isActive = true;
+
+        void (async () => {
+            if (!shouldUseLaunchLocationBootstrapRef.current || manualLocationOverride) {
+                if (isActive && isMountedRef.current) {
+                    setIsInitialMapRegionReady(true);
+                }
+                return;
+            }
+
+            const cachedRegion = await getLastDeviceLocationRegion();
+
+            if (!isActive || !isMountedRef.current) {
+                return;
+            }
+
+            launchCachedRegionRef.current = cachedRegion;
+
+            if (cachedRegion) {
+                setInitialMapRegion(cachedRegion);
+                applyResolvedRegion(cachedRegion);
+            }
+
+            setIsInitialMapRegionReady(true);
+        })();
+
+        return () => {
+            isActive = false;
+        };
+    }, [manualLocationOverride]);
+
+    useEffect(() => {
+        if (!isMapLoaded || !pendingInstantMapRegionRef.current || !mapRef.current) {
+            return;
+        }
+
+        const nextRegion = pendingInstantMapRegionRef.current;
+
+        mapRef.current.animateToRegion(nextRegion, 0);
+        pendingInstantMapRegionRef.current = null;
+    }, [isMapLoaded]);
+
+    const resolveCurrentLocation = async ({ allowLaunchBootstrap }) => {
         if (manualLocationOverride) {
             const manualLatitude = Number(manualLocationOverride.latitude);
             const manualLongitude = Number(manualLocationOverride.longitude);
@@ -1278,8 +1342,7 @@ export default function HomeScreen() {
 
             if (isMountedRef.current) {
                 setHasLocationPermission(false);
-                setLocation(manualRegion);
-                setMapRegionIfNeeded(manualRegion);
+                applyResolvedRegion(manualRegion);
                 setIsLoadingLocation(false);
             }
 
@@ -1314,29 +1377,12 @@ export default function HomeScreen() {
                 setHasLocationPermission(true);
             }
 
-            const persistLastDeviceLocation = async (nextRegion) => {
-                try {
-                    await AsyncStorage.setItem(
-                        LAST_DEVICE_LOCATION_STORAGE_KEY,
-                        JSON.stringify(nextRegion)
-                    );
-                } catch (error) {
-                    // Best-effort cache write for faster next launch.
-                }
-            };
-            const applyResolvedRegion = (nextRegion) => {
-                if (!isMountedRef.current) {
-                    return;
-                }
+            const cachedRegion = allowLaunchBootstrap
+                ? (launchCachedRegionRef.current || await getLastDeviceLocationRegion())
+                : null;
 
-                setLocation(nextRegion);
-                setMapRegionIfNeeded(nextRegion);
-            };
-
-            const cachedLocationRaw = await AsyncStorage.getItem(LAST_DEVICE_LOCATION_STORAGE_KEY);
-            const cachedRegion = parseCachedDeviceLocation(cachedLocationRaw);
-
-            if (cachedRegion) {
+            if (allowLaunchBootstrap && cachedRegion) {
+                launchCachedRegionRef.current = cachedRegion;
                 applyResolvedRegion(cachedRegion);
                 if (isMountedRef.current) {
                     setIsLoadingLocation(false);
@@ -1359,10 +1405,11 @@ export default function HomeScreen() {
                             longitudeDelta: 0.05,
                         };
 
-                        await persistLastDeviceLocation(freshRegion);
+                        await persistLastDeviceLocationRegion(freshRegion);
 
                         if (!areRegionsEquivalent(cachedRegion, freshRegion)) {
                             applyResolvedRegion(freshRegion);
+                            popMapToRegionWithoutAnimation(freshRegion);
                             await loadFuelData({
                                 latitude: freshRegion.latitude,
                                 longitude: freshRegion.longitude,
@@ -1397,7 +1444,12 @@ export default function HomeScreen() {
             };
 
             applyResolvedRegion(nextRegion);
-            await persistLastDeviceLocation(nextRegion);
+            if (allowLaunchBootstrap) {
+                popMapToRegionWithoutAnimation(nextRegion);
+            } else {
+                animateMapToRegion(nextRegion);
+            }
+            await persistLastDeviceLocationRegion(nextRegion);
 
             return {
                 ...nextRegion,
@@ -1499,7 +1551,13 @@ export default function HomeScreen() {
     };
 
     const refreshForCurrentView = async ({ preferCached }) => {
-        const nextRegion = await resolveCurrentLocation();
+        const allowLaunchBootstrap = shouldUseLaunchLocationBootstrapRef.current;
+
+        shouldUseLaunchLocationBootstrapRef.current = false;
+
+        const nextRegion = await resolveCurrentLocation({
+            allowLaunchBootstrap,
+        });
 
         if (!nextRegion) {
             return;
@@ -1764,10 +1822,16 @@ export default function HomeScreen() {
 
         isAnimatingRef.current = true;
         setMapMotionState(true);
+        const baseTopPadding = topCanopyHeight + STATIONS_FIT_TOP_EXTRA_PADDING;
+        const baseBottomPadding = bottomPadding + STATIONS_FIT_BOTTOM_CONTENT_PADDING;
+        const upwardBiasPadding = Math.min(
+            Math.round(height * STATIONS_FIT_UPWARD_BIAS_FACTOR),
+            Math.max(0, baseTopPadding - 8)
+        );
         const fitEdgePadding = {
-            top: topCanopyHeight + STATIONS_FIT_TOP_EXTRA_PADDING,
+            top: baseTopPadding - upwardBiasPadding,
             right: Math.max(horizontalPadding.right, sideInset) + STATIONS_FIT_SIDE_EXTRA_PADDING,
-            bottom: bottomPadding + STATIONS_FIT_BOTTOM_CONTENT_PADDING,
+            bottom: baseBottomPadding + upwardBiasPadding,
             left: Math.max(horizontalPadding.left, sideInset) + STATIONS_FIT_SIDE_EXTRA_PADDING,
         };
 
@@ -1857,7 +1921,7 @@ export default function HomeScreen() {
         const wasFocused = prevIsFocusedRef.current;
         prevIsFocusedRef.current = isFocused;
 
-        if (!mapRef.current || stationQuotes.length === 0 || isAnimatingRef.current) return;
+        if (!isMapLoaded || !mapRef.current || stationQuotes.length === 0 || isAnimatingRef.current) return;
 
         // Use ONLY stationQuotes for the data hash to avoid feedback loops from zooming
         const currentHash = stationQuotes.map(q => q.stationId).join(',');
@@ -1879,7 +1943,7 @@ export default function HomeScreen() {
                 zoomToStation(activeQuote);
             }
         }
-    }, [activeIndex, stationQuotes, bottomPadding, topCanopyHeight, horizontalPadding.left, horizontalPadding.right, sideInset, isFocused]);
+    }, [activeIndex, stationQuotes, bottomPadding, topCanopyHeight, horizontalPadding.left, horizontalPadding.right, sideInset, isFocused, isMapLoaded]);
 
     const fallbackCoordinate = {
         latitude: location.latitude,
@@ -2061,7 +2125,7 @@ export default function HomeScreen() {
     };
 
     const handleRunClusterDebugProbe = async (trigger = 'manual') => {
-        if (!debugClusterAnimations || isClusterDebugProbeRunning || isClusterDebugRecording) {
+        if (!debugClusterAnimations || isClusterDebugProbeRunning || isClusterDebugRecording || !isMapLoaded) {
             return;
         }
 
@@ -2361,6 +2425,7 @@ export default function HomeScreen() {
             !debugClusterAnimations ||
             isClusterDebugProbeRunning ||
             isClusterDebugRecording ||
+            !isMapLoaded ||
             watchedCluster ||
             !mapRef.current ||
             isAnimatingRef.current ||
@@ -2392,6 +2457,7 @@ export default function HomeScreen() {
         debugClusterAnimations,
         isClusterDebugProbeRunning,
         isClusterDebugRecording,
+        isMapLoaded,
         watchedCluster,
         stationQuotes,
         mapRegion,
@@ -2403,7 +2469,8 @@ export default function HomeScreen() {
             !autoClusterProbeRequested ||
             !debugClusterAnimations ||
             isClusterDebugProbeRunning ||
-            isClusterDebugRecording
+            isClusterDebugRecording ||
+            !isMapLoaded
         ) {
             return;
         }
@@ -2450,6 +2517,7 @@ export default function HomeScreen() {
         debugClusterAnimations,
         isClusterDebugProbeRunning,
         isClusterDebugRecording,
+        isMapLoaded,
         finishClusterProbeSession,
         watchedCluster,
     ]);
@@ -2484,105 +2552,113 @@ export default function HomeScreen() {
 
     return (
         <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-            <MapView
-                ref={mapRef}
-                style={StyleSheet.absoluteFillObject}
-                initialRegion={DEFAULT_REGION}
-                provider={PROVIDER_APPLE}
-                showsUserLocation={hasLocationPermission}
-                onUserLocationChange={(event) => {
-                    const coordinate = event?.nativeEvent?.coordinate;
-                    const latitude = Number(coordinate?.latitude);
-                    const longitude = Number(coordinate?.longitude);
+            {isInitialMapRegionReady ? (
+                <MapView
+                    ref={mapRef}
+                    style={StyleSheet.absoluteFillObject}
+                    initialRegion={initialMapRegion}
+                    provider={PROVIDER_APPLE}
+                    showsUserLocation={hasLocationPermission}
+                    onMapLoaded={() => {
+                        markMapLoaded();
+                    }}
+                    onUserLocationChange={(event) => {
+                        const coordinate = event?.nativeEvent?.coordinate;
+                        const latitude = Number(coordinate?.latitude);
+                        const longitude = Number(coordinate?.longitude);
 
-                    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-                        return;
-                    }
-
-                    setUserLocationBubble(currentValue => {
-                        if (
-                            currentValue &&
-                            Math.abs(currentValue.latitude - latitude) <= MAP_REGION_EPSILON &&
-                            Math.abs(currentValue.longitude - longitude) <= MAP_REGION_EPSILON
-                        ) {
-                            return currentValue;
-                        }
-
-                        return { latitude, longitude };
-                    });
-                }}
-                userInterfaceStyle={isDark ? 'dark' : 'light'}
-                onRegionChange={(region) => {
-                    clearMapIdleSettleTimeout();
-                    setMapMotionState(true);
-                    mapRegionRef.current = region;
-                    setMapRenderRegion(region);
-                }}
-                onRegionChangeComplete={(region) => {
-                    setMapRenderRegion(region);
-                    setMapRegionIfNeeded(region);
-                    isAnimatingRef.current = false;
-                    clearMapIdleSettleTimeout();
-                    mapIdleSettleTimeoutRef.current = setTimeout(() => {
-                        mapIdleSettleTimeoutRef.current = null;
-                        if (!isMountedRef.current) {
+                        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
                             return;
                         }
-                        setMapMotionState(false);
-                        flushMapIdleWaiters(true);
-                    }, CLUSTER_MAP_IDLE_SETTLE_MS);
-                }}
-            >
-                {ENABLE_CLUSTER_MERGE_TRANSITIONS
-                    ? (!hasRenderableClusters ? (
-                        <Marker
-                            coordinate={fallbackCoordinate}
-                            title="No Prices Returned"
-                            description={
-                                errorMsg
-                                    ? 'No live station price available'
-                                    : isLoadingLocation
-                                        ? 'Finding your location'
-                                        : 'Checking fuel providers'
-                            }
-                            pinColor="#D46A4C"
-                        />
-                    ) : null)
-                    : (hasRenderableClusters ? (
-                        <>
-                            {renderClusterEntries.map(entry => {
-                                const quote = entry.cluster.quotes[0];
-                                return (
-                                    <StationMarker
-                                        key={entry.key}
-                                        quote={quote}
-                                        isSuppressed={visibleSuppressedStationIds.has(String(entry.primaryStationId))}
-                                        isActive={quote.originalIndex === activeIndex}
-                                        isBest={quote.originalIndex === 0}
-                                        isDark={isDark}
-                                        themeColors={themeColors}
-                                        onPress={() => handleMarkerPress(entry.cluster)}
-                                    />
-                                );
-                            })}
-                        </>
-                    ) : (
-                        <Marker
-                            coordinate={fallbackCoordinate}
-                            title="No Prices Returned"
-                            description={
-                                errorMsg
-                                    ? 'No live station price available'
-                                    : isLoadingLocation
-                                        ? 'Finding your location'
-                                        : 'Checking fuel providers'
-                            }
-                            pinColor="#D46A4C"
-                        />
-                    ))}
-            </MapView>
 
-            {ENABLE_CLUSTER_MERGE_TRANSITIONS && hasRenderableClusters ? (
+                        setUserLocationBubble(currentValue => {
+                            if (
+                                currentValue &&
+                                Math.abs(currentValue.latitude - latitude) <= MAP_REGION_EPSILON &&
+                                Math.abs(currentValue.longitude - longitude) <= MAP_REGION_EPSILON
+                            ) {
+                                return currentValue;
+                            }
+
+                            return { latitude, longitude };
+                        });
+                    }}
+                    userInterfaceStyle={isDark ? 'dark' : 'light'}
+                    onRegionChange={(region) => {
+                        clearMapIdleSettleTimeout();
+                        setMapMotionState(true);
+                        mapRegionRef.current = region;
+                        setMapRenderRegion(region);
+                    }}
+                    onRegionChangeComplete={(region) => {
+                        markMapLoaded();
+                        setMapRenderRegion(region);
+                        setMapRegionIfNeeded(region);
+                        isAnimatingRef.current = false;
+                        clearMapIdleSettleTimeout();
+                        mapIdleSettleTimeoutRef.current = setTimeout(() => {
+                            mapIdleSettleTimeoutRef.current = null;
+                            if (!isMountedRef.current) {
+                                return;
+                            }
+                            setMapMotionState(false);
+                            flushMapIdleWaiters(true);
+                        }, CLUSTER_MAP_IDLE_SETTLE_MS);
+                    }}
+                >
+                    {isMapLoaded ? (
+                        ENABLE_CLUSTER_MERGE_TRANSITIONS
+                            ? (!hasRenderableClusters ? (
+                                <Marker
+                                    coordinate={fallbackCoordinate}
+                                    title="No Prices Returned"
+                                    description={
+                                        errorMsg
+                                            ? 'No live station price available'
+                                            : isLoadingLocation
+                                                ? 'Finding your location'
+                                                : 'Checking fuel providers'
+                                    }
+                                    pinColor="#D46A4C"
+                                />
+                            ) : null)
+                            : (hasRenderableClusters ? (
+                                <>
+                                    {renderClusterEntries.map(entry => {
+                                        const quote = entry.cluster.quotes[0];
+                                        return (
+                                            <StationMarker
+                                                key={entry.key}
+                                                quote={quote}
+                                                isSuppressed={visibleSuppressedStationIds.has(String(entry.primaryStationId))}
+                                                isActive={quote.originalIndex === activeIndex}
+                                                isBest={quote.originalIndex === 0}
+                                                isDark={isDark}
+                                                themeColors={themeColors}
+                                                onPress={() => handleMarkerPress(entry.cluster)}
+                                            />
+                                        );
+                                    })}
+                                </>
+                            ) : (
+                                <Marker
+                                    coordinate={fallbackCoordinate}
+                                    title="No Prices Returned"
+                                    description={
+                                        errorMsg
+                                            ? 'No live station price available'
+                                            : isLoadingLocation
+                                                ? 'Finding your location'
+                                                : 'Checking fuel providers'
+                                    }
+                                    pinColor="#D46A4C"
+                                />
+                            ))
+                    ) : null}
+                </MapView>
+            ) : null}
+
+            {ENABLE_CLUSTER_MERGE_TRANSITIONS && isMapLoaded && hasRenderableClusters ? (
                 <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
                     <LiquidGlassContainerView
                         pointerEvents="none"

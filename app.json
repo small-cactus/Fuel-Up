@@ -44,7 +44,7 @@
       "backgroundColor": "#000000"
     },
     "ios": {
-      "icon": "./assets/fuelup-icon.png",
+      "icon": "./fuelup.icon",
       "supportsTablet": true,
       "bundleIdentifier": "com.anthonyh.fuelup",
       "entitlements": {
@@ -60,6 +60,10 @@
       "package": "com.anthonyh.fuelup"
     },
     "extra": {
+      "supabase": {
+        "url": "https://vjindchxfebaltbslqwc.supabase.co",
+        "key": "sb_publishable_PXXDbGA0iU5sOiNHe1hqTw_Ms3pE0cm"
+      },
       "eas": {
         "build": {
           "experimental": {
