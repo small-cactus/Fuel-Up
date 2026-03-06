@@ -53,7 +53,8 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Fuel Up requires precise location access to function.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Fuel Up requires precise location access to function.",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CADisableMinimumFrameDurationOnPhone": true
       }
     },
     "android": {

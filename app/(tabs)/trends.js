@@ -14,6 +14,7 @@ import { fetchTrendData } from '../../src/services/fuel/trends';
 import { usePreferences } from '../../src/PreferencesContext';
 import TopCanopy from '../../src/components/TopCanopy';
 import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
+import ProgressiveBlurReveal from '../../src/components/ProgressiveBlurReveal';
 import { getFuelGradeMeta, normalizeFuelGrade } from '../../src/lib/fuelGrade';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -136,6 +137,7 @@ export default function TrendsScreen() {
     const [loading, setLoading] = useState(!cachedTrendData);
     const [refreshing, setRefreshing] = useState(false);
     const [trendData, setTrendData] = useState(cachedTrendData);
+    const [shouldRunReveal, setShouldRunReveal] = useState(false);
     const isMountedRef = useRef(true);
     const selectedFuelGradeRef = useRef(selectedFuelGrade);
     const activeFetchRef = useRef({
@@ -242,6 +244,16 @@ export default function TrendsScreen() {
                 void loadTrendData({ showLoading: !cachedDataForFuelType });
             }
         }, [loadTrendData, selectedFuelGrade, trendData])
+    );
+
+    useFocusEffect(
+        useCallback(() => {
+            setShouldRunReveal(true);
+
+            return () => {
+                setShouldRunReveal(false);
+            };
+        }, [])
     );
 
     const onPullToRefresh = useCallback(() => {
@@ -542,6 +554,9 @@ export default function TrendsScreen() {
                     <FuelUpHeaderLogo isDark={isDark} />
                 </View>
             </View>
+            <ProgressiveBlurReveal
+                shouldReveal={shouldRunReveal}
+            />
         </View>
     );
 }

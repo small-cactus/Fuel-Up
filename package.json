@@ -4,7 +4,7 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
-    "postinstall": "sh ./scripts/fix-expo-constants-ios.sh",
+    "postinstall": "sh ./scripts/fix-expo-constants-ios.sh && sh ./scripts/apply-package-patches.sh",
     "android": "expo run:android",
     "ios": "expo run:ios --device 00008150-001470C22220401C",
     "ios:sim": "expo start --ios",
