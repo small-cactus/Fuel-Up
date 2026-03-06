@@ -11,7 +11,6 @@ import {
     Animated,
     Easing,
     Platform,
-    requireNativeComponent,
     StyleSheet,
     UIManager,
     View,
@@ -20,6 +19,7 @@ import {
 } from 'react-native';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { BlurView } from 'expo-blur';
+import { ReactNativeProgressiveBlurView as NativeProgressiveBlurView } from '@sbaiahmed1/react-native-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { useTheme } from '../ThemeContext';
@@ -48,15 +48,6 @@ const DEFAULT_NATIVE_BLUR_CAP = 36;
 const DEFAULT_NATIVE_FEATHER_GROWTH = 0.35;
 
 const AnimatedView = Animated.View;
-let NativeProgressiveBlurView = null;
-
-if (Platform.OS === 'ios') {
-    try {
-        NativeProgressiveBlurView = requireNativeComponent('ReactNativeProgressiveBlurView');
-    } catch {
-        NativeProgressiveBlurView = null;
-    }
-}
 
 function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
@@ -243,7 +234,10 @@ export default function ProgressiveBlurReveal({
     const insets = useSafeAreaInsets();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const [isMounted, setIsMounted] = useState(true);
-    const [nativeRevealTrigger, setNativeRevealTrigger] = useState(0);
+    const [nativeMaskState, setNativeMaskState] = useState({
+        radius: startRadius,
+        feather: DEFAULT_STEP_SIZE,
+    });
     const frameRef = useRef(null);
     const completionTimerRef = useRef(null);
     const layerRefs = useRef([]);
@@ -295,7 +289,8 @@ export default function ProgressiveBlurReveal({
 
         return DEFAULT_LAYER_INTENSITIES;
     }, [intensity, layerIntensities]);
-    const shouldUseNativeRadialBlur = Platform.OS === 'ios' && Boolean(NativeProgressiveBlurView);
+    const hasNativeProgressiveBlurView = Boolean(NativeProgressiveBlurView);
+    const shouldUseNativeRadialBlur = Platform.OS === 'ios' ? hasNativeProgressiveBlurView : false;
     const resolvedNativeBlurAmount = useMemo(() => {
         const strongestLayerIntensity = Math.max(
             failsafeBlurIntensity,
@@ -314,6 +309,13 @@ export default function ProgressiveBlurReveal({
     );
     const resolvedOriginXFraction = safeWidth > 0 ? resolvedOriginX / safeWidth : 0.5;
     const resolvedOriginYFraction = safeHeight > 0 ? resolvedOriginY / safeHeight : 0.5;
+
+    useEffect(() => {
+        setNativeMaskState({
+            radius: startRadius,
+            feather: resolvedStepSize,
+        });
+    }, [resolvedStepSize, startRadius]);
 
     useEffect(() => {
         return () => {
@@ -367,19 +369,47 @@ export default function ProgressiveBlurReveal({
             }).start();
 
             const startedAt = Date.now();
-            const totalDuration = shouldUseNativeRadialBlur
-                ? Math.max(
-                    Math.max(0, fadeOutDelay) + Math.max(1, fadeOutDuration),
-                    Math.max(1, failsafeFadeDuration)
-                )
-                : Math.max(
-                    Math.max(0, delay) + Math.max(1, duration),
-                    Math.max(0, fadeOutDelay) + Math.max(1, fadeOutDuration),
-                    Math.max(1, failsafeFadeDuration)
-                );
+            const totalDuration = Math.max(
+                Math.max(0, delay) + Math.max(1, duration),
+                Math.max(0, fadeOutDelay) + Math.max(1, fadeOutDuration),
+                Math.max(1, failsafeFadeDuration)
+            );
 
             if (shouldUseNativeRadialBlur) {
-                setNativeRevealTrigger(previous => previous + 1);
+                const applyNativeRadiusFrame = () => {
+                    const elapsedMs = Date.now() - startedAt;
+                    const radiusRawProgress = clamp((elapsedMs - delay) / Math.max(1, duration), 0, 1);
+                    const radiusProgress = memoriumRadiusEase(radiusRawProgress);
+                    const currentRadius = startRadius + ((resolvedEndRadius - startRadius) * radiusProgress);
+                    const currentFeather = resolvedStepSize * (1 + (DEFAULT_NATIVE_FEATHER_GROWTH * radiusProgress));
+
+                    setNativeMaskState(previousMaskState => {
+                        if (
+                            Math.abs(previousMaskState.radius - currentRadius) < MASK_EPSILON &&
+                            Math.abs(previousMaskState.feather - currentFeather) < MASK_EPSILON
+                        ) {
+                            return previousMaskState;
+                        }
+
+                        return {
+                            radius: currentRadius,
+                            feather: currentFeather,
+                        };
+                    });
+
+                    if (elapsedMs < totalDuration) {
+                        frameRef.current = requestAnimationFrame(applyNativeRadiusFrame);
+                    } else {
+                        frameRef.current = null;
+                    }
+                };
+
+                setNativeMaskState({
+                    radius: startRadius,
+                    feather: resolvedStepSize,
+                });
+
+                applyNativeRadiusFrame();
             } else {
                 const applyRadiusFrame = () => {
                     const elapsedMs = Date.now() - startedAt;
@@ -420,10 +450,10 @@ export default function ProgressiveBlurReveal({
             setIsMounted(true);
             containerOpacity.setValue(1);
             failsafeOpacity.setValue(1);
-            if (shouldUseNativeRadialBlur && nativeBlurRef.current?.setNativeProps) {
-                nativeBlurRef.current.setNativeProps({
-                    radialClearRadius: startRadius,
-                    radialFeather: resolvedStepSize,
+            if (shouldUseNativeRadialBlur) {
+                setNativeMaskState({
+                    radius: startRadius,
+                    feather: resolvedStepSize,
                 });
             } else {
                 unstable_batchedUpdates(() => {
@@ -457,6 +487,10 @@ export default function ProgressiveBlurReveal({
         return null;
     }
 
+    if (Platform.OS === 'ios' && !hasNativeProgressiveBlurView) {
+        return null;
+    }
+
     return (
         <AnimatedView
             pointerEvents="none"
@@ -475,9 +509,8 @@ export default function ProgressiveBlurReveal({
                     radial
                     radialCenterX={resolvedOriginXFraction}
                     radialCenterY={resolvedOriginYFraction}
-                    radialClearRadius={startRadius}
-                    radialFeather={resolvedStepSize}
-                    revealTrigger={nativeRevealTrigger}
+                    radialClearRadius={nativeMaskState.radius}
+                    radialFeather={nativeMaskState.feather}
                     animationDuration={duration}
                     animationDelay={delay}
                     startRadius={startRadius}
@@ -487,7 +520,7 @@ export default function ProgressiveBlurReveal({
                     reducedTransparencyFallbackColor={isDark ? '#0B0B0F' : '#F4F4F7'}
                     style={StyleSheet.absoluteFill}
                 />
-            ) : HAS_NATIVE_MASK ? (
+            ) : Platform.OS !== 'ios' && HAS_NATIVE_MASK ? (
                 <>
                     <AnimatedView style={[StyleSheet.absoluteFill, { opacity: failsafeOpacity, zIndex: 200 }]}>
                         <BlurView
@@ -516,13 +549,13 @@ export default function ProgressiveBlurReveal({
                         />
                     ))}
                 </>
-            ) : (
+            ) : Platform.OS !== 'ios' ? (
                 <BlurView
                     intensity={resolvedLayerIntensities[resolvedLayerIntensities.length - 1] || failsafeBlurIntensity}
                     tint={resolvedTint}
                     style={StyleSheet.absoluteFill}
                 />
-            )}
+            ) : null}
         </AnimatedView>
     );
 }

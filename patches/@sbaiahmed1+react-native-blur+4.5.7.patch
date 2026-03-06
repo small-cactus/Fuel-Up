@@ -1,6 +1,6 @@
 diff -ruN a/node_modules/@sbaiahmed1/react-native-blur/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift b/node_modules/@sbaiahmed1/react-native-blur/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift
---- a/node_modules/@sbaiahmed1/react-native-blur/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift	2026-03-06 18:10:31
-+++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift	2026-03-06 18:10:31
+--- a/node_modules/@sbaiahmed1/react-native-blur/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift	2026-03-06 18:14:23
++++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift	2026-03-06 18:14:23
 @@ -27,6 +27,66 @@
      blurView.startOffset = startOffset
    }
@@ -69,8 +69,8 @@ diff -ruN a/node_modules/@sbaiahmed1/react-native-blur/ios/Helpers/ReactNativePr
    @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withBlurType blurType: String) {
      blurView.blurTypeString = blurType
 diff -ruN a/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurView.mm b/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurView.mm
---- a/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurView.mm	2026-03-06 18:10:31
-+++ b/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurView.mm	2026-03-06 18:10:31
+--- a/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurView.mm	2026-03-06 18:14:23
++++ b/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurView.mm	2026-03-06 18:14:23
 @@ -136,6 +136,18 @@
      }
  
@@ -146,8 +146,8 @@ diff -ruN a/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiv
  
    if (oldViewProps.reducedTransparencyFallbackColor != newViewProps.reducedTransparencyFallbackColor) {
 diff -ruN a/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurViewManager.mm b/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurViewManager.mm
---- a/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurViewManager.mm	2026-03-06 18:10:31
-+++ b/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurViewManager.mm	2026-03-06 18:10:31
+--- a/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurViewManager.mm	2026-03-06 18:14:23
++++ b/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurViewManager.mm	2026-03-06 18:14:23
 @@ -48,6 +48,78 @@
    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:view withStartOffset:offset];
  }
@@ -228,8 +228,8 @@ diff -ruN a/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiv
  {
    NSString *colorString = json ? [RCTConvert NSString:json] : @"#FFFFFF";
 diff -ruN a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlurView.swift b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlurView.swift
---- a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlurView.swift	2026-03-06 18:10:31
-+++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlurView.swift	2026-03-06 18:10:31
+--- a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlurView.swift	2026-03-06 18:14:23
++++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlurView.swift	2026-03-06 18:14:23
 @@ -3,10 +3,17 @@
  
  import SwiftUI
@@ -313,15 +313,24 @@ diff -ruN a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlur
  
      let blurStyle = blurStyleFromString(blurTypeString)
      let blurDirection = VariableBlurDirection(fromString: direction)
-@@ -73,6 +131,7 @@
+@@ -73,15 +131,7 @@
      ])
  
      self.variableBlurView = variableBlur
+-
+-    // Handle reduced transparency
+-    if UIAccessibility.isReduceTransparencyEnabled {
+-      variableBlur.isHidden = true
+-      backgroundColor = reducedTransparencyFallbackColor
+-    } else {
+-      variableBlur.isHidden = false
+-      backgroundColor = .clear
+-    }
 +    updateBlur()
+   }
  
-     // Handle reduced transparency
-     if UIAccessibility.isReduceTransparencyEnabled {
-@@ -90,6 +149,15 @@
+   private func updateBlur() {
+@@ -90,6 +140,15 @@
        return
      }
  
@@ -337,7 +346,7 @@ diff -ruN a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlur
      let blurStyle = blurStyleFromString(blurTypeString)
      let blurDirection = VariableBlurDirection(fromString: direction)
  
-@@ -97,6 +165,11 @@
+@@ -97,6 +156,11 @@
        maxBlurRadius: CGFloat(blurAmount),
        direction: blurDirection,
        startOffset: CGFloat(startOffset),
@@ -349,7 +358,7 @@ diff -ruN a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlur
        blurStyle: blurStyle
      )
  
-@@ -110,15 +183,299 @@
+@@ -110,15 +174,299 @@
      }
    }
  
@@ -650,8 +659,8 @@ diff -ruN a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlur
    }
  }
 diff -ruN a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift
---- a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift	2026-03-06 18:10:31
-+++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift	2026-03-06 18:10:31
+--- a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift	2026-03-06 18:14:23
++++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift	2026-03-06 18:14:23
 @@ -28,6 +28,32 @@
    private var maxBlurRadius: CGFloat = 20
    private var direction: VariableBlurDirection = .blurredTopClearBottom
@@ -1372,8 +1381,8 @@ diff -ruN a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurVie
    }
  }
 diff -ruN a/node_modules/@sbaiahmed1/react-native-blur/src/ReactNativeProgressiveBlurViewNativeComponent.ts b/node_modules/@sbaiahmed1/react-native-blur/src/ReactNativeProgressiveBlurViewNativeComponent.ts
---- a/node_modules/@sbaiahmed1/react-native-blur/src/ReactNativeProgressiveBlurViewNativeComponent.ts	2026-03-06 18:10:31
-+++ b/node_modules/@sbaiahmed1/react-native-blur/src/ReactNativeProgressiveBlurViewNativeComponent.ts	2026-03-06 18:10:31
+--- a/node_modules/@sbaiahmed1/react-native-blur/src/ReactNativeProgressiveBlurViewNativeComponent.ts	2026-03-06 18:14:23
++++ b/node_modules/@sbaiahmed1/react-native-blur/src/ReactNativeProgressiveBlurViewNativeComponent.ts	2026-03-06 18:14:23
 @@ -38,6 +38,18 @@
    blurType?: WithDefault<BlurType, 'regular'>;
    direction?: WithDefault<ProgressiveBlurDirection, 'blurredTopClearBottom'>;
