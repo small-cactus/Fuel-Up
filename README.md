@@ -1,12 +1,17 @@
-<p align="center">
-  <img src="./assets/fuelup-icon.png" alt="Fuel Up App Icon" width="64" />
-  &nbsp;&nbsp;
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/FuelUp-text-logo-dark.png" />
-    <source media="(prefers-color-scheme: light)" srcset="./assets/FuelUp-text-logo-light.png" />
-    <img src="./assets/FuelUp-text-logo-dark.png" alt="Fuel Up Logo" width="240" />
-  </picture>
-</p>
+<table align="center">
+  <tr>
+    <td valign="middle">
+      <img src="./assets/fuelup-icon.png" alt="Fuel Up App Icon" width="64" />
+    </td>
+    <td valign="middle">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="./assets/FuelUp-text-logo-dark.png" />
+        <source media="(prefers-color-scheme: light)" srcset="./assets/FuelUp-text-logo-light.png" />
+        <img src="./assets/FuelUp-text-logo-dark.png" alt="Fuel Up Logo" width="220" />
+      </picture>
+    </td>
+  </tr>
+</table>
 
 <p align="center">
   Native iOS-first gas discovery focused on one thing:
