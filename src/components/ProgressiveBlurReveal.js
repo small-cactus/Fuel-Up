@@ -243,6 +243,7 @@ export default function ProgressiveBlurReveal({
     const insets = useSafeAreaInsets();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const [isMounted, setIsMounted] = useState(true);
+    const [nativeRevealTrigger, setNativeRevealTrigger] = useState(0);
     const frameRef = useRef(null);
     const completionTimerRef = useRef(null);
     const layerRefs = useRef([]);
@@ -332,26 +333,6 @@ export default function ProgressiveBlurReveal({
     }, [containerOpacity, failsafeOpacity]);
 
     useEffect(() => {
-        if (!shouldUseNativeRadialBlur || !nativeBlurRef.current) {
-            return;
-        }
-
-        nativeBlurRef.current.setNativeProps({
-            radial: true,
-            radialCenterX: resolvedOriginXFraction,
-            radialCenterY: resolvedOriginYFraction,
-            radialClearRadius: startRadius,
-            radialFeather: resolvedStepSize,
-        });
-    }, [
-        resolvedOriginXFraction,
-        resolvedOriginYFraction,
-        resolvedStepSize,
-        shouldUseNativeRadialBlur,
-        startRadius,
-    ]);
-
-    useEffect(() => {
         if (frameRef.current) {
             cancelAnimationFrame(frameRef.current);
             frameRef.current = null;
@@ -386,40 +367,41 @@ export default function ProgressiveBlurReveal({
             }).start();
 
             const startedAt = Date.now();
-            const totalDuration = Math.max(
-                Math.max(0, delay) + Math.max(1, duration),
-                Math.max(0, fadeOutDelay) + Math.max(1, fadeOutDuration),
-                Math.max(1, failsafeFadeDuration)
-            );
+            const totalDuration = shouldUseNativeRadialBlur
+                ? Math.max(
+                    Math.max(0, fadeOutDelay) + Math.max(1, fadeOutDuration),
+                    Math.max(1, failsafeFadeDuration)
+                )
+                : Math.max(
+                    Math.max(0, delay) + Math.max(1, duration),
+                    Math.max(0, fadeOutDelay) + Math.max(1, fadeOutDuration),
+                    Math.max(1, failsafeFadeDuration)
+                );
 
-            const applyRadiusFrame = () => {
-                const elapsedMs = Date.now() - startedAt;
-                const radiusRawProgress = clamp((elapsedMs - delay) / Math.max(1, duration), 0, 1);
-                const radiusProgress = memoriumRadiusEase(radiusRawProgress);
-                const currentRadius = startRadius + ((resolvedEndRadius - startRadius) * radiusProgress);
-                const currentFeather = resolvedStepSize * (1 + (radiusProgress * DEFAULT_NATIVE_FEATHER_GROWTH));
+            if (shouldUseNativeRadialBlur) {
+                setNativeRevealTrigger(previous => previous + 1);
+            } else {
+                const applyRadiusFrame = () => {
+                    const elapsedMs = Date.now() - startedAt;
+                    const radiusRawProgress = clamp((elapsedMs - delay) / Math.max(1, duration), 0, 1);
+                    const radiusProgress = memoriumRadiusEase(radiusRawProgress);
+                    const currentRadius = startRadius + ((resolvedEndRadius - startRadius) * radiusProgress);
 
-                if (shouldUseNativeRadialBlur && nativeBlurRef.current?.setNativeProps) {
-                    nativeBlurRef.current.setNativeProps({
-                        radialClearRadius: currentRadius,
-                        radialFeather: currentFeather,
-                    });
-                } else {
                     unstable_batchedUpdates(() => {
                         layerRefs.current.forEach(layerRef => {
                             layerRef?.updateMask(currentRadius, resolvedStepSize);
                         });
                     });
-                }
 
-                if (elapsedMs < totalDuration) {
-                    frameRef.current = requestAnimationFrame(applyRadiusFrame);
-                } else {
-                    frameRef.current = null;
-                }
-            };
+                    if (elapsedMs < totalDuration) {
+                        frameRef.current = requestAnimationFrame(applyRadiusFrame);
+                    } else {
+                        frameRef.current = null;
+                    }
+                };
 
-            applyRadiusFrame();
+                applyRadiusFrame();
+            }
 
             completionTimerRef.current = setTimeout(() => {
                 if (hideWhenFinished) {
@@ -495,6 +477,13 @@ export default function ProgressiveBlurReveal({
                     radialCenterY={resolvedOriginYFraction}
                     radialClearRadius={startRadius}
                     radialFeather={resolvedStepSize}
+                    revealTrigger={nativeRevealTrigger}
+                    animationDuration={duration}
+                    animationDelay={delay}
+                    startRadius={startRadius}
+                    endRadius={resolvedEndRadius}
+                    featherStart={resolvedStepSize}
+                    featherEnd={resolvedStepSize * (1 + DEFAULT_NATIVE_FEATHER_GROWTH)}
                     reducedTransparencyFallbackColor={isDark ? '#0B0B0F' : '#F4F4F7'}
                     style={StyleSheet.absoluteFill}
                 />
