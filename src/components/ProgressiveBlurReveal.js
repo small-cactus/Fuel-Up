@@ -80,10 +80,6 @@ function cubicBezierAtTime(progress, p1x, p1y, p2x, p2y) {
     return sampleCurveY(t);
 }
 
-function memoriumRadiusEase(progress) {
-    return cubicBezierAtTime(progress, 0.05, 0.9, 0.2, 1);
-}
-
 function resolveAxis(value, size, unit) {
     if (!Number.isFinite(value)) {
         return size * 0.5;
@@ -234,14 +230,10 @@ export default function ProgressiveBlurReveal({
     const insets = useSafeAreaInsets();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const [isMounted, setIsMounted] = useState(true);
-    const [nativeMaskState, setNativeMaskState] = useState({
-        radius: startRadius,
-        feather: DEFAULT_STEP_SIZE,
-    });
+    const [nativeRevealTrigger, setNativeRevealTrigger] = useState(0);
     const frameRef = useRef(null);
     const completionTimerRef = useRef(null);
     const layerRefs = useRef([]);
-    const nativeBlurRef = useRef(null);
     const containerOpacity = useRef(new Animated.Value(1)).current;
     const failsafeOpacity = useRef(new Animated.Value(1)).current;
     const instanceId = useMemo(
@@ -311,13 +303,6 @@ export default function ProgressiveBlurReveal({
     const resolvedOriginYFraction = safeHeight > 0 ? resolvedOriginY / safeHeight : 0.5;
 
     useEffect(() => {
-        setNativeMaskState({
-            radius: startRadius,
-            feather: resolvedStepSize,
-        });
-    }, [resolvedStepSize, startRadius]);
-
-    useEffect(() => {
         return () => {
             if (frameRef.current) {
                 cancelAnimationFrame(frameRef.current);
@@ -376,45 +361,12 @@ export default function ProgressiveBlurReveal({
             );
 
             if (shouldUseNativeRadialBlur) {
-                const applyNativeRadiusFrame = () => {
-                    const elapsedMs = Date.now() - startedAt;
-                    const radiusRawProgress = clamp((elapsedMs - delay) / Math.max(1, duration), 0, 1);
-                    const radiusProgress = memoriumRadiusEase(radiusRawProgress);
-                    const currentRadius = startRadius + ((resolvedEndRadius - startRadius) * radiusProgress);
-                    const currentFeather = resolvedStepSize * (1 + (DEFAULT_NATIVE_FEATHER_GROWTH * radiusProgress));
-
-                    setNativeMaskState(previousMaskState => {
-                        if (
-                            Math.abs(previousMaskState.radius - currentRadius) < MASK_EPSILON &&
-                            Math.abs(previousMaskState.feather - currentFeather) < MASK_EPSILON
-                        ) {
-                            return previousMaskState;
-                        }
-
-                        return {
-                            radius: currentRadius,
-                            feather: currentFeather,
-                        };
-                    });
-
-                    if (elapsedMs < totalDuration) {
-                        frameRef.current = requestAnimationFrame(applyNativeRadiusFrame);
-                    } else {
-                        frameRef.current = null;
-                    }
-                };
-
-                setNativeMaskState({
-                    radius: startRadius,
-                    feather: resolvedStepSize,
-                });
-
-                applyNativeRadiusFrame();
+                setNativeRevealTrigger(previousValue => previousValue + 1);
             } else {
                 const applyRadiusFrame = () => {
                     const elapsedMs = Date.now() - startedAt;
                     const radiusRawProgress = clamp((elapsedMs - delay) / Math.max(1, duration), 0, 1);
-                    const radiusProgress = memoriumRadiusEase(radiusRawProgress);
+                    const radiusProgress = cubicBezierAtTime(radiusRawProgress, 0.05, 0.9, 0.2, 1);
                     const currentRadius = startRadius + ((resolvedEndRadius - startRadius) * radiusProgress);
 
                     unstable_batchedUpdates(() => {
@@ -450,12 +402,7 @@ export default function ProgressiveBlurReveal({
             setIsMounted(true);
             containerOpacity.setValue(1);
             failsafeOpacity.setValue(1);
-            if (shouldUseNativeRadialBlur) {
-                setNativeMaskState({
-                    radius: startRadius,
-                    feather: resolvedStepSize,
-                });
-            } else {
+            if (!shouldUseNativeRadialBlur) {
                 unstable_batchedUpdates(() => {
                     layerRefs.current.forEach(layerRef => {
                         layerRef?.updateMask(startRadius, resolvedStepSize);
@@ -503,14 +450,14 @@ export default function ProgressiveBlurReveal({
         >
             {shouldUseNativeRadialBlur ? (
                 <NativeProgressiveBlurView
-                    ref={nativeBlurRef}
                     blurAmount={resolvedNativeBlurAmount}
                     blurType={resolvedNativeBlurType}
                     radial
                     radialCenterX={resolvedOriginXFraction}
                     radialCenterY={resolvedOriginYFraction}
-                    radialClearRadius={nativeMaskState.radius}
-                    radialFeather={nativeMaskState.feather}
+                    radialClearRadius={startRadius}
+                    radialFeather={resolvedStepSize}
+                    revealTrigger={nativeRevealTrigger}
                     animationDuration={duration}
                     animationDelay={delay}
                     startRadius={startRadius}
