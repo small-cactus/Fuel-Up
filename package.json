@@ -9,7 +9,7 @@
     "ios": "expo run:ios --device 00008150-001470C22220401C",
     "ios:sim": "expo start --ios",
     "web": "expo start --web",
-    "test": "node --test ./tests/fuelDataContracts.test.cjs",
+    "test": "node --test ./tests/fuelDataContracts.test.cjs ./tests/priceValidation.test.cjs ./tests/fuelGradeValidation.test.mjs",
     "test:cluster": "node --test ./tests/clusterAnimationMath.test.cjs ./tests/clusterProbe.integration.test.cjs"
   },
   "dependencies": {

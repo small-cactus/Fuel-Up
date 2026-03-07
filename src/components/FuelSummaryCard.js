@@ -3,6 +3,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { GlassContainer, GlassView } from 'expo-glass-effect';
 
 import { SymbolView } from 'expo-symbols';
+import PredictedPriceFlag from './PredictedPriceFlag';
 import {
     FUEL_GRADE_ORDER,
     getFuelGradeMeta,
@@ -123,6 +124,11 @@ export default function FuelSummaryCard({
                                 )}
                             </View>
                         )}
+                        <PredictedPriceFlag
+                            validation={quote?.validation}
+                            isDark={isDark}
+                            themeColors={themeColors}
+                        />
                     </View>
                     {isRefreshing ? <ActivityIndicator size="small" color={themeColors.text} /> : null}
                 </View>
@@ -169,7 +175,6 @@ export default function FuelSummaryCard({
                         </View>
                     )}
                 </View>
-
                 {errorMsg ? <Text style={[styles.cardNotice, { color: themeColors.text }]}>{errorMsg}</Text> : null}
             </GlassView>
         </GlassContainer>

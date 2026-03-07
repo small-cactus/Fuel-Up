@@ -77,6 +77,7 @@ export function applyFuelGradeToQuote(quote, fuelGrade) {
 
     const normalizedFuelGrade = normalizeFuelGrade(fuelGrade);
     const resolvedPrice = resolveQuotePriceForFuelGrade(quote, normalizedFuelGrade);
+    const validationForGrade = quote.validationByFuelType?.[normalizedFuelGrade] || quote.validation || null;
 
     if (resolvedPrice === null) {
         return null;
@@ -86,6 +87,7 @@ export function applyFuelGradeToQuote(quote, fuelGrade) {
         ...quote,
         fuelType: normalizedFuelGrade,
         price: resolvedPrice,
+        validation: validationForGrade,
     };
 }
 

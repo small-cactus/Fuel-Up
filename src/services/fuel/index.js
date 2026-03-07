@@ -1,4 +1,5 @@
 const {
+    PROVIDER_LABELS,
     buildBarchartUrl,
     buildCacheKey,
     buildCardogUrl,
@@ -23,8 +24,15 @@ const {
 } = require('./core');
 const { BLS_SERIES_BY_FUEL, EIA_PRODUCT_BY_FUEL, FRED_SERIES_BY_FUEL, getFuelServiceConfig } = require('./config');
 const { clearCachedEntries, getCachedEntry, setCachedEntry } = require('./cacheStore');
+const {
+    buildValidationState,
+    normalizePrice,
+    validateAndChoosePrice,
+} = require('./priceValidation');
 
 const inflightRequests = new Map();
+const AREA_HISTORY_LOOKBACK_MS = 14 * 24 * 60 * 60 * 1000;
+const MAX_AREA_HISTORY_ROWS = 1500;
 
 function redactUrl(url) {
     return String(url || '').replace(/([?&](?:key|apikey|api_key)=)[^&]+/gi, '$1REDACTED');
@@ -181,30 +189,258 @@ function normalizeStoredAllPrices(allPrices) {
     return normalized;
 }
 
-function buildLatestQuotesFromRows({ rows, origin, fallbackSourceLabel }) {
+function cloneQuotePayload(value) {
+    if (!value || typeof value !== 'object') {
+        return {};
+    }
+
+    return JSON.parse(JSON.stringify(value));
+}
+
+function toTimestampMs(value) {
+    const timestampMs = Date.parse(value || '');
+    return Number.isFinite(timestampMs) ? timestampMs : null;
+}
+
+function buildValidationStationId({ stationId, fallbackIdentity }) {
+    const normalizedStationId = String(stationId || '').trim();
+    return normalizedStationId || fallbackIdentity;
+}
+
+function buildValidationRowFromStoredRow({ row, origin, fallbackSourceLabel }) {
+    const quote = mapStationPriceRowToQuote({ row, origin, fallbackSourceLabel });
+
+    if (!quote) {
+        return [];
+    }
+
+    const quoteIdentity = buildQuoteIdentity(quote);
+    const timestampMs = (
+        toTimestampMs(row.created_at) ??
+        toTimestampMs(row.updated_at_source) ??
+        Date.now()
+    );
+    const stationId = buildValidationStationId({
+        stationId: row.station_id,
+        fallbackIdentity: quoteIdentity,
+    });
+    const normalizedPrices = quote.allPrices && typeof quote.allPrices === 'object'
+        ? quote.allPrices
+        : { [quote.fuelType]: quote.price };
+
+    return Object.entries(normalizedPrices)
+        .filter(([fuelTypeKey, price]) => fuelTypeKey !== '_payment' && toPositiveNumber(price) !== null)
+        .map(([fuelTypeKey, price]) => ({
+            stationId,
+            fuelType: String(fuelTypeKey || quote.fuelType || 'regular').toLowerCase(),
+            price: toPositiveNumber(price),
+            timestampMs,
+            lat: quote.latitude,
+            lon: quote.longitude,
+            quoteIdentity,
+            originalRow: row,
+            originalQuote: quote,
+            baseFuelType: String(quote.fuelType || row.fuel_type || 'regular').toLowerCase(),
+        }));
+}
+
+function buildValidationRowFromQuote(quote) {
+    if (!quote) {
+        return [];
+    }
+
+    const quoteIdentity = buildQuoteIdentity(quote);
+    const timestampMs = (
+        toTimestampMs(quote.updatedAt) ??
+        toTimestampMs(quote.fetchedAt) ??
+        Date.now()
+    );
+    const stationId = buildValidationStationId({
+        stationId: quote.stationId,
+        fallbackIdentity: quoteIdentity,
+    });
+    const normalizedPrices = quote.allPrices && typeof quote.allPrices === 'object'
+        ? quote.allPrices
+        : { [quote.fuelType]: quote.price };
+
+    return Object.entries(normalizedPrices)
+        .filter(([fuelTypeKey, price]) => fuelTypeKey !== '_payment' && toPositiveNumber(price) !== null)
+        .map(([fuelTypeKey, price]) => ({
+            stationId,
+            fuelType: String(fuelTypeKey || quote.fuelType || 'regular').toLowerCase(),
+            price: toPositiveNumber(price),
+            timestampMs,
+            lat: Number(quote.latitude),
+            lon: Number(quote.longitude),
+            quoteIdentity,
+            originalQuote: quote,
+            baseFuelType: String(quote.fuelType || 'regular').toLowerCase(),
+        }));
+}
+
+function applyValidatedPriceToAllPrices(allPrices, fuelType, finalPrice) {
+    const normalizedPrice = normalizePrice(finalPrice);
+
+    if (normalizedPrice === null) {
+        return allPrices || {};
+    }
+
+    const nextAllPrices = cloneQuotePayload(allPrices);
+
+    nextAllPrices[fuelType] = normalizedPrice;
+
+    return nextAllPrices;
+}
+
+function applyGradeValidationToQuote(quote, fuelType, decision) {
+    if (!quote || !decision || !fuelType) {
+        return quote;
+    }
+
+    const finalDisplayedPrice = normalizePrice(decision.finalDisplayedPrice) ?? quote.price;
+    const normalizedFuelType = String(fuelType).toLowerCase();
+    const nextAllPrices = applyValidatedPriceToAllPrices(quote.allPrices, normalizedFuelType, finalDisplayedPrice);
+    const nextValidationByFuelType = {
+        ...(quote.validationByFuelType || {}),
+        [normalizedFuelType]: {
+            apiPrice: normalizePrice(decision.apiPrice),
+            predictedPrice: normalizePrice(decision.predictedPrice),
+            finalPrice: finalDisplayedPrice,
+            usedPrediction: Boolean(decision.usedPrediction),
+            decision: decision.decision,
+            validity: Number(decision.validity || 0),
+            risk: Number(decision.risk || 0),
+            isColdStart: Boolean(decision.isColdStart),
+            prediction: decision.prediction || null,
+            features: decision.features || null,
+            computedAt: new Date().toISOString(),
+            fuelType: normalizedFuelType,
+        },
+    };
+    const baseFuelType = String(quote.fuelType || normalizedFuelType).toLowerCase();
+    const activeValidation = nextValidationByFuelType[baseFuelType] || quote.validation || null;
+
+    return {
+        ...quote,
+        price: normalizedFuelType === baseFuelType ? finalDisplayedPrice : quote.price,
+        allPrices: nextAllPrices,
+        validation: activeValidation,
+        validationByFuelType: nextValidationByFuelType,
+    };
+}
+
+function buildValidatedLatestQuotesFromRows({ rows, origin, fallbackSourceLabel }) {
     if (!Array.isArray(rows) || rows.length === 0) {
         return [];
     }
 
-    const sortedRows = [...rows].sort((left, right) => {
-        const leftTime = Date.parse(left?.created_at || '') || 0;
-        const rightTime = Date.parse(right?.created_at || '') || 0;
-        return rightTime - leftTime;
-    });
+    const validationRows = rows.flatMap(row => buildValidationRowFromStoredRow({ row, origin, fallbackSourceLabel }));
+    const validationState = buildValidationState(validationRows);
     const latestByIdentity = new Map();
+    const sortedOutputs = [...validationState.outputs].sort((left, right) => (
+        right.row.timestampMs - left.row.timestampMs
+    ));
 
-    for (const row of sortedRows) {
-        const quote = mapStationPriceRowToQuote({ row, origin, fallbackSourceLabel });
-        const identity = buildQuoteIdentity(quote);
+    for (const output of sortedOutputs) {
+        const existingQuote = latestByIdentity.get(output.row.quoteIdentity);
+        const quote = existingQuote || {
+            ...output.row.originalQuote,
+            allPrices: cloneQuotePayload(output.row.originalQuote?.allPrices),
+            validationByFuelType: cloneQuotePayload(output.row.originalQuote?.validationByFuelType),
+        };
+        const identity = output.row.quoteIdentity || buildQuoteIdentity(quote);
 
         if (!quote || !identity || latestByIdentity.has(identity)) {
-            continue;
+            if (!quote || !identity) {
+                continue;
+            }
         }
 
-        latestByIdentity.set(identity, quote);
+        latestByIdentity.set(identity, applyGradeValidationToQuote(quote, output.row.fuelType, output.result));
     }
 
     return Array.from(latestByIdentity.values());
+}
+
+function applyValidationToStationQuotes({ stationQuotes, historyRows, origin }) {
+    if (!Array.isArray(stationQuotes) || stationQuotes.length === 0) {
+        return [];
+    }
+
+    const historyValidationRows = (historyRows || [])
+        .flatMap(row => buildValidationRowFromStoredRow({ row, origin }));
+    const historyState = buildValidationState(historyValidationRows);
+    const rawApiHistory = [...historyState.rawApiHistory];
+    const trustedRows = [...historyState.trustedRows];
+    const decisionsByIdentity = new Map();
+    const incomingRows = stationQuotes
+        .flatMap(buildValidationRowFromQuote)
+        .sort((left, right) => (
+            left.timestampMs - right.timestampMs ||
+            String(left.fuelType || '').localeCompare(String(right.fuelType || '')) ||
+            String(left.stationId || '').localeCompare(String(right.stationId || ''))
+        ));
+
+    for (const row of incomingRows) {
+        const result = validateAndChoosePrice(row, trustedRows, rawApiHistory);
+        const identity = row.quoteIdentity;
+        const existingDecisions = decisionsByIdentity.get(identity) || {};
+
+        existingDecisions[row.fuelType] = result;
+        decisionsByIdentity.set(identity, existingDecisions);
+        rawApiHistory.push(row);
+
+        if (result.decision === 'accept') {
+            trustedRows.push({
+                ...row,
+                source: 'api',
+            });
+        }
+    }
+
+    return stationQuotes.map(quote => {
+        if (quote?.validation?.computedAt) {
+            return quote;
+        }
+
+        const identity = buildQuoteIdentity(quote);
+        const decisions = decisionsByIdentity.get(identity);
+
+        if (!decisions) {
+            return quote;
+        }
+
+        return Object.entries(decisions).reduce(
+            (nextQuote, [fuelType, decision]) => applyGradeValidationToQuote(nextQuote, fuelType, decision),
+            {
+                ...quote,
+                allPrices: cloneQuotePayload(quote.allPrices),
+                validationByFuelType: cloneQuotePayload(quote.validationByFuelType),
+            }
+        );
+    });
+}
+
+async function fetchAreaHistoryRows({ supabase, searchLat, searchLng, fuelType }) {
+    const lookbackStartIso = new Date(Date.now() - AREA_HISTORY_LOOKBACK_MS).toISOString();
+    const { data, error } = await supabase
+        .from('station_prices')
+        .select('*')
+        .eq('search_latitude_rounded', searchLat)
+        .eq('search_longitude_rounded', searchLng)
+        .eq('fuel_type', fuelType)
+        .gte('created_at', lookbackStartIso)
+        .order('created_at', { ascending: true })
+        .limit(MAX_AREA_HISTORY_ROWS);
+
+    return {
+        data: Array.isArray(data) ? data : [],
+        error,
+    };
+}
+
+function buildLatestQuotesFromRows({ rows, origin, fallbackSourceLabel }) {
+    return buildValidatedLatestQuotesFromRows({ rows, origin, fallbackSourceLabel });
 }
 
 function mapStationPriceRowToQuote({ row, origin, fallbackSourceLabel }) {
@@ -864,6 +1100,7 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, force
     const origin = { latitude, longitude };
     const searchLat = Math.round(latitude * 10) / 10;
     const searchLng = Math.round(longitude * 10) / 10;
+    let cachedAreaHistoryRows = [];
 
     try {
         const { supabase } = require('../../lib/supabase');
@@ -883,55 +1120,42 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, force
         if (!error && data && data.length > 0) {
             const { incrementApiStat } = require('../../lib/devCounter');
             incrementApiStat('supabase');
-            const freshQuotes = buildLatestQuotesFromRows({
-                rows: data,
+            const { data: areaRows, error: areaRowsError } = await fetchAreaHistoryRows({
+                supabase,
+                searchLat,
+                searchLng,
+                fuelType,
+            });
+            cachedAreaHistoryRows = !areaRowsError && Array.isArray(areaRows) ? areaRows : [];
+            const quotes = buildLatestQuotesFromRows({
+                rows: cachedAreaHistoryRows.length > 0 ? cachedAreaHistoryRows : data,
                 origin,
+                fallbackSourceLabel: cachedAreaHistoryRows.length > 0 ? 'GasBuddy (area cache)' : undefined,
             });
 
-            if (freshQuotes.length > 0) {
-                const freshQuoteIds = new Set(
-                    freshQuotes
-                        .map(quote => buildQuoteIdentity(quote))
-                        .filter(Boolean)
-                );
-
-                let fallbackAreaQuotes = [];
-
-                const { data: areaRows, error: areaRowsError } = await supabase
-                    .from('station_prices')
-                    .select('*')
-                    .eq('search_latitude_rounded', searchLat)
-                    .eq('search_longitude_rounded', searchLng)
-                    .eq('fuel_type', fuelType)
-                    .order('created_at', { ascending: false });
-
-                if (!areaRowsError && Array.isArray(areaRows) && areaRows.length > 0) {
-                    const dedupedAreaQuotes = buildLatestQuotesFromRows({
-                        rows: areaRows,
-                        origin,
-                        fallbackSourceLabel: 'GasBuddy (area cache)',
-                    });
-
-                    fallbackAreaQuotes = dedupedAreaQuotes.filter(quote => !freshQuoteIds.has(buildQuoteIdentity(quote)));
-                }
-
-                const quotes = [...freshQuotes, ...fallbackAreaQuotes];
+            if (quotes.length > 0) {
                 debugEntry.summary.resultCount = quotes.length;
-                debugEntry.summary.freshCacheQuoteCount = freshQuotes.length;
-                debugEntry.summary.areaCacheFallbackCount = fallbackAreaQuotes.length;
+                debugEntry.summary.freshCacheQuoteCount = quotes.filter(quote => {
+                    const updatedAtMs = toTimestampMs(quote?.updatedAt);
+                    return updatedAtMs !== null && updatedAtMs >= Date.now() - (60 * 60 * 1000);
+                }).length;
+                debugEntry.summary.areaCacheFallbackCount = Math.max(
+                    0,
+                    quotes.length - (debugEntry.summary.freshCacheQuoteCount || 0)
+                );
                 debugEntry.quoteReturned = true;
                 debugEntry.requests.push(
                     createDebugRequest({
                         step: 'supabase_cache',
                         url: 'supabase://station_prices',
                         status: 200,
-                        output: `${quotes.length} cached prices retrieved (${freshQuotes.length} fresh + ${fallbackAreaQuotes.length} area fallback)`,
+                        output: `${quotes.length} validated cached prices rebuilt from area history`,
                     })
                 );
 
                 if (__DEV__) {
                     console.log(
-                        `[FuelUp][GasBuddy] cache-return: fresh=${freshQuotes.length} areaFallback=${fallbackAreaQuotes.length} total=${quotes.length} search=${searchLat},${searchLng} fuel=${fuelType}`
+                        `[FuelUp][GasBuddy] cache-return: total=${quotes.length} search=${searchLat},${searchLng} fuel=${fuelType}`
                     );
                 }
 
@@ -987,6 +1211,7 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, force
         }) || [];
 
         let fallbackQuotes = [];
+        let validatedLiveQuotes = liveQuotes;
 
         try {
             const { supabase } = require('../../lib/supabase');
@@ -1008,17 +1233,25 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, force
 
             debugEntry.summary.missingPriceStationCount = missingPriceStationIds.length;
 
-            const { data: areaRows, error: areaRowsError } = await supabase
-                .from('station_prices')
-                .select('*')
-                .eq('search_latitude_rounded', searchLat)
-                .eq('search_longitude_rounded', searchLng)
-                .eq('fuel_type', fuelType)
-                .order('created_at', { ascending: false });
+            const { data: areaRows, error: areaRowsError } = await fetchAreaHistoryRows({
+                supabase,
+                searchLat,
+                searchLng,
+                fuelType,
+            });
+            const usableAreaRows = !areaRowsError && Array.isArray(areaRows)
+                ? areaRows
+                : cachedAreaHistoryRows;
 
-            if (!areaRowsError && Array.isArray(areaRows) && areaRows.length > 0) {
+            if (usableAreaRows.length > 0) {
+                validatedLiveQuotes = applyValidationToStationQuotes({
+                    stationQuotes: liveQuotes,
+                    historyRows: usableAreaRows,
+                    origin,
+                });
+
                 const dedupedAreaQuotes = buildLatestQuotesFromRows({
-                    rows: areaRows,
+                    rows: usableAreaRows,
                     origin,
                     fallbackSourceLabel: 'GasBuddy (area cache)',
                 });
@@ -1036,7 +1269,8 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, force
             console.error('GasBuddy fallback lookup failed:', fallbackLookupError);
         }
 
-        const quotes = [...liveQuotes, ...fallbackQuotes];
+        const adjustedQuoteCount = validatedLiveQuotes.filter(quote => quote?.validation?.usedPrediction).length;
+        const quotes = [...validatedLiveQuotes, ...fallbackQuotes];
 
         debugEntry.requests.push(
             createDebugRequest({
@@ -1048,14 +1282,15 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, force
         );
         const stationCount = response.payload?.data?.locationBySearchTerm?.stations?.results?.length || 0;
         debugEntry.summary.resultCount = stationCount;
-        debugEntry.summary.liveQuoteCount = liveQuotes.length;
+        debugEntry.summary.liveQuoteCount = validatedLiveQuotes.length;
         debugEntry.summary.fallbackQuoteCount = fallbackQuotes.length;
         debugEntry.summary.totalQuoteCount = quotes.length;
+        debugEntry.summary.adjustedQuoteCount = adjustedQuoteCount;
         debugEntry.quoteReturned = Boolean(quotes && quotes.length > 0);
 
         if (__DEV__) {
             console.log(
-                `[FuelUp][GasBuddy] live-return: apiStations=${stationCount} live=${liveQuotes.length} fallback=${fallbackQuotes.length} total=${quotes.length} missingPriceStations=${debugEntry.summary.missingPriceStationCount || 0} apiOmittedFallback=${debugEntry.summary.apiOmittedStationFallbackCount || 0}`
+                `[FuelUp][GasBuddy] live-return: apiStations=${stationCount} live=${validatedLiveQuotes.length} fallback=${fallbackQuotes.length} adjusted=${adjustedQuoteCount} total=${quotes.length} missingPriceStations=${debugEntry.summary.missingPriceStationCount || 0} apiOmittedFallback=${debugEntry.summary.apiOmittedStationFallbackCount || 0}`
             );
         }
 
@@ -1299,7 +1534,45 @@ async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMi
 
         debugState.providers = providerResults.map(result => result.debugEntry);
 
-        const allQuotes = providerResults.flatMap(result => result.quotes || result.quote || []).filter(Boolean);
+        let allQuotes = providerResults.flatMap(result => result.quotes || result.quote || []).filter(Boolean);
+        const stationQuotesNeedingValidation = allQuotes.filter(quote => (
+            quote.providerTier === 'station' &&
+            !quote.isEstimated &&
+            !quote?.validation?.computedAt
+        ));
+
+        if (stationQuotesNeedingValidation.length > 0) {
+            try {
+                const { supabase } = require('../../lib/supabase');
+
+                if (supabase) {
+                    const searchLat = Math.round(latitude * 10) / 10;
+                    const searchLng = Math.round(longitude * 10) / 10;
+                    const { data: areaRows, error: areaRowsError } = await fetchAreaHistoryRows({
+                        supabase,
+                        searchLat,
+                        searchLng,
+                        fuelType: normalizedFuelType,
+                    });
+
+                    if (!areaRowsError && Array.isArray(areaRows) && areaRows.length > 0) {
+                        const validatedQuotes = applyValidationToStationQuotes({
+                            stationQuotes: stationQuotesNeedingValidation,
+                            historyRows: areaRows,
+                            origin: { latitude, longitude },
+                        });
+                        const replacementByIdentity = new Map(
+                            validatedQuotes.map(quote => [buildQuoteIdentity(quote), quote])
+                        );
+
+                        allQuotes = allQuotes.map(quote => replacementByIdentity.get(buildQuoteIdentity(quote)) || quote);
+                    }
+                }
+            } catch (validationError) {
+                console.error('Station validation replay failed:', validationError);
+            }
+        }
+
         const stationQuotes = allQuotes.filter(quote => quote.providerTier === 'station' && !quote.isEstimated);
 
         const uniqueQuotesMap = new Map();
@@ -1323,6 +1596,7 @@ async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMi
             stationQuoteCount: stationQuotes.length,
             uniqueStationQuoteCount: uniqueQuotesMap.size,
             dedupedStationCount,
+            adjustedStationQuoteCount: stationQuotes.filter(quote => quote?.validation?.usedPrediction).length,
         };
 
         if (__DEV__ && dedupedStationCount > 0) {

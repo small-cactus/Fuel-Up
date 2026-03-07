@@ -1,9 +1,16 @@
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase.js';
+const { buildValidationState } = require('./priceValidation');
 
 const cachedTrendDataByFuelType = {};
 const lastResolvedTrendDataByFuelType = {};
 const lastTrendsScreenViewedAtMsByFuelType = {};
 const inFlightTrendDataRequestsByFuelType = {};
+const FUEL_GRADE_ALIASES = {
+    regular: ['regular', 'regular_gas'],
+    midgrade: ['midgrade', 'midgrade_gas'],
+    premium: ['premium', 'premium_gas'],
+    diesel: ['diesel'],
+};
 
 // Helper: Calculate distance between two coords in miles
 function getDistanceMiles(lat1, lon1, lat2, lon2) {
@@ -18,6 +25,89 @@ function getDistanceMiles(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
+function toPositiveNumber(value) {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+}
+
+function resolveStoredFuelPrice(allPrices, fuelType) {
+    if (!allPrices || typeof allPrices !== 'object') {
+        return null;
+    }
+
+    const aliases = FUEL_GRADE_ALIASES[String(fuelType || 'regular').toLowerCase()] || [fuelType];
+
+    for (const alias of aliases) {
+        const directPrice = toPositiveNumber(allPrices[alias]);
+        if (directPrice !== null) {
+            return directPrice;
+        }
+    }
+
+    const paymentMap = allPrices._payment && typeof allPrices._payment === 'object'
+        ? allPrices._payment
+        : {};
+
+    for (const alias of aliases) {
+        const paymentEntry = paymentMap[alias];
+
+        if (!paymentEntry || typeof paymentEntry !== 'object') {
+            continue;
+        }
+
+        const creditPrice = toPositiveNumber(paymentEntry.credit);
+        if (creditPrice !== null) {
+            return creditPrice;
+        }
+
+        const cashPrice = toPositiveNumber(paymentEntry.cash);
+        if (cashPrice !== null) {
+            return cashPrice;
+        }
+    }
+
+    return null;
+}
+
+function buildValidatedTrendRows(rows, fuelType) {
+    const normalizedFuelType = String(fuelType || 'regular').toLowerCase();
+    const validationRows = (rows || [])
+        .map(row => {
+            const rowPrice = (
+                resolveStoredFuelPrice(row.all_prices, normalizedFuelType) ??
+                (String(row.fuel_type || '').toLowerCase() === normalizedFuelType ? toPositiveNumber(row.price) : null)
+            );
+            const timestampMs = Date.parse(row.created_at || '');
+
+            if (rowPrice === null || !Number.isFinite(timestampMs)) {
+                return null;
+            }
+
+            return {
+                stationId: row.station_id ? String(row.station_id) : '',
+                fuelType: normalizedFuelType,
+                price: rowPrice,
+                timestampMs,
+                lat: Number(row.latitude),
+                lon: Number(row.longitude),
+                originalRow: row,
+            };
+        })
+        .filter(Boolean);
+    const validationState = buildValidationState(validationRows);
+
+    return validationState.outputs.map(({ row, result }) => ({
+        ...row.originalRow,
+        price: result.finalDisplayedPrice,
+        api_price: result.apiPrice,
+        predicted_price: result.predictedPrice,
+        used_prediction: result.usedPrediction,
+        validation_decision: result.decision,
+        risk: result.risk,
+        validity: result.validity,
+    }));
+}
+
 export async function fetchTrendData({ latitude, longitude, fuelType = 'regular' }) {
     const searchLat = Math.round(latitude * 10) / 10;
     const searchLng = Math.round(longitude * 10) / 10;
@@ -27,10 +117,13 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
         .select('*')
         .eq('search_latitude_rounded', searchLat)
         .eq('search_longitude_rounded', searchLng)
-        .eq('fuel_type', fuelType)
         .order('created_at', { ascending: true });
 
-    if (error || !rows || rows.length === 0) {
+    const validatedRows = !error && Array.isArray(rows)
+        ? buildValidatedTrendRows(rows, fuelType)
+        : [];
+
+    if (error || validatedRows.length === 0) {
         return {
             overallTrend: null,
             averagePricesByDay: [],
@@ -47,7 +140,7 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
     const latestPriceByStation = new Map();
     let previousLeaderboardSnapshotKey = null;
 
-    rows.forEach(row => {
+    validatedRows.forEach(row => {
         latestPriceByStation.set(row.station_id, row.price);
 
         const rankingSnapshot = [...latestPriceByStation.entries()]
@@ -67,7 +160,7 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
 
     // 1. Average prices grouped by day (for the main chart)
     const dayAggregation = {};
-    rows.forEach(row => {
+    validatedRows.forEach(row => {
         const dateStr = new Date(row.created_at).toISOString().split('T')[0];
         if (!dayAggregation[dateStr]) {
             dayAggregation[dateStr] = { sum: 0, count: 0 };
@@ -101,7 +194,7 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
     // For heatmap, average price of each station over its history
     const mapHeatmapPoints = [];
 
-    rows.forEach(row => {
+    validatedRows.forEach(row => {
         if (!stationAggregation[row.station_id]) {
             stationAggregation[row.station_id] = {
                 stationId: row.station_id,
