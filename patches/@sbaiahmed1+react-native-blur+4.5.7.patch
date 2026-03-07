@@ -1,4 +1,4 @@
-diff -ruN /tmp/react-native-blur-orig/package/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift /Users/anthonyh/Desktop/Fuel Up/node_modules/@sbaiahmed1/react-native-blur/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift
+diff -ruN /tmp/package/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift node_modules/@sbaiahmed1/react-native-blur/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift
 --- a/node_modules/@sbaiahmed1/react-native-blur/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift	1985-10-26 04:15:00
 +++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift	2026-03-06 17:18:51
 @@ -27,6 +27,66 @@
@@ -68,7 +68,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Helpers/ReactNativeProgressive
    /// Updates the progressive blur view with a new blur type.
    @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withBlurType blurType: String) {
      blurView.blurTypeString = blurType
-diff -ruN /tmp/react-native-blur-orig/package/ios/ReactNativeProgressiveBlurView.mm /Users/anthonyh/Desktop/Fuel Up/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurView.mm
+diff -ruN /tmp/package/ios/ReactNativeProgressiveBlurView.mm node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurView.mm
 --- a/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurView.mm	1985-10-26 04:15:00
 +++ b/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurView.mm	2026-03-06 17:19:11
 @@ -136,6 +136,18 @@
@@ -145,7 +145,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/ReactNativeProgressiveBlurView
    }
  
    if (oldViewProps.reducedTransparencyFallbackColor != newViewProps.reducedTransparencyFallbackColor) {
-diff -ruN /tmp/react-native-blur-orig/package/ios/ReactNativeProgressiveBlurViewManager.mm /Users/anthonyh/Desktop/Fuel Up/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurViewManager.mm
+diff -ruN /tmp/package/ios/ReactNativeProgressiveBlurViewManager.mm node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurViewManager.mm
 --- a/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurViewManager.mm	1985-10-26 04:15:00
 +++ b/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurViewManager.mm	2026-03-06 17:19:23
 @@ -48,6 +48,78 @@
@@ -227,7 +227,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/ReactNativeProgressiveBlurView
  RCT_CUSTOM_VIEW_PROPERTY(reducedTransparencyFallbackColor, NSString, ProgressiveBlurView)
  {
    NSString *colorString = json ? [RCTConvert NSString:json] : @"#FFFFFF";
-diff -ruN /tmp/react-native-blur-orig/package/ios/Views/ProgressiveBlurView.swift /Users/anthonyh/Desktop/Fuel Up/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlurView.swift
+diff -ruN /tmp/package/ios/Views/ProgressiveBlurView.swift node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlurView.swift
 --- a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlurView.swift	1985-10-26 04:15:00
 +++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlurView.swift	2026-03-06 18:38:32
 @@ -26,6 +26,56 @@
@@ -358,9 +358,9 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/ProgressiveBlurView.swif
    }
  
    public override func didMoveToWindow() {
-diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /Users/anthonyh/Desktop/Fuel Up/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift
+diff -ruN /tmp/package/ios/Views/VariableBlurView.swift node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift
 --- a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift	1985-10-26 04:15:00
-+++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift	2026-03-06 18:43:31
++++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift	2026-03-07 13:53:46
 @@ -28,6 +28,32 @@
    private var maxBlurRadius: CGFloat = 20
    private var direction: VariableBlurDirection = .blurredTopClearBottom
@@ -404,7 +404,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
  
      super.init(effect: UIBlurEffect(style: blurStyle))
  
-@@ -53,66 +82,156 @@
+@@ -53,27 +82,46 @@
      maxBlurRadius: CGFloat,
      direction: VariableBlurDirection,
      startOffset: CGFloat,
@@ -426,13 +426,12 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
 +    self.radialFeather = radialFeather
 +    self.currentBlurStyle = blurStyle
  
--    setupVariableBlur()
 +    if displayLink == nil {
 +      currentAnimatedClearRadius = radialClearRadius
 +      currentAnimatedFeather = radialFeather
 +    }
 +
-+    applyCurrentConfiguration()
+     setupVariableBlur()
    }
  
    private func setupVariableBlur() {
@@ -440,70 +439,110 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
 -    // This uses a private Core Animation filter called "variableBlur"
 -    let clsName = String("retliFAC".reversed()) // CAFilter
 -    guard let Cls = NSClassFromString(clsName) as? NSObject.Type else {
--      print("[VariableBlur] Error: Can't find filter class")
-+    applyCurrentConfiguration()
-+  }
-+
-+  private func applyCurrentConfiguration() {
-+    if layer.mask != nil {
-+      layer.mask = nil
++    if effect == nil || appliedBlurStyle != currentBlurStyle {
++      effect = UIBlurEffect(style: currentBlurStyle)
++      appliedBlurStyle = currentBlurStyle
++      backdropLayerRef = nil
 +    }
 +
-+    guard let variableBlur = ensureBaseConfiguration() else {
++    let clsName = String("retliFAC".reversed())
++    guard let cls = NSClassFromString(clsName) as? NSObject.Type else {
+       print("[VariableBlur] Error: Can't find filter class")
        return
      }
  
 -    let selName = String(":epyThtiWretlif".reversed()) // filterWithType:
 -    guard let variableBlur = Cls.self.perform(
-+    updateFilterMaskAndRadius(variableBlur, forceMaskRefresh: true)
-+  }
-+
-+  private func ensureVariableBlurFilter() -> NSObject? {
-+    if let variableBlurFilter {
-+      return variableBlurFilter
-+    }
-+
-+    let clsName = String("retliFAC".reversed())
-+    guard let cls = NSClassFromString(clsName) as? NSObject.Type else {
-+      print("[VariableBlur] Error: Can't find filter class")
-+      return nil
-+    }
-+
 +    let selName = String(":epyThtiWretlif".reversed())
 +    guard let variableBlur = cls.perform(
        NSSelectorFromString(selName),
        with: "variableBlur"
      )?.takeUnretainedValue() as? NSObject else {
-       print("[VariableBlur] Error: Can't create variableBlur filter")
--      return
-+      return nil
+@@ -81,7 +129,10 @@
+       return
      }
  
--    let gradientImage = makeGradientImage(
--      startOffset: startOffset,
--      direction: direction
--    )
++    let maskCanvasSize = makeMaskCanvasSize()
+     let gradientImage = makeGradientImage(
++      width: maskCanvasSize.width,
++      height: maskCanvasSize.height,
+       startOffset: startOffset,
+       direction: direction
+     )
+@@ -90,29 +141,142 @@
+     variableBlur.setValue(gradientImage, forKey: "inputMaskImage")
+     variableBlur.setValue(true, forKey: "inputNormalizeEdges")
+ 
+-    let backdropLayer = subviews.first?.layer
+-    backdropLayer?.filters = [variableBlur]
++    guard let backdropLayer = ensureBackdropLayer() else {
++      return
++    }
+ 
+-    // Hide the default visual effect view overlays
++    backdropLayer.filters = [variableBlur]
++    updateBackdropScaleIfNeeded(backdropLayer)
 +    variableBlurFilter = variableBlur
-+    return variableBlur
++    lastAppliedBlurRadius = maxBlurRadius
++    lastRenderedClearRadius = currentAnimatedClearRadius
++    lastRenderedFeather = currentAnimatedFeather
++    layer.mask = nil
++
+     for subview in subviews.dropFirst() {
+-      subview.alpha = 0
++      if subview.alpha != 0 {
++        subview.alpha = 0
++      }
+     }
+   }
+ 
+-  open override func didMoveToWindow() {
+-    super.didMoveToWindow()
+-    guard let window, let backdropLayer = subviews.first?.layer else { return }
++  private func applyCurrentConfiguration() {
++    setupVariableBlur()
 +  }
  
--    variableBlur.setValue(maxBlurRadius, forKey: "inputRadius")
--    variableBlur.setValue(gradientImage, forKey: "inputMaskImage")
--    variableBlur.setValue(true, forKey: "inputNormalizeEdges")
+-    let newScale = window.traitCollection.displayScale
+-    let currentScale = backdropLayer.value(forKey: "scale") as? CGFloat
++  private func ensureVariableBlurFilter() -> NSObject? {
++    if let variableBlurFilter {
++      return variableBlurFilter
++    }
+ 
+-    // Only update scale if it actually changed to prevent unnecessary
+-    // recalculations during navigation gestures
+-    if currentScale != newScale {
+-      backdropLayer.setValue(newScale, forKey: "scale")
++    let clsName = String("retliFAC".reversed())
++    guard let cls = NSClassFromString(clsName) as? NSObject.Type else {
++      print("[VariableBlur] Error: Can't find filter class")
++      return nil
+     }
++
++    let selName = String(":epyThtiWretlif".reversed())
++    guard let variableBlur = cls.perform(
++      NSSelectorFromString(selName),
++      with: "variableBlur"
++    )?.takeUnretainedValue() as? NSObject else {
++      print("[VariableBlur] Error: Can't create variableBlur filter")
++      return nil
++    }
++
++    variableBlurFilter = variableBlur
++    return variableBlur
+   }
+ 
 +  private func ensureBackdropLayer() -> CALayer? {
 +    if let backdropLayerRef {
 +      return backdropLayerRef
 +    }
- 
-     let backdropLayer = subviews.first?.layer
--    backdropLayer?.filters = [variableBlur]
++
++    let backdropLayer = subviews.first?.layer
 +    backdropLayerRef = backdropLayer
 +    return backdropLayer
 +  }
- 
--    // Hide the default visual effect view overlays
--    for subview in subviews.dropFirst() {
--      subview.alpha = 0
++
 +  public func startRevealAnimation(
 +    durationMs: CGFloat,
 +    delayMs: CGFloat,
@@ -523,7 +562,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
 +    animationToFeather = toFeather
 +    currentAnimatedClearRadius = fromRadius
 +    currentAnimatedFeather = fromFeather
-+    applyCurrentConfiguration()
++    setupVariableBlur()
 +
 +    let displayLink = CADisplayLink(target: self, selector: #selector(handleRevealDisplayLink))
 +    if #available(iOS 15.0, *) {
@@ -536,32 +575,23 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
 +      )
 +    } else {
 +      displayLink.preferredFramesPerSecond = max(UIScreen.main.maximumFramesPerSecond, 60)
-     }
++    }
 +    displayLink.add(to: .main, forMode: .common)
 +    self.displayLink = displayLink
-   }
- 
--  open override func didMoveToWindow() {
--    super.didMoveToWindow()
--    guard let window, let backdropLayer = subviews.first?.layer else { return }
++  }
++
 +  public func stopRevealAnimation() {
 +    displayLink?.invalidate()
 +    displayLink = nil
 +    radialMaskLayer.removeAnimation(forKey: "radialRevealLocations")
 +  }
- 
--    let newScale = window.traitCollection.displayScale
--    let currentScale = backdropLayer.value(forKey: "scale") as? CGFloat
++
 +  @objc private func handleRevealDisplayLink() {
 +    let elapsed = CACurrentMediaTime() - animationStartTime - animationDelaySeconds
 +    if elapsed < 0 {
 +      return
 +    }
- 
--    // Only update scale if it actually changed to prevent unnecessary
--    // recalculations during navigation gestures
--    if currentScale != newScale {
--      backdropLayer.setValue(newScale, forKey: "scale")
++
 +    let rawProgress = min(max(CGFloat(elapsed / animationDurationSeconds), 0), 1)
 +    let easedProgress = memoriumRadiusEase(rawProgress)
 +    currentAnimatedClearRadius = interpolate(
@@ -574,9 +604,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
 +      to: animationToFeather,
 +      progress: easedProgress
 +    )
-+    if let variableBlur = ensureBaseConfiguration() {
-+      updateFilterMaskAndRadius(variableBlur, forceMaskRefresh: false)
-     }
++    setupVariableBlur()
 +
 +    if rawProgress >= 1 {
 +      stopRevealAnimation()
@@ -586,8 +614,8 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
 +      currentAnimatedFeather = animationToFeather
 +      applyCurrentConfiguration()
 +    }
-   }
- 
++  }
++
 +  open override func didMoveToWindow() {
 +    super.didMoveToWindow()
 +    guard let backdropLayer = ensureBackdropLayer() else { return }
@@ -597,7 +625,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
    open override func traitCollectionDidChange(
      _ previousTraitCollection: UITraitCollection?
    ) {
-@@ -120,16 +239,26 @@
+@@ -120,16 +284,26 @@
      // Re-setup blur if needed when trait collection changes
      if let previousTraitCollection = previousTraitCollection,
         traitCollection.userInterfaceStyle != previousTraitCollection.userInterfaceStyle {
@@ -625,7 +653,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
      switch direction {
      case .blurredCenterClearTopAndBottom:
        return makeCenterGradientImage(
-@@ -165,6 +294,69 @@
+@@ -165,6 +339,69 @@
      }
    }
  
@@ -695,7 +723,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
    private func makeCenterGradientImage(
      width: CGFloat = 100,
      height: CGFloat = 100,
-@@ -269,5 +461,373 @@
+@@ -269,5 +506,373 @@
      context.setFillColor(CGColor(gray: 0, alpha: 1))
      context.fill(CGRect(x: 0, y: 0, width: width, height: height))
      return context.makeImage()!
@@ -1069,7 +1097,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
 +    stopRevealAnimation()
    }
  }
-diff -ruN /tmp/react-native-blur-orig/package/lib/module/ReactNativeProgressiveBlurViewNativeComponent.ts /Users/anthonyh/Desktop/Fuel Up/node_modules/@sbaiahmed1/react-native-blur/lib/module/ReactNativeProgressiveBlurViewNativeComponent.ts
+diff -ruN /tmp/package/lib/module/ReactNativeProgressiveBlurViewNativeComponent.ts node_modules/@sbaiahmed1/react-native-blur/lib/module/ReactNativeProgressiveBlurViewNativeComponent.ts
 --- a/node_modules/@sbaiahmed1/react-native-blur/lib/module/ReactNativeProgressiveBlurViewNativeComponent.ts	1985-10-26 04:15:00
 +++ b/node_modules/@sbaiahmed1/react-native-blur/lib/module/ReactNativeProgressiveBlurViewNativeComponent.ts	2026-03-06 18:35:42
 @@ -38,6 +38,18 @@
@@ -1091,7 +1119,7 @@ diff -ruN /tmp/react-native-blur-orig/package/lib/module/ReactNativeProgressiveB
    reducedTransparencyFallbackColor?: WithDefault<string, '#FFFFFF'>;
  }
  
-diff -ruN /tmp/react-native-blur-orig/package/lib/typescript/src/ReactNativeProgressiveBlurViewNativeComponent.d.ts /Users/anthonyh/Desktop/Fuel Up/node_modules/@sbaiahmed1/react-native-blur/lib/typescript/src/ReactNativeProgressiveBlurViewNativeComponent.d.ts
+diff -ruN /tmp/package/lib/typescript/src/ReactNativeProgressiveBlurViewNativeComponent.d.ts node_modules/@sbaiahmed1/react-native-blur/lib/typescript/src/ReactNativeProgressiveBlurViewNativeComponent.d.ts
 --- a/node_modules/@sbaiahmed1/react-native-blur/lib/typescript/src/ReactNativeProgressiveBlurViewNativeComponent.d.ts	1985-10-26 04:15:00
 +++ b/node_modules/@sbaiahmed1/react-native-blur/lib/typescript/src/ReactNativeProgressiveBlurViewNativeComponent.d.ts	2026-03-06 18:35:49
 @@ -7,8 +7,20 @@
@@ -1117,7 +1145,7 @@ diff -ruN /tmp/react-native-blur-orig/package/lib/typescript/src/ReactNativeProg
 -//# sourceMappingURL=ReactNativeProgressiveBlurViewNativeComponent.d.ts.map
 \ No newline at end of file
 +//# sourceMappingURL=ReactNativeProgressiveBlurViewNativeComponent.d.ts.map
-diff -ruN /tmp/react-native-blur-orig/package/src/ReactNativeProgressiveBlurViewNativeComponent.ts /Users/anthonyh/Desktop/Fuel Up/node_modules/@sbaiahmed1/react-native-blur/src/ReactNativeProgressiveBlurViewNativeComponent.ts
+diff -ruN /tmp/package/src/ReactNativeProgressiveBlurViewNativeComponent.ts node_modules/@sbaiahmed1/react-native-blur/src/ReactNativeProgressiveBlurViewNativeComponent.ts
 --- a/node_modules/@sbaiahmed1/react-native-blur/src/ReactNativeProgressiveBlurViewNativeComponent.ts	1985-10-26 04:15:00
 +++ b/node_modules/@sbaiahmed1/react-native-blur/src/ReactNativeProgressiveBlurViewNativeComponent.ts	2026-03-06 17:17:19
 @@ -38,6 +38,18 @@
