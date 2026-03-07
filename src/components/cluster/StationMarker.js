@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Marker } from 'react-native-maps';
 import { LiquidGlassView } from '@callstack/liquid-glass';
@@ -41,7 +41,7 @@ function ensureInitialShrinkDelayWindowTimer() {
   }, INITIAL_SHRINK_DELAY_WINDOW_MS);
 }
 
-export default function StationMarker({
+function StationMarker({
   quote,
   isSuppressed = false,
   isActive = false,
@@ -120,7 +120,7 @@ export default function StationMarker({
         longitude: quote.longitude,
       }}
       anchor={{ x: 0.5, y: 0.5 }}
-      onPress={onPress}
+      onPress={() => onPress?.(quote)}
       style={{ zIndex: isActive ? 3 : isBest ? 2 : 1 }}
       tracksViewChanges
     >
@@ -142,6 +142,20 @@ export default function StationMarker({
     </Marker>
   );
 }
+
+function areStationMarkerPropsEqual(previousProps, nextProps) {
+  return (
+    previousProps.quote === nextProps.quote &&
+    previousProps.isSuppressed === nextProps.isSuppressed &&
+    previousProps.isActive === nextProps.isActive &&
+    previousProps.isBest === nextProps.isBest &&
+    previousProps.isDark === nextProps.isDark &&
+    previousProps.themeColors?.text === nextProps.themeColors?.text &&
+    previousProps.onPress === nextProps.onPress
+  );
+}
+
+export default memo(StationMarker, areStationMarkerPropsEqual);
 
 const styles = StyleSheet.create({
   pillShell: {

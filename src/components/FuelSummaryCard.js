@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { GlassContainer, GlassView } from 'expo-glass-effect';
 
@@ -13,6 +13,11 @@ import {
 
 const BEST_PRICE_LIGHT = '#007AFF';
 const BEST_PRICE_DARK = '#11f050ff';
+const CARD_GLASS_EFFECT_STYLE = {
+    style: 'clear',
+    animate: true,
+    animationDuration: 0.2,
+};
 
 function formatPrice(price) {
     if (typeof price !== 'number' || Number.isNaN(price)) {
@@ -48,7 +53,7 @@ function formatRelativeTime(updatedAt) {
     return `${diffDays}d ago`;
 }
 
-export default function FuelSummaryCard({
+function FuelSummaryCard({
     isDark,
     isRefreshing,
     errorMsg,
@@ -96,12 +101,7 @@ export default function FuelSummaryCard({
             <GlassView
                 style={styles.card}
                 tintColor={glassTintColor ?? (isDark ? '#101010ff' : '#FFFFFF')}
-                glassEffectStyle={{
-                    style: 'clear',
-                    animate: true,
-                    animationDuration: 0.2,
-                }}
-                key={isDark ? 'dark' : 'light'}
+                glassEffectStyle={CARD_GLASS_EFFECT_STYLE}
             >
                 <View style={styles.headerRow}>
                     <View style={styles.titleContainer}>
@@ -180,6 +180,8 @@ export default function FuelSummaryCard({
         </GlassContainer>
     );
 }
+
+export default memo(FuelSummaryCard);
 
 const styles = StyleSheet.create({
     cardGroup: {

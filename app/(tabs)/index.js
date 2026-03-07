@@ -1,4 +1,4 @@
-import React, { startTransition, useEffect, useRef, useState, useMemo } from 'react';
+import React, { startTransition, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
@@ -1230,6 +1230,7 @@ export default function HomeScreen() {
     const initialStationsFitRetryTimeoutRef = useRef(null);
     const prefetchedTrendRequestKeysRef = useRef(new Map());
     const mapLoadedFallbackTimeoutRef = useRef(null);
+    const lastSettledCardIndexRef = useRef(0);
     const router = useRouter();
     const scrollX = useSharedValue(0);
 
@@ -1834,6 +1835,7 @@ export default function HomeScreen() {
             screenHeight: height,
         });
     }, [stationQuotes, mapRegion, width, height]);
+    const suppressionRegion = isMapMoving ? mapRegion : mapRenderRegion;
     const suppressedOverlapStationIds = useMemo(() => {
         if (ENABLE_CLUSTER_MERGE_TRANSITIONS) {
             return new Set();
@@ -1841,12 +1843,12 @@ export default function HomeScreen() {
 
         return buildSuppressedOverlapStationIds(
             stationQuotes,
-            mapRenderRegion,
+            suppressionRegion,
             width,
             height,
             hasLocationPermission ? userLocationBubble : null
         );
-    }, [stationQuotes, mapRenderRegion, width, height, hasLocationPermission, userLocationBubble]);
+    }, [stationQuotes, suppressionRegion, width, height, hasLocationPermission, userLocationBubble]);
     const visibleSuppressedStationIds = useMemo(() => {
         const nextSuppressed = new Set(suppressedOverlapStationIds);
         const activeQuote = stationQuotes[activeIndex];
@@ -1858,8 +1860,8 @@ export default function HomeScreen() {
         return nextSuppressed;
     }, [suppressedOverlapStationIds, stationQuotes, activeIndex]);
     const allStationsFitZoomRegion = useMemo(() => (
-        buildStationsFitZoomRegion(stationQuotes, mapRenderRegion)
-    ), [stationQuotes, mapRenderRegion]);
+        buildStationsFitZoomRegion(stationQuotes, mapRegion)
+    ), [stationQuotes, mapRegion]);
     const [clusters, setClusters] = useState(computedClusters);
 
     useEffect(() => {
@@ -1949,6 +1951,7 @@ export default function HomeScreen() {
     useEffect(() => {
         if (activeIndex >= stationQuotes.length) {
             setActiveIndex(0);
+            lastSettledCardIndexRef.current = 0;
         }
     }, [activeIndex, stationQuotes.length]);
 
@@ -1984,7 +1987,7 @@ export default function HomeScreen() {
         ];
     };
 
-    const zoomToStation = (quote) => {
+    const zoomToStation = useCallback((quote) => {
         if (
             !mapRef.current ||
             !Number.isFinite(quote?.latitude) ||
@@ -2009,7 +2012,7 @@ export default function HomeScreen() {
             latitudeDelta: resolvedFocusZoom.latitudeDelta,
             longitudeDelta: resolvedFocusZoom.longitudeDelta,
         }, STATION_FOCUS_ANIMATION_MS);
-    };
+    }, [allStationsFitZoomRegion, hasLocationPermission, height, stationQuotes, userLocationBubble, width]);
 
     const handleMarkerPress = (cluster) => {
         const primaryQuote = cluster.quotes[0];
@@ -2047,7 +2050,7 @@ export default function HomeScreen() {
         }
     };
 
-    const fitMapToStations = ({ animated = true } = {}) => {
+    const fitMapToStations = useCallback(({ animated = true } = {}) => {
         if (!mapRef.current) {
             return;
         }
@@ -2093,7 +2096,38 @@ export default function HomeScreen() {
                 });
             }, STATIONS_FIT_SETTLE_PASS_DELAY_MS);
         }
-    };
+    }, [
+        bottomPadding,
+        height,
+        horizontalPadding.left,
+        horizontalPadding.right,
+        sideInset,
+        stationQuotes,
+        topCanopyHeight,
+    ]);
+
+    const handleStationMarkerPress = useCallback((quote) => {
+        const index = quote?.originalIndex;
+
+        if (!Number.isInteger(index)) {
+            return;
+        }
+
+        lastSettledCardIndexRef.current = index;
+        isUserScrollingRef.current = false;
+        flatListRef.current?.scrollToOffset({
+            offset: index * itemWidth,
+            animated: true,
+        });
+        setActiveIndex(index);
+
+        if (index === 0) {
+            fitMapToStations();
+            return;
+        }
+
+        zoomToStation(quote);
+    }, [fitMapToStations, itemWidth, zoomToStation]);
 
     const setMapMotionState = (moving) => {
         if (mapMotionRef.current === moving) {
@@ -2194,19 +2228,55 @@ export default function HomeScreen() {
         if (isNewData || isFocusGained) {
             lastDataHashRef.current = currentHash;
             isUserScrollingRef.current = false;
+            lastSettledCardIndexRef.current = activeIndex;
 
             setTimeout(() => {
                 fitMapToStations();
             }, 100);
-        } else if (isUserScrollingRef.current && activeIndex >= 0 && activeIndex < stationQuotes.length) {
-            const activeQuote = stationQuotes[activeIndex];
-            if (activeIndex === 0) {
-                fitMapToStations();
-            } else {
-                zoomToStation(activeQuote);
-            }
         }
     }, [activeIndex, stationQuotes, bottomPadding, topCanopyHeight, horizontalPadding.left, horizontalPadding.right, sideInset, isFocused, isMapLoaded, isMapMoving]);
+
+    const resolveCardIndexFromOffset = (offsetX) => {
+        if (!Number.isFinite(offsetX) || itemWidth <= 0 || stationQuotesRef.current.length === 0) {
+            return null;
+        }
+
+        const maxIndex = stationQuotesRef.current.length - 1;
+        const nextIndex = Math.round(offsetX / itemWidth);
+
+        return Math.max(0, Math.min(maxIndex, nextIndex));
+    };
+
+    const settleCardSelection = (offsetX) => {
+        const nextIndex = resolveCardIndexFromOffset(offsetX);
+
+        isUserScrollingRef.current = false;
+
+        if (nextIndex === null) {
+            return;
+        }
+
+        setActiveIndex(currentValue => (
+            currentValue === nextIndex ? currentValue : nextIndex
+        ));
+
+        if (lastSettledCardIndexRef.current === nextIndex) {
+            return;
+        }
+
+        lastSettledCardIndexRef.current = nextIndex;
+
+        if (nextIndex === 0) {
+            fitMapToStations();
+            return;
+        }
+
+        const nextQuote = stationQuotesRef.current[nextIndex];
+
+        if (nextQuote) {
+            zoomToStation(nextQuote);
+        }
+    };
 
     const fallbackCoordinate = {
         latitude: location.latitude,
@@ -2901,7 +2971,7 @@ export default function HomeScreen() {
                                                 isBest={quote.originalIndex === 0}
                                                 isDark={isDark}
                                                 themeColors={themeColors}
-                                                onPress={() => handleMarkerPress(entry.cluster)}
+                                                onPress={handleStationMarkerPress}
                                             />
                                         );
                                     })}
@@ -3075,6 +3145,16 @@ export default function HomeScreen() {
                         onViewableItemsChanged={onViewableItemsChanged}
                         viewabilityConfig={viewabilityConfig}
                         onScrollBeginDrag={() => { isUserScrollingRef.current = true; }}
+                        onMomentumScrollEnd={(event) => {
+                            settleCardSelection(event?.nativeEvent?.contentOffset?.x);
+                        }}
+                        onScrollEndDrag={(event) => {
+                            const targetOffsetX = event?.nativeEvent?.targetContentOffset?.x;
+
+                            if (Number.isFinite(targetOffsetX)) {
+                                settleCardSelection(targetOffsetX);
+                            }
+                        }}
                         onScroll={scrollHandler}
                         scrollEventThrottle={16}
                         renderItem={({ item, index }) => (
