@@ -1,4 +1,4 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Marker } from 'react-native-maps';
 import { LiquidGlassView } from '@callstack/liquid-glass';
@@ -23,6 +23,7 @@ const SUPPRESSED_SCALE = 0.005;
 const APPEAR_START_SCALE = 0.84;
 const APPEAR_DURATION_MS = 220;
 const INITIAL_SHRINK_DELAY_WINDOW_MS = 2500;
+const TRACKS_VIEW_CHANGES_IDLE_MS = 180;
 const BEST_PRICE_BLUE_LIGHT = '#007AFF';
 const BEST_PRICE_BLUE_DARK = '#11f050ff';
 const INACTIVE_TEXT_DARK = '#F5F7FA';
@@ -52,9 +53,19 @@ function StationMarker({
 }) {
   const appearProgress = useSharedValue(0);
   const suppressionProgress = useSharedValue(0);
+  const tracksViewChangesTimeoutRef = useRef(null);
+  const visualStateSignatureRef = useRef('');
+  const [tracksViewChanges, setTracksViewChanges] = useState(true);
 
   useEffect(() => {
     ensureInitialShrinkDelayWindowTimer();
+
+    return () => {
+      if (tracksViewChangesTimeoutRef.current) {
+        clearTimeout(tracksViewChangesTimeoutRef.current);
+        tracksViewChangesTimeoutRef.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -112,6 +123,37 @@ function StationMarker({
   const textColor = isBest
     ? bestTintColor
     : (isActive ? themeColors.text : inactiveTextColor);
+  const visualStateSignature = [
+    quote?.stationId ?? '',
+    quote?.price ?? '',
+    isSuppressed ? '1' : '0',
+    isActive ? '1' : '0',
+    isBest ? '1' : '0',
+    isDark ? '1' : '0',
+    themeColors?.text ?? '',
+  ].join('|');
+
+  useEffect(() => {
+    if (visualStateSignatureRef.current === visualStateSignature) {
+      return;
+    }
+
+    visualStateSignatureRef.current = visualStateSignature;
+    setTracksViewChanges(true);
+
+    if (tracksViewChangesTimeoutRef.current) {
+      clearTimeout(tracksViewChangesTimeoutRef.current);
+    }
+
+    const trackingDuration = isSuppressed && isInitialShrinkDelayWindowOpen
+      ? SHRINK_DELAY_MS + SHRINK_DURATION_MS + TRACKS_VIEW_CHANGES_IDLE_MS
+      : Math.max(APPEAR_DURATION_MS, SHRINK_DURATION_MS) + TRACKS_VIEW_CHANGES_IDLE_MS;
+
+    tracksViewChangesTimeoutRef.current = setTimeout(() => {
+      tracksViewChangesTimeoutRef.current = null;
+      setTracksViewChanges(false);
+    }, trackingDuration);
+  }, [isActive, isBest, isDark, isSuppressed, quote?.price, quote?.stationId, themeColors?.text, visualStateSignature]);
 
   return (
     <Marker
@@ -122,7 +164,7 @@ function StationMarker({
       anchor={{ x: 0.5, y: 0.5 }}
       onPress={() => onPress?.(quote)}
       style={{ zIndex: isActive ? 3 : isBest ? 2 : 1 }}
-      tracksViewChanges
+      tracksViewChanges={tracksViewChanges}
     >
       <AnimatedView style={shrinkStyle}>
         <LiquidGlassView effect="clear" style={styles.pillShell}>

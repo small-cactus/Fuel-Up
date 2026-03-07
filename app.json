@@ -16,6 +16,17 @@
       "expo-font",
       "expo-notifications",
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Fuel Up uses your precise location to find the closest cheapest gas around you.",
+          "locationAlwaysAndWhenInUsePermission": "Fuel Up uses your precise location in the background to predict where and when you should stop for gas.",
+          "locationAlwaysPermission": "Fuel Up uses your precise location in the background to predict where and when you should stop for gas.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ],
+      [
         "expo-widgets",
         {
           "groupIdentifier": "group.com.anthonyh.fuelup",
@@ -39,9 +50,13 @@
     "icon": "./assets/fuelup-icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/fuelup-icon.png",
+      "image": "./assets/splash-light.png",
       "resizeMode": "contain",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#FFFFFF",
+      "dark": {
+        "image": "./assets/splash-dark.png",
+        "backgroundColor": "#000000"
+      }
     },
     "ios": {
       "icon": "./fuelup.icon",
@@ -51,14 +66,21 @@
         "aps-environment": "development"
       },
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Fuel Up requires precise location access to function.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Fuel Up requires precise location access to function.",
+        "NSMotionUsageDescription": "Fuel Up uses motion signals to understand when you are driving toward a likely fuel stop.",
         "ITSAppUsesNonExemptEncryption": false,
         "CADisableMinimumFrameDurationOnPhone": true
       }
     },
     "android": {
-      "package": "com.anthonyh.fuelup"
+      "package": "com.anthonyh.fuelup",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "ACTIVITY_RECOGNITION"
+      ]
     },
     "extra": {
       "supabase": {

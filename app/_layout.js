@@ -9,6 +9,7 @@ import * as Linking from 'expo-linking';
 import * as FileSystem from 'expo-file-system/legacy';
 import OnboardingScreen from '../src/screens/OnboardingScreen';
 import ProgressiveBlurReveal from '../src/components/ProgressiveBlurReveal';
+import '../src/lib/predictiveLocation';
 
 const CLUSTER_DEBUG_PROBE_REQUEST_FILE_NAME = 'cluster-debug-probe-request.json';
 const CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME = 'cluster-debug-probe.json';

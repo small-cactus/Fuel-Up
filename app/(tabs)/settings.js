@@ -11,6 +11,11 @@ import { clearFuelPriceCache } from '../../src/services/fuel';
 import { useTheme } from '../../src/ThemeContext';
 import TopCanopy from '../../src/components/TopCanopy';
 import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
+import {
+    getPredictiveLocationPermissionStateAsync,
+    openPredictiveLocationSettingsAsync,
+    requestPredictiveLocationPermissionsAsync,
+} from '../../src/lib/predictiveLocation';
 
 const OCTANE_OPTIONS = [
     { key: 'regular', label: 'Regular' },
@@ -169,6 +174,7 @@ export default function SettingsScreen() {
     const { requestFuelReset, setFuelDebugState } = useAppState();
     const { preferences, updatePreference, resetOnboarding } = usePreferences();
     const [resetNotice, setResetNotice] = useState(null);
+    const [trackingPermissionState, setTrackingPermissionState] = useState(null);
 
     const glassTintColor = isDark ? '#101010ff' : '#FFFFFF';
     const canopyEdgeLine = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
@@ -190,6 +196,28 @@ export default function SettingsScreen() {
     useEffect(() => {
         lastRadiusIndexRef.current = radiusIndex;
     }, [radiusIndex]);
+
+    useEffect(() => {
+        let isActive = true;
+
+        void (async () => {
+            try {
+                const nextPermissionState = await getPredictiveLocationPermissionStateAsync();
+
+                if (isActive) {
+                    setTrackingPermissionState(nextPermissionState);
+                }
+            } catch (error) {
+                if (isActive) {
+                    setTrackingPermissionState(null);
+                }
+            }
+        })();
+
+        return () => {
+            isActive = false;
+        };
+    }, []);
 
     const fireTapHaptic = () => {
         noThrow(Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light));
@@ -256,6 +284,44 @@ export default function SettingsScreen() {
                 },
             ]
         );
+    };
+
+    const handleReviewTrackingPermissions = async () => {
+        fireTapHaptic();
+
+        try {
+            const nextPermissionState = await requestPredictiveLocationPermissionsAsync();
+            setTrackingPermissionState(nextPermissionState);
+
+            if (nextPermissionState.isReady) {
+                Alert.alert(
+                    'Predictive Tracking Enabled',
+                    'Always-on precise location is enabled for background fuel predictions.'
+                );
+                return;
+            }
+
+            Alert.alert(
+                'Finish Tracking Setup',
+                nextPermissionState.servicesEnabled
+                    ? 'Fuel Up still needs Always Allow and Precise Location in iPhone Settings to fully enable predictive fueling.'
+                    : 'Turn on Location Services in iPhone Settings first, then come back and enable Always Allow and Precise Location.',
+                [
+                    { text: 'Not Now', style: 'cancel' },
+                    {
+                        text: 'Open Settings',
+                        onPress: () => {
+                            void openPredictiveLocationSettingsAsync();
+                        },
+                    },
+                ]
+            );
+        } catch (error) {
+            Alert.alert(
+                'Unable To Review Permissions',
+                'Background tracking permissions can only be configured from a development or production build.'
+            );
+        }
     };
 
     return (
@@ -429,6 +495,25 @@ export default function SettingsScreen() {
                                     ))}
                                 </View>
                             </SettingsCard>
+                        </SettingsSection>
+
+                        <SettingsSection
+                            title="TRACKING"
+                            titleColor={themeColors.textOpacity}
+                            titleStyle={darkModeWeightStyle.sectionTitle}
+                            footer={trackingPermissionState?.isReady
+                                ? 'Always-on precise location is enabled.'
+                                : 'Fuel Up needs Always Allow and Precise Location for predictive fueling and geofences.'}
+                        >
+                            <ActionButton
+                                title={trackingPermissionState?.isReady ? 'Review Tracking Permissions' : 'Enable Predictive Tracking'}
+                                icon={trackingPermissionState?.isReady ? 'location.fill.viewfinder' : 'location.badge.clock'}
+                                iconTint="#0A84FF"
+                                isDark={isDark}
+                                onPress={handleReviewTrackingPermissions}
+                                glassTintColor={glassTintColor}
+                                themeColors={themeColors}
+                            />
                         </SettingsSection>
 
                         <SettingsSection

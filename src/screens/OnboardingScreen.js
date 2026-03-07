@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { LiquidGlassView as GlassView, LiquidGlassContainerView } from '@callstack/liquid-glass';
 
@@ -40,6 +40,11 @@ import {
     persistLastDeviceLocationRegion,
 } from '../lib/deviceLocationCache';
 import { consumeFreshLaunchMapBootstrap } from '../lib/appLaunchState';
+import {
+    getPredictiveLocationPermissionStateAsync,
+    openPredictiveLocationSettingsAsync,
+    requestPredictiveLocationPermissionsAsync,
+} from '../lib/predictiveLocation';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -77,6 +82,54 @@ const LIGHT_SCREEN_BACKGROUND = '#f2f1f6';
 const LIGHT_SCREEN_BACKGROUND_85 = 'rgba(242,241,246,0.85)';
 const LIGHT_SCREEN_BACKGROUND_42 = 'rgba(242,241,246,0.42)';
 const LIGHT_SCREEN_BACKGROUND_0 = 'rgba(242,241,246,0)';
+
+function hasPredictiveLocationAccess(permissionState) {
+    return permissionState?.isReady === true;
+}
+
+function getLocationActionLabel(permissionState) {
+    if (!permissionState?.foregroundGranted) {
+        return 'Enable Location';
+    }
+
+    if (!permissionState?.backgroundGranted) {
+        return 'Enable Always-On Location';
+    }
+
+    if (!permissionState?.preciseLocationGranted) {
+        return 'Enable Precise Location';
+    }
+
+    return 'Continue';
+}
+
+function getLocationStatusCopy(permissionState) {
+    if (!permissionState) {
+        return 'Choose Always Allow and keep Precise Location on when iOS asks.';
+    }
+
+    if (!permissionState.servicesEnabled) {
+        return 'Turn on Location Services in iPhone Settings to unlock predictive fueling.';
+    }
+
+    if (permissionState.isReady) {
+        return 'Always-on precise location is enabled.';
+    }
+
+    if (!permissionState.foregroundGranted) {
+        return 'Choose Allow While Using App first so Fuel Up can find gas near you.';
+    }
+
+    if (!permissionState.backgroundGranted) {
+        return 'Choose Always Allow so Fuel Up can keep watching for likely fuel stops.';
+    }
+
+    if (!permissionState.preciseLocationGranted) {
+        return 'Enable Precise Location in iPhone Settings for accurate route and stop predictions.';
+    }
+
+    return 'Fuel Up still needs full predictive tracking access.';
+}
 
 const OnboardingChip = ({ price, isCheapest, isDark, top, left, isActive }) => {
 
@@ -406,13 +459,15 @@ function RatingStep({ isDark, themeColors, insets, value, onChange }) {
     );
 }
 
-function LocationStep({ isDark, themeColors, insets, permissionStatus }) {
+function LocationStep({ isDark, themeColors, insets, permissionState }) {
     const highlights = [
         { icon: 'location.magnifyingglass', text: 'Automatically find stations around you' },
         { icon: 'shield.checkered', text: 'Your data will never be shared with anyone else' },
         { icon: 'sparkles', text: 'Predictive Fueling needs Always Allow to predict when and where you fuel' },
         { icon: 'cpu', text: 'We don\'t have servers, everything happens on your device' },
     ];
+    const hasFullAccess = hasPredictiveLocationAccess(permissionState);
+    const statusCopy = getLocationStatusCopy(permissionState);
 
     return (
         <View style={[styles.stepContainer, { backgroundColor: themeColors.background }]}>
@@ -437,6 +492,24 @@ function LocationStep({ isDark, themeColors, insets, permissionStatus }) {
                             </Text>
                         </View>
                     ))}
+                </View>
+
+                <View
+                    style={[
+                        styles.grantedRow,
+                        {
+                            backgroundColor: hasFullAccess
+                                ? (isDark ? 'rgba(52,199,89,0.22)' : 'rgba(52,199,89,0.14)')
+                                : (isDark ? 'rgba(10,132,255,0.2)' : 'rgba(10,132,255,0.1)'),
+                        },
+                    ]}
+                >
+                    <SymbolView
+                        name={hasFullAccess ? 'checkmark.circle.fill' : 'location.circle.fill'}
+                        size={18}
+                        tintColor={hasFullAccess ? '#34C759' : '#007AFF'}
+                    />
+                    <Text style={[styles.grantedText, { color: themeColors.text }]}>{statusCopy}</Text>
                 </View>
             </View>
         </View>
@@ -772,7 +845,7 @@ export default function OnboardingScreen() {
     const [radius, setRadius] = useState(preferences.searchRadiusMiles);
     const [octane, setOctane] = useState(preferences.preferredOctane);
     const [minRating, setMinRating] = useState(preferences.minimumRating);
-    const [permissionStatus, setPermissionStatus] = useState(null);
+    const [locationPermissionState, setLocationPermissionState] = useState(null);
     const [notifPermissionStatus, setNotifPermissionStatus] = useState(null);
     const [onboardingMapRegion, setOnboardingMapRegion] = useState(DEMO_REGION);
 
@@ -794,15 +867,15 @@ export default function OnboardingScreen() {
                 setOnboardingMapRegion(cachedRegion);
             }
 
-            const permissionState = await Location.getForegroundPermissionsAsync();
+            const permissionState = await getPredictiveLocationPermissionStateAsync();
 
             if (!isActive) {
                 return;
             }
 
-            setPermissionStatus(permissionState.status);
+            setLocationPermissionState(permissionState);
 
-            if (permissionState.status !== 'granted') {
+            if (!permissionState.foregroundGranted) {
                 return;
             }
 
@@ -835,12 +908,32 @@ export default function OnboardingScreen() {
     }, []);
 
     const handleRequestPermission = async () => {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        setPermissionStatus(status);
-        if (status === 'granted') {
+        const nextPermissionState = await requestPredictiveLocationPermissionsAsync();
+        setLocationPermissionState(nextPermissionState);
+
+        if (nextPermissionState.isReady) {
             setTimeout(() => {
                 scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * SCREEN_WIDTH, animated: true });
             }, 600);
+            return;
+        }
+
+        if (nextPermissionState.needsSettings) {
+            Alert.alert(
+                'Finish Location Setup',
+                nextPermissionState.servicesEnabled
+                    ? 'Fuel Up still needs Always Allow and Precise Location in iPhone Settings to run predictive fueling in the background.'
+                    : 'Turn on Location Services in iPhone Settings, then come back and enable Always Allow and Precise Location.',
+                [
+                    { text: 'Not Now', style: 'cancel' },
+                    {
+                        text: 'Open Settings',
+                        onPress: () => {
+                            void openPredictiveLocationSettingsAsync();
+                        },
+                    },
+                ]
+            );
         }
     };
 
@@ -862,7 +955,7 @@ export default function OnboardingScreen() {
     const handleContinue = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-        if (currentStep === 2 && permissionStatus !== 'granted') {
+        if (currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState)) {
             handleRequestPermission();
             return;
         }
@@ -917,8 +1010,7 @@ export default function OnboardingScreen() {
                         isActive={currentStep === 1}
                     />
 
-
-                    <LocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={permissionStatus} />
+                    <LocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionState={locationPermissionState} />
                     <NotificationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={notifPermissionStatus} />
                     <RadiusStep isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} mapRegion={onboardingMapRegion} />
                     <OctaneStep isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} />
@@ -960,11 +1052,11 @@ export default function OnboardingScreen() {
                     >
                         <AnimatedButtonContent
                             text={isLastStep ? 'Get Started' : (
-                                currentStep === 2 && permissionStatus !== 'granted' ? 'Enable Location' :
+                                currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? getLocationActionLabel(locationPermissionState) :
                                     currentStep === 3 && notifPermissionStatus !== 'granted' ? 'Enable Notifications' : 'Continue'
                             )}
                             icon={isLastStep ? 'checkmark' : (
-                                currentStep === 2 && permissionStatus !== 'granted' ? 'location.fill' :
+                                currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? 'location.fill' :
                                     currentStep === 3 && notifPermissionStatus !== 'granted' ? 'bell.fill' : 'arrow.right'
                             )}
                             isDark={isDark}
@@ -1178,8 +1270,10 @@ const styles = StyleSheet.create({
         borderRadius: 100,
     },
     grantedText: {
-        fontSize: 16,
-        fontWeight: '700',
+        fontSize: 15,
+        fontWeight: '600',
+        flex: 1,
+        lineHeight: 21,
     },
     skipText: {
         fontSize: 15,
