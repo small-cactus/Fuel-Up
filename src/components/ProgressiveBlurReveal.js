@@ -1,29 +1,14 @@
-import React, {
-    forwardRef,
-    memo,
-    useEffect,
-    useImperativeHandle,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
     Animated,
     Easing,
     Platform,
     StyleSheet,
-    UIManager,
-    View,
-    unstable_batchedUpdates,
     useWindowDimensions,
 } from 'react-native';
-import MaskedView from '@react-native-masked-view/masked-view';
-import { BlurView } from 'expo-blur';
+import { ReactNativeProgressiveBlurView as NativeProgressiveBlurView } from '@sbaiahmed1/react-native-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { useTheme } from '../ThemeContext';
-
-const HAS_NATIVE_MASK = Boolean(UIManager.hasViewManagerConfig?.('RNCMaskedView'));
 
 const DEFAULT_LAYER_INTENSITIES = [0.5, 1, 2, 4, 8, 14, 22, 32];
 const DEFAULT_STEP_SIZE = 60;
@@ -35,12 +20,9 @@ const DEFAULT_ORIGIN = { x: 0.5, y: 0.5 };
 const DEFAULT_ORIGIN_UNIT = 'fraction';
 const DEFAULT_FADE_OUT_DELAY = 10000;
 const DEFAULT_FADE_OUT_DURATION = 1500;
-const DEFAULT_FAILSAFE_BLUR_INTENSITY = 100;
-const DEFAULT_FAILSAFE_FADE_DURATION = 1500;
 const DEFAULT_IOS_TAB_BAR_HEIGHT = 52;
 const DEFAULT_ANDROID_TAB_BAR_HEIGHT = 56;
 const DEFAULT_Z_INDEX = 30;
-const MASK_EPSILON = 0.0005;
 
 const AnimatedView = Animated.View;
 
@@ -96,87 +78,21 @@ function getFarthestCornerDistance(originX, originY, width, height) {
     );
 }
 
-function resolveMaskState(radius, index, featherWidth) {
-    const innerRadius = radius + (index * featherWidth);
-    const outerRadius = Math.max(1, innerRadius + featherWidth);
-    const transparentStop = clamp(Math.max(0, innerRadius) / outerRadius, 0, 1);
-
-    return {
-        outerRadius,
-        transparentStop,
-    };
-}
-
-const BlurRingLayer = memo(forwardRef(function BlurRingLayer({
-    index,
-    intensity,
-    instanceId,
-    width,
-    height,
-    originX,
-    originY,
-    startRadius,
-    featherWidth,
-    tint,
-}, ref) {
-    const [maskState, setMaskState] = useState(() => resolveMaskState(startRadius, index, featherWidth));
-    const maskId = `${instanceId}-ring-${index}`;
-
-    useImperativeHandle(ref, () => ({
-        updateMask(nextRadius, nextFeatherWidth) {
-            const nextMaskState = resolveMaskState(nextRadius, index, nextFeatherWidth);
-
-            setMaskState(previousMaskState => {
-                if (
-                    Math.abs(previousMaskState.outerRadius - nextMaskState.outerRadius) < MASK_EPSILON &&
-                    Math.abs(previousMaskState.transparentStop - nextMaskState.transparentStop) < MASK_EPSILON
-                ) {
-                    return previousMaskState;
-                }
-
-                return nextMaskState;
-            });
-        },
-    }), [index]);
-
-    if (!HAS_NATIVE_MASK) {
-        return null;
+function resolveNativeBlurType(tint, isDark) {
+    if (tint === 'dark') {
+        return 'systemMaterialDark';
     }
 
-    return (
-        <MaskedView
-            style={StyleSheet.absoluteFill}
-            maskElement={
-                <View style={[StyleSheet.absoluteFill, { width, height }]}>
-                    <Svg width={width} height={height}>
-                        <Defs>
-                            <RadialGradient
-                                id={maskId}
-                                cx={originX}
-                                cy={originY}
-                                fx={originX}
-                                fy={originY}
-                                r={maskState.outerRadius}
-                                gradientUnits="userSpaceOnUse"
-                            >
-                                <Stop offset="0" stopColor="#000000" stopOpacity="0" />
-                                <Stop offset={maskState.transparentStop} stopColor="#000000" stopOpacity="0" />
-                                <Stop offset="1" stopColor="#000000" stopOpacity="1" />
-                            </RadialGradient>
-                        </Defs>
-                        <Rect x="0" y="0" width={width} height={height} fill={`url(#${maskId})`} />
-                    </Svg>
-                </View>
-            }
-        >
-            <BlurView
-                intensity={intensity}
-                tint={tint}
-                style={StyleSheet.absoluteFill}
-            />
-        </MaskedView>
-    );
-}));
+    if (tint === 'light' || tint === 'extraLight') {
+        return 'systemMaterialLight';
+    }
+
+    if (tint === 'prominent') {
+        return isDark ? 'systemChromeMaterialDark' : 'systemChromeMaterialLight';
+    }
+
+    return isDark ? 'systemMaterialDark' : 'systemMaterialLight';
+}
 
 export default function ProgressiveBlurReveal({
     shouldReveal = false,
@@ -202,20 +118,16 @@ export default function ProgressiveBlurReveal({
     onRevealComplete,
     style,
     zIndex = DEFAULT_Z_INDEX,
-    failsafeBlurIntensity = DEFAULT_FAILSAFE_BLUR_INTENSITY,
-    failsafeFadeDuration = DEFAULT_FAILSAFE_FADE_DURATION,
     stepSize = DEFAULT_STEP_SIZE,
 }) {
     const { isDark } = useTheme();
     const insets = useSafeAreaInsets();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const [isMounted, setIsMounted] = useState(false);
-    const frameRef = useRef(null);
     const completionTimerRef = useRef(null);
     const onRevealCompleteRef = useRef(onRevealComplete);
-    const layerRefs = useRef([]);
     const containerOpacity = useRef(new Animated.Value(1)).current;
-    const failsafeOpacity = useRef(new Animated.Value(1)).current;
+    const [nativeRevealTrigger, setNativeRevealTrigger] = useState(0);
     const instanceId = useMemo(
         () => `progressive-blur-reveal-${Math.random().toString(36).slice(2, 10)}`,
         []
@@ -261,53 +173,37 @@ export default function ProgressiveBlurReveal({
 
         return DEFAULT_LAYER_INTENSITIES;
     }, [intensity, layerIntensities]);
+    const hasNativeProgressiveBlurView = Boolean(NativeProgressiveBlurView);
+    const resolvedNativeBlurType = useMemo(
+        () => resolveNativeBlurType(resolvedTint, isDark),
+        [isDark, resolvedTint]
+    );
+    const resolvedOriginXFraction = safeWidth > 0 ? resolvedOriginX / safeWidth : 0.5;
+    const resolvedOriginYFraction = safeHeight > 0 ? resolvedOriginY / safeHeight : 0.5;
 
     useEffect(() => {
         onRevealCompleteRef.current = onRevealComplete;
     }, [onRevealComplete]);
 
     useEffect(() => {
-        return () => {
-            if (frameRef.current) {
-                cancelAnimationFrame(frameRef.current);
-                frameRef.current = null;
-            }
-
-            if (completionTimerRef.current) {
-                clearTimeout(completionTimerRef.current);
-                completionTimerRef.current = null;
-            }
-
-            containerOpacity.stopAnimation();
-            failsafeOpacity.stopAnimation();
-        };
-    }, [containerOpacity, failsafeOpacity]);
-
-    useEffect(() => {
-        if (frameRef.current) {
-            cancelAnimationFrame(frameRef.current);
-            frameRef.current = null;
+        if (!hasNativeProgressiveBlurView || !shouldReveal || !isMounted) {
+            return;
         }
 
+        setNativeRevealTrigger(currentValue => currentValue + 1);
+    }, [hasNativeProgressiveBlurView, isMounted, shouldReveal]);
+
+    useEffect(() => {
         if (completionTimerRef.current) {
             clearTimeout(completionTimerRef.current);
             completionTimerRef.current = null;
         }
 
         containerOpacity.stopAnimation();
-        failsafeOpacity.stopAnimation();
 
         if (shouldReveal) {
             setIsMounted(true);
             containerOpacity.setValue(1);
-            failsafeOpacity.setValue(1);
-
-            Animated.timing(failsafeOpacity, {
-                toValue: 0,
-                duration: Math.max(1, failsafeFadeDuration),
-                easing: Easing.in(Easing.ease),
-                useNativeDriver: true,
-            }).start();
 
             Animated.timing(containerOpacity, {
                 toValue: 0,
@@ -317,33 +213,10 @@ export default function ProgressiveBlurReveal({
                 useNativeDriver: true,
             }).start();
 
-            const startedAt = Date.now();
             const totalDuration = Math.max(
                 Math.max(0, delay) + Math.max(1, duration),
-                Math.max(0, fadeOutDelay) + Math.max(1, fadeOutDuration),
-                Math.max(1, failsafeFadeDuration)
+                Math.max(0, fadeOutDelay) + Math.max(1, fadeOutDuration)
             );
-
-            const applyRadiusFrame = () => {
-                const elapsedMs = Date.now() - startedAt;
-                const radiusRawProgress = clamp((elapsedMs - delay) / Math.max(1, duration), 0, 1);
-                const radiusProgress = cubicBezierAtTime(radiusRawProgress, 0.05, 0.9, 0.2, 1);
-                const currentRadius = startRadius + ((resolvedEndRadius - startRadius) * radiusProgress);
-
-                unstable_batchedUpdates(() => {
-                    layerRefs.current.forEach(layerRef => {
-                        layerRef?.updateMask(currentRadius, resolvedStepSize);
-                    });
-                });
-
-                if (elapsedMs < totalDuration) {
-                    frameRef.current = requestAnimationFrame(applyRadiusFrame);
-                } else {
-                    frameRef.current = null;
-                }
-            };
-
-            applyRadiusFrame();
 
             completionTimerRef.current = setTimeout(() => {
                 if (hideWhenFinished) {
@@ -361,25 +234,12 @@ export default function ProgressiveBlurReveal({
         if (isBlurred) {
             setIsMounted(true);
             containerOpacity.setValue(1);
-            failsafeOpacity.setValue(1);
-
-            unstable_batchedUpdates(() => {
-                layerRefs.current.forEach(layerRef => {
-                    layerRef?.updateMask(startRadius, resolvedStepSize);
-                });
-            });
 
             return undefined;
         }
 
         if (resetOnHide) {
             containerOpacity.setValue(1);
-            failsafeOpacity.setValue(1);
-            unstable_batchedUpdates(() => {
-                layerRefs.current.forEach(layerRef => {
-                    layerRef?.updateMask(startRadius, resolvedStepSize);
-                });
-            });
 
             if (hideWhenFinished) {
                 setIsMounted(false);
@@ -393,18 +253,24 @@ export default function ProgressiveBlurReveal({
         duration,
         fadeOutDelay,
         fadeOutDuration,
-        failsafeFadeDuration,
-        failsafeOpacity,
         hideWhenFinished,
         resetOnHide,
-        resolvedEndRadius,
-        resolvedStepSize,
         isBlurred,
         shouldReveal,
-        startRadius,
     ]);
 
-    if (!isMounted || safeHeight <= 0) {
+    useEffect(() => {
+        return () => {
+            if (completionTimerRef.current) {
+                clearTimeout(completionTimerRef.current);
+                completionTimerRef.current = null;
+            }
+
+            containerOpacity.stopAnimation();
+        };
+    }, [containerOpacity]);
+
+    if (!isMounted || safeHeight <= 0 || !hasNativeProgressiveBlurView) {
         return null;
     }
 
@@ -418,42 +284,27 @@ export default function ProgressiveBlurReveal({
                 { opacity: containerOpacity },
             ]}
         >
-            {HAS_NATIVE_MASK ? (
-                <>
-                    <AnimatedView style={[StyleSheet.absoluteFill, { opacity: failsafeOpacity, zIndex: 200 }]}>
-                        <BlurView
-                            intensity={failsafeBlurIntensity}
-                            tint={resolvedTint}
-                            style={StyleSheet.absoluteFill}
-                        />
-                    </AnimatedView>
-
-                    {resolvedLayerIntensities.map((layerIntensity, index) => (
-                        <BlurRingLayer
-                            key={`${instanceId}-${index}`}
-                            ref={layerRef => {
-                                layerRefs.current[index] = layerRef;
-                            }}
-                            index={index}
-                            intensity={layerIntensity}
-                            instanceId={instanceId}
-                            width={safeWidth}
-                            height={safeHeight}
-                            originX={resolvedOriginX}
-                            originY={resolvedOriginY}
-                            startRadius={startRadius}
-                            featherWidth={resolvedStepSize}
-                            tint={resolvedTint}
-                        />
-                    ))}
-                </>
-            ) : (
-                <BlurView
-                    intensity={resolvedLayerIntensities[resolvedLayerIntensities.length - 1] || failsafeBlurIntensity}
-                    tint={resolvedTint}
+            {resolvedLayerIntensities.map((layerIntensity, index) => (
+                <NativeProgressiveBlurView
+                    key={`${instanceId}-native-${index}`}
+                    blurAmount={layerIntensity}
+                    blurType={resolvedNativeBlurType}
+                    radial
+                    radialCenterX={resolvedOriginXFraction}
+                    radialCenterY={resolvedOriginYFraction}
+                    radialClearRadius={startRadius + (index * resolvedStepSize)}
+                    radialFeather={resolvedStepSize}
+                    animationDuration={duration}
+                    animationDelay={delay}
+                    startRadius={startRadius + (index * resolvedStepSize)}
+                    endRadius={resolvedEndRadius + (index * resolvedStepSize)}
+                    featherStart={resolvedStepSize}
+                    featherEnd={resolvedStepSize}
+                    revealTrigger={nativeRevealTrigger}
+                    reducedTransparencyFallbackColor={isDark ? '#0B0B0F' : '#F4F4F7'}
                     style={StyleSheet.absoluteFill}
                 />
-            )}
+            ))}
         </AnimatedView>
     );
 }

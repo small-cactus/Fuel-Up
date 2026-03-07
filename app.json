@@ -13,6 +13,7 @@
           }
         }
       ],
+      "./plugins/withProgressiveBlurNativeBuild",
       "expo-font",
       "expo-notifications",
       [

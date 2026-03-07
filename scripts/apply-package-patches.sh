@@ -10,7 +10,15 @@ for patch_file in $PATCH_FILES; do
     continue
   fi
 
+  if git apply --reverse --check "$patch_file" >/dev/null 2>&1; then
+    continue
+  fi
+
   if git apply --check "$patch_file" >/dev/null 2>&1; then
     git apply "$patch_file"
+    continue
   fi
+
+  echo "Failed to apply required patch: $patch_file" >&2
+  exit 1
 done
