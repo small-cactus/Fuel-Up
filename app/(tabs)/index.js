@@ -1192,6 +1192,7 @@ export default function HomeScreen() {
         clusterProbeRequest,
         isClusterProbeSessionActive,
         finishClusterProbeSession,
+        hasCompletedRootReveal,
         holdRootReveal,
         startRootReveal,
     } = useAppState();
@@ -2163,6 +2164,7 @@ export default function HomeScreen() {
     useEffect(() => {
         if (
             hasTriggeredInitialRevealRef.current ||
+            hasCompletedRootReveal ||
             !isFocused ||
             !isMapLoaded
         ) {
@@ -2170,7 +2172,7 @@ export default function HomeScreen() {
         }
 
         triggerRevealOnMapLoaded();
-    }, [isFocused, isMapLoaded]);
+    }, [hasCompletedRootReveal, isFocused, isMapLoaded]);
 
     useEffect(() => {
         const wasFocused = prevIsFocusedRef.current;

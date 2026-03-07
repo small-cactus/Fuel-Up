@@ -8,6 +8,7 @@ const AppStateContext = createContext({
     isClusterProbeSessionActive: false,
     rootRevealPhase: 'blurred',
     rootRevealVersion: 0,
+    hasCompletedRootReveal: false,
     setFuelDebugState: () => { },
     setManualLocationOverride: () => { },
     clearManualLocationOverride: () => { },
@@ -28,6 +29,7 @@ export function AppStateProvider({ children }) {
     const [isClusterProbeSessionActive, setIsClusterProbeSessionActive] = useState(false);
     const [rootRevealPhase, setRootRevealPhase] = useState('blurred');
     const [rootRevealVersion, setRootRevealVersion] = useState(0);
+    const [hasCompletedRootReveal, setHasCompletedRootReveal] = useState(false);
 
     const requestFuelReset = () => {
         setFuelResetToken(currentValue => currentValue + 1);
@@ -79,6 +81,7 @@ export function AppStateProvider({ children }) {
 
     const holdRootReveal = () => {
         setRootRevealVersion(currentValue => currentValue + 1);
+        setHasCompletedRootReveal(false);
         setRootRevealPhase('blurred');
     };
 
@@ -87,6 +90,7 @@ export function AppStateProvider({ children }) {
     };
 
     const hideRootReveal = () => {
+        setHasCompletedRootReveal(true);
         setRootRevealPhase('hidden');
     };
 
@@ -100,6 +104,7 @@ export function AppStateProvider({ children }) {
                 isClusterProbeSessionActive,
                 rootRevealPhase,
                 rootRevealVersion,
+                hasCompletedRootReveal,
                 setFuelDebugState,
                 setManualLocationOverride,
                 clearManualLocationOverride,
