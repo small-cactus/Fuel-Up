@@ -27,7 +27,7 @@ const { clearCachedEntries, getCachedEntry, setCachedEntry } = require('./cacheS
 const {
     buildValidationState,
     normalizePrice,
-    validateAndChoosePrice,
+    processValidationRows,
 } = require('./priceValidation');
 
 const inflightRequests = new Map();
@@ -336,12 +336,28 @@ function buildValidatedLatestQuotesFromRows({ rows, origin, fallbackSourceLabel 
 
     const validationRows = rows.flatMap(row => buildValidationRowFromStoredRow({ row, origin, fallbackSourceLabel }));
     const validationState = buildValidationState(validationRows);
+    const latestTimestampByIdentity = new Map();
     const latestByIdentity = new Map();
     const sortedOutputs = [...validationState.outputs].sort((left, right) => (
         right.row.timestampMs - left.row.timestampMs
     ));
 
+    for (const validationRow of validationRows) {
+        const identity = validationRow.quoteIdentity;
+        const previousTimestamp = latestTimestampByIdentity.get(identity) ?? Number.NEGATIVE_INFINITY;
+
+        if (validationRow.timestampMs > previousTimestamp) {
+            latestTimestampByIdentity.set(identity, validationRow.timestampMs);
+        }
+    }
+
     for (const output of sortedOutputs) {
+        const latestTimestamp = latestTimestampByIdentity.get(output.row.quoteIdentity);
+
+        if (latestTimestamp !== output.row.timestampMs) {
+            continue;
+        }
+
         const existingQuote = latestByIdentity.get(output.row.quoteIdentity);
         const quote = existingQuote || {
             ...output.row.originalQuote,
@@ -350,10 +366,8 @@ function buildValidatedLatestQuotesFromRows({ rows, origin, fallbackSourceLabel 
         };
         const identity = output.row.quoteIdentity || buildQuoteIdentity(quote);
 
-        if (!quote || !identity || latestByIdentity.has(identity)) {
-            if (!quote || !identity) {
-                continue;
-            }
+        if (!quote || !identity) {
+            continue;
         }
 
         latestByIdentity.set(identity, applyGradeValidationToQuote(quote, output.row.fuelType, output.result));
@@ -370,8 +384,7 @@ function applyValidationToStationQuotes({ stationQuotes, historyRows, origin }) 
     const historyValidationRows = (historyRows || [])
         .flatMap(row => buildValidationRowFromStoredRow({ row, origin }));
     const historyState = buildValidationState(historyValidationRows);
-    const rawApiHistory = [...historyState.rawApiHistory];
-    const trustedRows = [...historyState.trustedRows];
+    const validationContext = historyState.context;
     const decisionsByIdentity = new Map();
     const incomingRows = stationQuotes
         .flatMap(buildValidationRowFromQuote)
@@ -381,21 +394,14 @@ function applyValidationToStationQuotes({ stationQuotes, historyRows, origin }) 
             String(left.stationId || '').localeCompare(String(right.stationId || ''))
         ));
 
-    for (const row of incomingRows) {
-        const result = validateAndChoosePrice(row, trustedRows, rawApiHistory);
+    const processedResults = processValidationRows(incomingRows, validationContext);
+
+    for (const { row, result } of processedResults) {
         const identity = row.quoteIdentity;
         const existingDecisions = decisionsByIdentity.get(identity) || {};
 
         existingDecisions[row.fuelType] = result;
         decisionsByIdentity.set(identity, existingDecisions);
-        rawApiHistory.push(row);
-
-        if (result.decision === 'accept') {
-            trustedRows.push({
-                ...row,
-                source: 'api',
-            });
-        }
     }
 
     return stationQuotes.map(quote => {
