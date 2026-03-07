@@ -59,6 +59,15 @@
       }
     },
     "ios": {
+      "splash": {
+        "image": "./assets/splash-light.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#FFFFFF",
+        "dark": {
+          "image": "./assets/splash-dark.png",
+          "backgroundColor": "#000000"
+        }
+      },
       "icon": "./fuelup.icon",
       "supportsTablet": true,
       "bundleIdentifier": "com.anthonyh.fuelup",
