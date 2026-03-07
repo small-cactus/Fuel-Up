@@ -527,9 +527,15 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
 +
 +    let displayLink = CADisplayLink(target: self, selector: #selector(handleRevealDisplayLink))
 +    if #available(iOS 15.0, *) {
-+      displayLink.preferredFrameRateRange = CAFrameRateRange(minimum: 80, maximum: 120, preferred: 120)
++      let supportedMaximum = Float(max(UIScreen.main.maximumFramesPerSecond, 60))
++      let supportedMinimum = min(Float(30), supportedMaximum)
++      displayLink.preferredFrameRateRange = CAFrameRateRange(
++        minimum: supportedMinimum,
++        maximum: supportedMaximum,
++        preferred: supportedMaximum
++      )
 +    } else {
-+      displayLink.preferredFramesPerSecond = 120
++      displayLink.preferredFramesPerSecond = max(UIScreen.main.maximumFramesPerSecond, 60)
      }
 +    displayLink.add(to: .main, forMode: .common)
 +    self.displayLink = displayLink
