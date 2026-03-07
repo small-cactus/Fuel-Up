@@ -271,6 +271,10 @@ export function setLastTrendsScreenViewedAt(fuelType = 'regular', viewedAtMs = 0
     lastTrendsScreenViewedAtMsByFuelType[fuelType] = viewedAtMs;
 }
 
+export function getInFlightTrendDataRequest(fuelType = 'regular') {
+    return inFlightTrendDataRequestsByFuelType[fuelType] || null;
+}
+
 export async function prefetchTrendData({ latitude, longitude, fuelType = 'regular' }) {
     if (inFlightTrendDataRequestsByFuelType[fuelType]) {
         return inFlightTrendDataRequestsByFuelType[fuelType];
@@ -281,6 +285,7 @@ export async function prefetchTrendData({ latitude, longitude, fuelType = 'regul
             const data = await fetchTrendData({ latitude, longitude, fuelType });
             setCachedTrendData(fuelType, data);
             setLastResolvedTrendData(fuelType, data);
+            setLastTrendsScreenViewedAt(fuelType, Date.now());
             return data;
         } finally {
             delete inFlightTrendDataRequestsByFuelType[fuelType];

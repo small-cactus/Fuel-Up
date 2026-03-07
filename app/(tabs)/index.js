@@ -14,7 +14,6 @@ import FuelSummaryCard from '../../src/components/FuelSummaryCard';
 import ClusterDebugCard from '../../src/components/ClusterDebugCard';
 import TopCanopy from '../../src/components/TopCanopy';
 import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
-import ProgressiveBlurReveal from '../../src/components/ProgressiveBlurReveal';
 import { getCachedFuelPriceSnapshot, getFuelFailureMessage, refreshFuelPriceSnapshot } from '../../src/services/fuel';
 import { prefetchTrendData } from '../../src/services/fuel/trends';
 import { useTheme } from '../../src/ThemeContext';
@@ -99,6 +98,9 @@ const STATIONS_FIT_BOTTOM_CONTENT_PADDING = 140;
 const STATIONS_FIT_SIDE_EXTRA_PADDING = 12;
 const STATIONS_FIT_SETTLE_PASS_DELAY_MS = 260;
 const STATIONS_FIT_UPWARD_BIAS_FACTOR = 0.03;
+const INITIAL_STATIONS_FIT_MAX_ATTEMPTS = 4;
+const INITIAL_STATIONS_FIT_RETRY_DELAY_MS = 120;
+const INITIAL_SMOOTH_LAUNCH_TRANSITION_MAX_DISTANCE_METERS = 6000;
 const ENABLE_CLUSTER_MERGE_TRANSITIONS = false;
 const HOME_DARK_GLASS_TINT = '#373737ff';
 
@@ -609,6 +611,46 @@ function areRegionsEquivalent(currentRegion, nextRegion) {
         Math.abs((currentRegion.latitudeDelta || 0) - (nextRegion.latitudeDelta || 0)) <= MAP_REGION_EPSILON &&
         Math.abs((currentRegion.longitudeDelta || 0) - (nextRegion.longitudeDelta || 0)) <= MAP_REGION_EPSILON
     );
+}
+
+function getDistanceMetersBetweenRegions(fromRegion, toRegion) {
+    if (!fromRegion || !toRegion) {
+        return Number.POSITIVE_INFINITY;
+    }
+
+    const fromLatitude = Number(fromRegion.latitude);
+    const fromLongitude = Number(fromRegion.longitude);
+    const toLatitude = Number(toRegion.latitude);
+    const toLongitude = Number(toRegion.longitude);
+
+    if (
+        !Number.isFinite(fromLatitude) ||
+        !Number.isFinite(fromLongitude) ||
+        !Number.isFinite(toLatitude) ||
+        !Number.isFinite(toLongitude)
+    ) {
+        return Number.POSITIVE_INFINITY;
+    }
+
+    const toRadians = degrees => degrees * (Math.PI / 180);
+    const earthRadiusMeters = 6371000;
+    const latitudeDeltaRadians = toRadians(toLatitude - fromLatitude);
+    const longitudeDeltaRadians = toRadians(toLongitude - fromLongitude);
+    const fromLatitudeRadians = toRadians(fromLatitude);
+    const toLatitudeRadians = toRadians(toLatitude);
+    const haversineA = (
+        Math.sin(latitudeDeltaRadians / 2) ** 2 +
+        Math.cos(fromLatitudeRadians) *
+        Math.cos(toLatitudeRadians) *
+        Math.sin(longitudeDeltaRadians / 2) ** 2
+    );
+    const haversineC = 2 * Math.atan2(Math.sqrt(haversineA), Math.sqrt(1 - haversineA));
+
+    return earthRadiusMeters * haversineC;
+}
+
+function shouldAnimateSmoothLaunchTransition(fromRegion, toRegion) {
+    return getDistanceMetersBetweenRegions(fromRegion, toRegion) <= INITIAL_SMOOTH_LAUNCH_TRANSITION_MAX_DISTANCE_METERS;
 }
 
 function buildSingleQuoteClusters(stationQuotes) {
@@ -1150,6 +1192,8 @@ export default function HomeScreen() {
         clusterProbeRequest,
         isClusterProbeSessionActive,
         finishClusterProbeSession,
+        holdRootReveal,
+        startRootReveal,
     } = useAppState();
     const resolvedAutoClusterProbeRequest = __DEV__ ? clusterProbeRequest : null;
     const autoClusterProbeRequested = Boolean(resolvedAutoClusterProbeRequest) || Boolean(isClusterProbeSessionActive);
@@ -1175,13 +1219,16 @@ export default function HomeScreen() {
     const [mapRenderRegion, setMapRenderRegion] = useState(DEFAULT_REGION);
     const [userLocationBubble, setUserLocationBubble] = useState(null);
     const [isMapMoving, setIsMapMoving] = useState(false);
-    const [shouldHoldInitialBlur, setShouldHoldInitialBlur] = useState(true);
-    const [shouldRunReveal, setShouldRunReveal] = useState(false);
     const [isClusterDebugRecording, setIsClusterDebugRecording] = useState(false);
     const [isClusterDebugProbeRunning, setIsClusterDebugProbeRunning] = useState(false);
     const [clusterDebugProbeSummary, setClusterDebugProbeSummary] = useState('');
     const hasTriggeredInitialRevealRef = useRef(false);
-    const prefetchedTrendFuelGradesRef = useRef(new Set());
+    const pendingInitialStationsFitRef = useRef(false);
+    const shouldAnimatePendingInitialStationsFitRef = useRef(false);
+    const isInitialStationsFitScheduledRef = useRef(false);
+    const initialStationsFitRetryTimeoutRef = useRef(null);
+    const prefetchedTrendRequestKeysRef = useRef(new Map());
+    const mapLoadedFallbackTimeoutRef = useRef(null);
     const router = useRouter();
     const scrollX = useSharedValue(0);
 
@@ -1196,6 +1243,11 @@ export default function HomeScreen() {
     const canopyEdgeLine = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.42)';
     const selectedFuelGrade = normalizeFuelGrade(preferences.preferredOctane);
     const markMapLoaded = () => {
+        if (mapLoadedFallbackTimeoutRef.current) {
+            clearTimeout(mapLoadedFallbackTimeoutRef.current);
+            mapLoadedFallbackTimeoutRef.current = null;
+        }
+
         setIsMapLoaded(currentValue => currentValue || true);
     };
 
@@ -1221,8 +1273,15 @@ export default function HomeScreen() {
         setIsRefreshingPrices(false);
         setIsLoadingLocation(false);
         hasTriggeredInitialRevealRef.current = false;
-        setShouldHoldInitialBlur(true);
-        setShouldRunReveal(false);
+        pendingInitialStationsFitRef.current = false;
+        shouldAnimatePendingInitialStationsFitRef.current = false;
+        isInitialStationsFitScheduledRef.current = false;
+        if (initialStationsFitRetryTimeoutRef.current) {
+            clearTimeout(initialStationsFitRetryTimeoutRef.current);
+            initialStationsFitRetryTimeoutRef.current = null;
+        }
+        lastDataHashRef.current = '';
+        holdRootReveal();
     };
 
     const triggerRevealOnMapLoaded = () => {
@@ -1231,8 +1290,7 @@ export default function HomeScreen() {
         }
 
         hasTriggeredInitialRevealRef.current = true;
-        setShouldRunReveal(true);
-        setShouldHoldInitialBlur(false);
+        startRootReveal();
     };
 
     const applyResolvedRegion = (nextRegion) => {
@@ -1427,8 +1485,13 @@ export default function HomeScreen() {
                         await persistLastDeviceLocationRegion(freshRegion);
 
                         if (!areRegionsEquivalent(cachedRegion, freshRegion)) {
+                            const shouldAnimateLocationTransition = shouldAnimateSmoothLaunchTransition(cachedRegion, freshRegion);
                             applyResolvedRegion(freshRegion);
-                            popMapToRegionWithoutAnimation(freshRegion);
+                            if (shouldAnimateLocationTransition) {
+                                animateMapToRegion(freshRegion);
+                            } else {
+                                popMapToRegionWithoutAnimation(freshRegion);
+                            }
                             await loadFuelData({
                                 latitude: freshRegion.latitude,
                                 longitude: freshRegion.longitude,
@@ -1463,7 +1526,7 @@ export default function HomeScreen() {
             };
 
             applyResolvedRegion(nextRegion);
-            if (allowLaunchBootstrap) {
+            if (allowLaunchBootstrap || !bestQuote) {
                 popMapToRegionWithoutAnimation(nextRegion);
             } else {
                 animateMapToRegion(nextRegion);
@@ -1488,6 +1551,17 @@ export default function HomeScreen() {
     };
 
     const loadFuelData = async ({ latitude, longitude, locationSource, preferCached }) => {
+        const hadVisibleFuelState = Boolean(bestQuote) || topStations.length > 0 || regionalQuotes.length > 0;
+        const requestedRegion = {
+            latitude,
+            longitude,
+            latitudeDelta: DEFAULT_REGION.latitudeDelta,
+            longitudeDelta: DEFAULT_REGION.longitudeDelta,
+        };
+        const shouldAnimateInitialStationsFit = (
+            !hadVisibleFuelState &&
+            shouldAnimateSmoothLaunchTransition(launchCachedRegionRef.current, requestedRegion)
+        );
         const query = {
             latitude,
             longitude,
@@ -1537,11 +1611,20 @@ export default function HomeScreen() {
             }
 
             applySnapshot(freshSnapshot);
+            pendingInitialStationsFitRef.current = true;
+            shouldAnimatePendingInitialStationsFitRef.current = shouldAnimateInitialStationsFit;
 
             if (isMountedRef.current) {
                 setErrorMsg(null);
                 setFuelDebugState(nextDebugState);
             }
+
+            router.prefetch?.('/trends');
+            void prefetchTrendData({
+                latitude,
+                longitude,
+                fuelType: selectedFuelGrade,
+            });
         } catch (error) {
             if (isMountedRef.current) {
                 const nextDebugState = error?.debugState
@@ -1591,8 +1674,38 @@ export default function HomeScreen() {
     };
 
     useEffect(() => {
+        if (!isInitialMapRegionReady || isMapLoaded) {
+            return undefined;
+        }
+
+        mapLoadedFallbackTimeoutRef.current = setTimeout(() => {
+            mapLoadedFallbackTimeoutRef.current = null;
+            if (!isMountedRef.current) {
+                return;
+            }
+
+            markMapLoaded();
+        }, 1500);
+
+        return () => {
+            if (mapLoadedFallbackTimeoutRef.current) {
+                clearTimeout(mapLoadedFallbackTimeoutRef.current);
+                mapLoadedFallbackTimeoutRef.current = null;
+            }
+        };
+    }, [isInitialMapRegionReady, isMapLoaded]);
+
+    useEffect(() => {
         return () => {
             isMountedRef.current = false;
+            if (initialStationsFitRetryTimeoutRef.current) {
+                clearTimeout(initialStationsFitRetryTimeoutRef.current);
+                initialStationsFitRetryTimeoutRef.current = null;
+            }
+            if (mapLoadedFallbackTimeoutRef.current) {
+                clearTimeout(mapLoadedFallbackTimeoutRef.current);
+                mapLoadedFallbackTimeoutRef.current = null;
+            }
             clearMapIdleSettleTimeout();
             const pendingMapIdleWaiters = mapIdleWaitersRef.current;
 
@@ -1610,8 +1723,7 @@ export default function HomeScreen() {
 
         clearVisibleFuelState('Fuel cache cleared. Open Home to fetch fresh prices.');
         setFuelDebugState(null);
-        setShouldRunReveal(false);
-    }, [fuelResetToken]);
+    }, [fuelResetToken, setFuelDebugState]);
 
     useEffect(() => {
         if (!isFocused && !autoClusterProbeRequested) {
@@ -1635,17 +1747,21 @@ export default function HomeScreen() {
         const hasValidLocation =
             Number.isFinite(location?.latitude) &&
             Number.isFinite(location?.longitude);
+        const trendPrefetchLocationKey = hasValidLocation
+            ? `${selectedFuelGrade}:${Math.round(location.latitude * 10) / 10}:${Math.round(location.longitude * 10) / 10}`
+            : null;
 
         if (
             !isMapLoaded ||
             !hasVisibleMapContent ||
             !hasValidLocation ||
-            prefetchedTrendFuelGradesRef.current.has(selectedFuelGrade)
+            !trendPrefetchLocationKey ||
+            prefetchedTrendRequestKeysRef.current.get(selectedFuelGrade) === trendPrefetchLocationKey
         ) {
             return;
         }
 
-        prefetchedTrendFuelGradesRef.current.add(selectedFuelGrade);
+        prefetchedTrendRequestKeysRef.current.set(selectedFuelGrade, trendPrefetchLocationKey);
         router.prefetch?.('/trends');
 
         void prefetchTrendData({
@@ -1759,6 +1875,77 @@ export default function HomeScreen() {
     }, [stationQuotes]);
 
     useEffect(() => {
+        if (
+            !pendingInitialStationsFitRef.current ||
+            !isMapLoaded ||
+            !mapRef.current ||
+            stationQuotes.length === 0 ||
+            isInitialStationsFitScheduledRef.current
+        ) {
+            return;
+        }
+
+        isInitialStationsFitScheduledRef.current = true;
+
+        void (async () => {
+            await waitForMapIdle(
+                CLUSTER_DEBUG_PROBE_IDLE_TIMEOUT + STATIONS_FIT_SETTLE_PASS_DELAY_MS + CLUSTER_MAP_IDLE_SETTLE_MS
+            );
+
+            if (
+                !isMountedRef.current ||
+                !pendingInitialStationsFitRef.current ||
+                !mapRef.current ||
+                stationQuotesRef.current.length === 0
+            ) {
+                isInitialStationsFitScheduledRef.current = false;
+                return;
+            }
+
+            isInitialStationsFitScheduledRef.current = false;
+
+            const runInitialFitAttempt = (attemptNumber = 0) => {
+                if (
+                    !isMountedRef.current ||
+                    !pendingInitialStationsFitRef.current ||
+                    !mapRef.current ||
+                    stationQuotesRef.current.length === 0
+                ) {
+                    return;
+                }
+
+                const shouldAnimateAttempt = attemptNumber === 0 && shouldAnimatePendingInitialStationsFitRef.current;
+
+                fitMapToStations({ animated: shouldAnimateAttempt });
+
+                if (initialStationsFitRetryTimeoutRef.current) {
+                    clearTimeout(initialStationsFitRetryTimeoutRef.current);
+                }
+
+                if (attemptNumber >= INITIAL_STATIONS_FIT_MAX_ATTEMPTS - 1) {
+                    pendingInitialStationsFitRef.current = false;
+                    shouldAnimatePendingInitialStationsFitRef.current = false;
+                    initialStationsFitRetryTimeoutRef.current = null;
+                    return;
+                }
+
+                initialStationsFitRetryTimeoutRef.current = setTimeout(() => {
+                    initialStationsFitRetryTimeoutRef.current = null;
+
+                    if (
+                        pendingInitialStationsFitRef.current &&
+                        !isInitialStationsFitScheduledRef.current
+                    ) {
+                        runInitialFitAttempt(attemptNumber + 1);
+                    }
+                }, INITIAL_STATIONS_FIT_RETRY_DELAY_MS);
+            };
+
+            runInitialFitAttempt();
+        })();
+    }, [isMapLoaded, isMapMoving, stationQuotes.length]);
+
+    useEffect(() => {
         if (activeIndex >= stationQuotes.length) {
             setActiveIndex(0);
         }
@@ -1859,7 +2046,7 @@ export default function HomeScreen() {
         }
     };
 
-    const fitMapToStations = () => {
+    const fitMapToStations = ({ animated = true } = {}) => {
         if (!mapRef.current) {
             return;
         }
@@ -1890,18 +2077,21 @@ export default function HomeScreen() {
 
         mapRef.current.fitToCoordinates(coords, {
             edgePadding: fitEdgePadding,
-            animated: true,
+            animated,
         });
-        setTimeout(() => {
-            if (!mapRef.current) {
-                return;
-            }
 
-            mapRef.current.fitToCoordinates(coords, {
-                edgePadding: fitEdgePadding,
-                animated: false,
-            });
-        }, STATIONS_FIT_SETTLE_PASS_DELAY_MS);
+        if (animated) {
+            setTimeout(() => {
+                if (!mapRef.current) {
+                    return;
+                }
+
+                mapRef.current.fitToCoordinates(coords, {
+                    edgePadding: fitEdgePadding,
+                    animated: false,
+                });
+            }, STATIONS_FIT_SETTLE_PASS_DELAY_MS);
+        }
     };
 
     const setMapMotionState = (moving) => {
@@ -1986,12 +2176,18 @@ export default function HomeScreen() {
         const wasFocused = prevIsFocusedRef.current;
         prevIsFocusedRef.current = isFocused;
 
-        if (!isMapLoaded || !mapRef.current || stationQuotes.length === 0 || isAnimatingRef.current) return;
+        if (!isMapLoaded || !mapRef.current || stationQuotes.length === 0 || isMapMoving) return;
 
         // Use ONLY stationQuotes for the data hash to avoid feedback loops from zooming
         const currentHash = stationQuotes.map(q => q.stationId).join(',');
         const isFocusGained = isFocused && !wasFocused;
         const isNewData = currentHash !== lastDataHashRef.current;
+
+        if (pendingInitialStationsFitRef.current && isNewData) {
+            lastDataHashRef.current = currentHash;
+            isUserScrollingRef.current = false;
+            return;
+        }
 
         if (isNewData || isFocusGained) {
             lastDataHashRef.current = currentHash;
@@ -2008,7 +2204,7 @@ export default function HomeScreen() {
                 zoomToStation(activeQuote);
             }
         }
-    }, [activeIndex, stationQuotes, bottomPadding, topCanopyHeight, horizontalPadding.left, horizontalPadding.right, sideInset, isFocused, isMapLoaded]);
+    }, [activeIndex, stationQuotes, bottomPadding, topCanopyHeight, horizontalPadding.left, horizontalPadding.right, sideInset, isFocused, isMapLoaded, isMapMoving]);
 
     const fallbackCoordinate = {
         latitude: location.latitude,
@@ -2624,6 +2820,9 @@ export default function HomeScreen() {
                     initialRegion={initialMapRegion}
                     provider={PROVIDER_APPLE}
                     showsUserLocation={hasLocationPermission}
+                    onMapReady={() => {
+                        markMapLoaded();
+                    }}
                     onMapLoaded={() => {
                         markMapLoaded();
                     }}
@@ -2907,12 +3106,6 @@ export default function HomeScreen() {
                     </View>
                 )}
             </View>
-
-            <ProgressiveBlurReveal
-                isBlurred={shouldHoldInitialBlur}
-                shouldReveal={shouldRunReveal}
-                excludeTabs={false}
-            />
         </View>
     );
 }

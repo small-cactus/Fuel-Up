@@ -13,6 +13,7 @@ import { useFocusEffect } from 'expo-router';
 import {
     fetchTrendData,
     getCachedTrendData,
+    getInFlightTrendDataRequest,
     getLastResolvedTrendData,
     getLastTrendsScreenViewedAt,
     setCachedTrendData,
@@ -290,7 +291,7 @@ export default function TrendsScreen() {
     useEffect(() => {
         const nextCachedData = getCachedTrendData(selectedFuelGrade);
         const nextGradientData = nextCachedData || getLastResolvedTrendData(selectedFuelGrade) || null;
-        setTrendData(nextCachedData);
+        setTrendData(nextCachedData || getLastResolvedTrendData(selectedFuelGrade) || null);
         setLoading(!nextCachedData);
         setIncomingGradientColors(null);
         gradientFadeOpacity.setValue(1);
@@ -319,6 +320,43 @@ export default function TrendsScreen() {
             activeFetchRef.current.fuelGrade === requestFuelGrade
         ) {
             return activeFetchRef.current.promise;
+        }
+
+        const sharedPrefetchRequest = getInFlightTrendDataRequest(requestFuelGrade);
+
+        if (sharedPrefetchRequest) {
+            if (showLoading && isMountedRef.current) {
+                setLoading(true);
+            }
+
+            const request = (async () => {
+                try {
+                    const data = await sharedPrefetchRequest;
+
+                    if (
+                        isMountedRef.current &&
+                        selectedFuelGradeRef.current === requestFuelGrade
+                    ) {
+                        setTrendData(data);
+                        setLoading(false);
+                    }
+                } catch (err) {
+                    console.warn('Error awaiting prefetched trends data', err);
+                } finally {
+                    if (activeFetchRef.current.fuelGrade === requestFuelGrade) {
+                        activeFetchRef.current = {
+                            fuelGrade: null,
+                            promise: null,
+                        };
+                    }
+                }
+            })();
+
+            activeFetchRef.current = {
+                fuelGrade: requestFuelGrade,
+                promise: request,
+            };
+            return request;
         }
 
         if (showLoading && isMountedRef.current) {
@@ -426,8 +464,10 @@ export default function TrendsScreen() {
 
     const mockTrendData = useMemo(() => buildMockTrendData(), []);
     const resolvedTrendData = trendData || liveCachedTrendData || null;
-    const displayTrendData = resolvedTrendData || (loading ? mockTrendData : null);
-    const gradientSourceData = resolvedTrendData || getLastResolvedTrendData(selectedFuelGrade) || null;
+    const fallbackResolvedTrendData = getLastResolvedTrendData(selectedFuelGrade);
+    const realDisplayTrendData = resolvedTrendData || fallbackResolvedTrendData || null;
+    const displayTrendData = realDisplayTrendData || (loading ? mockTrendData : null);
+    const gradientSourceData = realDisplayTrendData || null;
     const isPriceDrop = displayTrendData?.overallTrend?.isDecrease;
     // Better = Green, Worse = Red
     const primaryTrendColor = isPriceDrop ? COLORS.GREEN : COLORS.RED;
@@ -544,7 +584,7 @@ export default function TrendsScreen() {
                 >
                     <View style={styles.contentWrap}>
                             {/* 1. Containerless Area Chart (Bleeding Edges) */}
-                            {displayTrendData?.averagePricesByDay?.length > 1 && (
+                            {realDisplayTrendData?.averagePricesByDay?.length > 1 ? (
                                 <View style={styles.heroGraphSection}>
                                     <View style={styles.heroGraphPad}>
                                         <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>
@@ -552,16 +592,16 @@ export default function TrendsScreen() {
                                         </Text>
                                         <View style={styles.heroPriceRow}>
                                             <Text style={[styles.heroPrice, numericTextStyle, darkModeWeightStyle.heroPrice, { color: themeColors.text }]}>
-                                                ${displayTrendData.averagePricesByDay[displayTrendData.averagePricesByDay.length - 1].price.toFixed(2)}
+                                                ${realDisplayTrendData.averagePricesByDay[realDisplayTrendData.averagePricesByDay.length - 1].price.toFixed(2)}
                                             </Text>
                                             <Text style={[styles.heroDelta, numericTextStyle, darkModeWeightStyle.heroDelta, { color: primaryTrendColor }]}>
-                                                {displayTrendData.overallTrend.delta > 0 ? '+' : ''}{displayTrendData.overallTrend.delta.toFixed(2)}¢
+                                                {realDisplayTrendData.overallTrend.delta > 0 ? '+' : ''}{realDisplayTrendData.overallTrend.delta.toFixed(2)}¢
                                             </Text>
                                         </View>
                                     </View>
 
                                     <ContainerlessAreaChart
-                                        data={displayTrendData.averagePricesByDay}
+                                        data={realDisplayTrendData.averagePricesByDay}
                                         width={SCREEN_WIDTH}
                                         height={CHART_HEIGHT}
                                         isDark={isDark}
@@ -570,14 +610,33 @@ export default function TrendsScreen() {
 
                                     <View style={styles.heroAxis}>
                                         <Text style={[styles.axisText, numericTextStyle, darkModeWeightStyle.axisText, { color: themeColors.textOpacity }]}>
-                                            {new Date(displayTrendData.averagePricesByDay[0].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                            {new Date(realDisplayTrendData.averagePricesByDay[0].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                         </Text>
                                         <Text style={[styles.axisText, numericTextStyle, darkModeWeightStyle.axisText, { color: themeColors.textOpacity }]}>
-                                            {new Date(displayTrendData.averagePricesByDay[displayTrendData.averagePricesByDay.length - 1].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                            {new Date(realDisplayTrendData.averagePricesByDay[realDisplayTrendData.averagePricesByDay.length - 1].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                         </Text>
                                     </View>
                                 </View>
-                            )}
+                            ) : loading ? (
+                                <View style={styles.heroGraphPlaceholderSection}>
+                                    <View style={styles.heroGraphPad}>
+                                        <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>
+                                            Your {selectedFuelGradeMeta.label} Local Average
+                                        </Text>
+                                        <View style={styles.heroPriceRow}>
+                                            <View style={[styles.heroPricePlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }]} />
+                                            <View style={[styles.heroDeltaPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]} />
+                                        </View>
+                                    </View>
+                                    <View style={styles.heroChartPlaceholderWrap}>
+                                        <View style={[styles.heroChartPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }]} />
+                                    </View>
+                                    <View style={styles.heroAxis}>
+                                        <View style={[styles.axisPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]} />
+                                        <View style={[styles.axisPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]} />
+                                    </View>
+                                </View>
+                            ) : null}
 
                             <View style={styles.contentPad}>
                                 {/* 2. Leaderboard */}
@@ -772,6 +831,10 @@ const styles = StyleSheet.create({
         width: '100%',
         marginBottom: 8,
     },
+    heroGraphPlaceholderSection: {
+        width: '100%',
+        marginBottom: 8,
+    },
     heroGraphPad: {
         paddingHorizontal: 24,
         paddingTop: 16,
@@ -798,11 +861,37 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         letterSpacing: -0.5,
     },
+    heroPricePlaceholder: {
+        width: 144,
+        height: 42,
+        borderRadius: 16,
+        marginRight: 10,
+    },
+    heroDeltaPlaceholder: {
+        width: 72,
+        height: 20,
+        borderRadius: 10,
+    },
+    heroChartPlaceholderWrap: {
+        width: '100%',
+        paddingHorizontal: 16,
+        marginTop: 10,
+    },
+    heroChartPlaceholder: {
+        width: '100%',
+        height: CHART_HEIGHT - 12,
+        borderRadius: 24,
+    },
     heroAxis: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingHorizontal: 24,
         marginTop: 4,
+    },
+    axisPlaceholder: {
+        width: 56,
+        height: 13,
+        borderRadius: 7,
     },
     axisText: {
         fontSize: 13,

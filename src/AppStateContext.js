@@ -6,6 +6,8 @@ const AppStateContext = createContext({
     manualLocationOverride: null,
     clusterProbeRequest: null,
     isClusterProbeSessionActive: false,
+    rootRevealPhase: 'blurred',
+    rootRevealVersion: 0,
     setFuelDebugState: () => { },
     setManualLocationOverride: () => { },
     clearManualLocationOverride: () => { },
@@ -13,6 +15,9 @@ const AppStateContext = createContext({
     clearClusterProbeRequest: () => { },
     finishClusterProbeSession: () => { },
     requestFuelReset: () => { },
+    holdRootReveal: () => { },
+    startRootReveal: () => { },
+    hideRootReveal: () => { },
 });
 
 export function AppStateProvider({ children }) {
@@ -21,6 +26,8 @@ export function AppStateProvider({ children }) {
     const [manualLocationOverride, setManualLocationOverrideState] = useState(null);
     const [clusterProbeRequest, setClusterProbeRequest] = useState(null);
     const [isClusterProbeSessionActive, setIsClusterProbeSessionActive] = useState(false);
+    const [rootRevealPhase, setRootRevealPhase] = useState('blurred');
+    const [rootRevealVersion, setRootRevealVersion] = useState(0);
 
     const requestFuelReset = () => {
         setFuelResetToken(currentValue => currentValue + 1);
@@ -70,6 +77,19 @@ export function AppStateProvider({ children }) {
         setIsClusterProbeSessionActive(false);
     };
 
+    const holdRootReveal = () => {
+        setRootRevealVersion(currentValue => currentValue + 1);
+        setRootRevealPhase('blurred');
+    };
+
+    const startRootReveal = () => {
+        setRootRevealPhase('revealing');
+    };
+
+    const hideRootReveal = () => {
+        setRootRevealPhase('hidden');
+    };
+
     return (
         <AppStateContext.Provider
             value={{
@@ -78,6 +98,8 @@ export function AppStateProvider({ children }) {
                 manualLocationOverride,
                 clusterProbeRequest,
                 isClusterProbeSessionActive,
+                rootRevealPhase,
+                rootRevealVersion,
                 setFuelDebugState,
                 setManualLocationOverride,
                 clearManualLocationOverride,
@@ -85,6 +107,9 @@ export function AppStateProvider({ children }) {
                 clearClusterProbeRequest,
                 finishClusterProbeSession,
                 requestFuelReset,
+                holdRootReveal,
+                startRootReveal,
+                hideRootReveal,
             }}
         >
             {children}

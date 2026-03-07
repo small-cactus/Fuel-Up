@@ -8,6 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import * as FileSystem from 'expo-file-system/legacy';
 import OnboardingScreen from '../src/screens/OnboardingScreen';
+import ProgressiveBlurReveal from '../src/components/ProgressiveBlurReveal';
 
 const CLUSTER_DEBUG_PROBE_REQUEST_FILE_NAME = 'cluster-debug-probe-request.json';
 const CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME = 'cluster-debug-probe.json';
@@ -62,6 +63,9 @@ function AppGate() {
         clusterProbeRequest,
         isClusterProbeSessionActive,
         requestClusterProbe,
+        rootRevealPhase,
+        rootRevealVersion,
+        hideRootReveal,
     } = useAppState();
     const { isDark, themeColors } = useTheme();
     const lastClusterProbeUrlRef = useRef('');
@@ -228,6 +232,13 @@ function AppGate() {
                     }}
                 />
             </Stack>
+            <ProgressiveBlurReveal
+                key={`root-reveal-${rootRevealVersion}`}
+                isBlurred={rootRevealPhase === 'blurred'}
+                shouldReveal={rootRevealPhase === 'revealing'}
+                excludeTabs={false}
+                onRevealComplete={hideRootReveal}
+            />
         </>
     );
 }
