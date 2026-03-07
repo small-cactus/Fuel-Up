@@ -230,6 +230,7 @@ export default function ProgressiveBlurReveal({
     const [isMounted, setIsMounted] = useState(false);
     const frameRef = useRef(null);
     const completionTimerRef = useRef(null);
+    const onRevealCompleteRef = useRef(onRevealComplete);
     const layerRefs = useRef([]);
     const nativeLayerRefs = useRef([]);
     const containerOpacity = useRef(new Animated.Value(1)).current;
@@ -287,6 +288,10 @@ export default function ProgressiveBlurReveal({
     );
     const resolvedOriginXFraction = safeWidth > 0 ? resolvedOriginX / safeWidth : 0.5;
     const resolvedOriginYFraction = safeHeight > 0 ? resolvedOriginY / safeHeight : 0.5;
+
+    useEffect(() => {
+        onRevealCompleteRef.current = onRevealComplete;
+    }, [onRevealComplete]);
 
     useEffect(() => {
         return () => {
@@ -402,8 +407,8 @@ export default function ProgressiveBlurReveal({
                     setIsMounted(false);
                 }
 
-                if (typeof onRevealComplete === 'function') {
-                    onRevealComplete();
+                if (typeof onRevealCompleteRef.current === 'function') {
+                    onRevealCompleteRef.current();
                 }
             }, totalDuration);
 
@@ -466,7 +471,6 @@ export default function ProgressiveBlurReveal({
         failsafeFadeDuration,
         failsafeOpacity,
         hideWhenFinished,
-        onRevealComplete,
         resetOnHide,
         resolvedEndRadius,
         resolvedStepSize,

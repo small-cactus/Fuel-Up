@@ -36,11 +36,6 @@ import BottomCanopy from '../components/BottomCanopy';
 import FuelUpHeaderLogo from '../components/FuelUpHeaderLogo';
 import { registerForPushNotificationsAsync, savePushTokenToSupabase } from '../lib/notifications';
 import {
-    getLastDeviceLocationRegion,
-    persistLastDeviceLocationRegion,
-} from '../lib/deviceLocationCache';
-import { consumeFreshLaunchMapBootstrap } from '../lib/appLaunchState';
-import {
     getPredictiveLocationPermissionStateAsync,
     openPredictiveLocationSettingsAsync,
     requestPredictiveLocationPermissionsAsync,
@@ -82,6 +77,9 @@ const LIGHT_SCREEN_BACKGROUND = '#f2f1f6';
 const LIGHT_SCREEN_BACKGROUND_85 = 'rgba(242,241,246,0.85)';
 const LIGHT_SCREEN_BACKGROUND_42 = 'rgba(242,241,246,0.42)';
 const LIGHT_SCREEN_BACKGROUND_0 = 'rgba(242,241,246,0)';
+const PREDICTIVE_FUELING_PLAYBACK_RATE = 2;
+const PREDICTIVE_FUELING_FADE_DURATION_MS = 400;
+const PREDICTIVE_FUELING_HINT_DELAY_MS = 150;
 
 function hasPredictiveLocationAccess(permissionState) {
     return permissionState?.isReady === true;
@@ -596,7 +594,7 @@ function NotificationStep({ isDark, themeColors, insets, permissionStatus }) {
 
 const videoSource = require('../../assets/red_car_drives.mp4');
 
-function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }) {
+function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive, shouldPrewarm }) {
     const greenPos = { top: 28, left: 75 };
     const redPos = { top: 15, left: 2 };
 
@@ -611,13 +609,25 @@ function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }
     const [showGreen, setShowGreen] = useState(false);
 
     useEffect(() => {
+        player.playbackRate = PREDICTIVE_FUELING_PLAYBACK_RATE;
+
         if (isActive) {
+            player.play();
+            return;
+        }
+
+        if (shouldPrewarm) {
             player.currentTime = 0.0;
             player.play();
-        } else {
-            player.pause();
+            return;
         }
-    }, [isActive, player]);
+
+        player.pause();
+        player.currentTime = 0.0;
+        setShowRed(false);
+        setShowLive(false);
+        setShowGreen(false);
+    }, [isActive, player, shouldPrewarm]);
 
 
     useEffect(() => {
@@ -648,7 +658,7 @@ function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }
 
 
     return (
-        <View style={[styles.stepContainer, { backgroundColor: themeColors.background }]}>
+        <View style={[styles.stepContainer, { backgroundColor: isDark ? themeColors.background : '#FFFFFF' }]}>
 
             <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
                 <Image
@@ -671,7 +681,7 @@ function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }
                         contentFit="cover"
                     />
                     {showGreen && (
-                        <Animated.View style={StyleSheet.absoluteFill} pointerEvents="none" entering={FadeIn.duration(800)}>
+                        <Animated.View style={StyleSheet.absoluteFill} pointerEvents="none" entering={FadeIn.duration(PREDICTIVE_FUELING_FADE_DURATION_MS)}>
                             <OnboardingChip
                                 price={3.89}
                                 isCheapest={true}
@@ -685,7 +695,7 @@ function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }
                     )}
 
                     {showRed && (
-                        <Animated.View style={StyleSheet.absoluteFill} pointerEvents="none" entering={FadeIn.duration(800)}>
+                        <Animated.View style={StyleSheet.absoluteFill} pointerEvents="none" entering={FadeIn.duration(PREDICTIVE_FUELING_FADE_DURATION_MS)}>
                             <OnboardingChip
                                 price={4.59}
                                 isCheapest={false}
@@ -703,7 +713,7 @@ function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }
                 <View style={[styles.mockLiveActivityContainer, { marginTop: 0 }]}>
                     {showLive && (
                         <Animated.View
-                            entering={FadeInUp.springify().mass(1).damping(16).stiffness(120)}
+                            entering={FadeInUp.springify().mass(0.8).damping(18).stiffness(180)}
                             style={{ width: '100%', alignItems: 'center' }}
                         >
                             <GlassView
@@ -747,7 +757,7 @@ function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive }
                                     </View>
                                 </View>
                             </GlassView>
-                            <Animated.View entering={FadeIn.delay(300).duration(800)}>
+                            <Animated.View entering={FadeIn.delay(PREDICTIVE_FUELING_HINT_DELAY_MS).duration(PREDICTIVE_FUELING_FADE_DURATION_MS)}>
                                 <Text style={[styles.mockLiveActivityHint, { color: themeColors.text }]}>
                                     Get real-time alerts as you drive
                                 </Text>
@@ -802,7 +812,6 @@ export default function OnboardingScreen() {
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
     const { preferences, updatePreference, completeOnboarding } = usePreferences();
-    const shouldUseFreshLaunchBootstrapRef = useRef(consumeFreshLaunchMapBootstrap());
     const [currentStep, setCurrentStep] = useState(0);
 
     const blurIntensity = useSharedValue(80);
@@ -827,6 +836,7 @@ export default function OnboardingScreen() {
     const predictivePlayer = useVideoPlayer(videoSource, (player) => {
         player.loop = true;
         player.muted = true;
+        player.playbackRate = PREDICTIVE_FUELING_PLAYBACK_RATE;
         player.currentTime = 0.0;
     });
     const scrollViewRef = useRef(null);
@@ -847,26 +857,12 @@ export default function OnboardingScreen() {
     const [minRating, setMinRating] = useState(preferences.minimumRating);
     const [locationPermissionState, setLocationPermissionState] = useState(null);
     const [notifPermissionStatus, setNotifPermissionStatus] = useState(null);
-    const [onboardingMapRegion, setOnboardingMapRegion] = useState(DEMO_REGION);
+    const onboardingMapRegion = DEMO_REGION;
 
     useEffect(() => {
         let isActive = true;
 
         void (async () => {
-            if (!shouldUseFreshLaunchBootstrapRef.current) {
-                return;
-            }
-
-            const cachedRegion = await getLastDeviceLocationRegion();
-
-            if (!isActive) {
-                return;
-            }
-
-            if (cachedRegion) {
-                setOnboardingMapRegion(cachedRegion);
-            }
-
             const permissionState = await getPredictiveLocationPermissionStateAsync();
 
             if (!isActive) {
@@ -874,32 +870,6 @@ export default function OnboardingScreen() {
             }
 
             setLocationPermissionState(permissionState);
-
-            if (!permissionState.foregroundGranted) {
-                return;
-            }
-
-            try {
-                const freshLocation = await Location.getCurrentPositionAsync({
-                    accuracy: Location.Accuracy.Balanced,
-                });
-
-                if (!isActive) {
-                    return;
-                }
-
-                const freshRegion = {
-                    latitude: freshLocation.coords.latitude,
-                    longitude: freshLocation.coords.longitude,
-                    latitudeDelta: cachedRegion?.latitudeDelta || DEMO_REGION.latitudeDelta,
-                    longitudeDelta: cachedRegion?.longitudeDelta || DEMO_REGION.longitudeDelta,
-                };
-
-                setOnboardingMapRegion(freshRegion);
-                await persistLastDeviceLocationRegion(freshRegion);
-            } catch (error) {
-                // Keep the cached region if GPS is still unavailable.
-            }
         })();
 
         return () => {
@@ -955,6 +925,12 @@ export default function OnboardingScreen() {
     const handleContinue = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
+        if (currentStep === 0) {
+            predictivePlayer.playbackRate = PREDICTIVE_FUELING_PLAYBACK_RATE;
+            predictivePlayer.currentTime = 0.0;
+            predictivePlayer.play();
+        }
+
         if (currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState)) {
             handleRequestPermission();
             return;
@@ -983,10 +959,15 @@ export default function OnboardingScreen() {
 
     // Use full map for specific steps
     const isTranslucentStep = currentStep === 0 || currentStep === 4;
+    const onboardingBackgroundColor = (
+        !isDark && currentStep === 1
+            ? '#FFFFFF'
+            : themeColors.background
+    );
 
 
     return (
-        <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+        <View style={[styles.container, { backgroundColor: onboardingBackgroundColor }]}>
 
             <View style={styles.content}>
                 <ScrollView
@@ -1008,6 +989,7 @@ export default function OnboardingScreen() {
                         insets={insets}
                         player={predictivePlayer}
                         isActive={currentStep === 1}
+                        shouldPrewarm={currentStep <= 1}
                     />
 
                     <LocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionState={locationPermissionState} />

@@ -1,5 +1,14 @@
 import React, { createContext, useContext, useState } from 'react';
 
+const ROOT_REVEAL_SESSION_DEFAULT = {
+    phase: 'blurred',
+    version: 0,
+    hasCompleted: false,
+    hasConsumed: false,
+};
+
+let rootRevealSessionState = { ...ROOT_REVEAL_SESSION_DEFAULT };
+
 const AppStateContext = createContext({
     fuelResetToken: 0,
     fuelDebugState: null,
@@ -27,9 +36,13 @@ export function AppStateProvider({ children }) {
     const [manualLocationOverride, setManualLocationOverrideState] = useState(null);
     const [clusterProbeRequest, setClusterProbeRequest] = useState(null);
     const [isClusterProbeSessionActive, setIsClusterProbeSessionActive] = useState(false);
-    const [rootRevealPhase, setRootRevealPhase] = useState('blurred');
-    const [rootRevealVersion, setRootRevealVersion] = useState(0);
-    const [hasCompletedRootReveal, setHasCompletedRootReveal] = useState(false);
+    const [rootRevealPhase, setRootRevealPhase] = useState(
+        rootRevealSessionState.hasConsumed
+            ? 'hidden'
+            : rootRevealSessionState.phase
+    );
+    const [rootRevealVersion, setRootRevealVersion] = useState(rootRevealSessionState.version);
+    const [hasCompletedRootReveal, setHasCompletedRootReveal] = useState(rootRevealSessionState.hasCompleted);
 
     const requestFuelReset = () => {
         setFuelResetToken(currentValue => currentValue + 1);
@@ -79,17 +92,44 @@ export function AppStateProvider({ children }) {
         setIsClusterProbeSessionActive(false);
     };
 
-    const holdRootReveal = () => {
-        setRootRevealVersion(currentValue => currentValue + 1);
+    const holdRootReveal = ({ force = false } = {}) => {
+        if (rootRevealSessionState.hasConsumed && !force) {
+            return;
+        }
+
+        const nextVersion = rootRevealSessionState.version + 1;
+
+        rootRevealSessionState = {
+            phase: 'blurred',
+            version: nextVersion,
+            hasCompleted: false,
+            hasConsumed: false,
+        };
+        setRootRevealVersion(nextVersion);
         setHasCompletedRootReveal(false);
         setRootRevealPhase('blurred');
     };
 
     const startRootReveal = () => {
+        if (rootRevealSessionState.hasConsumed || rootRevealSessionState.phase === 'revealing') {
+            return;
+        }
+
+        rootRevealSessionState = {
+            ...rootRevealSessionState,
+            phase: 'hidden',
+            hasConsumed: true,
+        };
         setRootRevealPhase('revealing');
     };
 
     const hideRootReveal = () => {
+        rootRevealSessionState = {
+            ...rootRevealSessionState,
+            phase: 'hidden',
+            hasCompleted: true,
+            hasConsumed: true,
+        };
         setHasCompletedRootReveal(true);
         setRootRevealPhase('hidden');
     };
