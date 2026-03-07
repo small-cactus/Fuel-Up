@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
 import { AppStateProvider, useAppState } from '../src/AppStateContext';
 import { ThemeProvider, useTheme } from '../src/ThemeContext';
 import { PreferencesProvider, usePreferences } from '../src/PreferencesContext';
@@ -207,11 +207,7 @@ function AppGate() {
     }, [requestClusterProbe]);
 
     if (isLoading) {
-        return (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: themeColors.background }}>
-                <ActivityIndicator size="large" color={themeColors.text} />
-            </View>
-        );
+        return <View style={{ flex: 1, backgroundColor: themeColors.background }} />;
     }
 
     if (!preferences.hasCompletedOnboarding && !shouldBypassOnboardingForClusterProbe) {

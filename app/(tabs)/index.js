@@ -14,7 +14,9 @@ import FuelSummaryCard from '../../src/components/FuelSummaryCard';
 import ClusterDebugCard from '../../src/components/ClusterDebugCard';
 import TopCanopy from '../../src/components/TopCanopy';
 import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
+import ProgressiveBlurReveal from '../../src/components/ProgressiveBlurReveal';
 import { getCachedFuelPriceSnapshot, getFuelFailureMessage, refreshFuelPriceSnapshot } from '../../src/services/fuel';
+import { prefetchTrendData } from '../../src/services/fuel/trends';
 import { useTheme } from '../../src/ThemeContext';
 import { usePreferences } from '../../src/PreferencesContext';
 import BottomCanopy from '../../src/components/BottomCanopy';
@@ -1173,9 +1175,13 @@ export default function HomeScreen() {
     const [mapRenderRegion, setMapRenderRegion] = useState(DEFAULT_REGION);
     const [userLocationBubble, setUserLocationBubble] = useState(null);
     const [isMapMoving, setIsMapMoving] = useState(false);
+    const [shouldHoldInitialBlur, setShouldHoldInitialBlur] = useState(true);
+    const [shouldRunReveal, setShouldRunReveal] = useState(false);
     const [isClusterDebugRecording, setIsClusterDebugRecording] = useState(false);
     const [isClusterDebugProbeRunning, setIsClusterDebugProbeRunning] = useState(false);
     const [clusterDebugProbeSummary, setClusterDebugProbeSummary] = useState('');
+    const hasTriggeredInitialRevealRef = useRef(false);
+    const prefetchedTrendFuelGradesRef = useRef(new Set());
     const router = useRouter();
     const scrollX = useSharedValue(0);
 
@@ -1214,6 +1220,19 @@ export default function HomeScreen() {
         setErrorMsg(nextError);
         setIsRefreshingPrices(false);
         setIsLoadingLocation(false);
+        hasTriggeredInitialRevealRef.current = false;
+        setShouldHoldInitialBlur(true);
+        setShouldRunReveal(false);
+    };
+
+    const triggerRevealOnMapLoaded = () => {
+        if (!isMountedRef.current || !isFocused) {
+            return;
+        }
+
+        hasTriggeredInitialRevealRef.current = true;
+        setShouldRunReveal(true);
+        setShouldHoldInitialBlur(false);
     };
 
     const applyResolvedRegion = (nextRegion) => {
@@ -1591,6 +1610,7 @@ export default function HomeScreen() {
 
         clearVisibleFuelState('Fuel cache cleared. Open Home to fetch fresh prices.');
         setFuelDebugState(null);
+        setShouldRunReveal(false);
     }, [fuelResetToken]);
 
     useEffect(() => {
@@ -1608,6 +1628,39 @@ export default function HomeScreen() {
         preferences.preferredProvider,
         preferences.searchRadiusMiles,
         selectedFuelGrade,
+    ]);
+
+    useEffect(() => {
+        const hasVisibleMapContent = Boolean(bestQuote) || topStations.length > 0 || regionalQuotes.length > 0;
+        const hasValidLocation =
+            Number.isFinite(location?.latitude) &&
+            Number.isFinite(location?.longitude);
+
+        if (
+            !isMapLoaded ||
+            !hasVisibleMapContent ||
+            !hasValidLocation ||
+            prefetchedTrendFuelGradesRef.current.has(selectedFuelGrade)
+        ) {
+            return;
+        }
+
+        prefetchedTrendFuelGradesRef.current.add(selectedFuelGrade);
+        router.prefetch?.('/trends');
+
+        void prefetchTrendData({
+            latitude: location.latitude,
+            longitude: location.longitude,
+            fuelType: selectedFuelGrade,
+        });
+    }, [
+        bestQuote,
+        isMapLoaded,
+        location,
+        regionalQuotes.length,
+        router,
+        selectedFuelGrade,
+        topStations.length,
     ]);
 
     const onViewableItemsChanged = useRef(({ viewableItems }) => {
@@ -1916,6 +1969,18 @@ export default function HomeScreen() {
             ];
         });
     };
+
+    useEffect(() => {
+        if (
+            hasTriggeredInitialRevealRef.current ||
+            !isFocused ||
+            !isMapLoaded
+        ) {
+            return;
+        }
+
+        triggerRevealOnMapLoaded();
+    }, [isFocused, isMapLoaded]);
 
     useEffect(() => {
         const wasFocused = prevIsFocusedRef.current;
@@ -2842,6 +2907,12 @@ export default function HomeScreen() {
                     </View>
                 )}
             </View>
+
+            <ProgressiveBlurReveal
+                isBlurred={shouldHoldInitialBlur}
+                shouldReveal={shouldRunReveal}
+                excludeTabs={false}
+            />
         </View>
     );
 }

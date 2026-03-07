@@ -1,5 +1,10 @@
 import { supabase } from '../../lib/supabase';
 
+const cachedTrendDataByFuelType = {};
+const lastResolvedTrendDataByFuelType = {};
+const lastTrendsScreenViewedAtMsByFuelType = {};
+const inFlightTrendDataRequestsByFuelType = {};
+
 // Helper: Calculate distance between two coords in miles
 function getDistanceMiles(lat1, lon1, lat2, lon2) {
     const R = 3958.8; // Radius of the earth in miles
@@ -240,4 +245,48 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
         competitorClusters: competitorClusters.slice(0, 5), // Top 5 competitive blocks
         mapHeatmapPoints
     };
+}
+
+export function getCachedTrendData(fuelType = 'regular') {
+    return cachedTrendDataByFuelType[fuelType] || null;
+}
+
+export function setCachedTrendData(fuelType = 'regular', data = null) {
+    cachedTrendDataByFuelType[fuelType] = data;
+}
+
+export function getLastResolvedTrendData(fuelType = 'regular') {
+    return lastResolvedTrendDataByFuelType[fuelType] || null;
+}
+
+export function setLastResolvedTrendData(fuelType = 'regular', data = null) {
+    lastResolvedTrendDataByFuelType[fuelType] = data;
+}
+
+export function getLastTrendsScreenViewedAt(fuelType = 'regular') {
+    return lastTrendsScreenViewedAtMsByFuelType[fuelType] || 0;
+}
+
+export function setLastTrendsScreenViewedAt(fuelType = 'regular', viewedAtMs = 0) {
+    lastTrendsScreenViewedAtMsByFuelType[fuelType] = viewedAtMs;
+}
+
+export async function prefetchTrendData({ latitude, longitude, fuelType = 'regular' }) {
+    if (inFlightTrendDataRequestsByFuelType[fuelType]) {
+        return inFlightTrendDataRequestsByFuelType[fuelType];
+    }
+
+    const request = (async () => {
+        try {
+            const data = await fetchTrendData({ latitude, longitude, fuelType });
+            setCachedTrendData(fuelType, data);
+            setLastResolvedTrendData(fuelType, data);
+            return data;
+        } finally {
+            delete inFlightTrendDataRequestsByFuelType[fuelType];
+        }
+    })();
+
+    inFlightTrendDataRequestsByFuelType[fuelType] = request;
+    return request;
 }

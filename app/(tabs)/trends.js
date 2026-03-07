@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { StyleSheet, Text, View, ScrollView, Dimensions, ActivityIndicator, RefreshControl } from 'react-native';
+import { Animated, StyleSheet, Text, View, ScrollView, Dimensions, RefreshControl } from 'react-native';
 import { GlassView } from 'expo-glass-effect';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/ThemeContext';
@@ -10,11 +10,18 @@ import * as d3Shape from 'd3-shape';
 import * as d3Scale from 'd3-scale';
 import { SymbolView } from 'expo-symbols';
 import { useFocusEffect } from 'expo-router';
-import { fetchTrendData } from '../../src/services/fuel/trends';
+import {
+    fetchTrendData,
+    getCachedTrendData,
+    getLastResolvedTrendData,
+    getLastTrendsScreenViewedAt,
+    setCachedTrendData,
+    setLastResolvedTrendData,
+    setLastTrendsScreenViewedAt,
+} from '../../src/services/fuel/trends';
 import { usePreferences } from '../../src/PreferencesContext';
 import TopCanopy from '../../src/components/TopCanopy';
 import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
-import ProgressiveBlurReveal from '../../src/components/ProgressiveBlurReveal';
 import { getFuelGradeMeta, normalizeFuelGrade } from '../../src/lib/fuelGrade';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -23,9 +30,6 @@ const TOP_CANOPY_HEIGHT = 44;
 const VIEW_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const TREND_BACKGROUND_GRADIENT_STRENGTH = 10; // 0 = off, 1 = default, >1 = stronger
 const TREND_BACKGROUND_GRADIENT_SPREAD = 0.35; // 0 = tighter/closer, 1 = wider/spread out
-
-const cachedTrendDataByFuelType = {};
-const lastTrendsScreenViewedAtMsByFuelType = {};
 
 const COLORS = {
     GREEN: '#51CF66',
@@ -41,6 +45,79 @@ const COLORS = {
     GRADIENT_RED_ALPHA_LIGHT: 1,
     GRADIENT_RED_ALPHA_DARK: 1,
 };
+
+function buildMockTrendData() {
+    const now = new Date();
+    const buildDay = (daysAgo, price) => {
+        const date = new Date(now);
+        date.setDate(now.getDate() - daysAgo);
+        return {
+            date: date.toISOString(),
+            price,
+        };
+    };
+
+    return {
+        averagePricesByDay: [
+            buildDay(6, 3.79),
+            buildDay(5, 3.76),
+            buildDay(4, 3.74),
+            buildDay(3, 3.71),
+            buildDay(2, 3.69),
+            buildDay(1, 3.67),
+            buildDay(0, 3.64),
+        ],
+        overallTrend: {
+            isDecrease: true,
+            delta: -0.15,
+        },
+        leaderboardLastChangedAt: new Date(now.getTime() - (12 * 60 * 1000)).toISOString(),
+        leaderboard: [
+            {
+                stationId: 'mock-1',
+                name: 'Shell',
+                address: '1200 Main St, Cupertino, CA',
+                distanceMiles: 0.8,
+                latestPrice: 3.59,
+                rankShift: 1,
+            },
+            {
+                stationId: 'mock-2',
+                name: 'Chevron',
+                address: '1980 Stevens Creek Blvd, Cupertino, CA',
+                distanceMiles: 1.1,
+                latestPrice: 3.62,
+                rankShift: 0,
+            },
+            {
+                stationId: 'mock-3',
+                name: '76',
+                address: '10455 N De Anza Blvd, Cupertino, CA',
+                distanceMiles: 1.5,
+                latestPrice: 3.64,
+                rankShift: -1,
+            },
+        ],
+        competitorClusters: [
+            {
+                stations: [
+                    { name: 'Shell' },
+                    { name: 'Chevron' },
+                ],
+                totalUpdates: 18,
+                averageJumpAmount: 0.06,
+            },
+            {
+                stations: [
+                    { name: 'Arco' },
+                    { name: '76' },
+                ],
+                totalUpdates: 11,
+                averageJumpAmount: 0.04,
+            },
+        ],
+    };
+}
 
 function clamp01(value) {
     return Math.min(1, Math.max(0, value));
@@ -73,6 +150,52 @@ function formatRelativeTime(updatedAt) {
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getTrendDirectionFromData(data) {
+    const pricesByDay = data?.averagePricesByDay;
+    if (!pricesByDay || pricesByDay.length < 2) {
+        return null;
+    }
+
+    const todayPrice = pricesByDay[pricesByDay.length - 1].price;
+    const yesterdayPrice = pricesByDay[pricesByDay.length - 2].price;
+
+    if (todayPrice < yesterdayPrice) {
+        return 'lower';
+    }
+
+    if (todayPrice > yesterdayPrice) {
+        return 'higher';
+    }
+
+    return 'flat';
+}
+
+function buildTrendBackgroundGradientColors({ direction, isDark }) {
+    if (direction === 'lower') {
+        const hex = isDark ? COLORS.GRADIENT_GREEN_DARK : COLORS.GRADIENT_GREEN_LIGHT;
+        const baseAlpha = isDark ? COLORS.GRADIENT_GREEN_ALPHA_DARK : COLORS.GRADIENT_GREEN_ALPHA_LIGHT;
+        const alpha = baseAlpha * TREND_BACKGROUND_GRADIENT_STRENGTH;
+        return [hexToRgba(hex, alpha), hexToRgba(hex, 0)];
+    }
+
+    if (direction === 'higher') {
+        const hex = isDark ? COLORS.GRADIENT_RED_DARK : COLORS.GRADIENT_RED_LIGHT;
+        const baseAlpha = isDark ? COLORS.GRADIENT_RED_ALPHA_DARK : COLORS.GRADIENT_RED_ALPHA_LIGHT;
+        const alpha = baseAlpha * TREND_BACKGROUND_GRADIENT_STRENGTH;
+        return [hexToRgba(hex, alpha), hexToRgba(hex, 0)];
+    }
+
+    return ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0)'];
+}
+
+function areGradientColorSetsEqual(left, right) {
+    if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) {
+        return false;
+    }
+
+    return left.every((color, index) => color === right[index]);
 }
 
 function ContainerlessAreaChart({ data, width, height, isDark, trendColor }) {
@@ -133,13 +256,22 @@ export default function TrendsScreen() {
     const { preferences } = usePreferences();
     const selectedFuelGrade = normalizeFuelGrade(preferences.preferredOctane);
     const selectedFuelGradeMeta = getFuelGradeMeta(selectedFuelGrade);
-    const cachedTrendData = cachedTrendDataByFuelType[selectedFuelGrade] || null;
-    const [loading, setLoading] = useState(!cachedTrendData);
+    const liveCachedTrendData = getCachedTrendData(selectedFuelGrade);
+    const [loading, setLoading] = useState(!liveCachedTrendData);
     const [refreshing, setRefreshing] = useState(false);
-    const [trendData, setTrendData] = useState(cachedTrendData);
-    const [shouldRunReveal, setShouldRunReveal] = useState(false);
+    const [trendData, setTrendData] = useState(liveCachedTrendData);
+    const [activeGradientColors, setActiveGradientColors] = useState(() => {
+        const initialGradientData = liveCachedTrendData || getLastResolvedTrendData(selectedFuelGrade) || null;
+        return buildTrendBackgroundGradientColors({
+            direction: getTrendDirectionFromData(initialGradientData),
+            isDark: false,
+        });
+    });
+    const [incomingGradientColors, setIncomingGradientColors] = useState(null);
     const isMountedRef = useRef(true);
+    const isFocusedRef = useRef(false);
     const selectedFuelGradeRef = useRef(selectedFuelGrade);
+    const gradientFadeOpacity = useRef(new Animated.Value(1)).current;
     const activeFetchRef = useRef({
         fuelGrade: null,
         promise: null,
@@ -156,12 +288,30 @@ export default function TrendsScreen() {
     }, [selectedFuelGrade]);
 
     useEffect(() => {
-        const nextCachedData = cachedTrendDataByFuelType[selectedFuelGrade] || null;
+        const nextCachedData = getCachedTrendData(selectedFuelGrade);
+        const nextGradientData = nextCachedData || getLastResolvedTrendData(selectedFuelGrade) || null;
         setTrendData(nextCachedData);
         setLoading(!nextCachedData);
-    }, [selectedFuelGrade]);
+        setIncomingGradientColors(null);
+        gradientFadeOpacity.setValue(1);
+        setActiveGradientColors(buildTrendBackgroundGradientColors({
+            direction: getTrendDirectionFromData(nextGradientData),
+            isDark,
+        }));
+    }, [gradientFadeOpacity, isDark, selectedFuelGrade]);
 
-    const loadTrendData = useCallback(({ showLoading = false } = {}) => {
+    useEffect(() => {
+        if (!liveCachedTrendData || trendData === liveCachedTrendData) {
+            return;
+        }
+
+        setTrendData(liveCachedTrendData);
+        setLoading(false);
+    }, [liveCachedTrendData, trendData]);
+
+    const loadTrendData = useCallback(({
+        showLoading = false,
+    } = {}) => {
         const requestFuelGrade = selectedFuelGrade;
 
         if (
@@ -195,7 +345,8 @@ export default function TrendsScreen() {
                     fuelType: requestFuelGrade,
                 });
 
-                cachedTrendDataByFuelType[requestFuelGrade] = data;
+                setCachedTrendData(requestFuelGrade, data);
+                setLastResolvedTrendData(requestFuelGrade, data);
 
                 if (isMountedRef.current) {
                     if (selectedFuelGradeRef.current === requestFuelGrade) {
@@ -228,37 +379,34 @@ export default function TrendsScreen() {
 
     useFocusEffect(
         useCallback(() => {
+            isFocusedRef.current = true;
             const now = Date.now();
-            const cachedDataForFuelType = cachedTrendDataByFuelType[selectedFuelGrade] || null;
-            const lastViewedAtForFuelType = lastTrendsScreenViewedAtMsByFuelType[selectedFuelGrade] || 0;
+            const cachedDataForFuelType = getCachedTrendData(selectedFuelGrade);
+            const lastViewedAtForFuelType = getLastTrendsScreenViewedAt(selectedFuelGrade);
             const hasExpired = (now - lastViewedAtForFuelType) > VIEW_REFRESH_INTERVAL_MS;
             const shouldFetch = !cachedDataForFuelType || hasExpired;
 
-            lastTrendsScreenViewedAtMsByFuelType[selectedFuelGrade] = now;
+            setLastTrendsScreenViewedAt(selectedFuelGrade, now);
 
             if (cachedDataForFuelType && trendData !== cachedDataForFuelType) {
                 setTrendData(cachedDataForFuelType);
             }
 
             if (shouldFetch) {
-                void loadTrendData({ showLoading: !cachedDataForFuelType });
+                const shouldAnimateFetchedEntry = !cachedDataForFuelType;
+                void loadTrendData({
+                    showLoading: shouldAnimateFetchedEntry,
+                });
             }
-        }, [loadTrendData, selectedFuelGrade, trendData])
-    );
-
-    useFocusEffect(
-        useCallback(() => {
-            setShouldRunReveal(true);
-
             return () => {
-                setShouldRunReveal(false);
+                isFocusedRef.current = false;
             };
-        }, [])
+        }, [loadTrendData, selectedFuelGrade, trendData])
     );
 
     const onPullToRefresh = useCallback(() => {
         setRefreshing(true);
-        lastTrendsScreenViewedAtMsByFuelType[selectedFuelGrade] = Date.now();
+        setLastTrendsScreenViewedAt(selectedFuelGrade, Date.now());
 
         const refreshStartedAt = Date.now();
         void (async () => {
@@ -276,36 +424,57 @@ export default function TrendsScreen() {
         })();
     }, [loadTrendData, selectedFuelGrade]);
 
-    const isPriceDrop = trendData?.overallTrend?.isDecrease;
+    const mockTrendData = useMemo(() => buildMockTrendData(), []);
+    const resolvedTrendData = trendData || liveCachedTrendData || null;
+    const displayTrendData = resolvedTrendData || (loading ? mockTrendData : null);
+    const gradientSourceData = resolvedTrendData || getLastResolvedTrendData(selectedFuelGrade) || null;
+    const isPriceDrop = displayTrendData?.overallTrend?.isDecrease;
     // Better = Green, Worse = Red
     const primaryTrendColor = isPriceDrop ? COLORS.GREEN : COLORS.RED;
     const secondaryTrendColor = isPriceDrop ? COLORS.GREEN_DARK : COLORS.RED_DARK;
 
-    const todayTrendDirection = useMemo(() => {
-        const pricesByDay = trendData?.averagePricesByDay;
-        if (!pricesByDay || pricesByDay.length < 2) return null;
-        const todayPrice = pricesByDay[pricesByDay.length - 1].price;
-        const yesterdayPrice = pricesByDay[pricesByDay.length - 2].price;
-        if (todayPrice < yesterdayPrice) return 'lower';
-        if (todayPrice > yesterdayPrice) return 'higher';
-        return 'flat';
-    }, [trendData?.averagePricesByDay]);
+    const todayTrendDirection = useMemo(
+        () => getTrendDirectionFromData(displayTrendData),
+        [displayTrendData]
+    );
+    const targetGradientColors = useMemo(() => (
+        buildTrendBackgroundGradientColors({
+            direction: getTrendDirectionFromData(gradientSourceData),
+            isDark,
+        })
+    ), [gradientSourceData, isDark]);
 
-    const trendBackgroundGradientColors = useMemo(() => {
-        if (todayTrendDirection === 'lower') {
-            const hex = isDark ? COLORS.GRADIENT_GREEN_DARK : COLORS.GRADIENT_GREEN_LIGHT;
-            const baseAlpha = isDark ? COLORS.GRADIENT_GREEN_ALPHA_DARK : COLORS.GRADIENT_GREEN_ALPHA_LIGHT;
-            const alpha = baseAlpha * TREND_BACKGROUND_GRADIENT_STRENGTH;
-            return [hexToRgba(hex, alpha), hexToRgba(hex, 0)];
+    useEffect(() => {
+        if (areGradientColorSetsEqual(activeGradientColors, targetGradientColors)) {
+            if (incomingGradientColors) {
+                setIncomingGradientColors(null);
+            }
+            gradientFadeOpacity.setValue(1);
+            return;
         }
-        if (todayTrendDirection === 'higher') {
-            const hex = isDark ? COLORS.GRADIENT_RED_DARK : COLORS.GRADIENT_RED_LIGHT;
-            const baseAlpha = isDark ? COLORS.GRADIENT_RED_ALPHA_DARK : COLORS.GRADIENT_RED_ALPHA_LIGHT;
-            const alpha = baseAlpha * TREND_BACKGROUND_GRADIENT_STRENGTH;
-            return [hexToRgba(hex, alpha), hexToRgba(hex, 0)];
-        }
-        return ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0)'];
-    }, [isDark, todayTrendDirection]);
+
+        setIncomingGradientColors(targetGradientColors);
+        gradientFadeOpacity.setValue(0);
+
+        Animated.timing(gradientFadeOpacity, {
+            toValue: 1,
+            duration: 650,
+            useNativeDriver: true,
+        }).start(({ finished }) => {
+            if (!finished) {
+                return;
+            }
+
+            setActiveGradientColors(targetGradientColors);
+            setIncomingGradientColors(null);
+            gradientFadeOpacity.setValue(1);
+        });
+    }, [
+        activeGradientColors,
+        gradientFadeOpacity,
+        incomingGradientColors,
+        targetGradientColors,
+    ]);
 
     const glassTintColor = isDark ? '#101010ff' : '#FFFFFF';
     const canopyEdgeLine = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
@@ -313,8 +482,8 @@ export default function TrendsScreen() {
     const gradientSpread = clamp01(TREND_BACKGROUND_GRADIENT_SPREAD);
     const numericTextStyle = styles.numericRounded;
     const leaderboardUpdatedLabel = useMemo(
-        () => formatRelativeTime(trendData?.leaderboardLastChangedAt),
-        [trendData?.leaderboardLastChangedAt]
+        () => formatRelativeTime(displayTrendData?.leaderboardLastChangedAt),
+        [displayTrendData?.leaderboardLastChangedAt]
     );
     const darkModeWeightStyle = useMemo(() => ({
         heroSub: { fontWeight: isDark ? '600' : '700' },
@@ -337,11 +506,25 @@ export default function TrendsScreen() {
             <View style={[styles.baseBackground, { backgroundColor: themeColors.background }]} />
             <ExpoLinearGradient
                 pointerEvents="none"
-                colors={trendBackgroundGradientColors}
+                colors={activeGradientColors}
                 start={{ x: 0, y: 0 }}
                 end={{ x: gradientSpread, y: gradientSpread }}
                 style={styles.topLeftTrendGradient}
             />
+            {incomingGradientColors ? (
+                <Animated.View
+                    pointerEvents="none"
+                    style={[styles.topLeftTrendGradient, { opacity: gradientFadeOpacity, zIndex: 2 }]}
+                >
+                    <ExpoLinearGradient
+                        pointerEvents="none"
+                        colors={incomingGradientColors}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: gradientSpread, y: gradientSpread }}
+                        style={StyleSheet.absoluteFill}
+                    />
+                </Animated.View>
+            ) : null}
             <View style={styles.foregroundLayer}>
                 <ScrollView
                     style={styles.scrollView}
@@ -359,14 +542,9 @@ export default function TrendsScreen() {
                         />
                     )}
                 >
-                    {loading ? (
-                        <View style={{ marginTop: 100 }}>
-                            <ActivityIndicator color={themeColors.text} />
-                        </View>
-                    ) : (
-                        <View style={styles.contentWrap}>
+                    <View style={styles.contentWrap}>
                             {/* 1. Containerless Area Chart (Bleeding Edges) */}
-                            {trendData?.averagePricesByDay?.length > 1 && (
+                            {displayTrendData?.averagePricesByDay?.length > 1 && (
                                 <View style={styles.heroGraphSection}>
                                     <View style={styles.heroGraphPad}>
                                         <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>
@@ -374,16 +552,16 @@ export default function TrendsScreen() {
                                         </Text>
                                         <View style={styles.heroPriceRow}>
                                             <Text style={[styles.heroPrice, numericTextStyle, darkModeWeightStyle.heroPrice, { color: themeColors.text }]}>
-                                                ${trendData.averagePricesByDay[trendData.averagePricesByDay.length - 1].price.toFixed(2)}
+                                                ${displayTrendData.averagePricesByDay[displayTrendData.averagePricesByDay.length - 1].price.toFixed(2)}
                                             </Text>
                                             <Text style={[styles.heroDelta, numericTextStyle, darkModeWeightStyle.heroDelta, { color: primaryTrendColor }]}>
-                                                {trendData.overallTrend.delta > 0 ? '+' : ''}{trendData.overallTrend.delta.toFixed(2)}¢
+                                                {displayTrendData.overallTrend.delta > 0 ? '+' : ''}{displayTrendData.overallTrend.delta.toFixed(2)}¢
                                             </Text>
                                         </View>
                                     </View>
 
                                     <ContainerlessAreaChart
-                                        data={trendData.averagePricesByDay}
+                                        data={displayTrendData.averagePricesByDay}
                                         width={SCREEN_WIDTH}
                                         height={CHART_HEIGHT}
                                         isDark={isDark}
@@ -392,10 +570,10 @@ export default function TrendsScreen() {
 
                                     <View style={styles.heroAxis}>
                                         <Text style={[styles.axisText, numericTextStyle, darkModeWeightStyle.axisText, { color: themeColors.textOpacity }]}>
-                                            {new Date(trendData.averagePricesByDay[0].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                            {new Date(displayTrendData.averagePricesByDay[0].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                         </Text>
                                         <Text style={[styles.axisText, numericTextStyle, darkModeWeightStyle.axisText, { color: themeColors.textOpacity }]}>
-                                            {new Date(trendData.averagePricesByDay[trendData.averagePricesByDay.length - 1].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                            {new Date(displayTrendData.averagePricesByDay[displayTrendData.averagePricesByDay.length - 1].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                         </Text>
                                     </View>
                                 </View>
@@ -403,7 +581,7 @@ export default function TrendsScreen() {
 
                             <View style={styles.contentPad}>
                                 {/* 2. Leaderboard */}
-                                {trendData?.leaderboard?.length > 0 && (
+                                {displayTrendData?.leaderboard?.length > 0 && (
                                     <GlassView
                                         style={styles.glassCard}
                                         glassEffectStyle="regular"
@@ -417,7 +595,7 @@ export default function TrendsScreen() {
                                                 Updated {leaderboardUpdatedLabel}
                                             </Text>
                                         </View>
-                                        {trendData.leaderboard.map((st, idx) => {
+                                        {displayTrendData.leaderboard.map((st, idx) => {
                                             const rankLabel = idx === 0 ? '1st' : idx === 1 ? '2nd' : idx === 2 ? '3rd' : `${idx + 1}th`;
                                             const medalColor = idx === 0 ? themeColors.text : idx === 1 ? '#8f8f8fff' : idx === 2 ? '#CD7F32' : 'transparent';
 
@@ -509,7 +687,7 @@ export default function TrendsScreen() {
                                 )}
 
                                 {/* 3. Competitor Clusters */}
-                                {trendData?.competitorClusters?.length > 0 && (
+                                {displayTrendData?.competitorClusters?.length > 0 && (
                                     <GlassView
                                         style={[styles.glassCard, { marginTop: 16 }]}
                                         glassEffectStyle="regular"
@@ -518,7 +696,7 @@ export default function TrendsScreen() {
                                         <Text style={[styles.cardTitle, darkModeWeightStyle.cardTitle, { color: themeColors.text, marginBottom: 4 }]}>Fierce Competitors</Text>
                                         <Text style={[styles.cardSubTitle, darkModeWeightStyle.cardSubTitle, { color: themeColors.textOpacity, marginBottom: 16 }]}>Stations battling on the same block</Text>
 
-                                        {trendData.competitorClusters.map((cluster, idx) => (
+                                        {displayTrendData.competitorClusters.map((cluster, idx) => (
                                             <View key={`cluster-${idx}`} style={[styles.listItem, idx > 0 && { borderTopWidth: 1, borderTopColor: isDark ? '#333' : '#EEE' }]}>
                                                 <View style={styles.listTextCol}>
                                                     <Text style={[styles.itemName, darkModeWeightStyle.itemName, { color: themeColors.text }]}>
@@ -539,14 +717,13 @@ export default function TrendsScreen() {
                                 )}
 
                                 {/* Empty/No Data Fallback */}
-                                {!loading && !trendData?.averagePricesByDay?.length && !trendData?.leaderboard?.length && (
+                                {!loading && !displayTrendData?.averagePricesByDay?.length && !displayTrendData?.leaderboard?.length && (
                                     <View style={styles.emptyState}>
                                         <Text style={[styles.emptyText, darkModeWeightStyle.emptyText, { color: themeColors.textOpacity }]}>Not enough historical data collected yet to render trends. Check back soon.</Text>
                                     </View>
                                 )}
                             </View>
                         </View>
-                    )}
                 </ScrollView>
 
                 <TopCanopy edgeColor={canopyEdgeLine} height={topCanopyHeight} isDark={isDark} topInset={insets.top} />
@@ -554,9 +731,6 @@ export default function TrendsScreen() {
                     <FuelUpHeaderLogo isDark={isDark} />
                 </View>
             </View>
-            <ProgressiveBlurReveal
-                shouldReveal={shouldRunReveal}
-            />
         </View>
     );
 }

@@ -360,7 +360,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/ProgressiveBlurView.swif
    public override func didMoveToWindow() {
 diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /Users/anthonyh/Desktop/Fuel Up/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift
 --- a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift	1985-10-26 04:15:00
-+++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift	2026-03-06 17:57:39
++++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift	2026-03-06 18:43:31
 @@ -28,6 +28,32 @@
    private var maxBlurRadius: CGFloat = 20
    private var direction: VariableBlurDirection = .blurredTopClearBottom
@@ -404,7 +404,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
  
      super.init(effect: UIBlurEffect(style: blurStyle))
  
-@@ -53,66 +82,173 @@
+@@ -53,66 +82,156 @@
      maxBlurRadius: CGFloat,
      direction: VariableBlurDirection,
      startOffset: CGFloat,
@@ -445,21 +445,16 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
 +  }
 +
 +  private func applyCurrentConfiguration() {
-+    if radial {
-+      applyRadialMaskConfiguration()
-       return
-     }
- 
--    let selName = String(":epyThtiWretlif".reversed()) // filterWithType:
--    guard let variableBlur = Cls.self.perform(
 +    if layer.mask != nil {
 +      layer.mask = nil
 +    }
 +
 +    guard let variableBlur = ensureBaseConfiguration() else {
-+      return
-+    }
-+
+       return
+     }
+ 
+-    let selName = String(":epyThtiWretlif".reversed()) // filterWithType:
+-    guard let variableBlur = Cls.self.perform(
 +    updateFilterMaskAndRadius(variableBlur, forceMaskRefresh: true)
 +  }
 +
@@ -519,18 +514,6 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
 +  ) {
 +    stopRevealAnimation()
 +
-+    if radial {
-+      startRadialMaskRevealAnimation(
-+        durationMs: durationMs,
-+        delayMs: delayMs,
-+        fromRadius: fromRadius,
-+        toRadius: toRadius,
-+        fromFeather: fromFeather,
-+        toFeather: toFeather
-+      )
-+      return
-     }
-+
 +    animationStartTime = CACurrentMediaTime()
 +    animationDelaySeconds = CFTimeInterval(max(delayMs, 0) / 1000)
 +    animationDurationSeconds = CFTimeInterval(max(durationMs, 1) / 1000)
@@ -547,7 +530,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
 +      displayLink.preferredFrameRateRange = CAFrameRateRange(minimum: 80, maximum: 120, preferred: 120)
 +    } else {
 +      displayLink.preferredFramesPerSecond = 120
-+    }
+     }
 +    displayLink.add(to: .main, forMode: .common)
 +    self.displayLink = displayLink
    }
@@ -608,7 +591,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
    open override func traitCollectionDidChange(
      _ previousTraitCollection: UITraitCollection?
    ) {
-@@ -120,16 +256,26 @@
+@@ -120,16 +239,26 @@
      // Re-setup blur if needed when trait collection changes
      if let previousTraitCollection = previousTraitCollection,
         traitCollection.userInterfaceStyle != previousTraitCollection.userInterfaceStyle {
@@ -636,7 +619,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
      switch direction {
      case .blurredCenterClearTopAndBottom:
        return makeCenterGradientImage(
-@@ -165,6 +311,69 @@
+@@ -165,6 +294,69 @@
      }
    }
  
@@ -706,7 +689,7 @@ diff -ruN /tmp/react-native-blur-orig/package/ios/Views/VariableBlurView.swift /
    private func makeCenterGradientImage(
      width: CGFloat = 100,
      height: CGFloat = 100,
-@@ -269,5 +478,373 @@
+@@ -269,5 +461,373 @@
      context.setFillColor(CGColor(gray: 0, alpha: 1))
      context.fill(CGRect(x: 0, y: 0, width: width, height: height))
      return context.makeImage()!
