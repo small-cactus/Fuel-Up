@@ -165,6 +165,7 @@ export default function PredictiveMapScene({
                     coordinate={sceneConfig.expensiveStation.coordinate}
                     emphasisState={demoState.passedStationState}
                     isDark={isDark}
+                    isVisible={demoState.chipRevealState?.expensive}
                     price={sceneConfig.expensiveStation.price}
                     role="expensive"
                 />
@@ -173,6 +174,7 @@ export default function PredictiveMapScene({
                     coordinate={sceneConfig.destinationStation.coordinate}
                     emphasisState="highlighted"
                     isDark={isDark}
+                    isVisible={demoState.chipRevealState?.destination}
                     price={sceneConfig.destinationStation.price}
                     role="destination"
                 />

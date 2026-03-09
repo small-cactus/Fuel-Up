@@ -271,6 +271,24 @@ function formatDurationMinutes(seconds) {
   return `${minutes} min`;
 }
 
+function getChipRevealState(routeMetrics, sceneConfig, travelledDistanceMeters) {
+  const expensiveLeadMeters = sceneConfig?.stationChipReveal?.expensiveLeadMeters || 360;
+  const destinationLeadMeters = sceneConfig?.stationChipReveal?.destinationLeadMeters || 900;
+  const expensiveRevealDistanceMeters = Math.max(
+    0,
+    routeMetrics.totalDistanceMeters * routeMetrics.expensiveStationProgress - expensiveLeadMeters
+  );
+  const destinationRevealDistanceMeters = Math.max(
+    0,
+    routeMetrics.totalDistanceMeters * routeMetrics.destinationStationProgress - destinationLeadMeters
+  );
+
+  return {
+    expensive: travelledDistanceMeters >= expensiveRevealDistanceMeters,
+    destination: travelledDistanceMeters >= destinationRevealDistanceMeters,
+  };
+}
+
 function getSpeedFactorAtDistance(routeMetrics, sceneConfig, distanceMeters) {
   const slowdownLookaheadMeters = sceneConfig?.motionProfile?.slowdownLookaheadMeters || 86;
   const slowdownRecoveryMeters = sceneConfig?.motionProfile?.slowdownRecoveryMeters || 54;
@@ -467,6 +485,10 @@ function buildRouteMetrics(route, sceneConfig) {
       baseMetrics,
       sceneConfig.expensiveStation.coordinate
     );
+  const destinationStationProgress = getProgressForNearestCoordinate(
+    baseMetrics,
+    sceneConfig.destinationStation.coordinate
+  );
   const initialCoordinate = baseMetrics.coordinates[0] || sceneConfig.origin;
   const initialHeading = baseMetrics.coordinates.length > 1
     ? calculateHeadingDegrees(baseMetrics.coordinates[0], baseMetrics.coordinates[1])
@@ -500,6 +522,7 @@ function buildRouteMetrics(route, sceneConfig) {
     segments: baseMetrics.segments,
     totalDistanceMeters: baseMetrics.totalDistanceMeters,
     expensiveStationProgress,
+    destinationStationProgress,
     initialCoordinate,
     initialHeading,
     overviewHeading,
@@ -765,6 +788,11 @@ function getDemoSnapshot(routeMetrics, sceneConfig, progress, arrivalElapsedMs =
   const arrivalBlend = isArrived
     ? smoothstep(0, arrivalTransitionDurationMs, arrivalElapsedMs)
     : 0;
+  const chipRevealState = getChipRevealState(
+    routeMetrics,
+    sceneConfig,
+    point.travelledDistanceMeters
+  );
 
   return {
     progress: distanceProgress,
@@ -776,6 +804,7 @@ function getDemoSnapshot(routeMetrics, sceneConfig, progress, arrivalElapsedMs =
     remainingTravelTimeSeconds,
     scenePhase: isArrived ? 'arrived' : scenePhase,
     passedStationState: getPassedStationState(distanceProgress, routeMetrics.expensiveStationProgress),
+    chipRevealState,
     activeCamera: isArrived
       ? blendCameraStates(routeFollowCamera, arrivalCamera, arrivalBlend)
       : routeFollowCamera,
@@ -795,6 +824,7 @@ module.exports = {
   getArrivalCamera,
   getDistanceForTimeProgress,
   getCameraForProgress,
+  getChipRevealState,
   getDemoSnapshot,
   getPassedStationState,
   getPointAtDistance,

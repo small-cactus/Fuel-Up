@@ -158,6 +158,10 @@ export const PREDICTIVE_FUELING_SCENE = {
         passingExpensive: 560,
         routingCheap: 720,
     },
+    stationChipReveal: {
+        expensiveLeadMeters: 360,
+        destinationLeadMeters: 900,
+    },
     cameraAnimationMs: 0,
     cameraUpdateIntervalMs: 0,
     loopDurationMs: 12400,

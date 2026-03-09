@@ -280,3 +280,17 @@ test('close turns are grouped into one camera event', () => {
   assert.ok(routeMetrics.turnEvents.length > routeMetrics.cameraTurnEvents.length);
   assert.equal(routeMetrics.cameraTurnEvents.at(-1)?.eventCount, 2);
 });
+
+test('station chips reveal before the route reaches each station', () => {
+  const routeMetrics = buildRouteMetrics(PREDICTIVE_FUELING_SCENE.fallbackRoute, PREDICTIVE_FUELING_SCENE);
+  const earlySnapshot = getDemoSnapshot(routeMetrics, PREDICTIVE_FUELING_SCENE, 0.45, 0);
+  const midSnapshot = getDemoSnapshot(routeMetrics, PREDICTIVE_FUELING_SCENE, 0.66, 0);
+  const lateSnapshot = getDemoSnapshot(routeMetrics, PREDICTIVE_FUELING_SCENE, 0.9, 0);
+
+  assert.equal(earlySnapshot.chipRevealState.expensive, false);
+  assert.equal(earlySnapshot.chipRevealState.destination, false);
+  assert.equal(midSnapshot.chipRevealState.destination, true);
+  assert.equal(midSnapshot.chipRevealState.expensive, false);
+  assert.equal(lateSnapshot.chipRevealState.expensive, true);
+  assert.equal(lateSnapshot.chipRevealState.destination, true);
+});
