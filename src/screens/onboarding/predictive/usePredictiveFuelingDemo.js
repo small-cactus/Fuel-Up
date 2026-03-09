@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 const {
+    buildPredictiveRouteMetrics,
     buildRouteMetrics,
     getDemoSnapshot,
 } = require('./simulationMath.cjs');
@@ -51,6 +52,10 @@ function smoothCamera(previousCamera, nextCamera, sceneConfig, deltaMs) {
 
 export default function usePredictiveFuelingDemo({ isActive, route, sceneConfig }) {
     const routeMetrics = useMemo(() => {
+        if (route?.initialRoute?.coordinates?.length && route?.rerouteRoute?.coordinates?.length) {
+            return buildPredictiveRouteMetrics(route, sceneConfig);
+        }
+
         if (!route?.coordinates?.length) {
             return null;
         }

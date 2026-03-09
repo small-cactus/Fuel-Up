@@ -33,7 +33,7 @@ export default function PredictiveMapScene({
     const pendingCameraRef = useRef(null);
     const [isMapReady, setIsMapReady] = useState(false);
 
-    const routeCoordinates = routeMetrics?.coordinates || [];
+    const routeCoordinates = demoState?.visibleRouteCoordinates || routeMetrics?.coordinates || [];
 
     useEffect(() => {
         return () => {

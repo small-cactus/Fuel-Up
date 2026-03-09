@@ -8,7 +8,7 @@ import FuelUpHeaderLogo from '../../../components/FuelUpHeaderLogo';
 import { getDrivingRouteAsync } from '../../../lib/FuelUpMapKitRouting';
 import PredictiveMapScene from './PredictiveMapScene';
 import {
-    getPredictiveFuelingFallbackRoute,
+    getPredictiveFuelingFallbackRoutes,
     PREDICTIVE_FUELING_SCENE,
 } from './constants';
 import usePredictiveFuelingDemo from './usePredictiveFuelingDemo';
@@ -21,50 +21,60 @@ const LIGHT_SCREEN_BACKGROUND_85 = 'rgba(242,241,246,0.85)';
 const LIGHT_SCREEN_BACKGROUND_0 = 'rgba(242,241,246,0)';
 
 export default function PredictiveFuelingStep({ insets, isActive, isDark }) {
-    const [route, setRoute] = useState(() => getPredictiveFuelingFallbackRoute());
+    const [route, setRoute] = useState(() => getPredictiveFuelingFallbackRoutes());
 
     useEffect(() => {
         let isCancelled = false;
 
         void (async () => {
             try {
-                const nextRoute = await getDrivingRouteAsync({
-                    origin: PREDICTIVE_FUELING_SCENE.origin,
-                    destination: PREDICTIVE_FUELING_SCENE.destinationStation.coordinate,
-                });
+                const [initialRoute, rerouteRoute] = await Promise.all([
+                    getDrivingRouteAsync({
+                        origin: PREDICTIVE_FUELING_SCENE.origin,
+                        destination: PREDICTIVE_FUELING_SCENE.expensiveStation.coordinate,
+                    }),
+                    getDrivingRouteAsync({
+                        origin: PREDICTIVE_FUELING_SCENE.rerouteOrigin,
+                        destination: PREDICTIVE_FUELING_SCENE.destinationStation.coordinate,
+                    }),
+                ]);
 
-                if (!isCancelled && nextRoute?.coordinates?.length) {
+                if (
+                    !isCancelled &&
+                    initialRoute?.coordinates?.length &&
+                    rerouteRoute?.coordinates?.length
+                ) {
+                    const nextRouteSet = {
+                        initialRoute,
+                        rerouteRoute,
+                        isFallback: false,
+                    };
+
                     if (__DEV__) {
                         console.info(
                             'Predictive fueling route diagnostics:',
                             getPredictiveRouteDiagnostics(
-                                {
-                                    ...nextRoute,
-                                    isFallback: false,
-                                },
+                                nextRouteSet,
                                 PREDICTIVE_FUELING_SCENE
                             )
                         );
                     }
 
-                    setRoute({
-                        ...nextRoute,
-                        isFallback: false,
-                    });
+                    setRoute(nextRouteSet);
                 }
             } catch (error) {
-                const fallbackRoute = getPredictiveFuelingFallbackRoute();
+                const fallbackRouteSet = getPredictiveFuelingFallbackRoutes();
 
                 if (__DEV__) {
                     console.warn(
                         'Predictive fueling route fallback in use:',
                         error?.code || error?.message || error,
-                        getPredictiveRouteDiagnostics(fallbackRoute, PREDICTIVE_FUELING_SCENE)
+                        getPredictiveRouteDiagnostics(fallbackRouteSet, PREDICTIVE_FUELING_SCENE)
                     );
                 }
 
                 if (!isCancelled) {
-                    setRoute(fallbackRoute);
+                    setRoute(fallbackRouteSet);
                 }
             }
         })();

@@ -1,8 +1,30 @@
 const {
+  buildPredictiveRouteMetrics,
   buildRouteMetrics,
 } = require('./simulationMath.cjs');
 
 function getPredictiveRouteDiagnostics(route, sceneConfig) {
+  if (route?.initialRoute && route?.rerouteRoute) {
+    const combinedMetrics = buildPredictiveRouteMetrics(route, sceneConfig);
+
+    return {
+      source: route?.isFallback ? 'fallback' : 'native',
+      initialRawCoordinateCount: Array.isArray(route?.initialRoute?.coordinates) ? route.initialRoute.coordinates.length : 0,
+      rerouteRawCoordinateCount: Array.isArray(route?.rerouteRoute?.coordinates) ? route.rerouteRoute.coordinates.length : 0,
+      renderedCoordinateCount: combinedMetrics.coordinates.length,
+      initialStepCount: Array.isArray(route?.initialRoute?.steps) ? route.initialRoute.steps.length : 0,
+      rerouteStepCount: Array.isArray(route?.rerouteRoute?.steps) ? route.rerouteRoute.steps.length : 0,
+      totalDistanceMeters: Math.round(combinedMetrics.totalDistanceMeters),
+      expectedTravelTimeSeconds: Math.round(
+        Number(combinedMetrics.expectedTravelTimeSeconds)
+        || Number(combinedMetrics.expectedTravelTime)
+        || 0
+      ),
+      rerouteTriggerProgress: Number((combinedMetrics.rerouteTriggerProgress || 0).toFixed(3)),
+      expensiveChipRevealProgress: Number((combinedMetrics.expensiveStationProgress || 0).toFixed(3)),
+    };
+  }
+
   const routeMetrics = buildRouteMetrics(route, sceneConfig);
   const segmentDistances = routeMetrics.segments.map(segment => segment.distanceMeters);
   const sortedDistances = [...segmentDistances].sort((left, right) => left - right);

@@ -142,7 +142,6 @@ export default function RouteStationMarker({
     const markerPlacement = getMarkerPlacement(role);
     const baseScale = getBaseScale(role, emphasisState);
     const revealStyle = useAnimatedStyle(() => ({
-        opacity: appearProgress.value <= 0 ? 0 : 1,
         transform: [{
             scale: baseScale * interpolate(
                 appearProgress.value,

@@ -238,9 +238,28 @@ function getProgressForNearestCoordinate(routeMetrics, targetCoordinate) {
   return bestProgress;
 }
 
-function getScenePhase(progress, expensiveStationProgress) {
-  const expensiveLeadWindow = Math.max(0.11, expensiveStationProgress - 0.07);
-  const expensiveTailWindow = Math.min(1, expensiveStationProgress + 0.05);
+function getNearestCoordinateIndex(coordinates, targetCoordinate) {
+  if (!coordinates?.length) {
+    return 0;
+  }
+
+  let bestIndex = 0;
+  let bestDistance = Number.POSITIVE_INFINITY;
+
+  coordinates.forEach((coordinate, index) => {
+    const distance = haversineDistanceMeters(coordinate, targetCoordinate);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestIndex = index;
+    }
+  });
+
+  return bestIndex;
+}
+
+function getScenePhase(progress, expensiveStationProgress, rerouteTriggerProgress = expensiveStationProgress) {
+  const expensiveLeadWindow = Math.max(0.11, expensiveStationProgress - 0.06);
+  const expensiveTailWindow = Math.min(1, rerouteTriggerProgress + 0.02);
 
   if (progress < expensiveLeadWindow) {
     return 'driving';
@@ -251,11 +270,11 @@ function getScenePhase(progress, expensiveStationProgress) {
   return 'routing-cheap';
 }
 
-function getPassedStationState(progress, expensiveStationProgress) {
-  if (progress < expensiveStationProgress - 0.03) {
+function getPassedStationState(progress, expensiveStationProgress, rerouteTriggerProgress = expensiveStationProgress) {
+  if (progress < expensiveStationProgress - 0.025) {
     return 'default';
   }
-  if (progress <= expensiveStationProgress + 0.035) {
+  if (progress <= rerouteTriggerProgress + 0.018) {
     return 'highlighted';
   }
   return 'dimmed';
@@ -272,14 +291,20 @@ function formatDurationMinutes(seconds) {
 }
 
 function getChipRevealState(routeMetrics, sceneConfig, travelledDistanceMeters) {
-  const expensiveLeadMeters = sceneConfig?.stationChipReveal?.expensiveLeadMeters || 360;
-  const destinationLeadMeters = sceneConfig?.stationChipReveal?.destinationLeadMeters || 900;
+  const expensiveLeadMeters = sceneConfig?.stationChipReveal?.expensiveLeadMeters || 260;
+  const destinationLeadMeters = sceneConfig?.stationChipReveal?.destinationLeadMeters || 480;
+  const destinationPostRerouteLeadMeters = sceneConfig?.stationChipReveal?.destinationPostRerouteLeadMeters || 140;
+  const expensiveTriggerDistanceMeters = routeMetrics.rerouteTriggerDistanceMeters || (
+    routeMetrics.totalDistanceMeters * routeMetrics.expensiveStationProgress
+  );
   const expensiveRevealDistanceMeters = Math.max(
     0,
-    routeMetrics.totalDistanceMeters * routeMetrics.expensiveStationProgress - expensiveLeadMeters
+    expensiveTriggerDistanceMeters - expensiveLeadMeters
   );
   const destinationRevealDistanceMeters = Math.max(
-    0,
+    routeMetrics.rerouteTriggerDistanceMeters
+      ? routeMetrics.rerouteTriggerDistanceMeters + destinationPostRerouteLeadMeters
+      : 0,
     routeMetrics.totalDistanceMeters * routeMetrics.destinationStationProgress - destinationLeadMeters
   );
 
@@ -287,6 +312,109 @@ function getChipRevealState(routeMetrics, sceneConfig, travelledDistanceMeters) 
     expensive: travelledDistanceMeters >= expensiveRevealDistanceMeters,
     destination: travelledDistanceMeters >= destinationRevealDistanceMeters,
   };
+}
+
+function buildPredictiveRouteMetrics(routeSet, sceneConfig) {
+  const initialRouteMetrics = buildRouteMetrics(routeSet.initialRoute, sceneConfig);
+  const rerouteRouteMetrics = buildRouteMetrics(routeSet.rerouteRoute, sceneConfig);
+  const rerouteTriggerProgressOnInitial = getProgressForNearestCoordinate(
+    initialRouteMetrics,
+    sceneConfig.rerouteOrigin
+  );
+  const rerouteTriggerDistanceOnInitial = (
+    initialRouteMetrics.totalDistanceMeters * rerouteTriggerProgressOnInitial
+  );
+  const rerouteTriggerIndexOnInitial = getNearestCoordinateIndex(
+    initialRouteMetrics.coordinates,
+    sceneConfig.rerouteOrigin
+  );
+  const initialPrefixCoordinates = initialRouteMetrics.coordinates.slice(0, rerouteTriggerIndexOnInitial + 1);
+  const initialPrefixSteps = (routeSet.initialRoute.steps || []).filter(step => (
+    getProgressForNearestCoordinate(initialRouteMetrics, step.coordinate) <= rerouteTriggerProgressOnInitial + 0.0005
+  ));
+  const combinedRoute = {
+    coordinates: dedupeCoordinates([
+      ...initialPrefixCoordinates,
+      ...(routeSet.rerouteRoute.coordinates || []).slice(1),
+    ]),
+    expectedTravelTimeSeconds: Math.round(
+      (Number(routeSet.initialRoute.expectedTravelTimeSeconds) || 0) * rerouteTriggerProgressOnInitial +
+      (Number(routeSet.rerouteRoute.expectedTravelTimeSeconds) || 0)
+    ),
+    steps: [
+      ...initialPrefixSteps,
+      ...(routeSet.rerouteRoute.steps || []),
+    ],
+  };
+  const combinedMetrics = buildRouteMetrics(combinedRoute, sceneConfig);
+  const rerouteTriggerProgress = getProgressForNearestCoordinate(combinedMetrics, sceneConfig.rerouteOrigin);
+  const rerouteTriggerDistanceMeters = combinedMetrics.totalDistanceMeters * rerouteTriggerProgress;
+  const expensiveChipRevealProgress = combinedMetrics.totalDistanceMeters > 0
+    ? Math.max(
+      0,
+      (rerouteTriggerDistanceMeters - (sceneConfig?.stationChipReveal?.expensiveLeadMeters || 260)) /
+      combinedMetrics.totalDistanceMeters
+    )
+    : 0;
+
+  return {
+    ...combinedMetrics,
+    initialRouteMetrics,
+    rerouteRouteMetrics,
+    initialRouteCoordinates: routeSet.initialRoute.coordinates || [],
+    rerouteRouteCoordinates: routeSet.rerouteRoute.coordinates || [],
+    rerouteTriggerDistanceMeters,
+    rerouteTriggerProgress,
+    expensiveStationProgress: expensiveChipRevealProgress,
+    destinationStationProgress: 1,
+    isFallback: routeSet?.isFallback,
+  };
+}
+
+function getVisibleRouteCoordinates(routeMetrics, travelledDistanceMeters) {
+  if (!routeMetrics?.coordinates?.length) {
+    return [];
+  }
+
+  if (
+    routeMetrics.rerouteRouteMetrics &&
+    typeof routeMetrics.rerouteTriggerDistanceMeters === 'number' &&
+    travelledDistanceMeters >= routeMetrics.rerouteTriggerDistanceMeters
+  ) {
+    const rerouteDistanceMeters = clamp(
+      travelledDistanceMeters - routeMetrics.rerouteTriggerDistanceMeters,
+      0,
+      routeMetrics.rerouteRouteMetrics.totalDistanceMeters
+    );
+    const reroutePoint = getPointAtDistance(routeMetrics.rerouteRouteMetrics, rerouteDistanceMeters);
+    const rerouteCoordinateIndex = getNearestCoordinateIndex(
+      routeMetrics.rerouteRouteMetrics.coordinates,
+      reroutePoint.coordinate
+    );
+
+    return routeMetrics.rerouteRouteMetrics.coordinates.slice(rerouteCoordinateIndex);
+  }
+
+  if (routeMetrics.initialRouteMetrics) {
+    const initialDistanceMeters = clamp(
+      travelledDistanceMeters,
+      0,
+      routeMetrics.initialRouteMetrics.totalDistanceMeters
+    );
+    const initialPoint = getPointAtDistance(routeMetrics.initialRouteMetrics, initialDistanceMeters);
+    const initialCoordinateIndex = getNearestCoordinateIndex(
+      routeMetrics.initialRouteMetrics.coordinates,
+      initialPoint.coordinate
+    );
+
+    return routeMetrics.initialRouteMetrics.coordinates.slice(initialCoordinateIndex);
+  }
+
+  const visibleCoordinateIndex = getNearestCoordinateIndex(
+    routeMetrics.coordinates,
+    getPointAtDistance(routeMetrics, travelledDistanceMeters).coordinate
+  );
+  return routeMetrics.coordinates.slice(visibleCoordinateIndex);
 }
 
 function getSpeedFactorAtDistance(routeMetrics, sceneConfig, distanceMeters) {
@@ -607,7 +735,11 @@ function getCameraForProgress(routeMetrics, sceneConfig, progress) {
   const clampedProgress = clamp(progress, 0, 1);
   const currentDistanceMeters = routeMetrics.totalDistanceMeters * clampedProgress;
   const point = getPointAtDistance(routeMetrics, currentDistanceMeters);
-  const phase = getScenePhase(clampedProgress, routeMetrics.expensiveStationProgress);
+  const phase = getScenePhase(
+    clampedProgress,
+    routeMetrics.expensiveStationProgress,
+    routeMetrics.rerouteTriggerProgress
+  );
   const introToCruiseBlend = smoothstep(
     routeMetrics.primaryTurnDistanceMeters - 8,
     routeMetrics.primaryTurnDistanceMeters + 110,
@@ -771,7 +903,11 @@ function getDemoSnapshot(routeMetrics, sceneConfig, progress, arrivalElapsedMs =
     ? travelledDistanceMeters / routeMetrics.totalDistanceMeters
     : 0;
   const point = getPointAtDistance(routeMetrics, travelledDistanceMeters);
-  const scenePhase = getScenePhase(distanceProgress, routeMetrics.expensiveStationProgress);
+  const scenePhase = getScenePhase(
+    distanceProgress,
+    routeMetrics.expensiveStationProgress,
+    routeMetrics.rerouteTriggerProgress
+  );
   const remainingDistanceMeters = Math.max(
     0,
     routeMetrics.totalDistanceMeters - point.travelledDistanceMeters
@@ -793,6 +929,10 @@ function getDemoSnapshot(routeMetrics, sceneConfig, progress, arrivalElapsedMs =
     sceneConfig,
     point.travelledDistanceMeters
   );
+  const visibleRouteCoordinates = getVisibleRouteCoordinates(
+    routeMetrics,
+    point.travelledDistanceMeters
+  );
 
   return {
     progress: distanceProgress,
@@ -803,8 +943,13 @@ function getDemoSnapshot(routeMetrics, sceneConfig, progress, arrivalElapsedMs =
     remainingDistanceMeters,
     remainingTravelTimeSeconds,
     scenePhase: isArrived ? 'arrived' : scenePhase,
-    passedStationState: getPassedStationState(distanceProgress, routeMetrics.expensiveStationProgress),
+    passedStationState: getPassedStationState(
+      distanceProgress,
+      routeMetrics.expensiveStationProgress,
+      routeMetrics.rerouteTriggerProgress
+    ),
     chipRevealState,
+    visibleRouteCoordinates: isArrived ? [] : visibleRouteCoordinates,
     activeCamera: isArrived
       ? blendCameraStates(routeFollowCamera, arrivalCamera, arrivalBlend)
       : routeFollowCamera,
@@ -818,6 +963,7 @@ function getDemoSnapshot(routeMetrics, sceneConfig, progress, arrivalElapsedMs =
 }
 
 module.exports = {
+  buildPredictiveRouteMetrics,
   buildRouteMetrics,
   densifyCoordinates,
   calculateHeadingDegrees,
@@ -831,6 +977,7 @@ module.exports = {
   getProgressForNearestCoordinate,
   getRouteRegion,
   getScenePhase,
+  getVisibleRouteCoordinates,
   haversineDistanceMeters,
   interpolateHeadingDegrees,
   interpolateCoordinate,
