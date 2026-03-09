@@ -10,6 +10,20 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
+function dedupeCoordinates(coordinates) {
+  return coordinates.filter((coordinate, index, source) => {
+    if (index === 0) {
+      return true;
+    }
+
+    const previous = source[index - 1];
+    return (
+      previous.latitude !== coordinate.latitude ||
+      previous.longitude !== coordinate.longitude
+    );
+  });
+}
+
 function normalizeCoordinate(coordinate) {
   return {
     latitude: Number(coordinate?.latitude) || 0,
@@ -42,6 +56,36 @@ function interpolateCoordinate(start, end, progress) {
   };
 }
 
+function densifyCoordinates(coordinates, maximumSpacingMeters = 6) {
+  const safeSpacingMeters = Math.max(2, Number(maximumSpacingMeters) || 6);
+  const normalizedCoordinates = dedupeCoordinates((coordinates || []).map(normalizeCoordinate));
+
+  if (normalizedCoordinates.length <= 1) {
+    return normalizedCoordinates;
+  }
+
+  const densifiedCoordinates = [normalizedCoordinates[0]];
+
+  for (let index = 0; index < normalizedCoordinates.length - 1; index += 1) {
+    const start = normalizedCoordinates[index];
+    const end = normalizedCoordinates[index + 1];
+    const segmentDistanceMeters = haversineDistanceMeters(start, end);
+
+    if (segmentDistanceMeters <= 0) {
+      continue;
+    }
+
+    const subdivisionCount = Math.max(1, Math.ceil(segmentDistanceMeters / safeSpacingMeters));
+    for (let subdivisionIndex = 1; subdivisionIndex <= subdivisionCount; subdivisionIndex += 1) {
+      densifiedCoordinates.push(
+        interpolateCoordinate(start, end, subdivisionIndex / subdivisionCount)
+      );
+    }
+  }
+
+  return dedupeCoordinates(densifiedCoordinates);
+}
+
 function calculateHeadingDegrees(start, end) {
   const startCoordinate = normalizeCoordinate(start);
   const endCoordinate = normalizeCoordinate(end);
@@ -60,19 +104,8 @@ function calculateHeadingDegrees(start, end) {
   return (heading + 360) % 360;
 }
 
-function buildRouteSegments(coordinates) {
-  const sanitizedCoordinates = (coordinates || [])
-    .map(normalizeCoordinate)
-    .filter((coordinate, index, source) => {
-      if (index === 0) {
-        return true;
-      }
-      const previous = source[index - 1];
-      return (
-        previous.latitude !== coordinate.latitude ||
-        previous.longitude !== coordinate.longitude
-      );
-    });
+function buildRouteSegments(coordinates, maximumSpacingMeters = 6) {
+  const sanitizedCoordinates = densifyCoordinates(coordinates, maximumSpacingMeters);
 
   const segments = [];
   let totalDistanceMeters = 0;
@@ -197,7 +230,10 @@ function formatDurationMinutes(seconds) {
 }
 
 function buildRouteMetrics(route, sceneConfig) {
-  const baseMetrics = buildRouteSegments(route?.coordinates || []);
+  const baseMetrics = buildRouteSegments(
+    route?.coordinates || [],
+    sceneConfig?.routeSpacingMeters
+  );
   const expensiveStationProgress = getProgressForNearestCoordinate(
     baseMetrics,
     sceneConfig.expensiveStation.coordinate
@@ -342,6 +378,7 @@ function getDemoSnapshot(routeMetrics, sceneConfig, progress) {
 
 module.exports = {
   buildRouteMetrics,
+  densifyCoordinates,
   calculateHeadingDegrees,
   getCameraForProgress,
   getDemoSnapshot,

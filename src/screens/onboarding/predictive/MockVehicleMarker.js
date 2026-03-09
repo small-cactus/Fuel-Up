@@ -16,9 +16,11 @@ export default function MockVehicleMarker({ coordinate, heading = 0 }) {
             tracksViewChanges
             zIndex={5}
         >
-            <View style={styles.outerPulse}>
-                <View style={[styles.innerShell, { transform: [{ rotate: `${heading}deg` }] }]}>
-                    <SymbolView name="car.fill" size={15} tintColor="#FFFFFF" />
+            <View style={styles.outerHalo}>
+                <View style={styles.innerPuck}>
+                    <View style={[styles.directionGlyph, { transform: [{ rotate: `${heading}deg` }] }]}>
+                        <SymbolView name="location.north.fill" size={15} tintColor="#FFFFFF" />
+                    </View>
                 </View>
             </View>
         </Marker>
@@ -26,7 +28,7 @@ export default function MockVehicleMarker({ coordinate, heading = 0 }) {
 }
 
 const styles = StyleSheet.create({
-    outerPulse: {
+    outerHalo: {
         width: 34,
         height: 34,
         borderRadius: 17,
@@ -34,7 +36,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    innerShell: {
+    innerPuck: {
         width: 22,
         height: 22,
         borderRadius: 11,
@@ -48,5 +50,9 @@ const styles = StyleSheet.create({
             width: 0,
             height: 4,
         },
+    },
+    directionGlyph: {
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });

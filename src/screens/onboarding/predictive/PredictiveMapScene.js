@@ -15,6 +15,20 @@ function buildRouteGradient(coordinates) {
     });
 }
 
+function createCameraSignature(camera) {
+    if (!camera?.center) {
+        return '';
+    }
+
+    return JSON.stringify({
+        altitude: Math.round(camera.altitude || 0),
+        heading: Number((camera.heading || 0).toFixed(1)),
+        latitude: Number(camera.center.latitude.toFixed(5)),
+        longitude: Number(camera.center.longitude.toFixed(5)),
+        pitch: Number((camera.pitch || 0).toFixed(1)),
+    });
+}
+
 export default function PredictiveMapScene({
     demoState,
     insets,
@@ -25,6 +39,7 @@ export default function PredictiveMapScene({
 }) {
     const mapRef = useRef(null);
     const lastCameraSignatureRef = useRef('');
+    const lastCameraUpdateAtRef = useRef(0);
     const [isMapReady, setIsMapReady] = useState(false);
 
     const routeCoordinates = routeMetrics?.coordinates || [];
@@ -44,30 +59,58 @@ export default function PredictiveMapScene({
             pitch: demoState.activeCamera.pitch,
             altitude: demoState.activeCamera.altitude,
         };
-        const signature = JSON.stringify(nextCamera);
+        const signature = createCameraSignature(nextCamera);
 
         if (signature === lastCameraSignatureRef.current) {
             return;
         }
 
+        const now = Date.now();
+        const shouldAnimate = (
+            isActive &&
+            now - lastCameraUpdateAtRef.current >= sceneConfig.cameraUpdateIntervalMs
+        );
+
         lastCameraSignatureRef.current = signature;
+        if (!isActive || !lastCameraUpdateAtRef.current) {
+            lastCameraUpdateAtRef.current = now;
+            mapRef.current.setCamera(nextCamera);
+            return;
+        }
+
+        if (!shouldAnimate) {
+            return;
+        }
+
+        lastCameraUpdateAtRef.current = now;
         mapRef.current.animateCamera(nextCamera, {
-            duration: isActive ? sceneConfig.cameraAnimationMs : 0,
+            duration: sceneConfig.cameraAnimationMs,
         });
-    }, [demoState?.activeCamera, isActive, isMapReady, sceneConfig.cameraAnimationMs]);
+    }, [
+        demoState?.activeCamera,
+        isActive,
+        isMapReady,
+        sceneConfig.cameraAnimationMs,
+        sceneConfig.cameraUpdateIntervalMs,
+    ]);
 
     return (
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
             <MapView
                 ref={mapRef}
                 style={StyleSheet.absoluteFill}
-                initialCamera={routeMetrics ? {
-                    center: routeMetrics.initialCoordinate,
-                    heading: routeMetrics.initialHeading,
+                initialCamera={{
+                    center: routeMetrics?.initialCoordinate || sceneConfig.origin,
+                    heading: routeMetrics?.initialHeading || 214,
                     pitch: sceneConfig.cameraPitch,
                     altitude: sceneConfig.cameraAltitudes.driving,
-                } : undefined}
-                initialRegion={routeMetrics?.routeRegion}
+                }}
+                initialRegion={routeMetrics?.routeRegion || {
+                    latitude: sceneConfig.origin.latitude,
+                    longitude: sceneConfig.origin.longitude,
+                    latitudeDelta: 0.018,
+                    longitudeDelta: 0.018,
+                }}
                 provider={PROVIDER_APPLE}
                 userInterfaceStyle={isDark ? 'dark' : 'light'}
                 scrollEnabled={false}
@@ -79,6 +122,8 @@ export default function PredictiveMapScene({
                 loadingEnabled={false}
                 showsBuildings
                 showsCompass={false}
+                pointsOfInterestFilter={[]}
+                showsPointsOfInterests={false}
                 showsScale={false}
                 showsTraffic={false}
                 legalLabelInsets={{

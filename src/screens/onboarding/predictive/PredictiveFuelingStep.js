@@ -14,6 +14,8 @@ import {
 } from './constants';
 import usePredictiveFuelingDemo from './usePredictiveFuelingDemo';
 
+const { getPredictiveRouteDiagnostics } = require('./routeDiagnostics.cjs');
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const LIGHT_SCREEN_BACKGROUND = '#f2f1f6';
 const LIGHT_SCREEN_BACKGROUND_85 = 'rgba(242,241,246,0.85)';
@@ -33,13 +35,38 @@ export default function PredictiveFuelingStep({ insets, isActive, isDark }) {
                 });
 
                 if (!isCancelled && nextRoute?.coordinates?.length) {
+                    if (__DEV__) {
+                        console.info(
+                            'Predictive fueling route diagnostics:',
+                            getPredictiveRouteDiagnostics(
+                                {
+                                    ...nextRoute,
+                                    isFallback: false,
+                                },
+                                PREDICTIVE_FUELING_SCENE
+                            )
+                        );
+                    }
+
                     setRoute({
                         ...nextRoute,
                         isFallback: false,
                     });
                 }
             } catch (error) {
-                console.warn('Predictive fueling route fallback in use:', error?.code || error?.message || error);
+                const fallbackRoute = getPredictiveFuelingFallbackRoute();
+
+                if (__DEV__) {
+                    console.warn(
+                        'Predictive fueling route fallback in use:',
+                        error?.code || error?.message || error,
+                        getPredictiveRouteDiagnostics(fallbackRoute, PREDICTIVE_FUELING_SCENE)
+                    );
+                }
+
+                if (!isCancelled) {
+                    setRoute(fallbackRoute);
+                }
             }
         })();
 

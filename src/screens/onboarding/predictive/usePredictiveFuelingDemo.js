@@ -28,18 +28,28 @@ export default function usePredictiveFuelingDemo({ isActive, route, sceneConfig 
         }
 
         const cycleDurationMs = sceneConfig.loopDurationMs + sceneConfig.loopHoldDurationMs;
-        const startedAt = Date.now();
-        const intervalId = setInterval(() => {
-            setElapsedMs((Date.now() - startedAt) % cycleDurationMs);
-        }, sceneConfig.frameIntervalMs);
+        let animationFrameId = null;
+        let startedAtMs = 0;
+
+        const tick = timestampMs => {
+            if (!startedAtMs) {
+                startedAtMs = timestampMs;
+            }
+
+            setElapsedMs((timestampMs - startedAtMs) % cycleDurationMs);
+            animationFrameId = requestAnimationFrame(tick);
+        };
+
+        animationFrameId = requestAnimationFrame(tick);
 
         return () => {
-            clearInterval(intervalId);
+            if (animationFrameId !== null) {
+                cancelAnimationFrame(animationFrameId);
+            }
         };
     }, [
         isActive,
         routeMetrics,
-        sceneConfig.frameIntervalMs,
         sceneConfig.loopDurationMs,
         sceneConfig.loopHoldDurationMs,
     ]);
