@@ -1,0 +1,9 @@
+{
+  "name": "fuel-up-map-kit-routing",
+  "version": "1.0.0",
+  "description": "Local Expo module for Apple MapKit driving routes in Fuel Up.",
+  "main": "index.js",
+  "private": true,
+  "license": "MIT",
+  "author": "Fuel Up"
+}

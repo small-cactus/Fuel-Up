@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useVideoPlayer, VideoView } from 'expo-video';
-import { LiquidGlassView as GlassView, LiquidGlassContainerView } from '@callstack/liquid-glass';
+import { LiquidGlassView as GlassView } from '@callstack/liquid-glass';
 
 
 import { SymbolView } from 'expo-symbols';
@@ -14,10 +13,6 @@ import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
 import Animated, {
     FadeIn,
-    FadeInDown,
-    FadeInUp,
-    ZoomIn,
-    SlideInDown,
     useSharedValue,
     useAnimatedStyle,
     useAnimatedProps,
@@ -34,6 +29,7 @@ import { useTheme } from '../ThemeContext';
 import TopCanopy from '../components/TopCanopy';
 import BottomCanopy from '../components/BottomCanopy';
 import FuelUpHeaderLogo from '../components/FuelUpHeaderLogo';
+import PredictiveFuelingStep from './onboarding/predictive/PredictiveFuelingStep';
 import { registerForPushNotificationsAsync, savePushTokenToSupabase } from '../lib/notifications';
 import {
     getPredictiveLocationPermissionStateAsync,
@@ -77,9 +73,6 @@ const LIGHT_SCREEN_BACKGROUND = '#f2f1f6';
 const LIGHT_SCREEN_BACKGROUND_85 = 'rgba(242,241,246,0.85)';
 const LIGHT_SCREEN_BACKGROUND_42 = 'rgba(242,241,246,0.42)';
 const LIGHT_SCREEN_BACKGROUND_0 = 'rgba(242,241,246,0)';
-const PREDICTIVE_FUELING_PLAYBACK_RATE = 2;
-const PREDICTIVE_FUELING_FADE_DURATION_MS = 400;
-const PREDICTIVE_FUELING_HINT_DELAY_MS = 150;
 
 function hasPredictiveLocationAccess(permissionState) {
     return permissionState?.isReady === true;
@@ -592,184 +585,6 @@ function NotificationStep({ isDark, themeColors, insets, permissionStatus }) {
     );
 }
 
-const videoSource = require('../../assets/red_car_drives.mp4');
-
-function PredictiveFuelingStep({ isDark, themeColors, insets, player, isActive, shouldPrewarm }) {
-    const greenPos = { top: 28, left: 75 };
-    const redPos = { top: 15, left: 2 };
-
-    // --- Animation Trigger Points (in seconds) ---
-    // Easily configure when you want the 3 steps to animate in during the video playback
-    const redChipTriggerPoint = 0.7;
-    const liveActivityTriggerPoint = 1.8;
-    const greenChipTriggerPoint = 3.0;
-
-    const [showRed, setShowRed] = useState(false);
-    const [showLive, setShowLive] = useState(false);
-    const [showGreen, setShowGreen] = useState(false);
-
-    useEffect(() => {
-        player.playbackRate = PREDICTIVE_FUELING_PLAYBACK_RATE;
-
-        if (isActive) {
-            player.play();
-            return;
-        }
-
-        if (shouldPrewarm) {
-            player.currentTime = 0.0;
-            player.play();
-            return;
-        }
-
-        player.pause();
-        player.currentTime = 0.0;
-        setShowRed(false);
-        setShowLive(false);
-        setShowGreen(false);
-    }, [isActive, player, shouldPrewarm]);
-
-
-    useEffect(() => {
-        if (!isActive) return;
-
-        // Check video time periodically to trigger animations
-        const interval = setInterval(() => {
-            const t = player.currentTime;
-            // Only set to true once the time is reached. They will remain true 
-            // even if the video loops, preventing them from disappearing.
-            setShowRed(prev => prev || t >= redChipTriggerPoint);
-
-            setShowLive(prev => {
-                if (!prev && t >= liveActivityTriggerPoint) {
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                    return true;
-                }
-                return prev;
-            });
-
-            setShowGreen(prev => prev || t >= greenChipTriggerPoint);
-        }, 50);
-
-        return () => clearInterval(interval);
-    }, [isActive, player]);
-
-
-
-
-    return (
-        <View style={[styles.stepContainer, { backgroundColor: isDark ? themeColors.background : '#FFFFFF' }]}>
-
-            <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
-                <Image
-                    source={require('../../assets/predictive-fueling.png')}
-                    style={{ width: 80, height: 80, borderRadius: 20 }}
-                    resizeMode="contain"
-                />
-                <Text style={[styles.stepTitle, { color: themeColors.text }]}>Predictive Fueling</Text>
-                <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
-                    We'll predict your gas stop and find a cheaper station on your way.
-                </Text>
-            </View>
-
-            <View style={[styles.stepContent, { paddingHorizontal: 0, justifyContent: 'flex-start', marginTop: 24 }]}>
-                <View style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH * 0.6 }}>
-                    <VideoView
-                        player={player}
-                        style={StyleSheet.absoluteFill}
-                        nativeControls={false}
-                        contentFit="cover"
-                    />
-                    {showGreen && (
-                        <Animated.View style={StyleSheet.absoluteFill} pointerEvents="none" entering={FadeIn.duration(PREDICTIVE_FUELING_FADE_DURATION_MS)}>
-                            <OnboardingChip
-                                price={3.89}
-                                isCheapest={true}
-                                isDark={isDark}
-                                top={greenPos.top}
-                                left={greenPos.left}
-                                isActive={isActive}
-                            />
-
-                        </Animated.View>
-                    )}
-
-                    {showRed && (
-                        <Animated.View style={StyleSheet.absoluteFill} pointerEvents="none" entering={FadeIn.duration(PREDICTIVE_FUELING_FADE_DURATION_MS)}>
-                            <OnboardingChip
-                                price={4.59}
-                                isCheapest={false}
-                                isDark={isDark}
-                                top={redPos.top}
-                                left={redPos.left}
-                                isActive={isActive}
-                            />
-
-                        </Animated.View>
-                    )}
-                </View>
-
-                {/* Mock Live Activity */}
-                <View style={[styles.mockLiveActivityContainer, { marginTop: 0 }]}>
-                    {showLive && (
-                        <Animated.View
-                            entering={FadeInUp.springify().mass(0.8).damping(18).stiffness(180)}
-                            style={{ width: '100%', alignItems: 'center' }}
-                        >
-                            <GlassView
-                                effect="regular"
-                                tintColor="#000000"
-                                style={styles.mockLiveActivityGlass}
-                                key={isActive ? 'glass-active' : 'glass-inactive'}
-                            >
-
-                                <View style={styles.mockLiveActivityHeader}>
-                                    <View style={styles.mockLiveActivityAppIcon}>
-                                        <Image
-                                            source={require('../../assets/predictive-fueling.png')}
-                                            style={{ width: 22, height: 22, borderRadius: 5 }}
-                                            resizeMode="contain"
-                                        />
-                                    </View>
-                                    <Text style={[styles.mockLiveActivityTitle, { color: '#FFFFFF' }]}>Fuel Up</Text>
-                                    <Text style={[styles.mockLiveActivityTime, { color: '#FFFFFF', opacity: 0.5 }]}>now</Text>
-                                </View>
-
-                                <View style={styles.mockLiveActivityContent}>
-                                    <View style={styles.mockLiveActivityMain}>
-                                        <View style={styles.mockLiveActivityStationInfo}>
-                                            <Text style={[styles.mockLiveActivityStationName, { color: '#FFFFFF' }]}>Save $8.93 at Mobil One</Text>
-                                            <View style={styles.mockLiveActivityBadge}>
-                                                <Text style={styles.mockLiveActivityBadgeText}>Cheapest</Text>
-                                            </View>
-                                        </View>
-                                        <View style={styles.mockLiveActivityPriceContainer}>
-                                            <Text style={[styles.mockLiveActivityPriceLabel, { color: '#FFFFFF', opacity: 0.6 }]}>Regular</Text>
-                                            <Text style={[styles.mockLiveActivityPrice, { color: '#007AFF' }]}>$3.89</Text>
-                                        </View>
-                                    </View>
-
-                                    <View style={[styles.mockLiveActivityDivider, { backgroundColor: 'rgba(255,255,255,0.1)' }]} />
-
-                                    <View style={styles.mockLiveActivityFooter}>
-                                        <SymbolView name="location.fill" size={12} tintColor="#FFFFFF" style={{ opacity: 0.6 }} />
-                                        <Text style={[styles.mockLiveActivityDistance, { color: '#FFFFFF', opacity: 0.6 }]}>1.2 mi away • On your route</Text>
-                                    </View>
-                                </View>
-                            </GlassView>
-                            <Animated.View entering={FadeIn.delay(PREDICTIVE_FUELING_HINT_DELAY_MS).duration(PREDICTIVE_FUELING_FADE_DURATION_MS)}>
-                                <Text style={[styles.mockLiveActivityHint, { color: themeColors.text }]}>
-                                    Get real-time alerts as you drive
-                                </Text>
-                            </Animated.View>
-                        </Animated.View>
-                    )}
-                </View>
-            </View>
-        </View>
-    );
-}
-
 function AnimatedButtonContent({ text, icon, isDark }) {
     const [currentText, setCurrentText] = useState(text);
     const [currentIcon, setCurrentIcon] = useState(icon);
@@ -833,12 +648,6 @@ export default function OnboardingScreen() {
         }));
     }, []);
 
-    const predictivePlayer = useVideoPlayer(videoSource, (player) => {
-        player.loop = true;
-        player.muted = true;
-        player.playbackRate = PREDICTIVE_FUELING_PLAYBACK_RATE;
-        player.currentTime = 0.0;
-    });
     const scrollViewRef = useRef(null);
 
     const handleScroll = (event) => {
@@ -925,12 +734,6 @@ export default function OnboardingScreen() {
     const handleContinue = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-        if (currentStep === 0) {
-            predictivePlayer.playbackRate = PREDICTIVE_FUELING_PLAYBACK_RATE;
-            predictivePlayer.currentTime = 0.0;
-            predictivePlayer.play();
-        }
-
         if (currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState)) {
             handleRequestPermission();
             return;
@@ -958,7 +761,7 @@ export default function OnboardingScreen() {
     const isLastStep = currentStep === totalSteps - 1;
 
     // Use full map for specific steps
-    const isTranslucentStep = currentStep === 0 || currentStep === 4;
+    const isTranslucentStep = currentStep === 0 || currentStep === 1 || currentStep === 4;
     const onboardingBackgroundColor = (
         !isDark && currentStep === 1
             ? '#FFFFFF'
@@ -985,11 +788,8 @@ export default function OnboardingScreen() {
 
                     <PredictiveFuelingStep
                         isDark={isDark}
-                        themeColors={themeColors}
                         insets={insets}
-                        player={predictivePlayer}
                         isActive={currentStep === 1}
-                        shouldPrewarm={currentStep <= 1}
                     />
 
                     <LocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionState={locationPermissionState} />
