@@ -109,6 +109,9 @@ export const PREDICTIVE_FUELING_SCENE = {
         leadMeters: 188,
         pitch: 12,
         minimumTurnDistanceMeters: 18,
+        minimumTurnGapMeters: 140,
+        startExclusionMeters: 90,
+        endExclusionMeters: 90,
         recoveryMeters: 96,
         postTurnSampleMeters: 76,
     },
@@ -140,6 +143,7 @@ export const PREDICTIVE_FUELING_SCENE = {
     },
     orbit: {
         degreesPerSecond: 9,
+        transitionDurationMs: 1400,
     },
     cameraSmoothing: {
         center: 0.18,

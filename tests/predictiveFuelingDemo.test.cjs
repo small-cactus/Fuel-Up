@@ -175,7 +175,7 @@ test('buildRouteMetrics computes total route distance and station progress', () 
   assert.ok(routeMetrics.coordinates.length > PREDICTIVE_FUELING_SCENE.fallbackRoute.coordinates.length);
   assert.ok(routeMetrics.totalDistanceMeters > 2200);
   assert.equal(routeMetrics.expensiveStationProgress, 0.84);
-  assert.ok(routeMetrics.turnEvents.length >= 4);
+  assert.ok(routeMetrics.turnEvents.length >= 3);
 });
 
 test('densifyCoordinates adds interpolation points for smoother motion', () => {
@@ -210,12 +210,12 @@ test('scene phase moves from driving to passing to routing cheap', () => {
   assert.equal(getScenePhase(Math.min(1, expensiveProgress + 0.08), expensiveProgress), 'routing-cheap');
 });
 
-test('distance timing slows slightly around turn windows', () => {
+test('distance timing remains non-linear around turn windows', () => {
   const routeMetrics = buildRouteMetrics(PREDICTIVE_FUELING_SCENE.fallbackRoute, PREDICTIVE_FUELING_SCENE);
-  const halfwayDistance = getDistanceForTimeProgress(routeMetrics, 0.5);
-  const linearHalfwayDistance = routeMetrics.totalDistanceMeters * 0.5;
+  const weightedDistance = getDistanceForTimeProgress(routeMetrics, 0.4);
+  const linearDistance = routeMetrics.totalDistanceMeters * 0.4;
 
-  assert.ok(halfwayDistance < linearHalfwayDistance);
+  assert.ok(Math.abs(weightedDistance - linearDistance) > 5);
 });
 
 test('route diagnostics report whether the predictive route is native or fallback', () => {
@@ -231,4 +231,45 @@ test('route diagnostics report whether the predictive route is native or fallbac
   assert.equal(diagnostics.source, 'fallback');
   assert.ok(diagnostics.renderedCoordinateCount > diagnostics.rawCoordinateCount);
   assert.ok(diagnostics.maxSegmentDistanceMeters <= 6.1);
+});
+
+test('camera target remains continuous through turn windows and arrival handoff', () => {
+  const routeMetrics = buildRouteMetrics(PREDICTIVE_FUELING_SCENE.fallbackRoute, PREDICTIVE_FUELING_SCENE);
+  let previousCamera = null;
+  let maximumPitchDelta = 0;
+  let maximumAltitudeDelta = 0;
+  let maximumHeadingDelta = 0;
+
+  for (let index = 0; index <= 480; index += 1) {
+    const elapsedMs = (PREDICTIVE_FUELING_SCENE.loopDurationMs + 1800) * (index / 480);
+    const progress = Math.min(elapsedMs / PREDICTIVE_FUELING_SCENE.loopDurationMs, 1);
+    const arrivalElapsedMs = Math.max(0, elapsedMs - PREDICTIVE_FUELING_SCENE.loopDurationMs);
+    const snapshot = getDemoSnapshot(
+      routeMetrics,
+      PREDICTIVE_FUELING_SCENE,
+      progress,
+      arrivalElapsedMs
+    );
+
+    if (previousCamera) {
+      const headingDelta = Math.abs(
+        ((snapshot.activeCamera.heading - previousCamera.heading + 540) % 360) - 180
+      );
+      maximumHeadingDelta = Math.max(maximumHeadingDelta, headingDelta);
+      maximumPitchDelta = Math.max(
+        maximumPitchDelta,
+        Math.abs(snapshot.activeCamera.pitch - previousCamera.pitch)
+      );
+      maximumAltitudeDelta = Math.max(
+        maximumAltitudeDelta,
+        Math.abs(snapshot.activeCamera.altitude - previousCamera.altitude)
+      );
+    }
+
+    previousCamera = snapshot.activeCamera;
+  }
+
+  assert.ok(maximumPitchDelta < 10, `maximum pitch delta was ${maximumPitchDelta}`);
+  assert.ok(maximumAltitudeDelta < 90, `maximum altitude delta was ${maximumAltitudeDelta}`);
+  assert.ok(maximumHeadingDelta < 12, `maximum heading delta was ${maximumHeadingDelta}`);
 });

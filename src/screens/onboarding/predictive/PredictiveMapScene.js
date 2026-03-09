@@ -11,11 +11,11 @@ function createCameraSignature(camera) {
     }
 
     return JSON.stringify({
-        altitude: Number((camera.altitude || 0).toFixed(2)),
-        heading: Number((camera.heading || 0).toFixed(2)),
-        latitude: Number(camera.center.latitude.toFixed(6)),
-        longitude: Number(camera.center.longitude.toFixed(6)),
-        pitch: Number((camera.pitch || 0).toFixed(2)),
+        altitude: Number((camera.altitude || 0).toFixed(3)),
+        heading: Number((camera.heading || 0).toFixed(3)),
+        latitude: Number(camera.center.latitude.toFixed(7)),
+        longitude: Number(camera.center.longitude.toFixed(7)),
+        pitch: Number((camera.pitch || 0).toFixed(3)),
     });
 }
 
@@ -29,15 +29,30 @@ export default function PredictiveMapScene({
 }) {
     const mapRef = useRef(null);
     const lastCameraSignatureRef = useRef('');
+    const animationFrameRef = useRef(null);
+    const pendingCameraRef = useRef(null);
     const [isMapReady, setIsMapReady] = useState(false);
 
     const routeCoordinates = routeMetrics?.coordinates || [];
+
+    useEffect(() => {
+        return () => {
+            if (animationFrameRef.current !== null) {
+                cancelAnimationFrame(animationFrameRef.current);
+            }
+        };
+    }, []);
 
     useEffect(() => {
         if (isActive) {
             return;
         }
 
+        if (animationFrameRef.current !== null) {
+            cancelAnimationFrame(animationFrameRef.current);
+        }
+
+        pendingCameraRef.current = null;
         lastCameraSignatureRef.current = '';
     }, [isActive]);
 
@@ -58,8 +73,33 @@ export default function PredictiveMapScene({
             return;
         }
 
-        lastCameraSignatureRef.current = signature;
-        mapRef.current.setCamera(nextCamera);
+        pendingCameraRef.current = {
+            camera: nextCamera,
+            signature,
+        };
+
+        const flushCameraFrame = () => {
+            if (!mapRef.current || !pendingCameraRef.current) {
+                animationFrameRef.current = null;
+                return;
+            }
+
+            const nextPendingCamera = pendingCameraRef.current;
+            pendingCameraRef.current = null;
+
+            if (nextPendingCamera.signature === lastCameraSignatureRef.current) {
+                animationFrameRef.current = null;
+                return;
+            }
+
+            mapRef.current.setCamera(nextPendingCamera.camera);
+            lastCameraSignatureRef.current = nextPendingCamera.signature;
+            animationFrameRef.current = null;
+        }
+
+        if (animationFrameRef.current === null) {
+            animationFrameRef.current = requestAnimationFrame(flushCameraFrame);
+        }
     }, [
         demoState?.activeCamera,
         isMapReady,
