@@ -1,19 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import MapView, { Polyline, PROVIDER_APPLE } from 'react-native-maps';
 
 import MockVehicleMarker from './MockVehicleMarker';
 import RouteStationMarker from './RouteStationMarker';
-
-function buildRouteGradient(coordinates) {
-    return coordinates.map((_, index) => {
-        const progress = coordinates.length <= 1
-            ? 1
-            : index / (coordinates.length - 1);
-        const alpha = 0.78 + progress * 0.22;
-        return `rgba(10,132,255,${alpha.toFixed(3)})`;
-    });
-}
 
 function createCameraSignature(camera) {
     if (!camera?.center) {
@@ -21,11 +11,11 @@ function createCameraSignature(camera) {
     }
 
     return JSON.stringify({
-        altitude: Math.round(camera.altitude || 0),
-        heading: Number((camera.heading || 0).toFixed(1)),
-        latitude: Number(camera.center.latitude.toFixed(5)),
-        longitude: Number(camera.center.longitude.toFixed(5)),
-        pitch: Number((camera.pitch || 0).toFixed(1)),
+        altitude: Number((camera.altitude || 0).toFixed(2)),
+        heading: Number((camera.heading || 0).toFixed(2)),
+        latitude: Number(camera.center.latitude.toFixed(6)),
+        longitude: Number(camera.center.longitude.toFixed(6)),
+        pitch: Number((camera.pitch || 0).toFixed(2)),
     });
 }
 
@@ -39,14 +29,9 @@ export default function PredictiveMapScene({
 }) {
     const mapRef = useRef(null);
     const lastCameraSignatureRef = useRef('');
-    const lastCameraUpdateAtRef = useRef(0);
     const [isMapReady, setIsMapReady] = useState(false);
 
     const routeCoordinates = routeMetrics?.coordinates || [];
-    const routeGradient = useMemo(
-        () => buildRouteGradient(routeCoordinates),
-        [routeCoordinates]
-    );
 
     useEffect(() => {
         if (!isMapReady || !mapRef.current || !demoState?.activeCamera) {
@@ -65,33 +50,11 @@ export default function PredictiveMapScene({
             return;
         }
 
-        const now = Date.now();
-        const shouldAnimate = (
-            isActive &&
-            now - lastCameraUpdateAtRef.current >= sceneConfig.cameraUpdateIntervalMs
-        );
-
         lastCameraSignatureRef.current = signature;
-        if (!isActive || !lastCameraUpdateAtRef.current) {
-            lastCameraUpdateAtRef.current = now;
-            mapRef.current.setCamera(nextCamera);
-            return;
-        }
-
-        if (!shouldAnimate) {
-            return;
-        }
-
-        lastCameraUpdateAtRef.current = now;
-        mapRef.current.animateCamera(nextCamera, {
-            duration: sceneConfig.cameraAnimationMs,
-        });
+        mapRef.current.setCamera(nextCamera);
     }, [
         demoState?.activeCamera,
-        isActive,
         isMapReady,
-        sceneConfig.cameraAnimationMs,
-        sceneConfig.cameraUpdateIntervalMs,
     ]);
 
     return (
@@ -141,23 +104,13 @@ export default function PredictiveMapScene({
                 }}
             >
                 {routeCoordinates.length > 1 ? (
-                    <>
-                        <Polyline
-                            coordinates={routeCoordinates}
-                            strokeColor={isDark ? 'rgba(4,10,18,0.82)' : 'rgba(255,255,255,0.92)'}
-                            strokeWidth={12}
-                            lineCap="round"
-                            lineJoin="round"
-                        />
-                        <Polyline
-                            coordinates={routeCoordinates}
-                            strokeColor="#0A84FF"
-                            strokeColors={Platform.OS === 'ios' ? routeGradient : undefined}
-                            strokeWidth={6}
-                            lineCap="round"
-                            lineJoin="round"
-                        />
-                    </>
+                    <Polyline
+                        coordinates={routeCoordinates}
+                        strokeColor={isDark ? '#4DA3FF' : '#007AFF'}
+                        strokeWidth={5}
+                        lineCap="round"
+                        lineJoin="round"
+                    />
                 ) : null}
 
                 <RouteStationMarker

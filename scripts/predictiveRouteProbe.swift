@@ -69,6 +69,26 @@ MKDirections(request: request).calculate { response, error in
     print(String(format: "  { latitude: %.6f, longitude: %.6f },", coordinate.latitude, coordinate.longitude))
   }
   print("]")
+  print("steps=[")
+  for step in route.steps where step.distance > 15 {
+    var stepCoordinates = Array(
+      repeating: CLLocationCoordinate2D(latitude: 0, longitude: 0),
+      count: step.polyline.pointCount
+    )
+    step.polyline.getCoordinates(&stepCoordinates, range: NSRange(location: 0, length: step.polyline.pointCount))
+
+    guard let firstCoordinate = stepCoordinates.first else {
+      continue
+    }
+
+    print("  {")
+    print("    instructions: \"\(step.instructions)\",")
+    print("    distanceMeters: \(Int(step.distance.rounded())),")
+    print("    expectedTravelTimeSeconds: \(Int((step.distance / 13.4).rounded())),")
+    print(String(format: "    coordinate: { latitude: %.6f, longitude: %.6f },", firstCoordinate.latitude, firstCoordinate.longitude))
+    print("  },")
+  }
+  print("]")
 }
 
 RunLoop.main.run(until: Date().addingTimeInterval(20))

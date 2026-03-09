@@ -43,7 +43,7 @@ export default function RouteStationMarker({
         <Marker
             coordinate={coordinate}
             anchor={{ x: 0.5, y: 0.84 }}
-            tracksViewChanges
+            tracksViewChanges={false}
             zIndex={role === 'destination' ? 4 : 3}
         >
             <View style={containerStyle}>

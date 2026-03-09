@@ -77,9 +77,8 @@ private func mapItem(from payload: [String: Any]) throws -> MKMapItem {
     throw MissingCoordinateFieldException()
   }
 
-  let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-  let placemark = MKPlacemark(coordinate: coordinate)
-  return MKMapItem(placemark: placemark)
+  let location = CLLocation(latitude: latitude, longitude: longitude)
+  return MKMapItem(location: location, address: nil)
 }
 
 private func coordinatesPayload(from polyline: MKPolyline) -> [[String: CLLocationDegrees]] {
@@ -108,6 +107,7 @@ private func stepPayload(from step: MKRoute.Step) -> [String: Any]? {
     "instructions": step.instructions,
     "distanceMeters": step.distance,
     "expectedTravelTimeSeconds": step.distance > 0 ? step.distance / 13.4 : 0,
-    "coordinate": firstCoordinate
+    "coordinate": firstCoordinate,
+    "coordinates": coordinates
   ]
 }
