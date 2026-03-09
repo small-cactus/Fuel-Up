@@ -248,6 +248,76 @@ function formatDurationMinutes(seconds) {
   return `${minutes} min`;
 }
 
+function getSpeedFactorAtDistance(routeMetrics, sceneConfig, distanceMeters) {
+  const slowdownLookaheadMeters = sceneConfig?.motionProfile?.slowdownLookaheadMeters || 86;
+  const slowdownRecoveryMeters = sceneConfig?.motionProfile?.slowdownRecoveryMeters || 54;
+  const minimumSpeedFactor = sceneConfig?.motionProfile?.turnSlowFactor || 0.76;
+  let speedFactor = 1;
+
+  (routeMetrics.turnEvents || []).forEach(turnEvent => {
+    const startDistanceMeters = turnEvent.distanceMeters - slowdownLookaheadMeters;
+    const endDistanceMeters = turnEvent.distanceMeters + slowdownRecoveryMeters;
+    const slowdownBlend = smoothstep(startDistanceMeters, turnEvent.distanceMeters, distanceMeters)
+      - smoothstep(turnEvent.distanceMeters, endDistanceMeters, distanceMeters);
+    const candidateSpeedFactor = 1 - slowdownBlend * (1 - minimumSpeedFactor);
+    speedFactor = Math.min(speedFactor, candidateSpeedFactor);
+  });
+
+  return clamp(speedFactor, minimumSpeedFactor, 1);
+}
+
+function buildDistanceTiming(routeMetrics, sceneConfig) {
+  if (!routeMetrics.coordinates.length) {
+    return [{
+      distanceMeters: 0,
+      timeWeight: 0,
+    }];
+  }
+
+  const samples = [{ distanceMeters: 0, timeWeight: 0 }];
+  let cumulativeTimeWeight = 0;
+
+  routeMetrics.segments.forEach(segment => {
+    const midpointDistanceMeters = segment.startDistanceMeters + segment.distanceMeters / 2;
+    const speedFactor = getSpeedFactorAtDistance(routeMetrics, sceneConfig, midpointDistanceMeters);
+    cumulativeTimeWeight += segment.distanceMeters / speedFactor;
+    samples.push({
+      distanceMeters: segment.endDistanceMeters,
+      timeWeight: cumulativeTimeWeight,
+    });
+  });
+
+  return samples;
+}
+
+function getDistanceForTimeProgress(routeMetrics, progress) {
+  const samples = routeMetrics.distanceTiming || [];
+  if (!samples.length) {
+    return 0;
+  }
+
+  const totalTimeWeight = samples[samples.length - 1].timeWeight || 0;
+  if (totalTimeWeight <= 0) {
+    return routeMetrics.totalDistanceMeters * clamp(progress, 0, 1);
+  }
+
+  const targetTimeWeight = totalTimeWeight * clamp(progress, 0, 1);
+  const sampleIndex = samples.findIndex(sample => targetTimeWeight <= sample.timeWeight);
+
+  if (sampleIndex <= 0) {
+    return samples[0].distanceMeters;
+  }
+
+  const endSample = samples[sampleIndex];
+  const startSample = samples[sampleIndex - 1];
+  const intervalWeight = endSample.timeWeight - startSample.timeWeight;
+  const intervalProgress = intervalWeight > 0
+    ? (targetTimeWeight - startSample.timeWeight) / intervalWeight
+    : 0;
+
+  return lerp(startSample.distanceMeters, endSample.distanceMeters, intervalProgress);
+}
+
 function isTurnInstruction(instructions) {
   return /turn left|turn right|keep left|keep right|slight left|slight right|merge|take the/i.test(
     String(instructions || '')
@@ -294,14 +364,22 @@ function buildRouteMetrics(route, sceneConfig) {
     route?.coordinates || [],
     sceneConfig?.routeSpacingMeters
   );
-  const expensiveStationProgress = getProgressForNearestCoordinate(
-    baseMetrics,
-    sceneConfig.expensiveStation.coordinate
-  );
+  const expensiveStationProgress = typeof sceneConfig?.expensiveStation?.routeProgress === 'number'
+    ? clamp(sceneConfig.expensiveStation.routeProgress, 0, 1)
+    : getProgressForNearestCoordinate(
+      baseMetrics,
+      sceneConfig.expensiveStation.coordinate
+    );
   const initialCoordinate = baseMetrics.coordinates[0] || sceneConfig.origin;
   const initialHeading = baseMetrics.coordinates.length > 1
     ? calculateHeadingDegrees(baseMetrics.coordinates[0], baseMetrics.coordinates[1])
     : 180;
+  const overviewHeading = baseMetrics.coordinates.length > 1
+    ? calculateHeadingDegrees(
+      baseMetrics.coordinates[0],
+      baseMetrics.coordinates[baseMetrics.coordinates.length - 1]
+    )
+    : initialHeading;
   const routeRegion = getRouteRegion(baseMetrics.coordinates);
   const turnEvents = buildTurnEvents(route, baseMetrics, sceneConfig);
   const primaryTurnDistanceMeters = turnEvents[1]?.distanceMeters
@@ -312,8 +390,7 @@ function buildRouteMetrics(route, sceneConfig) {
     primaryTurnDistanceMeters + 120,
     baseMetrics.totalDistanceMeters * 0.9
   );
-
-  return {
+  const provisionalMetrics = {
     ...route,
     coordinates: baseMetrics.coordinates,
     segments: baseMetrics.segments,
@@ -321,10 +398,17 @@ function buildRouteMetrics(route, sceneConfig) {
     expensiveStationProgress,
     initialCoordinate,
     initialHeading,
+    overviewHeading,
     routeRegion,
     turnEvents,
     primaryTurnDistanceMeters,
     showcaseDistanceMeters,
+  };
+  const distanceTiming = buildDistanceTiming(provisionalMetrics, sceneConfig);
+
+  return {
+    ...provisionalMetrics,
+    distanceTiming,
   };
 }
 
@@ -437,6 +521,7 @@ function getCameraForProgress(routeMetrics, sceneConfig, progress) {
     currentDistanceMeters + baseLeadMeters
   );
   const center = getCoordinateAtDistance(routeMetrics, leadDistanceMeters);
+  const baseHeading = routeMetrics.overviewHeading;
   const phaseAltitude = (
     phase === 'passing-expensive'
       ? sceneConfig.cameraAltitudes.passingExpensive
@@ -446,52 +531,78 @@ function getCameraForProgress(routeMetrics, sceneConfig, progress) {
   );
   const altitude = lerp(storyboardAltitude, phaseAltitude, 0.32);
   const upcomingTurn = (routeMetrics.turnEvents || []).find(turnEvent => (
-    turnEvent.distanceMeters > currentDistanceMeters &&
-    turnEvent.distanceMeters - currentDistanceMeters <= sceneConfig.turnPreview.lookaheadMeters
+    currentDistanceMeters >= turnEvent.distanceMeters - sceneConfig.turnPreview.lookaheadMeters &&
+    currentDistanceMeters <= turnEvent.distanceMeters + sceneConfig.turnPreview.recoveryMeters
   ));
 
   if (!upcomingTurn) {
     return {
       center,
-      heading: point.heading,
+      heading: baseHeading,
       pitch: basePitch,
       altitude,
     };
   }
 
-  const turnDistanceMeters = upcomingTurn.distanceMeters - currentDistanceMeters;
-  const turnBlend = clamp(
-    1 - turnDistanceMeters / sceneConfig.turnPreview.lookaheadMeters,
-    0,
-    1
+  const turnStartDistanceMeters = upcomingTurn.distanceMeters - sceneConfig.turnPreview.lookaheadMeters;
+  const turnMidDistanceMeters = upcomingTurn.distanceMeters;
+  const turnEndDistanceMeters = upcomingTurn.distanceMeters + sceneConfig.turnPreview.recoveryMeters;
+  const preTurnBlend = smoothstep(
+    turnStartDistanceMeters,
+    turnMidDistanceMeters,
+    currentDistanceMeters
   );
-  const turnFocusCenter = interpolateCoordinate(
-    center,
-    upcomingTurn.coordinate,
-    sceneConfig.turnPreview.centerBlend * turnBlend
+  const postTurnBlend = smoothstep(
+    turnMidDistanceMeters,
+    turnEndDistanceMeters,
+    currentDistanceMeters
   );
-  const turnHeading = interpolateHeadingDegrees(
-    point.heading,
-    upcomingTurn.exitHeading,
-    sceneConfig.turnPreview.headingBlend * turnBlend
+  const turnBlend = clamp(preTurnBlend - postTurnBlend, 0, 1);
+  const turnLeadMeters = lerp(
+    baseLeadMeters,
+    sceneConfig.turnPreview.leadMeters,
+    turnBlend
+  );
+  const turnCenter = getCoordinateAtDistance(
+    routeMetrics,
+    Math.min(routeMetrics.totalDistanceMeters, currentDistanceMeters + turnLeadMeters)
   );
   const turnAltitude = altitude + (
     sceneConfig.turnPreview.altitude - altitude
   ) * turnBlend;
-  const turnPitch = lerp(basePitch, sceneConfig.cameraProfiles.intro.pitch, turnBlend * 0.58);
+  const postTurnPitch = lerp(sceneConfig.turnPreview.pitch, basePitch, postTurnBlend);
+  const turnPitch = lerp(postTurnPitch, sceneConfig.cameraProfiles.intro.pitch, postTurnBlend);
 
   return {
-    center: turnFocusCenter,
-    heading: turnHeading,
+    center: turnCenter,
+    heading: baseHeading,
     pitch: turnPitch,
     altitude: turnAltitude,
   };
 }
 
-function getDemoSnapshot(routeMetrics, sceneConfig, progress) {
+function getArrivalCamera(routeMetrics, sceneConfig, arrivalElapsedMs) {
+  const orbitHeading = (
+    routeMetrics.initialHeading +
+    (arrivalElapsedMs / 1000) * sceneConfig.orbit.degreesPerSecond
+  ) % 360;
+
+  return {
+    center: routeMetrics.coordinates[routeMetrics.coordinates.length - 1] || routeMetrics.initialCoordinate,
+    heading: orbitHeading,
+    pitch: sceneConfig.cameraProfiles.arrival.pitch,
+    altitude: sceneConfig.cameraProfiles.arrival.altitude,
+  };
+}
+
+function getDemoSnapshot(routeMetrics, sceneConfig, progress, arrivalElapsedMs = 0) {
   const clampedProgress = clamp(progress, 0, 1);
-  const point = getPointAtDistance(routeMetrics, routeMetrics.totalDistanceMeters * clampedProgress);
-  const scenePhase = getScenePhase(clampedProgress, routeMetrics.expensiveStationProgress);
+  const travelledDistanceMeters = getDistanceForTimeProgress(routeMetrics, clampedProgress);
+  const distanceProgress = routeMetrics.totalDistanceMeters > 0
+    ? travelledDistanceMeters / routeMetrics.totalDistanceMeters
+    : 0;
+  const point = getPointAtDistance(routeMetrics, travelledDistanceMeters);
+  const scenePhase = getScenePhase(distanceProgress, routeMetrics.expensiveStationProgress);
   const remainingDistanceMeters = Math.max(
     0,
     routeMetrics.totalDistanceMeters - point.travelledDistanceMeters
@@ -500,20 +611,31 @@ function getDemoSnapshot(routeMetrics, sceneConfig, progress) {
     || Number(routeMetrics.expectedTravelTime)
     || 0;
   const remainingTravelTimeSeconds = expectedTravelTimeSeconds * (1 - clampedProgress);
+  const isArrived = clampedProgress >= 1 && arrivalElapsedMs > 0;
+  const destinationCoordinate = routeMetrics.coordinates[routeMetrics.coordinates.length - 1] || point.coordinate;
+  const finalHeading = routeMetrics.segments.length
+    ? calculateHeadingDegrees(
+      routeMetrics.segments[routeMetrics.segments.length - 1].start,
+      routeMetrics.segments[routeMetrics.segments.length - 1].end
+    )
+    : point.heading;
 
   return {
-    progress: clampedProgress,
-    carCoordinate: point.coordinate,
-    heading: point.heading,
+    progress: distanceProgress,
+    arrivalOrbitProgress: arrivalElapsedMs / 1000,
+    carCoordinate: isArrived ? destinationCoordinate : point.coordinate,
+    heading: isArrived ? finalHeading : point.heading,
     travelledDistanceMeters: point.travelledDistanceMeters,
     remainingDistanceMeters,
     remainingTravelTimeSeconds,
-    scenePhase,
-    passedStationState: getPassedStationState(clampedProgress, routeMetrics.expensiveStationProgress),
-    activeCamera: getCameraForProgress(routeMetrics, sceneConfig, clampedProgress),
+    scenePhase: isArrived ? 'arrived' : scenePhase,
+    passedStationState: getPassedStationState(distanceProgress, routeMetrics.expensiveStationProgress),
+    activeCamera: isArrived
+      ? getArrivalCamera(routeMetrics, sceneConfig, arrivalElapsedMs)
+      : getCameraForProgress(routeMetrics, sceneConfig, distanceProgress),
     narrative: getNarrative(
       sceneConfig,
-      scenePhase,
+      isArrived ? 'routing-cheap' : scenePhase,
       remainingDistanceMeters,
       remainingTravelTimeSeconds
     ),
@@ -524,6 +646,8 @@ module.exports = {
   buildRouteMetrics,
   densifyCoordinates,
   calculateHeadingDegrees,
+  getArrivalCamera,
+  getDistanceForTimeProgress,
   getCameraForProgress,
   getDemoSnapshot,
   getPassedStationState,

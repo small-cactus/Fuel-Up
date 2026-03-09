@@ -34,6 +34,14 @@ export default function PredictiveMapScene({
     const routeCoordinates = routeMetrics?.coordinates || [];
 
     useEffect(() => {
+        if (isActive) {
+            return;
+        }
+
+        lastCameraSignatureRef.current = '';
+    }, [isActive]);
+
+    useEffect(() => {
         if (!isMapReady || !mapRef.current || !demoState?.activeCamera) {
             return;
         }
@@ -114,17 +122,17 @@ export default function PredictiveMapScene({
                 ) : null}
 
                 <RouteStationMarker
-                    brand={sceneConfig.expensiveStation.brand}
                     coordinate={sceneConfig.expensiveStation.coordinate}
                     emphasisState={demoState.passedStationState}
+                    isDark={isDark}
                     price={sceneConfig.expensiveStation.price}
                     role="expensive"
                 />
 
                 <RouteStationMarker
-                    brand={sceneConfig.destinationStation.brand}
                     coordinate={sceneConfig.destinationStation.coordinate}
                     emphasisState="highlighted"
+                    isDark={isDark}
                     price={sceneConfig.destinationStation.price}
                     role="destination"
                 />

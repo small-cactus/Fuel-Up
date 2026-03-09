@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import TopCanopy from '../../../components/TopCanopy';
@@ -7,7 +7,6 @@ import BottomCanopy from '../../../components/BottomCanopy';
 import FuelUpHeaderLogo from '../../../components/FuelUpHeaderLogo';
 import { getDrivingRouteAsync } from '../../../lib/FuelUpMapKitRouting';
 import PredictiveMapScene from './PredictiveMapScene';
-import PredictiveNarrativeCard from './PredictiveNarrativeCard';
 import {
     getPredictiveFuelingFallbackRoute,
     PREDICTIVE_FUELING_SCENE,
@@ -127,14 +126,10 @@ export default function PredictiveFuelingStep({ insets, isActive, isDark }) {
                 style={[styles.headerOverlay, { paddingTop: insets.top + 20 }]}
             >
                 <FuelUpHeaderLogo isDark={isDark} />
+                <Text style={[styles.headerTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>
+                    Predictive Fueling
+                </Text>
             </View>
-
-            <PredictiveNarrativeCard
-                insets={insets}
-                isDark={isDark}
-                narrative={demoState.narrative}
-                sceneConfig={PREDICTIVE_FUELING_SCENE}
-            />
         </View>
     );
 }
@@ -163,5 +158,14 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         alignItems: 'center',
+        gap: 12,
+        paddingHorizontal: 24,
+    },
+    headerTitle: {
+        fontSize: 28,
+        fontWeight: '800',
+        textAlign: 'center',
+        letterSpacing: -0.3,
+        fontFamily: 'ui-rounded',
     },
 });

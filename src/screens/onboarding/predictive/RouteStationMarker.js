@@ -1,13 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Marker } from 'react-native-maps';
-import { LiquidGlassView } from '@callstack/liquid-glass';
+import { LiquidGlassView as GlassView } from '@callstack/liquid-glass';
 import { SymbolView } from 'expo-symbols';
-
-const PRICE_COLOR_BY_ROLE = {
-    destination: '#34C759',
-    expensive: '#FF5A5F',
-};
 
 function getContainerStyle(role, emphasisState) {
     if (role === 'destination') {
@@ -26,9 +21,9 @@ function getContainerStyle(role, emphasisState) {
 }
 
 export default function RouteStationMarker({
-    brand,
     coordinate,
     emphasisState = 'default',
+    isDark,
     price,
     role = 'expensive',
 }) {
@@ -36,7 +31,6 @@ export default function RouteStationMarker({
         return null;
     }
 
-    const priceColor = PRICE_COLOR_BY_ROLE[role] || '#FFFFFF';
     const containerStyle = getContainerStyle(role, emphasisState);
 
     return (
@@ -47,13 +41,23 @@ export default function RouteStationMarker({
             zIndex={role === 'destination' ? 4 : 3}
         >
             <View style={containerStyle}>
-                <LiquidGlassView effect="clear" style={styles.markerGlass}>
-                    <View style={styles.markerRow}>
-                        <SymbolView name="fuelpump.fill" size={13} tintColor={priceColor} />
-                        <Text style={[styles.priceText, { color: priceColor }]}>${price.toFixed(2)}</Text>
-                    </View>
-                    <Text style={styles.brandText}>{brand}</Text>
-                </LiquidGlassView>
+                <GlassView
+                    tintColor={role === 'destination' ? 'rgba(0, 255, 47, 0.3)' : 'rgba(255, 25, 0, 0.3)'}
+                    effect="clear"
+                    colorScheme={isDark ? 'dark' : 'light'}
+                    interactive={false}
+                    style={styles.markerGlass}
+                >
+                    <SymbolView
+                        name="fuelpump.fill"
+                        size={14}
+                        tintColor={isDark ? '#FFFFFF' : '#000000'}
+                        style={styles.markerIcon}
+                    />
+                    <Text style={[styles.priceText, { color: isDark ? '#FFFFFF' : '#000000' }]}>
+                        ${price.toFixed(2)}
+                    </Text>
+                </GlassView>
             </View>
         </Marker>
     );
@@ -74,29 +78,19 @@ const styles = StyleSheet.create({
         opacity: 0.82,
     },
     markerGlass: {
-        minWidth: 88,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 18,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    markerRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 16,
+        gap: 6,
+        overflow: 'hidden',
+    },
+    markerIcon: {
+        marginRight: 2,
     },
     priceText: {
-        fontSize: 16,
-        fontWeight: '800',
-        letterSpacing: -0.2,
-    },
-    brandText: {
-        marginTop: 2,
-        color: '#FFFFFF',
-        fontSize: 11,
+        fontSize: 15,
         fontWeight: '700',
-        letterSpacing: 0.3,
-        textTransform: 'uppercase',
     },
 });
