@@ -210,6 +210,16 @@ export const PREDICTIVE_FUELING_SCENE = {
             leadMeters: 128,
             pitch: 58,
         },
+        stationFocus: {
+            altitude: 610,
+            leadMeters: 108,
+            pitch: 62,
+        },
+        destinationFocus: {
+            altitude: 580,
+            leadMeters: 96,
+            pitch: 64,
+        },
         arrival: {
             altitude: 560,
             pitch: 66,
@@ -236,9 +246,17 @@ export const PREDICTIVE_FUELING_SCENE = {
         routingCheap: 720,
     },
     stationChipReveal: {
-        expensiveLeadMeters: 260,
-        destinationLeadMeters: 480,
+        expensiveLeadMeters: 120,
+        destinationLeadMeters: 220,
         destinationPostRerouteLeadMeters: 140,
+    },
+    cameraStoryboard: {
+        introHoldProgress: 0.08,
+        introBlendEndProgress: 0.18,
+        expensiveFocusLeadProgress: 0.035,
+        expensiveFocusTailProgress: 0.04,
+        cheapFocusLeadProgress: 0.055,
+        cheapFocusTailProgress: 0.035,
     },
     cameraAnimationMs: 0,
     cameraUpdateIntervalMs: 0,

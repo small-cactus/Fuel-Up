@@ -157,11 +157,16 @@ test('close turns are grouped into one camera event', () => {
 test('expensive chip appears before reroute and cheaper chip appears after reroute', () => {
   const routeMetrics = createFallbackRouteMetrics();
   const earlySnapshot = getDemoSnapshot(routeMetrics, PREDICTIVE_FUELING_SCENE, 0.18, 0);
-  const expensiveWarningSnapshot = getDemoSnapshot(routeMetrics, PREDICTIVE_FUELING_SCENE, 0.34, 0);
+  const expensiveWarningSnapshot = getDemoSnapshot(
+    routeMetrics,
+    PREDICTIVE_FUELING_SCENE,
+    routeMetrics.expensiveStationProgress + 0.015,
+    0
+  );
   const reroutedSnapshot = getDemoSnapshot(
     routeMetrics,
     PREDICTIVE_FUELING_SCENE,
-    0.82,
+    0.9,
     0
   );
 
