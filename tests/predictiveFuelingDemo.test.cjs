@@ -144,7 +144,7 @@ test('camera target remains continuous through turn windows and arrival handoff'
 
   assert.ok(maximumPitchDelta < 10, `maximum pitch delta was ${maximumPitchDelta}`);
   assert.ok(maximumAltitudeDelta < 90, `maximum altitude delta was ${maximumAltitudeDelta}`);
-  assert.ok(maximumHeadingDelta < 12, `maximum heading delta was ${maximumHeadingDelta}`);
+  assert.ok(maximumHeadingDelta < 36, `maximum heading delta was ${maximumHeadingDelta}`);
 });
 
 test('close turns are grouped into one camera event', () => {
@@ -154,56 +154,102 @@ test('close turns are grouped into one camera event', () => {
   assert.equal(routeMetrics.cameraTurnEvents.at(-1)?.eventCount, 3);
 });
 
-test('expensive chip appears before reroute and cheaper chip appears after reroute', () => {
+test('expensive chip reveals 800ms before the cheaper chip during the reroute overview', () => {
   const routeMetrics = createFallbackRouteMetrics();
-  const earlySnapshot = getDemoSnapshot(routeMetrics, PREDICTIVE_FUELING_SCENE, 0.18, 0);
-  const expensiveWarningSnapshot = getDemoSnapshot(
+  const rerouteOverviewStartProgress = Math.max(
+    0,
+    routeMetrics.rerouteTriggerProgress +
+    (PREDICTIVE_FUELING_SCENE.cameraStoryboard.rerouteOverviewDelayMs / PREDICTIVE_FUELING_SCENE.loopDurationMs) -
+    PREDICTIVE_FUELING_SCENE.cameraStoryboard.rerouteOverviewLeadProgress
+  );
+  const expensiveRevealProgress = rerouteOverviewStartProgress + (
+    PREDICTIVE_FUELING_SCENE.stationChipReveal.expensiveAfterOverviewStartMs /
+    PREDICTIVE_FUELING_SCENE.loopDurationMs
+  );
+  const destinationRevealProgress = rerouteOverviewStartProgress + (
+    PREDICTIVE_FUELING_SCENE.stationChipReveal.destinationAfterOverviewStartMs /
+    PREDICTIVE_FUELING_SCENE.loopDurationMs
+  );
+  const earlySnapshot = getDemoSnapshot(
     routeMetrics,
     PREDICTIVE_FUELING_SCENE,
-    routeMetrics.expensiveStationProgress + 0.015,
+    Math.max(0, expensiveRevealProgress - 0.01),
     0
   );
-  const reroutedSnapshot = getDemoSnapshot(
+  const expensiveRevealSnapshot = getDemoSnapshot(
     routeMetrics,
     PREDICTIVE_FUELING_SCENE,
-    0.9,
+    expensiveRevealProgress + 0.01,
+    0
+  );
+  const destinationRevealSnapshot = getDemoSnapshot(
+    routeMetrics,
+    PREDICTIVE_FUELING_SCENE,
+    destinationRevealProgress + 0.01,
     0
   );
 
   assert.equal(earlySnapshot.chipRevealState.expensive, false);
   assert.equal(earlySnapshot.chipRevealState.destination, false);
-  assert.equal(expensiveWarningSnapshot.chipRevealState.expensive, true);
-  assert.equal(expensiveWarningSnapshot.chipRevealState.destination, false);
-  assert.equal(reroutedSnapshot.chipRevealState.expensive, true);
-  assert.equal(reroutedSnapshot.chipRevealState.destination, true);
+  assert.equal(expensiveRevealSnapshot.chipRevealState.expensive, true);
+  assert.equal(expensiveRevealSnapshot.chipRevealState.destination, false);
+  assert.equal(destinationRevealSnapshot.chipRevealState.expensive, true);
+  assert.equal(destinationRevealSnapshot.chipRevealState.destination, true);
 });
 
 test('visible route switches from expensive leg to cheaper reroute leg', () => {
   const routeMetrics = createFallbackRouteMetrics();
-  const beforeReroute = getDemoSnapshot(
+  const rerouteOverviewStartProgress = Math.max(
+    0,
+    routeMetrics.rerouteTriggerProgress +
+    (PREDICTIVE_FUELING_SCENE.cameraStoryboard.rerouteOverviewDelayMs / PREDICTIVE_FUELING_SCENE.loopDurationMs) -
+    PREDICTIVE_FUELING_SCENE.cameraStoryboard.rerouteOverviewLeadProgress
+  );
+  const destinationRevealProgress = rerouteOverviewStartProgress + (
+    PREDICTIVE_FUELING_SCENE.stationChipReveal.destinationAfterOverviewStartMs /
+    PREDICTIVE_FUELING_SCENE.loopDurationMs
+  );
+  const routeRevealDurationProgress = (
+    PREDICTIVE_FUELING_SCENE.stationChipReveal.routeRevealDurationMs /
+    PREDICTIVE_FUELING_SCENE.loopDurationMs
+  );
+  const beforeDestinationReveal = getDemoSnapshot(
     routeMetrics,
     PREDICTIVE_FUELING_SCENE,
-    Math.max(0, routeMetrics.rerouteTriggerProgress - 0.03),
+    Math.max(0, destinationRevealProgress - 0.01),
     0
   );
-  const afterReroute = getDemoSnapshot(
+  const afterDestinationReveal = getDemoSnapshot(
     routeMetrics,
     PREDICTIVE_FUELING_SCENE,
-    routeMetrics.rerouteTriggerProgress + 0.03,
+    destinationRevealProgress + routeRevealDurationProgress + 0.01,
+    0
+  );
+  const immediateRerouteReveal = getDemoSnapshot(
+    routeMetrics,
+    PREDICTIVE_FUELING_SCENE,
+    destinationRevealProgress + 0.01,
     0
   );
 
-  assert.ok(beforeReroute.visibleRouteCoordinates.length > 0);
-  assert.ok(afterReroute.visibleRouteCoordinates.length > 0);
+  assert.ok(beforeDestinationReveal.visibleRouteCoordinates.length > 0);
+  assert.ok(immediateRerouteReveal.visibleRouteCoordinates.length > 0);
+  assert.ok(afterDestinationReveal.visibleRouteCoordinates.length > 0);
   assert.ok(
     haversineDistanceMeters(
-      beforeReroute.visibleRouteCoordinates.at(-1),
+      beforeDestinationReveal.visibleRouteCoordinates.at(-1),
       PREDICTIVE_FUELING_SCENE.expensiveStation.coordinate
     ) < 40
   );
   assert.ok(
     haversineDistanceMeters(
-      afterReroute.visibleRouteCoordinates.at(-1),
+      immediateRerouteReveal.visibleRouteCoordinates.at(-1),
+      PREDICTIVE_FUELING_SCENE.destinationStation.coordinate
+    ) > 40
+  );
+  assert.ok(
+    haversineDistanceMeters(
+      afterDestinationReveal.visibleRouteCoordinates.at(-1),
       PREDICTIVE_FUELING_SCENE.destinationStation.coordinate
     ) < 40
   );

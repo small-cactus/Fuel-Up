@@ -13,7 +13,8 @@ import Animated, {
 } from 'react-native-reanimated';
 
 const AnimatedView = Animated.createAnimatedComponent(View);
-const APPEAR_START_SCALE = 0.84;
+const HIDDEN_SCALE = 0.06;
+const APPEAR_START_SCALE = 0.12;
 const APPEAR_DURATION_MS = 220;
 const TRACKS_VIEW_CHANGES_IDLE_MS = 180;
 
@@ -146,15 +147,11 @@ export default function RouteStationMarker({
             scale: baseScale * interpolate(
                 appearProgress.value,
                 [0, 1],
-                [APPEAR_START_SCALE, 1],
+                [isVisible ? APPEAR_START_SCALE : HIDDEN_SCALE, 1],
                 Extrapolate.CLAMP
             ),
         }],
     }), [appearProgress, baseScale]);
-
-    if (!isVisible) {
-        return null;
-    }
 
     return (
         <Marker

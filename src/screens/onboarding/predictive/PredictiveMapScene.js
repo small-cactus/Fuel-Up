@@ -34,6 +34,7 @@ export default function PredictiveMapScene({
     const [isMapReady, setIsMapReady] = useState(false);
 
     const routeCoordinates = demoState?.visibleRouteCoordinates || routeMetrics?.coordinates || [];
+    const puckCoordinate = routeCoordinates[0] || demoState?.carCoordinate;
 
     useEffect(() => {
         return () => {
@@ -180,8 +181,7 @@ export default function PredictiveMapScene({
                 />
 
                 <MockVehicleMarker
-                    coordinate={demoState.carCoordinate}
-                    mapPitch={demoState.activeCamera?.pitch || 0}
+                    coordinate={puckCoordinate}
                 />
             </MapView>
         </View>
