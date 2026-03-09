@@ -411,6 +411,51 @@ function buildTurnEvents(route, baseMetrics, sceneConfig) {
   }, []);
 }
 
+function buildCameraTurnEvents(turnEvents, sceneConfig) {
+  const mergeGapMeters = sceneConfig?.turnPreview?.cameraTurnGroupGapMeters || 320;
+
+  return (turnEvents || []).reduce((cameraEvents, turnEvent) => {
+    const previousCameraEvent = cameraEvents[cameraEvents.length - 1];
+
+    if (!previousCameraEvent) {
+      cameraEvents.push({
+        peakDistanceMeters: turnEvent.distanceMeters,
+        startDistanceMeters: turnEvent.distanceMeters,
+        endDistanceMeters: turnEvent.distanceMeters,
+        turnMagnitude: turnEvent.turnMagnitude,
+        eventCount: 1,
+      });
+      return cameraEvents;
+    }
+
+    if (turnEvent.distanceMeters - previousCameraEvent.endDistanceMeters > mergeGapMeters) {
+      cameraEvents.push({
+        peakDistanceMeters: turnEvent.distanceMeters,
+        startDistanceMeters: turnEvent.distanceMeters,
+        endDistanceMeters: turnEvent.distanceMeters,
+        turnMagnitude: turnEvent.turnMagnitude,
+        eventCount: 1,
+      });
+      return cameraEvents;
+    }
+
+    const totalWeight = previousCameraEvent.turnMagnitude + turnEvent.turnMagnitude;
+    previousCameraEvent.peakDistanceMeters = totalWeight > 0
+      ? (
+        previousCameraEvent.peakDistanceMeters * previousCameraEvent.turnMagnitude +
+        turnEvent.distanceMeters * turnEvent.turnMagnitude
+      ) / totalWeight
+      : turnEvent.distanceMeters;
+    previousCameraEvent.endDistanceMeters = turnEvent.distanceMeters;
+    previousCameraEvent.turnMagnitude = Math.max(
+      previousCameraEvent.turnMagnitude,
+      turnEvent.turnMagnitude
+    );
+    previousCameraEvent.eventCount += 1;
+    return cameraEvents;
+  }, []);
+}
+
 function buildRouteMetrics(route, sceneConfig) {
   const baseMetrics = buildRouteSegments(
     route?.coordinates || [],
@@ -440,6 +485,7 @@ function buildRouteMetrics(route, sceneConfig) {
     : overviewHeading;
   const routeRegion = getRouteRegion(baseMetrics.coordinates);
   const turnEvents = buildTurnEvents(route, baseMetrics, sceneConfig);
+  const cameraTurnEvents = buildCameraTurnEvents(turnEvents, sceneConfig);
   const primaryTurnDistanceMeters = turnEvents[1]?.distanceMeters
     || turnEvents[0]?.distanceMeters
     || baseMetrics.totalDistanceMeters * 0.15;
@@ -460,6 +506,7 @@ function buildRouteMetrics(route, sceneConfig) {
     finalHeading,
     routeRegion,
     turnEvents,
+    cameraTurnEvents,
     primaryTurnDistanceMeters,
     showcaseDistanceMeters,
   };
@@ -589,20 +636,26 @@ function getCameraForProgress(routeMetrics, sceneConfig, progress) {
         : sceneConfig.cameraAltitudes.driving
   );
   const altitude = lerp(storyboardAltitude, phaseAltitude, 0.32);
-  const turnContributions = (routeMetrics.turnEvents || [])
+  const turnContributions = (routeMetrics.cameraTurnEvents || routeMetrics.turnEvents || [])
     .map(turnEvent => {
-      const turnStartDistanceMeters = turnEvent.distanceMeters - sceneConfig.turnPreview.lookaheadMeters;
-      const turnMidDistanceMeters = turnEvent.distanceMeters;
-      const turnEndDistanceMeters = turnEvent.distanceMeters + sceneConfig.turnPreview.recoveryMeters;
+      const turnStartDistanceMeters = turnEvent.startDistanceMeters - sceneConfig.turnPreview.lookaheadMeters;
+      const turnPeakDistanceMeters = turnEvent.peakDistanceMeters;
+      const turnEndDistanceMeters = turnEvent.endDistanceMeters + sceneConfig.turnPreview.recoveryMeters + (
+        Math.max(0, (turnEvent.eventCount || 1) - 1) *
+        (sceneConfig.turnPreview.groupRecoveryExtensionMeters || 120)
+      );
       const influence = clamp(
-        smoothstep(
-          turnStartDistanceMeters,
-          turnMidDistanceMeters,
-          currentDistanceMeters
-        ) - smoothstep(
-          turnMidDistanceMeters,
-          turnEndDistanceMeters,
-          currentDistanceMeters
+        Math.min(
+          smoothstep(
+            turnStartDistanceMeters,
+            turnPeakDistanceMeters,
+            currentDistanceMeters
+          ),
+          1 - smoothstep(
+            turnEvent.endDistanceMeters,
+            turnEndDistanceMeters,
+            currentDistanceMeters
+          )
         ),
         0,
         1

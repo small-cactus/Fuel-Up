@@ -273,3 +273,10 @@ test('camera target remains continuous through turn windows and arrival handoff'
   assert.ok(maximumAltitudeDelta < 90, `maximum altitude delta was ${maximumAltitudeDelta}`);
   assert.ok(maximumHeadingDelta < 12, `maximum heading delta was ${maximumHeadingDelta}`);
 });
+
+test('close turns are grouped into one camera event', () => {
+  const routeMetrics = buildRouteMetrics(PREDICTIVE_FUELING_SCENE.fallbackRoute, PREDICTIVE_FUELING_SCENE);
+
+  assert.ok(routeMetrics.turnEvents.length > routeMetrics.cameraTurnEvents.length);
+  assert.equal(routeMetrics.cameraTurnEvents.at(-1)?.eventCount, 2);
+});

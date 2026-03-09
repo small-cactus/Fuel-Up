@@ -179,7 +179,7 @@ export default function PredictiveMapScene({
 
                 <MockVehicleMarker
                     coordinate={demoState.carCoordinate}
-                    heading={demoState.heading}
+                    mapPitch={demoState.activeCamera?.pitch || 0}
                 />
             </MapView>
         </View>

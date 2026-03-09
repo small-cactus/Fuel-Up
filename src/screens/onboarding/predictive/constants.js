@@ -110,9 +110,11 @@ export const PREDICTIVE_FUELING_SCENE = {
         pitch: 12,
         minimumTurnDistanceMeters: 18,
         minimumTurnGapMeters: 140,
+        cameraTurnGroupGapMeters: 320,
         startExclusionMeters: 90,
         endExclusionMeters: 90,
         recoveryMeters: 96,
+        groupRecoveryExtensionMeters: 120,
         postTurnSampleMeters: 76,
     },
     cameraProfiles: {

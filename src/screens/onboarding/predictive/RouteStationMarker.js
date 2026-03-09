@@ -20,6 +20,20 @@ function getContainerStyle(role, emphasisState) {
     return styles.expensiveShellDefault;
 }
 
+function getMarkerPlacement(role) {
+    if (role === 'destination') {
+        return {
+            anchor: { x: 0.5, y: 0.92 },
+            centerOffset: { x: 0, y: -28 },
+        };
+    }
+
+    return {
+        anchor: { x: 0.5, y: 0.84 },
+        centerOffset: { x: 0, y: -10 },
+    };
+}
+
 export default function RouteStationMarker({
     coordinate,
     emphasisState = 'default',
@@ -32,11 +46,13 @@ export default function RouteStationMarker({
     }
 
     const containerStyle = getContainerStyle(role, emphasisState);
+    const markerPlacement = getMarkerPlacement(role);
 
     return (
         <Marker
             coordinate={coordinate}
-            anchor={{ x: 0.5, y: 0.84 }}
+            anchor={markerPlacement.anchor}
+            centerOffset={markerPlacement.centerOffset}
             tracksViewChanges={false}
             zIndex={role === 'destination' ? 4 : 3}
         >
