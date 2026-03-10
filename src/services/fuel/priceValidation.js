@@ -4,6 +4,7 @@ const MARKET_TIERS = [
     { maxMiles: 20, maxAgeHours: 168, distanceDecay: 8, timeDecay: 48, minStations: 2 },
 ];
 const MAX_RAW_STATION_HISTORY = 6;
+const SOURCE_REPLAY_TOLERANCE_MS = 5 * 60 * 1000;
 
 function toFiniteNumber(value) {
     if (value === null || value === undefined || value === '') {
@@ -22,6 +23,34 @@ function normalizePrice(value) {
     }
 
     return Number(numericValue.toFixed(3));
+}
+
+function getObservedAtMs(row) {
+    return (
+        toFiniteNumber(row?.observedAtMs) ??
+        toFiniteNumber(row?.timestampMs) ??
+        toFiniteNumber(row?.sourceUpdatedAtMs) ??
+        Date.now()
+    );
+}
+
+function getSourceUpdatedAtMs(row) {
+    return (
+        toFiniteNumber(row?.sourceUpdatedAtMs) ??
+        toFiniteNumber(row?.updatedAtMs) ??
+        getObservedAtMs(row)
+    );
+}
+
+function hoursBetween(laterMs, earlierMs) {
+    const normalizedLaterMs = toFiniteNumber(laterMs);
+    const normalizedEarlierMs = toFiniteNumber(earlierMs);
+
+    if (normalizedLaterMs === null || normalizedEarlierMs === null) {
+        return null;
+    }
+
+    return (normalizedLaterMs - normalizedEarlierMs) / (1000 * 60 * 60);
 }
 
 function clamp01(value) {
@@ -116,8 +145,11 @@ function weightedMedian(values) {
 
 function sortRowsAscending(rows) {
     return [...(rows || [])].sort((left, right) => {
-        if (left.timestampMs !== right.timestampMs) {
-            return left.timestampMs - right.timestampMs;
+        const leftObservedAtMs = getObservedAtMs(left);
+        const rightObservedAtMs = getObservedAtMs(right);
+
+        if (leftObservedAtMs !== rightObservedAtMs) {
+            return leftObservedAtMs - rightObservedAtMs;
         }
 
         const stationComparison = String(left.stationId || '').localeCompare(String(right.stationId || ''));
@@ -134,10 +166,11 @@ function groupRowsByTimestamp(rows) {
 
     for (const row of rows || []) {
         const lastGroup = groups[groups.length - 1];
+        const observedAtMs = getObservedAtMs(row);
 
-        if (!lastGroup || lastGroup.timestampMs !== row.timestampMs) {
+        if (!lastGroup || lastGroup.timestampMs !== observedAtMs) {
             groups.push({
-                timestampMs: row.timestampMs,
+                timestampMs: observedAtMs,
                 rows: [row],
             });
             continue;
@@ -150,8 +183,14 @@ function groupRowsByTimestamp(rows) {
 }
 
 function cloneRow(row) {
+    const observedAtMs = getObservedAtMs(row);
+    const sourceUpdatedAtMs = getSourceUpdatedAtMs(row);
+
     return {
         ...row,
+        observedAtMs,
+        sourceUpdatedAtMs,
+        timestampMs: observedAtMs,
         price: normalizePrice(row?.price),
         marketPrice: normalizePrice(row?.marketPrice),
     };
@@ -198,6 +237,11 @@ function getStationRawHistory(fuelState, stationId) {
     return fuelState.rawByStation.get(String(stationId || '')) || [];
 }
 
+function getLatestTrustedStationRow(fuelState, stationId) {
+    const stationRows = getStationTrustedHistory(fuelState, stationId);
+    return stationRows.length > 0 ? stationRows[stationRows.length - 1] : null;
+}
+
 function estimateLocalMarketFromContext(row, context) {
     const fuelState = getFuelState(context, row.fuelType);
     const latestTrustedRows = Array.from(fuelState.latestTrustedByStation.values());
@@ -211,9 +255,15 @@ function estimateLocalMarketFromContext(row, context) {
             }
 
             const distanceMiles = haversineMiles(row.lat, row.lon, candidate.lat, candidate.lon);
-            const ageHours = (row.timestampMs - candidate.timestampMs) / (1000 * 60 * 60);
+            const ageHours = hoursBetween(row.observedAtMs, candidate.observedAtMs);
 
-            if (!Number.isFinite(distanceMiles) || distanceMiles > tier.maxMiles || ageHours > tier.maxAgeHours) {
+            if (
+                !Number.isFinite(distanceMiles) ||
+                distanceMiles > tier.maxMiles ||
+                ageHours === null ||
+                ageHours < 0 ||
+                ageHours > tier.maxAgeHours
+            ) {
                 continue;
             }
 
@@ -225,6 +275,7 @@ function estimateLocalMarketFromContext(row, context) {
                 ageHours,
                 distanceMiles,
                 weight,
+                sourceUpdatedAtMs: candidate.sourceUpdatedAtMs,
             });
         }
 
@@ -274,7 +325,7 @@ function estimateCarryForwardFromContext(row, context, marketNow) {
     }
 
     const lastTrustedRow = stationRows[stationRows.length - 1];
-    const ageHours = (row.timestampMs - lastTrustedRow.timestampMs) / (1000 * 60 * 60);
+    const ageHours = hoursBetween(row.observedAtMs, lastTrustedRow.observedAtMs);
 
     if (marketNow === null || lastTrustedRow.marketPrice === null) {
         return {
@@ -295,18 +346,48 @@ function predictStationPriceFromContext(row, context) {
     const marketEstimate = estimateLocalMarketFromContext(row, context);
     const offsetResult = estimateStationOffsetFromContext(row, context);
     const carryResult = estimateCarryForwardFromContext(row, context, marketEstimate.price);
+    const sourceAgeHours = hoursBetween(row.observedAtMs, row.sourceUpdatedAtMs) ?? 0;
+    const marketGap = marketEstimate.price === null ? 0 : Math.abs(marketEstimate.price - row.price);
+    const offsetDamping = (
+        sourceAgeHours <= 6
+            ? 1
+            : clamp01(1 - ((sourceAgeHours - 6) / 30))
+    );
+    const effectiveStationOffset = normalizePrice((offsetResult.offset ?? 0) * offsetDamping) ?? 0;
     const directPrice = marketEstimate.price === null
         ? null
-        : normalizePrice(marketEstimate.price + offsetResult.offset);
+        : normalizePrice(marketEstimate.price + effectiveStationOffset);
     const carryPrice = normalizePrice(carryResult.price);
+    const freshNeighborCount = (marketEstimate.neighbors || [])
+        .filter(neighbor => (
+            hoursBetween(neighbor.sourceUpdatedAtMs, row.sourceUpdatedAtMs) !== null &&
+            hoursBetween(neighbor.sourceUpdatedAtMs, row.sourceUpdatedAtMs) >= 0.1
+        ))
+        .length;
     let predictedPrice = null;
 
     if (directPrice !== null && carryPrice !== null) {
         const ageHours = carryResult.ageHours ?? 999;
-        let carryWeight = Math.exp(-ageHours / 48);
+        let carryWeight = Math.exp(-Math.max(0, ageHours) / 60);
 
         if (offsetResult.sampleCount < 2 && ageHours <= 36) {
-            carryWeight = Math.max(carryWeight, 0.75);
+            carryWeight = Math.max(carryWeight, 0.82);
+        }
+
+        if (freshNeighborCount >= 3 && ageHours >= 12) {
+            carryWeight = Math.max(0.45, carryWeight - 0.25);
+        }
+
+        if (freshNeighborCount >= 3 && sourceAgeHours >= 24) {
+            carryWeight = Math.min(carryWeight, 0.35);
+        } else if (freshNeighborCount >= 2 && sourceAgeHours >= 12) {
+            carryWeight = Math.min(carryWeight, 0.5);
+        }
+
+        if (sourceAgeHours >= 24 && marketGap >= 0.30) {
+            carryWeight = Math.min(carryWeight, 0.2);
+        } else if (sourceAgeHours >= 12 && marketGap >= 0.20) {
+            carryWeight = Math.min(carryWeight, 0.35);
         }
 
         predictedPrice = normalizePrice((carryWeight * carryPrice) + ((1 - carryWeight) * directPrice));
@@ -321,10 +402,12 @@ function predictStationPriceFromContext(row, context) {
         localMarketPrice: marketEstimate.price,
         localMarketNeighborCount: marketEstimate.neighborCount,
         localMarketNeighbors: marketEstimate.neighbors,
+        freshNeighborCount,
         directPrice,
         carryPrice,
-        stationOffset: offsetResult.offset,
+        stationOffset: effectiveStationOffset,
         carryAgeHours: carryResult.ageHours,
+        sourceAgeHours,
         stationOffsetSampleCount: offsetResult.sampleCount,
         stationHistoryCount: Math.max(offsetResult.stationHistoryCount, carryResult.stationHistoryCount || 0),
     };
@@ -349,12 +432,13 @@ function staleMatchScoreFromContext(row, context, predictedPrice) {
 
     const fuelState = getFuelState(context, row.fuelType);
     const stationRows = getStationTrustedHistory(fuelState, row.stationId);
+    const lastTrustedRow = getLatestTrustedStationRow(fuelState, row.stationId);
     let bestDifference = Number.POSITIVE_INFINITY;
 
     for (const candidate of stationRows) {
-        const ageHours = (row.timestampMs - candidate.timestampMs) / (1000 * 60 * 60);
+        const ageHours = hoursBetween(row.observedAtMs, candidate.observedAtMs);
 
-        if (ageHours < 36 || ageHours > 168) {
+        if (ageHours === null || ageHours < 36 || ageHours > 168) {
             continue;
         }
 
@@ -362,9 +446,17 @@ function staleMatchScoreFromContext(row, context, predictedPrice) {
     }
 
     const gap = predictedPrice - row.price;
+    const replayedSameSource = Boolean(
+        lastTrustedRow &&
+        Math.abs(row.sourceUpdatedAtMs - lastTrustedRow.sourceUpdatedAtMs) <= SOURCE_REPLAY_TOLERANCE_MS &&
+        Math.abs(row.price - lastTrustedRow.price) <= 0.01
+    );
+    const sourceAgeHours = hoursBetween(row.observedAtMs, row.sourceUpdatedAtMs) ?? 0;
 
-    if (bestDifference <= 0.02 && gap >= 0.12) return 1;
-    if (bestDifference <= 0.03 && gap >= 0.08) return 0.6;
+    if (replayedSameSource && sourceAgeHours >= 6 && gap >= 0.20) return 1;
+    if (replayedSameSource && sourceAgeHours >= 3 && gap >= 0.12) return 0.7;
+    if (bestDifference <= 0.02 && gap >= 0.18) return 0.8;
+    if (bestDifference <= 0.03 && gap >= 0.12) return 0.5;
     return 0;
 }
 
@@ -380,7 +472,10 @@ function plateauScoreFromContext(row, context, predictedPrice) {
         return 0;
     }
 
-    const repeatedPrice = stationRows.every(candidate => Math.abs(candidate.price - row.price) <= 0.01);
+    const repeatedPrice = stationRows.every(candidate => (
+        Math.abs(candidate.price - row.price) <= 0.01 &&
+        Math.abs(candidate.sourceUpdatedAtMs - row.sourceUpdatedAtMs) <= SOURCE_REPLAY_TOLERANCE_MS
+    ));
 
     if (!repeatedPrice) {
         return 0;
@@ -414,6 +509,39 @@ function jumpScoreFromContext(row, context, prediction, sigma) {
     return clamp01(residual / Math.max(0.20, 1.5 * sigma));
 }
 
+function evaluateSourceFreshness(row, context, prediction) {
+    const fuelState = getFuelState(context, row.fuelType);
+    const lastTrustedRow = getLatestTrustedStationRow(fuelState, row.stationId);
+    const sourceAgeHours = hoursBetween(row.observedAtMs, row.sourceUpdatedAtMs) ?? 0;
+
+    if (!lastTrustedRow) {
+        return {
+            sourceAgeHours,
+            hasFreshUpdate: false,
+            isReplay: false,
+            isBackdated: false,
+        };
+    }
+
+    const sourceDeltaMs = row.sourceUpdatedAtMs - lastTrustedRow.sourceUpdatedAtMs;
+    const hasFreshUpdate = sourceDeltaMs > SOURCE_REPLAY_TOLERANCE_MS;
+    const isReplay = Math.abs(sourceDeltaMs) <= SOURCE_REPLAY_TOLERANCE_MS;
+    const isBackdated = sourceDeltaMs < -SOURCE_REPLAY_TOLERANCE_MS;
+    const changedFromLastTrusted = Math.abs(row.price - lastTrustedRow.price) >= 0.01;
+    const gapToPrediction = Math.abs((prediction?.predictedPrice ?? row.price) - row.price);
+
+    return {
+        sourceAgeHours,
+        hasFreshUpdate,
+        isReplay,
+        isBackdated,
+        changedFromLastTrusted,
+        shouldTrustFreshUpdate: hasFreshUpdate && changedFromLastTrusted,
+        sameSourceReplay: isReplay && !changedFromLastTrusted,
+        gapToPrediction,
+    };
+}
+
 function anomalyScores(apiPrice, predictedPrice, sigma) {
     if (predictedPrice === null) {
         return {
@@ -433,19 +561,22 @@ function anomalyScores(apiPrice, predictedPrice, sigma) {
 
 function scoreApiPriceFromContext(row, context, prediction) {
     const predictedPrice = prediction.predictedPrice;
+    const freshness = evaluateSourceFreshness(row, context, prediction);
 
     if (predictedPrice === null) {
         return {
             predictedPrice: null,
-            validity: 0.5,
-            risk: 0.5,
-            decision: 'quarantine',
+            validity: freshness.shouldTrustFreshUpdate ? 1 : 0.5,
+            risk: freshness.shouldTrustFreshUpdate ? 0 : 0.5,
+            decision: freshness.shouldTrustFreshUpdate ? 'accept' : 'quarantine',
             features: {
                 low: 0,
                 abs: 0,
                 stale: 0,
                 plateau: 0,
                 jump: 0,
+                sourceAge: clamp01((freshness.sourceAgeHours || 0) / 24),
+                replay: freshness.sameSourceReplay ? 1 : 0,
                 sigma: 0.08,
             },
         };
@@ -456,24 +587,40 @@ function scoreApiPriceFromContext(row, context, prediction) {
     const stale = staleMatchScoreFromContext(row, context, predictedPrice);
     const plateau = plateauScoreFromContext(row, context, predictedPrice);
     const jump = jumpScoreFromContext(row, context, prediction, sigma);
+    const sourceAge = clamp01((freshness.sourceAgeHours || 0) / 24);
+    const replay = freshness.sameSourceReplay ? 1 : 0;
     const risk = (
-        (0.42 * basicAnomalies.low) +
-        (0.23 * stale) +
-        (0.15 * jump) +
-        (0.10 * plateau) +
-        (0.10 * basicAnomalies.abs)
+        (0.28 * basicAnomalies.low) +
+        (0.16 * stale) +
+        (0.12 * jump) +
+        (0.08 * plateau) +
+        (0.06 * basicAnomalies.abs) +
+        (0.12 * sourceAge) +
+        (0.18 * replay)
     );
-    const validity = 1 - risk;
+    const validity = freshness.shouldTrustFreshUpdate ? 1 : 1 - risk;
     let decision = 'quarantine';
 
-    if (
+    if (freshness.shouldTrustFreshUpdate) {
+        decision = 'accept';
+    } else if (freshness.isBackdated) {
+        decision = 'reject';
+    } else if (
         (basicAnomalies.low >= 1 && stale >= 0.6) ||
-        (plateau >= 1 && (predictedPrice - row.price) >= 0.25)
+        (plateau >= 1 && (predictedPrice - row.price) >= 0.25) ||
+        (freshness.sameSourceReplay && freshness.sourceAgeHours >= 6 && (predictedPrice - row.price) >= 0.18)
     ) {
         decision = 'reject';
-    } else if (validity >= 0.65) {
+    } else if (
+        freshness.sameSourceReplay &&
+        freshness.sourceAgeHours >= 3 &&
+        freshness.gapToPrediction >= 0.12 &&
+        basicAnomalies.low >= 0.2
+    ) {
+        decision = 'quarantine';
+    } else if (validity >= 0.72) {
         decision = 'accept';
-    } else if (validity < 0.40) {
+    } else if (validity < 0.48) {
         decision = 'reject';
     }
 
@@ -488,6 +635,8 @@ function scoreApiPriceFromContext(row, context, prediction) {
             stale,
             plateau,
             jump,
+            sourceAge,
+            replay,
             sigma,
         },
     };

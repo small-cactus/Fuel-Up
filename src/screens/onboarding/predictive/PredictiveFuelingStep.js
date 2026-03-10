@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -11,8 +11,11 @@ import {
     getPredictiveFuelingFallbackRoutes,
     PREDICTIVE_FUELING_SCENE,
 } from './constants';
-import usePredictiveFuelingDemo from './usePredictiveFuelingDemo';
 
+const {
+    buildPredictiveRouteMetrics,
+    buildRouteMetrics,
+} = require('./simulationMath.cjs');
 const { getPredictiveRouteDiagnostics } = require('./routeDiagnostics.cjs');
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -84,20 +87,25 @@ export default function PredictiveFuelingStep({ insets, isActive, isDark }) {
         };
     }, []);
 
-    const demoState = usePredictiveFuelingDemo({
-        isActive,
-        route,
-        sceneConfig: PREDICTIVE_FUELING_SCENE,
-    });
+    const routeMetrics = useMemo(() => {
+        if (route?.initialRoute?.coordinates?.length && route?.rerouteRoute?.coordinates?.length) {
+            return buildPredictiveRouteMetrics(route, PREDICTIVE_FUELING_SCENE);
+        }
+
+        if (!route?.coordinates?.length) {
+            return null;
+        }
+
+        return buildRouteMetrics(route, PREDICTIVE_FUELING_SCENE);
+    }, [route]);
 
     return (
         <View style={styles.stepContainer}>
             <PredictiveMapScene
-                demoState={demoState}
                 insets={insets}
                 isActive={isActive}
                 isDark={isDark}
-                routeMetrics={demoState.routeMetrics}
+                routeMetrics={routeMetrics}
                 sceneConfig={PREDICTIVE_FUELING_SCENE}
             />
 

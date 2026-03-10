@@ -215,10 +215,14 @@ function buildValidationRowFromStoredRow({ row, origin, fallbackSourceLabel }) {
     }
 
     const quoteIdentity = buildQuoteIdentity(quote);
-    const timestampMs = (
+    const observedAtMs = (
         toTimestampMs(row.created_at) ??
         toTimestampMs(row.updated_at_source) ??
         Date.now()
+    );
+    const sourceUpdatedAtMs = (
+        toTimestampMs(row.updated_at_source) ??
+        observedAtMs
     );
     const stationId = buildValidationStationId({
         stationId: row.station_id,
@@ -234,7 +238,9 @@ function buildValidationRowFromStoredRow({ row, origin, fallbackSourceLabel }) {
             stationId,
             fuelType: String(fuelTypeKey || quote.fuelType || 'regular').toLowerCase(),
             price: toPositiveNumber(price),
-            timestampMs,
+            observedAtMs,
+            sourceUpdatedAtMs,
+            timestampMs: observedAtMs,
             lat: quote.latitude,
             lon: quote.longitude,
             quoteIdentity,
@@ -250,10 +256,13 @@ function buildValidationRowFromQuote(quote) {
     }
 
     const quoteIdentity = buildQuoteIdentity(quote);
-    const timestampMs = (
-        toTimestampMs(quote.updatedAt) ??
+    const observedAtMs = (
         toTimestampMs(quote.fetchedAt) ??
         Date.now()
+    );
+    const sourceUpdatedAtMs = (
+        toTimestampMs(quote.updatedAt) ??
+        observedAtMs
     );
     const stationId = buildValidationStationId({
         stationId: quote.stationId,
@@ -269,7 +278,9 @@ function buildValidationRowFromQuote(quote) {
             stationId,
             fuelType: String(fuelTypeKey || quote.fuelType || 'regular').toLowerCase(),
             price: toPositiveNumber(price),
-            timestampMs,
+            observedAtMs,
+            sourceUpdatedAtMs,
+            timestampMs: observedAtMs,
             lat: Number(quote.latitude),
             lon: Number(quote.longitude),
             quoteIdentity,

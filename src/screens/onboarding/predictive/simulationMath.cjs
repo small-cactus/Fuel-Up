@@ -528,11 +528,6 @@ function getVisibleRouteCoordinates(routeMetrics, travelledDistanceMeters, progr
     routeMetrics.rerouteRouteMetrics &&
     progress >= destinationRevealProgress
   ) {
-    const rerouteDistanceMeters = clamp(
-      travelledDistanceMeters - routeMetrics.rerouteTriggerDistanceMeters,
-      0,
-      routeMetrics.rerouteRouteMetrics.totalDistanceMeters
-    );
     const revealDurationProgress = sceneConfig
       ? (
         (sceneConfig?.stationChipReveal?.routeRevealDurationMs || 700) /
@@ -547,29 +542,20 @@ function getVisibleRouteCoordinates(routeMetrics, travelledDistanceMeters, progr
       )
       : 1;
     const rerouteEndDistanceMeters = lerp(
-      rerouteDistanceMeters,
+      0,
       routeMetrics.rerouteRouteMetrics.totalDistanceMeters,
       revealProgress
     );
 
     return buildVisibleRouteSlice(
       routeMetrics.rerouteRouteMetrics,
-      rerouteDistanceMeters,
+      0,
       rerouteEndDistanceMeters
     );
   }
 
   if (routeMetrics.initialRouteMetrics) {
-    const initialDistanceMeters = clamp(
-      travelledDistanceMeters,
-      0,
-      routeMetrics.initialRouteMetrics.totalDistanceMeters
-    );
-    return buildVisibleRouteSlice(
-      routeMetrics.initialRouteMetrics,
-      initialDistanceMeters,
-      routeMetrics.initialRouteMetrics.totalDistanceMeters
-    );
+    return routeMetrics.initialRouteMetrics.coordinates;
   }
 
   return buildVisibleRouteSlice(
