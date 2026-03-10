@@ -5,6 +5,7 @@ const cachedTrendDataByFuelType = {};
 const lastResolvedTrendDataByFuelType = {};
 const lastTrendsScreenViewedAtMsByFuelType = {};
 const inFlightTrendDataRequestsByFuelType = {};
+let trendCacheGeneration = 0;
 const FUEL_GRADE_ALIASES = {
     regular: ['regular', 'regular_gas'],
     midgrade: ['midgrade', 'midgrade_gas'],
@@ -106,6 +107,33 @@ function buildValidatedTrendRows(rows, fuelType) {
         risk: result.risk,
         validity: result.validity,
     }));
+}
+
+function clearObjectValues(target, fuelType = null) {
+    if (fuelType) {
+        delete target[fuelType];
+        return;
+    }
+
+    Object.keys(target).forEach(key => {
+        delete target[key];
+    });
+}
+
+export function captureTrendCacheGeneration() {
+    return trendCacheGeneration;
+}
+
+export function isTrendCacheGenerationCurrent(generation) {
+    return generation === trendCacheGeneration;
+}
+
+export function clearTrendDataCache(fuelType = null) {
+    trendCacheGeneration += 1;
+    clearObjectValues(cachedTrendDataByFuelType, fuelType);
+    clearObjectValues(lastResolvedTrendDataByFuelType, fuelType);
+    clearObjectValues(lastTrendsScreenViewedAtMsByFuelType, fuelType);
+    clearObjectValues(inFlightTrendDataRequestsByFuelType, fuelType);
 }
 
 export async function fetchTrendData({ latitude, longitude, fuelType = 'regular' }) {
@@ -373,15 +401,23 @@ export async function prefetchTrendData({ latitude, longitude, fuelType = 'regul
         return inFlightTrendDataRequestsByFuelType[fuelType];
     }
 
-    const request = (async () => {
+    const requestGeneration = captureTrendCacheGeneration();
+    let request;
+
+    request = (async () => {
         try {
             const data = await fetchTrendData({ latitude, longitude, fuelType });
+            if (!isTrendCacheGenerationCurrent(requestGeneration)) {
+                return null;
+            }
             setCachedTrendData(fuelType, data);
             setLastResolvedTrendData(fuelType, data);
             setLastTrendsScreenViewedAt(fuelType, Date.now());
             return data;
         } finally {
-            delete inFlightTrendDataRequestsByFuelType[fuelType];
+            if (inFlightTrendDataRequestsByFuelType[fuelType] === request) {
+                delete inFlightTrendDataRequestsByFuelType[fuelType];
+            }
         }
     })();
 

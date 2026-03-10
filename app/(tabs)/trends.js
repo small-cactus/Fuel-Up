@@ -11,15 +11,19 @@ import * as d3Scale from 'd3-scale';
 import { SymbolView } from 'expo-symbols';
 import { useFocusEffect } from 'expo-router';
 import {
+    captureTrendCacheGeneration,
+    clearTrendDataCache,
     fetchTrendData,
     getCachedTrendData,
     getInFlightTrendDataRequest,
     getLastResolvedTrendData,
     getLastTrendsScreenViewedAt,
+    isTrendCacheGenerationCurrent,
     setCachedTrendData,
     setLastResolvedTrendData,
     setLastTrendsScreenViewedAt,
 } from '../../src/services/fuel/trends';
+import { useAppState } from '../../src/AppStateContext';
 import { usePreferences } from '../../src/PreferencesContext';
 import TopCanopy from '../../src/components/TopCanopy';
 import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
@@ -254,6 +258,7 @@ function ContainerlessAreaChart({ data, width, height, isDark, trendColor }) {
 export default function TrendsScreen() {
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
+    const { fuelResetToken } = useAppState();
     const { preferences } = usePreferences();
     const selectedFuelGrade = normalizeFuelGrade(preferences.preferredOctane);
     const selectedFuelGradeMeta = getFuelGradeMeta(selectedFuelGrade);
@@ -287,6 +292,27 @@ export default function TrendsScreen() {
     useEffect(() => {
         selectedFuelGradeRef.current = selectedFuelGrade;
     }, [selectedFuelGrade]);
+
+    useEffect(() => {
+        if (!fuelResetToken) {
+            return;
+        }
+
+        clearTrendDataCache();
+        activeFetchRef.current = {
+            fuelGrade: null,
+            promise: null,
+        };
+        setTrendData(null);
+        setLoading(false);
+        setRefreshing(false);
+        setIncomingGradientColors(null);
+        gradientFadeOpacity.setValue(1);
+        setActiveGradientColors(buildTrendBackgroundGradientColors({
+            direction: null,
+            isDark,
+        }));
+    }, [fuelResetToken, gradientFadeOpacity, isDark]);
 
     useEffect(() => {
         const nextCachedData = getCachedTrendData(selectedFuelGrade);
@@ -333,6 +359,17 @@ export default function TrendsScreen() {
                 try {
                     const data = await sharedPrefetchRequest;
 
+                    if (!data) {
+                        if (
+                            isMountedRef.current &&
+                            selectedFuelGradeRef.current === requestFuelGrade
+                        ) {
+                            setTrendData(null);
+                            setLoading(false);
+                        }
+                        return;
+                    }
+
                     if (
                         isMountedRef.current &&
                         selectedFuelGradeRef.current === requestFuelGrade
@@ -365,6 +402,7 @@ export default function TrendsScreen() {
 
         const request = (async () => {
             try {
+                const requestGeneration = captureTrendCacheGeneration();
                 let permission = await Location.getForegroundPermissionsAsync();
                 if (permission.status !== 'granted') {
                     permission = await Location.requestForegroundPermissionsAsync();
@@ -382,6 +420,10 @@ export default function TrendsScreen() {
                     longitude: lng,
                     fuelType: requestFuelGrade,
                 });
+
+                if (!isTrendCacheGenerationCurrent(requestGeneration)) {
+                    return;
+                }
 
                 setCachedTrendData(requestFuelGrade, data);
                 setLastResolvedTrendData(requestFuelGrade, data);

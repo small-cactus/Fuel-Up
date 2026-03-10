@@ -23,7 +23,7 @@ const {
     selectPreferredQuote,
 } = require('./core');
 const { BLS_SERIES_BY_FUEL, EIA_PRODUCT_BY_FUEL, FRED_SERIES_BY_FUEL, getFuelServiceConfig } = require('./config');
-const { clearCachedEntries, getCachedEntry, setCachedEntry } = require('./cacheStore');
+const { clearCachedEntries, getCachedEntry, removeCachedEntry, setCachedEntry } = require('./cacheStore');
 const {
     buildValidationState,
     normalizePrice,
@@ -35,6 +35,18 @@ const inflightRequests = new Map();
 const AREA_HISTORY_LOOKBACK_MS = 14 * 24 * 60 * 60 * 1000;
 const MAX_AREA_HISTORY_ROWS = 1500;
 const PRICE_VALIDATION_VERSION = 2;
+const FUEL_CACHE_RESET_ERROR_CODE = 'FUEL_CACHE_RESET';
+let fuelCacheGeneration = 0;
+
+function createFuelCacheResetError() {
+    const error = new Error('Fuel cache reset invalidated the in-flight request.');
+    error.code = FUEL_CACHE_RESET_ERROR_CODE;
+    return error;
+}
+
+function isFuelCacheResetError(error) {
+    return error?.code === FUEL_CACHE_RESET_ERROR_CODE;
+}
 
 function redactUrl(url) {
     return String(url || '').replace(/([?&](?:key|apikey|api_key)=)[^&]+/gi, '$1REDACTED');
@@ -1529,7 +1541,10 @@ async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMi
         return inflightRequests.get(cacheKey);
     }
 
-    const request = (async () => {
+    const requestGeneration = fuelCacheGeneration;
+    let request;
+
+    request = (async () => {
         const debugState = {
             input: {
                 fuelType: normalizedFuelType,
@@ -1698,14 +1713,25 @@ async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMi
             regionalQuotes: supplementalQuotes,
         });
 
+        if (requestGeneration !== fuelCacheGeneration) {
+            throw createFuelCacheResetError();
+        }
+
         await setCachedEntry(cacheKey, snapshot);
+
+        if (requestGeneration !== fuelCacheGeneration) {
+            await removeCachedEntry(cacheKey);
+            throw createFuelCacheResetError();
+        }
 
         return {
             debugState,
             snapshot,
         };
     })().finally(() => {
-        inflightRequests.delete(cacheKey);
+        if (inflightRequests.get(cacheKey) === request) {
+            inflightRequests.delete(cacheKey);
+        }
     });
 
     inflightRequests.set(cacheKey, request);
@@ -1714,6 +1740,7 @@ async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMi
 }
 
 async function clearFuelPriceCache() {
+    fuelCacheGeneration += 1;
     inflightRequests.clear();
     return clearCachedEntries('fuel:');
 }
@@ -1722,5 +1749,6 @@ module.exports = {
     clearFuelPriceCache,
     getFuelFailureMessage,
     getCachedFuelPriceSnapshot,
+    isFuelCacheResetError,
     refreshFuelPriceSnapshot,
 };

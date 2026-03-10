@@ -7,7 +7,7 @@ import { useAppState } from '../../src/AppStateContext';
 import { usePreferences } from '../../src/PreferencesContext';
 import { getApiStats, resetApiStats } from '../../src/lib/devCounter';
 import { scheduleTestNotification, startLiveActivity, updateLiveActivity, endLiveActivity } from '../../src/lib/notifications';
-import { refreshFuelPriceSnapshot } from '../../src/services/fuel';
+import { isFuelCacheResetError, refreshFuelPriceSnapshot } from '../../src/services/fuel';
 
 export default function DevStatsScreen() {
     const { isDark } = useTheme();
@@ -105,6 +105,10 @@ export default function DevStatsScreen() {
                     : `No station quote returned (${coords.source}).${persistLine}${persistErrorLine}`
             );
         } catch (error) {
+            if (isFuelCacheResetError(error)) {
+                return;
+            }
+
             if (error?.debugState) {
                 setFuelDebugState(error.debugState);
             }

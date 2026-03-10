@@ -14,7 +14,12 @@ import FuelSummaryCard from '../../src/components/FuelSummaryCard';
 import ClusterDebugCard from '../../src/components/ClusterDebugCard';
 import TopCanopy from '../../src/components/TopCanopy';
 import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
-import { getCachedFuelPriceSnapshot, getFuelFailureMessage, refreshFuelPriceSnapshot } from '../../src/services/fuel';
+import {
+    getCachedFuelPriceSnapshot,
+    getFuelFailureMessage,
+    isFuelCacheResetError,
+    refreshFuelPriceSnapshot,
+} from '../../src/services/fuel';
 import { prefetchTrendData } from '../../src/services/fuel/trends';
 import { useTheme } from '../../src/ThemeContext';
 import { usePreferences } from '../../src/PreferencesContext';
@@ -1628,6 +1633,10 @@ export default function HomeScreen() {
                 fuelType: selectedFuelGrade,
             });
         } catch (error) {
+            if (isFuelCacheResetError(error)) {
+                return;
+            }
+
             if (isMountedRef.current) {
                 const nextDebugState = error?.debugState
                     ? {

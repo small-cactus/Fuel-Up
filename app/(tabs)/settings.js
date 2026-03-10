@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppState } from '../../src/AppStateContext';
 import { usePreferences } from '../../src/PreferencesContext';
 import { clearFuelPriceCache } from '../../src/services/fuel';
+import { clearTrendDataCache } from '../../src/services/fuel/trends';
 import { useTheme } from '../../src/ThemeContext';
 import TopCanopy from '../../src/components/TopCanopy';
 import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
@@ -240,6 +241,7 @@ export default function SettingsScreen() {
     const handleFuelReset = async () => {
         try {
             await clearFuelPriceCache();
+            clearTrendDataCache();
             setFuelDebugState(null);
             requestFuelReset();
             setResetNotice('Fuel cache has been cleared.');

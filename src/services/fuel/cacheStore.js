@@ -53,6 +53,18 @@ async function setCachedEntry(key, value) {
     return value;
 }
 
+async function removeCachedEntry(key) {
+    memoryCache.delete(key);
+
+    try {
+        await AsyncStorage.removeItem(key);
+    } catch (error) {
+        return false;
+    }
+
+    return true;
+}
+
 async function clearCachedEntries(prefix = 'fuel:') {
     memoryCache.clear();
 
@@ -73,5 +85,6 @@ async function clearCachedEntries(prefix = 'fuel:') {
 module.exports = {
     clearCachedEntries,
     getCachedEntry,
+    removeCachedEntry,
     setCachedEntry,
 };
