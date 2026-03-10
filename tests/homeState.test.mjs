@@ -7,6 +7,7 @@ import {
     buildVisibleSuppressedStationIds,
     filterStationQuotesForHome,
     hasHomeFilterSignatureChanged,
+    shouldRenderStationMarker,
     shouldShowActiveStationDecoration,
     shouldAutoFitHomeMap,
 } from '../src/lib/homeState.js';
@@ -121,6 +122,26 @@ test('shouldShowActiveStationDecoration only decorates visible non-best stations
             originalIndex: 2,
         },
         suppressedStationIds: new Set(['other-station']),
+    }), true);
+});
+
+test('shouldRenderStationMarker removes suppressed markers after the initial suppression window closes', () => {
+    assert.equal(shouldRenderStationMarker({
+        stationId: 'station-a',
+        suppressedStationIds: new Set(['station-a']),
+        hasClosedInitialSuppressionWindow: false,
+    }), true);
+
+    assert.equal(shouldRenderStationMarker({
+        stationId: 'station-a',
+        suppressedStationIds: new Set(['station-a']),
+        hasClosedInitialSuppressionWindow: true,
+    }), false);
+
+    assert.equal(shouldRenderStationMarker({
+        stationId: 'station-b',
+        suppressedStationIds: new Set(['station-a']),
+        hasClosedInitialSuppressionWindow: true,
     }), true);
 });
 

@@ -43,6 +43,7 @@ import {
     buildVisibleSuppressedStationIds,
     filterStationQuotesForHome,
     hasHomeFilterSignatureChanged,
+    shouldRenderStationMarker,
     shouldShowActiveStationDecoration,
     shouldAutoFitHomeMap,
 } from '../../src/lib/homeState';
@@ -118,6 +119,7 @@ const STATIONS_FIT_BOTTOM_CONTENT_PADDING = 140;
 const STATIONS_FIT_SIDE_EXTRA_PADDING = 12;
 const STATIONS_FIT_SETTLE_PASS_DELAY_MS = 260;
 const STATIONS_FIT_UPWARD_BIAS_FACTOR = 0.03;
+const INITIAL_SUPPRESSION_RENDER_WINDOW_MS = 1200;
 const INITIAL_STATIONS_FIT_MAX_ATTEMPTS = 4;
 const INITIAL_STATIONS_FIT_RETRY_DELAY_MS = 120;
 const INITIAL_SMOOTH_LAUNCH_TRANSITION_MAX_DISTANCE_METERS = 6000;
@@ -1247,6 +1249,7 @@ export default function HomeScreen() {
     const [mapRenderRegion, setMapRenderRegion] = useState(DEFAULT_REGION);
     const [userLocationBubble, setUserLocationBubble] = useState(null);
     const [isMapMoving, setIsMapMoving] = useState(false);
+    const [hasClosedInitialSuppressionWindow, setHasClosedInitialSuppressionWindow] = useState(false);
     const [isLaunchVisualReady, setIsLaunchVisualReady] = useState(false);
     const [isLaunchCriticalFitPending, setIsLaunchCriticalFitPending] = useState(false);
     const [homeRefitRequestVersion, setHomeRefitRequestVersion] = useState(0);
@@ -1308,6 +1311,20 @@ export default function HomeScreen() {
     useEffect(() => {
         isFocusedRef.current = isFocused;
     }, [isFocused]);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (!isMountedRef.current) {
+                return;
+            }
+
+            setHasClosedInitialSuppressionWindow(true);
+        }, INITIAL_SUPPRESSION_RENDER_WINDOW_MS);
+
+        return () => {
+            clearTimeout(timeoutId);
+        };
+    }, []);
 
     useEffect(() => {
         isLaunchVisualReadyRef.current = isLaunchVisualReady;
@@ -3426,11 +3443,21 @@ export default function HomeScreen() {
                                 <>
                                     {renderClusterEntries.map(entry => {
                                         const quote = entry.cluster.quotes[0];
+                                        const isSuppressed = visibleSuppressedStationIds.has(String(entry.primaryStationId));
+
+                                        if (!shouldRenderStationMarker({
+                                            stationId: entry.primaryStationId,
+                                            suppressedStationIds: visibleSuppressedStationIds,
+                                            hasClosedInitialSuppressionWindow,
+                                        })) {
+                                            return null;
+                                        }
+
                                         return (
                                             <StationMarker
                                                 key={entry.key}
                                                 quote={quote}
-                                                isSuppressed={visibleSuppressedStationIds.has(String(entry.primaryStationId))}
+                                                isSuppressed={isSuppressed}
                                                 isBest={quote.originalIndex === 0}
                                                 isDark={isDark}
                                                 themeColors={themeColors}
