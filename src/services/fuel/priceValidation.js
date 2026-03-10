@@ -5,6 +5,7 @@ const MARKET_TIERS = [
 ];
 const MAX_RAW_STATION_HISTORY = 6;
 const SOURCE_REPLAY_TOLERANCE_MS = 5 * 60 * 1000;
+const ADJUSTED_PRICE_SAFETY_BUFFER = 0.10;
 
 function toFiniteNumber(value) {
     if (value === null || value === undefined || value === '') {
@@ -23,6 +24,16 @@ function normalizePrice(value) {
     }
 
     return Number(numericValue.toFixed(3));
+}
+
+function applyAdjustedPriceSafetyBuffer(price) {
+    const normalizedPrice = normalizePrice(price);
+
+    if (normalizedPrice === null) {
+        return null;
+    }
+
+    return normalizePrice(normalizedPrice + ADJUSTED_PRICE_SAFETY_BUFFER);
 }
 
 function getObservedAtMs(row) {
@@ -348,11 +359,18 @@ function predictStationPriceFromContext(row, context) {
     const carryResult = estimateCarryForwardFromContext(row, context, marketEstimate.price);
     const sourceAgeHours = hoursBetween(row.observedAtMs, row.sourceUpdatedAtMs) ?? 0;
     const marketGap = marketEstimate.price === null ? 0 : Math.abs(marketEstimate.price - row.price);
-    const offsetDamping = (
-        sourceAgeHours <= 6
-            ? 1
-            : clamp01(1 - ((sourceAgeHours - 6) / 30))
-    );
+    const rawStationOffset = offsetResult.offset ?? 0;
+    const offsetDamping = rawStationOffset >= 0
+        ? (
+            sourceAgeHours <= 12
+                ? 1
+                : Math.max(0.35, clamp01(1 - ((sourceAgeHours - 12) / 60)))
+        )
+        : (
+            sourceAgeHours <= 6
+                ? 1
+                : clamp01(1 - ((sourceAgeHours - 6) / 30))
+        );
     const effectiveStationOffset = normalizePrice((offsetResult.offset ?? 0) * offsetDamping) ?? 0;
     const directPrice = marketEstimate.price === null
         ? null
@@ -692,13 +710,14 @@ function evaluateRowAgainstContext(row, context) {
         !(isColdStart && resolvedDecision === 'quarantine')
     );
     const finalDisplayedPrice = shouldUsePrediction
-        ? score.predictedPrice
+        ? applyAdjustedPriceSafetyBuffer(score.predictedPrice)
         : normalizedRow.price;
 
     return {
         finalDisplayedPrice: normalizePrice(finalDisplayedPrice),
         usedPrediction: shouldUsePrediction,
         predictedPrice: normalizePrice(score.predictedPrice),
+        adjustedPriceSafetyBuffer: shouldUsePrediction ? ADJUSTED_PRICE_SAFETY_BUFFER : 0,
         apiPrice: normalizePrice(normalizedRow.price),
         decision: resolvedDecision,
         validity: score.validity,
@@ -866,5 +885,6 @@ module.exports = {
     processValidationRow,
     processValidationRows,
     scoreApiPrice,
+    ADJUSTED_PRICE_SAFETY_BUFFER,
     validateAndChoosePrice,
 };

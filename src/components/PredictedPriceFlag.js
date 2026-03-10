@@ -17,7 +17,7 @@ export default function PredictedPriceFlag({ validation, isDark, themeColors }) 
 
     const label = validation.decision === 'reject' ? 'Adjusted' : 'Estimated';
     const backgroundColor = isDark ? 'rgba(255, 184, 0, 0.24)' : 'rgba(255, 184, 0, 0.18)';
-    const predictedPrice = formatPrice(validation.predictedPrice ?? validation.finalPrice);
+    const predictedPrice = formatPrice(validation.finalPrice ?? validation.predictedPrice);
     const apiPrice = formatPrice(validation.apiPrice);
 
     const handlePress = () => {

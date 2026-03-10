@@ -41,6 +41,12 @@ function resolvePriceFromAllPrices(allPrices, fuelGrade) {
     return null;
 }
 
+function resolveValidatedPriceForFuelGrade(quote, fuelGrade) {
+    const validation = quote?.validationByFuelType?.[fuelGrade] || quote?.validation || null;
+    const finalPrice = toPositiveNumber(validation?.finalPrice);
+    return finalPrice !== null ? finalPrice : null;
+}
+
 export function resolveQuotePriceForFuelGrade(
     quote,
     fuelGrade,
@@ -51,6 +57,11 @@ export function resolveQuotePriceForFuelGrade(
     }
 
     const normalizedFuelGrade = normalizeFuelGrade(fuelGrade);
+    const validatedPrice = resolveValidatedPriceForFuelGrade(quote, normalizedFuelGrade);
+    if (validatedPrice !== null) {
+        return validatedPrice;
+    }
+
     const allPricesValue = resolvePriceFromAllPrices(quote.allPrices, normalizedFuelGrade);
     if (allPricesValue !== null) {
         return allPricesValue;

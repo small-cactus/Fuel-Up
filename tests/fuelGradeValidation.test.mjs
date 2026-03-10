@@ -65,3 +65,27 @@ test('rankQuotesForFuelGrade sorts leaderboard rows by the corrected selected-gr
     assert.equal(ranked[1].stationId, 'A');
     assert.equal(ranked[1].price, 3.89);
 });
+
+test('applyFuelGradeToQuote prefers the validated final price over stale allPrices data', () => {
+    const quote = {
+        stationId: 'station-2',
+        fuelType: 'premium',
+        price: 4.41,
+        allPrices: {
+            regular: 3.04,
+            premium: 4.41,
+        },
+        validationByFuelType: {
+            regular: {
+                fuelType: 'regular',
+                finalPrice: 3.40,
+                usedPrediction: true,
+            },
+        },
+    };
+
+    const regularQuote = applyFuelGradeToQuote(quote, 'regular');
+
+    assert.equal(regularQuote.price, 3.40);
+    assert.equal(regularQuote.validation?.finalPrice, 3.40);
+});

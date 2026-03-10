@@ -28,11 +28,13 @@ const {
     buildValidationState,
     normalizePrice,
     processValidationRows,
+    validateAndChoosePrice,
 } = require('./priceValidation');
 
 const inflightRequests = new Map();
 const AREA_HISTORY_LOOKBACK_MS = 14 * 24 * 60 * 60 * 1000;
 const MAX_AREA_HISTORY_ROWS = 1500;
+const PRICE_VALIDATION_VERSION = 2;
 
 function redactUrl(url) {
     return String(url || '').replace(/([?&](?:key|apikey|api_key)=)[^&]+/gi, '$1REDACTED');
@@ -303,6 +305,46 @@ function applyValidatedPriceToAllPrices(allPrices, fuelType, finalPrice) {
     return nextAllPrices;
 }
 
+function getQuoteValidationFuelTypes(quote) {
+    const allPrices = quote?.allPrices;
+    const grades = allPrices && typeof allPrices === 'object'
+        ? Object.keys(allPrices).filter(key => key !== '_payment')
+        : [];
+
+    if (grades.length > 0) {
+        return grades;
+    }
+
+    return [String(quote?.fuelType || 'regular').toLowerCase()];
+}
+
+function quoteHasCurrentValidation(quote) {
+    if (!quote || !quote.validationByFuelType || typeof quote.validationByFuelType !== 'object') {
+        return false;
+    }
+
+    return getQuoteValidationFuelTypes(quote).every(fuelType => (
+        quote.validationByFuelType?.[fuelType]?.validationVersion === PRICE_VALIDATION_VERSION
+    ));
+}
+
+function snapshotHasCurrentValidation(snapshot) {
+    if (!snapshot) {
+        return false;
+    }
+
+    const stationQuotes = [
+        snapshot.quote,
+        ...(Array.isArray(snapshot.topStations) ? snapshot.topStations : []),
+    ].filter(quote => quote?.providerTier === 'station' && !quote?.isEstimated);
+
+    if (stationQuotes.length === 0) {
+        return true;
+    }
+
+    return stationQuotes.every(quoteHasCurrentValidation);
+}
+
 function applyGradeValidationToQuote(quote, fuelType, decision) {
     if (!quote || !decision || !fuelType) {
         return quote;
@@ -318,6 +360,7 @@ function applyGradeValidationToQuote(quote, fuelType, decision) {
             predictedPrice: normalizePrice(decision.predictedPrice),
             finalPrice: finalDisplayedPrice,
             usedPrediction: Boolean(decision.usedPrediction),
+            adjustedPriceSafetyBuffer: Number(decision.adjustedPriceSafetyBuffer || 0),
             decision: decision.decision,
             validity: Number(decision.validity || 0),
             risk: Number(decision.risk || 0),
@@ -325,6 +368,7 @@ function applyGradeValidationToQuote(quote, fuelType, decision) {
             prediction: decision.prediction || null,
             features: decision.features || null,
             computedAt: new Date().toISOString(),
+            validationVersion: PRICE_VALIDATION_VERSION,
             fuelType: normalizedFuelType,
         },
     };
@@ -352,6 +396,7 @@ function buildValidatedLatestQuotesFromRows({ rows, origin, fallbackSourceLabel 
     const sortedOutputs = [...validationState.outputs].sort((left, right) => (
         right.row.timestampMs - left.row.timestampMs
     ));
+    const displayObservedAtMs = Date.now();
 
     for (const validationRow of validationRows) {
         const identity = validationRow.quoteIdentity;
@@ -381,7 +426,17 @@ function buildValidatedLatestQuotesFromRows({ rows, origin, fallbackSourceLabel 
             continue;
         }
 
-        latestByIdentity.set(identity, applyGradeValidationToQuote(quote, output.row.fuelType, output.result));
+        const refreshedDecision = validateAndChoosePrice(
+            {
+                ...output.row,
+                observedAtMs: displayObservedAtMs,
+                timestampMs: displayObservedAtMs,
+            },
+            validationState.context,
+            validationState.rawApiHistory
+        );
+
+        latestByIdentity.set(identity, applyGradeValidationToQuote(quote, output.row.fuelType, refreshedDecision));
     }
 
     return Array.from(latestByIdentity.values());
@@ -416,7 +471,7 @@ function applyValidationToStationQuotes({ stationQuotes, historyRows, origin }) 
     }
 
     return stationQuotes.map(quote => {
-        if (quote?.validation?.computedAt) {
+        if (quoteHasCurrentValidation(quote)) {
             return quote;
         }
 
@@ -1446,6 +1501,10 @@ async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fu
         return null;
     }
 
+    if (!snapshotHasCurrentValidation(cacheEntry)) {
+        return null;
+    }
+
     return {
         ...cacheEntry,
         isFresh: isCacheEntryFresh(
@@ -1555,7 +1614,7 @@ async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMi
         const stationQuotesNeedingValidation = allQuotes.filter(quote => (
             quote.providerTier === 'station' &&
             !quote.isEstimated &&
-            !quote?.validation?.computedAt
+            !quoteHasCurrentValidation(quote)
         ));
 
         if (stationQuotesNeedingValidation.length > 0) {
