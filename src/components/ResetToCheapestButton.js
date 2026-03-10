@@ -29,7 +29,7 @@ function ResetToCheapestButton({
                 tintColor={glassTintColor ?? (isDark ? '#101010ff' : '#FFFFFF')}
                 glassEffectStyle="clear"
             >
-                <Ionicons color={themeColors.text} name="arrow-undo" size={15} />
+                <Ionicons color={themeColors.text} name="arrow-undo" size={14} />
                 <Text style={[styles.label, { color: themeColors.text }]}>Reset to Cheapest</Text>
             </GlassView>
         </Pressable>
@@ -38,25 +38,25 @@ function ResetToCheapestButton({
 
 const styles = StyleSheet.create({
     pressable: {
-        borderRadius: 17,
+        borderRadius: 15,
     },
     pressablePressed: {
         opacity: 0.92,
     },
     button: {
-        minHeight: 34,
-        paddingHorizontal: 14,
-        borderRadius: 17,
+        minHeight: 30,
+        paddingHorizontal: 13,
+        borderRadius: 15,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
+        gap: 7,
     },
     buttonDisabled: {
         opacity: 0.7,
     },
     label: {
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: '700',
     },
 });

@@ -25,6 +25,7 @@ import { prefetchTrendData } from '../../src/services/fuel/trends';
 import { useTheme } from '../../src/ThemeContext';
 import { usePreferences } from '../../src/PreferencesContext';
 import BottomCanopy from '../../src/components/BottomCanopy';
+import ActiveStationOverlay from '../../src/components/cluster/ActiveStationOverlay';
 import ClusterMarkerOverlay from '../../src/components/cluster/ClusterMarkerOverlay';
 import StationMarker from '../../src/components/cluster/StationMarker';
 import { consumeFreshLaunchMapBootstrap } from '../../src/lib/appLaunchState';
@@ -82,6 +83,7 @@ const DEFAULT_REGION = {
     longitudeDelta: 0.05,
 };
 const TAB_BAR_CLEARANCE = 34;
+const RESET_TO_CHEAPEST_GAP_OFFSET = 7;
 const CARD_GAP = 0;
 const SIDE_MARGIN = 16;
 const TOP_CANOPY_HEIGHT = 72;
@@ -1245,6 +1247,7 @@ export default function HomeScreen() {
     const [mapRenderRegion, setMapRenderRegion] = useState(DEFAULT_REGION);
     const [userLocationBubble, setUserLocationBubble] = useState(null);
     const [isMapMoving, setIsMapMoving] = useState(false);
+    const [isResetToCheapestPending, setIsResetToCheapestPending] = useState(false);
     const [isLaunchVisualReady, setIsLaunchVisualReady] = useState(false);
     const [isLaunchCriticalFitPending, setIsLaunchCriticalFitPending] = useState(false);
     const [shouldRevealActiveSelection, setShouldRevealActiveSelection] = useState(false);
@@ -2398,6 +2401,7 @@ export default function HomeScreen() {
             return;
         }
 
+        setIsResetToCheapestPending(true);
         lastSettledCardIndexRef.current = 0;
         isUserScrollingRef.current = false;
         setShouldRevealActiveSelection(false);
@@ -2706,6 +2710,7 @@ export default function HomeScreen() {
         const nextIndex = resolveCardIndexFromOffset(offsetX);
 
         isUserScrollingRef.current = false;
+        setIsResetToCheapestPending(false);
 
         if (nextIndex === null) {
             return;
@@ -3336,9 +3341,21 @@ export default function HomeScreen() {
             cluster,
         };
     });
+    const activeStationQuote = stationQuotes[activeIndex] || null;
+    const shouldShowActiveStationOverlay = (
+        !ENABLE_CLUSTER_MERGE_TRANSITIONS &&
+        isMapLoaded &&
+        !isMapMoving &&
+        Boolean(activeStationQuote) &&
+        activeStationQuote?.originalIndex !== 0 &&
+        !visibleSuppressedStationIds.has(String(activeStationQuote?.stationId))
+    );
 
     const hasRenderableClusters = renderClusterEntries.length > 0;
-    const showResetToCheapestButton = stationQuotes.length > 1 && activeIndex !== 0;
+    const showResetToCheapestButton = (
+        stationQuotes.length > 1 &&
+        (activeIndex !== 0 || isResetToCheapestPending)
+    );
 
     return (
         <View style={[styles.container, { backgroundColor: themeColors.background }]}>
@@ -3424,7 +3441,6 @@ export default function HomeScreen() {
                                                 key={entry.key}
                                                 quote={quote}
                                                 isSuppressed={visibleSuppressedStationIds.has(String(entry.primaryStationId))}
-                                                isActive={quote.originalIndex === activeIndex}
                                                 isBest={quote.originalIndex === 0}
                                                 isDark={isDark}
                                                 themeColors={themeColors}
@@ -3480,6 +3496,18 @@ export default function HomeScreen() {
                         ))}
                     </LiquidGlassContainerView>
                 </View>
+            ) : null}
+
+            {shouldShowActiveStationOverlay ? (
+                <ActiveStationOverlay
+                    quote={activeStationQuote}
+                    isBest={activeStationQuote?.originalIndex === 0}
+                    isDark={isDark}
+                    mapRegion={mapRenderRegion}
+                    screenWidth={width}
+                    screenHeight={height}
+                    themeColors={themeColors}
+                />
             ) : null}
 
             <TopCanopy edgeColor={canopyEdgeLine} height={topCanopyHeight} isDark={isDark} topInset={insets.top} />
@@ -3654,7 +3682,8 @@ export default function HomeScreen() {
                     style={[
                         styles.resetToCheapestShell,
                         {
-                            bottom: insets.bottom + 10,
+                            bottom: insets.bottom + RESET_TO_CHEAPEST_GAP_OFFSET,
+                            height: TAB_BAR_CLEARANCE,
                             paddingLeft: horizontalPadding.left,
                             paddingRight: horizontalPadding.right,
                         },
@@ -3696,6 +3725,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         alignItems: 'center',
+        justifyContent: 'center',
         zIndex: 2,
     },
     clusterMapParentContainer: {
