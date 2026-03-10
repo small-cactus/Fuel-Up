@@ -170,6 +170,31 @@ export function buildHomeQuerySignature({
     ].join('|');
 }
 
+export function buildHomeFilterSignature({
+    radiusMiles,
+    fuelGrade,
+    preferredProvider,
+    minimumRating = 0,
+}) {
+    return [
+        String(fuelGrade || 'regular').toLowerCase(),
+        Math.max(1, Math.round(toPositiveNumber(radiusMiles) || 10)),
+        String(preferredProvider || 'gasbuddy').toLowerCase(),
+        Math.max(0, toFiniteNumber(minimumRating) ?? 0).toFixed(1),
+    ].join('|');
+}
+
+export function hasHomeFilterSignatureChanged({
+    previousFilterSignature,
+    nextFilterSignature,
+}) {
+    if (!previousFilterSignature || !nextFilterSignature) {
+        return false;
+    }
+
+    return previousFilterSignature !== nextFilterSignature;
+}
+
 export function buildVisibleSuppressedStationIds({
     suppressedStationIds,
     activeStationId = null,
@@ -187,6 +212,41 @@ export function buildVisibleSuppressedStationIds({
 export function shouldAutoFitHomeMap({
     isFocused,
     isNewData,
+    pendingRefitRequest = null,
 }) {
-    return Boolean(isFocused && isNewData);
+    if (!isFocused || !pendingRefitRequest?.reason) {
+        return null;
+    }
+
+    if (pendingRefitRequest.reason === 'filter-change') {
+        return {
+            reason: 'filter-change',
+            animated: true,
+            forceAnimation: Boolean(pendingRefitRequest.forceAnimation),
+            runSettlePass: false,
+            requiresNewData: false,
+        };
+    }
+
+    if (!isNewData) {
+        return null;
+    }
+
+    if (pendingRefitRequest.reason === 'initial-load') {
+        return {
+            reason: 'initial-load',
+            animated: Boolean(pendingRefitRequest.animated),
+            forceAnimation: false,
+            runSettlePass: true,
+            requiresNewData: true,
+        };
+    }
+
+    return {
+        reason: pendingRefitRequest.reason || 'location-refresh',
+        animated: pendingRefitRequest.animated !== false,
+        forceAnimation: Boolean(pendingRefitRequest.forceAnimation),
+        runSettlePass: false,
+        requiresNewData: true,
+    };
 }

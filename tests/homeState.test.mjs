@@ -2,9 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+    buildHomeFilterSignature,
     buildHomeQuerySignature,
     buildVisibleSuppressedStationIds,
     filterStationQuotesForHome,
+    hasHomeFilterSignatureChanged,
     shouldAutoFitHomeMap,
 } from '../src/lib/homeState.js';
 import { rankQuotesForFuelGrade } from '../src/lib/fuelGrade.js';
@@ -103,15 +105,68 @@ test('buildVisibleSuppressedStationIds preserves passive suppression and only re
     assert.deepEqual(Array.from(explicitSelectionSuppression).sort(), ['station-b']);
 });
 
-test('home auto-fit only runs for new data, not for passive focus restoration', () => {
+test('home auto-fit skips passive focus restoration when there is no pending refit request', () => {
     assert.equal(shouldAutoFitHomeMap({
         isFocused: true,
         isNewData: false,
-    }), false);
-    assert.equal(shouldAutoFitHomeMap({
+        pendingRefitRequest: null,
+    }), null);
+    assert.deepEqual(shouldAutoFitHomeMap({
         isFocused: true,
         isNewData: true,
-    }), true);
+        pendingRefitRequest: {
+            reason: 'location-refresh',
+            animated: true,
+        },
+    }), {
+        reason: 'location-refresh',
+        animated: true,
+        forceAnimation: false,
+        runSettlePass: false,
+        requiresNewData: true,
+    });
+});
+
+test('home auto-fit returns a forced animated intent for off-screen filter changes even without new data', () => {
+    assert.deepEqual(shouldAutoFitHomeMap({
+        isFocused: true,
+        isNewData: false,
+        pendingRefitRequest: {
+            reason: 'filter-change',
+            forceAnimation: true,
+        },
+    }), {
+        reason: 'filter-change',
+        animated: true,
+        forceAnimation: true,
+        runSettlePass: false,
+        requiresNewData: false,
+    });
+});
+
+test('home auto-fit keeps initial-load behavior on fresh data only', () => {
+    assert.equal(shouldAutoFitHomeMap({
+        isFocused: true,
+        isNewData: false,
+        pendingRefitRequest: {
+            reason: 'initial-load',
+            animated: false,
+        },
+    }), null);
+    assert.deepEqual(shouldAutoFitHomeMap({
+        isFocused: true,
+        isNewData: true,
+        pendingRefitRequest: {
+            reason: 'initial-load',
+            animated: false,
+        },
+    }), {
+        reason: 'initial-load',
+        animated: false,
+        forceAnimation: false,
+        runSettlePass: true,
+        requiresNewData: true,
+    });
 });
 
 test('buildHomeQuerySignature changes when the selected fuel grade or radius changes', () => {
@@ -136,4 +191,55 @@ test('buildHomeQuerySignature changes when the selected fuel grade or radius cha
 
     assert.notEqual(regularSignature, premiumSignature);
     assert.notEqual(premiumSignature, shortRadiusSignature);
+});
+
+test('buildHomeFilterSignature changes for every map-affecting filter', () => {
+    const baseSignature = buildHomeFilterSignature({
+        radiusMiles: 10,
+        fuelGrade: 'regular',
+        preferredProvider: 'gasbuddy',
+        minimumRating: 0,
+    });
+    const ratingSignature = buildHomeFilterSignature({
+        radiusMiles: 10,
+        fuelGrade: 'regular',
+        preferredProvider: 'gasbuddy',
+        minimumRating: 4,
+    });
+    const providerSignature = buildHomeFilterSignature({
+        radiusMiles: 10,
+        fuelGrade: 'regular',
+        preferredProvider: 'all',
+        minimumRating: 0,
+    });
+
+    assert.notEqual(baseSignature, ratingSignature);
+    assert.notEqual(baseSignature, providerSignature);
+});
+
+test('hasHomeFilterSignatureChanged only flags a real off-screen filter change once a baseline exists', () => {
+    const nextFilterSignature = buildHomeFilterSignature({
+        radiusMiles: 15,
+        fuelGrade: 'premium',
+        preferredProvider: 'all',
+        minimumRating: 4,
+    });
+
+    assert.equal(hasHomeFilterSignatureChanged({
+        previousFilterSignature: '',
+        nextFilterSignature,
+    }), false);
+    assert.equal(hasHomeFilterSignatureChanged({
+        previousFilterSignature: nextFilterSignature,
+        nextFilterSignature,
+    }), false);
+    assert.equal(hasHomeFilterSignatureChanged({
+        previousFilterSignature: buildHomeFilterSignature({
+            radiusMiles: 10,
+            fuelGrade: 'regular',
+            preferredProvider: 'gasbuddy',
+            minimumRating: 0,
+        }),
+        nextFilterSignature,
+    }), true);
 });
