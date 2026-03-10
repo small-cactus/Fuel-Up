@@ -43,7 +43,7 @@ import {
     buildVisibleSuppressedStationIds,
     filterStationQuotesForHome,
     hasHomeFilterSignatureChanged,
-    shouldRenderStationMarker,
+    shouldInitializeInitialSuppressionDelay,
     shouldShowActiveStationDecoration,
     shouldAutoFitHomeMap,
 } from '../../src/lib/homeState';
@@ -108,6 +108,7 @@ const CLUSTER_DEBUG_PROBE_REPORT_CACHE_RELATIVE_PATH = `Library/Caches/${CLUSTER
 const USER_LOCATION_BUBBLE_SIZE = 14;
 const USER_LOCATION_OVERLAP_PILL_WIDTH = CLUSTER_PRIMARY_PILL_WIDTH - 28;
 const USER_LOCATION_OVERLAP_PILL_HEIGHT = CLUSTER_PILL_HEIGHT - 14;
+const SUPPRESSION_REVEAL_PADDING = 10;
 const STATION_FOCUS_MIN_LATITUDE_DELTA = 0.002;
 const STATION_FOCUS_MIN_LONGITUDE_DELTA = 0.002;
 const STATION_FOCUS_ZOOM_STEP_MULTIPLIER = 0.82;
@@ -119,7 +120,7 @@ const STATIONS_FIT_BOTTOM_CONTENT_PADDING = 140;
 const STATIONS_FIT_SIDE_EXTRA_PADDING = 12;
 const STATIONS_FIT_SETTLE_PASS_DELAY_MS = 260;
 const STATIONS_FIT_UPWARD_BIAS_FACTOR = 0.03;
-const INITIAL_SUPPRESSION_RENDER_WINDOW_MS = 1200;
+const INITIAL_HOME_SUPPRESSION_DELAY_MS = 900;
 const INITIAL_STATIONS_FIT_MAX_ATTEMPTS = 4;
 const INITIAL_STATIONS_FIT_RETRY_DELAY_MS = 120;
 const INITIAL_SMOOTH_LAUNCH_TRANSITION_MAX_DISTANCE_METERS = 6000;
@@ -692,7 +693,45 @@ function doRectsTouch(left, right) {
     );
 }
 
-function buildSuppressedOverlapStationIds(stationQuotes, mapRegion, screenWidth, screenHeight, userLocation = null) {
+function expandRect(rect, padding) {
+    if (!rect || !Number.isFinite(padding) || padding <= 0) {
+        return rect;
+    }
+
+    return {
+        left: rect.left - padding,
+        right: rect.right + padding,
+        top: rect.top - padding,
+        bottom: rect.bottom + padding,
+    };
+}
+
+function areStationIdSetsEqual(left, right) {
+    if (left === right) {
+        return true;
+    }
+
+    if (!left || !right || left.size !== right.size) {
+        return false;
+    }
+
+    for (const value of left) {
+        if (!right.has(value)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function buildSuppressedOverlapStationIds(
+    stationQuotes,
+    mapRegion,
+    screenWidth,
+    screenHeight,
+    userLocation = null,
+    previousSuppressedStationIds = null
+) {
     if (!Array.isArray(stationQuotes) || stationQuotes.length <= 1 || !mapRegion) {
         return new Set();
     }
@@ -710,6 +749,9 @@ function buildSuppressedOverlapStationIds(stationQuotes, mapRegion, screenWidth,
 
     const visibleRects = [];
     const suppressedIds = new Set();
+    const previousSuppressedIds = previousSuppressedStationIds instanceof Set
+        ? previousSuppressedStationIds
+        : new Set(previousSuppressedStationIds || []);
     const hasValidUserLocation = (
         typeof userLocation?.latitude === 'number' &&
         typeof userLocation?.longitude === 'number'
@@ -740,10 +782,20 @@ function buildSuppressedOverlapStationIds(stationQuotes, mapRegion, screenWidth,
         };
 
         const overlapsVisible = visibleRects.some(visibleRect => doRectsTouch(rect, visibleRect));
+        const shouldKeepSuppressedForRevealSpacing = previousSuppressedIds.has(String(quote.stationId)) &&
+            visibleRects.some(visibleRect => doRectsTouch(rect, expandRect(visibleRect, SUPPRESSION_REVEAL_PADDING)));
         const overlapsUserLocationBubble = userLocationRect
             ? doRectsTouch(userOverlapRect, userLocationRect)
             : false;
-        if (overlapsVisible || overlapsUserLocationBubble) {
+        const shouldKeepSuppressedNearUserLocation = previousSuppressedIds.has(String(quote.stationId)) && userLocationRect
+            ? doRectsTouch(userOverlapRect, expandRect(userLocationRect, SUPPRESSION_REVEAL_PADDING))
+            : false;
+        if (
+            overlapsVisible ||
+            overlapsUserLocationBubble ||
+            shouldKeepSuppressedForRevealSpacing ||
+            shouldKeepSuppressedNearUserLocation
+        ) {
             suppressedIds.add(String(quote.stationId));
             return;
         }
@@ -1190,9 +1242,14 @@ export default function HomeScreen() {
     const shouldUseLaunchLocationBootstrapRef = useRef(consumeFreshLaunchMapBootstrap());
     const launchCachedRegionRef = useRef(null);
     const pendingInstantMapRegionRef = useRef(null);
+    const pendingSuppressionRegionRef = useRef(null);
+    const suppressionRegionAnimationFrameRef = useRef(null);
     const mapIdleWaitersRef = useRef([]);
     const mapIdleSettleTimeoutRef = useRef(null);
     const mapRegionRef = useRef(DEFAULT_REGION);
+    const suppressionRegionRef = useRef(DEFAULT_REGION);
+    const previousSuppressedStationIdsRef = useRef(new Set());
+    const previousSuppressedStationSignatureRef = useRef('');
     const lastClusterDebugSignatureRef = useRef('');
     const clusterDebugSamplesRef = useRef([]);
     const clusterDebugTransitionEventsRef = useRef([]);
@@ -1209,6 +1266,7 @@ export default function HomeScreen() {
     const launchVisualReadyRequestIdRef = useRef(0);
     const isLaunchVisualReadyRef = useRef(false);
     const isLaunchCriticalFitPendingRef = useRef(false);
+    const initialSuppressionDelayTimeoutRef = useRef(null);
     const isFocused = useIsFocused();
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
@@ -1247,9 +1305,12 @@ export default function HomeScreen() {
     const [activeIndex, setActiveIndex] = useState(0);
     const [mapRegion, setMapRegion] = useState(DEFAULT_REGION);
     const [mapRenderRegion, setMapRenderRegion] = useState(DEFAULT_REGION);
+    const [suppressionRegion, setSuppressionRegion] = useState(DEFAULT_REGION);
     const [userLocationBubble, setUserLocationBubble] = useState(null);
     const [isMapMoving, setIsMapMoving] = useState(false);
-    const [hasClosedInitialSuppressionWindow, setHasClosedInitialSuppressionWindow] = useState(false);
+    const [hasInitializedInitialSuppressionDelay, setHasInitializedInitialSuppressionDelay] = useState(false);
+    const [isInitialSuppressionDelayActive, setIsInitialSuppressionDelayActive] = useState(false);
+    const [effectiveSuppressedStationIds, setEffectiveSuppressedStationIds] = useState(new Set());
     const [isLaunchVisualReady, setIsLaunchVisualReady] = useState(false);
     const [isLaunchCriticalFitPending, setIsLaunchCriticalFitPending] = useState(false);
     const [homeRefitRequestVersion, setHomeRefitRequestVersion] = useState(0);
@@ -1313,16 +1374,16 @@ export default function HomeScreen() {
     }, [isFocused]);
 
     useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            if (!isMountedRef.current) {
-                return;
+        return () => {
+            if (suppressionRegionAnimationFrameRef.current != null) {
+                cancelAnimationFrame(suppressionRegionAnimationFrameRef.current);
+                suppressionRegionAnimationFrameRef.current = null;
             }
 
-            setHasClosedInitialSuppressionWindow(true);
-        }, INITIAL_SUPPRESSION_RENDER_WINDOW_MS);
-
-        return () => {
-            clearTimeout(timeoutId);
+            if (initialSuppressionDelayTimeoutRef.current) {
+                clearTimeout(initialSuppressionDelayTimeoutRef.current);
+                initialSuppressionDelayTimeoutRef.current = null;
+            }
         };
     }, []);
 
@@ -1352,6 +1413,11 @@ export default function HomeScreen() {
             setTopStations([]);
             setRegionalQuotes([]);
         });
+        if (initialSuppressionDelayTimeoutRef.current) {
+            clearTimeout(initialSuppressionDelayTimeoutRef.current);
+            initialSuppressionDelayTimeoutRef.current = null;
+        }
+        setIsInitialSuppressionDelayActive(false);
         setErrorMsg(nextError);
         setIsRefreshingPrices(false);
         setIsLoadingLocation(false);
@@ -2066,24 +2132,64 @@ export default function HomeScreen() {
             screenHeight: height,
         });
     }, [stationQuotes, mapRegion, width, height]);
-    const suppressedOverlapStationIds = useMemo(() => {
+    const rawSuppressedOverlapStationIds = useMemo(() => {
         if (ENABLE_CLUSTER_MERGE_TRANSITIONS) {
             return new Set();
         }
 
+        const previousSuppressedStationIds = previousSuppressedStationSignatureRef.current === stationQuotesSignature
+            ? previousSuppressedStationIdsRef.current
+            : new Set();
+
         return buildSuppressedOverlapStationIds(
             stationQuotes,
-            mapRegion,
+            suppressionRegion,
             width,
             height,
-            hasLocationPermission ? userLocationBubble : null
+            hasLocationPermission ? userLocationBubble : null,
+            previousSuppressedStationIds
         );
-    }, [stationQuotes, mapRegion, width, height, hasLocationPermission, userLocationBubble]);
+    }, [stationQuotes, stationQuotesSignature, suppressionRegion, width, height, hasLocationPermission, userLocationBubble]);
+    useEffect(() => {
+        if (ENABLE_CLUSTER_MERGE_TRANSITIONS) {
+            setEffectiveSuppressedStationIds(currentValue => (
+                currentValue.size === 0 ? currentValue : new Set()
+            ));
+            return;
+        }
+
+        setEffectiveSuppressedStationIds(currentValue => {
+            const nextSuppressedIds = new Set();
+            const visibleStationIds = new Set(stationQuotes.map(quote => String(quote.stationId)));
+
+            currentValue.forEach(stationId => {
+                if (visibleStationIds.has(String(stationId))) {
+                    nextSuppressedIds.add(String(stationId));
+                }
+            });
+
+            rawSuppressedOverlapStationIds.forEach(stationId => {
+                nextSuppressedIds.add(String(stationId));
+            });
+
+            if (!isMapMoving) {
+                Array.from(nextSuppressedIds).forEach(stationId => {
+                    if (!rawSuppressedOverlapStationIds.has(String(stationId))) {
+                        nextSuppressedIds.delete(String(stationId));
+                    }
+                });
+            }
+
+            return areStationIdSetsEqual(currentValue, nextSuppressedIds)
+                ? currentValue
+                : nextSuppressedIds;
+        });
+    }, [ENABLE_CLUSTER_MERGE_TRANSITIONS, isMapMoving, rawSuppressedOverlapStationIds, stationQuotes]);
     const visibleSuppressedStationIds = useMemo(() => {
         return buildVisibleSuppressedStationIds({
-            suppressedStationIds: suppressedOverlapStationIds,
+            suppressedStationIds: effectiveSuppressedStationIds,
         });
-    }, [suppressedOverlapStationIds]);
+    }, [effectiveSuppressedStationIds]);
     const allStationsFitZoomRegion = useMemo(() => (
         buildStationsFitZoomRegion(stationQuotes, mapRegion)
     ), [stationQuotes, mapRegion]);
@@ -2102,6 +2208,55 @@ export default function HomeScreen() {
     useEffect(() => {
         stationQuotesRef.current = stationQuotes;
     }, [stationQuotes]);
+
+    useEffect(() => {
+        previousSuppressedStationIdsRef.current = effectiveSuppressedStationIds;
+        previousSuppressedStationSignatureRef.current = stationQuotesSignature;
+    }, [effectiveSuppressedStationIds, stationQuotesSignature]);
+
+    useEffect(() => {
+        const shouldInitializeDelay = shouldInitializeInitialSuppressionDelay({
+            hasInitializedInitialSuppressionDelay,
+            isMapLoaded,
+            isMapMoving,
+            stationCount: stationQuotes.length,
+            hasSettledInitialStationLayout: lastDataHashRef.current === stationQuotesSignature,
+        });
+
+        if (!shouldInitializeDelay) {
+            return;
+        }
+
+        setHasInitializedInitialSuppressionDelay(true);
+
+        if (effectiveSuppressedStationIds.size === 0) {
+            setIsInitialSuppressionDelayActive(false);
+            return;
+        }
+
+        setIsInitialSuppressionDelayActive(true);
+
+        if (initialSuppressionDelayTimeoutRef.current) {
+            clearTimeout(initialSuppressionDelayTimeoutRef.current);
+        }
+
+        initialSuppressionDelayTimeoutRef.current = setTimeout(() => {
+            initialSuppressionDelayTimeoutRef.current = null;
+
+            if (!isMountedRef.current) {
+                return;
+            }
+
+            setIsInitialSuppressionDelayActive(false);
+        }, INITIAL_HOME_SUPPRESSION_DELAY_MS);
+    }, [
+        hasInitializedInitialSuppressionDelay,
+        isMapLoaded,
+        isMapMoving,
+        stationQuotes.length,
+        stationQuotesSignature,
+        effectiveSuppressedStationIds,
+    ]);
 
     useEffect(() => {
         const pendingHomeRefitRequest = pendingHomeRefitRequestRef.current;
@@ -2510,12 +2665,50 @@ export default function HomeScreen() {
         });
     }
 
+    const setSuppressionRegionIfNeeded = (nextRegion) => {
+        if (!nextRegion) {
+            return;
+        }
+
+        suppressionRegionRef.current = nextRegion;
+        setSuppressionRegion(currentRegion => (
+            areRegionsEquivalent(currentRegion, nextRegion)
+                ? currentRegion
+                : nextRegion
+        ));
+    };
+
+    const scheduleSuppressionRegionUpdate = (nextRegion) => {
+        if (!nextRegion) {
+            return;
+        }
+
+        pendingSuppressionRegionRef.current = nextRegion;
+
+        if (suppressionRegionAnimationFrameRef.current != null) {
+            return;
+        }
+
+        suppressionRegionAnimationFrameRef.current = requestAnimationFrame(() => {
+            suppressionRegionAnimationFrameRef.current = null;
+            const pendingRegion = pendingSuppressionRegionRef.current;
+            pendingSuppressionRegionRef.current = null;
+
+            if (!pendingRegion || !isMountedRef.current) {
+                return;
+            }
+
+            setSuppressionRegionIfNeeded(pendingRegion);
+        });
+    };
+
     const setMapRegionIfNeeded = (nextRegion) => {
         if (!nextRegion) {
             return;
         }
 
         mapRegionRef.current = nextRegion;
+        setSuppressionRegionIfNeeded(nextRegion);
         setMapRenderRegion(currentRegion => (
             areRegionsEquivalent(currentRegion, nextRegion)
                 ? currentRegion
@@ -3406,9 +3599,16 @@ export default function HomeScreen() {
                         clearMapIdleSettleTimeout();
                         setMapMotionState(true);
                         mapRegionRef.current = region;
+                        scheduleSuppressionRegionUpdate(region);
                     }}
                     onRegionChangeComplete={(region) => {
                         markMapLoaded();
+                        if (suppressionRegionAnimationFrameRef.current != null) {
+                            cancelAnimationFrame(suppressionRegionAnimationFrameRef.current);
+                            suppressionRegionAnimationFrameRef.current = null;
+                        }
+                        pendingSuppressionRegionRef.current = null;
+                        setSuppressionRegionIfNeeded(region);
                         setMapRenderRegion(region);
                         setMapRegionIfNeeded(region);
                         isAnimatingRef.current = false;
@@ -3445,19 +3645,12 @@ export default function HomeScreen() {
                                         const quote = entry.cluster.quotes[0];
                                         const isSuppressed = visibleSuppressedStationIds.has(String(entry.primaryStationId));
 
-                                        if (!shouldRenderStationMarker({
-                                            stationId: entry.primaryStationId,
-                                            suppressedStationIds: visibleSuppressedStationIds,
-                                            hasClosedInitialSuppressionWindow,
-                                        })) {
-                                            return null;
-                                        }
-
                                         return (
                                             <StationMarker
                                                 key={entry.key}
                                                 quote={quote}
                                                 isSuppressed={isSuppressed}
+                                                shouldDelaySuppression={isSuppressed && isInitialSuppressionDelayActive}
                                                 isBest={quote.originalIndex === 0}
                                                 isDark={isDark}
                                                 themeColors={themeColors}
@@ -3520,7 +3713,7 @@ export default function HomeScreen() {
                     quote={activeStationQuote}
                     isBest={activeStationQuote?.originalIndex === 0}
                     isDark={isDark}
-                    mapRegion={mapRenderRegion}
+                    mapRegion={suppressionRegion}
                     screenWidth={width}
                     screenHeight={height}
                     themeColors={themeColors}

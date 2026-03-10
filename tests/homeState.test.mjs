@@ -7,7 +7,7 @@ import {
     buildVisibleSuppressedStationIds,
     filterStationQuotesForHome,
     hasHomeFilterSignatureChanged,
-    shouldRenderStationMarker,
+    shouldInitializeInitialSuppressionDelay,
     shouldShowActiveStationDecoration,
     shouldAutoFitHomeMap,
 } from '../src/lib/homeState.js';
@@ -125,24 +125,30 @@ test('shouldShowActiveStationDecoration only decorates visible non-best stations
     }), true);
 });
 
-test('shouldRenderStationMarker removes suppressed markers after the initial suppression window closes', () => {
-    assert.equal(shouldRenderStationMarker({
-        stationId: 'station-a',
-        suppressedStationIds: new Set(['station-a']),
-        hasClosedInitialSuppressionWindow: false,
+test('shouldInitializeInitialSuppressionDelay only allows the launch grace period once the initial layout has settled', () => {
+    assert.equal(shouldInitializeInitialSuppressionDelay({
+        hasInitializedInitialSuppressionDelay: false,
+        isMapLoaded: true,
+        isMapMoving: false,
+        stationCount: 3,
+        hasSettledInitialStationLayout: true,
     }), true);
 
-    assert.equal(shouldRenderStationMarker({
-        stationId: 'station-a',
-        suppressedStationIds: new Set(['station-a']),
-        hasClosedInitialSuppressionWindow: true,
+    assert.equal(shouldInitializeInitialSuppressionDelay({
+        hasInitializedInitialSuppressionDelay: true,
+        isMapLoaded: true,
+        isMapMoving: false,
+        stationCount: 3,
+        hasSettledInitialStationLayout: true,
     }), false);
 
-    assert.equal(shouldRenderStationMarker({
-        stationId: 'station-b',
-        suppressedStationIds: new Set(['station-a']),
-        hasClosedInitialSuppressionWindow: true,
-    }), true);
+    assert.equal(shouldInitializeInitialSuppressionDelay({
+        hasInitializedInitialSuppressionDelay: false,
+        isMapLoaded: true,
+        isMapMoving: false,
+        stationCount: 3,
+        hasSettledInitialStationLayout: false,
+    }), false);
 });
 
 test('home auto-fit skips passive focus restoration when there is no pending refit request', () => {

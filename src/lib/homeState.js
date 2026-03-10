@@ -212,16 +212,20 @@ export function shouldShowActiveStationDecoration({
     return !new Set(suppressedStationIds || []).has(String(activeQuote.stationId));
 }
 
-export function shouldRenderStationMarker({
-    stationId,
-    suppressedStationIds,
-    hasClosedInitialSuppressionWindow = false,
+export function shouldInitializeInitialSuppressionDelay({
+    hasInitializedInitialSuppressionDelay = false,
+    isMapLoaded = false,
+    isMapMoving = true,
+    stationCount = 0,
+    hasSettledInitialStationLayout = false,
 }) {
-    if (!hasClosedInitialSuppressionWindow) {
-        return true;
-    }
-
-    return !new Set(suppressedStationIds || []).has(String(stationId));
+    return (
+        !hasInitializedInitialSuppressionDelay &&
+        isMapLoaded &&
+        !isMapMoving &&
+        stationCount > 0 &&
+        hasSettledInitialStationLayout
+    );
 }
 
 export function shouldAutoFitHomeMap({

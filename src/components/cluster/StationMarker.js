@@ -22,64 +22,52 @@ const SHRINK_DURATION_MS = 150;
 const SUPPRESSED_SCALE = 0.005;
 const APPEAR_START_SCALE = 0.84;
 const APPEAR_DURATION_MS = 220;
-const INITIAL_SHRINK_DELAY_WINDOW_MS = 2500;
 const TRACKS_VIEW_CHANGES_IDLE_MS = 180;
 const BEST_PRICE_BLUE_LIGHT = '#007AFF';
 const BEST_PRICE_BLUE_DARK = '#11f050ff';
 const INACTIVE_TEXT_DARK = '#F5F7FA';
 const AnimatedView = Animated.createAnimatedComponent(View);
-let isInitialShrinkDelayWindowOpen = true;
-let hasStartedInitialShrinkDelayWindowTimer = false;
-
-function ensureInitialShrinkDelayWindowTimer() {
-  if (hasStartedInitialShrinkDelayWindowTimer) {
-    return;
-  }
-
-  hasStartedInitialShrinkDelayWindowTimer = true;
-  setTimeout(() => {
-    isInitialShrinkDelayWindowOpen = false;
-  }, INITIAL_SHRINK_DELAY_WINDOW_MS);
-}
-
-function resolveInitialSuppressionProgress(isSuppressed) {
-  if (!isSuppressed) {
-    return 0;
-  }
-
-  // On the very first launch window, let overlapping pills appear briefly
-  // before shrinking out. After that window, suppressed pills should mount hidden.
-  return isInitialShrinkDelayWindowOpen ? 0 : 1;
-}
 
 function StationMarker({
   quote,
   isSuppressed = false,
+  shouldDelaySuppression = false,
   isBest = false,
   isDark = false,
   themeColors,
   onPress,
 }) {
   const appearProgress = useSharedValue(1);
-  const suppressionProgress = useSharedValue(resolveInitialSuppressionProgress(isSuppressed));
+  const suppressionProgress = useSharedValue(isSuppressed && !shouldDelaySuppression ? 1 : 0);
   const tracksViewChangesTimeoutRef = useRef(null);
+  const suppressionHideTimeoutRef = useRef(null);
   const visualStateSignatureRef = useRef('');
   const [tracksViewChanges, setTracksViewChanges] = useState(false);
+  const [isContentHidden, setIsContentHidden] = useState(isSuppressed && !shouldDelaySuppression);
 
   useEffect(() => {
-    ensureInitialShrinkDelayWindowTimer();
-
     return () => {
       if (tracksViewChangesTimeoutRef.current) {
         clearTimeout(tracksViewChangesTimeoutRef.current);
         tracksViewChangesTimeoutRef.current = null;
       }
+
+      if (suppressionHideTimeoutRef.current) {
+        clearTimeout(suppressionHideTimeoutRef.current);
+        suppressionHideTimeoutRef.current = null;
+      }
     };
   }, []);
 
   useEffect(() => {
+    if (suppressionHideTimeoutRef.current) {
+      clearTimeout(suppressionHideTimeoutRef.current);
+      suppressionHideTimeoutRef.current = null;
+    }
+
     if (isSuppressed) {
-      const delayMs = isInitialShrinkDelayWindowOpen ? SHRINK_DELAY_MS : 0;
+      setIsContentHidden(false);
+      const delayMs = shouldDelaySuppression ? SHRINK_DELAY_MS : 0;
       suppressionProgress.value = withDelay(
         delayMs,
         withTiming(1, {
@@ -87,14 +75,20 @@ function StationMarker({
           easing: Easing.out(Easing.cubic),
         })
       );
+
+      suppressionHideTimeoutRef.current = setTimeout(() => {
+        suppressionHideTimeoutRef.current = null;
+        setIsContentHidden(true);
+      }, delayMs + SHRINK_DURATION_MS);
       return;
     }
 
+    setIsContentHidden(false);
     suppressionProgress.value = withTiming(0, {
       duration: 120,
       easing: Easing.out(Easing.cubic),
     });
-  }, [isSuppressed, suppressionProgress]);
+  }, [isSuppressed, shouldDelaySuppression, suppressionProgress]);
 
   const shrinkStyle = useAnimatedStyle(() => ({
     transform: [
@@ -128,6 +122,8 @@ function StationMarker({
     quote?.stationId ?? '',
     quote?.price ?? '',
     isSuppressed ? '1' : '0',
+    shouldDelaySuppression ? '1' : '0',
+    isContentHidden ? '1' : '0',
     isBest ? '1' : '0',
     isDark ? '1' : '0',
   ].join('|');
@@ -144,7 +140,7 @@ function StationMarker({
       clearTimeout(tracksViewChangesTimeoutRef.current);
     }
 
-    const trackingDuration = isSuppressed && isInitialShrinkDelayWindowOpen
+    const trackingDuration = isSuppressed && shouldDelaySuppression
       ? SHRINK_DELAY_MS + SHRINK_DURATION_MS + TRACKS_VIEW_CHANGES_IDLE_MS
       : SHRINK_DURATION_MS + TRACKS_VIEW_CHANGES_IDLE_MS;
 
@@ -152,7 +148,7 @@ function StationMarker({
       tracksViewChangesTimeoutRef.current = null;
       setTracksViewChanges(false);
     }, trackingDuration);
-  }, [isBest, isDark, isSuppressed, quote?.price, quote?.stationId, visualStateSignature]);
+  }, [isBest, isContentHidden, isDark, isSuppressed, quote?.price, quote?.stationId, shouldDelaySuppression, visualStateSignature]);
 
   return (
     <Marker
@@ -166,19 +162,23 @@ function StationMarker({
       tracksViewChanges={tracksViewChanges}
     >
       <AnimatedView style={shrinkStyle}>
-        <LiquidGlassView effect="clear" style={styles.pillShell}>
-          <View style={styles.rowItem}>
-            <SymbolView
-              name="fuelpump.fill"
-              size={14}
-              tintColor={iconTintColor}
-              style={styles.priceIcon}
-            />
-            <Text style={[styles.priceText, isBest && styles.bestPriceText, { color: textColor }]}>
-              ${quote.price.toFixed(2)}
-            </Text>
-          </View>
-        </LiquidGlassView>
+        {isContentHidden ? (
+          <View style={styles.hiddenPlaceholder} />
+        ) : (
+          <LiquidGlassView effect="clear" style={styles.pillShell}>
+            <View style={styles.rowItem}>
+              <SymbolView
+                name="fuelpump.fill"
+                size={14}
+                tintColor={iconTintColor}
+                style={styles.priceIcon}
+              />
+              <Text style={[styles.priceText, isBest && styles.bestPriceText, { color: textColor }]}>
+                ${quote.price.toFixed(2)}
+              </Text>
+            </View>
+          </LiquidGlassView>
+        )}
       </AnimatedView>
     </Marker>
   );
@@ -188,6 +188,7 @@ function areStationMarkerPropsEqual(previousProps, nextProps) {
   return (
     previousProps.quote === nextProps.quote &&
     previousProps.isSuppressed === nextProps.isSuppressed &&
+    previousProps.shouldDelaySuppression === nextProps.shouldDelaySuppression &&
     previousProps.isBest === nextProps.isBest &&
     previousProps.isDark === nextProps.isDark &&
     previousProps.onPress === nextProps.onPress
@@ -211,6 +212,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  hiddenPlaceholder: {
+    width: 1,
+    height: 1,
+    opacity: 0,
   },
   priceIcon: {
     marginRight: 2,
