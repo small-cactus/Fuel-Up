@@ -32,10 +32,15 @@ import {
     persistLastDeviceLocationRegion,
 } from '../../src/lib/deviceLocationCache';
 import {
-    applyFuelGradeToQuote,
     normalizeFuelGrade,
     rankQuotesForFuelGrade,
 } from '../../src/lib/fuelGrade';
+import {
+    buildHomeQuerySignature,
+    buildVisibleSuppressedStationIds,
+    filterStationQuotesForHome,
+    shouldAutoFitHomeMap,
+} from '../../src/lib/homeState';
 import { groupStationsIntoClusters } from '../../src/cluster/grouping';
 import {
     CLUSTER_PILL_HEIGHT,
@@ -1185,6 +1190,8 @@ export default function HomeScreen() {
     const clusterDebugProbeRunIdRef = useRef(0);
     const clusterDebugAutoProbeHandledKeyRef = useRef('');
     const clusterDebugAutoProbeSeededKeyRef = useRef('');
+    const lastResolvedHomeQuerySignatureRef = useRef('');
+    const activeHomeQuerySignatureRef = useRef('');
     const isFocused = useIsFocused();
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
@@ -1225,6 +1232,7 @@ export default function HomeScreen() {
     const [mapRenderRegion, setMapRenderRegion] = useState(DEFAULT_REGION);
     const [userLocationBubble, setUserLocationBubble] = useState(null);
     const [isMapMoving, setIsMapMoving] = useState(false);
+    const [shouldRevealActiveSelection, setShouldRevealActiveSelection] = useState(false);
     const [isClusterDebugRecording, setIsClusterDebugRecording] = useState(false);
     const [isClusterDebugProbeRunning, setIsClusterDebugProbeRunning] = useState(false);
     const [clusterDebugProbeSummary, setClusterDebugProbeSummary] = useState('');
@@ -1249,6 +1257,16 @@ export default function HomeScreen() {
     const topCanopyHeight = insets.top + TOP_CANOPY_HEIGHT;
     const canopyEdgeLine = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.42)';
     const selectedFuelGrade = normalizeFuelGrade(preferences.preferredOctane);
+    const buildResolvedHomeQuerySignature = useCallback((nextRegion) => buildHomeQuerySignature({
+        origin: nextRegion,
+        radiusMiles: preferences.searchRadiusMiles,
+        fuelGrade: selectedFuelGrade,
+        preferredProvider: preferences.preferredProvider,
+    }), [
+        preferences.preferredProvider,
+        preferences.searchRadiusMiles,
+        selectedFuelGrade,
+    ]);
     const markMapLoaded = () => {
         if (mapLoadedFallbackTimeoutRef.current) {
             clearTimeout(mapLoadedFallbackTimeoutRef.current);
@@ -1288,6 +1306,9 @@ export default function HomeScreen() {
             initialStationsFitRetryTimeoutRef.current = null;
         }
         lastDataHashRef.current = '';
+        lastResolvedHomeQuerySignatureRef.current = '';
+        activeHomeQuerySignatureRef.current = '';
+        setShouldRevealActiveSelection(false);
         holdRootReveal();
     };
 
@@ -1504,6 +1525,7 @@ export default function HomeScreen() {
                                 longitude: freshRegion.longitude,
                                 locationSource: 'device',
                                 preferCached: true,
+                                querySignature: buildResolvedHomeQuerySignature(freshRegion),
                             });
                         }
                     } catch (error) {
@@ -1557,7 +1579,17 @@ export default function HomeScreen() {
         }
     };
 
-    const loadFuelData = async ({ latitude, longitude, locationSource, preferCached }) => {
+    const loadFuelData = async ({
+        latitude,
+        longitude,
+        locationSource,
+        preferCached,
+        querySignature = null,
+    }) => {
+        const requestQuerySignature = querySignature || buildResolvedHomeQuerySignature({
+            latitude,
+            longitude,
+        });
         const hadVisibleFuelState = Boolean(bestQuote) || topStations.length > 0 || regionalQuotes.length > 0;
         const requestedRegion = {
             latitude,
@@ -1587,13 +1619,18 @@ export default function HomeScreen() {
         };
 
         try {
+            activeHomeQuerySignatureRef.current = requestQuerySignature;
+
             if (isMountedRef.current) {
                 setFuelDebugState(baseDebugState);
             }
 
             if (preferCached) {
                 const cachedSnapshot = await getCachedFuelPriceSnapshot(query);
-                applySnapshot(cachedSnapshot);
+
+                if (activeHomeQuerySignatureRef.current === requestQuerySignature) {
+                    applySnapshot(cachedSnapshot);
+                }
             }
 
             if (isMountedRef.current) {
@@ -1617,9 +1654,14 @@ export default function HomeScreen() {
                 throw new Error('No prices returned');
             }
 
+            if (activeHomeQuerySignatureRef.current !== requestQuerySignature) {
+                return;
+            }
+
             applySnapshot(freshSnapshot);
             pendingInitialStationsFitRef.current = true;
             shouldAnimatePendingInitialStationsFitRef.current = shouldAnimateInitialStationsFit;
+            lastResolvedHomeQuerySignatureRef.current = requestQuerySignature;
 
             if (isMountedRef.current) {
                 setErrorMsg(null);
@@ -1634,6 +1676,10 @@ export default function HomeScreen() {
             });
         } catch (error) {
             if (isFuelCacheResetError(error)) {
+                return;
+            }
+
+            if (activeHomeQuerySignatureRef.current !== requestQuerySignature) {
                 return;
             }
 
@@ -1663,7 +1709,7 @@ export default function HomeScreen() {
         }
     };
 
-    const refreshForCurrentView = async ({ preferCached }) => {
+    const refreshForCurrentView = async ({ preferCached, force = false }) => {
         const allowLaunchBootstrap = shouldUseLaunchLocationBootstrapRef.current;
 
         shouldUseLaunchLocationBootstrapRef.current = false;
@@ -1676,11 +1722,18 @@ export default function HomeScreen() {
             return;
         }
 
+        const nextQuerySignature = buildResolvedHomeQuerySignature(nextRegion);
+
+        if (!force && lastResolvedHomeQuerySignatureRef.current === nextQuerySignature) {
+            return;
+        }
+
         await loadFuelData({
             latitude: nextRegion.latitude,
             longitude: nextRegion.longitude,
             locationSource: nextRegion.locationSource || 'device',
             preferCached,
+            querySignature: nextQuerySignature,
         });
     };
 
@@ -1732,6 +1785,8 @@ export default function HomeScreen() {
             return;
         }
 
+        lastResolvedHomeQuerySignatureRef.current = '';
+        activeHomeQuerySignatureRef.current = '';
         clearVisibleFuelState('Fuel cache cleared. Open Home to fetch fresh prices.');
         setFuelDebugState(null);
     }, [fuelResetToken, setFuelDebugState]);
@@ -1809,21 +1864,44 @@ export default function HomeScreen() {
     const { width, height } = Dimensions.get('window');
 
     const minRating = preferences.minimumRating || 0;
+    const rawStationQuotes = useMemo(() => (
+        [
+            ...(Array.isArray(topStations) ? topStations : []),
+            bestQuote,
+        ]
+            .filter(Boolean)
+            .filter(quote => quote?.providerTier === 'station' && !quote?.isEstimated)
+    ), [bestQuote, topStations]);
+    const filteredStationQuotes = useMemo(() => (
+        filterStationQuotesForHome({
+            quotes: rawStationQuotes,
+            origin: location,
+            radiusMiles: preferences.searchRadiusMiles,
+            minimumRating: minRating,
+        })
+    ), [
+        location,
+        minRating,
+        preferences.searchRadiusMiles,
+        rawStationQuotes,
+    ]);
     const rankedStationQuotes = useMemo(() => {
-        const baseQuotes = topStations.length > 0
-            ? topStations
-            : [bestQuote].filter(Boolean);
-
-        return rankQuotesForFuelGrade(baseQuotes, selectedFuelGrade);
-    }, [topStations, bestQuote, selectedFuelGrade]);
-    const displayBestQuote = useMemo(() => (
-        applyFuelGradeToQuote(bestQuote, selectedFuelGrade)
-    ), [bestQuote, selectedFuelGrade]);
+        return rankQuotesForFuelGrade(filteredStationQuotes, selectedFuelGrade);
+    }, [filteredStationQuotes, selectedFuelGrade]);
+    const displayBestQuote = rankedStationQuotes[0] || null;
     const stationQuotes = useMemo(() => (
         rankedStationQuotes
-            .filter(q => minRating === 0 || (q.rating != null && q.rating >= minRating))
             .map((q, idx) => ({ ...q, originalIndex: idx }))
-    ), [rankedStationQuotes, minRating]);
+    ), [rankedStationQuotes]);
+    const effectiveErrorMsg = useMemo(() => {
+        if (errorMsg) {
+            return errorMsg;
+        }
+
+        return rawStationQuotes.length > 0 && filteredStationQuotes.length === 0
+            ? 'No nearby stations match your current filters.'
+            : null;
+    }, [errorMsg, filteredStationQuotes.length, rawStationQuotes.length]);
 
     const stationQuotesRef = useRef([]);
     const clustersSignatureRef = useRef('');
@@ -1844,7 +1922,6 @@ export default function HomeScreen() {
             screenHeight: height,
         });
     }, [stationQuotes, mapRegion, width, height]);
-    const suppressionRegion = isMapMoving ? mapRegion : mapRenderRegion;
     const suppressedOverlapStationIds = useMemo(() => {
         if (ENABLE_CLUSTER_MERGE_TRANSITIONS) {
             return new Set();
@@ -1852,22 +1929,20 @@ export default function HomeScreen() {
 
         return buildSuppressedOverlapStationIds(
             stationQuotes,
-            suppressionRegion,
+            mapRegion,
             width,
             height,
             hasLocationPermission ? userLocationBubble : null
         );
-    }, [stationQuotes, suppressionRegion, width, height, hasLocationPermission, userLocationBubble]);
+    }, [stationQuotes, mapRegion, width, height, hasLocationPermission, userLocationBubble]);
     const visibleSuppressedStationIds = useMemo(() => {
-        const nextSuppressed = new Set(suppressedOverlapStationIds);
         const activeQuote = stationQuotes[activeIndex];
-
-        if (activeQuote?.stationId != null) {
-            nextSuppressed.delete(String(activeQuote.stationId));
-        }
-
-        return nextSuppressed;
-    }, [suppressedOverlapStationIds, stationQuotes, activeIndex]);
+        return buildVisibleSuppressedStationIds({
+            suppressedStationIds: suppressedOverlapStationIds,
+            activeStationId: activeQuote?.stationId ?? null,
+            allowActiveReveal: shouldRevealActiveSelection,
+        });
+    }, [activeIndex, shouldRevealActiveSelection, stationQuotes, suppressedOverlapStationIds]);
     const allStationsFitZoomRegion = useMemo(() => (
         buildStationsFitZoomRegion(stationQuotes, mapRegion)
     ), [stationQuotes, mapRegion]);
@@ -1878,9 +1953,10 @@ export default function HomeScreen() {
             setClusters(computedClusters);
         }
     }, [computedClusters, isMapMoving]);
+    const renderedClusters = ENABLE_CLUSTER_MERGE_TRANSITIONS ? clusters : computedClusters;
     const clustersSignature = useMemo(() => (
-        clusters.map(buildClusterMembershipKey).join('|')
-    ), [clusters]);
+        renderedClusters.map(buildClusterMembershipKey).join('|')
+    ), [renderedClusters]);
 
     useEffect(() => {
         stationQuotesRef.current = stationQuotes;
@@ -1928,7 +2004,10 @@ export default function HomeScreen() {
 
                 const shouldAnimateAttempt = attemptNumber === 0 && shouldAnimatePendingInitialStationsFitRef.current;
 
-                fitMapToStations({ animated: shouldAnimateAttempt });
+                fitMapToStations({
+                    animated: shouldAnimateAttempt,
+                    runSettlePass: true,
+                });
 
                 if (initialStationsFitRetryTimeoutRef.current) {
                     clearTimeout(initialStationsFitRetryTimeoutRef.current);
@@ -2028,6 +2107,7 @@ export default function HomeScreen() {
         const index = primaryQuote.originalIndex;
 
         isUserScrollingRef.current = false; // Prevent map feedback loop
+        setShouldRevealActiveSelection(index !== 0);
         flatListRef.current?.scrollToOffset({
             offset: index * itemWidth,
             animated: true,
@@ -2050,7 +2130,6 @@ export default function HomeScreen() {
     const isUserScrollingRef = useRef(false);
     const isAnimatingRef = useRef(false);
     const mapMotionRef = useRef(false);
-    const prevIsFocusedRef = useRef(isFocused);
 
     const clearMapIdleSettleTimeout = () => {
         if (mapIdleSettleTimeoutRef.current) {
@@ -2059,7 +2138,7 @@ export default function HomeScreen() {
         }
     };
 
-    const fitMapToStations = useCallback(({ animated = true } = {}) => {
+    const fitMapToStations = useCallback(({ animated = true, runSettlePass = false } = {}) => {
         if (!mapRef.current) {
             return;
         }
@@ -2093,7 +2172,7 @@ export default function HomeScreen() {
             animated,
         });
 
-        if (animated) {
+        if (runSettlePass) {
             setTimeout(() => {
                 if (!mapRef.current) {
                     return;
@@ -2124,6 +2203,7 @@ export default function HomeScreen() {
 
         lastSettledCardIndexRef.current = index;
         isUserScrollingRef.current = false;
+        setShouldRevealActiveSelection(index !== 0);
         flatListRef.current?.scrollToOffset({
             offset: index * itemWidth,
             animated: true,
@@ -2218,14 +2298,16 @@ export default function HomeScreen() {
     }, [hasCompletedRootReveal, isFocused, isMapLoaded]);
 
     useEffect(() => {
-        const wasFocused = prevIsFocusedRef.current;
-        prevIsFocusedRef.current = isFocused;
+        if (!isFocused) {
+            setShouldRevealActiveSelection(false);
+        }
+    }, [isFocused]);
 
+    useEffect(() => {
         if (!isMapLoaded || !mapRef.current || stationQuotes.length === 0 || isMapMoving) return;
 
         // Use ONLY stationQuotes for the data hash to avoid feedback loops from zooming
         const currentHash = stationQuotes.map(q => q.stationId).join(',');
-        const isFocusGained = isFocused && !wasFocused;
         const isNewData = currentHash !== lastDataHashRef.current;
 
         if (pendingInitialStationsFitRef.current && isNewData) {
@@ -2234,16 +2316,22 @@ export default function HomeScreen() {
             return;
         }
 
-        if (isNewData || isFocusGained) {
+        if (shouldAutoFitHomeMap({
+            isFocused,
+            isNewData,
+        })) {
             lastDataHashRef.current = currentHash;
             isUserScrollingRef.current = false;
             lastSettledCardIndexRef.current = activeIndex;
 
             setTimeout(() => {
-                fitMapToStations();
+                fitMapToStations({
+                    animated: true,
+                    runSettlePass: false,
+                });
             }, 100);
         }
-    }, [activeIndex, stationQuotes, bottomPadding, topCanopyHeight, horizontalPadding.left, horizontalPadding.right, sideInset, isFocused, isMapLoaded, isMapMoving]);
+    }, [activeIndex, fitMapToStations, isFocused, isMapLoaded, isMapMoving, stationQuotes]);
 
     const resolveCardIndexFromOffset = (offsetX) => {
         if (!Number.isFinite(offsetX) || itemWidth <= 0 || stationQuotesRef.current.length === 0) {
@@ -2265,6 +2353,7 @@ export default function HomeScreen() {
             return;
         }
 
+        setShouldRevealActiveSelection(nextIndex !== 0);
         setActiveIndex(currentValue => (
             currentValue === nextIndex ? currentValue : nextIndex
         ));
@@ -2297,7 +2386,7 @@ export default function HomeScreen() {
             return null;
         }
 
-        const multiQuoteClusters = clusters.filter(cluster => cluster.quotes.length > 1);
+        const multiQuoteClusters = renderedClusters.filter(cluster => cluster.quotes.length > 1);
         if (multiQuoteClusters.length === 0) {
             return null;
         }
@@ -2321,7 +2410,7 @@ export default function HomeScreen() {
 
             return clusterDistance < closestDistance ? cluster : closestCluster;
         }, null);
-    }, [debugClusterAnimations, clusters, mapRegion.latitude, mapRegion.longitude, mapRegion.latitudeDelta, mapRegion.longitudeDelta]);
+    }, [debugClusterAnimations, renderedClusters, mapRegion.latitude, mapRegion.longitude, mapRegion.latitudeDelta, mapRegion.longitudeDelta]);
     const watchedClusterDiagnostic = null;
     const activeClusterDebugPrimaryId = isClusterDebugRecording
         ? clusterDebugWatchedPrimaryIdRef.current
@@ -2881,7 +2970,7 @@ export default function HomeScreen() {
         }
     }, [debugClusterAnimations]);
 
-    const renderClusterEntries = clusters.map(cluster => {
+    const renderClusterEntries = renderedClusters.map(cluster => {
         const primaryStationId = cluster.quotes[0].stationId;
         return {
             key: primaryStationId,
@@ -2933,7 +3022,6 @@ export default function HomeScreen() {
                         clearMapIdleSettleTimeout();
                         setMapMotionState(true);
                         mapRegionRef.current = region;
-                        setMapRenderRegion(region);
                     }}
                     onRegionChangeComplete={(region) => {
                         markMapLoaded();
@@ -2946,6 +3034,7 @@ export default function HomeScreen() {
                             if (!isMountedRef.current) {
                                 return;
                             }
+                            setShouldRevealActiveSelection(false);
                             setMapMotionState(false);
                             flushMapIdleWaiters(true);
                         }, CLUSTER_MAP_IDLE_SETTLE_MS);
@@ -2958,8 +3047,8 @@ export default function HomeScreen() {
                                     coordinate={fallbackCoordinate}
                                     title="No Prices Returned"
                                     description={
-                                        errorMsg
-                                            ? 'No live station price available'
+                                        effectiveErrorMsg
+                                            ? effectiveErrorMsg
                                             : isLoadingLocation
                                                 ? 'Finding your location'
                                                 : 'Checking fuel providers'
@@ -2990,8 +3079,8 @@ export default function HomeScreen() {
                                     coordinate={fallbackCoordinate}
                                     title="No Prices Returned"
                                     description={
-                                        errorMsg
-                                            ? 'No live station price available'
+                                        effectiveErrorMsg
+                                            ? effectiveErrorMsg
                                             : isLoadingLocation
                                                 ? 'Finding your location'
                                                 : 'Checking fuel providers'
@@ -3051,6 +3140,7 @@ export default function HomeScreen() {
                     onPress={() =>
                         void refreshForCurrentView({
                             preferCached: false,
+                            force: true,
                         })
                     }
                 >
@@ -3101,7 +3191,7 @@ export default function HomeScreen() {
                                 params: {
                                     quotesData: stationQuotes.length > 0 ? JSON.stringify(stationQuotes) : JSON.stringify([displayBestQuote].filter(Boolean)),
                                     benchmarkData: benchmarkQuote ? JSON.stringify(benchmarkQuote) : null,
-                                    errorMsg: errorMsg || '',
+                                    errorMsg: effectiveErrorMsg || '',
                                     fuelGrade: selectedFuelGrade,
                                 },
                             });
@@ -3174,7 +3264,7 @@ export default function HomeScreen() {
                                 itemWidth={itemWidth}
                                 isDark={isDark}
                                 benchmarkQuote={benchmarkQuote}
-                                errorMsg={errorMsg}
+                                errorMsg={effectiveErrorMsg}
                                 fuelGrade={selectedFuelGrade}
                                 isRefreshing={isRefreshingPrices || isLoadingLocation}
                                 themeColors={themeColors}
@@ -3186,7 +3276,7 @@ export default function HomeScreen() {
                     <View style={{ width: width, paddingHorizontal: sideInset }}>
                         <FuelSummaryCard
                             benchmarkQuote={benchmarkQuote}
-                            errorMsg={errorMsg}
+                            errorMsg={effectiveErrorMsg}
                             fuelGrade={selectedFuelGrade}
                             glassTintColor={homeGlassTintColor}
                             isDark={isDark}

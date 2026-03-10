@@ -1,5 +1,7 @@
 import { supabase } from '../../lib/supabase.js';
+const { buildLatestFuelStationQuotesFromRows } = require('./index');
 const { buildValidationState } = require('./priceValidation');
+const { applyCurrentStationQuoteProjection } = require('./trendProjection');
 
 const cachedTrendDataByFuelType = {};
 const lastResolvedTrendDataByFuelType = {};
@@ -99,6 +101,7 @@ function buildValidatedTrendRows(rows, fuelType) {
 
     return validationState.outputs.map(({ row, result }) => ({
         ...row.originalRow,
+        timestampMs: row.timestampMs,
         price: result.finalDisplayedPrice,
         api_price: result.apiPrice,
         predicted_price: result.predictedPrice,
@@ -150,8 +153,18 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
     const validatedRows = !error && Array.isArray(rows)
         ? buildValidatedTrendRows(rows, fuelType)
         : [];
+    const projectedLatestQuotes = validatedRows.length > 0
+        ? buildLatestFuelStationQuotesFromRows({
+            rows,
+            origin: {
+                latitude,
+                longitude,
+            },
+        })
+        : [];
+    const projectedRows = applyCurrentStationQuoteProjection(validatedRows, projectedLatestQuotes);
 
-    if (error || validatedRows.length === 0) {
+    if (error || projectedRows.length === 0) {
         return {
             overallTrend: null,
             averagePricesByDay: [],
@@ -168,7 +181,7 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
     const latestPriceByStation = new Map();
     let previousLeaderboardSnapshotKey = null;
 
-    validatedRows.forEach(row => {
+    projectedRows.forEach(row => {
         latestPriceByStation.set(row.station_id, row.price);
 
         const rankingSnapshot = [...latestPriceByStation.entries()]
@@ -188,7 +201,7 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
 
     // 1. Average prices grouped by day (for the main chart)
     const dayAggregation = {};
-    validatedRows.forEach(row => {
+    projectedRows.forEach(row => {
         const dateStr = new Date(row.created_at).toISOString().split('T')[0];
         if (!dayAggregation[dateStr]) {
             dayAggregation[dateStr] = { sum: 0, count: 0 };
@@ -222,7 +235,7 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
     // For heatmap, average price of each station over its history
     const mapHeatmapPoints = [];
 
-    validatedRows.forEach(row => {
+    projectedRows.forEach(row => {
         if (!stationAggregation[row.station_id]) {
             stationAggregation[row.station_id] = {
                 stationId: row.station_id,

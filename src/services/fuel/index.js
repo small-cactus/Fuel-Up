@@ -1402,7 +1402,7 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, force
                     return { debugEntry, quotes };
                 }
 
-                const rows = liveQuotes.map(q => ({
+                const rows = validatedLiveQuotes.map(q => ({
                     station_id: q.stationId,
                     provider_id: q.providerId,
                     fuel_type: q.fuelType,
@@ -1746,6 +1746,7 @@ async function clearFuelPriceCache() {
 }
 
 module.exports = {
+    buildLatestFuelStationQuotesFromRows: buildLatestQuotesFromRows,
     clearFuelPriceCache,
     getFuelFailureMessage,
     getCachedFuelPriceSnapshot,

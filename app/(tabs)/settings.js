@@ -35,7 +35,7 @@ const APPEARANCE_OPTIONS = [
     { key: 'dark', label: 'Dark' },
 ];
 
-const RADIUS_OPTIONS = [5, 10, 15, 20, 25];
+const RADIUS_OPTIONS = [3, 5, 10, 15, 20, 25];
 const RATING_OPTIONS = [0, 3, 3.5, 4, 4.5];
 const TOP_CANOPY_HEIGHT = 44;
 const SHOW_PRICE_SOURCE_CONTROLS = false;

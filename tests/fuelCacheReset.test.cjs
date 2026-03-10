@@ -37,6 +37,37 @@ function primeModule(modulePath, exports) {
     };
 }
 
+function buildStationHistoryRow({
+    stationId,
+    price,
+    hoursAgo,
+    latitude,
+    longitude,
+    sourceHoursAgo = hoursAgo,
+}) {
+    return {
+        station_id: stationId,
+        provider_id: 'gasbuddy',
+        fuel_type: 'regular',
+        all_prices: {
+            regular: price,
+        },
+        price,
+        currency: 'USD',
+        station_name: `Station ${stationId}`,
+        address: `${stationId} Main St`,
+        latitude,
+        longitude,
+        search_latitude_rounded: 37.3,
+        search_longitude_rounded: -122,
+        source_label: 'GasBuddy',
+        rating: 4.2,
+        user_rating_count: 12,
+        created_at: new Date(Date.now() - (hoursAgo * 60 * 60 * 1000)).toISOString(),
+        updated_at_source: new Date(Date.now() - (sourceHoursAgo * 60 * 60 * 1000)).toISOString(),
+    };
+}
+
 test('clearFuelPriceCache prevents in-flight requests from repopulating cached fuel data', async () => {
     const asyncStorageMock = createAsyncStorageMock();
     const asyncStoragePath = require.resolve('@react-native-async-storage/async-storage');
@@ -163,5 +194,167 @@ test('clearFuelPriceCache prevents in-flight requests from repopulating cached f
         delete require.cache[asyncStoragePath];
         delete require.cache[devCounterPath];
         delete require.cache[supabasePath];
+    }
+});
+
+test('refreshFuelPriceSnapshot persists the validated live price instead of the raw API replay', async () => {
+    const asyncStorageMock = createAsyncStorageMock();
+    const insertedRows = [];
+    const areaHistoryRows = [
+        buildStationHistoryRow({ stationId: 'A', price: 3.25, hoursAgo: 120, latitude: 37.3346, longitude: -122.0090 }),
+        buildStationHistoryRow({ stationId: 'B', price: 3.00, hoursAgo: 120, latitude: 37.3446, longitude: -122.0090 }),
+        buildStationHistoryRow({ stationId: 'C', price: 3.01, hoursAgo: 120, latitude: 37.3496, longitude: -122.0150 }),
+        buildStationHistoryRow({ stationId: 'D', price: 3.02, hoursAgo: 120, latitude: 37.3526, longitude: -122.0070 }),
+        buildStationHistoryRow({ stationId: 'A', price: 3.35, hoursAgo: 96, latitude: 37.3346, longitude: -122.0090 }),
+        buildStationHistoryRow({ stationId: 'B', price: 3.10, hoursAgo: 96, latitude: 37.3446, longitude: -122.0090 }),
+        buildStationHistoryRow({ stationId: 'C', price: 3.11, hoursAgo: 96, latitude: 37.3496, longitude: -122.0150 }),
+        buildStationHistoryRow({ stationId: 'D', price: 3.12, hoursAgo: 96, latitude: 37.3526, longitude: -122.0070 }),
+        buildStationHistoryRow({ stationId: 'A', price: 3.45, hoursAgo: 72, latitude: 37.3346, longitude: -122.0090 }),
+        buildStationHistoryRow({ stationId: 'B', price: 3.20, hoursAgo: 72, latitude: 37.3446, longitude: -122.0090 }),
+        buildStationHistoryRow({ stationId: 'C', price: 3.21, hoursAgo: 72, latitude: 37.3496, longitude: -122.0150 }),
+        buildStationHistoryRow({ stationId: 'D', price: 3.22, hoursAgo: 72, latitude: 37.3526, longitude: -122.0070 }),
+        buildStationHistoryRow({ stationId: 'A', price: 3.55, hoursAgo: 60, latitude: 37.3346, longitude: -122.0090 }),
+        buildStationHistoryRow({ stationId: 'B', price: 3.30, hoursAgo: 60, latitude: 37.3446, longitude: -122.0090 }),
+        buildStationHistoryRow({ stationId: 'C', price: 3.31, hoursAgo: 60, latitude: 37.3496, longitude: -122.0150 }),
+        buildStationHistoryRow({ stationId: 'D', price: 3.32, hoursAgo: 60, latitude: 37.3526, longitude: -122.0070 }),
+        buildStationHistoryRow({ stationId: 'A', price: 3.65, hoursAgo: 48, latitude: 37.3346, longitude: -122.0090 }),
+        buildStationHistoryRow({ stationId: 'B', price: 3.40, hoursAgo: 48, latitude: 37.3446, longitude: -122.0090 }),
+        buildStationHistoryRow({ stationId: 'C', price: 3.41, hoursAgo: 48, latitude: 37.3496, longitude: -122.0150 }),
+        buildStationHistoryRow({ stationId: 'D', price: 3.42, hoursAgo: 48, latitude: 37.3526, longitude: -122.0070 }),
+        buildStationHistoryRow({ stationId: 'B', price: 3.69, hoursAgo: 2, latitude: 37.3446, longitude: -122.0090 }),
+        buildStationHistoryRow({ stationId: 'C', price: 3.70, hoursAgo: 2, latitude: 37.3496, longitude: -122.0150 }),
+        buildStationHistoryRow({ stationId: 'D', price: 3.71, hoursAgo: 1, latitude: 37.3526, longitude: -122.0070 }),
+    ];
+    const asyncStoragePath = require.resolve('@react-native-async-storage/async-storage');
+    const devCounterPath = require.resolve('../src/lib/devCounter.js');
+    const supabasePath = require.resolve('../src/lib/supabase.js');
+    const userPath = require.resolve('../src/lib/user.js');
+    const fuelServicePath = require.resolve('../src/services/fuel/index.js');
+    const cacheStorePath = require.resolve('../src/services/fuel/cacheStore.js');
+
+    delete require.cache[fuelServicePath];
+    delete require.cache[cacheStorePath];
+    delete require.cache[asyncStoragePath];
+    delete require.cache[devCounterPath];
+    delete require.cache[supabasePath];
+    delete require.cache[userPath];
+
+    primeModule(asyncStoragePath, {
+        default: asyncStorageMock.module,
+    });
+    primeModule(devCounterPath, {
+        getApiStats: async () => ({}),
+        incrementApiStat: () => { },
+        resetApiStats: async () => ({}),
+    });
+    primeModule(userPath, {
+        getUserUuid: async () => 'test-user',
+    });
+    primeModule(supabasePath, {
+        hasSupabaseConfig: true,
+        supabase: {
+            from(tableName) {
+                assert.equal(tableName, 'station_prices');
+
+                return {
+                    select() {
+                        return {
+                            eq() {
+                                return this;
+                            },
+                            gte() {
+                                return this;
+                            },
+                            order() {
+                                return this;
+                            },
+                            limit() {
+                                return Promise.resolve({
+                                    data: areaHistoryRows,
+                                    error: null,
+                                });
+                            },
+                        };
+                    },
+                    insert(rows) {
+                        insertedRows.push(...rows);
+                        return Promise.resolve({ error: null });
+                    },
+                };
+            },
+        },
+    });
+
+    const originalFetch = global.fetch;
+    const originalDevFlag = global.__DEV__;
+
+    global.__DEV__ = false;
+    global.fetch = async () => ({
+        ok: true,
+        status: 200,
+        async text() {
+            return JSON.stringify({
+                data: {
+                    locationBySearchTerm: {
+                        stations: {
+                            results: [
+                                {
+                                    id: 'A',
+                                    name: 'Dodge Store',
+                                    latitude: 37.3346,
+                                    longitude: -122.0090,
+                                    address: {
+                                        line1: '1 Main St',
+                                        locality: 'Cupertino',
+                                        region: 'CA',
+                                        postalCode: '95014',
+                                    },
+                                    prices: [
+                                        {
+                                            fuelProduct: 'regular_gas',
+                                            credit: {
+                                                price: 3.10,
+                                                postedTime: new Date(Date.now() - (48 * 60 * 60 * 1000)).toISOString(),
+                                            },
+                                        },
+                                    ],
+                                    ratingsCount: 42,
+                                    starRating: 4.5,
+                                },
+                            ],
+                        },
+                    },
+                },
+            });
+        },
+    });
+
+    try {
+        const { refreshFuelPriceSnapshot } = require(fuelServicePath);
+        const result = await refreshFuelPriceSnapshot({
+            latitude: 37.3346,
+            longitude: -122.0090,
+            radiusMiles: 10,
+            fuelType: 'regular',
+            preferredProvider: 'gasbuddy',
+            forceLiveGasBuddy: true,
+        });
+        const persistedStation = (result?.snapshot?.topStations || []).find(
+            quote => String(quote?.stationId || '') === 'A'
+        );
+
+        assert.equal(insertedRows.length, 1);
+        assert.ok((persistedStation?.price || 0) > 3.10);
+        assert.equal(insertedRows[0].price, persistedStation.price);
+        assert.equal(insertedRows[0].all_prices.regular, persistedStation.allPrices.regular);
+    } finally {
+        global.fetch = originalFetch;
+        global.__DEV__ = originalDevFlag;
+        delete require.cache[fuelServicePath];
+        delete require.cache[cacheStorePath];
+        delete require.cache[asyncStoragePath];
+        delete require.cache[devCounterPath];
+        delete require.cache[supabasePath];
+        delete require.cache[userPath];
     }
 });

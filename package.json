@@ -10,7 +10,7 @@
     "ios:sim": "expo start --ios",
     "route:probe": "swift ./scripts/predictiveRouteProbe.swift",
     "web": "expo start --web",
-    "test": "node --test ./tests/fuelDataContracts.test.cjs ./tests/fuelCacheReset.test.cjs ./tests/priceValidation.test.cjs ./tests/fuelGradeValidation.test.mjs ./tests/predictiveFuelingDemo.test.cjs",
+    "test": "node --test ./tests/fuelDataContracts.test.cjs ./tests/fuelCacheReset.test.cjs ./tests/trendData.test.cjs ./tests/priceValidation.test.cjs ./tests/fuelGradeValidation.test.mjs ./tests/homeState.test.mjs ./tests/predictiveFuelingDemo.test.cjs",
     "test:cluster": "node --test ./tests/clusterAnimationMath.test.cjs ./tests/clusterProbe.integration.test.cjs"
   },
   "dependencies": {
