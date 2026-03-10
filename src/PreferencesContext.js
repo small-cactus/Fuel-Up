@@ -21,6 +21,23 @@ const PreferencesContext = createContext({
     isLoading: true,
 });
 
+function toFiniteNumber(value) {
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) ? numericValue : null;
+}
+
+function normalizePreferences(preferences = {}) {
+    const normalizedSearchRadiusMiles = toFiniteNumber(preferences.searchRadiusMiles);
+    const normalizedMinimumRating = toFiniteNumber(preferences.minimumRating);
+
+    return {
+        ...DEFAULT_PREFERENCES,
+        ...preferences,
+        searchRadiusMiles: normalizedSearchRadiusMiles ?? DEFAULT_PREFERENCES.searchRadiusMiles,
+        minimumRating: normalizedMinimumRating ?? DEFAULT_PREFERENCES.minimumRating,
+    };
+}
+
 export function PreferencesProvider({ children }) {
     const [preferences, setPreferences] = useState(DEFAULT_PREFERENCES);
     const [isLoading, setIsLoading] = useState(true);
@@ -34,7 +51,7 @@ export function PreferencesProvider({ children }) {
             const stored = await AsyncStorage.getItem(STORAGE_KEY);
             if (stored) {
                 const parsed = JSON.parse(stored);
-                setPreferences({ ...DEFAULT_PREFERENCES, ...parsed });
+                setPreferences(normalizePreferences(parsed));
             }
         } catch (error) {
             console.warn('Failed to load preferences:', error);
@@ -53,7 +70,7 @@ export function PreferencesProvider({ children }) {
 
     const updatePreference = (key, value) => {
         setPreferences(current => {
-            const next = { ...current, [key]: value };
+            const next = normalizePreferences({ ...current, [key]: value });
             savePreferences(next);
             return next;
         });

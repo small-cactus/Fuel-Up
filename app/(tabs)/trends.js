@@ -258,9 +258,10 @@ function ContainerlessAreaChart({ data, width, height, isDark, trendColor }) {
 export default function TrendsScreen() {
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
-    const { fuelResetToken } = useAppState();
+    const { fuelResetToken, manualLocationOverride } = useAppState();
     const { preferences } = usePreferences();
     const selectedFuelGrade = normalizeFuelGrade(preferences.preferredOctane);
+    const minimumRating = preferences.minimumRating || 0;
     const selectedFuelGradeMeta = getFuelGradeMeta(selectedFuelGrade);
     const liveCachedTrendData = getCachedTrendData(selectedFuelGrade);
     const [loading, setLoading] = useState(!liveCachedTrendData);
@@ -409,7 +410,18 @@ export default function TrendsScreen() {
                 }
 
                 let loc = null;
-                if (permission.status === 'granted') {
+                if (
+                    manualLocationOverride &&
+                    Number.isFinite(Number(manualLocationOverride.latitude)) &&
+                    Number.isFinite(Number(manualLocationOverride.longitude))
+                ) {
+                    loc = {
+                        coords: {
+                            latitude: Number(manualLocationOverride.latitude),
+                            longitude: Number(manualLocationOverride.longitude),
+                        },
+                    };
+                } else if (permission.status === 'granted') {
                     loc = await Location.getCurrentPositionAsync({});
                 }
 
@@ -419,6 +431,8 @@ export default function TrendsScreen() {
                     latitude: lat,
                     longitude: lng,
                     fuelType: requestFuelGrade,
+                    radiusMiles: preferences.searchRadiusMiles,
+                    minimumRating,
                 });
 
                 if (!isTrendCacheGenerationCurrent(requestGeneration)) {
@@ -455,7 +469,7 @@ export default function TrendsScreen() {
             promise: request,
         };
         return request;
-    }, [selectedFuelGrade]);
+    }, [manualLocationOverride, minimumRating, preferences.searchRadiusMiles, selectedFuelGrade]);
 
     useFocusEffect(
         useCallback(() => {

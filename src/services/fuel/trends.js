@@ -1,7 +1,10 @@
 import { supabase } from '../../lib/supabase.js';
+import { filterStationQuotesForHome } from '../../lib/homeState.js';
+import { rankQuotesForFuelGrade } from '../../lib/fuelGrade.js';
 const { buildLatestFuelStationQuotesFromRows } = require('./index');
 const { buildValidationState } = require('./priceValidation');
 const { applyCurrentStationQuoteProjection } = require('./trendProjection');
+const { buildTrendLeaderboard } = require('./trendLeaderboard');
 
 const cachedTrendDataByFuelType = {};
 const lastResolvedTrendDataByFuelType = {};
@@ -139,7 +142,13 @@ export function clearTrendDataCache(fuelType = null) {
     clearObjectValues(inFlightTrendDataRequestsByFuelType, fuelType);
 }
 
-export async function fetchTrendData({ latitude, longitude, fuelType = 'regular' }) {
+export async function fetchTrendData({
+    latitude,
+    longitude,
+    fuelType = 'regular',
+    radiusMiles = 10,
+    minimumRating = 0,
+}) {
     const searchLat = Math.round(latitude * 10) / 10;
     const searchLng = Math.round(longitude * 10) / 10;
 
@@ -148,6 +157,7 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
         .select('*')
         .eq('search_latitude_rounded', searchLat)
         .eq('search_longitude_rounded', searchLng)
+        .eq('fuel_type', fuelType)
         .order('created_at', { ascending: true });
 
     const validatedRows = !error && Array.isArray(rows)
@@ -162,9 +172,29 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
             },
         })
         : [];
+    const rankedLatestQuotes = rankQuotesForFuelGrade(
+        filterStationQuotesForHome({
+            quotes: projectedLatestQuotes,
+            origin: {
+                latitude,
+                longitude,
+            },
+            radiusMiles,
+            minimumRating,
+        }),
+        fuelType
+    );
+    const visibleStationIds = new Set(
+        rankedLatestQuotes
+            .map(quote => String(quote?.stationId || '').trim())
+            .filter(Boolean)
+    );
     const projectedRows = applyCurrentStationQuoteProjection(validatedRows, projectedLatestQuotes);
+    const displayedRows = visibleStationIds.size > 0
+        ? projectedRows.filter(row => visibleStationIds.has(String(row?.station_id || '').trim()))
+        : [];
 
-    if (error || projectedRows.length === 0) {
+    if (error || displayedRows.length === 0 || rankedLatestQuotes.length === 0) {
         return {
             overallTrend: null,
             averagePricesByDay: [],
@@ -181,7 +211,7 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
     const latestPriceByStation = new Map();
     let previousLeaderboardSnapshotKey = null;
 
-    projectedRows.forEach(row => {
+    displayedRows.forEach(row => {
         latestPriceByStation.set(row.station_id, row.price);
 
         const rankingSnapshot = [...latestPriceByStation.entries()]
@@ -201,7 +231,7 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
 
     // 1. Average prices grouped by day (for the main chart)
     const dayAggregation = {};
-    projectedRows.forEach(row => {
+    displayedRows.forEach(row => {
         const dateStr = new Date(row.created_at).toISOString().split('T')[0];
         if (!dayAggregation[dateStr]) {
             dayAggregation[dateStr] = { sum: 0, count: 0 };
@@ -235,7 +265,7 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
     // For heatmap, average price of each station over its history
     const mapHeatmapPoints = [];
 
-    projectedRows.forEach(row => {
+    displayedRows.forEach(row => {
         if (!stationAggregation[row.station_id]) {
             stationAggregation[row.station_id] = {
                 stationId: row.station_id,
@@ -270,6 +300,9 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
     });
 
     const stations = Object.values(stationAggregation);
+    const stationHistoryById = new Map(
+        stations.map(station => [String(station.stationId || '').trim(), station])
+    );
 
     // Calculate max delta per station and distance to user
     stations.forEach(st => {
@@ -315,22 +348,11 @@ export async function fetchTrendData({ latitude, longitude, fuelType = 'regular'
         st.earliestRank = idx;
     });
 
-    const latestRanking = [...stations].sort((a, b) => {
-        if (a.latestPrice === b.latestPrice) return String(a.stationId).localeCompare(String(b.stationId));
-        return a.latestPrice - b.latestPrice;
+    const leaderboard = buildTrendLeaderboard({
+        rankedLatestQuotes,
+        stationHistoryById,
+        limit: 5,
     });
-
-    // Assign latest rank and calculate shift
-    latestRanking.forEach((st, idx) => {
-        st.latestRank = idx;
-        // Positive means they improved (moved up the leaderboard to a smaller index)
-        // e.g. from rank 5 (index 4) to rank 2 (index 1) -> 4 - 1 = +3
-        st.rankShift = st.earliestRank - st.latestRank;
-    });
-
-    const leaderboard = latestRanking
-        .filter(st => st.prices.length > 0)
-        .slice(0, 5); // Return top 5 currently cheapest
 
     // 3. Competitor Clusters (Stations within 0.5 miles of each other)
     const processedPairs = new Set();

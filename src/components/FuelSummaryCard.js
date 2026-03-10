@@ -69,24 +69,15 @@ function FuelSummaryCard({
     const selectedGradePrice = resolveQuotePriceForFuelGrade(quote, selectedFuelGrade);
     const additionalGradePrices = FUEL_GRADE_ORDER
         .filter(grade => grade !== selectedFuelGrade)
-        .map(grade => {
-            const price = resolveQuotePriceForFuelGrade(
+        .map(grade => ({
+            grade,
+            price: resolveQuotePriceForFuelGrade(
                 quote,
                 grade,
                 { allowFallbackToQuotePrice: false }
-            );
-
-            if (price === null) {
-                return null;
-            }
-
-            return {
-                grade,
-                price,
-                meta: getFuelGradeMeta(grade),
-            };
-        })
-        .filter(Boolean);
+            ),
+            meta: getFuelGradeMeta(grade),
+        }));
     const bestPriceColor = isDark ? BEST_PRICE_DARK : BEST_PRICE_LIGHT;
     const hasFailureState = !quote && Boolean(errorMsg);
     const title = hasFailureState ? 'No Prices Returned' : quote?.stationName || 'Cheapest Nearby';
@@ -140,7 +131,7 @@ function FuelSummaryCard({
                             <Text style={[styles.octaneLabel, { color: themeColors.text }]}>{selectedGradeMeta.octane}</Text>
                         </View>
                         <Text style={[styles.cardPrice, { color: bestPriceColor }]}>
-                            ${formatPrice(selectedGradePrice ?? quote?.price)}
+                            ${formatPrice(selectedGradePrice)}
                         </Text>
                     </View>
 

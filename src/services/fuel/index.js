@@ -36,6 +36,7 @@ const AREA_HISTORY_LOOKBACK_MS = 14 * 24 * 60 * 60 * 1000;
 const MAX_AREA_HISTORY_ROWS = 1500;
 const PRICE_VALIDATION_VERSION = 2;
 const FUEL_CACHE_RESET_ERROR_CODE = 'FUEL_CACHE_RESET';
+const STANDARD_FUEL_TYPES = ['regular', 'midgrade', 'premium', 'diesel'];
 let fuelCacheGeneration = 0;
 
 function createFuelCacheResetError() {
@@ -191,9 +192,8 @@ function resolveStoredFuelPrice({ allPrices, fuelType }) {
 
 function normalizeStoredAllPrices(allPrices) {
     const normalized = {};
-    const fuelTypes = ['regular', 'midgrade', 'premium', 'diesel'];
 
-    for (const fuelType of fuelTypes) {
+    for (const fuelType of STANDARD_FUEL_TYPES) {
         const resolved = resolveStoredFuelPrice({ allPrices, fuelType });
         if (resolved !== null) {
             normalized[fuelType] = resolved;
@@ -209,6 +209,135 @@ function cloneQuotePayload(value) {
     }
 
     return JSON.parse(JSON.stringify(value));
+}
+
+function normalizeFuelTypeName(value) {
+    const normalizedFuelType = String(value || '').trim().toLowerCase();
+    return STANDARD_FUEL_TYPES.includes(normalizedFuelType) ? normalizedFuelType : 'regular';
+}
+
+function extractStandardFuelPrices(allPrices) {
+    if (!allPrices || typeof allPrices !== 'object') {
+        return [];
+    }
+
+    return STANDARD_FUEL_TYPES
+        .map(fuelType => ({
+            fuelType,
+            price: toPositiveNumber(allPrices[fuelType]),
+        }))
+        .filter(entry => entry.price !== null);
+}
+
+function getUniformGradePriceIssue(allPrices) {
+    const standardFuelPrices = extractStandardFuelPrices(allPrices);
+
+    if (standardFuelPrices.length < 2) {
+        return null;
+    }
+
+    const distinctPrices = new Set(
+        standardFuelPrices.map(entry => Number(entry.price).toFixed(3))
+    );
+
+    if (distinctPrices.size !== 1) {
+        return null;
+    }
+
+    return {
+        fuelTypes: standardFuelPrices.map(entry => entry.fuelType),
+        price: standardFuelPrices[0].price,
+        regularPrice: standardFuelPrices.find(entry => entry.fuelType === 'regular')?.price ?? null,
+    };
+}
+
+function buildRegularOnlyAllPrices(allPrices, regularPrice) {
+    const normalizedRegularPrice = toPositiveNumber(regularPrice);
+
+    if (normalizedRegularPrice === null) {
+        return {};
+    }
+
+    const nextAllPrices = {
+        regular: normalizedRegularPrice,
+    };
+    const regularPayment = allPrices?._payment?.regular;
+
+    if (regularPayment && typeof regularPayment === 'object') {
+        const credit = toPositiveNumber(regularPayment.credit);
+        const cash = toPositiveNumber(regularPayment.cash);
+
+        if (credit !== null || cash !== null) {
+            const selected = regularPayment.selected === 'cash'
+                ? 'cash'
+                : regularPayment.selected === 'credit'
+                    ? 'credit'
+                    : credit !== null
+                        ? 'credit'
+                        : 'cash';
+            nextAllPrices._payment = {
+                regular: {
+                    credit,
+                    cash,
+                    selected,
+                },
+            };
+        }
+    }
+
+    return nextAllPrices;
+}
+
+function sanitizeUniformGradeQuoteForFuelType(quote, requestedFuelType) {
+    if (!quote || quote.providerTier !== 'station' || quote.isEstimated) {
+        return quote;
+    }
+
+    const normalizedRequestedFuelType = normalizeFuelTypeName(requestedFuelType || quote.fuelType);
+    const uniformGradePriceIssue = getUniformGradePriceIssue(quote.allPrices);
+
+    if (!uniformGradePriceIssue) {
+        return quote;
+    }
+
+    if (normalizedRequestedFuelType !== 'regular' || uniformGradePriceIssue.regularPrice === null) {
+        return null;
+    }
+
+    return {
+        ...quote,
+        fuelType: 'regular',
+        price: uniformGradePriceIssue.regularPrice,
+        allPrices: buildRegularOnlyAllPrices(quote.allPrices, uniformGradePriceIssue.regularPrice),
+        validation: quote.validationByFuelType?.regular || (
+            String(quote.validation?.fuelType || '').toLowerCase() === 'regular'
+                ? quote.validation
+                : null
+        ),
+        validationByFuelType: quote.validationByFuelType?.regular
+            ? { regular: quote.validationByFuelType.regular }
+            : {},
+        availableFuelGrades: ['regular'],
+        hasUniformGradePriceIssue: true,
+    };
+}
+
+function sanitizeStationQuotesForFuelType(quotes, requestedFuelType) {
+    return (quotes || [])
+        .map(quote => sanitizeUniformGradeQuoteForFuelType(quote, requestedFuelType))
+        .filter(Boolean);
+}
+
+function sanitizeSnapshotForFuelType(snapshot, requestedFuelType) {
+    if (!snapshot || typeof snapshot !== 'object') {
+        return snapshot;
+    }
+
+    return {
+        ...snapshot,
+        quote: sanitizeUniformGradeQuoteForFuelType(snapshot.quote, requestedFuelType),
+        topStations: sanitizeStationQuotesForFuelType(snapshot.topStations, requestedFuelType),
+    };
 }
 
 function toTimestampMs(value) {
@@ -548,7 +677,7 @@ function mapStationPriceRowToQuote({ row, origin, fallbackSourceLabel }) {
         ? { latitude, longitude }
         : { latitude: origin.latitude, longitude: origin.longitude };
 
-    return {
+    const quote = {
         providerId: row.provider_id || 'gasbuddy',
         providerTier: 'station',
         stationId: row.station_id ? String(row.station_id) : '',
@@ -571,6 +700,8 @@ function mapStationPriceRowToQuote({ row, origin, fallbackSourceLabel }) {
         rating: row.rating ? Number(row.rating) : null,
         userRatingCount: row.user_rating_count ? Number(row.user_rating_count) : null,
     };
+
+    return sanitizeUniformGradeQuoteForFuelType(quote, fuelType);
 }
 
 function buildBlsUrl({ fuelType }) {
@@ -1285,14 +1416,14 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, force
         const { incrementApiStat } = require('../../lib/devCounter');
         incrementApiStat('gasbuddy');
 
-        const liveQuotes = normalizeGasBuddyResponse({
+        const liveQuotes = sanitizeStationQuotesForFuelType(normalizeGasBuddyResponse({
             origin: {
                 latitude,
                 longitude,
             },
             fuelType,
             payload: response.payload,
-        }) || [];
+        }) || [], fuelType);
 
         let fallbackQuotes = [];
         let validatedLiveQuotes = liveQuotes;
@@ -1352,6 +1483,9 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, force
         } catch (fallbackLookupError) {
             console.error('GasBuddy fallback lookup failed:', fallbackLookupError);
         }
+
+        validatedLiveQuotes = sanitizeStationQuotesForFuelType(validatedLiveQuotes, fuelType);
+        fallbackQuotes = sanitizeStationQuotesForFuelType(fallbackQuotes, fuelType);
 
         const adjustedQuoteCount = validatedLiveQuotes.filter(quote => quote?.validation?.usedPrediction).length;
         const quotes = [...validatedLiveQuotes, ...fallbackQuotes];
@@ -1517,13 +1651,13 @@ async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fu
         return null;
     }
 
-    return {
+    return sanitizeSnapshotForFuelType({
         ...cacheEntry,
         isFresh: isCacheEntryFresh(
             cacheEntry,
             cacheEntry.quote?.isEstimated ? getFuelServiceConfig().areaCacheTtlMs : getFuelServiceConfig().stationCacheTtlMs
         ),
-    };
+    }, fuelType);
 }
 
 async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMiles, fuelType, preferredProvider, forceLiveGasBuddy = false }) {
@@ -1625,7 +1759,10 @@ async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMi
 
         debugState.providers = providerResults.map(result => result.debugEntry);
 
-        let allQuotes = providerResults.flatMap(result => result.quotes || result.quote || []).filter(Boolean);
+        let allQuotes = sanitizeStationQuotesForFuelType(
+            providerResults.flatMap(result => result.quotes || result.quote || []).filter(Boolean),
+            normalizedFuelType
+        );
         const stationQuotesNeedingValidation = allQuotes.filter(quote => (
             quote.providerTier === 'station' &&
             !quote.isEstimated &&
@@ -1656,7 +1793,10 @@ async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMi
                             validatedQuotes.map(quote => [buildQuoteIdentity(quote), quote])
                         );
 
-                        allQuotes = allQuotes.map(quote => replacementByIdentity.get(buildQuoteIdentity(quote)) || quote);
+                        allQuotes = sanitizeStationQuotesForFuelType(
+                            allQuotes.map(quote => replacementByIdentity.get(buildQuoteIdentity(quote)) || quote),
+                            normalizedFuelType
+                        );
                     }
                 }
             } catch (validationError) {
@@ -1706,12 +1846,12 @@ async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMi
             throw requestError;
         }
 
-        const snapshot = normalizeSnapshot({
+        const snapshot = sanitizeSnapshotForFuelType(normalizeSnapshot({
             cacheKey,
             quote: bestQuote,
             topStations,
             regionalQuotes: supplementalQuotes,
-        });
+        }), normalizedFuelType);
 
         if (requestGeneration !== fuelCacheGeneration) {
             throw createFuelCacheResetError();

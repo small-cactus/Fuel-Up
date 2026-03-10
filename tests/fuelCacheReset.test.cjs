@@ -358,3 +358,152 @@ test('refreshFuelPriceSnapshot persists the validated live price instead of the 
         delete require.cache[userPath];
     }
 });
+
+test('refreshFuelPriceSnapshot rejects live uniform multi-grade stations for non-regular fuel requests', async () => {
+    const asyncStorageMock = createAsyncStorageMock();
+    const insertedRows = [];
+    const asyncStoragePath = require.resolve('@react-native-async-storage/async-storage');
+    const devCounterPath = require.resolve('../src/lib/devCounter.js');
+    const supabasePath = require.resolve('../src/lib/supabase.js');
+    const userPath = require.resolve('../src/lib/user.js');
+    const fuelServicePath = require.resolve('../src/services/fuel/index.js');
+    const cacheStorePath = require.resolve('../src/services/fuel/cacheStore.js');
+
+    delete require.cache[fuelServicePath];
+    delete require.cache[cacheStorePath];
+    delete require.cache[asyncStoragePath];
+    delete require.cache[devCounterPath];
+    delete require.cache[supabasePath];
+    delete require.cache[userPath];
+
+    primeModule(asyncStoragePath, {
+        default: asyncStorageMock.module,
+    });
+    primeModule(devCounterPath, {
+        getApiStats: async () => ({}),
+        incrementApiStat: () => { },
+        resetApiStats: async () => ({}),
+    });
+    primeModule(userPath, {
+        getUserUuid: async () => 'test-user',
+    });
+    primeModule(supabasePath, {
+        hasSupabaseConfig: true,
+        supabase: {
+            from(tableName) {
+                assert.equal(tableName, 'station_prices');
+
+                return {
+                    select() {
+                        return {
+                            eq() {
+                                return this;
+                            },
+                            gte() {
+                                return this;
+                            },
+                            order() {
+                                return this;
+                            },
+                            limit() {
+                                return Promise.resolve({
+                                    data: [],
+                                    error: null,
+                                });
+                            },
+                            then(resolve) {
+                                return Promise.resolve({
+                                    data: [],
+                                    error: null,
+                                }).then(resolve);
+                            },
+                        };
+                    },
+                    insert(rows) {
+                        insertedRows.push(...rows);
+                        return Promise.resolve({ error: null });
+                    },
+                };
+            },
+        },
+    });
+
+    const originalFetch = global.fetch;
+    const originalDevFlag = global.__DEV__;
+
+    global.__DEV__ = false;
+    global.fetch = async () => ({
+        ok: true,
+        status: 200,
+        async text() {
+            return JSON.stringify({
+                data: {
+                    locationBySearchTerm: {
+                        stations: {
+                            results: [
+                                {
+                                    id: 'uniform-premium',
+                                    name: 'Uniform Fuel',
+                                    latitude: 37.3346,
+                                    longitude: -122.0090,
+                                    address: {
+                                        line1: '1 Main St',
+                                        locality: 'Cupertino',
+                                        region: 'CA',
+                                        postalCode: '95014',
+                                    },
+                                    prices: [
+                                        {
+                                            fuelProduct: 'regular_gas',
+                                            credit: { price: 3.79, postedTime: new Date().toISOString() },
+                                        },
+                                        {
+                                            fuelProduct: 'midgrade_gas',
+                                            credit: { price: 3.79, postedTime: new Date().toISOString() },
+                                        },
+                                        {
+                                            fuelProduct: 'premium_gas',
+                                            credit: { price: 3.79, postedTime: new Date().toISOString() },
+                                        },
+                                    ],
+                                    ratingsCount: 42,
+                                    starRating: 4.5,
+                                },
+                            ],
+                        },
+                    },
+                },
+            });
+        },
+    });
+
+    try {
+        const { refreshFuelPriceSnapshot } = require(fuelServicePath);
+
+        await assert.rejects(
+            refreshFuelPriceSnapshot({
+                latitude: 37.3346,
+                longitude: -122.0090,
+                radiusMiles: 10,
+                fuelType: 'premium',
+                preferredProvider: 'gasbuddy',
+                forceLiveGasBuddy: true,
+            }),
+            error => {
+                assert.match(String(error?.userMessage || ''), /No prices returned/i);
+                return true;
+            }
+        );
+
+        assert.equal(insertedRows.length, 0);
+    } finally {
+        global.fetch = originalFetch;
+        global.__DEV__ = originalDevFlag;
+        delete require.cache[fuelServicePath];
+        delete require.cache[cacheStorePath];
+        delete require.cache[asyncStoragePath];
+        delete require.cache[devCounterPath];
+        delete require.cache[supabasePath];
+        delete require.cache[userPath];
+    }
+});

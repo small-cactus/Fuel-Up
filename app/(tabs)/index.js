@@ -1673,6 +1673,8 @@ export default function HomeScreen() {
                 latitude,
                 longitude,
                 fuelType: selectedFuelGrade,
+                radiusMiles: preferences.searchRadiusMiles,
+                minimumRating: preferences.minimumRating || 0,
             });
         } catch (error) {
             if (isFuelCacheResetError(error)) {
@@ -1893,6 +1895,15 @@ export default function HomeScreen() {
         rankedStationQuotes
             .map((q, idx) => ({ ...q, originalIndex: idx }))
     ), [rankedStationQuotes]);
+    const stationQuotesSignature = useMemo(() => (
+        stationQuotes
+            .map(quote => [
+                String(quote.stationId || ''),
+                Number.isFinite(quote.latitude) ? quote.latitude.toFixed(5) : 'lat',
+                Number.isFinite(quote.longitude) ? quote.longitude.toFixed(5) : 'lng',
+            ].join(':'))
+            .join('|')
+    ), [stationQuotes]);
     const effectiveErrorMsg = useMemo(() => {
         if (errorMsg) {
             return errorMsg;
@@ -1967,7 +1978,7 @@ export default function HomeScreen() {
             !pendingInitialStationsFitRef.current ||
             !isMapLoaded ||
             !mapRef.current ||
-            stationQuotes.length === 0 ||
+            !stationQuotesSignature ||
             isInitialStationsFitScheduledRef.current
         ) {
             return;
@@ -2034,7 +2045,7 @@ export default function HomeScreen() {
 
             runInitialFitAttempt();
         })();
-    }, [isMapLoaded, isMapMoving, stationQuotes.length]);
+    }, [isMapLoaded, isMapMoving, stationQuotesSignature]);
 
     useEffect(() => {
         if (activeIndex >= stationQuotes.length) {
@@ -2307,7 +2318,7 @@ export default function HomeScreen() {
         if (!isMapLoaded || !mapRef.current || stationQuotes.length === 0 || isMapMoving) return;
 
         // Use ONLY stationQuotes for the data hash to avoid feedback loops from zooming
-        const currentHash = stationQuotes.map(q => q.stationId).join(',');
+        const currentHash = stationQuotesSignature;
         const isNewData = currentHash !== lastDataHashRef.current;
 
         if (pendingInitialStationsFitRef.current && isNewData) {
@@ -2331,7 +2342,7 @@ export default function HomeScreen() {
                 });
             }, 100);
         }
-    }, [activeIndex, fitMapToStations, isFocused, isMapLoaded, isMapMoving, stationQuotes]);
+    }, [activeIndex, fitMapToStations, isFocused, isMapLoaded, isMapMoving, stationQuotes.length, stationQuotesSignature]);
 
     const resolveCardIndexFromOffset = (offsetX) => {
         if (!Number.isFinite(offsetX) || itemWidth <= 0 || stationQuotesRef.current.length === 0) {

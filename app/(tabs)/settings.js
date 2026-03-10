@@ -41,12 +41,43 @@ const TOP_CANOPY_HEIGHT = 44;
 const SHOW_PRICE_SOURCE_CONTROLS = false;
 const SHOW_MINIMUM_RATING_CONTROLS = false;
 
+function clamp(value, minimum, maximum) {
+    return Math.min(maximum, Math.max(minimum, value));
+}
+
 function formatRatingLabel(rating) {
     return rating === 0 ? 'Any' : `${rating}+`;
 }
 
 function findLabel(options, key, fallback) {
     return options.find((option) => option.key === key)?.label ?? fallback;
+}
+
+function resolveRadiusIndex(value) {
+    const numericValue = Number(value);
+
+    if (!Number.isFinite(numericValue)) {
+        return 0;
+    }
+
+    const exactMatchIndex = RADIUS_OPTIONS.indexOf(numericValue);
+    if (exactMatchIndex >= 0) {
+        return exactMatchIndex;
+    }
+
+    let closestIndex = 0;
+    let closestDistance = Number.POSITIVE_INFINITY;
+
+    RADIUS_OPTIONS.forEach((option, index) => {
+        const distance = Math.abs(option - numericValue);
+
+        if (distance < closestDistance) {
+            closestDistance = distance;
+            closestIndex = index;
+        }
+    });
+
+    return closestIndex;
 }
 
 function noThrow(promise) {
@@ -190,7 +221,7 @@ export default function SettingsScreen() {
         noticeText: { fontWeight: isDark ? '400' : '500' },
     }), [isDark]);
 
-    const radiusIndex = Math.max(0, RADIUS_OPTIONS.indexOf(preferences.searchRadiusMiles));
+    const radiusIndex = resolveRadiusIndex(preferences.searchRadiusMiles);
     const radiusValue = RADIUS_OPTIONS[radiusIndex];
     const lastRadiusIndexRef = useRef(radiusIndex);
 
@@ -230,12 +261,16 @@ export default function SettingsScreen() {
     };
 
     const handleRadiusSliderChange = (rawValue) => {
-        const nextIndex = Math.round(rawValue);
+        const nextIndex = clamp(
+            Math.round(rawValue),
+            0,
+            RADIUS_OPTIONS.length - 1
+        );
         if (nextIndex === lastRadiusIndexRef.current) return;
 
         lastRadiusIndexRef.current = nextIndex;
         noThrow(Haptics.selectionAsync());
-        updatePreference('searchRadiusMiles', RADIUS_OPTIONS[nextIndex]);
+        updatePreference('searchRadiusMiles', Number(RADIUS_OPTIONS[nextIndex]));
     };
 
     const handleFuelReset = async () => {

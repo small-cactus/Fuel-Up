@@ -47,6 +47,16 @@ function resolveValidatedPriceForFuelGrade(quote, fuelGrade) {
     return finalPrice !== null ? finalPrice : null;
 }
 
+function hasExplicitAvailabilityForFuelGrade(quote, fuelGrade) {
+    if (!Array.isArray(quote?.availableFuelGrades) || quote.availableFuelGrades.length === 0) {
+        return false;
+    }
+
+    return quote.availableFuelGrades
+        .map(grade => normalizeFuelGrade(grade))
+        .includes(fuelGrade);
+}
+
 export function resolveQuotePriceForFuelGrade(
     quote,
     fuelGrade,
@@ -72,6 +82,10 @@ export function resolveQuotePriceForFuelGrade(
         if (quotePrice !== null) {
             return quotePrice;
         }
+    }
+
+    if (Array.isArray(quote?.availableFuelGrades) && !hasExplicitAvailabilityForFuelGrade(quote, normalizedFuelGrade)) {
+        return null;
     }
 
     if (!allowFallbackToQuotePrice) {

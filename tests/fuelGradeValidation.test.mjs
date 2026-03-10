@@ -89,3 +89,21 @@ test('applyFuelGradeToQuote prefers the validated final price over stale allPric
     assert.equal(regularQuote.price, 3.40);
     assert.equal(regularQuote.validation?.finalPrice, 3.40);
 });
+
+test('applyFuelGradeToQuote rejects unavailable grades on regular-only quotes', () => {
+    const quote = {
+        stationId: 'station-3',
+        fuelType: 'regular',
+        price: 3.09,
+        allPrices: {
+            regular: 3.09,
+        },
+        availableFuelGrades: ['regular'],
+        hasUniformGradePriceIssue: true,
+    };
+
+    assert.equal(applyFuelGradeToQuote(quote, 'premium'), null);
+
+    const regularQuote = applyFuelGradeToQuote(quote, 'regular');
+    assert.equal(regularQuote?.price, 3.09);
+});
