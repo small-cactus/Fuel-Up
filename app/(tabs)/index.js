@@ -1233,6 +1233,7 @@ export default function HomeScreen() {
     const [userLocationBubble, setUserLocationBubble] = useState(null);
     const [isMapMoving, setIsMapMoving] = useState(false);
     const [shouldRevealActiveSelection, setShouldRevealActiveSelection] = useState(false);
+    const [stationsFitRequestVersion, setStationsFitRequestVersion] = useState(0);
     const [isClusterDebugRecording, setIsClusterDebugRecording] = useState(false);
     const [isClusterDebugProbeRunning, setIsClusterDebugProbeRunning] = useState(false);
     const [clusterDebugProbeSummary, setClusterDebugProbeSummary] = useState('');
@@ -1309,6 +1310,7 @@ export default function HomeScreen() {
         lastResolvedHomeQuerySignatureRef.current = '';
         activeHomeQuerySignatureRef.current = '';
         setShouldRevealActiveSelection(false);
+        setStationsFitRequestVersion(0);
         holdRootReveal();
     };
 
@@ -1661,6 +1663,7 @@ export default function HomeScreen() {
             applySnapshot(freshSnapshot);
             pendingInitialStationsFitRef.current = true;
             shouldAnimatePendingInitialStationsFitRef.current = shouldAnimateInitialStationsFit;
+            setStationsFitRequestVersion(currentValue => currentValue + 1);
             lastResolvedHomeQuerySignatureRef.current = requestQuerySignature;
 
             if (isMountedRef.current) {
@@ -2045,7 +2048,7 @@ export default function HomeScreen() {
 
             runInitialFitAttempt();
         })();
-    }, [isMapLoaded, isMapMoving, stationQuotesSignature]);
+    }, [isMapLoaded, isMapMoving, stationQuotesSignature, stationsFitRequestVersion]);
 
     useEffect(() => {
         if (activeIndex >= stationQuotes.length) {

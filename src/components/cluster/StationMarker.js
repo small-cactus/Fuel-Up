@@ -50,11 +50,11 @@ function StationMarker({
   themeColors,
   onPress,
 }) {
-  const appearProgress = useSharedValue(0);
-  const suppressionProgress = useSharedValue(0);
+  const appearProgress = useSharedValue(1);
+  const suppressionProgress = useSharedValue(isSuppressed ? 1 : 0);
   const tracksViewChangesTimeoutRef = useRef(null);
   const visualStateSignatureRef = useRef('');
-  const [tracksViewChanges, setTracksViewChanges] = useState(true);
+  const [tracksViewChanges, setTracksViewChanges] = useState(false);
 
   useEffect(() => {
     ensureInitialShrinkDelayWindowTimer();
@@ -66,14 +66,6 @@ function StationMarker({
       }
     };
   }, []);
-
-  useEffect(() => {
-    appearProgress.value = 0;
-    appearProgress.value = withTiming(1, {
-      duration: APPEAR_DURATION_MS,
-      easing: Easing.out(Easing.cubic),
-    });
-  }, [appearProgress]);
 
   useEffect(() => {
     if (isSuppressed) {
@@ -144,7 +136,7 @@ function StationMarker({
 
     const trackingDuration = isSuppressed && isInitialShrinkDelayWindowOpen
       ? SHRINK_DELAY_MS + SHRINK_DURATION_MS + TRACKS_VIEW_CHANGES_IDLE_MS
-      : Math.max(APPEAR_DURATION_MS, SHRINK_DURATION_MS) + TRACKS_VIEW_CHANGES_IDLE_MS;
+      : SHRINK_DURATION_MS + TRACKS_VIEW_CHANGES_IDLE_MS;
 
     tracksViewChangesTimeoutRef.current = setTimeout(() => {
       tracksViewChangesTimeoutRef.current = null;
