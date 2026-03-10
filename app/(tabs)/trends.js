@@ -153,6 +153,20 @@ function formatRelativeTime(updatedAt) {
     return `${diffDays}d ago`;
 }
 
+function formatTrendDeltaPercent(delta, baselinePrice) {
+    const numericDelta = Number(delta);
+    const numericBaseline = Number(baselinePrice);
+
+    if (!Number.isFinite(numericDelta) || !Number.isFinite(numericBaseline) || numericBaseline <= 0) {
+        return '—';
+    }
+
+    const percentChange = (numericDelta / numericBaseline) * 100;
+    const prefix = percentChange > 0 ? '+' : '';
+
+    return `${prefix}${percentChange.toFixed(1)}%`;
+}
+
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -524,15 +538,12 @@ export default function TrendsScreen() {
     const realDisplayTrendData = resolvedTrendData || fallbackResolvedTrendData || null;
     const displayTrendData = realDisplayTrendData || (loading ? mockTrendData : null);
     const gradientSourceData = realDisplayTrendData || null;
-    const isPriceDrop = displayTrendData?.overallTrend?.isDecrease;
-    // Better = Green, Worse = Red
-    const primaryTrendColor = isPriceDrop ? COLORS.GREEN : COLORS.RED;
-    const secondaryTrendColor = isPriceDrop ? COLORS.GREEN_DARK : COLORS.RED_DARK;
-
     const todayTrendDirection = useMemo(
         () => getTrendDirectionFromData(displayTrendData),
         [displayTrendData]
     );
+    // Keep the chart stroke/fill aligned with the day-over-day background signal.
+    const primaryTrendColor = todayTrendDirection === 'lower' ? COLORS.GREEN : COLORS.RED;
     const targetGradientColors = useMemo(() => (
         buildTrendBackgroundGradientColors({
             direction: getTrendDirectionFromData(gradientSourceData),
@@ -581,6 +592,16 @@ export default function TrendsScreen() {
         () => formatRelativeTime(displayTrendData?.leaderboardLastChangedAt),
         [displayTrendData?.leaderboardLastChangedAt]
     );
+    const heroDeltaLabel = useMemo(() => {
+        if (!realDisplayTrendData?.overallTrend || realDisplayTrendData.averagePricesByDay.length < 2) {
+            return null;
+        }
+
+        return formatTrendDeltaPercent(
+            realDisplayTrendData.overallTrend.delta,
+            realDisplayTrendData.averagePricesByDay[0]?.price
+        );
+    }, [realDisplayTrendData]);
     const darkModeWeightStyle = useMemo(() => ({
         heroSub: { fontWeight: isDark ? '600' : '700' },
         heroPrice: { fontWeight: isDark ? '700' : '800' },
@@ -651,7 +672,7 @@ export default function TrendsScreen() {
                                                 ${realDisplayTrendData.averagePricesByDay[realDisplayTrendData.averagePricesByDay.length - 1].price.toFixed(2)}
                                             </Text>
                                             <Text style={[styles.heroDelta, numericTextStyle, darkModeWeightStyle.heroDelta, { color: primaryTrendColor }]}>
-                                                {realDisplayTrendData.overallTrend.delta > 0 ? '+' : ''}{realDisplayTrendData.overallTrend.delta.toFixed(2)}¢
+                                                {heroDeltaLabel}
                                             </Text>
                                         </View>
                                     </View>
