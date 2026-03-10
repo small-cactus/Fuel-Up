@@ -197,16 +197,19 @@ export function hasHomeFilterSignatureChanged({
 
 export function buildVisibleSuppressedStationIds({
     suppressedStationIds,
-    activeStationId = null,
-    allowActiveReveal = false,
 }) {
-    const nextSuppressedIds = new Set(suppressedStationIds || []);
+    return new Set(suppressedStationIds || []);
+}
 
-    if (allowActiveReveal && activeStationId != null) {
-        nextSuppressedIds.delete(String(activeStationId));
+export function shouldShowActiveStationDecoration({
+    activeQuote = null,
+    suppressedStationIds,
+}) {
+    if (!activeQuote || activeQuote.originalIndex === 0) {
+        return false;
     }
 
-    return nextSuppressedIds;
+    return !new Set(suppressedStationIds || []).has(String(activeQuote.stationId));
 }
 
 export function shouldAutoFitHomeMap({

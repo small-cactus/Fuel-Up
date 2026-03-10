@@ -42,6 +42,16 @@ function ensureInitialShrinkDelayWindowTimer() {
   }, INITIAL_SHRINK_DELAY_WINDOW_MS);
 }
 
+function resolveInitialSuppressionProgress(isSuppressed) {
+  if (!isSuppressed) {
+    return 0;
+  }
+
+  // On the very first launch window, let overlapping pills appear briefly
+  // before shrinking out. After that window, suppressed pills should mount hidden.
+  return isInitialShrinkDelayWindowOpen ? 0 : 1;
+}
+
 function StationMarker({
   quote,
   isSuppressed = false,
@@ -51,7 +61,7 @@ function StationMarker({
   onPress,
 }) {
   const appearProgress = useSharedValue(1);
-  const suppressionProgress = useSharedValue(isSuppressed ? 1 : 0);
+  const suppressionProgress = useSharedValue(resolveInitialSuppressionProgress(isSuppressed));
   const tracksViewChangesTimeoutRef = useRef(null);
   const visualStateSignatureRef = useRef('');
   const [tracksViewChanges, setTracksViewChanges] = useState(false);

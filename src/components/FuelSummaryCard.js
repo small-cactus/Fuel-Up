@@ -53,6 +53,26 @@ function formatRelativeTime(updatedAt) {
     return `${diffDays}d ago`;
 }
 
+function truncateStationTitle(title, { hasPredictionFlag, hasRating }) {
+    if (typeof title !== 'string') {
+        return title;
+    }
+
+    const maxLength = hasPredictionFlag && hasRating
+        ? 16
+        : hasPredictionFlag
+            ? 22
+            : hasRating
+                ? 24
+                : 32;
+
+    if (title.length <= maxLength) {
+        return title;
+    }
+
+    return `${title.slice(0, maxLength - 1).trimEnd()}…`;
+}
+
 function FuelSummaryCard({
     isDark,
     isRefreshing,
@@ -81,6 +101,12 @@ function FuelSummaryCard({
     const bestPriceColor = isDark ? BEST_PRICE_DARK : BEST_PRICE_LIGHT;
     const hasFailureState = !quote && Boolean(errorMsg);
     const title = hasFailureState ? 'No Prices Returned' : quote?.stationName || 'Cheapest Nearby';
+    const showPredictedPriceFlag = Boolean(quote?.validation?.usedPrediction);
+    const showRating = quote?.rating != null;
+    const displayTitle = truncateStationTitle(title, {
+        hasPredictionFlag: showPredictedPriceFlag,
+        hasRating: showRating,
+    });
     const subtitle = quote ? formatDistance(quote?.distanceMiles) : null;
     const benchmarkLine =
         benchmarkQuote && quote && benchmarkQuote.providerId !== quote.providerId
@@ -95,31 +121,35 @@ function FuelSummaryCard({
                 glassEffectStyle={CARD_GLASS_EFFECT_STYLE}
             >
                 <View style={styles.headerRow}>
-                    <View style={styles.titleContainer}>
-                        {rank ? (
-                            <View style={[styles.rankBadge, { backgroundColor: themeColors.text }]}>
-                                <Text style={[styles.rankText, { color: themeColors.background }]}>#{rank}</Text>
-                            </View>
-                        ) : null}
-                        <Text style={[styles.cardTitle, { color: themeColors.text }]} numberOfLines={1}>{title}</Text>
-                        {quote?.rating != null && (
-                            <View style={styles.ratingRow}>
-                                <SymbolView name="star.fill" size={12} tintColor="#FFB800" />
-                                <Text style={[styles.ratingText, { color: themeColors.text }]}>
-                                    {quote.rating.toFixed(1)}
-                                </Text>
-                                {quote?.userRatingCount != null && (
-                                    <Text style={[styles.ratingCount, { color: themeColors.text }]}>
-                                        ({quote.userRatingCount.toLocaleString()})
+                    <View style={styles.headerContent}>
+                        <View style={styles.titleRow}>
+                            {rank ? (
+                                <View style={[styles.rankBadge, { backgroundColor: themeColors.text }]}>
+                                    <Text style={[styles.rankText, { color: themeColors.background }]}>#{rank}</Text>
+                                </View>
+                            ) : null}
+                            <Text style={[styles.cardTitle, { color: themeColors.text }]} numberOfLines={1}>
+                                {displayTitle}
+                            </Text>
+                            <PredictedPriceFlag
+                                validation={quote?.validation}
+                                isDark={isDark}
+                                themeColors={themeColors}
+                            />
+                            {showRating ? (
+                                <View style={styles.ratingRow}>
+                                    <SymbolView name="star.fill" size={12} tintColor="#FFB800" />
+                                    <Text style={[styles.ratingText, { color: themeColors.text }]}>
+                                        {quote.rating.toFixed(1)}
                                     </Text>
-                                )}
-                            </View>
-                        )}
-                        <PredictedPriceFlag
-                            validation={quote?.validation}
-                            isDark={isDark}
-                            themeColors={themeColors}
-                        />
+                                    {quote?.userRatingCount != null && (
+                                        <Text style={[styles.ratingCount, { color: themeColors.text }]}>
+                                            ({quote.userRatingCount.toLocaleString()})
+                                        </Text>
+                                    )}
+                                </View>
+                            ) : null}
+                        </View>
                     </View>
                     {isRefreshing ? <ActivityIndicator size="small" color={themeColors.text} /> : null}
                 </View>
@@ -191,24 +221,26 @@ const styles = StyleSheet.create({
     },
     headerRow: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'space-between',
         gap: 12,
         marginBottom: 12,
     },
-    titleContainer: {
+    headerContent: {
+        flex: 1,
+        minWidth: 0,
+    },
+    titleRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        flexShrink: 1,
-        flexWrap: 'wrap',
-        marginRight: 12,
         gap: 6,
+        minWidth: 0,
     },
     ratingRow: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 3,
-        marginLeft: 4,
+        flexShrink: 0,
     },
     ratingText: {
         fontSize: 13,
@@ -232,6 +264,8 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: 18,
         fontWeight: '700',
+        flexShrink: 1,
+        minWidth: 0,
     },
     pricesRow: {
         flexDirection: 'row',

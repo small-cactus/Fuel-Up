@@ -15,7 +15,6 @@ export default function PredictedPriceFlag({ validation, isDark, themeColors }) 
         return null;
     }
 
-    const label = validation.decision === 'reject' ? 'Adjusted' : 'Estimated';
     const backgroundColor = isDark ? 'rgba(255, 184, 0, 0.24)' : 'rgba(255, 184, 0, 0.18)';
     const predictedPrice = formatPrice(validation.finalPrice ?? validation.predictedPrice);
     const apiPrice = formatPrice(validation.apiPrice);
@@ -47,7 +46,7 @@ export default function PredictedPriceFlag({ validation, isDark, themeColors }) 
         >
             <View style={styles.badgeContent}>
                 <SymbolView name="exclamationmark.circle.fill" size={12} tintColor={themeColors.text} />
-                <Text style={[styles.badgeText, { color: themeColors.text }]}>{label}</Text>
+                <Text style={[styles.badgeText, { color: themeColors.text }]}>Estimated</Text>
             </View>
         </Pressable>
     );
@@ -58,6 +57,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 9,
         paddingVertical: 5,
         borderRadius: 999,
+        flexShrink: 0,
     },
     badgeContent: {
         flexDirection: 'row',

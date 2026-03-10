@@ -7,6 +7,7 @@ import {
     buildVisibleSuppressedStationIds,
     filterStationQuotesForHome,
     hasHomeFilterSignatureChanged,
+    shouldShowActiveStationDecoration,
     shouldAutoFitHomeMap,
 } from '../src/lib/homeState.js';
 import { rankQuotesForFuelGrade } from '../src/lib/fuelGrade.js';
@@ -89,20 +90,38 @@ test('rankQuotesForFuelGrade reorders filtered home rows immediately when fuel g
     assert.equal(rankedPremiumQuotes[1].stationId, 'station-a');
 });
 
-test('buildVisibleSuppressedStationIds preserves passive suppression and only reveals the active chip on explicit selection', () => {
-    const passiveSuppression = buildVisibleSuppressedStationIds({
+test('buildVisibleSuppressedStationIds keeps overlap suppression authoritative for non-cluster pills', () => {
+    const visibleSuppression = buildVisibleSuppressedStationIds({
         suppressedStationIds: new Set(['station-a', 'station-b']),
-        activeStationId: 'station-a',
-        allowActiveReveal: false,
-    });
-    const explicitSelectionSuppression = buildVisibleSuppressedStationIds({
-        suppressedStationIds: new Set(['station-a', 'station-b']),
-        activeStationId: 'station-a',
-        allowActiveReveal: true,
     });
 
-    assert.deepEqual(Array.from(passiveSuppression).sort(), ['station-a', 'station-b']);
-    assert.deepEqual(Array.from(explicitSelectionSuppression).sort(), ['station-b']);
+    assert.deepEqual(Array.from(visibleSuppression).sort(), ['station-a', 'station-b']);
+});
+
+test('shouldShowActiveStationDecoration only decorates visible non-best stations', () => {
+    assert.equal(shouldShowActiveStationDecoration({
+        activeQuote: {
+            stationId: 'best-station',
+            originalIndex: 0,
+        },
+        suppressedStationIds: new Set(),
+    }), false);
+
+    assert.equal(shouldShowActiveStationDecoration({
+        activeQuote: {
+            stationId: 'hidden-station',
+            originalIndex: 2,
+        },
+        suppressedStationIds: new Set(['hidden-station']),
+    }), false);
+
+    assert.equal(shouldShowActiveStationDecoration({
+        activeQuote: {
+            stationId: 'visible-station',
+            originalIndex: 2,
+        },
+        suppressedStationIds: new Set(['other-station']),
+    }), true);
 });
 
 test('home auto-fit skips passive focus restoration when there is no pending refit request', () => {

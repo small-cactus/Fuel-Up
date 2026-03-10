@@ -43,6 +43,7 @@ import {
     buildVisibleSuppressedStationIds,
     filterStationQuotesForHome,
     hasHomeFilterSignatureChanged,
+    shouldShowActiveStationDecoration,
     shouldAutoFitHomeMap,
 } from '../../src/lib/homeState';
 import {
@@ -83,7 +84,6 @@ const DEFAULT_REGION = {
     longitudeDelta: 0.05,
 };
 const TAB_BAR_CLEARANCE = 34;
-const RESET_TO_CHEAPEST_GAP_OFFSET = 7;
 const CARD_GAP = 0;
 const SIDE_MARGIN = 16;
 const TOP_CANOPY_HEIGHT = 72;
@@ -1247,10 +1247,8 @@ export default function HomeScreen() {
     const [mapRenderRegion, setMapRenderRegion] = useState(DEFAULT_REGION);
     const [userLocationBubble, setUserLocationBubble] = useState(null);
     const [isMapMoving, setIsMapMoving] = useState(false);
-    const [isResetToCheapestPending, setIsResetToCheapestPending] = useState(false);
     const [isLaunchVisualReady, setIsLaunchVisualReady] = useState(false);
     const [isLaunchCriticalFitPending, setIsLaunchCriticalFitPending] = useState(false);
-    const [shouldRevealActiveSelection, setShouldRevealActiveSelection] = useState(false);
     const [homeRefitRequestVersion, setHomeRefitRequestVersion] = useState(0);
     const [isClusterDebugRecording, setIsClusterDebugRecording] = useState(false);
     const [isClusterDebugProbeRunning, setIsClusterDebugProbeRunning] = useState(false);
@@ -1350,7 +1348,6 @@ export default function HomeScreen() {
         launchVisualReadyRequestIdRef.current += 1;
         setIsLaunchCriticalFitPending(false);
         setIsLaunchVisualReady(!isFirstLaunchWithoutCachedRegionRef.current);
-        setShouldRevealActiveSelection(false);
         setHomeRefitRequestVersion(0);
         holdRootReveal();
 
@@ -2066,13 +2063,10 @@ export default function HomeScreen() {
         );
     }, [stationQuotes, mapRegion, width, height, hasLocationPermission, userLocationBubble]);
     const visibleSuppressedStationIds = useMemo(() => {
-        const activeQuote = stationQuotes[activeIndex];
         return buildVisibleSuppressedStationIds({
             suppressedStationIds: suppressedOverlapStationIds,
-            activeStationId: activeQuote?.stationId ?? null,
-            allowActiveReveal: shouldRevealActiveSelection,
         });
-    }, [activeIndex, shouldRevealActiveSelection, stationQuotes, suppressedOverlapStationIds]);
+    }, [suppressedOverlapStationIds]);
     const allStationsFitZoomRegion = useMemo(() => (
         buildStationsFitZoomRegion(stationQuotes, mapRegion)
     ), [stationQuotes, mapRegion]);
@@ -2285,14 +2279,16 @@ export default function HomeScreen() {
         const index = primaryQuote.originalIndex;
 
         isUserScrollingRef.current = false; // Prevent map feedback loop
-        setShouldRevealActiveSelection(index !== 0);
         flatListRef.current?.scrollToOffset({
             offset: index * itemWidth,
             animated: true,
         });
         setActiveIndex(index);
         if (index === 0) {
-            fitMapToStations();
+            fitMapToStations({
+                animated: true,
+                runSettlePass: false,
+            });
             return;
         }
 
@@ -2381,7 +2377,6 @@ export default function HomeScreen() {
 
         lastSettledCardIndexRef.current = index;
         isUserScrollingRef.current = false;
-        setShouldRevealActiveSelection(index !== 0);
         flatListRef.current?.scrollToOffset({
             offset: index * itemWidth,
             animated: true,
@@ -2389,7 +2384,10 @@ export default function HomeScreen() {
         setActiveIndex(index);
 
         if (index === 0) {
-            fitMapToStations();
+            fitMapToStations({
+                animated: true,
+                runSettlePass: false,
+            });
             return;
         }
 
@@ -2401,16 +2399,17 @@ export default function HomeScreen() {
             return;
         }
 
-        setIsResetToCheapestPending(true);
         lastSettledCardIndexRef.current = 0;
         isUserScrollingRef.current = false;
-        setShouldRevealActiveSelection(false);
         flatListRef.current?.scrollToOffset({
             offset: 0,
             animated: true,
         });
         setActiveIndex(0);
-        fitMapToStations();
+        fitMapToStations({
+            animated: true,
+            runSettlePass: false,
+        });
     }, [fitMapToStations, stationQuotes.length]);
 
     const setMapMotionState = (moving) => {
@@ -2487,7 +2486,6 @@ export default function HomeScreen() {
     function resetHomeSelectionToBest() {
         isUserScrollingRef.current = false;
         lastSettledCardIndexRef.current = 0;
-        setShouldRevealActiveSelection(false);
         setActiveIndex(currentValue => (currentValue === 0 ? currentValue : 0));
         flatListRef.current?.scrollToOffset({
             offset: 0,
@@ -2594,7 +2592,6 @@ export default function HomeScreen() {
 
     useEffect(() => {
         if (!isFocused) {
-            setShouldRevealActiveSelection(false);
             cancelInitialHomeFitRetries();
             resetMapMotionTracking();
         }
@@ -2710,13 +2707,11 @@ export default function HomeScreen() {
         const nextIndex = resolveCardIndexFromOffset(offsetX);
 
         isUserScrollingRef.current = false;
-        setIsResetToCheapestPending(false);
 
         if (nextIndex === null) {
             return;
         }
 
-        setShouldRevealActiveSelection(nextIndex !== 0);
         setActiveIndex(currentValue => (
             currentValue === nextIndex ? currentValue : nextIndex
         ));
@@ -2728,7 +2723,10 @@ export default function HomeScreen() {
         lastSettledCardIndexRef.current = nextIndex;
 
         if (nextIndex === 0) {
-            fitMapToStations();
+            fitMapToStations({
+                animated: true,
+                runSettlePass: false,
+            });
             return;
         }
 
@@ -3342,20 +3340,13 @@ export default function HomeScreen() {
         };
     });
     const activeStationQuote = stationQuotes[activeIndex] || null;
-    const shouldShowActiveStationOverlay = (
-        !ENABLE_CLUSTER_MERGE_TRANSITIONS &&
-        isMapLoaded &&
-        !isMapMoving &&
-        Boolean(activeStationQuote) &&
-        activeStationQuote?.originalIndex !== 0 &&
-        !visibleSuppressedStationIds.has(String(activeStationQuote?.stationId))
-    );
+    const shouldShowActiveStationOverlay = !ENABLE_CLUSTER_MERGE_TRANSITIONS && isMapLoaded && shouldShowActiveStationDecoration({
+        activeQuote: activeStationQuote,
+        suppressedStationIds: visibleSuppressedStationIds,
+    });
 
     const hasRenderableClusters = renderClusterEntries.length > 0;
-    const showResetToCheapestButton = (
-        stationQuotes.length > 1 &&
-        (activeIndex !== 0 || isResetToCheapestPending)
-    );
+    const showResetToCheapestButton = stationQuotes.length > 1 && activeIndex !== 0;
 
     return (
         <View style={[styles.container, { backgroundColor: themeColors.background }]}>
@@ -3410,7 +3401,6 @@ export default function HomeScreen() {
                             if (!isMountedRef.current) {
                                 return;
                             }
-                            setShouldRevealActiveSelection(false);
                             setMapMotionState(false);
                             flushMapIdleWaiters(true);
                         }, CLUSTER_MAP_IDLE_SETTLE_MS);
@@ -3682,8 +3672,7 @@ export default function HomeScreen() {
                     style={[
                         styles.resetToCheapestShell,
                         {
-                            bottom: insets.bottom + RESET_TO_CHEAPEST_GAP_OFFSET,
-                            height: TAB_BAR_CLEARANCE,
+                            bottom: insets.bottom + 10,
                             paddingLeft: horizontalPadding.left,
                             paddingRight: horizontalPadding.right,
                         },
