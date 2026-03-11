@@ -229,24 +229,37 @@ function extractStandardFuelPrices(allPrices) {
         .filter(entry => entry.price !== null);
 }
 
-function getUniformGradePriceIssue(allPrices) {
+function getDuplicateGradePriceIssue(allPrices) {
     const standardFuelPrices = extractStandardFuelPrices(allPrices);
 
     if (standardFuelPrices.length < 2) {
         return null;
     }
 
-    const distinctPrices = new Set(
-        standardFuelPrices.map(entry => Number(entry.price).toFixed(3))
-    );
+    const firstFuelTypeByPrice = new Map();
+    const visibleFuelTypes = [];
+    const suppressedFuelTypes = [];
 
-    if (distinctPrices.size !== 1) {
+    for (const { fuelType, price } of standardFuelPrices) {
+        const priceKey = Number(price).toFixed(3);
+
+        if (firstFuelTypeByPrice.has(priceKey)) {
+            suppressedFuelTypes.push(fuelType);
+            continue;
+        }
+
+        firstFuelTypeByPrice.set(priceKey, fuelType);
+        visibleFuelTypes.push(fuelType);
+    }
+
+    if (suppressedFuelTypes.length === 0) {
         return null;
     }
 
     return {
-        fuelTypes: standardFuelPrices.map(entry => entry.fuelType),
-        price: standardFuelPrices[0].price,
+        visibleFuelTypes,
+        suppressedFuelTypes,
+        isUniform: visibleFuelTypes.length === 1,
         regularPrice: standardFuelPrices.find(entry => entry.fuelType === 'regular')?.price ?? null,
     };
 }
@@ -288,43 +301,137 @@ function buildRegularOnlyAllPrices(allPrices, regularPrice) {
     return nextAllPrices;
 }
 
-function sanitizeUniformGradeQuoteForFuelType(quote, requestedFuelType) {
+function buildVisibleGradeAllPrices(allPrices, visibleFuelTypes) {
+    const visibleFuelTypeSet = new Set(visibleFuelTypes || []);
+    const nextAllPrices = {};
+
+    for (const fuelType of STANDARD_FUEL_TYPES) {
+        if (!visibleFuelTypeSet.has(fuelType)) {
+            continue;
+        }
+
+        const normalizedPrice = toPositiveNumber(allPrices?.[fuelType]);
+
+        if (normalizedPrice !== null) {
+            nextAllPrices[fuelType] = normalizedPrice;
+        }
+    }
+
+    const paymentMap = allPrices?._payment && typeof allPrices._payment === 'object'
+        ? allPrices._payment
+        : null;
+
+    if (paymentMap) {
+        const nextPaymentMap = {};
+
+        for (const fuelType of STANDARD_FUEL_TYPES) {
+            if (!visibleFuelTypeSet.has(fuelType) || !paymentMap[fuelType]) {
+                continue;
+            }
+
+            nextPaymentMap[fuelType] = cloneQuotePayload(paymentMap[fuelType]);
+        }
+
+        if (Object.keys(nextPaymentMap).length > 0) {
+            nextAllPrices._payment = nextPaymentMap;
+        }
+    }
+
+    return nextAllPrices;
+}
+
+function filterValidationByFuelType(validationByFuelType, visibleFuelTypes) {
+    if (!validationByFuelType || typeof validationByFuelType !== 'object') {
+        return {};
+    }
+
+    const nextValidationByFuelType = {};
+
+    for (const fuelType of visibleFuelTypes || []) {
+        if (validationByFuelType[fuelType]) {
+            nextValidationByFuelType[fuelType] = validationByFuelType[fuelType];
+        }
+    }
+
+    return nextValidationByFuelType;
+}
+
+function sanitizeStationGradeQuoteForFuelType(quote, requestedFuelType) {
     if (!quote || quote.providerTier !== 'station' || quote.isEstimated) {
         return quote;
     }
 
     const normalizedRequestedFuelType = normalizeFuelTypeName(requestedFuelType || quote.fuelType);
-    const uniformGradePriceIssue = getUniformGradePriceIssue(quote.allPrices);
+    const duplicateGradePriceIssue = getDuplicateGradePriceIssue(quote.allPrices);
 
-    if (!uniformGradePriceIssue) {
+    if (!duplicateGradePriceIssue) {
         return quote;
     }
 
-    if (normalizedRequestedFuelType !== 'regular' || uniformGradePriceIssue.regularPrice === null) {
+    if (!duplicateGradePriceIssue.visibleFuelTypes.includes(normalizedRequestedFuelType)) {
+        return null;
+    }
+
+    if (duplicateGradePriceIssue.isUniform && normalizedRequestedFuelType === 'regular' && duplicateGradePriceIssue.regularPrice !== null) {
+        return {
+            ...quote,
+            fuelType: 'regular',
+            price: duplicateGradePriceIssue.regularPrice,
+            allPrices: buildRegularOnlyAllPrices(quote.allPrices, duplicateGradePriceIssue.regularPrice),
+            validation: quote.validationByFuelType?.regular || (
+                String(quote.validation?.fuelType || '').toLowerCase() === 'regular'
+                    ? quote.validation
+                    : null
+            ),
+            validationByFuelType: quote.validationByFuelType?.regular
+                ? { regular: quote.validationByFuelType.regular }
+                : {},
+            availableFuelGrades: ['regular'],
+            hasUniformGradePriceIssue: true,
+            hasDuplicateGradePriceIssue: true,
+            suppressedDuplicateFuelGrades: duplicateGradePriceIssue.suppressedFuelTypes,
+        };
+    }
+
+    const nextAllPrices = buildVisibleGradeAllPrices(
+        quote.allPrices,
+        duplicateGradePriceIssue.visibleFuelTypes
+    );
+    const nextValidationByFuelType = filterValidationByFuelType(
+        quote.validationByFuelType,
+        duplicateGradePriceIssue.visibleFuelTypes
+    );
+    const nextPrice = toPositiveNumber(nextAllPrices[normalizedRequestedFuelType]) ?? (
+        normalizeFuelTypeName(quote.fuelType) === normalizedRequestedFuelType
+            ? toPositiveNumber(quote.price)
+            : null
+    );
+
+    if (nextPrice === null) {
         return null;
     }
 
     return {
         ...quote,
-        fuelType: 'regular',
-        price: uniformGradePriceIssue.regularPrice,
-        allPrices: buildRegularOnlyAllPrices(quote.allPrices, uniformGradePriceIssue.regularPrice),
-        validation: quote.validationByFuelType?.regular || (
-            String(quote.validation?.fuelType || '').toLowerCase() === 'regular'
+        fuelType: normalizedRequestedFuelType,
+        price: nextPrice,
+        allPrices: nextAllPrices,
+        validation: nextValidationByFuelType[normalizedRequestedFuelType] || (
+            String(quote.validation?.fuelType || '').toLowerCase() === normalizedRequestedFuelType
                 ? quote.validation
                 : null
         ),
-        validationByFuelType: quote.validationByFuelType?.regular
-            ? { regular: quote.validationByFuelType.regular }
-            : {},
-        availableFuelGrades: ['regular'],
-        hasUniformGradePriceIssue: true,
+        validationByFuelType: nextValidationByFuelType,
+        availableFuelGrades: duplicateGradePriceIssue.visibleFuelTypes,
+        hasUniformGradePriceIssue: false,
+        hasDuplicateGradePriceIssue: true,
+        suppressedDuplicateFuelGrades: duplicateGradePriceIssue.suppressedFuelTypes,
     };
 }
 
 function sanitizeStationQuotesForFuelType(quotes, requestedFuelType) {
     return (quotes || [])
-        .map(quote => sanitizeUniformGradeQuoteForFuelType(quote, requestedFuelType))
+        .map(quote => sanitizeStationGradeQuoteForFuelType(quote, requestedFuelType))
         .filter(Boolean);
 }
 
@@ -335,7 +442,7 @@ function sanitizeSnapshotForFuelType(snapshot, requestedFuelType) {
 
     return {
         ...snapshot,
-        quote: sanitizeUniformGradeQuoteForFuelType(snapshot.quote, requestedFuelType),
+        quote: sanitizeStationGradeQuoteForFuelType(snapshot.quote, requestedFuelType),
         topStations: sanitizeStationQuotesForFuelType(snapshot.topStations, requestedFuelType),
     };
 }
@@ -701,7 +808,7 @@ function mapStationPriceRowToQuote({ row, origin, fallbackSourceLabel }) {
         userRatingCount: row.user_rating_count ? Number(row.user_rating_count) : null,
     };
 
-    return sanitizeUniformGradeQuoteForFuelType(quote, fuelType);
+    return sanitizeStationGradeQuoteForFuelType(quote, fuelType);
 }
 
 function buildBlsUrl({ fuelType }) {

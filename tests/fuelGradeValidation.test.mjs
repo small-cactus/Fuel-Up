@@ -108,6 +108,51 @@ test('applyFuelGradeToQuote rejects unavailable grades on regular-only quotes', 
     assert.equal(regularQuote?.price, 3.09);
 });
 
+test('applyFuelGradeToQuote rejects grades suppressed by duplicate-price sanitization', () => {
+    const quote = {
+        stationId: 'station-duplicate',
+        fuelType: 'regular',
+        price: 3.39,
+        allPrices: {
+            regular: 3.39,
+            premium: 3.79,
+        },
+        availableFuelGrades: ['regular', 'premium'],
+        suppressedDuplicateFuelGrades: ['midgrade'],
+        hasDuplicateGradePriceIssue: true,
+        validationByFuelType: {
+            midgrade: {
+                fuelType: 'midgrade',
+                finalPrice: 3.39,
+                usedPrediction: false,
+            },
+        },
+    };
+
+    assert.equal(applyFuelGradeToQuote(quote, 'midgrade'), null);
+    assert.equal(applyFuelGradeToQuote(quote, 'regular')?.price, 3.39);
+    assert.equal(applyFuelGradeToQuote(quote, 'premium')?.price, 3.79);
+});
+
+test('applyFuelGradeToQuote suppresses duplicate grade prices even on unsanitized quotes', () => {
+    const quote = {
+        stationId: 'station-unsanitized-duplicate',
+        fuelType: 'regular',
+        price: 3.59,
+        allPrices: {
+            regular: 3.59,
+            midgrade: 3.59,
+            premium: 3.59,
+            diesel: 4.89,
+        },
+    };
+
+    assert.equal(applyFuelGradeToQuote(quote, 'regular')?.price, 3.59);
+    assert.equal(applyFuelGradeToQuote(quote, 'midgrade'), null);
+    assert.equal(applyFuelGradeToQuote(quote, 'premium'), null);
+    assert.equal(applyFuelGradeToQuote(quote, 'diesel')?.price, 4.89);
+});
+
 test('applyFuelGradeToQuote exposes diesel validation metadata and corrected price', () => {
     const quote = {
         stationId: 'station-4',

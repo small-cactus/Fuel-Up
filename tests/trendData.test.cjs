@@ -484,3 +484,167 @@ test('buildLatestFuelStationQuotesFromRows drops uniform multi-grade rows for no
         delete require.cache[userPath];
     }
 });
+
+test('buildLatestFuelStationQuotesFromRows suppresses duplicate higher grades and keeps the cheapest matching grade', async () => {
+    const supabasePath = require.resolve('../src/lib/supabase.js');
+    const indexPath = require.resolve('../src/services/fuel/index.js');
+    const cacheStorePath = require.resolve('../src/services/fuel/cacheStore.js');
+    const asyncStoragePath = require.resolve('@react-native-async-storage/async-storage');
+    const devCounterPath = require.resolve('../src/lib/devCounter.js');
+    const userPath = require.resolve('../src/lib/user.js');
+
+    delete require.cache[supabasePath];
+    delete require.cache[indexPath];
+    delete require.cache[cacheStorePath];
+    delete require.cache[asyncStoragePath];
+    delete require.cache[devCounterPath];
+    delete require.cache[userPath];
+
+    primeModule(asyncStoragePath, {
+        default: {
+            async getItem() { return null; },
+            async setItem() { },
+            async removeItem() { },
+            async getAllKeys() { return []; },
+            async multiRemove() { },
+        },
+    });
+    primeModule(devCounterPath, {
+        incrementApiStat: () => { },
+        getApiStats: async () => ({}),
+        resetApiStats: async () => ({}),
+    });
+    primeModule(userPath, {
+        getUserUuid: async () => 'test-user',
+    });
+    primeModule(supabasePath, {
+        hasSupabaseConfig: true,
+        supabase: null,
+    });
+
+    try {
+        const { buildLatestFuelStationQuotesFromRows } = require(indexPath);
+        const rows = [{
+            station_id: 'duplicate-midgrade',
+            provider_id: 'gasbuddy',
+            fuel_type: 'regular',
+            all_prices: {
+                regular: 3.39,
+                midgrade: 3.39,
+                premium: 3.79,
+            },
+            price: 3.39,
+            currency: 'USD',
+            station_name: 'Duplicate Fuel',
+            address: '2 Main St',
+            latitude: 37.3346,
+            longitude: -122.0090,
+            search_latitude_rounded: 37.3,
+            search_longitude_rounded: -122.0,
+            source_label: 'GasBuddy',
+            created_at: new Date().toISOString(),
+            updated_at_source: new Date().toISOString(),
+        }];
+        const quotes = buildLatestFuelStationQuotesFromRows({
+            rows,
+            origin: {
+                latitude: 37.3346,
+                longitude: -122.0090,
+            },
+        });
+
+        assert.equal(quotes.length, 1);
+        assert.deepEqual(quotes[0].allPrices, {
+            regular: 3.39,
+            premium: 3.79,
+        });
+        assert.deepEqual(quotes[0].availableFuelGrades, ['regular', 'premium']);
+        assert.deepEqual(quotes[0].suppressedDuplicateFuelGrades, ['midgrade']);
+    } finally {
+        delete require.cache[supabasePath];
+        delete require.cache[indexPath];
+        delete require.cache[cacheStorePath];
+        delete require.cache[asyncStoragePath];
+        delete require.cache[devCounterPath];
+        delete require.cache[userPath];
+    }
+});
+
+test('buildLatestFuelStationQuotesFromRows drops duplicate grades when the requested grade is not the cheapest match', async () => {
+    const supabasePath = require.resolve('../src/lib/supabase.js');
+    const indexPath = require.resolve('../src/services/fuel/index.js');
+    const cacheStorePath = require.resolve('../src/services/fuel/cacheStore.js');
+    const asyncStoragePath = require.resolve('@react-native-async-storage/async-storage');
+    const devCounterPath = require.resolve('../src/lib/devCounter.js');
+    const userPath = require.resolve('../src/lib/user.js');
+
+    delete require.cache[supabasePath];
+    delete require.cache[indexPath];
+    delete require.cache[cacheStorePath];
+    delete require.cache[asyncStoragePath];
+    delete require.cache[devCounterPath];
+    delete require.cache[userPath];
+
+    primeModule(asyncStoragePath, {
+        default: {
+            async getItem() { return null; },
+            async setItem() { },
+            async removeItem() { },
+            async getAllKeys() { return []; },
+            async multiRemove() { },
+        },
+    });
+    primeModule(devCounterPath, {
+        incrementApiStat: () => { },
+        getApiStats: async () => ({}),
+        resetApiStats: async () => ({}),
+    });
+    primeModule(userPath, {
+        getUserUuid: async () => 'test-user',
+    });
+    primeModule(supabasePath, {
+        hasSupabaseConfig: true,
+        supabase: null,
+    });
+
+    try {
+        const { buildLatestFuelStationQuotesFromRows } = require(indexPath);
+        const rows = [{
+            station_id: 'duplicate-midgrade-hidden',
+            provider_id: 'gasbuddy',
+            fuel_type: 'midgrade',
+            all_prices: {
+                regular: 3.39,
+                midgrade: 3.39,
+                premium: 3.79,
+            },
+            price: 3.39,
+            currency: 'USD',
+            station_name: 'Duplicate Fuel',
+            address: '2 Main St',
+            latitude: 37.3346,
+            longitude: -122.0090,
+            search_latitude_rounded: 37.3,
+            search_longitude_rounded: -122.0,
+            source_label: 'GasBuddy',
+            created_at: new Date().toISOString(),
+            updated_at_source: new Date().toISOString(),
+        }];
+        const quotes = buildLatestFuelStationQuotesFromRows({
+            rows,
+            origin: {
+                latitude: 37.3346,
+                longitude: -122.0090,
+            },
+        });
+
+        assert.equal(quotes.length, 0);
+    } finally {
+        delete require.cache[supabasePath];
+        delete require.cache[indexPath];
+        delete require.cache[cacheStorePath];
+        delete require.cache[asyncStoragePath];
+        delete require.cache[devCounterPath];
+        delete require.cache[userPath];
+    }
+});

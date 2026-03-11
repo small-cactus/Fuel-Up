@@ -57,6 +57,78 @@ function hasExplicitAvailabilityForFuelGrade(quote, fuelGrade) {
         .includes(fuelGrade);
 }
 
+function resolveBaseQuotePriceForFuelGrade(
+    quote,
+    fuelGrade,
+    { allowFallbackToQuotePrice = true } = {}
+) {
+    const normalizedFuelGrade = normalizeFuelGrade(fuelGrade);
+    const validatedPrice = resolveValidatedPriceForFuelGrade(quote, normalizedFuelGrade);
+    if (validatedPrice !== null) {
+        return validatedPrice;
+    }
+
+    const allPricesValue = resolvePriceFromAllPrices(quote?.allPrices, normalizedFuelGrade);
+    if (allPricesValue !== null) {
+        return allPricesValue;
+    }
+
+    if (normalizeFuelGrade(quote?.fuelType) === normalizedFuelGrade) {
+        const quotePrice = toPositiveNumber(quote?.price);
+        if (quotePrice !== null) {
+            return quotePrice;
+        }
+    }
+
+    if (!allowFallbackToQuotePrice) {
+        return null;
+    }
+
+    return toPositiveNumber(quote?.price);
+}
+
+function shouldSuppressDuplicatePriceGrade(quote, fuelGrade) {
+    const normalizedFuelGrade = normalizeFuelGrade(fuelGrade);
+    const fuelGradeIndex = FUEL_GRADE_ORDER.indexOf(normalizedFuelGrade);
+
+    if (fuelGradeIndex <= 0) {
+        return false;
+    }
+
+    const resolvedPrice = resolveBaseQuotePriceForFuelGrade(
+        quote,
+        normalizedFuelGrade,
+        { allowFallbackToQuotePrice: false }
+    );
+
+    if (resolvedPrice === null) {
+        return false;
+    }
+
+    const resolvedPriceKey = resolvedPrice.toFixed(3);
+
+    for (const cheaperGrade of FUEL_GRADE_ORDER.slice(0, fuelGradeIndex)) {
+        if (
+            Array.isArray(quote?.availableFuelGrades) &&
+            !hasExplicitAvailabilityForFuelGrade(quote, cheaperGrade)
+        ) {
+            continue;
+        }
+
+        const cheaperGradePrice = resolveBaseQuotePriceForFuelGrade(
+            quote,
+            cheaperGrade,
+            { allowFallbackToQuotePrice: false }
+        );
+
+        if (cheaperGradePrice !== null && cheaperGradePrice.toFixed(3) === resolvedPriceKey) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export function resolveQuotePriceForFuelGrade(
     quote,
     fuelGrade,
@@ -67,32 +139,19 @@ export function resolveQuotePriceForFuelGrade(
     }
 
     const normalizedFuelGrade = normalizeFuelGrade(fuelGrade);
-    const validatedPrice = resolveValidatedPriceForFuelGrade(quote, normalizedFuelGrade);
-    if (validatedPrice !== null) {
-        return validatedPrice;
-    }
-
-    const allPricesValue = resolvePriceFromAllPrices(quote.allPrices, normalizedFuelGrade);
-    if (allPricesValue !== null) {
-        return allPricesValue;
-    }
-
-    if (normalizeFuelGrade(quote.fuelType) === normalizedFuelGrade) {
-        const quotePrice = toPositiveNumber(quote.price);
-        if (quotePrice !== null) {
-            return quotePrice;
-        }
-    }
-
     if (Array.isArray(quote?.availableFuelGrades) && !hasExplicitAvailabilityForFuelGrade(quote, normalizedFuelGrade)) {
         return null;
     }
 
-    if (!allowFallbackToQuotePrice) {
+    if (shouldSuppressDuplicatePriceGrade(quote, normalizedFuelGrade)) {
         return null;
     }
 
-    return toPositiveNumber(quote.price);
+    return resolveBaseQuotePriceForFuelGrade(
+        quote,
+        normalizedFuelGrade,
+        { allowFallbackToQuotePrice }
+    );
 }
 
 export function applyFuelGradeToQuote(quote, fuelGrade) {
