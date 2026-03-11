@@ -15,6 +15,7 @@ import {
     shouldInitializeInitialSuppressionDelay,
     shouldDelayStationMarkerSuppression,
     shouldAutoFitHomeMap,
+    resolveHomeFuelSnapshotStrategy,
 } from '../src/lib/homeState.js';
 import { rankQuotesForFuelGrade } from '../src/lib/fuelGrade.js';
 
@@ -352,6 +353,52 @@ test('home auto-fit keeps initial-load behavior on fresh data only', () => {
         forceAnimation: false,
         runSettlePass: true,
         requiresNewData: true,
+    });
+});
+
+test('home fuel snapshot strategy only allows cached bootstrap for regular loads without a pending filter change', () => {
+    assert.deepEqual(resolveHomeFuelSnapshotStrategy({
+        preferCached: true,
+        fuelGrade: 'regular',
+        hasVisibleFuelState: false,
+        pendingRefitRequest: null,
+    }), {
+        shouldForceLiveRefresh: true,
+        useCachedSnapshot: true,
+    });
+
+    assert.deepEqual(resolveHomeFuelSnapshotStrategy({
+        preferCached: true,
+        fuelGrade: 'premium',
+        hasVisibleFuelState: false,
+        pendingRefitRequest: null,
+    }), {
+        shouldForceLiveRefresh: true,
+        useCachedSnapshot: false,
+    });
+
+    assert.deepEqual(resolveHomeFuelSnapshotStrategy({
+        preferCached: true,
+        fuelGrade: 'regular',
+        hasVisibleFuelState: true,
+        pendingRefitRequest: {
+            reason: 'filter-change',
+        },
+    }), {
+        shouldForceLiveRefresh: true,
+        useCachedSnapshot: false,
+    });
+
+    assert.deepEqual(resolveHomeFuelSnapshotStrategy({
+        preferCached: true,
+        fuelGrade: 'regular',
+        hasVisibleFuelState: true,
+        pendingRefitRequest: {
+            reason: 'location-refresh',
+        },
+    }), {
+        shouldForceLiveRefresh: false,
+        useCachedSnapshot: true,
     });
 });
 

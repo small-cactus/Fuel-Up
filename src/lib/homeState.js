@@ -384,3 +384,22 @@ export function shouldAutoFitHomeMap({
         requiresNewData: true,
     };
 }
+
+export function resolveHomeFuelSnapshotStrategy({
+    preferCached = false,
+    fuelGrade = 'regular',
+    hasVisibleFuelState = false,
+    pendingRefitRequest = null,
+}) {
+    const normalizedFuelGrade = String(fuelGrade || 'regular').trim().toLowerCase();
+    const useCachedSnapshot = Boolean(
+        preferCached &&
+        normalizedFuelGrade === 'regular' &&
+        pendingRefitRequest?.reason !== 'filter-change'
+    );
+
+    return {
+        shouldForceLiveRefresh: !useCachedSnapshot || !hasVisibleFuelState,
+        useCachedSnapshot,
+    };
+}

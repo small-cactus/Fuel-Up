@@ -54,6 +54,7 @@ import {
     shouldDelayStationMarkerSuppression,
     shouldShowActiveStationDecoration,
     shouldAutoFitHomeMap,
+    resolveHomeFuelSnapshotStrategy,
 } from '../../src/lib/homeState';
 import {
     canTriggerHomeLaunchReveal,
@@ -1409,6 +1410,12 @@ export default function HomeScreen() {
         searchRadiusMiles,
         selectedFuelGrade,
     ]);
+    const isShowingStaleHomeRequestData = (
+        Boolean(
+            lastVisibleHomeRequestKeyRef.current &&
+            lastVisibleHomeRequestKeyRef.current !== currentVisibleHomeRequestKey
+        )
+    );
     const markMapLoaded = () => {
         if (mapLoadedFallbackTimeoutRef.current) {
             clearTimeout(mapLoadedFallbackTimeoutRef.current);
@@ -1878,22 +1885,32 @@ export default function HomeScreen() {
             radiusMiles: searchRadiusMiles,
             preferredProvider,
         });
+        const snapshotFuelGrade = preferredProvider === 'gasbuddy'
+            ? 'regular'
+            : selectedFuelGrade;
         const query = {
             latitude,
             longitude,
             radiusMiles: searchRadiusMiles,
-            fuelType: selectedFuelGrade,
+            fuelType: snapshotFuelGrade,
             preferredProvider,
         };
+        const pendingHomeRefitRequest = pendingHomeRefitRequestRef.current;
+        const homeFuelSnapshotStrategy = resolveHomeFuelSnapshotStrategy({
+            preferCached,
+            fuelGrade: selectedFuelGrade,
+            hasVisibleFuelState: hasVisibleFuelStateRef.current,
+            pendingRefitRequest: pendingHomeRefitRequest,
+        });
         const shouldForceLiveGasBuddyRefresh = (
             preferredProvider === 'gasbuddy' &&
-            preferCached &&
-            !hasVisibleFuelStateRef.current
+            homeFuelSnapshotStrategy.shouldForceLiveRefresh
         );
         const baseDebugState = {
             input: {
                 ...query,
                 locationSource,
+                requestedFuelType: selectedFuelGrade,
                 zipCode: null,
             },
             providers: [],
@@ -1907,7 +1924,7 @@ export default function HomeScreen() {
                 setFuelDebugState(baseDebugState);
             }
 
-            if (preferCached) {
+            if (homeFuelSnapshotStrategy.useCachedSnapshot) {
                 const cachedSnapshot = await getCachedFuelPriceSnapshot(query);
 
                 if (activeHomeQuerySignatureRef.current === requestQuerySignature) {
@@ -1948,6 +1965,7 @@ export default function HomeScreen() {
                     input: {
                         ...result.debugState.input,
                         locationSource,
+                        requestedFuelType: selectedFuelGrade,
                     },
                 }
                 : baseDebugState;
@@ -1969,14 +1987,14 @@ export default function HomeScreen() {
                 setIsLaunchCriticalFitPending(true);
             }
 
-            const pendingHomeRefitRequest = pendingHomeRefitRequestRef.current;
+            const latestPendingHomeRefitRequest = pendingHomeRefitRequestRef.current;
             const shouldPreserveQueuedFilterChange = (
-                pendingHomeRefitRequest?.reason === 'filter-change' &&
-                pendingHomeRefitRequest.filterSignature === currentHomeFilterSignature
+                latestPendingHomeRefitRequest?.reason === 'filter-change' &&
+                latestPendingHomeRefitRequest.filterSignature === currentHomeFilterSignature
             );
             const hasPendingInitialLoadFitForQuery = (
-                pendingHomeRefitRequest?.reason === 'initial-load' &&
-                pendingHomeRefitRequest.querySignature === requestQuerySignature
+                latestPendingHomeRefitRequest?.reason === 'initial-load' &&
+                latestPendingHomeRefitRequest.querySignature === requestQuerySignature
             );
             const hasVisibleFuelStateNow = hasVisibleFuelStateRef.current;
 
@@ -1992,7 +2010,7 @@ export default function HomeScreen() {
                         : shouldUseInitialLoadFit,
                     filterSignature: currentHomeFilterSignature,
                     forceAnimation: shouldPreserveQueuedFilterChange
-                        ? pendingHomeRefitRequest.forceAnimation !== false
+                        ? latestPendingHomeRefitRequest.forceAnimation !== false
                         : false,
                     querySignature: requestQuerySignature,
                     renderedRequestVersion: nextRenderedHomeRefitRequestVersion,
@@ -2336,13 +2354,15 @@ export default function HomeScreen() {
 
     const minRating = minimumRating;
     const rawStationQuotes = useMemo(() => (
-        [
-            ...(Array.isArray(topStations) ? topStations : []),
-            bestQuote,
-        ]
-            .filter(Boolean)
-            .filter(quote => quote?.providerTier === 'station' && !quote?.isEstimated)
-    ), [bestQuote, topStations]);
+        isShowingStaleHomeRequestData
+            ? []
+            : [
+                ...(Array.isArray(topStations) ? topStations : []),
+                bestQuote,
+            ]
+                .filter(Boolean)
+                .filter(quote => quote?.providerTier === 'station' && !quote?.isEstimated)
+    ), [bestQuote, isShowingStaleHomeRequestData, topStations]);
     const filteredStationQuotes = useMemo(() => (
         filterStationQuotesForHome({
             quotes: rawStationQuotes,
