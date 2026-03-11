@@ -1262,6 +1262,7 @@ export default function HomeScreen() {
     const suppressionRegionAnimationFrameRef = useRef(null);
     const mapIdleWaitersRef = useRef([]);
     const mapIdleSettleTimeoutRef = useRef(null);
+    const fitSettlePassTimeoutRef = useRef(null);
     const suppressionRevealDelayTimeoutRef = useRef(null);
     const mapRegionRef = useRef(DEFAULT_REGION);
     const suppressionRegionRef = useRef(DEFAULT_REGION);
@@ -1340,11 +1341,14 @@ export default function HomeScreen() {
     const [isLaunchVisualReady, setIsLaunchVisualReady] = useState(false);
     const [isLaunchCriticalFitPending, setIsLaunchCriticalFitPending] = useState(false);
     const [homeRefitRequestVersion, setHomeRefitRequestVersion] = useState(0);
+    const [homeLayoutSettlementVersion, setHomeLayoutSettlementVersion] = useState(0);
+    const [stagedHomeRefitRequest, setStagedHomeRefitRequest] = useState(null);
     const [isClusterDebugRecording, setIsClusterDebugRecording] = useState(false);
     const [isClusterDebugProbeRunning, setIsClusterDebugProbeRunning] = useState(false);
     const [clusterDebugProbeSummary, setClusterDebugProbeSummary] = useState('');
     const hasTriggeredInitialRevealRef = useRef(false);
     const pendingHomeRefitRequestRef = useRef(null);
+    const renderedHomeRefitRequestVersionRef = useRef(0);
     const lastAppliedHomeFilterSignatureRef = useRef('');
     const isInitialStationsFitScheduledRef = useRef(false);
     const isQueuedHomeRefitScheduledRef = useRef(false);
@@ -1353,12 +1357,17 @@ export default function HomeScreen() {
     const mapLoadedFallbackTimeoutRef = useRef(null);
     const lastSettledCardIndexRef = useRef(0);
     const activeIndexRef = useRef(0);
+    const hasVisibleFuelStateRef = useRef(false);
     const router = useRouter();
     const scrollX = useSharedValue(0);
 
     useEffect(() => {
         activeIndexRef.current = activeIndex;
     }, [activeIndex]);
+
+    useEffect(() => {
+        hasVisibleFuelStateRef.current = Boolean(bestQuote) || topStations.length > 0 || regionalQuotes.length > 0;
+    }, [bestQuote, regionalQuotes.length, topStations.length]);
 
     const USE_SHEET_UX = false; // Temporary toggle for the Form Sheet UX experiment
 
@@ -1429,6 +1438,11 @@ export default function HomeScreen() {
                 clearTimeout(suppressionRevealDelayTimeoutRef.current);
                 suppressionRevealDelayTimeoutRef.current = null;
             }
+
+            if (fitSettlePassTimeoutRef.current) {
+                clearTimeout(fitSettlePassTimeoutRef.current);
+                fitSettlePassTimeoutRef.current = null;
+            }
         };
     }, []);
 
@@ -1440,7 +1454,16 @@ export default function HomeScreen() {
         isLaunchCriticalFitPendingRef.current = isLaunchCriticalFitPending;
     }, [isLaunchCriticalFitPending]);
 
-    const applySnapshot = snapshot => {
+    useEffect(() => {
+        if (!stagedHomeRefitRequest) {
+            return;
+        }
+
+        queueHomeRefitRequest(stagedHomeRefitRequest);
+        setStagedHomeRefitRequest(null);
+    }, [stagedHomeRefitRequest]);
+
+    const applySnapshot = (snapshot, nextRefitRequest = null) => {
         if (!snapshot?.quote || !isMountedRef.current) {
             return;
         }
@@ -1449,6 +1472,9 @@ export default function HomeScreen() {
             setBestQuote(snapshot.quote);
             setTopStations(snapshot.topStations || []);
             setRegionalQuotes(snapshot.regionalQuotes || []);
+            if (nextRefitRequest) {
+                setStagedHomeRefitRequest(nextRefitRequest);
+            }
         });
     };
 
@@ -1484,6 +1510,7 @@ export default function HomeScreen() {
             setBestQuote(null);
             setTopStations([]);
             setRegionalQuotes([]);
+            setStagedHomeRefitRequest(null);
         });
         setErrorMsg(null);
         setIsRefreshingPrices(true);
@@ -1494,6 +1521,7 @@ export default function HomeScreen() {
             setBestQuote(null);
             setTopStations([]);
             setRegionalQuotes([]);
+            setStagedHomeRefitRequest(null);
         });
         if (initialSuppressionDelayTimeoutRef.current) {
             clearTimeout(initialSuppressionDelayTimeoutRef.current);
@@ -1538,7 +1566,11 @@ export default function HomeScreen() {
             return;
         }
 
-        setLocation(nextRegion);
+        setLocation(currentRegion => (
+            areRegionsEquivalent(currentRegion, nextRegion)
+                ? currentRegion
+                : nextRegion
+        ));
         setMapRegionIfNeeded(nextRegion);
     };
 
@@ -1745,6 +1777,15 @@ export default function HomeScreen() {
                         await persistLastDeviceLocationRegion(freshRegion);
 
                         if (!areRegionsEquivalent(cachedRegion, freshRegion)) {
+                            const shouldDeferBootstrapRegionRefresh = (
+                                !hasVisibleFuelStateRef.current ||
+                                pendingHomeRefitRequestRef.current?.reason === 'initial-load'
+                            );
+
+                            if (shouldDeferBootstrapRegionRefresh) {
+                                return;
+                            }
+
                             const shouldAnimateLocationTransition = shouldAnimateSmoothLaunchTransition(cachedRegion, freshRegion);
                             applyResolvedRegion(freshRegion);
                             updateResolvedFuelSearchContext(freshRegion, 'device');
@@ -1837,11 +1878,6 @@ export default function HomeScreen() {
             radiusMiles: searchRadiusMiles,
             preferredProvider,
         });
-        const launchFitStartRegion = launchCachedRegionRef.current || mapRegionRef.current || requestedRegion;
-        const shouldAnimateInitialStationsFit = (
-            !hadVisibleFuelState &&
-            shouldAnimateSmoothLaunchTransition(launchFitStartRegion, requestedRegion)
-        );
         const query = {
             latitude,
             longitude,
@@ -1849,6 +1885,11 @@ export default function HomeScreen() {
             fuelType: selectedFuelGrade,
             preferredProvider,
         };
+        const shouldForceLiveGasBuddyRefresh = (
+            preferredProvider === 'gasbuddy' &&
+            preferCached &&
+            !hasVisibleFuelStateRef.current
+        );
         const baseDebugState = {
             input: {
                 ...query,
@@ -1870,7 +1911,21 @@ export default function HomeScreen() {
                 const cachedSnapshot = await getCachedFuelPriceSnapshot(query);
 
                 if (activeHomeQuerySignatureRef.current === requestQuerySignature) {
-                    applySnapshot(cachedSnapshot);
+                    if (cachedSnapshot?.quote && !hadVisibleFuelState) {
+                        const nextRenderedHomeRefitRequestVersion = renderedHomeRefitRequestVersionRef.current + 1;
+                        renderedHomeRefitRequestVersionRef.current = nextRenderedHomeRefitRequestVersion;
+                        applySnapshot(cachedSnapshot, {
+                            animated: true,
+                            filterSignature: currentHomeFilterSignature,
+                            forceAnimation: false,
+                            querySignature: requestQuerySignature,
+                            renderedRequestVersion: nextRenderedHomeRefitRequestVersion,
+                            reason: 'initial-load',
+                        });
+                    } else {
+                        applySnapshot(cachedSnapshot);
+                    }
+
                     if (cachedSnapshot?.quote) {
                         lastVisibleHomeRequestKeyRef.current = requestDisplayKey;
                     }
@@ -1882,7 +1937,10 @@ export default function HomeScreen() {
                 setIsRefreshingPrices(true);
             }
 
-            const result = await refreshFuelPriceSnapshot(query);
+            const result = await refreshFuelPriceSnapshot({
+                ...query,
+                forceLiveGasBuddy: shouldForceLiveGasBuddyRefresh,
+            });
             const freshSnapshot = result?.snapshot;
             const nextDebugState = result?.debugState
                 ? {
@@ -1911,28 +1969,42 @@ export default function HomeScreen() {
                 setIsLaunchCriticalFitPending(true);
             }
 
-            applySnapshot(freshSnapshot);
-            lastVisibleHomeRequestKeyRef.current = requestDisplayKey;
-            lastResolvedHomeQuerySignatureRef.current = requestQuerySignature;
-            lastAppliedHomeFilterSignatureRef.current = currentHomeFilterSignature;
             const pendingHomeRefitRequest = pendingHomeRefitRequestRef.current;
             const shouldPreserveQueuedFilterChange = (
                 pendingHomeRefitRequest?.reason === 'filter-change' &&
                 pendingHomeRefitRequest.filterSignature === currentHomeFilterSignature
             );
-            queueHomeRefitRequest({
-                animated: shouldPreserveQueuedFilterChange
-                    ? true
-                    : (!hadVisibleFuelState && shouldAnimateInitialStationsFit),
-                filterSignature: currentHomeFilterSignature,
-                forceAnimation: shouldPreserveQueuedFilterChange
-                    ? pendingHomeRefitRequest.forceAnimation !== false
-                    : false,
-                querySignature: requestQuerySignature,
-                reason: shouldPreserveQueuedFilterChange
-                    ? 'filter-change'
-                    : (hadVisibleFuelState ? 'location-refresh' : 'initial-load'),
-            });
+            const hasPendingInitialLoadFitForQuery = (
+                pendingHomeRefitRequest?.reason === 'initial-load' &&
+                pendingHomeRefitRequest.querySignature === requestQuerySignature
+            );
+            const hasVisibleFuelStateNow = hasVisibleFuelStateRef.current;
+
+            if (hasPendingInitialLoadFitForQuery) {
+                applySnapshot(freshSnapshot);
+            } else {
+                const shouldUseInitialLoadFit = !hasVisibleFuelStateNow;
+                const nextRenderedHomeRefitRequestVersion = renderedHomeRefitRequestVersionRef.current + 1;
+                renderedHomeRefitRequestVersionRef.current = nextRenderedHomeRefitRequestVersion;
+                const nextHomeRefitRequest = {
+                    animated: shouldPreserveQueuedFilterChange
+                        ? true
+                        : shouldUseInitialLoadFit,
+                    filterSignature: currentHomeFilterSignature,
+                    forceAnimation: shouldPreserveQueuedFilterChange
+                        ? pendingHomeRefitRequest.forceAnimation !== false
+                        : false,
+                    querySignature: requestQuerySignature,
+                    renderedRequestVersion: nextRenderedHomeRefitRequestVersion,
+                    reason: shouldPreserveQueuedFilterChange
+                        ? 'filter-change'
+                        : (shouldUseInitialLoadFit ? 'initial-load' : 'location-refresh'),
+                };
+                applySnapshot(freshSnapshot, nextHomeRefitRequest);
+            }
+            lastVisibleHomeRequestKeyRef.current = requestDisplayKey;
+            lastResolvedHomeQuerySignatureRef.current = requestQuerySignature;
+            lastAppliedHomeFilterSignatureRef.current = currentHomeFilterSignature;
 
             if (isMountedRef.current) {
                 setErrorMsg(null);
@@ -2024,6 +2096,20 @@ export default function HomeScreen() {
                 !isFocusedRef.current
             )
         );
+        const reusableQuerySignature = reusableResolvedRegion
+            ? buildResolvedHomeQuerySignature(reusableResolvedRegion)
+            : '';
+
+        if (
+            !force &&
+            reusableResolvedRegion &&
+            !shouldReuseResolvedRegion &&
+            lastResolvedHomeQuerySignatureRef.current === reusableQuerySignature &&
+            hasVisibleFuelStateRef.current
+        ) {
+            lastAppliedHomeFilterSignatureRef.current = currentHomeFilterSignature;
+            return;
+        }
 
         const nextRegion = shouldReuseResolvedRegion
             ? reusableResolvedRegion
@@ -2048,7 +2134,11 @@ export default function HomeScreen() {
             });
         }
 
-        if (!force && lastResolvedHomeQuerySignatureRef.current === nextQuerySignature) {
+        if (
+            !force &&
+            lastResolvedHomeQuerySignatureRef.current === nextQuerySignature &&
+            hasVisibleFuelStateRef.current
+        ) {
             lastAppliedHomeFilterSignatureRef.current = currentHomeFilterSignature;
             return;
         }
@@ -2148,13 +2238,27 @@ export default function HomeScreen() {
             nextFilterSignature: currentHomeFilterSignature,
         })) {
             resetHomeSelectionToBest();
-            queueHomeRefitRequest({
-                animated: true,
-                filterSignature: currentHomeFilterSignature,
-                forceAnimation: true,
-                querySignature: buildResolvedHomeQuerySignature(location),
-                reason: 'filter-change',
-            });
+            const nextFilterQuerySignature = hasUsableHomeRegion(location)
+                ? buildResolvedHomeQuerySignature(location)
+                : '';
+            const shouldWaitForFreshSnapshot = Boolean(
+                nextFilterQuerySignature &&
+                lastResolvedHomeQuerySignatureRef.current &&
+                nextFilterQuerySignature !== lastResolvedHomeQuerySignatureRef.current
+            );
+
+            if (!shouldWaitForFreshSnapshot) {
+                const nextRenderedHomeRefitRequestVersion = renderedHomeRefitRequestVersionRef.current + 1;
+                renderedHomeRefitRequestVersionRef.current = nextRenderedHomeRefitRequestVersion;
+                queueHomeRefitRequest({
+                    animated: true,
+                    filterSignature: currentHomeFilterSignature,
+                    forceAnimation: true,
+                    querySignature: nextFilterQuerySignature,
+                    renderedRequestVersion: nextRenderedHomeRefitRequestVersion,
+                    reason: 'filter-change',
+                });
+            }
         }
 
         void refreshForCurrentView({
@@ -2165,7 +2269,6 @@ export default function HomeScreen() {
         autoClusterProbeRequested,
         buildResolvedHomeQuerySignature,
         isFocused,
-        location,
         manualLocationOverride,
         minimumRating,
         preferredProvider,
@@ -2355,6 +2458,18 @@ export default function HomeScreen() {
             return;
         }
 
+        const shouldPauseSuppressionPersistence = (
+            pendingHomeRefitRequestRef.current?.reason === 'initial-load' ||
+            lastDataHashRef.current !== stationQuotesSignature
+        );
+
+        if (shouldPauseSuppressionPersistence) {
+            setEffectiveSuppressedStationIds(currentValue => (
+                currentValue.size === 0 ? currentValue : new Set()
+            ));
+            return;
+        }
+
         setEffectiveSuppressedStationIds(currentValue => {
             const visibleStationIds = new Set(stationQuotes.map(quote => String(quote.stationId)));
             const activeStationId = stationQuotes[activeIndex]?.stationId ?? null;
@@ -2376,7 +2491,15 @@ export default function HomeScreen() {
                 ? currentValue
                 : nextSuppressedIds;
         });
-    }, [ENABLE_CLUSTER_MERGE_TRANSITIONS, activeIndex, isMapMoving, isSuppressionRevealAllowed, rawSuppressedOverlapStationIds, stationQuotes]);
+    }, [
+        ENABLE_CLUSTER_MERGE_TRANSITIONS,
+        activeIndex,
+        homeLayoutSettlementVersion,
+        isMapMoving,
+        isSuppressionRevealAllowed,
+        rawSuppressedOverlapStationIds,
+        stationQuotes,
+    ]);
     const visibleSuppressedStationIds = useMemo(() => {
         return buildVisibleSuppressedStationIds({
             suppressedStationIds: effectiveSuppressedStationIds,
@@ -2451,6 +2574,7 @@ export default function HomeScreen() {
         }, INITIAL_HOME_SUPPRESSION_DELAY_MS);
     }, [
         hasInitializedInitialSuppressionDelay,
+        homeLayoutSettlementVersion,
         isMapLoaded,
         isMapMoving,
         stationQuotes.length,
@@ -2525,17 +2649,18 @@ export default function HomeScreen() {
 
                 fitMapToStations({
                     animated: shouldAnimateAttempt,
-                    runSettlePass: !shouldRevealDuringFit,
+                    runSettlePass: !shouldRevealDuringFit && !shouldAnimateAttempt,
                 });
 
                 if (initialStationsFitRetryTimeoutRef.current) {
                     clearTimeout(initialStationsFitRetryTimeoutRef.current);
                 }
 
-                if (attemptNumber >= INITIAL_STATIONS_FIT_MAX_ATTEMPTS - 1) {
-                    clearQueuedHomeRefitRequest();
+                const shouldScheduleRetry = !shouldAnimateAttempt && attemptNumber < INITIAL_STATIONS_FIT_MAX_ATTEMPTS - 1;
+
+                if (!shouldScheduleRetry) {
                     initialStationsFitRetryTimeoutRef.current = null;
-                    lastDataHashRef.current = currentHash;
+                    commitSettledHomeLayout(currentHash);
 
                     if (
                         isFirstLaunchWithoutCachedRegionRef.current &&
@@ -2667,6 +2792,13 @@ export default function HomeScreen() {
         }
     };
 
+    const clearFitSettlePassTimeout = () => {
+        if (fitSettlePassTimeoutRef.current) {
+            clearTimeout(fitSettlePassTimeoutRef.current);
+            fitSettlePassTimeoutRef.current = null;
+        }
+    };
+
     const fitMapToStations = useCallback(({ animated = true, runSettlePass = false } = {}) => {
         if (!mapRef.current) {
             return;
@@ -2678,6 +2810,13 @@ export default function HomeScreen() {
                 .filter(q => !suppressedStationIds?.has(String(q.stationId)))
                 .map(q => ({ latitude: q.latitude, longitude: q.longitude }))
         );
+        const buildCoordinateSignature = (coordinates) => (
+            (coordinates || [])
+                .map(coord => (
+                    `${coord.latitude.toFixed(5)}:${coord.longitude.toFixed(5)}`
+                ))
+                .join('|')
+        );
 
         // Frame all visible stations without forcing the user-location bubble into the fit bounds.
         const coords = buildFitCoordinates(stationQuotes);
@@ -2685,6 +2824,8 @@ export default function HomeScreen() {
         if (coords.length === 0) {
             return;
         }
+
+        clearFitSettlePassTimeout();
 
         isAnimatingRef.current = true;
         setMapMotionState(true);
@@ -2707,7 +2848,11 @@ export default function HomeScreen() {
         });
 
         if (runSettlePass) {
-            setTimeout(() => {
+            const initialCoordinateSignature = buildCoordinateSignature(coords);
+
+            fitSettlePassTimeoutRef.current = setTimeout(() => {
+                fitSettlePassTimeoutRef.current = null;
+
                 if (!mapRef.current) {
                     return;
                 }
@@ -2719,6 +2864,10 @@ export default function HomeScreen() {
                 const nextCoords = settledCoords.length > 0 ? settledCoords : buildFitCoordinates(stationQuotesRef.current);
 
                 if (nextCoords.length === 0) {
+                    return;
+                }
+
+                if (buildCoordinateSignature(nextCoords) === initialCoordinateSignature) {
                     return;
                 }
 
@@ -2809,6 +2958,7 @@ export default function HomeScreen() {
 
     function cancelInitialHomeFitRetries() {
         isInitialStationsFitScheduledRef.current = false;
+        clearFitSettlePassTimeout();
 
         if (initialStationsFitRetryTimeoutRef.current) {
             clearTimeout(initialStationsFitRetryTimeoutRef.current);
@@ -2821,12 +2971,19 @@ export default function HomeScreen() {
         isQueuedHomeRefitScheduledRef.current = false;
     }
 
+    function commitSettledHomeLayout(nextDataHash = lastDataHashRef.current) {
+        lastDataHashRef.current = nextDataHash;
+        clearQueuedHomeRefitRequest();
+        setHomeLayoutSettlementVersion(currentValue => currentValue + 1);
+    }
+
     function flushMapIdleWaitersWithoutAnimation(didReachIdle) {
         flushMapIdleWaiters(didReachIdle);
     }
 
     function resetMapMotionTracking() {
         clearMapIdleSettleTimeout();
+        clearFitSettlePassTimeout();
         isQueuedHomeRefitScheduledRef.current = false;
         isAnimatingRef.current = false;
         setMapMotionState(false);
@@ -2843,6 +3000,7 @@ export default function HomeScreen() {
             previousRequest.reason === nextRequest.reason &&
             previousRequest.querySignature === nextRequest.querySignature &&
             previousRequest.filterSignature === nextRequest.filterSignature &&
+            previousRequest.renderedRequestVersion === nextRequest.renderedRequestVersion &&
             previousRequest.animated === nextRequest.animated &&
             previousRequest.forceAnimation === nextRequest.forceAnimation;
 
@@ -2864,6 +3022,7 @@ export default function HomeScreen() {
     }
 
     function clearPendingHomeRefitRequest() {
+        setStagedHomeRefitRequest(null);
         clearQueuedHomeRefitRequest();
         cancelInitialHomeFitRetries();
         resetMapMotionTracking();
@@ -3063,6 +3222,7 @@ export default function HomeScreen() {
             pendingHomeRefitRequest.reason,
             pendingHomeRefitRequest.filterSignature || '',
             pendingHomeRefitRequest.querySignature || '',
+            pendingHomeRefitRequest.renderedRequestVersion || '',
         ].join('|');
 
         isQueuedHomeRefitScheduledRef.current = true;
@@ -3083,6 +3243,7 @@ export default function HomeScreen() {
                     latestRequest.reason,
                     latestRequest.filterSignature || '',
                     latestRequest.querySignature || '',
+                    latestRequest.renderedRequestVersion || '',
                 ].join('|')
                 : '';
 
@@ -3113,10 +3274,9 @@ export default function HomeScreen() {
             resetHomeSelectionToBest();
             fitMapToStations({
                 animated: homeRefitIntent.animated,
-                runSettlePass: homeRefitIntent.runSettlePass,
+                runSettlePass: homeRefitIntent.runSettlePass && !homeRefitIntent.animated,
             });
-            lastDataHashRef.current = currentHash;
-            clearQueuedHomeRefitRequest();
+            commitSettledHomeLayout(currentHash);
         })();
     }, [fitMapToStations, homeRefitRequestVersion, isFocused, isMapLoaded, stationQuotes.length, stationQuotesSignature]);
 
