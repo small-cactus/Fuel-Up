@@ -1,15 +1,16 @@
 import { supabase } from '../../lib/supabase.js';
 import { filterStationQuotesForHome } from '../../lib/homeState.js';
 import { rankQuotesForFuelGrade } from '../../lib/fuelGrade.js';
+import { buildFuelSearchRequestKey } from '../../lib/fuelSearchState.js';
 const { buildLatestFuelStationQuotesFromRows } = require('./index');
 const { buildValidationState } = require('./priceValidation');
 const { applyCurrentStationQuoteProjection } = require('./trendProjection');
 const { buildTrendLeaderboard } = require('./trendLeaderboard');
 
-const cachedTrendDataByFuelType = {};
-const lastResolvedTrendDataByFuelType = {};
-const lastTrendsScreenViewedAtMsByFuelType = {};
-const inFlightTrendDataRequestsByFuelType = {};
+const cachedTrendDataByRequestKey = {};
+const lastResolvedTrendDataByRequestKey = {};
+const lastTrendsScreenViewedAtMsByRequestKey = {};
+const inFlightTrendDataRequestsByRequestKey = {};
 let trendCacheGeneration = 0;
 const FUEL_GRADE_ALIASES = {
     regular: ['regular', 'regular_gas'],
@@ -115,9 +116,9 @@ function buildValidatedTrendRows(rows, fuelType) {
     }));
 }
 
-function clearObjectValues(target, fuelType = null) {
-    if (fuelType) {
-        delete target[fuelType];
+function clearObjectValues(target, requestKey = null) {
+    if (requestKey) {
+        delete target[requestKey];
         return;
     }
 
@@ -136,10 +137,35 @@ export function isTrendCacheGenerationCurrent(generation) {
 
 export function clearTrendDataCache(fuelType = null) {
     trendCacheGeneration += 1;
-    clearObjectValues(cachedTrendDataByFuelType, fuelType);
-    clearObjectValues(lastResolvedTrendDataByFuelType, fuelType);
-    clearObjectValues(lastTrendsScreenViewedAtMsByFuelType, fuelType);
-    clearObjectValues(inFlightTrendDataRequestsByFuelType, fuelType);
+    clearObjectValues(cachedTrendDataByRequestKey, fuelType);
+    clearObjectValues(lastResolvedTrendDataByRequestKey, fuelType);
+    clearObjectValues(lastTrendsScreenViewedAtMsByRequestKey, fuelType);
+    clearObjectValues(inFlightTrendDataRequestsByRequestKey, fuelType);
+}
+
+export function buildTrendRequestKey({
+    latitude,
+    longitude,
+    fuelType = 'regular',
+    radiusMiles = 10,
+    preferredProvider = 'gasbuddy',
+    minimumRating = 0,
+    requestKey = '',
+}) {
+    if (requestKey) {
+        return String(requestKey);
+    }
+
+    return buildFuelSearchRequestKey({
+        origin: {
+            latitude,
+            longitude,
+        },
+        fuelGrade: fuelType,
+        radiusMiles,
+        preferredProvider,
+        minimumRating,
+    });
 }
 
 export async function fetchTrendData({
@@ -403,37 +429,67 @@ export async function fetchTrendData({
     };
 }
 
-export function getCachedTrendData(fuelType = 'regular') {
-    return cachedTrendDataByFuelType[fuelType] || null;
+export function getCachedTrendData(requestKey = '') {
+    return cachedTrendDataByRequestKey[requestKey] || null;
 }
 
-export function setCachedTrendData(fuelType = 'regular', data = null) {
-    cachedTrendDataByFuelType[fuelType] = data;
+export function setCachedTrendData(requestKey = '', data = null) {
+    if (!requestKey) {
+        return;
+    }
+
+    cachedTrendDataByRequestKey[requestKey] = data;
 }
 
-export function getLastResolvedTrendData(fuelType = 'regular') {
-    return lastResolvedTrendDataByFuelType[fuelType] || null;
+export function getLastResolvedTrendData(requestKey = '') {
+    return lastResolvedTrendDataByRequestKey[requestKey] || null;
 }
 
-export function setLastResolvedTrendData(fuelType = 'regular', data = null) {
-    lastResolvedTrendDataByFuelType[fuelType] = data;
+export function setLastResolvedTrendData(requestKey = '', data = null) {
+    if (!requestKey) {
+        return;
+    }
+
+    lastResolvedTrendDataByRequestKey[requestKey] = data;
 }
 
-export function getLastTrendsScreenViewedAt(fuelType = 'regular') {
-    return lastTrendsScreenViewedAtMsByFuelType[fuelType] || 0;
+export function getLastTrendsScreenViewedAt(requestKey = '') {
+    return lastTrendsScreenViewedAtMsByRequestKey[requestKey] || 0;
 }
 
-export function setLastTrendsScreenViewedAt(fuelType = 'regular', viewedAtMs = 0) {
-    lastTrendsScreenViewedAtMsByFuelType[fuelType] = viewedAtMs;
+export function setLastTrendsScreenViewedAt(requestKey = '', viewedAtMs = 0) {
+    if (!requestKey) {
+        return;
+    }
+
+    lastTrendsScreenViewedAtMsByRequestKey[requestKey] = viewedAtMs;
 }
 
-export function getInFlightTrendDataRequest(fuelType = 'regular') {
-    return inFlightTrendDataRequestsByFuelType[fuelType] || null;
+export function getInFlightTrendDataRequest(requestKey = '') {
+    return inFlightTrendDataRequestsByRequestKey[requestKey] || null;
 }
 
-export async function prefetchTrendData({ latitude, longitude, fuelType = 'regular' }) {
-    if (inFlightTrendDataRequestsByFuelType[fuelType]) {
-        return inFlightTrendDataRequestsByFuelType[fuelType];
+export async function prefetchTrendData({
+    latitude,
+    longitude,
+    fuelType = 'regular',
+    radiusMiles = 10,
+    preferredProvider = 'gasbuddy',
+    minimumRating = 0,
+    requestKey = '',
+}) {
+    const resolvedRequestKey = buildTrendRequestKey({
+        latitude,
+        longitude,
+        fuelType,
+        radiusMiles,
+        preferredProvider,
+        minimumRating,
+        requestKey,
+    });
+
+    if (inFlightTrendDataRequestsByRequestKey[resolvedRequestKey]) {
+        return inFlightTrendDataRequestsByRequestKey[resolvedRequestKey];
     }
 
     const requestGeneration = captureTrendCacheGeneration();
@@ -441,21 +497,27 @@ export async function prefetchTrendData({ latitude, longitude, fuelType = 'regul
 
     request = (async () => {
         try {
-            const data = await fetchTrendData({ latitude, longitude, fuelType });
+            const data = await fetchTrendData({
+                latitude,
+                longitude,
+                fuelType,
+                radiusMiles,
+                minimumRating,
+            });
             if (!isTrendCacheGenerationCurrent(requestGeneration)) {
                 return null;
             }
-            setCachedTrendData(fuelType, data);
-            setLastResolvedTrendData(fuelType, data);
-            setLastTrendsScreenViewedAt(fuelType, Date.now());
+            setCachedTrendData(resolvedRequestKey, data);
+            setLastResolvedTrendData(resolvedRequestKey, data);
+            setLastTrendsScreenViewedAt(resolvedRequestKey, Date.now());
             return data;
         } finally {
-            if (inFlightTrendDataRequestsByFuelType[fuelType] === request) {
-                delete inFlightTrendDataRequestsByFuelType[fuelType];
+            if (inFlightTrendDataRequestsByRequestKey[resolvedRequestKey] === request) {
+                delete inFlightTrendDataRequestsByRequestKey[resolvedRequestKey];
             }
         }
     })();
 
-    inFlightTrendDataRequestsByFuelType[fuelType] = request;
+    inFlightTrendDataRequestsByRequestKey[resolvedRequestKey] = request;
     return request;
 }

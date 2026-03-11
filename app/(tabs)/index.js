@@ -24,6 +24,7 @@ import { prefetchTrendData } from '../../src/services/fuel/trends';
 import { useTheme } from '../../src/ThemeContext';
 import { usePreferences } from '../../src/PreferencesContext';
 import BottomCanopy from '../../src/components/BottomCanopy';
+import ActiveStationOverlay from '../../src/components/cluster/ActiveStationOverlay';
 import ClusterMarkerOverlay from '../../src/components/cluster/ClusterMarkerOverlay';
 import StationMarker from '../../src/components/cluster/StationMarker';
 import { consumeFreshLaunchMapBootstrap } from '../../src/lib/appLaunchState';
@@ -36,6 +37,10 @@ import {
     rankQuotesForFuelGrade,
 } from '../../src/lib/fuelGrade';
 import {
+    buildFuelSearchRequestKey,
+    buildResolvedFuelSearchContext,
+} from '../../src/lib/fuelSearchState';
+import {
     buildPersistentSuppressedStationIds,
     canRevealActiveStation,
     buildHomeFilterSignature,
@@ -47,6 +52,7 @@ import {
     resolveHomeCardIndexFromOffset,
     shouldInitializeInitialSuppressionDelay,
     shouldDelayStationMarkerSuppression,
+    shouldShowActiveStationDecoration,
     shouldAutoFitHomeMap,
 } from '../../src/lib/homeState';
 import {
@@ -150,6 +156,13 @@ function interpolateZoomDelta(startDelta, endDelta, stepNumber, totalSteps, dist
     const progress = (stepNumber / totalSteps) * distanceMultiplier;
 
     return startDelta * Math.pow(endDelta / startDelta, progress);
+}
+
+function hasUsableHomeRegion(region) {
+    return Boolean(
+        Number.isFinite(region?.latitude) &&
+        Number.isFinite(region?.longitude)
+    );
 }
 
 function buildClusterDebugAutomationSeedRegion(quotes, fallbackRegion) {
@@ -1265,6 +1278,7 @@ export default function HomeScreen() {
     const clusterDebugAutoProbeSeededKeyRef = useRef('');
     const lastResolvedHomeQuerySignatureRef = useRef('');
     const activeHomeQuerySignatureRef = useRef('');
+    const lastVisibleHomeRequestKeyRef = useRef('');
     const isFocusedRef = useRef(false);
     const isFirstLaunchWithoutCachedRegionRef = useRef(false);
     const launchVisualReadyRequestIdRef = useRef(0);
@@ -1275,11 +1289,17 @@ export default function HomeScreen() {
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
     const homeGlassTintColor = isDark ? HOME_DARK_GLASS_TINT : '#FFFFFF';
-    const { preferences } = usePreferences();
+    const {
+        preferences,
+        fuelSearchCriteriaSignature,
+        normalizedFuelSearchPreferences,
+    } = usePreferences();
     const {
         fuelResetToken,
         manualLocationOverride,
+        resolvedFuelSearchContext,
         setFuelDebugState,
+        setResolvedFuelSearchContext,
         clusterProbeRequest,
         isClusterProbeSessionActive,
         finishClusterProbeSession,
@@ -1329,7 +1349,7 @@ export default function HomeScreen() {
     const isInitialStationsFitScheduledRef = useRef(false);
     const isQueuedHomeRefitScheduledRef = useRef(false);
     const initialStationsFitRetryTimeoutRef = useRef(null);
-    const prefetchedTrendRequestKeysRef = useRef(new Map());
+    const prefetchedTrendRequestKeysRef = useRef(new Set());
     const mapLoadedFallbackTimeoutRef = useRef(null);
     const lastSettledCardIndexRef = useRef(0);
     const activeIndexRef = useRef(0);
@@ -1349,26 +1369,35 @@ export default function HomeScreen() {
     };
     const topCanopyHeight = insets.top + TOP_CANOPY_HEIGHT;
     const canopyEdgeLine = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.42)';
-    const selectedFuelGrade = normalizeFuelGrade(preferences.preferredOctane);
+    const selectedFuelGrade = normalizeFuelGrade(normalizedFuelSearchPreferences.preferredOctane);
+    const searchRadiusMiles = normalizedFuelSearchPreferences.searchRadiusMiles;
+    const preferredProvider = normalizedFuelSearchPreferences.preferredProvider;
+    const minimumRating = normalizedFuelSearchPreferences.minimumRating;
     const buildResolvedHomeQuerySignature = useCallback((nextRegion) => buildHomeQuerySignature({
         origin: nextRegion,
-        radiusMiles: preferences.searchRadiusMiles,
+        radiusMiles: searchRadiusMiles,
         fuelGrade: selectedFuelGrade,
-        preferredProvider: preferences.preferredProvider,
+        preferredProvider,
     }), [
-        preferences.preferredProvider,
-        preferences.searchRadiusMiles,
+        preferredProvider,
+        searchRadiusMiles,
         selectedFuelGrade,
     ]);
-    const currentHomeFilterSignature = useMemo(() => buildHomeFilterSignature({
-        radiusMiles: preferences.searchRadiusMiles,
+    const currentHomeFilterSignature = fuelSearchCriteriaSignature || buildHomeFilterSignature({
+        radiusMiles: searchRadiusMiles,
         fuelGrade: selectedFuelGrade,
-        preferredProvider: preferences.preferredProvider,
-        minimumRating: preferences.minimumRating || 0,
+        preferredProvider,
+        minimumRating,
+    });
+    const currentVisibleHomeRequestKey = useMemo(() => buildFuelSearchRequestKey({
+        origin: location,
+        fuelGrade: selectedFuelGrade,
+        radiusMiles: searchRadiusMiles,
+        preferredProvider,
     }), [
-        preferences.minimumRating,
-        preferences.preferredProvider,
-        preferences.searchRadiusMiles,
+        location,
+        preferredProvider,
+        searchRadiusMiles,
         selectedFuelGrade,
     ]);
     const markMapLoaded = () => {
@@ -1422,6 +1451,43 @@ export default function HomeScreen() {
             setRegionalQuotes(snapshot.regionalQuotes || []);
         });
     };
+
+    const updateResolvedFuelSearchContext = useCallback((origin, locationSource = 'device') => {
+        const nextContext = buildResolvedFuelSearchContext({
+            origin,
+            locationSource,
+            fuelGrade: selectedFuelGrade,
+            radiusMiles: searchRadiusMiles,
+            preferredProvider,
+            minimumRating,
+        });
+
+        if (!nextContext) {
+            return;
+        }
+
+        setResolvedFuelSearchContext(nextContext);
+    }, [
+        minimumRating,
+        preferredProvider,
+        searchRadiusMiles,
+        selectedFuelGrade,
+        setResolvedFuelSearchContext,
+    ]);
+
+    const clearVisibleHomeResultsForReload = useCallback(() => {
+        if (!isMountedRef.current) {
+            return;
+        }
+
+        startTransition(() => {
+            setBestQuote(null);
+            setTopStations([]);
+            setRegionalQuotes([]);
+        });
+        setErrorMsg(null);
+        setIsRefreshingPrices(true);
+    }, []);
 
     const clearVisibleFuelState = (nextError = null) => {
         startTransition(() => {
@@ -1614,6 +1680,8 @@ export default function HomeScreen() {
                 setIsLoadingLocation(false);
             }
 
+            updateResolvedFuelSearchContext(manualRegion, 'manual');
+
             return {
                 ...manualRegion,
                 locationSource: 'manual',
@@ -1652,6 +1720,7 @@ export default function HomeScreen() {
             if (allowLaunchBootstrap && cachedRegion) {
                 launchCachedRegionRef.current = cachedRegion;
                 applyResolvedRegion(cachedRegion);
+                updateResolvedFuelSearchContext(cachedRegion, 'device-cache');
                 if (isMountedRef.current) {
                     setIsLoadingLocation(false);
                 }
@@ -1678,6 +1747,7 @@ export default function HomeScreen() {
                         if (!areRegionsEquivalent(cachedRegion, freshRegion)) {
                             const shouldAnimateLocationTransition = shouldAnimateSmoothLaunchTransition(cachedRegion, freshRegion);
                             applyResolvedRegion(freshRegion);
+                            updateResolvedFuelSearchContext(freshRegion, 'device');
                             if (shouldAnimateLocationTransition) {
                                 animateMapToRegion(freshRegion);
                             } else {
@@ -1718,6 +1788,7 @@ export default function HomeScreen() {
             };
 
             applyResolvedRegion(nextRegion);
+            updateResolvedFuelSearchContext(nextRegion, 'device');
             if (allowLaunchBootstrap || !bestQuote) {
                 popMapToRegionWithoutAnimation(nextRegion);
             } else {
@@ -1760,6 +1831,12 @@ export default function HomeScreen() {
             latitudeDelta: DEFAULT_REGION.latitudeDelta,
             longitudeDelta: DEFAULT_REGION.longitudeDelta,
         };
+        const requestDisplayKey = buildFuelSearchRequestKey({
+            origin: requestedRegion,
+            fuelGrade: selectedFuelGrade,
+            radiusMiles: searchRadiusMiles,
+            preferredProvider,
+        });
         const launchFitStartRegion = launchCachedRegionRef.current || mapRegionRef.current || requestedRegion;
         const shouldAnimateInitialStationsFit = (
             !hadVisibleFuelState &&
@@ -1768,9 +1845,9 @@ export default function HomeScreen() {
         const query = {
             latitude,
             longitude,
-            radiusMiles: preferences.searchRadiusMiles || 10,
+            radiusMiles: searchRadiusMiles,
             fuelType: selectedFuelGrade,
-            preferredProvider: preferences.preferredProvider || 'gasbuddy',
+            preferredProvider,
         };
         const baseDebugState = {
             input: {
@@ -1794,6 +1871,9 @@ export default function HomeScreen() {
 
                 if (activeHomeQuerySignatureRef.current === requestQuerySignature) {
                     applySnapshot(cachedSnapshot);
+                    if (cachedSnapshot?.quote) {
+                        lastVisibleHomeRequestKeyRef.current = requestDisplayKey;
+                    }
                 }
             }
 
@@ -1832,6 +1912,7 @@ export default function HomeScreen() {
             }
 
             applySnapshot(freshSnapshot);
+            lastVisibleHomeRequestKeyRef.current = requestDisplayKey;
             lastResolvedHomeQuerySignatureRef.current = requestQuerySignature;
             lastAppliedHomeFilterSignatureRef.current = currentHomeFilterSignature;
             const pendingHomeRefitRequest = pendingHomeRefitRequestRef.current;
@@ -1863,8 +1944,10 @@ export default function HomeScreen() {
                 latitude,
                 longitude,
                 fuelType: selectedFuelGrade,
-                radiusMiles: preferences.searchRadiusMiles,
-                minimumRating: preferences.minimumRating || 0,
+                radiusMiles: searchRadiusMiles,
+                preferredProvider,
+                minimumRating,
+                requestKey: requestDisplayKey,
             });
         } catch (error) {
             if (isFuelCacheResetError(error)) {
@@ -1903,19 +1986,56 @@ export default function HomeScreen() {
 
     const refreshForCurrentView = async ({ preferCached, force = false }) => {
         const allowLaunchBootstrap = shouldUseLaunchLocationBootstrapRef.current;
+        const pendingHomeRefitRequest = pendingHomeRefitRequestRef.current;
 
         shouldUseLaunchLocationBootstrapRef.current = false;
 
-        const nextRegion = await resolveCurrentLocation({
-            allowLaunchBootstrap,
-        });
+        const reusableResolvedRegion = !force
+            ? (
+                hasUsableHomeRegion(location) && lastResolvedHomeQuerySignatureRef.current
+                    ? {
+                        ...location,
+                        locationSource: manualLocationOverride
+                            ? 'manual'
+                            : (resolvedFuelSearchContext?.locationSource || 'device'),
+                    }
+                    : (
+                        hasUsableHomeRegion(resolvedFuelSearchContext)
+                            ? {
+                                latitude: resolvedFuelSearchContext.latitude,
+                                longitude: resolvedFuelSearchContext.longitude,
+                                latitudeDelta: resolvedFuelSearchContext.latitudeDelta || DEFAULT_REGION.latitudeDelta,
+                                longitudeDelta: resolvedFuelSearchContext.longitudeDelta || DEFAULT_REGION.longitudeDelta,
+                                locationSource: resolvedFuelSearchContext.locationSource || 'device',
+                            }
+                            : null
+                    )
+            )
+            : null;
+
+        const shouldReuseResolvedRegion = Boolean(
+            reusableResolvedRegion &&
+            (
+                pendingHomeRefitRequest?.reason === 'filter-change' ||
+                hasHomeFilterSignatureChanged({
+                    previousFilterSignature: lastAppliedHomeFilterSignatureRef.current,
+                    nextFilterSignature: currentHomeFilterSignature,
+                }) ||
+                !isFocusedRef.current
+            )
+        );
+
+        const nextRegion = shouldReuseResolvedRegion
+            ? reusableResolvedRegion
+            : await resolveCurrentLocation({
+                allowLaunchBootstrap,
+            });
 
         if (!nextRegion) {
             return;
         }
 
         const nextQuerySignature = buildResolvedHomeQuerySignature(nextRegion);
-        const pendingHomeRefitRequest = pendingHomeRefitRequestRef.current;
 
         if (
             pendingHomeRefitRequest?.reason === 'filter-change' &&
@@ -1984,9 +2104,37 @@ export default function HomeScreen() {
 
         lastResolvedHomeQuerySignatureRef.current = '';
         activeHomeQuerySignatureRef.current = '';
+        lastVisibleHomeRequestKeyRef.current = '';
+        prefetchedTrendRequestKeysRef.current.clear();
         clearVisibleFuelState('Fuel cache cleared. Open Home to fetch fresh prices.');
         setFuelDebugState(null);
     }, [fuelResetToken, setFuelDebugState]);
+
+    useEffect(() => {
+        const hasVisibleFuelState = Boolean(bestQuote) || topStations.length > 0 || regionalQuotes.length > 0 || Boolean(errorMsg);
+        const previousVisibleRequestKey = lastVisibleHomeRequestKeyRef.current;
+
+        if (
+            !hasVisibleFuelState ||
+            !previousVisibleRequestKey ||
+            previousVisibleRequestKey === currentVisibleHomeRequestKey
+        ) {
+            if (hasVisibleFuelState) {
+                lastVisibleHomeRequestKeyRef.current = currentVisibleHomeRequestKey;
+            }
+            return;
+        }
+
+        lastVisibleHomeRequestKeyRef.current = currentVisibleHomeRequestKey;
+        clearVisibleHomeResultsForReload();
+    }, [
+        bestQuote,
+        clearVisibleHomeResultsForReload,
+        currentVisibleHomeRequestKey,
+        errorMsg,
+        regionalQuotes.length,
+        topStations.length,
+    ]);
 
     useEffect(() => {
         if (!isFocused && !autoClusterProbeRequested) {
@@ -2019,9 +2167,9 @@ export default function HomeScreen() {
         isFocused,
         location,
         manualLocationOverride,
-        preferences.minimumRating,
-        preferences.preferredProvider,
-        preferences.searchRadiusMiles,
+        minimumRating,
+        preferredProvider,
+        searchRadiusMiles,
         selectedFuelGrade,
     ]);
 
@@ -2030,34 +2178,47 @@ export default function HomeScreen() {
         const hasValidLocation =
             Number.isFinite(location?.latitude) &&
             Number.isFinite(location?.longitude);
-        const trendPrefetchLocationKey = hasValidLocation
-            ? `${selectedFuelGrade}:${Math.round(location.latitude * 10) / 10}:${Math.round(location.longitude * 10) / 10}`
+        const trendPrefetchRequestKey = hasValidLocation
+            ? buildFuelSearchRequestKey({
+                origin: location,
+                fuelGrade: selectedFuelGrade,
+                radiusMiles: searchRadiusMiles,
+                preferredProvider,
+                minimumRating,
+            })
             : null;
 
         if (
             !isMapLoaded ||
             !hasVisibleMapContent ||
             !hasValidLocation ||
-            !trendPrefetchLocationKey ||
-            prefetchedTrendRequestKeysRef.current.get(selectedFuelGrade) === trendPrefetchLocationKey
+            !trendPrefetchRequestKey ||
+            prefetchedTrendRequestKeysRef.current.has(trendPrefetchRequestKey)
         ) {
             return;
         }
 
-        prefetchedTrendRequestKeysRef.current.set(selectedFuelGrade, trendPrefetchLocationKey);
+        prefetchedTrendRequestKeysRef.current.add(trendPrefetchRequestKey);
         router.prefetch?.('/trends');
 
         void prefetchTrendData({
             latitude: location.latitude,
             longitude: location.longitude,
             fuelType: selectedFuelGrade,
+            radiusMiles: searchRadiusMiles,
+            preferredProvider,
+            minimumRating,
+            requestKey: trendPrefetchRequestKey,
         });
     }, [
         bestQuote,
         isMapLoaded,
         location,
+        minimumRating,
+        preferredProvider,
         regionalQuotes.length,
         router,
+        searchRadiusMiles,
         selectedFuelGrade,
         topStations.length,
     ]);
@@ -2070,7 +2231,7 @@ export default function HomeScreen() {
 
     const { width, height } = Dimensions.get('window');
 
-    const minRating = preferences.minimumRating || 0;
+    const minRating = minimumRating;
     const rawStationQuotes = useMemo(() => (
         [
             ...(Array.isArray(topStations) ? topStations : []),
@@ -2083,13 +2244,13 @@ export default function HomeScreen() {
         filterStationQuotesForHome({
             quotes: rawStationQuotes,
             origin: location,
-            radiusMiles: preferences.searchRadiusMiles,
+            radiusMiles: searchRadiusMiles,
             minimumRating: minRating,
         })
     ), [
         location,
         minRating,
-        preferences.searchRadiusMiles,
+        searchRadiusMiles,
         rawStationQuotes,
     ]);
     const rankedStationQuotes = useMemo(() => {
@@ -2120,6 +2281,7 @@ export default function HomeScreen() {
     }, [errorMsg, filteredStationQuotes.length, rawStationQuotes.length]);
 
     const stationQuotesRef = useRef([]);
+    const effectiveSuppressedStationIdsRef = useRef(new Set());
     const clustersSignatureRef = useRef('');
 
     const computedClusters = useMemo(() => {
@@ -2241,6 +2403,7 @@ export default function HomeScreen() {
 
     useEffect(() => {
         previousSuppressedStationIdsRef.current = effectiveSuppressedStationIds;
+        effectiveSuppressedStationIdsRef.current = effectiveSuppressedStationIds;
         previousSuppressedStationSignatureRef.current = stationQuotesSignature;
     }, [effectiveSuppressedStationIds, stationQuotesSignature]);
 
@@ -2509,10 +2672,15 @@ export default function HomeScreen() {
             return;
         }
 
+        const buildFitCoordinates = (quotes, suppressedStationIds = null) => (
+            (quotes || [])
+                .filter(q => Number.isFinite(q?.latitude) && Number.isFinite(q?.longitude))
+                .filter(q => !suppressedStationIds?.has(String(q.stationId)))
+                .map(q => ({ latitude: q.latitude, longitude: q.longitude }))
+        );
+
         // Frame all visible stations without forcing the user-location bubble into the fit bounds.
-        const coords = stationQuotes
-            .filter(q => Number.isFinite(q?.latitude) && Number.isFinite(q?.longitude))
-            .map(q => ({ latitude: q.latitude, longitude: q.longitude }));
+        const coords = buildFitCoordinates(stationQuotes);
 
         if (coords.length === 0) {
             return;
@@ -2544,11 +2712,21 @@ export default function HomeScreen() {
                     return;
                 }
 
-                mapRef.current.fitToCoordinates(coords, {
+                const settledCoords = buildFitCoordinates(
+                    stationQuotesRef.current,
+                    effectiveSuppressedStationIdsRef.current
+                );
+                const nextCoords = settledCoords.length > 0 ? settledCoords : buildFitCoordinates(stationQuotesRef.current);
+
+                if (nextCoords.length === 0) {
+                    return;
+                }
+
+                mapRef.current.fitToCoordinates(nextCoords, {
                     edgePadding: fitEdgePadding,
                     animated: false,
                 });
-            }, STATIONS_FIT_SETTLE_PASS_DELAY_MS);
+            }, STATIONS_FIT_SETTLE_PASS_DELAY_MS + CLUSTER_MAP_IDLE_SETTLE_MS);
         }
     }, [
         bottomPadding,
@@ -3590,7 +3768,11 @@ export default function HomeScreen() {
             cluster,
         };
     });
-
+    const activeStationQuote = stationQuotes[activeIndex] || null;
+    const shouldShowActiveStationOverlay = !ENABLE_CLUSTER_MERGE_TRANSITIONS && isMapLoaded && shouldShowActiveStationDecoration({
+        activeQuote: activeStationQuote,
+        suppressedStationIds: visibleSuppressedStationIds,
+    });
     const hasRenderableClusters = renderClusterEntries.length > 0;
     const showResetToCheapestButton = stationQuotes.length > 1 && activeIndex !== 0;
 
@@ -3692,14 +3874,25 @@ export default function HomeScreen() {
                                                     isInitialSuppressionDelayActive,
                                                     initialSuppressionStationIds: initialSuppressionDelayStationIds,
                                                 })}
-                                                isActive={quote.originalIndex === activeIndex}
                                                 isBest={quote.originalIndex === 0}
                                                 isDark={isDark}
-                                                themeColors={themeColors}
                                                 onPress={handleStationMarkerPress}
                                             />
                                         );
                                     })}
+                                    {shouldShowActiveStationOverlay ? (
+                                        <ActiveStationOverlay
+                                            key={[
+                                                activeStationQuote?.stationId ?? 'none',
+                                                isDark ? 'dark' : 'light',
+                                                activeStationQuote?.originalIndex === 0 ? 'best' : 'normal',
+                                            ].join('-')}
+                                            quote={activeStationQuote}
+                                            isBest={activeStationQuote?.originalIndex === 0}
+                                            isDark={isDark}
+                                            themeColors={themeColors}
+                                        />
+                                    ) : null}
                                 </>
                             ) : (
                                 <Marker

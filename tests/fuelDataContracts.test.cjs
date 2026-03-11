@@ -386,9 +386,10 @@ test('cache keys are bucketed by search region and freshness respects the ttl', 
         longitude: -74.00591,
         radiusMiles: 10,
         fuelType: 'regular',
+        preferredProvider: 'gasbuddy',
     });
 
-    assert.equal(cacheKey, 'fuel:regular:10:40.71:-74.01');
+    assert.equal(cacheKey, 'fuel:regular:gasbuddy:10:40.71:-74.01');
     assert.equal(
         isCacheEntryFresh(
             {

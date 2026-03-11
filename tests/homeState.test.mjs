@@ -11,6 +11,7 @@ import {
     hasHomeFilterSignatureChanged,
     resolveCommittedHomeActiveIndex,
     resolveHomeCardIndexFromOffset,
+    shouldShowActiveStationDecoration,
     shouldInitializeInitialSuppressionDelay,
     shouldDelayStationMarkerSuppression,
     shouldAutoFitHomeMap,
@@ -101,6 +102,37 @@ test('buildVisibleSuppressedStationIds keeps overlap suppression authoritative f
     });
 
     assert.deepEqual(Array.from(visibleSuppression).sort(), ['station-a', 'station-b']);
+});
+
+test('shouldShowActiveStationDecoration only decorates non-best visible active stations', () => {
+    assert.equal(shouldShowActiveStationDecoration({
+        activeQuote: null,
+        suppressedStationIds: new Set(),
+    }), false);
+
+    assert.equal(shouldShowActiveStationDecoration({
+        activeQuote: {
+            originalIndex: 0,
+            stationId: 'station-a',
+        },
+        suppressedStationIds: new Set(),
+    }), false);
+
+    assert.equal(shouldShowActiveStationDecoration({
+        activeQuote: {
+            originalIndex: 2,
+            stationId: 'station-b',
+        },
+        suppressedStationIds: new Set(['station-b']),
+    }), false);
+
+    assert.equal(shouldShowActiveStationDecoration({
+        activeQuote: {
+            originalIndex: 2,
+            stationId: 'station-b',
+        },
+        suppressedStationIds: new Set(),
+    }), true);
 });
 
 test('canRevealActiveStation stays locked while the map is moving and only releases after the current suppression pass clears the active station', () => {
@@ -293,7 +325,7 @@ test('home auto-fit returns a forced animated intent for off-screen filter chang
         reason: 'filter-change',
         animated: true,
         forceAnimation: true,
-        runSettlePass: false,
+        runSettlePass: true,
         requiresNewData: false,
     });
 });

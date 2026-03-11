@@ -107,3 +107,30 @@ test('applyFuelGradeToQuote rejects unavailable grades on regular-only quotes', 
     const regularQuote = applyFuelGradeToQuote(quote, 'regular');
     assert.equal(regularQuote?.price, 3.09);
 });
+
+test('applyFuelGradeToQuote exposes diesel validation metadata and corrected price', () => {
+    const quote = {
+        stationId: 'station-4',
+        fuelType: 'diesel',
+        price: 3.89,
+        allPrices: {
+            diesel: 3.89,
+        },
+        validationByFuelType: {
+            diesel: {
+                fuelType: 'diesel',
+                finalPrice: 4.09,
+                predictedPrice: 4.09,
+                apiPrice: 3.89,
+                usedPrediction: true,
+                decision: 'reject',
+            },
+        },
+    };
+
+    const dieselQuote = applyFuelGradeToQuote(quote, 'diesel');
+
+    assert.equal(dieselQuote?.price, 4.09);
+    assert.equal(dieselQuote?.validation?.fuelType, 'diesel');
+    assert.equal(dieselQuote?.validation?.usedPrediction, true);
+});

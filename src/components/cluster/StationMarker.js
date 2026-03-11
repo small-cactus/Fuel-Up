@@ -20,8 +20,8 @@ import {
 const SHRINK_DELAY_MS = 900;
 const SHRINK_DURATION_MS = 150;
 const SUPPRESSED_SCALE = 0.005;
-const APPEAR_START_SCALE = 0.84;
-const APPEAR_DURATION_MS = 220;
+const APPEAR_START_SCALE = 0.58;
+const APPEAR_DURATION_MS = 260;
 const TRACKS_VIEW_CHANGES_IDLE_MS = 180;
 const BEST_PRICE_BLUE_LIGHT = '#007AFF';
 const BEST_PRICE_BLUE_DARK = '#11f050ff';
@@ -32,10 +32,8 @@ function StationMarker({
   quote,
   isSuppressed = false,
   shouldDelaySuppression = false,
-  isActive = false,
   isBest = false,
   isDark = false,
-  themeColors,
   onPress,
 }) {
   const appearProgress = useSharedValue(1);
@@ -59,6 +57,14 @@ function StationMarker({
       }
     };
   }, []);
+
+  useEffect(() => {
+    appearProgress.value = 0;
+    appearProgress.value = withTiming(1, {
+      duration: APPEAR_DURATION_MS,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [appearProgress, quote?.stationId]);
 
   useEffect(() => {
     if (suppressionHideTimeoutRef.current) {
@@ -115,20 +121,18 @@ function StationMarker({
   const bestTintColor = isDark ? BEST_PRICE_BLUE_DARK : BEST_PRICE_BLUE_LIGHT;
   const iconTintColor = isBest
     ? bestTintColor
-    : (isActive ? themeColors?.text ?? inactiveTextColor : inactiveIconTintColor);
+    : inactiveIconTintColor;
   const textColor = isBest
     ? bestTintColor
-    : (isActive ? themeColors?.text ?? inactiveTextColor : inactiveTextColor);
+    : inactiveTextColor;
   const visualStateSignature = [
     quote?.stationId ?? '',
     quote?.price ?? '',
     isSuppressed ? '1' : '0',
     shouldDelaySuppression ? '1' : '0',
     isContentHidden ? '1' : '0',
-    isActive ? '1' : '0',
     isBest ? '1' : '0',
     isDark ? '1' : '0',
-    themeColors?.text ?? '',
   ].join('|');
 
   useEffect(() => {
@@ -144,14 +148,14 @@ function StationMarker({
     }
 
     const trackingDuration = isSuppressed && shouldDelaySuppression
-      ? SHRINK_DELAY_MS + SHRINK_DURATION_MS + TRACKS_VIEW_CHANGES_IDLE_MS
-      : SHRINK_DURATION_MS + TRACKS_VIEW_CHANGES_IDLE_MS;
+      ? Math.max(APPEAR_DURATION_MS, SHRINK_DELAY_MS + SHRINK_DURATION_MS) + TRACKS_VIEW_CHANGES_IDLE_MS
+      : Math.max(APPEAR_DURATION_MS, SHRINK_DURATION_MS) + TRACKS_VIEW_CHANGES_IDLE_MS;
 
     tracksViewChangesTimeoutRef.current = setTimeout(() => {
       tracksViewChangesTimeoutRef.current = null;
       setTracksViewChanges(false);
     }, trackingDuration);
-  }, [isActive, isBest, isContentHidden, isDark, isSuppressed, quote?.price, quote?.stationId, shouldDelaySuppression, themeColors?.text, visualStateSignature]);
+  }, [isBest, isContentHidden, isDark, isSuppressed, quote?.price, quote?.stationId, shouldDelaySuppression, visualStateSignature]);
 
   return (
     <Marker
@@ -161,7 +165,7 @@ function StationMarker({
       }}
       anchor={{ x: 0.5, y: 0.5 }}
       onPress={() => onPress?.(quote)}
-      style={{ zIndex: isActive ? 3 : isBest ? 2 : 1 }}
+      style={{ zIndex: isBest ? 2 : 1 }}
       tracksViewChanges={tracksViewChanges}
     >
       <AnimatedView style={shrinkStyle}>
@@ -192,10 +196,8 @@ function areStationMarkerPropsEqual(previousProps, nextProps) {
     previousProps.quote === nextProps.quote &&
     previousProps.isSuppressed === nextProps.isSuppressed &&
     previousProps.shouldDelaySuppression === nextProps.shouldDelaySuppression &&
-    previousProps.isActive === nextProps.isActive &&
     previousProps.isBest === nextProps.isBest &&
     previousProps.isDark === nextProps.isDark &&
-    previousProps.themeColors?.text === nextProps.themeColors?.text &&
     previousProps.onPress === nextProps.onPress
   );
 }

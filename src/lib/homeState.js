@@ -1,3 +1,8 @@
+import {
+    buildFuelSearchCriteriaSignature,
+    buildFuelSearchRequestKey,
+} from './fuelSearchState.js';
+
 function toFiniteNumber(value) {
     const numericValue = Number(value);
     return Number.isFinite(numericValue) ? numericValue : null;
@@ -153,21 +158,13 @@ export function buildHomeQuerySignature({
     fuelGrade,
     preferredProvider,
 }) {
-    const latitude = toFiniteNumber(origin?.latitude);
-    const longitude = toFiniteNumber(origin?.longitude);
-    const locationBucket = (
-        latitude !== null &&
-        longitude !== null
-    )
-        ? `${latitude.toFixed(2)}:${longitude.toFixed(2)}`
-        : 'unresolved';
-
-    return [
-        locationBucket,
-        String(fuelGrade || 'regular').toLowerCase(),
-        Math.max(1, Math.round(toPositiveNumber(radiusMiles) || 10)),
-        String(preferredProvider || 'gasbuddy').toLowerCase(),
-    ].join('|');
+    return buildFuelSearchRequestKey({
+        origin,
+        fuelGrade,
+        radiusMiles,
+        preferredProvider,
+        minimumRating: 0,
+    });
 }
 
 export function buildHomeFilterSignature({
@@ -176,12 +173,12 @@ export function buildHomeFilterSignature({
     preferredProvider,
     minimumRating = 0,
 }) {
-    return [
-        String(fuelGrade || 'regular').toLowerCase(),
-        Math.max(1, Math.round(toPositiveNumber(radiusMiles) || 10)),
-        String(preferredProvider || 'gasbuddy').toLowerCase(),
-        Math.max(0, toFiniteNumber(minimumRating) ?? 0).toFixed(1),
-    ].join('|');
+    return buildFuelSearchCriteriaSignature({
+        fuelGrade,
+        radiusMiles,
+        preferredProvider,
+        minimumRating,
+    });
 }
 
 export function hasHomeFilterSignatureChanged({
@@ -199,6 +196,17 @@ export function buildVisibleSuppressedStationIds({
     suppressedStationIds,
 }) {
     return new Set(suppressedStationIds || []);
+}
+
+export function shouldShowActiveStationDecoration({
+    activeQuote = null,
+    suppressedStationIds,
+}) {
+    if (!activeQuote || activeQuote.originalIndex === 0) {
+        return false;
+    }
+
+    return !new Set(suppressedStationIds || []).has(String(activeQuote.stationId));
 }
 
 export function canRevealActiveStation({
@@ -349,7 +357,7 @@ export function shouldAutoFitHomeMap({
             reason: 'filter-change',
             animated: true,
             forceAnimation: Boolean(pendingRefitRequest.forceAnimation),
-            runSettlePass: false,
+            runSettlePass: true,
             requiresNewData: false,
         };
     }

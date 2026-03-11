@@ -12,17 +12,21 @@ import { clearTrendDataCache } from '../../src/services/fuel/trends';
 import { useTheme } from '../../src/ThemeContext';
 import TopCanopy from '../../src/components/TopCanopy';
 import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
+import { FUEL_GRADE_ORDER, getFuelGradeMeta } from '../../src/lib/fuelGrade';
 import {
     getPredictiveLocationPermissionStateAsync,
     openPredictiveLocationSettingsAsync,
     requestPredictiveLocationPermissionsAsync,
 } from '../../src/lib/predictiveLocation';
 
-const OCTANE_OPTIONS = [
-    { key: 'regular', label: 'Regular' },
-    { key: 'midgrade', label: 'Midgrade' },
-    { key: 'premium', label: 'Premium' },
-];
+const OCTANE_OPTIONS = FUEL_GRADE_ORDER.map(fuelGrade => {
+    const meta = getFuelGradeMeta(fuelGrade);
+
+    return {
+        key: meta.key,
+        label: meta.label,
+    };
+});
 
 const PRICE_SOURCE_OPTIONS = [
     { key: 'gasbuddy', label: 'GasBuddy' },
@@ -443,7 +447,7 @@ export default function SettingsScreen() {
                                     ))}
                                 </View>
                                 <Text style={[styles.helperText, { color: themeColors.textOpacity }]}>
-                                    Regular: 85-88 (usually 87) • Midgrade: 89-90 • Premium: 91-94+
+                                    Regular: 85-88 • Midgrade: 89-90 • Premium: 91-94+ • Diesel
                                 </Text>
                             </SettingsCard>
 

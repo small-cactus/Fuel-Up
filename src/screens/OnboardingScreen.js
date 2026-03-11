@@ -36,14 +36,24 @@ import {
     openPredictiveLocationSettingsAsync,
     requestPredictiveLocationPermissionsAsync,
 } from '../lib/predictiveLocation';
+import { FUEL_GRADE_ORDER, getFuelGradeMeta } from '../lib/fuelGrade';
+import {
+    buildOnboardingPreferenceUpdates,
+    isTranslucentOnboardingStep,
+    ONBOARDING_STEPS,
+} from '../lib/onboardingFlow';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-const OCTANE_OPTIONS = [
-    { key: 'regular', label: 'Regular', octane: '87' },
-    { key: 'midgrade', label: 'Midgrade', octane: '89' },
-    { key: 'premium', label: 'Premium', octane: '93' },
-];
+const OCTANE_OPTIONS = FUEL_GRADE_ORDER.map(fuelGrade => {
+    const meta = getFuelGradeMeta(fuelGrade);
+
+    return {
+        key: meta.key,
+        label: meta.label,
+        octane: meta.octane,
+    };
+});
 
 // Demo coordinates: San Francisco
 const DEMO_REGION = {
@@ -405,51 +415,6 @@ function OctaneStep({ isDark, themeColors, insets, value, onChange }) {
     );
 }
 
-function RatingStep({ isDark, themeColors, insets, value, onChange }) {
-    const ratingValues = [0, 3, 3.5, 4, 4.5];
-
-    return (
-        <View style={[styles.stepContainer, { backgroundColor: themeColors.background }]}>
-
-            <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
-                <SymbolView name="star.fill" size={44} tintColor="#FFB800" />
-                <Text style={[styles.stepTitle, { color: themeColors.text }]}>Minimum Rating</Text>
-                <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
-                    Only show stations above a certain rating?
-                </Text>
-            </View>
-
-            <View style={styles.stepContent}>
-                <Text style={[styles.heroValue, { color: '#FFB800' }]}>
-                    {value === 0 ? 'Show All' : `${value}+`}
-                </Text>
-
-                <View style={styles.segmentRow}>
-                    {ratingValues.map(r => (
-                        <Pressable key={r} onPress={() => onChange(r)}>
-                            <GlassView
-                                tintColor={isDark ? '#000000' : '#FFFFFF'}
-                                style={[
-                                    styles.segmentButton,
-                                    r === value && { backgroundColor: isDark ? 'rgba(255,184,0,0.2)' : 'rgba(255,184,0,0.1)' },
-                                ]}
-                            >
-                                <Text style={[
-                                    styles.segmentText,
-                                    { color: r === value ? '#FFB800' : themeColors.text },
-                                    r === value && { fontWeight: '700' },
-                                ]}>
-                                    {r === 0 ? 'All' : r}
-                                </Text>
-                            </GlassView>
-                        </Pressable>
-                    ))}
-                </View>
-            </View>
-        </View>
-    );
-}
-
 function LocationStep({ isDark, themeColors, insets, permissionState }) {
     const highlights = [
         { icon: 'location.magnifyingglass', text: 'Automatically find stations around you' },
@@ -657,13 +622,10 @@ export default function OnboardingScreen() {
             setCurrentStep(index);
         }
     };
-
-
-    const totalSteps = 7;
+    const totalSteps = ONBOARDING_STEPS.length;
 
     const [radius, setRadius] = useState(preferences.searchRadiusMiles);
     const [octane, setOctane] = useState(preferences.preferredOctane);
-    const [minRating, setMinRating] = useState(preferences.minimumRating);
     const [locationPermissionState, setLocationPermissionState] = useState(null);
     const [notifPermissionStatus, setNotifPermissionStatus] = useState(null);
     const onboardingMapRegion = DEMO_REGION;
@@ -745,10 +707,13 @@ export default function OnboardingScreen() {
         }
 
         if (currentStep < totalSteps - 1) {
-            // Save preferences as we go
-            if (currentStep === 4) updatePreference('searchRadiusMiles', radius);
-            if (currentStep === 5) updatePreference('preferredOctane', octane);
-            if (currentStep === 6) updatePreference('minimumRating', minRating);
+            buildOnboardingPreferenceUpdates({
+                currentStep,
+                radius,
+                octane,
+            }).forEach(([preferenceKey, preferenceValue]) => {
+                updatePreference(preferenceKey, preferenceValue);
+            });
 
             scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * SCREEN_WIDTH, animated: true });
         } else {
@@ -761,7 +726,7 @@ export default function OnboardingScreen() {
     const isLastStep = currentStep === totalSteps - 1;
 
     // Use full map for specific steps
-    const isTranslucentStep = currentStep === 0 || currentStep === 1 || currentStep === 4;
+    const isTranslucentStep = isTranslucentOnboardingStep(currentStep);
     const onboardingBackgroundColor = (
         !isDark && currentStep === 1
             ? '#FFFFFF'
@@ -796,7 +761,6 @@ export default function OnboardingScreen() {
                     <NotificationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={notifPermissionStatus} />
                     <RadiusStep isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} mapRegion={onboardingMapRegion} />
                     <OctaneStep isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} />
-                    <RatingStep isDark={isDark} themeColors={themeColors} insets={insets} value={minRating} onChange={setMinRating} />
                 </ScrollView>
             </View>
 

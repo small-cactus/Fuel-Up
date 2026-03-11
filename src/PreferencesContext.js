@@ -1,11 +1,15 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+    buildFuelSearchCriteriaSignature,
+    normalizeFuelSearchPreferences,
+} from './lib/fuelSearchState';
 
 const STORAGE_KEY = '@fuelup/preferences';
 
 const DEFAULT_PREFERENCES = {
     searchRadiusMiles: 10,
-    preferredOctane: 'regular', // 'regular' | 'midgrade' | 'premium'
+    preferredOctane: 'regular', // 'regular' | 'midgrade' | 'premium' | 'diesel'
     preferredProvider: 'gasbuddy', // 'gasbuddy' | 'all'
     minimumRating: 0, // 0 = no filter
     debugClusterAnimations: false,
@@ -15,31 +19,60 @@ const DEFAULT_PREFERENCES = {
 
 const PreferencesContext = createContext({
     preferences: DEFAULT_PREFERENCES,
+    fuelSearchCriteriaSignature: '',
+    normalizedFuelSearchPreferences: normalizeFuelSearchPreferences(DEFAULT_PREFERENCES),
+    preferenceRevision: 0,
     updatePreference: () => { },
     resetOnboarding: () => { },
     completeOnboarding: () => { },
     isLoading: true,
 });
 
-function toFiniteNumber(value) {
-    const numericValue = Number(value);
-    return Number.isFinite(numericValue) ? numericValue : null;
+function areValuesEqual(left, right) {
+    if (Object.is(left, right)) {
+        return true;
+    }
+
+    if (Array.isArray(left) && Array.isArray(right)) {
+        if (left.length !== right.length) {
+            return false;
+        }
+
+        return left.every((value, index) => areValuesEqual(value, right[index]));
+    }
+
+    if (
+        left &&
+        right &&
+        typeof left === 'object' &&
+        typeof right === 'object'
+    ) {
+        const leftKeys = Object.keys(left);
+        const rightKeys = Object.keys(right);
+
+        if (leftKeys.length !== rightKeys.length) {
+            return false;
+        }
+
+        return leftKeys.every(key => areValuesEqual(left[key], right[key]));
+    }
+
+    return false;
 }
 
 function normalizePreferences(preferences = {}) {
-    const normalizedSearchRadiusMiles = toFiniteNumber(preferences.searchRadiusMiles);
-    const normalizedMinimumRating = toFiniteNumber(preferences.minimumRating);
+    const normalizedFuelSearchPreferences = normalizeFuelSearchPreferences(preferences);
 
     return {
         ...DEFAULT_PREFERENCES,
         ...preferences,
-        searchRadiusMiles: normalizedSearchRadiusMiles ?? DEFAULT_PREFERENCES.searchRadiusMiles,
-        minimumRating: normalizedMinimumRating ?? DEFAULT_PREFERENCES.minimumRating,
+        ...normalizedFuelSearchPreferences,
     };
 }
 
 export function PreferencesProvider({ children }) {
     const [preferences, setPreferences] = useState(DEFAULT_PREFERENCES);
+    const [preferenceRevision, setPreferenceRevision] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -71,7 +104,12 @@ export function PreferencesProvider({ children }) {
     const updatePreference = (key, value) => {
         setPreferences(current => {
             const next = normalizePreferences({ ...current, [key]: value });
+            if (areValuesEqual(current, next)) {
+                return current;
+            }
+
             savePreferences(next);
+            setPreferenceRevision(currentValue => currentValue + 1);
             return next;
         });
     };
@@ -84,10 +122,21 @@ export function PreferencesProvider({ children }) {
         updatePreference('hasCompletedOnboarding', false);
     };
 
+    const normalizedFuelSearchPreferences = useMemo(() => (
+        normalizeFuelSearchPreferences(preferences)
+    ), [preferences]);
+
+    const fuelSearchCriteriaSignature = useMemo(() => (
+        buildFuelSearchCriteriaSignature(normalizedFuelSearchPreferences)
+    ), [normalizedFuelSearchPreferences]);
+
     return (
         <PreferencesContext.Provider
             value={{
                 preferences,
+                fuelSearchCriteriaSignature,
+                normalizedFuelSearchPreferences,
+                preferenceRevision,
                 updatePreference,
                 resetOnboarding,
                 completeOnboarding,

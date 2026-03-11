@@ -1634,12 +1634,13 @@ function normalizeSnapshot({ quote, topStations, regionalQuotes, cacheKey }) {
     };
 }
 
-async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fuelType }) {
+async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fuelType, preferredProvider = 'gasbuddy' }) {
     const cacheKey = buildCacheKey({
         latitude,
         longitude,
         radiusMiles,
         fuelType,
+        preferredProvider,
     });
     const cacheEntry = await getCachedEntry(cacheKey);
 
@@ -1669,6 +1670,7 @@ async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMi
         longitude,
         radiusMiles: normalizedRadius,
         fuelType: normalizedFuelType,
+        preferredProvider,
     });
 
     if (inflightRequests.has(cacheKey)) {

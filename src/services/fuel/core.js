@@ -46,10 +46,11 @@ function normalizeCoordinate(value) {
     return Number(value).toFixed(2);
 }
 
-function buildCacheKey({ latitude, longitude, radiusMiles, fuelType }) {
+function buildCacheKey({ latitude, longitude, radiusMiles, fuelType, preferredProvider = 'gasbuddy' }) {
     return [
         'fuel',
         normalizeFuelTypeName(fuelType),
+        String(preferredProvider || 'gasbuddy').trim().toLowerCase(),
         Math.max(1, Math.round(toFiniteNumber(radiusMiles) || 10)),
         normalizeCoordinate(latitude),
         normalizeCoordinate(longitude),
