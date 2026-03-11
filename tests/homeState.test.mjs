@@ -2,13 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+    canRevealActiveStation,
+    buildPersistentSuppressedStationIds,
     buildHomeFilterSignature,
     buildHomeQuerySignature,
     buildVisibleSuppressedStationIds,
     filterStationQuotesForHome,
     hasHomeFilterSignatureChanged,
+    resolveCommittedHomeActiveIndex,
+    resolveHomeCardIndexFromOffset,
     shouldInitializeInitialSuppressionDelay,
-    shouldShowActiveStationDecoration,
+    shouldDelayStationMarkerSuppression,
     shouldAutoFitHomeMap,
 } from '../src/lib/homeState.js';
 import { rankQuotesForFuelGrade } from '../src/lib/fuelGrade.js';
@@ -99,30 +103,99 @@ test('buildVisibleSuppressedStationIds keeps overlap suppression authoritative f
     assert.deepEqual(Array.from(visibleSuppression).sort(), ['station-a', 'station-b']);
 });
 
-test('shouldShowActiveStationDecoration only decorates visible non-best stations', () => {
-    assert.equal(shouldShowActiveStationDecoration({
-        activeQuote: {
-            stationId: 'best-station',
-            originalIndex: 0,
-        },
-        suppressedStationIds: new Set(),
+test('canRevealActiveStation stays locked while the map is moving and only releases after the current suppression pass clears the active station', () => {
+    assert.equal(canRevealActiveStation({
+        activeStationId: 'station-a',
+        currentSuppressedStationIds: new Set(),
+        isMapMoving: true,
+        isSuppressionRevealAllowed: true,
     }), false);
 
-    assert.equal(shouldShowActiveStationDecoration({
-        activeQuote: {
-            stationId: 'hidden-station',
-            originalIndex: 2,
-        },
-        suppressedStationIds: new Set(['hidden-station']),
+    assert.equal(canRevealActiveStation({
+        activeStationId: 'station-a',
+        currentSuppressedStationIds: new Set(['station-a']),
+        isMapMoving: false,
+        isSuppressionRevealAllowed: true,
     }), false);
 
-    assert.equal(shouldShowActiveStationDecoration({
-        activeQuote: {
-            stationId: 'visible-station',
-            originalIndex: 2,
-        },
-        suppressedStationIds: new Set(['other-station']),
+    assert.equal(canRevealActiveStation({
+        activeStationId: 'station-a',
+        currentSuppressedStationIds: new Set(),
+        isMapMoving: false,
+        isSuppressionRevealAllowed: true,
     }), true);
+});
+
+test('shouldDelayStationMarkerSuppression only keeps the launch delay for the stations captured in the initial suppression snapshot', () => {
+    assert.equal(shouldDelayStationMarkerSuppression({
+        stationId: 'station-a',
+        isSuppressed: true,
+        isInitialSuppressionDelayActive: true,
+        initialSuppressionStationIds: new Set(['station-a', 'station-b']),
+    }), true);
+
+    assert.equal(shouldDelayStationMarkerSuppression({
+        stationId: 'station-c',
+        isSuppressed: true,
+        isInitialSuppressionDelayActive: true,
+        initialSuppressionStationIds: new Set(['station-a', 'station-b']),
+    }), false);
+
+    assert.equal(shouldDelayStationMarkerSuppression({
+        stationId: 'station-a',
+        isSuppressed: false,
+        isInitialSuppressionDelayActive: true,
+        initialSuppressionStationIds: new Set(['station-a']),
+    }), false);
+});
+
+test('resolveCommittedHomeActiveIndex ignores preview changes and only commits settled or explicit selection changes', () => {
+    assert.equal(resolveCommittedHomeActiveIndex({
+        currentActiveIndex: 2,
+        nextIndex: 4,
+        stationCount: 6,
+        reason: 'preview',
+    }), 2);
+
+    assert.equal(resolveCommittedHomeActiveIndex({
+        currentActiveIndex: 2,
+        nextIndex: 4,
+        stationCount: 6,
+        reason: 'settle',
+    }), 4);
+
+    assert.equal(resolveCommittedHomeActiveIndex({
+        currentActiveIndex: 1,
+        nextIndex: 3,
+        stationCount: 6,
+        reason: 'marker-press',
+    }), 3);
+
+    assert.equal(resolveCommittedHomeActiveIndex({
+        currentActiveIndex: 5,
+        stationCount: 6,
+        reason: 'reset',
+    }), 0);
+});
+
+test('resolveHomeCardIndexFromOffset clamps the settled card index to the available station range', () => {
+    assert.equal(resolveHomeCardIndexFromOffset({
+        offsetX: 0,
+        itemWidth: 320,
+        stationCount: 4,
+    }), 0);
+
+    assert.equal(resolveHomeCardIndexFromOffset({
+        offsetX: 640,
+        itemWidth: 320,
+        stationCount: 4,
+    }), 2);
+
+    assert.equal(resolveHomeCardIndexFromOffset({
+        offsetX: 5000,
+        itemWidth: 320,
+        stationCount: 4,
+    }), 3);
 });
 
 test('shouldInitializeInitialSuppressionDelay only allows the launch grace period once the initial layout has settled', () => {
@@ -149,6 +222,41 @@ test('shouldInitializeInitialSuppressionDelay only allows the launch grace perio
         stationCount: 3,
         hasSettledInitialStationLayout: false,
     }), false);
+});
+
+test('buildPersistentSuppressedStationIds keeps hidden chips hidden by default and only releases the active clear station', () => {
+    assert.deepEqual(
+        Array.from(buildPersistentSuppressedStationIds({
+            currentSuppressedStationIds: new Set(),
+            previousPersistentSuppressedStationIds: new Set(['station-a', 'station-b']),
+            visibleStationIds: new Set(['station-a', 'station-b', 'station-c']),
+            activeStationId: null,
+            canRevealActiveStation: false,
+        })).sort(),
+        ['station-a', 'station-b']
+    );
+
+    assert.deepEqual(
+        Array.from(buildPersistentSuppressedStationIds({
+            currentSuppressedStationIds: new Set(['station-c']),
+            previousPersistentSuppressedStationIds: new Set(['station-a', 'station-b']),
+            visibleStationIds: new Set(['station-a', 'station-b', 'station-c']),
+            activeStationId: 'station-a',
+            canRevealActiveStation: true,
+        })).sort(),
+        ['station-b', 'station-c']
+    );
+
+    assert.deepEqual(
+        Array.from(buildPersistentSuppressedStationIds({
+            currentSuppressedStationIds: new Set(['station-a']),
+            previousPersistentSuppressedStationIds: new Set(['station-a', 'station-b']),
+            visibleStationIds: new Set(['station-a', 'station-b']),
+            activeStationId: 'station-a',
+            canRevealActiveStation: true,
+        })).sort(),
+        ['station-a', 'station-b']
+    );
 });
 
 test('home auto-fit skips passive focus restoration when there is no pending refit request', () => {

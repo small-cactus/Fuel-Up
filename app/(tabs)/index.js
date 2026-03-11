@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { GlassView } from 'expo-glass-effect';
-import { LiquidGlassContainerView } from '@callstack/liquid-glass';
 import * as Location from 'expo-location';
 import * as FileSystem from 'expo-file-system/legacy';
 import MapView, { Marker, PROVIDER_APPLE } from 'react-native-maps';
@@ -25,7 +24,6 @@ import { prefetchTrendData } from '../../src/services/fuel/trends';
 import { useTheme } from '../../src/ThemeContext';
 import { usePreferences } from '../../src/PreferencesContext';
 import BottomCanopy from '../../src/components/BottomCanopy';
-import ActiveStationOverlay from '../../src/components/cluster/ActiveStationOverlay';
 import ClusterMarkerOverlay from '../../src/components/cluster/ClusterMarkerOverlay';
 import StationMarker from '../../src/components/cluster/StationMarker';
 import { consumeFreshLaunchMapBootstrap } from '../../src/lib/appLaunchState';
@@ -38,13 +36,17 @@ import {
     rankQuotesForFuelGrade,
 } from '../../src/lib/fuelGrade';
 import {
+    buildPersistentSuppressedStationIds,
+    canRevealActiveStation,
     buildHomeFilterSignature,
     buildHomeQuerySignature,
     buildVisibleSuppressedStationIds,
     filterStationQuotesForHome,
     hasHomeFilterSignatureChanged,
+    resolveCommittedHomeActiveIndex,
+    resolveHomeCardIndexFromOffset,
     shouldInitializeInitialSuppressionDelay,
-    shouldShowActiveStationDecoration,
+    shouldDelayStationMarkerSuppression,
     shouldAutoFitHomeMap,
 } from '../../src/lib/homeState';
 import {
@@ -109,6 +111,7 @@ const USER_LOCATION_BUBBLE_SIZE = 14;
 const USER_LOCATION_OVERLAP_PILL_WIDTH = CLUSTER_PRIMARY_PILL_WIDTH - 28;
 const USER_LOCATION_OVERLAP_PILL_HEIGHT = CLUSTER_PILL_HEIGHT - 14;
 const SUPPRESSION_REVEAL_PADDING = 10;
+const SUPPRESSION_REVEAL_STABILITY_MS = 360;
 const STATION_FOCUS_MIN_LATITUDE_DELTA = 0.002;
 const STATION_FOCUS_MIN_LONGITUDE_DELTA = 0.002;
 const STATION_FOCUS_ZOOM_STEP_MULTIPLIER = 0.82;
@@ -1246,6 +1249,7 @@ export default function HomeScreen() {
     const suppressionRegionAnimationFrameRef = useRef(null);
     const mapIdleWaitersRef = useRef([]);
     const mapIdleSettleTimeoutRef = useRef(null);
+    const suppressionRevealDelayTimeoutRef = useRef(null);
     const mapRegionRef = useRef(DEFAULT_REGION);
     const suppressionRegionRef = useRef(DEFAULT_REGION);
     const previousSuppressedStationIdsRef = useRef(new Set());
@@ -1310,7 +1314,9 @@ export default function HomeScreen() {
     const [isMapMoving, setIsMapMoving] = useState(false);
     const [hasInitializedInitialSuppressionDelay, setHasInitializedInitialSuppressionDelay] = useState(false);
     const [isInitialSuppressionDelayActive, setIsInitialSuppressionDelayActive] = useState(false);
+    const [initialSuppressionDelayStationIds, setInitialSuppressionDelayStationIds] = useState(new Set());
     const [effectiveSuppressedStationIds, setEffectiveSuppressedStationIds] = useState(new Set());
+    const [isSuppressionRevealAllowed, setIsSuppressionRevealAllowed] = useState(false);
     const [isLaunchVisualReady, setIsLaunchVisualReady] = useState(false);
     const [isLaunchCriticalFitPending, setIsLaunchCriticalFitPending] = useState(false);
     const [homeRefitRequestVersion, setHomeRefitRequestVersion] = useState(0);
@@ -1326,8 +1332,13 @@ export default function HomeScreen() {
     const prefetchedTrendRequestKeysRef = useRef(new Map());
     const mapLoadedFallbackTimeoutRef = useRef(null);
     const lastSettledCardIndexRef = useRef(0);
+    const activeIndexRef = useRef(0);
     const router = useRouter();
     const scrollX = useSharedValue(0);
+
+    useEffect(() => {
+        activeIndexRef.current = activeIndex;
+    }, [activeIndex]);
 
     const USE_SHEET_UX = false; // Temporary toggle for the Form Sheet UX experiment
 
@@ -1383,6 +1394,11 @@ export default function HomeScreen() {
             if (initialSuppressionDelayTimeoutRef.current) {
                 clearTimeout(initialSuppressionDelayTimeoutRef.current);
                 initialSuppressionDelayTimeoutRef.current = null;
+            }
+
+            if (suppressionRevealDelayTimeoutRef.current) {
+                clearTimeout(suppressionRevealDelayTimeoutRef.current);
+                suppressionRevealDelayTimeoutRef.current = null;
             }
         };
     }, []);
@@ -2046,21 +2062,11 @@ export default function HomeScreen() {
         topStations.length,
     ]);
 
-    const onViewableItemsChanged = useRef(({ viewableItems }) => {
-        if (viewableItems.length > 0) {
-            setActiveIndex(viewableItems[0].index);
-        }
-    }).current;
-
     const scrollHandler = useAnimatedScrollHandler({
         onScroll: (event) => {
             scrollX.value = event.contentOffset.x;
         },
     });
-
-    const viewabilityConfig = useRef({
-        itemVisiblePercentThreshold: 50,
-    }).current;
 
     const { width, height } = Dimensions.get('window');
 
@@ -2151,6 +2157,35 @@ export default function HomeScreen() {
         );
     }, [stationQuotes, stationQuotesSignature, suppressionRegion, width, height, hasLocationPermission, userLocationBubble]);
     useEffect(() => {
+        if (suppressionRevealDelayTimeoutRef.current) {
+            clearTimeout(suppressionRevealDelayTimeoutRef.current);
+            suppressionRevealDelayTimeoutRef.current = null;
+        }
+
+        if (isMapMoving) {
+            setIsSuppressionRevealAllowed(false);
+            return;
+        }
+
+        suppressionRevealDelayTimeoutRef.current = setTimeout(() => {
+            suppressionRevealDelayTimeoutRef.current = null;
+
+            if (!isMountedRef.current) {
+                return;
+            }
+
+            setIsSuppressionRevealAllowed(true);
+        }, SUPPRESSION_REVEAL_STABILITY_MS);
+
+        return () => {
+            if (suppressionRevealDelayTimeoutRef.current) {
+                clearTimeout(suppressionRevealDelayTimeoutRef.current);
+                suppressionRevealDelayTimeoutRef.current = null;
+            }
+        };
+    }, [isMapMoving]);
+
+    useEffect(() => {
         if (ENABLE_CLUSTER_MERGE_TRANSITIONS) {
             setEffectiveSuppressedStationIds(currentValue => (
                 currentValue.size === 0 ? currentValue : new Set()
@@ -2159,32 +2194,27 @@ export default function HomeScreen() {
         }
 
         setEffectiveSuppressedStationIds(currentValue => {
-            const nextSuppressedIds = new Set();
             const visibleStationIds = new Set(stationQuotes.map(quote => String(quote.stationId)));
-
-            currentValue.forEach(stationId => {
-                if (visibleStationIds.has(String(stationId))) {
-                    nextSuppressedIds.add(String(stationId));
-                }
+            const activeStationId = stationQuotes[activeIndex]?.stationId ?? null;
+            const shouldRevealCommittedActiveStation = canRevealActiveStation({
+                activeStationId,
+                currentSuppressedStationIds: rawSuppressedOverlapStationIds,
+                isMapMoving,
+                isSuppressionRevealAllowed,
             });
-
-            rawSuppressedOverlapStationIds.forEach(stationId => {
-                nextSuppressedIds.add(String(stationId));
+            const nextSuppressedIds = buildPersistentSuppressedStationIds({
+                currentSuppressedStationIds: rawSuppressedOverlapStationIds,
+                previousPersistentSuppressedStationIds: currentValue,
+                visibleStationIds,
+                activeStationId,
+                canRevealActiveStation: shouldRevealCommittedActiveStation,
             });
-
-            if (!isMapMoving) {
-                Array.from(nextSuppressedIds).forEach(stationId => {
-                    if (!rawSuppressedOverlapStationIds.has(String(stationId))) {
-                        nextSuppressedIds.delete(String(stationId));
-                    }
-                });
-            }
 
             return areStationIdSetsEqual(currentValue, nextSuppressedIds)
                 ? currentValue
                 : nextSuppressedIds;
         });
-    }, [ENABLE_CLUSTER_MERGE_TRANSITIONS, isMapMoving, rawSuppressedOverlapStationIds, stationQuotes]);
+    }, [ENABLE_CLUSTER_MERGE_TRANSITIONS, activeIndex, isMapMoving, isSuppressionRevealAllowed, rawSuppressedOverlapStationIds, stationQuotes]);
     const visibleSuppressedStationIds = useMemo(() => {
         return buildVisibleSuppressedStationIds({
             suppressedStationIds: effectiveSuppressedStationIds,
@@ -2231,9 +2261,13 @@ export default function HomeScreen() {
 
         if (effectiveSuppressedStationIds.size === 0) {
             setIsInitialSuppressionDelayActive(false);
+            setInitialSuppressionDelayStationIds(currentValue => (
+                currentValue.size === 0 ? currentValue : new Set()
+            ));
             return;
         }
 
+        setInitialSuppressionDelayStationIds(new Set(effectiveSuppressedStationIds));
         setIsInitialSuppressionDelayActive(true);
 
         if (initialSuppressionDelayTimeoutRef.current) {
@@ -2248,6 +2282,9 @@ export default function HomeScreen() {
             }
 
             setIsInitialSuppressionDelayActive(false);
+            setInitialSuppressionDelayStationIds(currentValue => (
+                currentValue.size === 0 ? currentValue : new Set()
+            ));
         }, INITIAL_HOME_SUPPRESSION_DELAY_MS);
     }, [
         hasInitializedInitialSuppressionDelay,
@@ -2382,7 +2419,11 @@ export default function HomeScreen() {
 
     useEffect(() => {
         if (activeIndex >= stationQuotes.length) {
-            setActiveIndex(0);
+            setActiveIndex(currentValue => resolveCommittedHomeActiveIndex({
+                currentActiveIndex: currentValue,
+                stationCount: stationQuotes.length,
+                reason: 'bounds-correction',
+            }));
             lastSettledCardIndexRef.current = 0;
         }
     }, [activeIndex, stationQuotes.length]);
@@ -2445,27 +2486,6 @@ export default function HomeScreen() {
             longitudeDelta: resolvedFocusZoom.longitudeDelta,
         }, STATION_FOCUS_ANIMATION_MS);
     }, [allStationsFitZoomRegion, hasLocationPermission, height, stationQuotes, userLocationBubble, width]);
-
-    const handleMarkerPress = (cluster) => {
-        const primaryQuote = cluster.quotes[0];
-        const index = primaryQuote.originalIndex;
-
-        isUserScrollingRef.current = false; // Prevent map feedback loop
-        flatListRef.current?.scrollToOffset({
-            offset: index * itemWidth,
-            animated: true,
-        });
-        setActiveIndex(index);
-        if (index === 0) {
-            fitMapToStations({
-                animated: true,
-                runSettlePass: false,
-            });
-            return;
-        }
-
-        zoomToStation(primaryQuote);
-    };
 
     // We want the card to be almost full width, minus some padding to peek the next card.
     const peekPadding = 16;
@@ -2541,7 +2561,12 @@ export default function HomeScreen() {
     ]);
 
     const handleStationMarkerPress = useCallback((quote) => {
-        const index = quote?.originalIndex;
+        const index = resolveCommittedHomeActiveIndex({
+            currentActiveIndex: activeIndexRef.current,
+            nextIndex: quote?.originalIndex,
+            stationCount: stationQuotes.length,
+            reason: 'marker-press',
+        });
 
         if (!Number.isInteger(index)) {
             return;
@@ -2553,6 +2578,7 @@ export default function HomeScreen() {
             offset: index * itemWidth,
             animated: true,
         });
+        primeCommittedSelectionMapMotion();
         setActiveIndex(index);
 
         if (index === 0) {
@@ -2564,7 +2590,7 @@ export default function HomeScreen() {
         }
 
         zoomToStation(quote);
-    }, [fitMapToStations, itemWidth, zoomToStation]);
+    }, [fitMapToStations, itemWidth, stationQuotes.length, zoomToStation]);
 
     const handleResetToCheapest = useCallback(() => {
         if (stationQuotes.length === 0) {
@@ -2577,7 +2603,12 @@ export default function HomeScreen() {
             offset: 0,
             animated: true,
         });
-        setActiveIndex(0);
+        primeCommittedSelectionMapMotion();
+        setActiveIndex(currentValue => resolveCommittedHomeActiveIndex({
+            currentActiveIndex: currentValue,
+            stationCount: stationQuotes.length,
+            reason: 'reset',
+        }));
         fitMapToStations({
             animated: true,
             runSettlePass: false,
@@ -2591,6 +2622,11 @@ export default function HomeScreen() {
 
         mapMotionRef.current = moving;
         setIsMapMoving(moving);
+    };
+
+    const primeCommittedSelectionMapMotion = () => {
+        isAnimatingRef.current = true;
+        setMapMotionState(true);
     };
 
     function cancelInitialHomeFitRetries() {
@@ -2658,7 +2694,11 @@ export default function HomeScreen() {
     function resetHomeSelectionToBest() {
         isUserScrollingRef.current = false;
         lastSettledCardIndexRef.current = 0;
-        setActiveIndex(currentValue => (currentValue === 0 ? currentValue : 0));
+        setActiveIndex(currentValue => resolveCommittedHomeActiveIndex({
+            currentActiveIndex: currentValue,
+            stationCount: stationQuotes.length,
+            reason: 'reset',
+        }));
         flatListRef.current?.scrollToOffset({
             offset: 0,
             animated: false,
@@ -2903,14 +2943,11 @@ export default function HomeScreen() {
     }, [fitMapToStations, homeRefitRequestVersion, isFocused, isMapLoaded, stationQuotes.length, stationQuotesSignature]);
 
     const resolveCardIndexFromOffset = (offsetX) => {
-        if (!Number.isFinite(offsetX) || itemWidth <= 0 || stationQuotesRef.current.length === 0) {
-            return null;
-        }
-
-        const maxIndex = stationQuotesRef.current.length - 1;
-        const nextIndex = Math.round(offsetX / itemWidth);
-
-        return Math.max(0, Math.min(maxIndex, nextIndex));
+        return resolveHomeCardIndexFromOffset({
+            offsetX,
+            itemWidth,
+            stationCount: stationQuotesRef.current.length,
+        });
     };
 
     const settleCardSelection = (offsetX) => {
@@ -2922,15 +2959,19 @@ export default function HomeScreen() {
             return;
         }
 
-        setActiveIndex(currentValue => (
-            currentValue === nextIndex ? currentValue : nextIndex
-        ));
+        setActiveIndex(currentValue => resolveCommittedHomeActiveIndex({
+            currentActiveIndex: currentValue,
+            nextIndex,
+            stationCount: stationQuotesRef.current.length,
+            reason: 'settle',
+        }));
 
         if (lastSettledCardIndexRef.current === nextIndex) {
             return;
         }
 
         lastSettledCardIndexRef.current = nextIndex;
+        primeCommittedSelectionMapMotion();
 
         if (nextIndex === 0) {
             fitMapToStations({
@@ -3549,11 +3590,6 @@ export default function HomeScreen() {
             cluster,
         };
     });
-    const activeStationQuote = stationQuotes[activeIndex] || null;
-    const shouldShowActiveStationOverlay = !ENABLE_CLUSTER_MERGE_TRANSITIONS && isMapLoaded && shouldShowActiveStationDecoration({
-        activeQuote: activeStationQuote,
-        suppressedStationIds: visibleSuppressedStationIds,
-    });
 
     const hasRenderableClusters = renderClusterEntries.length > 0;
     const showResetToCheapestButton = stationQuotes.length > 1 && activeIndex !== 0;
@@ -3650,7 +3686,13 @@ export default function HomeScreen() {
                                                 key={entry.key}
                                                 quote={quote}
                                                 isSuppressed={isSuppressed}
-                                                shouldDelaySuppression={isSuppressed && isInitialSuppressionDelayActive}
+                                                shouldDelaySuppression={shouldDelayStationMarkerSuppression({
+                                                    stationId: entry.primaryStationId,
+                                                    isSuppressed,
+                                                    isInitialSuppressionDelayActive,
+                                                    initialSuppressionStationIds: initialSuppressionDelayStationIds,
+                                                })}
+                                                isActive={quote.originalIndex === activeIndex}
                                                 isBest={quote.originalIndex === 0}
                                                 isDark={isDark}
                                                 themeColors={themeColors}
@@ -3679,45 +3721,26 @@ export default function HomeScreen() {
 
             {ENABLE_CLUSTER_MERGE_TRANSITIONS && isMapLoaded && hasRenderableClusters ? (
                 <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
-                    <LiquidGlassContainerView
-                        pointerEvents="none"
-                        spacing={24}
-                        style={styles.clusterMapParentContainer}
-                    >
-                        {renderClusterEntries.map(entry => (
-                            <ClusterMarkerOverlay
-                                key={entry.key}
-                                cluster={entry.cluster}
-                                anchorCoordinate={location}
-                                isSuppressed={visibleSuppressedStationIds.has(String(entry.primaryStationId))}
-                                scrollX={scrollX}
-                                itemWidth={itemWidth}
-                                isDark={isDark}
-                                themeColors={themeColors}
-                                activeIndex={activeIndex}
-                                onMarkerPress={handleMarkerPress}
-                                onDebugTransitionEvent={recordClusterDebugTransitionEvent}
-                                onDebugRenderFrame={recordClusterDebugRenderFrame}
-                                isDebugWatched={entry.primaryStationId === activeClusterDebugPrimaryId}
-                                isDebugRecording={isClusterDebugRecording}
-                                mapRegion={mapRenderRegion}
-                                isMapMoving={isMapMoving}
-                            />
-                        ))}
-                    </LiquidGlassContainerView>
+                    {renderClusterEntries.map(entry => (
+                        <ClusterMarkerOverlay
+                            key={entry.key}
+                            cluster={entry.cluster}
+                            anchorCoordinate={location}
+                            isSuppressed={visibleSuppressedStationIds.has(String(entry.primaryStationId))}
+                            scrollX={scrollX}
+                            itemWidth={itemWidth}
+                            isDark={isDark}
+                            themeColors={themeColors}
+                            activeIndex={activeIndex}
+                            onDebugTransitionEvent={recordClusterDebugTransitionEvent}
+                            onDebugRenderFrame={recordClusterDebugRenderFrame}
+                            isDebugWatched={entry.primaryStationId === activeClusterDebugPrimaryId}
+                            isDebugRecording={isClusterDebugRecording}
+                            mapRegion={mapRenderRegion}
+                            isMapMoving={isMapMoving}
+                        />
+                    ))}
                 </View>
-            ) : null}
-
-            {shouldShowActiveStationOverlay ? (
-                <ActiveStationOverlay
-                    quote={activeStationQuote}
-                    isBest={activeStationQuote?.originalIndex === 0}
-                    isDark={isDark}
-                    mapRegion={suppressionRegion}
-                    screenWidth={width}
-                    screenHeight={height}
-                    themeColors={themeColors}
-                />
             ) : null}
 
             <TopCanopy edgeColor={canopyEdgeLine} height={topCanopyHeight} isDark={isDark} topInset={insets.top} />
@@ -3838,8 +3861,6 @@ export default function HomeScreen() {
                         snapToInterval={itemWidth} // Precise snapping prevents jitter
                         snapToAlignment="start"
                         disableIntervalMomentum={true}
-                        onViewableItemsChanged={onViewableItemsChanged}
-                        viewabilityConfig={viewabilityConfig}
                         onScrollBeginDrag={() => { isUserScrollingRef.current = true; }}
                         onMomentumScrollEnd={(event) => {
                             settleCardSelection(event?.nativeEvent?.contentOffset?.x);
@@ -3936,12 +3957,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 2,
-    },
-    clusterMapParentContainer: {
-        ...StyleSheet.absoluteFillObject,
-        overflow: 'visible',
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     sheetTriggerButton: {
         flexDirection: 'row',

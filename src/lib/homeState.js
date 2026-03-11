@@ -201,15 +201,86 @@ export function buildVisibleSuppressedStationIds({
     return new Set(suppressedStationIds || []);
 }
 
-export function shouldShowActiveStationDecoration({
-    activeQuote = null,
-    suppressedStationIds,
+export function canRevealActiveStation({
+    activeStationId = null,
+    currentSuppressedStationIds,
+    isMapMoving = true,
+    isSuppressionRevealAllowed = false,
 }) {
-    if (!activeQuote || activeQuote.originalIndex === 0) {
+    if (
+        activeStationId == null ||
+        isMapMoving ||
+        !isSuppressionRevealAllowed
+    ) {
         return false;
     }
 
-    return !new Set(suppressedStationIds || []).has(String(activeQuote.stationId));
+    return !new Set(currentSuppressedStationIds || []).has(String(activeStationId));
+}
+
+export function shouldDelayStationMarkerSuppression({
+    stationId = null,
+    isSuppressed = false,
+    isInitialSuppressionDelayActive = false,
+    initialSuppressionStationIds,
+}) {
+    if (
+        !isSuppressed ||
+        !isInitialSuppressionDelayActive ||
+        stationId == null
+    ) {
+        return false;
+    }
+
+    return new Set(initialSuppressionStationIds || []).has(String(stationId));
+}
+
+export function resolveHomeCardIndexFromOffset({
+    offsetX,
+    itemWidth,
+    stationCount = 0,
+}) {
+    if (
+        !Number.isFinite(offsetX) ||
+        !Number.isFinite(itemWidth) ||
+        itemWidth <= 0 ||
+        stationCount <= 0
+    ) {
+        return null;
+    }
+
+    const maxIndex = stationCount - 1;
+    const nextIndex = Math.round(offsetX / itemWidth);
+
+    return Math.max(0, Math.min(maxIndex, nextIndex));
+}
+
+export function resolveCommittedHomeActiveIndex({
+    currentActiveIndex = 0,
+    nextIndex = null,
+    stationCount = 0,
+    reason = 'settle',
+}) {
+    if (stationCount <= 0) {
+        return 0;
+    }
+
+    const maxIndex = stationCount - 1;
+    const clampedCurrentIndex = Math.max(0, Math.min(maxIndex, currentActiveIndex));
+
+    if (reason === 'preview') {
+        return clampedCurrentIndex;
+    }
+
+    if (reason === 'reset' || reason === 'bounds-correction') {
+        return 0;
+    }
+
+    if (!Number.isInteger(nextIndex)) {
+        return clampedCurrentIndex;
+    }
+
+    return Math.max(0, Math.min(maxIndex, nextIndex));
 }
 
 export function shouldInitializeInitialSuppressionDelay({
@@ -226,6 +297,42 @@ export function shouldInitializeInitialSuppressionDelay({
         stationCount > 0 &&
         hasSettledInitialStationLayout
     );
+}
+
+export function buildPersistentSuppressedStationIds({
+    currentSuppressedStationIds,
+    previousPersistentSuppressedStationIds,
+    visibleStationIds,
+    activeStationId = null,
+    canRevealActiveStation = false,
+}) {
+    const nextSuppressedIds = new Set();
+    const currentSuppressedIds = new Set(currentSuppressedStationIds || []);
+    const previousSuppressedIds = new Set(previousPersistentSuppressedStationIds || []);
+    const visibleIds = new Set(visibleStationIds || []);
+    const normalizedActiveStationId = activeStationId == null ? null : String(activeStationId);
+
+    previousSuppressedIds.forEach(stationId => {
+        const normalizedStationId = String(stationId);
+
+        if (visibleIds.has(normalizedStationId)) {
+            nextSuppressedIds.add(normalizedStationId);
+        }
+    });
+
+    currentSuppressedIds.forEach(stationId => {
+        nextSuppressedIds.add(String(stationId));
+    });
+
+    if (
+        canRevealActiveStation &&
+        normalizedActiveStationId != null &&
+        !currentSuppressedIds.has(normalizedActiveStationId)
+    ) {
+        nextSuppressedIds.delete(normalizedActiveStationId);
+    }
+
+    return nextSuppressedIds;
 }
 
 export function shouldAutoFitHomeMap({

@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, Text } from 'react-native';
-import { LiquidGlassView } from '@callstack/liquid-glass';
+import { LiquidGlassContainerView, LiquidGlassView } from '@callstack/liquid-glass';
 import { SymbolView } from 'expo-symbols';
 import Animated, {
   cancelAnimation,
@@ -23,8 +23,10 @@ import {
   buildClusterMembershipKey,
   buildMapProjection,
   buildOutsideTargets,
+  computeParentBounds,
   computeAccumulatorAnchor,
 } from '../../cluster/layout';
+import { areClusterMarkerOverlayPropsEqual } from '../../cluster/clusterMarkerOverlayMemo';
 import {
   buildTransitionPlan,
 } from '../../cluster/transitionEngine';
@@ -72,7 +74,7 @@ function PricePill({ quote, isActive, isBest, isDark, themeColors, animatedTextS
   );
 }
 
-export default function ClusterMarkerOverlay({
+function ClusterMarkerOverlay({
   cluster,
   anchorCoordinate,
   isSuppressed = false,
@@ -81,7 +83,6 @@ export default function ClusterMarkerOverlay({
   isDark,
   themeColors,
   activeIndex,
-  onMarkerPress,
   onDebugTransitionEvent,
   onDebugRenderFrame,
   isDebugWatched = false,
@@ -152,14 +153,14 @@ export default function ClusterMarkerOverlay({
       opacity: 1,
       transform: [
         {
-          translateX: baseOffsetX + interpolate(mergeProgress.value, [0, 1], [mergeMover.startX, mergeMover.endX]),
+          translateX: interpolate(mergeProgress.value, [0, 1], [mergeMover.startX, mergeMover.endX]),
         },
         {
-          translateY: baseOffsetY + interpolate(mergeProgress.value, [0, 1], [mergeMover.startY, mergeMover.endY]),
+          translateY: interpolate(mergeProgress.value, [0, 1], [mergeMover.startY, mergeMover.endY]),
         },
       ],
     };
-  }, [baseOffsetX, baseOffsetY, mergeMover]);
+  }, [mergeMover]);
 
   const splitMoverStyle = useAnimatedStyle(() => {
     if (!splitMover) {
@@ -170,14 +171,14 @@ export default function ClusterMarkerOverlay({
       opacity: 1,
       transform: [
         {
-          translateX: baseOffsetX + interpolate(splitProgress.value, [0, 1], [splitMover.startX, splitMover.endX]),
+          translateX: interpolate(splitProgress.value, [0, 1], [splitMover.startX, splitMover.endX]),
         },
         {
-          translateY: baseOffsetY + interpolate(splitProgress.value, [0, 1], [splitMover.startY, splitMover.endY]),
+          translateY: interpolate(splitProgress.value, [0, 1], [splitMover.startY, splitMover.endY]),
         },
       ],
     };
-  }, [baseOffsetX, baseOffsetY, splitMover]);
+  }, [splitMover]);
 
   const animatedTextStyle = useAnimatedStyle(() => {
     if (primaryQuote.originalIndex === 0) {
@@ -590,153 +591,183 @@ export default function ClusterMarkerOverlay({
   const isBest = quotes.some(quote => quote.originalIndex === 0);
   const hiddenOutsideSet = new Set(outsideHiddenIds);
   const renderedOutsideTargets = outsideTargets.filter(target => !hiddenOutsideSet.has(String(target.stationId)));
+  const parentBounds = useMemo(() => computeParentBounds({ outsideTargets }), [outsideTargets]);
 
   if (!hasValidPrimaryOffset) {
     return null;
   }
 
   return (
-    <>
-      <Animated.View
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        styles.clusterAnchor,
+        {
+          transform: [
+            { translateX: baseOffsetX },
+            { translateY: baseOffsetY },
+          ],
+          zIndex: isActive ? 3 : isBest ? 2 : 1,
+        },
+      ]}
+    >
+      <LiquidGlassContainerView
         pointerEvents="none"
+        spacing={24}
         style={[
-          styles.pillPositioner,
-          styles.primaryPill,
+          styles.clusterParentContainer,
           {
-            transform: [
-              { translateX: baseOffsetX },
-              { translateY: baseOffsetY },
-            ],
-            zIndex: isActive ? 3 : isBest ? 2 : 1,
+            width: parentBounds.width,
+            height: parentBounds.height,
           },
         ]}
       >
-        <Animated.View style={suppressionStyle}>
-          <PricePill
-            quote={primaryQuote}
-            isActive={primaryQuote.originalIndex === activeIndex}
-            isBest={primaryQuote.originalIndex === 0}
-            isDark={isDark}
-            themeColors={themeColors}
-            animatedTextStyle={animatedTextStyle}
-            priceOpacity={1}
-          />
-        </Animated.View>
-      </Animated.View>
-
-      {renderedOutsideTargets.map(target => (
-        <Animated.View
-          pointerEvents="none"
-          key={`outside-${target.stationId}`}
-          style={[
-            styles.pillPositioner,
-            {
-              transform: [
-                { translateX: baseOffsetX + target.x },
-                { translateY: baseOffsetY + target.y },
-              ],
-            },
-          ]}
-        >
-          <PricePill
-            quote={target.quote}
-            isActive={target.quote.originalIndex === activeIndex}
-            isBest={target.quote.originalIndex === 0}
-            isDark={isDark}
-            themeColors={themeColors}
-            animatedTextStyle={animatedTextStyle}
-            priceOpacity={1}
-          />
-        </Animated.View>
-      ))}
-
-      {splitRevealTargets.map(target => (
-        <Animated.View
-          pointerEvents="none"
-          key={`split-reveal-${target.stationId}`}
-          style={[
-            styles.pillPositioner,
-            {
-              transform: [
-                { translateX: baseOffsetX + target.endX },
-                { translateY: baseOffsetY + target.endY },
-              ],
-            },
-          ]}
-        >
-          <PricePill
-            quote={target.quote}
-            isActive={target.quote.originalIndex === activeIndex}
-            isBest={target.quote.originalIndex === 0}
-            isDark={isDark}
-            themeColors={themeColors}
-            animatedTextStyle={animatedTextStyle}
-            priceOpacity={1}
-          />
-        </Animated.View>
-      ))}
-
-      {(runtimePhase !== CLUSTER_RUNTIME_PHASE.LIVE || accumulatorCount > 0) ? (
         <Animated.View
           pointerEvents="none"
           style={[
             styles.pillPositioner,
-            {
-              transform: [
-                { translateX: baseOffsetX + accumulatorAnchor.x },
-                { translateY: baseOffsetY + accumulatorAnchor.y },
-              ],
-            },
+            styles.primaryPill,
           ]}
         >
-          <PricePill
-            quote={null}
-            plusCount={Math.max(1, accumulatorCount)}
-            showDivider
-            isDark={isDark}
-            themeColors={themeColors}
-            animatedTextStyle={animatedTextStyle}
-            plusOpacity={1}
-            priceOpacity={0}
-          />
+          <Animated.View style={suppressionStyle}>
+            <PricePill
+              quote={primaryQuote}
+              isActive={primaryQuote.originalIndex === activeIndex}
+              isBest={primaryQuote.originalIndex === 0}
+              isDark={isDark}
+              themeColors={themeColors}
+              animatedTextStyle={animatedTextStyle}
+              priceOpacity={1}
+            />
+          </Animated.View>
         </Animated.View>
-      ) : null}
 
-      {mergeMover ? (
-        <Animated.View pointerEvents="none" style={[styles.pillPositioner, mergeMoverStyle]}>
-          <PricePill
-            quote={mergeMover.quote}
-            isActive={mergeMover.quote.originalIndex === activeIndex}
-            isBest={mergeMover.quote.originalIndex === 0}
-            isDark={isDark}
-            themeColors={themeColors}
-            animatedTextStyle={animatedTextStyle}
-            priceOpacity={1}
-          />
-        </Animated.View>
-      ) : null}
+        {renderedOutsideTargets.map(target => (
+          <Animated.View
+            pointerEvents="none"
+            key={`outside-${target.stationId}`}
+            style={[
+              styles.pillPositioner,
+              {
+                transform: [
+                  { translateX: target.x },
+                  { translateY: target.y },
+                ],
+              },
+            ]}
+          >
+            <PricePill
+              quote={target.quote}
+              isActive={target.quote.originalIndex === activeIndex}
+              isBest={target.quote.originalIndex === 0}
+              isDark={isDark}
+              themeColors={themeColors}
+              animatedTextStyle={animatedTextStyle}
+              priceOpacity={1}
+            />
+          </Animated.View>
+        ))}
 
-      {splitMover ? (
-        <Animated.View pointerEvents="none" style={[styles.pillPositioner, splitMoverStyle]}>
-          <PricePill
-            quote={splitMover.quote}
-            plusCount={splitMover.plusCount}
-            showDivider
-            isActive={splitMover.quote.originalIndex === activeIndex}
-            isBest={splitMover.quote.originalIndex === 0}
-            isDark={isDark}
-            themeColors={themeColors}
-            animatedTextStyle={animatedTextStyle}
-            plusOpacity={Math.max(0, 1 - splitProgress.value * 1.6)}
-            priceOpacity={Math.max(0, Math.min(1, (splitProgress.value - 0.65) / 0.35))}
-          />
-        </Animated.View>
-      ) : null}
-    </>
+        {splitRevealTargets.map(target => (
+          <Animated.View
+            pointerEvents="none"
+            key={`split-reveal-${target.stationId}`}
+            style={[
+              styles.pillPositioner,
+              {
+                transform: [
+                  { translateX: target.endX },
+                  { translateY: target.endY },
+                ],
+              },
+            ]}
+          >
+            <PricePill
+              quote={target.quote}
+              isActive={target.quote.originalIndex === activeIndex}
+              isBest={target.quote.originalIndex === 0}
+              isDark={isDark}
+              themeColors={themeColors}
+              animatedTextStyle={animatedTextStyle}
+              priceOpacity={1}
+            />
+          </Animated.View>
+        ))}
+
+        {(runtimePhase !== CLUSTER_RUNTIME_PHASE.LIVE || accumulatorCount > 0) ? (
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.pillPositioner,
+              {
+                transform: [
+                  { translateX: accumulatorAnchor.x },
+                  { translateY: accumulatorAnchor.y },
+                ],
+              },
+            ]}
+          >
+            <PricePill
+              quote={null}
+              plusCount={Math.max(1, accumulatorCount)}
+              showDivider
+              isDark={isDark}
+              themeColors={themeColors}
+              animatedTextStyle={animatedTextStyle}
+              plusOpacity={1}
+              priceOpacity={0}
+            />
+          </Animated.View>
+        ) : null}
+
+        {mergeMover ? (
+          <Animated.View pointerEvents="none" style={[styles.pillPositioner, mergeMoverStyle]}>
+            <PricePill
+              quote={mergeMover.quote}
+              isActive={mergeMover.quote.originalIndex === activeIndex}
+              isBest={mergeMover.quote.originalIndex === 0}
+              isDark={isDark}
+              themeColors={themeColors}
+              animatedTextStyle={animatedTextStyle}
+              priceOpacity={1}
+            />
+          </Animated.View>
+        ) : null}
+
+        {splitMover ? (
+          <Animated.View pointerEvents="none" style={[styles.pillPositioner, splitMoverStyle]}>
+            <PricePill
+              quote={splitMover.quote}
+              plusCount={splitMover.plusCount}
+              showDivider
+              isActive={splitMover.quote.originalIndex === activeIndex}
+              isBest={splitMover.quote.originalIndex === 0}
+              isDark={isDark}
+              themeColors={themeColors}
+              animatedTextStyle={animatedTextStyle}
+              plusOpacity={Math.max(0, 1 - splitProgress.value * 1.6)}
+              priceOpacity={Math.max(0, Math.min(1, (splitProgress.value - 0.65) / 0.35))}
+            />
+          </Animated.View>
+        ) : null}
+      </LiquidGlassContainerView>
+    </Animated.View>
   );
 }
 
+export default memo(ClusterMarkerOverlay, areClusterMarkerOverlayPropsEqual);
+
 const styles = StyleSheet.create({
+  clusterAnchor: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  clusterParentContainer: {
+    overflow: 'visible',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   pillPositioner: {
     position: 'absolute',
     top: 0,

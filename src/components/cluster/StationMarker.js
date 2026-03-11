@@ -32,6 +32,7 @@ function StationMarker({
   quote,
   isSuppressed = false,
   shouldDelaySuppression = false,
+  isActive = false,
   isBest = false,
   isDark = false,
   themeColors,
@@ -114,18 +115,20 @@ function StationMarker({
   const bestTintColor = isDark ? BEST_PRICE_BLUE_DARK : BEST_PRICE_BLUE_LIGHT;
   const iconTintColor = isBest
     ? bestTintColor
-    : inactiveIconTintColor;
+    : (isActive ? themeColors?.text ?? inactiveTextColor : inactiveIconTintColor);
   const textColor = isBest
     ? bestTintColor
-    : inactiveTextColor;
+    : (isActive ? themeColors?.text ?? inactiveTextColor : inactiveTextColor);
   const visualStateSignature = [
     quote?.stationId ?? '',
     quote?.price ?? '',
     isSuppressed ? '1' : '0',
     shouldDelaySuppression ? '1' : '0',
     isContentHidden ? '1' : '0',
+    isActive ? '1' : '0',
     isBest ? '1' : '0',
     isDark ? '1' : '0',
+    themeColors?.text ?? '',
   ].join('|');
 
   useEffect(() => {
@@ -148,7 +151,7 @@ function StationMarker({
       tracksViewChangesTimeoutRef.current = null;
       setTracksViewChanges(false);
     }, trackingDuration);
-  }, [isBest, isContentHidden, isDark, isSuppressed, quote?.price, quote?.stationId, shouldDelaySuppression, visualStateSignature]);
+  }, [isActive, isBest, isContentHidden, isDark, isSuppressed, quote?.price, quote?.stationId, shouldDelaySuppression, themeColors?.text, visualStateSignature]);
 
   return (
     <Marker
@@ -158,7 +161,7 @@ function StationMarker({
       }}
       anchor={{ x: 0.5, y: 0.5 }}
       onPress={() => onPress?.(quote)}
-      style={{ zIndex: isBest ? 2 : 1 }}
+      style={{ zIndex: isActive ? 3 : isBest ? 2 : 1 }}
       tracksViewChanges={tracksViewChanges}
     >
       <AnimatedView style={shrinkStyle}>
@@ -189,8 +192,10 @@ function areStationMarkerPropsEqual(previousProps, nextProps) {
     previousProps.quote === nextProps.quote &&
     previousProps.isSuppressed === nextProps.isSuppressed &&
     previousProps.shouldDelaySuppression === nextProps.shouldDelaySuppression &&
+    previousProps.isActive === nextProps.isActive &&
     previousProps.isBest === nextProps.isBest &&
     previousProps.isDark === nextProps.isDark &&
+    previousProps.themeColors?.text === nextProps.themeColors?.text &&
     previousProps.onPress === nextProps.onPress
   );
 }
