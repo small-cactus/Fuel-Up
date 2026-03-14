@@ -1,0 +1,142 @@
+function pickFirstNonEmpty(...values) {
+    for (const value of values) {
+        const normalizedValue = String(value || '').trim();
+        if (normalizedValue) {
+            return normalizedValue;
+        }
+    }
+
+    return '';
+}
+
+const supabaseUrl = pickFirstNonEmpty(
+    process.env.EXPO_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_URL
+);
+
+const supabaseKey = pickFirstNonEmpty(
+    process.env.EXPO_PUBLIC_SUPABASE_KEY,
+    process.env.SUPABASE_KEY
+);
+
+module.exports = {
+    expo: {
+        name: 'Fuel Up',
+        slug: 'fuel-up',
+        scheme: 'fuelup',
+        version: '1.0.0',
+        plugins: [
+            [
+                'expo-build-properties',
+                {
+                    ios: {
+                        buildReactNativeFromSource: true,
+                    },
+                },
+            ],
+            './plugins/withProgressiveBlurNativeBuild',
+            'expo-font',
+            'expo-notifications',
+            [
+                'expo-location',
+                {
+                    locationWhenInUsePermission: 'Fuel Up uses your precise location to find the closest cheapest gas around you.',
+                    locationAlwaysAndWhenInUsePermission: 'Fuel Up uses your precise location in the background to predict where and when you should stop for gas.',
+                    locationAlwaysPermission: 'Fuel Up uses your precise location in the background to predict where and when you should stop for gas.',
+                    isIosBackgroundLocationEnabled: true,
+                    isAndroidBackgroundLocationEnabled: true,
+                    isAndroidForegroundServiceEnabled: true,
+                },
+            ],
+            [
+                'expo-widgets',
+                {
+                    groupIdentifier: 'group.com.anthonyh.fuelup',
+                    enablePushNotifications: true,
+                    widgets: [
+                        {
+                            name: 'PriceDropActivity',
+                            displayName: 'Fuel Price Drop',
+                            description: 'Live fuel price updates and timers',
+                            supportedFamilies: ['systemSmall', 'systemMedium'],
+                        },
+                    ],
+                },
+            ],
+            'expo-video',
+        ],
+        orientation: 'portrait',
+        icon: './assets/fuelup-icon.png',
+        userInterfaceStyle: 'automatic',
+        splash: {
+            image: './assets/splash-light.png',
+            resizeMode: 'contain',
+            backgroundColor: '#FFFFFF',
+            dark: {
+                image: './assets/splash-dark.png',
+                backgroundColor: '#000000',
+            },
+        },
+        ios: {
+            splash: {
+                image: './assets/splash-light.png',
+                resizeMode: 'contain',
+                backgroundColor: '#FFFFFF',
+                dark: {
+                    image: './assets/splash-dark.png',
+                    backgroundColor: '#000000',
+                },
+            },
+            icon: './fuelup.icon',
+            supportsTablet: true,
+            bundleIdentifier: 'com.anthonyh.fuelup',
+            entitlements: {
+                'aps-environment': 'development',
+            },
+            infoPlist: {
+                NSMotionUsageDescription: 'Fuel Up uses motion signals to understand when you are driving toward a likely fuel stop.',
+                ITSAppUsesNonExemptEncryption: false,
+                CADisableMinimumFrameDurationOnPhone: true,
+            },
+        },
+        android: {
+            package: 'com.anthonyh.fuelup',
+            permissions: [
+                'ACCESS_COARSE_LOCATION',
+                'ACCESS_FINE_LOCATION',
+                'ACCESS_BACKGROUND_LOCATION',
+                'FOREGROUND_SERVICE',
+                'FOREGROUND_SERVICE_LOCATION',
+                'ACTIVITY_RECOGNITION',
+            ],
+        },
+        extra: {
+            supabase: {
+                url: supabaseUrl,
+                key: supabaseKey,
+            },
+            EXPO_PUBLIC_SUPABASE_URL: supabaseUrl,
+            EXPO_PUBLIC_SUPABASE_KEY: supabaseKey,
+            eas: {
+                build: {
+                    experimental: {
+                        ios: {
+                            appExtensions: [
+                                {
+                                    targetName: 'ExpoWidgetsTarget',
+                                    bundleIdentifier: 'com.anthonyh.fuelup.ExpoWidgetsTarget',
+                                    entitlements: {
+                                        'com.apple.security.application-groups': [
+                                            'group.com.anthonyh.fuelup',
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                },
+                projectId: 'ba30e199-db8a-4094-b10b-230e5fdf8cc3',
+            },
+        },
+    },
+};

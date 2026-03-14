@@ -1,0 +1,1169 @@
+diff -ruN /tmp/package/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift node_modules/@sbaiahmed1/react-native-blur/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift
+--- a/node_modules/@sbaiahmed1/react-native-blur/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift	1985-10-26 04:15:00
++++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Helpers/ReactNativeProgressiveBlurViewHelper.swift	2026-03-06 17:18:51
+@@ -27,6 +27,66 @@
+     blurView.startOffset = startOffset
+   }
+ 
++  /// Updates whether the progressive blur view uses a radial mask.
++  @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withRadial radial: Bool) {
++    blurView.radial = radial
++  }
++
++  /// Updates the radial mask center x fraction.
++  @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withRadialCenterX radialCenterX: Double) {
++    blurView.radialCenterX = radialCenterX
++  }
++
++  /// Updates the radial mask center y fraction.
++  @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withRadialCenterY radialCenterY: Double) {
++    blurView.radialCenterY = radialCenterY
++  }
++
++  /// Updates the radial mask clear radius in points.
++  @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withRadialClearRadius radialClearRadius: Double) {
++    blurView.radialClearRadius = radialClearRadius
++  }
++
++  /// Updates the radial mask feather width in points.
++  @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withRadialFeather radialFeather: Double) {
++    blurView.radialFeather = radialFeather
++  }
++
++  /// Updates the reveal trigger value.
++  @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withRevealTrigger revealTrigger: Double) {
++    blurView.revealTrigger = revealTrigger
++  }
++
++  /// Updates the native reveal animation duration.
++  @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withAnimationDuration animationDuration: Double) {
++    blurView.animationDuration = animationDuration
++  }
++
++  /// Updates the native reveal animation delay.
++  @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withAnimationDelay animationDelay: Double) {
++    blurView.animationDelay = animationDelay
++  }
++
++  /// Updates the reveal starting radius.
++  @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withStartRadius startRadius: Double) {
++    blurView.startRadius = startRadius
++  }
++
++  /// Updates the reveal ending radius.
++  @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withEndRadius endRadius: Double) {
++    blurView.endRadius = endRadius
++  }
++
++  /// Updates the reveal starting feather width.
++  @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withFeatherStart featherStart: Double) {
++    blurView.featherStart = featherStart
++  }
++
++  /// Updates the reveal ending feather width.
++  @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withFeatherEnd featherEnd: Double) {
++    blurView.featherEnd = featherEnd
++  }
++
+   /// Updates the progressive blur view with a new blur type.
+   @objc public static func updateProgressiveBlurView(_ blurView: ProgressiveBlurView, withBlurType blurType: String) {
+     blurView.blurTypeString = blurType
+diff -ruN /tmp/package/ios/ReactNativeProgressiveBlurView.mm node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurView.mm
+--- a/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurView.mm	1985-10-26 04:15:00
++++ b/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurView.mm	2026-03-06 17:19:11
+@@ -136,6 +136,18 @@
+     }
+ 
+     [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withStartOffset:pbvProps.startOffset];
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withRadial:pbvProps.radial];
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withRadialCenterX:pbvProps.radialCenterX];
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withRadialCenterY:pbvProps.radialCenterY];
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withRadialClearRadius:pbvProps.radialClearRadius];
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withRadialFeather:pbvProps.radialFeather];
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withAnimationDuration:pbvProps.animationDuration];
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withAnimationDelay:pbvProps.animationDelay];
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withStartRadius:pbvProps.startRadius];
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withEndRadius:pbvProps.endRadius];
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withFeatherStart:pbvProps.featherStart];
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withFeatherEnd:pbvProps.featherEnd];
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withRevealTrigger:pbvProps.revealTrigger];
+ 
+     if (!pbvProps.reducedTransparencyFallbackColor.empty()) {
+       NSString *fallbackColorString = [[NSString alloc] initWithUTF8String:pbvProps.reducedTransparencyFallbackColor.c_str()];
+@@ -169,6 +181,54 @@
+ 
+   if (oldViewProps.startOffset != newViewProps.startOffset) {
+     [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withStartOffset:newViewProps.startOffset];
++  }
++
++  if (oldViewProps.radial != newViewProps.radial) {
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withRadial:newViewProps.radial];
++  }
++
++  if (oldViewProps.radialCenterX != newViewProps.radialCenterX) {
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withRadialCenterX:newViewProps.radialCenterX];
++  }
++
++  if (oldViewProps.radialCenterY != newViewProps.radialCenterY) {
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withRadialCenterY:newViewProps.radialCenterY];
++  }
++
++  if (oldViewProps.radialClearRadius != newViewProps.radialClearRadius) {
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withRadialClearRadius:newViewProps.radialClearRadius];
++  }
++
++  if (oldViewProps.radialFeather != newViewProps.radialFeather) {
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withRadialFeather:newViewProps.radialFeather];
++  }
++
++  if (oldViewProps.animationDuration != newViewProps.animationDuration) {
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withAnimationDuration:newViewProps.animationDuration];
++  }
++
++  if (oldViewProps.animationDelay != newViewProps.animationDelay) {
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withAnimationDelay:newViewProps.animationDelay];
++  }
++
++  if (oldViewProps.startRadius != newViewProps.startRadius) {
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withStartRadius:newViewProps.startRadius];
++  }
++
++  if (oldViewProps.endRadius != newViewProps.endRadius) {
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withEndRadius:newViewProps.endRadius];
++  }
++
++  if (oldViewProps.featherStart != newViewProps.featherStart) {
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withFeatherStart:newViewProps.featherStart];
++  }
++
++  if (oldViewProps.featherEnd != newViewProps.featherEnd) {
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withFeatherEnd:newViewProps.featherEnd];
++  }
++
++  if (oldViewProps.revealTrigger != newViewProps.revealTrigger) {
++    [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:_progressiveBlurView withRevealTrigger:newViewProps.revealTrigger];
+   }
+ 
+   if (oldViewProps.reducedTransparencyFallbackColor != newViewProps.reducedTransparencyFallbackColor) {
+diff -ruN /tmp/package/ios/ReactNativeProgressiveBlurViewManager.mm node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurViewManager.mm
+--- a/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurViewManager.mm	1985-10-26 04:15:00
++++ b/node_modules/@sbaiahmed1/react-native-blur/ios/ReactNativeProgressiveBlurViewManager.mm	2026-03-06 17:19:23
+@@ -48,6 +48,78 @@
+   [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:view withStartOffset:offset];
+ }
+ 
++RCT_CUSTOM_VIEW_PROPERTY(radial, BOOL, ProgressiveBlurView)
++{
++  BOOL radial = json ? [RCTConvert BOOL:json] : NO;
++  [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:view withRadial:radial];
++}
++
++RCT_CUSTOM_VIEW_PROPERTY(radialCenterX, NSNumber, ProgressiveBlurView)
++{
++  double value = json ? [RCTConvert double:json] : 0.5;
++  [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:view withRadialCenterX:value];
++}
++
++RCT_CUSTOM_VIEW_PROPERTY(radialCenterY, NSNumber, ProgressiveBlurView)
++{
++  double value = json ? [RCTConvert double:json] : 0.5;
++  [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:view withRadialCenterY:value];
++}
++
++RCT_CUSTOM_VIEW_PROPERTY(radialClearRadius, NSNumber, ProgressiveBlurView)
++{
++  double value = json ? [RCTConvert double:json] : 0.0;
++  [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:view withRadialClearRadius:value];
++}
++
++RCT_CUSTOM_VIEW_PROPERTY(radialFeather, NSNumber, ProgressiveBlurView)
++{
++  double value = json ? [RCTConvert double:json] : 120.0;
++  [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:view withRadialFeather:value];
++}
++
++RCT_CUSTOM_VIEW_PROPERTY(revealTrigger, NSNumber, ProgressiveBlurView)
++{
++  double value = json ? [RCTConvert double:json] : 0.0;
++  [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:view withRevealTrigger:value];
++}
++
++RCT_CUSTOM_VIEW_PROPERTY(animationDuration, NSNumber, ProgressiveBlurView)
++{
++  double value = json ? [RCTConvert double:json] : 20000.0;
++  [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:view withAnimationDuration:value];
++}
++
++RCT_CUSTOM_VIEW_PROPERTY(animationDelay, NSNumber, ProgressiveBlurView)
++{
++  double value = json ? [RCTConvert double:json] : 200.0;
++  [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:view withAnimationDelay:value];
++}
++
++RCT_CUSTOM_VIEW_PROPERTY(startRadius, NSNumber, ProgressiveBlurView)
++{
++  double value = json ? [RCTConvert double:json] : 0.0;
++  [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:view withStartRadius:value];
++}
++
++RCT_CUSTOM_VIEW_PROPERTY(endRadius, NSNumber, ProgressiveBlurView)
++{
++  double value = json ? [RCTConvert double:json] : 1000.0;
++  [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:view withEndRadius:value];
++}
++
++RCT_CUSTOM_VIEW_PROPERTY(featherStart, NSNumber, ProgressiveBlurView)
++{
++  double value = json ? [RCTConvert double:json] : 120.0;
++  [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:view withFeatherStart:value];
++}
++
++RCT_CUSTOM_VIEW_PROPERTY(featherEnd, NSNumber, ProgressiveBlurView)
++{
++  double value = json ? [RCTConvert double:json] : 160.0;
++  [ReactNativeProgressiveBlurViewHelper updateProgressiveBlurView:view withFeatherEnd:value];
++}
++
+ RCT_CUSTOM_VIEW_PROPERTY(reducedTransparencyFallbackColor, NSString, ProgressiveBlurView)
+ {
+   NSString *colorString = json ? [RCTConvert NSString:json] : @"#FFFFFF";
+diff -ruN /tmp/package/ios/Views/ProgressiveBlurView.swift node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlurView.swift
+--- a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlurView.swift	1985-10-26 04:15:00
++++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/ProgressiveBlurView.swift	2026-03-06 18:38:32
+@@ -26,6 +26,56 @@
+     }
+   }
+ 
++  @objc public var radial: Bool = false {
++    didSet {
++      updateBlur()
++    }
++  }
++
++  @objc public var radialCenterX: Double = 0.5 {
++    didSet {
++      updateBlur()
++    }
++  }
++
++  @objc public var radialCenterY: Double = 0.5 {
++    didSet {
++      updateBlur()
++    }
++  }
++
++  @objc public var radialClearRadius: Double = 0.0 {
++    didSet {
++      updateBlur()
++    }
++  }
++
++  @objc public var radialFeather: Double = 120.0 {
++    didSet {
++      updateBlur()
++    }
++  }
++
++  @objc public var revealTrigger: Double = 0.0 {
++    didSet {
++      if revealTrigger != oldValue {
++        startRevealAnimation()
++      }
++    }
++  }
++
++  @objc public var animationDuration: Double = 20000.0
++
++  @objc public var animationDelay: Double = 200.0
++
++  @objc public var startRadius: Double = 0.0
++
++  @objc public var endRadius: Double = 1000.0
++
++  @objc public var featherStart: Double = 120.0
++
++  @objc public var featherEnd: Double = 160.0
++
+   @objc public var blurTypeString: String = "regular" {
+     didSet {
+       updateBlur()
+@@ -49,7 +99,6 @@
+   }
+ 
+   private func setupView() {
+-    // Remove old view if exists
+     variableBlurView?.removeFromSuperview()
+ 
+     let blurStyle = blurStyleFromString(blurTypeString)
+@@ -72,20 +121,12 @@
+       variableBlur.bottomAnchor.constraint(equalTo: bottomAnchor)
+     ])
+ 
+-    self.variableBlurView = variableBlur
+-
+-    // Handle reduced transparency
+-    if UIAccessibility.isReduceTransparencyEnabled {
+-      variableBlur.isHidden = true
+-      backgroundColor = reducedTransparencyFallbackColor
+-    } else {
+-      variableBlur.isHidden = false
+-      backgroundColor = .clear
+-    }
++    variableBlurView = variableBlur
++    updateBlur()
+   }
+ 
+   private func updateBlur() {
+-    guard let variableBlurView = variableBlurView else {
++    guard let variableBlurView else {
+       setupView()
+       return
+     }
+@@ -97,10 +138,14 @@
+       maxBlurRadius: CGFloat(blurAmount),
+       direction: blurDirection,
+       startOffset: CGFloat(startOffset),
++      radial: radial,
++      radialCenterX: CGFloat(radialCenterX),
++      radialCenterY: CGFloat(radialCenterY),
++      radialClearRadius: CGFloat(radialClearRadius),
++      radialFeather: CGFloat(radialFeather),
+       blurStyle: blurStyle
+     )
+ 
+-    // Handle reduced transparency
+     if UIAccessibility.isReduceTransparencyEnabled {
+       variableBlurView.isHidden = true
+       backgroundColor = reducedTransparencyFallbackColor
+@@ -108,6 +153,22 @@
+       variableBlurView.isHidden = false
+       backgroundColor = .clear
+     }
++  }
++
++  private func startRevealAnimation() {
++    guard let variableBlurView else {
++      return
++    }
++
++    updateBlur()
++    variableBlurView.startRevealAnimation(
++      durationMs: CGFloat(animationDuration),
++      delayMs: CGFloat(animationDelay),
++      fromRadius: CGFloat(startRadius),
++      toRadius: CGFloat(endRadius),
++      fromFeather: CGFloat(featherStart),
++      toFeather: CGFloat(featherEnd)
++    )
+   }
+ 
+   public override func didMoveToWindow() {
+diff -ruN /tmp/package/ios/Views/VariableBlurView.swift node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift
+--- a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift	1985-10-26 04:15:00
++++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift	2026-03-07 13:53:46
+@@ -28,6 +28,32 @@
+   private var maxBlurRadius: CGFloat = 20
+   private var direction: VariableBlurDirection = .blurredTopClearBottom
+   private var startOffset: CGFloat = 0
++  private var radial: Bool = false
++  private var radialCenterX: CGFloat = 0.5
++  private var radialCenterY: CGFloat = 0.5
++  private var radialClearRadius: CGFloat = 0
++  private var radialFeather: CGFloat = 120
++  private var currentBlurStyle: UIBlurEffect.Style = .regular
++  private var appliedBlurStyle: UIBlurEffect.Style?
++  private var variableBlurFilter: NSObject?
++  private weak var backdropLayerRef: CALayer?
++  private let radialMaskLayer = CAGradientLayer()
++  private var displayLink: CADisplayLink?
++  private var animationStartTime: CFTimeInterval = 0
++  private var animationDelaySeconds: CFTimeInterval = 0
++  private var animationDurationSeconds: CFTimeInterval = 0
++  private var animationFromRadius: CGFloat = 0
++  private var animationToRadius: CGFloat = 0
++  private var animationFromFeather: CGFloat = 120
++  private var animationToFeather: CGFloat = 120
++  private var currentAnimatedClearRadius: CGFloat = 0
++  private var currentAnimatedFeather: CGFloat = 120
++  private var cachedMaskCanvasSize: CGSize = .zero
++  private var cachedMaskContext: CGContext?
++  private var cachedRadialGradient: CGGradient?
++  private var lastAppliedBlurRadius: CGFloat?
++  private var lastRenderedClearRadius: CGFloat?
++  private var lastRenderedFeather: CGFloat?
+ 
+   public init(
+     maxBlurRadius: CGFloat = 20,
+@@ -38,6 +64,9 @@
+     self.maxBlurRadius = maxBlurRadius
+     self.direction = direction
+     self.startOffset = startOffset
++    self.currentBlurStyle = blurStyle
++    self.currentAnimatedClearRadius = 0
++    self.currentAnimatedFeather = 120
+ 
+     super.init(effect: UIBlurEffect(style: blurStyle))
+ 
+@@ -53,27 +82,46 @@
+     maxBlurRadius: CGFloat,
+     direction: VariableBlurDirection,
+     startOffset: CGFloat,
++    radial: Bool,
++    radialCenterX: CGFloat,
++    radialCenterY: CGFloat,
++    radialClearRadius: CGFloat,
++    radialFeather: CGFloat,
+     blurStyle: UIBlurEffect.Style = .regular
+   ) {
+     self.maxBlurRadius = maxBlurRadius
+     self.direction = direction
+     self.startOffset = startOffset
+-    self.effect = UIBlurEffect(style: blurStyle)
++    self.radial = radial
++    self.radialCenterX = radialCenterX
++    self.radialCenterY = radialCenterY
++    self.radialClearRadius = radialClearRadius
++    self.radialFeather = radialFeather
++    self.currentBlurStyle = blurStyle
+ 
++    if displayLink == nil {
++      currentAnimatedClearRadius = radialClearRadius
++      currentAnimatedFeather = radialFeather
++    }
++
+     setupVariableBlur()
+   }
+ 
+   private func setupVariableBlur() {
+-    // Creates filter via runtime reflection
+-    // This uses a private Core Animation filter called "variableBlur"
+-    let clsName = String("retliFAC".reversed()) // CAFilter
+-    guard let Cls = NSClassFromString(clsName) as? NSObject.Type else {
++    if effect == nil || appliedBlurStyle != currentBlurStyle {
++      effect = UIBlurEffect(style: currentBlurStyle)
++      appliedBlurStyle = currentBlurStyle
++      backdropLayerRef = nil
++    }
++
++    let clsName = String("retliFAC".reversed())
++    guard let cls = NSClassFromString(clsName) as? NSObject.Type else {
+       print("[VariableBlur] Error: Can't find filter class")
+       return
+     }
+ 
+-    let selName = String(":epyThtiWretlif".reversed()) // filterWithType:
+-    guard let variableBlur = Cls.self.perform(
++    let selName = String(":epyThtiWretlif".reversed())
++    guard let variableBlur = cls.perform(
+       NSSelectorFromString(selName),
+       with: "variableBlur"
+     )?.takeUnretainedValue() as? NSObject else {
+@@ -81,7 +129,10 @@
+       return
+     }
+ 
++    let maskCanvasSize = makeMaskCanvasSize()
+     let gradientImage = makeGradientImage(
++      width: maskCanvasSize.width,
++      height: maskCanvasSize.height,
+       startOffset: startOffset,
+       direction: direction
+     )
+@@ -90,29 +141,142 @@
+     variableBlur.setValue(gradientImage, forKey: "inputMaskImage")
+     variableBlur.setValue(true, forKey: "inputNormalizeEdges")
+ 
+-    let backdropLayer = subviews.first?.layer
+-    backdropLayer?.filters = [variableBlur]
++    guard let backdropLayer = ensureBackdropLayer() else {
++      return
++    }
+ 
+-    // Hide the default visual effect view overlays
++    backdropLayer.filters = [variableBlur]
++    updateBackdropScaleIfNeeded(backdropLayer)
++    variableBlurFilter = variableBlur
++    lastAppliedBlurRadius = maxBlurRadius
++    lastRenderedClearRadius = currentAnimatedClearRadius
++    lastRenderedFeather = currentAnimatedFeather
++    layer.mask = nil
++
+     for subview in subviews.dropFirst() {
+-      subview.alpha = 0
++      if subview.alpha != 0 {
++        subview.alpha = 0
++      }
+     }
+   }
+ 
+-  open override func didMoveToWindow() {
+-    super.didMoveToWindow()
+-    guard let window, let backdropLayer = subviews.first?.layer else { return }
++  private func applyCurrentConfiguration() {
++    setupVariableBlur()
++  }
+ 
+-    let newScale = window.traitCollection.displayScale
+-    let currentScale = backdropLayer.value(forKey: "scale") as? CGFloat
++  private func ensureVariableBlurFilter() -> NSObject? {
++    if let variableBlurFilter {
++      return variableBlurFilter
++    }
+ 
+-    // Only update scale if it actually changed to prevent unnecessary
+-    // recalculations during navigation gestures
+-    if currentScale != newScale {
+-      backdropLayer.setValue(newScale, forKey: "scale")
++    let clsName = String("retliFAC".reversed())
++    guard let cls = NSClassFromString(clsName) as? NSObject.Type else {
++      print("[VariableBlur] Error: Can't find filter class")
++      return nil
+     }
++
++    let selName = String(":epyThtiWretlif".reversed())
++    guard let variableBlur = cls.perform(
++      NSSelectorFromString(selName),
++      with: "variableBlur"
++    )?.takeUnretainedValue() as? NSObject else {
++      print("[VariableBlur] Error: Can't create variableBlur filter")
++      return nil
++    }
++
++    variableBlurFilter = variableBlur
++    return variableBlur
+   }
+ 
++  private func ensureBackdropLayer() -> CALayer? {
++    if let backdropLayerRef {
++      return backdropLayerRef
++    }
++
++    let backdropLayer = subviews.first?.layer
++    backdropLayerRef = backdropLayer
++    return backdropLayer
++  }
++
++  public func startRevealAnimation(
++    durationMs: CGFloat,
++    delayMs: CGFloat,
++    fromRadius: CGFloat,
++    toRadius: CGFloat,
++    fromFeather: CGFloat,
++    toFeather: CGFloat
++  ) {
++    stopRevealAnimation()
++
++    animationStartTime = CACurrentMediaTime()
++    animationDelaySeconds = CFTimeInterval(max(delayMs, 0) / 1000)
++    animationDurationSeconds = CFTimeInterval(max(durationMs, 1) / 1000)
++    animationFromRadius = fromRadius
++    animationToRadius = toRadius
++    animationFromFeather = fromFeather
++    animationToFeather = toFeather
++    currentAnimatedClearRadius = fromRadius
++    currentAnimatedFeather = fromFeather
++    setupVariableBlur()
++
++    let displayLink = CADisplayLink(target: self, selector: #selector(handleRevealDisplayLink))
++    if #available(iOS 15.0, *) {
++      let supportedMaximum = Float(max(UIScreen.main.maximumFramesPerSecond, 60))
++      let supportedMinimum = min(Float(30), supportedMaximum)
++      displayLink.preferredFrameRateRange = CAFrameRateRange(
++        minimum: supportedMinimum,
++        maximum: supportedMaximum,
++        preferred: supportedMaximum
++      )
++    } else {
++      displayLink.preferredFramesPerSecond = max(UIScreen.main.maximumFramesPerSecond, 60)
++    }
++    displayLink.add(to: .main, forMode: .common)
++    self.displayLink = displayLink
++  }
++
++  public func stopRevealAnimation() {
++    displayLink?.invalidate()
++    displayLink = nil
++    radialMaskLayer.removeAnimation(forKey: "radialRevealLocations")
++  }
++
++  @objc private func handleRevealDisplayLink() {
++    let elapsed = CACurrentMediaTime() - animationStartTime - animationDelaySeconds
++    if elapsed < 0 {
++      return
++    }
++
++    let rawProgress = min(max(CGFloat(elapsed / animationDurationSeconds), 0), 1)
++    let easedProgress = memoriumRadiusEase(rawProgress)
++    currentAnimatedClearRadius = interpolate(
++      from: animationFromRadius,
++      to: animationToRadius,
++      progress: easedProgress
++    )
++    currentAnimatedFeather = interpolate(
++      from: animationFromFeather,
++      to: animationToFeather,
++      progress: easedProgress
++    )
++    setupVariableBlur()
++
++    if rawProgress >= 1 {
++      stopRevealAnimation()
++      radialClearRadius = animationToRadius
++      radialFeather = animationToFeather
++      currentAnimatedClearRadius = animationToRadius
++      currentAnimatedFeather = animationToFeather
++      applyCurrentConfiguration()
++    }
++  }
++
++  open override func didMoveToWindow() {
++    super.didMoveToWindow()
++    guard let backdropLayer = ensureBackdropLayer() else { return }
++    updateBackdropScaleIfNeeded(backdropLayer)
++  }
++
+   open override func traitCollectionDidChange(
+     _ previousTraitCollection: UITraitCollection?
+   ) {
+@@ -120,16 +284,26 @@
+     // Re-setup blur if needed when trait collection changes
+     if let previousTraitCollection = previousTraitCollection,
+        traitCollection.userInterfaceStyle != previousTraitCollection.userInterfaceStyle {
+-      setupVariableBlur()
++      applyCurrentConfiguration()
+     }
+   }
+ 
++  open override func layoutSubviews() {
++    super.layoutSubviews()
++    invalidateMaskResources()
++    applyCurrentConfiguration()
++  }
++
+   private func makeGradientImage(
+     width: CGFloat = 100,
+     height: CGFloat = 100,
+     startOffset: CGFloat,
+     direction: VariableBlurDirection
+   ) -> CGImage {
++    if radial {
++      return makeRadialGradientImage(width: width, height: height)
++    }
++
+     switch direction {
+     case .blurredCenterClearTopAndBottom:
+       return makeCenterGradientImage(
+@@ -165,6 +339,69 @@
+     }
+   }
+ 
++  private func makeMaskCanvasSize() -> CGSize {
++    let width = max(bounds.width, 1)
++    let height = max(bounds.height, 1)
++    let maxSide = max(width, height)
++    let targetMaxSide: CGFloat = 160
++    let scale = targetMaxSide / max(maxSide, 1)
++
++    return CGSize(
++      width: max(ceil(width * scale), 1),
++      height: max(ceil(height * scale), 1)
++    )
++  }
++
++  private func makeRadialGradientImage(
++    width: CGFloat,
++    height: CGFloat
++  ) -> CGImage {
++    guard let context = ensureMaskContext(width: width, height: height),
++          let gradient = ensureRadialGradient() else {
++      return makeFallbackMask(width: width, height: height)
++    }
++
++    let viewWidth = max(bounds.width, 1)
++    let viewHeight = max(bounds.height, 1)
++    let viewMaxSide = max(viewWidth, viewHeight)
++    let maskMaxSide = max(width, height)
++    let scale = maskMaxSide / max(viewMaxSide, 1)
++    let center = CGPoint(
++      x: min(max(radialCenterX, 0), 1) * width,
++      y: min(max(radialCenterY, 0), 1) * height
++    )
++    let clearRadius = currentAnimatedClearRadius * scale
++    let feather = max(currentAnimatedFeather * scale, 1)
++    let opaqueRadius = max(clearRadius + feather, 1)
++    let farthestCorner = max(
++      hypot(center.x, center.y),
++      hypot(width - center.x, center.y),
++      hypot(center.x, height - center.y),
++      hypot(width - center.x, height - center.y)
++    )
++
++    if clearRadius + feather <= 0 {
++      return makeOpaqueMask(width: width, height: height)
++    }
++
++    if clearRadius >= farthestCorner {
++      return makeTransparentMask(width: width, height: height)
++    }
++
++    context.clear(CGRect(x: 0, y: 0, width: width, height: height))
++
++    context.drawRadialGradient(
++      gradient,
++      startCenter: center,
++      startRadius: max(clearRadius, 0),
++      endCenter: center,
++      endRadius: opaqueRadius,
++      options: [.drawsBeforeStartLocation, .drawsAfterEndLocation]
++    )
++
++    return context.makeImage() ?? makeFallbackMask(width: width, height: height)
++  }
++
+   private func makeCenterGradientImage(
+     width: CGFloat = 100,
+     height: CGFloat = 100,
+@@ -269,5 +506,373 @@
+     context.setFillColor(CGColor(gray: 0, alpha: 1))
+     context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+     return context.makeImage()!
++  }
++
++  private func makeOpaqueMask(width: CGFloat, height: CGFloat) -> CGImage {
++    return makeSolidMask(width: width, height: height, alpha: 1)
++  }
++
++  private func makeTransparentMask(width: CGFloat, height: CGFloat) -> CGImage {
++    return makeSolidMask(width: width, height: height, alpha: 0)
++  }
++
++  private func makeSolidMask(width: CGFloat, height: CGFloat, alpha: CGFloat) -> CGImage {
++    let colorSpace = CGColorSpaceCreateDeviceRGB()
++    let bitmapInfo = CGImageAlphaInfo.premultipliedLast.rawValue
++
++    guard let context = CGContext(
++      data: nil,
++      width: Int(max(width, 1)),
++      height: Int(max(height, 1)),
++      bitsPerComponent: 8,
++      bytesPerRow: 0,
++      space: colorSpace,
++      bitmapInfo: bitmapInfo
++    ) else {
++      return makeFallbackMask(width: width, height: height)
++    }
++
++    context.setFillColor(UIColor.black.withAlphaComponent(alpha).cgColor)
++    context.fill(CGRect(x: 0, y: 0, width: width, height: height))
++    return context.makeImage() ?? makeFallbackMask(width: width, height: height)
++  }
++
++  private func updateBackdropScaleIfNeeded(_ backdropLayer: CALayer) {
++    guard let window else {
++      return
++    }
++
++    let newScale = window.traitCollection.displayScale
++    let currentScale = backdropLayer.value(forKey: "scale") as? CGFloat
++    if currentScale != newScale {
++      backdropLayer.setValue(newScale, forKey: "scale")
++    }
++  }
++
++  private func interpolate(from: CGFloat, to: CGFloat, progress: CGFloat) -> CGFloat {
++    from + ((to - from) * progress)
++  }
++
++  private func memoriumRadiusEase(_ progress: CGFloat) -> CGFloat {
++    cubicBezierAtTime(progress: progress, p1x: 0.05, p1y: 0.9, p2x: 0.2, p2y: 1)
++  }
++
++  private func applyRadialMaskConfiguration() {
++    ensureStandardBlurConfiguration()
++
++    guard bounds.width > 0, bounds.height > 0 else {
++      layer.mask = nil
++      return
++    }
++
++    let opaqueRadius = max(currentAnimatedClearRadius + currentAnimatedFeather, 0)
++    if opaqueRadius <= 0 {
++      layer.mask = nil
++      return
++    }
++
++    let envelopeRadius = resolvedRadialMaskEnvelopeRadius(
++      clearRadius: currentAnimatedClearRadius,
++      feather: currentAnimatedFeather
++    )
++    configureRadialMaskLayer(envelopeRadius: envelopeRadius)
++
++    CATransaction.begin()
++    CATransaction.setDisableActions(true)
++    radialMaskLayer.colors = radialMaskColors()
++    radialMaskLayer.locations = radialMaskLocations(
++      clearRadius: currentAnimatedClearRadius,
++      feather: currentAnimatedFeather,
++      envelopeRadius: envelopeRadius
++    )
++    CATransaction.commit()
++    layer.mask = radialMaskLayer
++  }
++
++  private func startRadialMaskRevealAnimation(
++    durationMs: CGFloat,
++    delayMs: CGFloat,
++    fromRadius: CGFloat,
++    toRadius: CGFloat,
++    fromFeather: CGFloat,
++    toFeather: CGFloat
++  ) {
++    currentAnimatedClearRadius = fromRadius
++    currentAnimatedFeather = fromFeather
++    ensureStandardBlurConfiguration()
++
++    let envelopeRadius = resolvedRadialMaskEnvelopeRadius(
++      clearRadius: toRadius,
++      feather: toFeather
++    )
++    configureRadialMaskLayer(envelopeRadius: envelopeRadius)
++
++    let startLocations = radialMaskLocations(
++      clearRadius: fromRadius,
++      feather: fromFeather,
++      envelopeRadius: envelopeRadius
++    )
++    let endLocations = radialMaskLocations(
++      clearRadius: toRadius,
++      feather: toFeather,
++      envelopeRadius: envelopeRadius
++    )
++
++    CATransaction.begin()
++    CATransaction.setDisableActions(true)
++    radialMaskLayer.colors = radialMaskColors()
++    radialMaskLayer.locations = endLocations
++    layer.mask = radialMaskLayer
++    CATransaction.commit()
++
++    let revealAnimation = CABasicAnimation(keyPath: "locations")
++    revealAnimation.fromValue = startLocations
++    revealAnimation.toValue = endLocations
++    revealAnimation.beginTime = CACurrentMediaTime() + CFTimeInterval(max(delayMs, 0) / 1000)
++    revealAnimation.duration = CFTimeInterval(max(durationMs, 1) / 1000)
++    revealAnimation.timingFunction = CAMediaTimingFunction(
++      controlPoints: 0.05,
++      0.9,
++      0.2,
++      1
++    )
++    revealAnimation.fillMode = .both
++    revealAnimation.isRemovedOnCompletion = true
++    radialMaskLayer.add(revealAnimation, forKey: "radialRevealLocations")
++
++    radialClearRadius = toRadius
++    radialFeather = toFeather
++    currentAnimatedClearRadius = toRadius
++    currentAnimatedFeather = toFeather
++  }
++
++  private func ensureBaseConfiguration() -> NSObject? {
++    if effect == nil || appliedBlurStyle != currentBlurStyle {
++      effect = UIBlurEffect(style: currentBlurStyle)
++      appliedBlurStyle = currentBlurStyle
++      backdropLayerRef = nil
++    }
++
++    guard let variableBlur = ensureVariableBlurFilter(),
++          let backdropLayer = ensureBackdropLayer() else {
++      return nil
++    }
++
++    if let filters = backdropLayer.filters as? [NSObject], filters.first !== variableBlur {
++      backdropLayer.filters = [variableBlur]
++    } else if backdropLayer.filters == nil {
++      backdropLayer.filters = [variableBlur]
++    }
++
++    updateBackdropScaleIfNeeded(backdropLayer)
++
++    for subview in subviews.dropFirst() {
++      if subview.alpha != 0 {
++        subview.alpha = 0
++      }
++    }
++
++    return variableBlur
++  }
++
++  private func ensureStandardBlurConfiguration() {
++    if effect == nil || appliedBlurStyle != currentBlurStyle {
++      effect = UIBlurEffect(style: currentBlurStyle)
++      appliedBlurStyle = currentBlurStyle
++      backdropLayerRef = nil
++    }
++
++    if let backdropLayer = ensureBackdropLayer() {
++      if let filters = backdropLayer.filters as? [NSObject],
++         let variableBlurFilter,
++         filters.contains(where: { $0 === variableBlurFilter }) {
++        backdropLayer.filters = nil
++      }
++
++      updateBackdropScaleIfNeeded(backdropLayer)
++    }
++
++    for subview in subviews.dropFirst() {
++      if subview.alpha != 0 {
++        subview.alpha = 0
++      }
++    }
++  }
++
++  private func configureRadialMaskLayer(envelopeRadius: CGFloat) {
++    let safeEnvelopeRadius = max(envelopeRadius, 1)
++    let diameter = safeEnvelopeRadius * 2
++    let originPoint = CGPoint(
++      x: min(max(radialCenterX, 0), 1) * bounds.width,
++      y: min(max(radialCenterY, 0), 1) * bounds.height
++    )
++
++    CATransaction.begin()
++    CATransaction.setDisableActions(true)
++    radialMaskLayer.type = .radial
++    radialMaskLayer.startPoint = CGPoint(x: 0.5, y: 0.5)
++    radialMaskLayer.endPoint = CGPoint(x: 1, y: 0.5)
++    radialMaskLayer.bounds = CGRect(x: 0, y: 0, width: diameter, height: diameter)
++    radialMaskLayer.position = originPoint
++    CATransaction.commit()
++  }
++
++  private func radialMaskColors() -> [CGColor] {
++    [
++      UIColor.clear.cgColor,
++      UIColor.clear.cgColor,
++      UIColor.black.cgColor
++    ]
++  }
++
++  private func radialMaskLocations(
++    clearRadius: CGFloat,
++    feather: CGFloat,
++    envelopeRadius: CGFloat
++  ) -> [NSNumber] {
++    let safeEnvelopeRadius = max(envelopeRadius, 1)
++    let safeClearRadius = max(clearRadius, 0)
++    let safeFeather = max(feather, 1)
++    let clearStop = min(max(safeClearRadius / safeEnvelopeRadius, 0), 1)
++    let opaqueStop = min(max((safeClearRadius + safeFeather) / safeEnvelopeRadius, clearStop), 1)
++
++    return [
++      0,
++      NSNumber(value: Double(clearStop)),
++      NSNumber(value: Double(opaqueStop))
++    ]
++  }
++
++  private func resolvedRadialMaskEnvelopeRadius(clearRadius: CGFloat, feather: CGFloat) -> CGFloat {
++    let farthestCorner = max(
++      hypot(bounds.width * radialCenterX, bounds.height * radialCenterY),
++      hypot(bounds.width - (bounds.width * radialCenterX), bounds.height * radialCenterY),
++      hypot(bounds.width * radialCenterX, bounds.height - (bounds.height * radialCenterY)),
++      hypot(bounds.width - (bounds.width * radialCenterX), bounds.height - (bounds.height * radialCenterY))
++    )
++
++    return max(clearRadius + feather, farthestCorner + max(feather, 1), 1)
++  }
++
++  private func updateFilterMaskAndRadius(_ variableBlur: NSObject, forceMaskRefresh: Bool) {
++    if lastAppliedBlurRadius != maxBlurRadius {
++      variableBlur.setValue(maxBlurRadius, forKey: "inputRadius")
++      lastAppliedBlurRadius = maxBlurRadius
++    }
++
++    let shouldRefreshMask = forceMaskRefresh
++      || lastRenderedClearRadius != currentAnimatedClearRadius
++      || lastRenderedFeather != currentAnimatedFeather
++
++    guard shouldRefreshMask else {
++      return
++    }
++
++    let maskCanvasSize = makeMaskCanvasSize()
++    let gradientImage = makeGradientImage(
++      width: maskCanvasSize.width,
++      height: maskCanvasSize.height,
++      startOffset: startOffset,
++      direction: direction
++    )
++
++    variableBlur.setValue(gradientImage, forKey: "inputMaskImage")
++    variableBlur.setValue(true, forKey: "inputNormalizeEdges")
++    lastRenderedClearRadius = currentAnimatedClearRadius
++    lastRenderedFeather = currentAnimatedFeather
++  }
++
++  private func ensureMaskContext(width: CGFloat, height: CGFloat) -> CGContext? {
++    let targetSize = CGSize(width: width, height: height)
++    if let cachedMaskContext, cachedMaskCanvasSize == targetSize {
++      return cachedMaskContext
++    }
++
++    let colorSpace = CGColorSpaceCreateDeviceRGB()
++    let bitmapInfo = CGImageAlphaInfo.premultipliedLast.rawValue
++    let context = CGContext(
++      data: nil,
++      width: Int(max(width, 1)),
++      height: Int(max(height, 1)),
++      bitsPerComponent: 8,
++      bytesPerRow: 0,
++      space: colorSpace,
++      bitmapInfo: bitmapInfo
++    )
++
++    cachedMaskContext = context
++    cachedMaskCanvasSize = targetSize
++    return context
++  }
++
++  private func ensureRadialGradient() -> CGGradient? {
++    if let cachedRadialGradient {
++      return cachedRadialGradient
++    }
++
++    let colorSpace = CGColorSpaceCreateDeviceRGB()
++    let colors = [
++      UIColor.clear.cgColor,
++      UIColor.black.cgColor
++    ] as CFArray
++    let locations: [CGFloat] = [0, 1]
++    let gradient = CGGradient(
++      colorsSpace: colorSpace,
++      colors: colors,
++      locations: locations
++    )
++    cachedRadialGradient = gradient
++    return gradient
++  }
++
++  private func invalidateMaskResources() {
++    cachedMaskContext = nil
++    cachedMaskCanvasSize = .zero
++    lastRenderedClearRadius = nil
++    lastRenderedFeather = nil
++  }
++
++  private func cubicBezierAtTime(
++    progress: CGFloat,
++    p1x: CGFloat,
++    p1y: CGFloat,
++    p2x: CGFloat,
++    p2y: CGFloat
++  ) -> CGFloat {
++    let cx = 3 * p1x
++    let bx = 3 * (p2x - p1x) - cx
++    let ax = 1 - cx - bx
++    let cy = 3 * p1y
++    let by = 3 * (p2y - p1y) - cy
++    let ay = 1 - cy - by
++
++    func sampleCurveX(_ t: CGFloat) -> CGFloat {
++      ((ax * t + bx) * t + cx) * t
++    }
++
++    func sampleCurveY(_ t: CGFloat) -> CGFloat {
++      ((ay * t + by) * t + cy) * t
++    }
++
++    func sampleCurveDerivativeX(_ t: CGFloat) -> CGFloat {
++      (3 * ax * t + 2 * bx) * t + cx
++    }
++
++    var t = min(max(progress, 0), 1)
++    for _ in 0..<8 {
++      let currentSlope = sampleCurveDerivativeX(t)
++      if abs(currentSlope) < 0.000001 {
++        break
++      }
++
++      let currentX = sampleCurveX(t) - progress
++      t -= currentX / currentSlope
++    }
++
++    return sampleCurveY(min(max(t, 0), 1))
++  }
++
++  deinit {
++    stopRevealAnimation()
+   }
+ }
+diff -ruN /tmp/package/lib/module/ReactNativeProgressiveBlurViewNativeComponent.ts node_modules/@sbaiahmed1/react-native-blur/lib/module/ReactNativeProgressiveBlurViewNativeComponent.ts
+--- a/node_modules/@sbaiahmed1/react-native-blur/lib/module/ReactNativeProgressiveBlurViewNativeComponent.ts	1985-10-26 04:15:00
++++ b/node_modules/@sbaiahmed1/react-native-blur/lib/module/ReactNativeProgressiveBlurViewNativeComponent.ts	2026-03-06 18:35:42
+@@ -38,6 +38,18 @@
+   blurType?: WithDefault<BlurType, 'regular'>;
+   direction?: WithDefault<ProgressiveBlurDirection, 'blurredTopClearBottom'>;
+   startOffset?: WithDefault<Double, 0.0>;
++  radial?: WithDefault<boolean, false>;
++  radialCenterX?: WithDefault<Double, 0.5>;
++  radialCenterY?: WithDefault<Double, 0.5>;
++  radialClearRadius?: WithDefault<Double, 0.0>;
++  radialFeather?: WithDefault<Double, 120.0>;
++  revealTrigger?: WithDefault<Double, 0.0>;
++  animationDuration?: WithDefault<Double, 20000.0>;
++  animationDelay?: WithDefault<Double, 200.0>;
++  startRadius?: WithDefault<Double, 0.0>;
++  endRadius?: WithDefault<Double, 1000.0>;
++  featherStart?: WithDefault<Double, 120.0>;
++  featherEnd?: WithDefault<Double, 160.0>;
+   reducedTransparencyFallbackColor?: WithDefault<string, '#FFFFFF'>;
+ }
+ 
+diff -ruN /tmp/package/lib/typescript/src/ReactNativeProgressiveBlurViewNativeComponent.d.ts node_modules/@sbaiahmed1/react-native-blur/lib/typescript/src/ReactNativeProgressiveBlurViewNativeComponent.d.ts
+--- a/node_modules/@sbaiahmed1/react-native-blur/lib/typescript/src/ReactNativeProgressiveBlurViewNativeComponent.d.ts	1985-10-26 04:15:00
++++ b/node_modules/@sbaiahmed1/react-native-blur/lib/typescript/src/ReactNativeProgressiveBlurViewNativeComponent.d.ts	2026-03-06 18:35:49
+@@ -7,8 +7,20 @@
+     blurType?: WithDefault<BlurType, 'regular'>;
+     direction?: WithDefault<ProgressiveBlurDirection, 'blurredTopClearBottom'>;
+     startOffset?: WithDefault<Double, 0.0>;
++    radial?: WithDefault<boolean, false>;
++    radialCenterX?: WithDefault<Double, 0.5>;
++    radialCenterY?: WithDefault<Double, 0.5>;
++    radialClearRadius?: WithDefault<Double, 0.0>;
++    radialFeather?: WithDefault<Double, 120.0>;
++    revealTrigger?: WithDefault<Double, 0.0>;
++    animationDuration?: WithDefault<Double, 20000.0>;
++    animationDelay?: WithDefault<Double, 200.0>;
++    startRadius?: WithDefault<Double, 0.0>;
++    endRadius?: WithDefault<Double, 1000.0>;
++    featherStart?: WithDefault<Double, 120.0>;
++    featherEnd?: WithDefault<Double, 160.0>;
+     reducedTransparencyFallbackColor?: WithDefault<string, '#FFFFFF'>;
+ }
+ declare const _default: import("react-native/Libraries/Utilities/codegenNativeComponent").NativeComponentType<NativeProps>;
+ export default _default;
+-//# sourceMappingURL=ReactNativeProgressiveBlurViewNativeComponent.d.ts.map
+\ No newline at end of file
++//# sourceMappingURL=ReactNativeProgressiveBlurViewNativeComponent.d.ts.map
+diff -ruN /tmp/package/src/ReactNativeProgressiveBlurViewNativeComponent.ts node_modules/@sbaiahmed1/react-native-blur/src/ReactNativeProgressiveBlurViewNativeComponent.ts
+--- a/node_modules/@sbaiahmed1/react-native-blur/src/ReactNativeProgressiveBlurViewNativeComponent.ts	1985-10-26 04:15:00
++++ b/node_modules/@sbaiahmed1/react-native-blur/src/ReactNativeProgressiveBlurViewNativeComponent.ts	2026-03-06 17:17:19
+@@ -38,6 +38,18 @@
+   blurType?: WithDefault<BlurType, 'regular'>;
+   direction?: WithDefault<ProgressiveBlurDirection, 'blurredTopClearBottom'>;
+   startOffset?: WithDefault<Double, 0.0>;
++  radial?: WithDefault<boolean, false>;
++  radialCenterX?: WithDefault<Double, 0.5>;
++  radialCenterY?: WithDefault<Double, 0.5>;
++  radialClearRadius?: WithDefault<Double, 0.0>;
++  radialFeather?: WithDefault<Double, 120.0>;
++  revealTrigger?: WithDefault<Double, 0.0>;
++  animationDuration?: WithDefault<Double, 20000.0>;
++  animationDelay?: WithDefault<Double, 200.0>;
++  startRadius?: WithDefault<Double, 0.0>;
++  endRadius?: WithDefault<Double, 1000.0>;
++  featherStart?: WithDefault<Double, 120.0>;
++  featherEnd?: WithDefault<Double, 160.0>;
+   reducedTransparencyFallbackColor?: WithDefault<string, '#FFFFFF'>;
+ }
+ 

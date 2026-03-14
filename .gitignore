@@ -1,0 +1,59 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env
+.env.*
+!.env.example
+.env*.local
+
+# local planning and notes
+Agents.md
+FuelApiAggregation.md
+maxDelta
+
+# local build outputs and archives
+build/
+*.ipa
+*.cer
+*.tgz
+/Red_car_drives_quickly_frame_delpmaspu_.mp4
+/assets/red_car_drives.mp4
+/image copy.png
+/image copy Background Removed.png
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios
+/android

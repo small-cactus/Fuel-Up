@@ -1,0 +1,8 @@
+{
+  "platforms": ["apple"],
+  "apple": {
+    "modules": ["FuelUpMapKitRoutingModule"],
+    "podspecPath": "ios/FuelUpMapKitRouting.podspec",
+    "swiftModuleName": "FuelUpMapKitRouting"
+  }
+}
