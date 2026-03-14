@@ -758,6 +758,11 @@ function getFuelFailureMessage({ reason, debugState } = {}) {
     }
 
     const hasLocationIssue = enabledProviders.some(provider => provider.failureCategory === 'location');
+    const hasLiveFetchPolicyBlock = enabledProviders.some(provider => provider.failureCategory === 'policy');
+
+    if (hasLiveFetchPolicyBlock) {
+        return 'No cached nearby GasBuddy prices are available yet. Try again after the next hourly refresh.';
+    }
 
     if (hasLocationIssue) {
         return 'The selected location did not return nearby gas stations. Check the coordinates being sent to the API.';

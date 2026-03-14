@@ -1902,10 +1902,6 @@ export default function HomeScreen() {
             hasVisibleFuelState: hasVisibleFuelStateRef.current,
             pendingRefitRequest: pendingHomeRefitRequest,
         });
-        const shouldForceLiveGasBuddyRefresh = (
-            preferredProvider === 'gasbuddy' &&
-            homeFuelSnapshotStrategy.shouldForceLiveRefresh
-        );
         const baseDebugState = {
             input: {
                 ...query,
@@ -1956,7 +1952,6 @@ export default function HomeScreen() {
 
             const result = await refreshFuelPriceSnapshot({
                 ...query,
-                forceLiveGasBuddy: shouldForceLiveGasBuddyRefresh,
             });
             const freshSnapshot = result?.snapshot;
             const nextDebugState = result?.debugState

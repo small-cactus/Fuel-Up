@@ -356,14 +356,13 @@ test('home auto-fit keeps initial-load behavior on fresh data only', () => {
     });
 });
 
-test('home fuel snapshot strategy only allows cached bootstrap for regular loads without a pending filter change', () => {
+test('home fuel snapshot strategy only controls cached bootstrap eligibility', () => {
     assert.deepEqual(resolveHomeFuelSnapshotStrategy({
         preferCached: true,
         fuelGrade: 'regular',
         hasVisibleFuelState: false,
         pendingRefitRequest: null,
     }), {
-        shouldForceLiveRefresh: true,
         useCachedSnapshot: true,
     });
 
@@ -373,7 +372,6 @@ test('home fuel snapshot strategy only allows cached bootstrap for regular loads
         hasVisibleFuelState: false,
         pendingRefitRequest: null,
     }), {
-        shouldForceLiveRefresh: true,
         useCachedSnapshot: false,
     });
 
@@ -385,7 +383,6 @@ test('home fuel snapshot strategy only allows cached bootstrap for regular loads
             reason: 'filter-change',
         },
     }), {
-        shouldForceLiveRefresh: true,
         useCachedSnapshot: false,
     });
 
@@ -397,7 +394,6 @@ test('home fuel snapshot strategy only allows cached bootstrap for regular loads
             reason: 'location-refresh',
         },
     }), {
-        shouldForceLiveRefresh: false,
         useCachedSnapshot: true,
     });
 });

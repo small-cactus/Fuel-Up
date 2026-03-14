@@ -77,8 +77,8 @@ private func mapItem(from payload: [String: Any]) throws -> MKMapItem {
     throw MissingCoordinateFieldException()
   }
 
-  let location = CLLocation(latitude: latitude, longitude: longitude)
-  return MKMapItem(location: location, address: nil)
+  let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+  return MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
 }
 
 private func coordinatesPayload(from polyline: MKPolyline) -> [[String: CLLocationDegrees]] {

@@ -125,6 +125,7 @@ test('clearFuelPriceCache prevents in-flight requests from repopulating cached f
             longitude: -122.009,
             radiusMiles: 10,
             fuelType: 'regular',
+            allowLiveGasBuddy: true,
             preferredProvider: 'gasbuddy',
             forceLiveGasBuddy: true,
         };
@@ -189,6 +190,94 @@ test('clearFuelPriceCache prevents in-flight requests from repopulating cached f
         global.fetch = originalFetch;
         global.__DEV__ = originalDevFlag;
         console.error = originalConsoleError;
+        delete require.cache[fuelServicePath];
+        delete require.cache[cacheStorePath];
+        delete require.cache[asyncStoragePath];
+        delete require.cache[devCounterPath];
+        delete require.cache[supabasePath];
+    }
+});
+
+test('refreshFuelPriceSnapshot does not call live GasBuddy without an explicit live opt-in', async () => {
+    const asyncStorageMock = createAsyncStorageMock();
+    const asyncStoragePath = require.resolve('@react-native-async-storage/async-storage');
+    const devCounterPath = require.resolve('../src/lib/devCounter.js');
+    const supabasePath = require.resolve('../src/lib/supabase.js');
+    const fuelServicePath = require.resolve('../src/services/fuel/index.js');
+    const cacheStorePath = require.resolve('../src/services/fuel/cacheStore.js');
+
+    delete require.cache[fuelServicePath];
+    delete require.cache[cacheStorePath];
+    delete require.cache[asyncStoragePath];
+    delete require.cache[devCounterPath];
+    delete require.cache[supabasePath];
+
+    primeModule(asyncStoragePath, {
+        default: asyncStorageMock.module,
+    });
+    primeModule(devCounterPath, {
+        getApiStats: async () => ({}),
+        incrementApiStat: () => { },
+        resetApiStats: async () => ({}),
+    });
+    primeModule(supabasePath, {
+        hasSupabaseConfig: true,
+        supabase: {
+            from(tableName) {
+                assert.equal(tableName, 'station_prices');
+
+                return {
+                    select() {
+                        return this;
+                    },
+                    eq() {
+                        return this;
+                    },
+                    gte() {
+                        return Promise.resolve({
+                            data: [],
+                            error: null,
+                        });
+                    },
+                };
+            },
+        },
+    });
+
+    const originalFetch = global.fetch;
+    const originalDevFlag = global.__DEV__;
+    let fetchCalled = false;
+
+    global.__DEV__ = false;
+    global.fetch = async () => {
+        fetchCalled = true;
+        throw new Error('Live GasBuddy fetch should not run');
+    };
+
+    try {
+        const { refreshFuelPriceSnapshot } = require(fuelServicePath);
+
+        await assert.rejects(
+            refreshFuelPriceSnapshot({
+                latitude: 37.3346,
+                longitude: -122.009,
+                radiusMiles: 10,
+                fuelType: 'regular',
+                preferredProvider: 'gasbuddy',
+            }),
+            error => {
+                assert.equal(
+                    error?.userMessage,
+                    'No cached nearby GasBuddy prices are available yet. Try again after the next hourly refresh.'
+                );
+                return true;
+            }
+        );
+
+        assert.equal(fetchCalled, false);
+    } finally {
+        global.fetch = originalFetch;
+        global.__DEV__ = originalDevFlag;
         delete require.cache[fuelServicePath];
         delete require.cache[cacheStorePath];
         delete require.cache[asyncStoragePath];
@@ -336,6 +425,7 @@ test('refreshFuelPriceSnapshot persists the validated live price instead of the 
             longitude: -122.0090,
             radiusMiles: 10,
             fuelType: 'regular',
+            allowLiveGasBuddy: true,
             preferredProvider: 'gasbuddy',
             forceLiveGasBuddy: true,
         });
@@ -486,6 +576,7 @@ test('refreshFuelPriceSnapshot rejects live uniform multi-grade stations for non
                 longitude: -122.0090,
                 radiusMiles: 10,
                 fuelType: 'premium',
+                allowLiveGasBuddy: true,
                 preferredProvider: 'gasbuddy',
                 forceLiveGasBuddy: true,
             }),
@@ -634,6 +725,7 @@ test('refreshFuelPriceSnapshot suppresses duplicate higher grades in live statio
             longitude: -122.0090,
             radiusMiles: 10,
             fuelType: 'regular',
+            allowLiveGasBuddy: true,
             preferredProvider: 'gasbuddy',
             forceLiveGasBuddy: true,
         });
@@ -794,6 +886,7 @@ test('refreshFuelPriceSnapshot rejects live duplicate grades when the requested 
                 longitude: -122.0090,
                 radiusMiles: 10,
                 fuelType: 'midgrade',
+                allowLiveGasBuddy: true,
                 preferredProvider: 'gasbuddy',
                 forceLiveGasBuddy: true,
             }),

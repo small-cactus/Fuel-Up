@@ -1417,7 +1417,7 @@ async function fetchFredQuote({ latitude, longitude, fuelType, config }) {
     }
 }
 
-async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, forceLive = false }) {
+async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, forceLive = false, allowLive = false }) {
     const debugEntry = createDebugEntry('gasbuddy', 'station', true);
     const origin = { latitude, longitude };
     const searchLat = Math.round(latitude * 10) / 10;
@@ -1504,6 +1504,20 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, force
         }
     } catch (err) {
         console.error('Supabase caching check failed:', err);
+    }
+
+    if (!allowLive) {
+        debugEntry.failureCategory = 'policy';
+        debugEntry.summary.liveFetchSkipped = true;
+        debugEntry.requests.push(
+            createDebugRequest({
+                step: 'graphql',
+                url: 'https://www.gasbuddy.com/graphql',
+                status: 200,
+                output: 'Skipped: live GasBuddy fetch is disabled unless explicitly allowed by the hourly/dev path.',
+            })
+        );
+        return { debugEntry, quotes: [] };
     }
 
     const requestConfig = buildGasBuddyGraphQLRequest({
@@ -1768,7 +1782,16 @@ async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fu
     }, fuelType);
 }
 
-async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMiles, fuelType, preferredProvider, forceLiveGasBuddy = false }) {
+async function refreshFuelPriceSnapshot({
+    latitude,
+    longitude,
+    zipCode,
+    radiusMiles,
+    fuelType,
+    preferredProvider,
+    forceLiveGasBuddy = false,
+    allowLiveGasBuddy = false,
+}) {
     const config = getFuelServiceConfig();
     const normalizedFuelType = fuelType || config.defaultFuelType;
     const normalizedRadius = radiusMiles || config.defaultRadiusMiles;
@@ -1807,7 +1830,8 @@ async function refreshFuelPriceSnapshot({ latitude, longitude, zipCode, radiusMi
                     longitude,
                     fuelType: normalizedFuelType,
                     config,
-                    forceLive: forceLiveGasBuddy,
+                    allowLive: allowLiveGasBuddy,
+                    forceLive: allowLiveGasBuddy && forceLiveGasBuddy,
                 }),
             ]
             : [

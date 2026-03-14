@@ -76,6 +76,7 @@ export default function DevStatsScreen() {
                 longitude: coords.longitude,
                 radiusMiles: preferences.searchRadiusMiles || 10,
                 fuelType: preferences.preferredOctane || 'regular',
+                allowLiveGasBuddy: true,
                 preferredProvider: 'gasbuddy',
                 forceLiveGasBuddy: true,
             };

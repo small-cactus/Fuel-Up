@@ -399,7 +399,6 @@ export function resolveHomeFuelSnapshotStrategy({
     );
 
     return {
-        shouldForceLiveRefresh: !useCachedSnapshot || !hasVisibleFuelState,
         useCachedSnapshot,
     };
 }

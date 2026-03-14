@@ -8,6 +8,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios --device 00008150-001470C22220401C",
     "ios:sim": "expo start --ios",
+    "push:send": "node ./scripts/sendPushNotification.cjs",
     "route:probe": "swift ./scripts/predictiveRouteProbe.swift",
     "web": "expo start --web",
     "test": "node --test ./tests/fuelDataContracts.test.cjs ./tests/fuelCacheReset.test.cjs ./tests/trendData.test.cjs ./tests/priceValidation.test.cjs ./tests/fuelGradeValidation.test.mjs ./tests/homeLaunch.test.mjs ./tests/homeState.test.mjs ./tests/clusterMarkerOverlayMemo.test.mjs ./tests/predictiveFuelingDemo.test.cjs",
