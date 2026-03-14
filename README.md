@@ -23,10 +23,6 @@
   <img alt="iOS First" src="https://img.shields.io/badge/Platform-iOS%20First-3A3A3C?logo=apple&logoColor=white" />
 </p>
 
-<p align="center">
-  <img src="./assets/predictive-fueling.png" alt="Fuel Up predictive fueling artwork" width="100%" />
-</p>
-
 ## Quick Start
 
 ### Prerequisites
