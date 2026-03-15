@@ -24,7 +24,7 @@
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.9.8",
     "@react-navigation/native": "^7.1.8",
-    "@sbaiahmed1/react-native-blur": "^4.5.7",
+    "@sbaiahmed1/react-native-blur": "^4.6.0",
     "@shopify/react-native-skia": "^2.5.1",
     "@supabase/supabase-js": "^2.98.0",
     "d3-path": "^3.1.0",
