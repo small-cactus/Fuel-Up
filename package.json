@@ -21,7 +21,7 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/slider": "5.1.2",
     "@react-native-masked-view/masked-view": "0.3.2",
-    "@react-navigation/bottom-tabs": "^7.4.0",
+    "@react-navigation/bottom-tabs": "^7.15.5",
     "@react-navigation/elements": "^2.9.8",
     "@react-navigation/native": "^7.1.8",
     "@sbaiahmed1/react-native-blur": "^4.5.7",
