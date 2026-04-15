@@ -45,7 +45,8 @@
           ]
         }
       ],
-      "expo-video"
+      "expo-video",
+      "expo-router"
     ],
     "orientation": "portrait",
     "icon": "./assets/fuelup-icon.png",
