@@ -169,6 +169,37 @@ function formatTrendDeltaPercent(delta, baselinePrice) {
     return `${prefix}${percentChange.toFixed(1)}%`;
 }
 
+function formatTrendAxisLabel(dateValue, rangeStartValue, rangeEndValue) {
+    const date = new Date(dateValue);
+    const rangeStart = new Date(rangeStartValue);
+    const rangeEnd = new Date(rangeEndValue);
+
+    if (
+        !Number.isFinite(date.getTime()) ||
+        !Number.isFinite(rangeStart.getTime()) ||
+        !Number.isFinite(rangeEnd.getTime())
+    ) {
+        return '—';
+    }
+
+    const isSingleDayRange = (
+        date.toDateString() === rangeStart.toDateString() &&
+        rangeStart.toDateString() === rangeEnd.toDateString()
+    );
+
+    if (isSingleDayRange) {
+        return date.toLocaleTimeString(undefined, {
+            hour: 'numeric',
+            minute: '2-digit',
+        });
+    }
+
+    return date.toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+    });
+}
+
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -705,14 +736,32 @@ export default function TrendsScreen() {
         ? getLastResolvedTrendData(currentTrendRequestKey)
         : null;
     const realDisplayTrendData = resolvedTrendData || fallbackResolvedTrendData || null;
-    const displayTrendData = realDisplayTrendData || (loading ? mockTrendData : null);
+    const displayTrendData = realDisplayTrendData;
+    const hasRealHeroTrendData = Boolean(realDisplayTrendData?.averagePricesByDay?.length > 1);
+    const heroTrendData = hasRealHeroTrendData
+        ? realDisplayTrendData
+        : mockTrendData;
+    const isHeroPreview = !hasRealHeroTrendData;
     const gradientSourceData = realDisplayTrendData || null;
-    const todayTrendDirection = useMemo(
-        () => getTrendDirectionFromData(displayTrendData),
-        [displayTrendData]
+    const heroTrendDirection = useMemo(
+        () => getTrendDirectionFromData(heroTrendData),
+        [heroTrendData]
     );
-    // Keep the chart stroke/fill aligned with the day-over-day background signal.
-    const primaryTrendColor = todayTrendDirection === 'lower' ? COLORS.GREEN : COLORS.RED;
+    const primaryTrendColor = useMemo(() => {
+        if (isHeroPreview) {
+            return isDark ? 'rgba(255,255,255,0.82)' : 'rgba(15,23,42,0.82)';
+        }
+
+        if (heroTrendDirection === 'lower') {
+            return COLORS.GREEN;
+        }
+
+        if (heroTrendDirection === 'higher') {
+            return COLORS.RED;
+        }
+
+        return themeColors.text;
+    }, [heroTrendDirection, isDark, isHeroPreview, themeColors.text]);
     const targetGradientColors = useMemo(() => (
         buildTrendBackgroundGradientColors({
             direction: getTrendDirectionFromData(gradientSourceData),
@@ -762,15 +811,15 @@ export default function TrendsScreen() {
         [displayTrendData?.leaderboardLastChangedAt]
     );
     const heroDeltaLabel = useMemo(() => {
-        if (!realDisplayTrendData?.overallTrend || realDisplayTrendData.averagePricesByDay.length < 2) {
+        if (!heroTrendData?.overallTrend || heroTrendData.averagePricesByDay.length < 2) {
             return null;
         }
 
         return formatTrendDeltaPercent(
-            realDisplayTrendData.overallTrend.delta,
-            realDisplayTrendData.averagePricesByDay[0]?.price
+            heroTrendData.overallTrend.delta,
+            heroTrendData.averagePricesByDay[0]?.price
         );
-    }, [realDisplayTrendData]);
+    }, [heroTrendData]);
     const darkModeWeightStyle = useMemo(() => ({
         heroSub: { fontWeight: isDark ? '600' : '700' },
         heroPrice: { fontWeight: isDark ? '700' : '800' },
@@ -830,24 +879,31 @@ export default function TrendsScreen() {
                 >
                     <View style={styles.contentWrap}>
                             {/* 1. Containerless Area Chart (Bleeding Edges) */}
-                            {realDisplayTrendData?.averagePricesByDay?.length > 1 ? (
+                            {heroTrendData?.averagePricesByDay?.length > 1 ? (
                                 <View style={styles.heroGraphSection}>
                                     <View style={styles.heroGraphPad}>
                                         <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>
-                                            Your {selectedFuelGradeMeta.label} Local Average
+                                            {isHeroPreview
+                                                ? `${selectedFuelGradeMeta.label} Trend Preview`
+                                                : `Your ${selectedFuelGradeMeta.label} Local Average`}
                                         </Text>
                                         <View style={styles.heroPriceRow}>
                                             <Text style={[styles.heroPrice, numericTextStyle, darkModeWeightStyle.heroPrice, { color: themeColors.text }]}>
-                                                ${realDisplayTrendData.averagePricesByDay[realDisplayTrendData.averagePricesByDay.length - 1].price.toFixed(2)}
+                                                ${heroTrendData.averagePricesByDay[heroTrendData.averagePricesByDay.length - 1].price.toFixed(2)}
                                             </Text>
                                             <Text style={[styles.heroDelta, numericTextStyle, darkModeWeightStyle.heroDelta, { color: primaryTrendColor }]}>
                                                 {heroDeltaLabel}
                                             </Text>
                                         </View>
+                                        {isHeroPreview ? (
+                                            <Text style={[styles.heroPreviewText, darkModeWeightStyle.itemSub, { color: themeColors.textOpacity }]}>
+                                                We&apos;re still collecting enough local history to replace this preview with live trend data.
+                                            </Text>
+                                        ) : null}
                                     </View>
 
                                     <ContainerlessAreaChart
-                                        data={realDisplayTrendData.averagePricesByDay}
+                                        data={heroTrendData.averagePricesByDay}
                                         width={SCREEN_WIDTH}
                                         height={CHART_HEIGHT}
                                         isDark={isDark}
@@ -856,10 +912,18 @@ export default function TrendsScreen() {
 
                                     <View style={styles.heroAxis}>
                                         <Text style={[styles.axisText, numericTextStyle, darkModeWeightStyle.axisText, { color: themeColors.textOpacity }]}>
-                                            {new Date(realDisplayTrendData.averagePricesByDay[0].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                            {formatTrendAxisLabel(
+                                                heroTrendData.averagePricesByDay[0].date,
+                                                heroTrendData.averagePricesByDay[0].date,
+                                                heroTrendData.averagePricesByDay[heroTrendData.averagePricesByDay.length - 1].date
+                                            )}
                                         </Text>
                                         <Text style={[styles.axisText, numericTextStyle, darkModeWeightStyle.axisText, { color: themeColors.textOpacity }]}>
-                                            {new Date(realDisplayTrendData.averagePricesByDay[realDisplayTrendData.averagePricesByDay.length - 1].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                            {formatTrendAxisLabel(
+                                                heroTrendData.averagePricesByDay[heroTrendData.averagePricesByDay.length - 1].date,
+                                                heroTrendData.averagePricesByDay[0].date,
+                                                heroTrendData.averagePricesByDay[heroTrendData.averagePricesByDay.length - 1].date
+                                            )}
                                         </Text>
                                     </View>
                                 </View>
@@ -1117,6 +1181,12 @@ const styles = StyleSheet.create({
         width: 72,
         height: 20,
         borderRadius: 10,
+    },
+    heroPreviewText: {
+        marginTop: 8,
+        fontSize: 13,
+        lineHeight: 18,
+        letterSpacing: -0.2,
     },
     heroChartPlaceholderWrap: {
         width: '100%',

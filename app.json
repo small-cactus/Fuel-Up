@@ -78,7 +78,10 @@
       "infoPlist": {
         "NSMotionUsageDescription": "Fuel Up uses motion signals to understand when you are driving toward a likely fuel stop.",
         "ITSAppUsesNonExemptEncryption": false,
-        "CADisableMinimumFrameDurationOnPhone": true
+        "CADisableMinimumFrameDurationOnPhone": true,
+        "LSApplicationQueriesSchemes": [
+          "comgooglemaps"
+        ]
       }
     },
     "android": {

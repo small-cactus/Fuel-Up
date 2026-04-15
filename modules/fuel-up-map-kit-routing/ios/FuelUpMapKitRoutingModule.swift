@@ -33,6 +33,26 @@ public final class FuelUpMapKitRoutingModule: Module {
   public func definition() -> ModuleDefinition {
     Name("FuelUpMapKitRouting")
 
+    AsyncFunction("openDrivingDirectionsInMapsAsync") { (destination: [String: Any], promise: Promise) in
+      DispatchQueue.main.async {
+        do {
+          let destinationItem = try mapItem(from: destination)
+          let didOpen = destinationItem.openInMaps(launchOptions: [
+            MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
+          ])
+
+          if didOpen {
+            promise.resolve(["opened": true])
+            return
+          }
+
+          promise.reject(RouteUnavailableException("Maps app declined the destination handoff."))
+        } catch {
+          promise.reject(error)
+        }
+      }
+    }
+
     AsyncFunction("getDrivingRouteAsync") { (origin: [String: Any], destination: [String: Any], promise: Promise) in
       DispatchQueue.main.async {
         do {
@@ -78,7 +98,17 @@ private func mapItem(from payload: [String: Any]) throws -> MKMapItem {
   }
 
   let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-  return MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
+  let placemark = MKPlacemark(coordinate: coordinate)
+  let mapItem = MKMapItem(placemark: placemark)
+
+  if let name = payload["name"] as? String {
+    let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    if !trimmedName.isEmpty {
+      mapItem.name = trimmedName
+    }
+  }
+
+  return mapItem
 }
 
 private func coordinatesPayload(from polyline: MKPolyline) -> [[String: CLLocationDegrees]] {

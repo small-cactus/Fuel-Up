@@ -12,6 +12,7 @@ const DEFAULT_PREFERENCES = {
     preferredOctane: 'regular', // 'regular' | 'midgrade' | 'premium' | 'diesel'
     preferredProvider: 'gasbuddy', // 'gasbuddy' | 'all'
     minimumRating: 0, // 0 = no filter
+    navigationApp: 'apple-maps', // 'apple-maps' | 'google-maps'
     debugClusterAnimations: false,
     excludedBrands: [],
     hasCompletedOnboarding: false,

@@ -30,11 +30,18 @@ const {
     processValidationRows,
     validateAndChoosePrice,
 } = require('./priceValidation');
+const {
+    annotateStationWithRouteContext,
+    isTrajectoryRouteUnavailableError,
+    resolveTrajectoryFetchPlanAsync,
+} = require('../../lib/trajectoryFuelFetch');
 
 const inflightRequests = new Map();
+const inflightTrajectoryRequests = new Map();
 const AREA_HISTORY_LOOKBACK_MS = 14 * 24 * 60 * 60 * 1000;
 const MAX_AREA_HISTORY_ROWS = 1500;
 const PRICE_VALIDATION_VERSION = 2;
+const TRAJECTORY_CACHE_PREFIX = 'fuel-trajectory:';
 const FUEL_CACHE_RESET_ERROR_CODE = 'FUEL_CACHE_RESET';
 const STANDARD_FUEL_TYPES = ['regular', 'midgrade', 'premium', 'diesel'];
 let fuelCacheGeneration = 0;
@@ -1417,7 +1424,7 @@ async function fetchFredQuote({ latitude, longitude, fuelType, config }) {
     }
 }
 
-async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, forceLive = false, allowLive = false }) {
+async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, forceLive = false }) {
     const debugEntry = createDebugEntry('gasbuddy', 'station', true);
     const origin = { latitude, longitude };
     const searchLat = Math.round(latitude * 10) / 10;
@@ -1506,19 +1513,13 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, force
         console.error('Supabase caching check failed:', err);
     }
 
-    if (!allowLive) {
-        debugEntry.failureCategory = 'policy';
-        debugEntry.summary.liveFetchSkipped = true;
-        debugEntry.requests.push(
-            createDebugRequest({
-                step: 'graphql',
-                url: 'https://www.gasbuddy.com/graphql',
-                status: 200,
-                output: 'Skipped: live GasBuddy fetch is disabled unless explicitly allowed by the hourly/dev path.',
-            })
-        );
-        return { debugEntry, quotes: [] };
-    }
+    // At this point the Supabase cache lookup returned no usable rows for the
+    // last hour at `searchLat, searchLng` (either empty, errored, or bypassed
+    // via `forceLive`). Fall through to a live GasBuddy GraphQL fetch so the
+    // user sees fresh prices instead of an empty screen. This is the
+    // "fallback-to-live" policy the app relies on for locations that have not
+    // been seeded by a backend scraper yet.
+    debugEntry.summary.liveFetchTrigger = forceLive ? 'force-live' : 'cache-miss';
 
     const requestConfig = buildGasBuddyGraphQLRequest({
         latitude,
@@ -1745,14 +1746,129 @@ async function fetchGasBuddyQuote({ latitude, longitude, fuelType, config, force
     }
 }
 
-function normalizeSnapshot({ quote, topStations, regionalQuotes, cacheKey }) {
+function normalizeSnapshot({ quote, topStations, regionalQuotes, cacheKey, trajectory = null }) {
     return {
         cacheKey,
         quote,
         topStations,
         regionalQuotes,
+        trajectory,
         fetchedAt: quote?.fetchedAt || new Date().toISOString(),
     };
+}
+
+function buildTrajectorySnapshotCacheKey({
+    latitude,
+    longitude,
+    radiusMiles,
+    fuelType,
+    preferredProvider,
+    courseDegrees,
+    speedMps,
+    lookaheadMeters,
+}) {
+    return [
+        TRAJECTORY_CACHE_PREFIX,
+        buildCacheKey({
+            latitude,
+            longitude,
+            radiusMiles,
+            fuelType,
+            preferredProvider,
+        }),
+        Math.round(Number(courseDegrees) || 0),
+        Math.round((Number(speedMps) || 0) * 10),
+        Math.round(Number(lookaheadMeters) || 0),
+    ].join('');
+}
+
+function cloneSerializable(value) {
+    return value == null ? value : JSON.parse(JSON.stringify(value));
+}
+
+function rebaseQuoteToOrigin(quote, origin) {
+    if (!quote) {
+        return null;
+    }
+
+    const normalizedQuote = cloneSerializable(quote);
+    normalizedQuote.distanceMiles = calculateDistanceMiles(origin, normalizedQuote);
+    return normalizedQuote;
+}
+
+function mergeTrajectorySnapshotResults({
+    origin,
+    baseSnapshot,
+    aheadSnapshot,
+    cacheKey,
+    trajectoryPlan,
+}) {
+    const stationQuotesByIdentity = new Map();
+    const regionalQuotesByIdentity = new Map();
+    const route = trajectoryPlan?.route || null;
+    const allStationQuotes = [
+        ...(Array.isArray(baseSnapshot?.topStations) ? baseSnapshot.topStations : []),
+        ...(Array.isArray(aheadSnapshot?.topStations) ? aheadSnapshot.topStations : []),
+    ]
+        .map(quote => rebaseQuoteToOrigin(quote, origin))
+        .map(quote => annotateStationWithRouteContext({ station: quote, route, origin }));
+    const allRegionalQuotes = [
+        ...(Array.isArray(baseSnapshot?.regionalQuotes) ? baseSnapshot.regionalQuotes : []),
+        ...(Array.isArray(aheadSnapshot?.regionalQuotes) ? aheadSnapshot.regionalQuotes : []),
+    ].map(quote => rebaseQuoteToOrigin(quote, origin));
+
+    allStationQuotes.forEach(quote => {
+        const identity = buildQuoteIdentity(quote);
+        const existingQuote = stationQuotesByIdentity.get(identity);
+        const quoteEffectivePrice = Number.isFinite(Number(quote?.effectivePrice))
+            ? Number(quote.effectivePrice)
+            : Number(quote?.price);
+        const existingEffectivePrice = Number.isFinite(Number(existingQuote?.effectivePrice))
+            ? Number(existingQuote.effectivePrice)
+            : Number(existingQuote?.price);
+
+        if (
+            !existingQuote ||
+            quoteEffectivePrice < existingEffectivePrice ||
+            (
+                quoteEffectivePrice === existingEffectivePrice &&
+                (quote.distanceMiles || Number.POSITIVE_INFINITY) < (existingQuote.distanceMiles || Number.POSITIVE_INFINITY)
+            )
+        ) {
+            stationQuotesByIdentity.set(identity, quote);
+        }
+    });
+
+    allRegionalQuotes.forEach(quote => {
+        const identity = buildQuoteIdentity(quote);
+        if (!regionalQuotesByIdentity.has(identity)) {
+            regionalQuotesByIdentity.set(identity, quote);
+        }
+    });
+
+    const topStations = Array.from(stationQuotesByIdentity.values())
+        .sort((left, right) => {
+            const leftEffectivePrice = Number.isFinite(Number(left?.effectivePrice)) ? Number(left.effectivePrice) : Number(left?.price);
+            const rightEffectivePrice = Number.isFinite(Number(right?.effectivePrice)) ? Number(right.effectivePrice) : Number(right?.price);
+            return leftEffectivePrice - rightEffectivePrice ||
+                left.distanceMiles - right.distanceMiles ||
+                left.price - right.price;
+        });
+    const regionalQuotes = Array.from(regionalQuotesByIdentity.values())
+        .sort((left, right) => left.price - right.price || left.distanceMiles - right.distanceMiles);
+    const quote = topStations[0] || null;
+
+    return normalizeSnapshot({
+        cacheKey,
+        quote: quote || annotateStationWithRouteContext({
+            station: rebaseQuoteToOrigin(baseSnapshot?.quote, origin) || rebaseQuoteToOrigin(aheadSnapshot?.quote, origin),
+            route,
+            origin,
+        }),
+        topStations,
+        regionalQuotes,
+        trajectory: trajectoryPlan,
+    });
 }
 
 async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fuelType, preferredProvider = 'gasbuddy' }) {
@@ -1790,6 +1906,11 @@ async function refreshFuelPriceSnapshot({
     fuelType,
     preferredProvider,
     forceLiveGasBuddy = false,
+    // `allowLiveGasBuddy` is accepted for backwards compatibility with the
+    // dev tab and any external callers that still pass it, but it is a
+    // no-op now: the cache-miss path inside `fetchGasBuddyQuote` always
+    // triggers a live fetch regardless of this flag.
+    // eslint-disable-next-line no-unused-vars
     allowLiveGasBuddy = false,
 }) {
     const config = getFuelServiceConfig();
@@ -1830,8 +1951,7 @@ async function refreshFuelPriceSnapshot({
                     longitude,
                     fuelType: normalizedFuelType,
                     config,
-                    allowLive: allowLiveGasBuddy,
-                    forceLive: allowLiveGasBuddy && forceLiveGasBuddy,
+                    forceLive: forceLiveGasBuddy,
                 }),
             ]
             : [
@@ -2012,10 +2132,192 @@ async function refreshFuelPriceSnapshot({
     return request;
 }
 
+async function refreshFuelPriceSnapshotAlongTrajectory({
+    latitude,
+    longitude,
+    courseDegrees,
+    speedMps,
+    radiusMiles,
+    fuelType,
+    preferredProvider,
+    routeProvider,
+    lookaheadMeters,
+    routeTargetMeters,
+    forceLiveGasBuddy = false,
+    allowLiveGasBuddy = false,
+    snapshotFetcher = refreshFuelPriceSnapshot,
+    cacheWriter = setCachedEntry,
+}) {
+    const normalizedFuelType = fuelType || getFuelServiceConfig().defaultFuelType;
+    const normalizedRadius = radiusMiles || getFuelServiceConfig().defaultRadiusMiles;
+    const trajectoryCacheKey = [
+        'trajectory',
+        buildCacheKey({
+            latitude,
+            longitude,
+            radiusMiles: normalizedRadius,
+            fuelType: normalizedFuelType,
+            preferredProvider,
+        }),
+        Math.round(Number(courseDegrees) || 0),
+        Math.round((Number(speedMps) || 0) * 10),
+        Math.round(Number(lookaheadMeters) || 0),
+    ].join(':');
+
+    if (inflightTrajectoryRequests.has(trajectoryCacheKey)) {
+        return inflightTrajectoryRequests.get(trajectoryCacheKey);
+    }
+
+    const requestGeneration = fuelCacheGeneration;
+    let request;
+
+    request = (async () => {
+        const trajectoryPlan = await resolveTrajectoryFetchPlanAsync({
+            latitude,
+            longitude,
+            courseDegrees,
+            speedMps,
+            lookaheadMeters,
+            routeTargetMeters,
+            routeProvider,
+        });
+        if (!trajectoryPlan?.aheadPoint) {
+            throw new Error('MapKit could not build a trajectory fetch plan.');
+        }
+
+        const baseQuery = {
+            latitude,
+            longitude,
+            radiusMiles: normalizedRadius,
+            fuelType: normalizedFuelType,
+            preferredProvider,
+            forceLiveGasBuddy,
+            allowLiveGasBuddy,
+        };
+        const aheadQuery = {
+            ...baseQuery,
+            latitude: trajectoryPlan.aheadPoint.latitude,
+            longitude: trajectoryPlan.aheadPoint.longitude,
+        };
+        const [baseResult, aheadResult] = await Promise.all([
+            snapshotFetcher(baseQuery),
+            snapshotFetcher(aheadQuery),
+        ]);
+        const cacheKey = buildCacheKey({
+            latitude,
+            longitude,
+            radiusMiles: normalizedRadius,
+            fuelType: normalizedFuelType,
+            preferredProvider,
+        });
+        const trajectorySnapshotCacheKey = buildTrajectorySnapshotCacheKey({
+            latitude,
+            longitude,
+            radiusMiles: normalizedRadius,
+            fuelType: normalizedFuelType,
+            preferredProvider,
+            courseDegrees,
+            speedMps,
+            lookaheadMeters: trajectoryPlan.lookaheadMeters,
+        });
+        const mergedSnapshot = sanitizeSnapshotForFuelType(mergeTrajectorySnapshotResults({
+            origin: trajectoryPlan.origin,
+            baseSnapshot: baseResult?.snapshot,
+            aheadSnapshot: aheadResult?.snapshot,
+            cacheKey: trajectorySnapshotCacheKey,
+            trajectoryPlan: {
+                aheadPoint: trajectoryPlan.aheadPoint,
+                lookaheadMeters: trajectoryPlan.lookaheadMeters,
+                routeDistanceMeters: trajectoryPlan.routeDistanceMeters,
+                projectedDestination: trajectoryPlan.projectedDestination,
+                route: trajectoryPlan.route,
+                routeStepCount: Array.isArray(trajectoryPlan.route?.steps) ? trajectoryPlan.route.steps.length : 0,
+            },
+        }), normalizedFuelType);
+        const debugState = {
+            input: {
+                ...baseQuery,
+                courseDegrees,
+                speedMps,
+            },
+            providers: [
+                ...((baseResult?.debugState?.providers || []).map(provider => ({
+                    ...provider,
+                    trajectoryPoint: 'origin',
+                }))),
+                ...((aheadResult?.debugState?.providers || []).map(provider => ({
+                    ...provider,
+                    trajectoryPoint: 'ahead',
+                }))),
+            ],
+            requestedAt: new Date().toISOString(),
+            summary: {
+                baseStationCount: Array.isArray(baseResult?.snapshot?.topStations) ? baseResult.snapshot.topStations.length : 0,
+                aheadStationCount: Array.isArray(aheadResult?.snapshot?.topStations) ? aheadResult.snapshot.topStations.length : 0,
+                mergedStationCount: Array.isArray(mergedSnapshot?.topStations) ? mergedSnapshot.topStations.length : 0,
+            },
+            trajectory: mergedSnapshot?.trajectory || null,
+        };
+
+        if (requestGeneration !== fuelCacheGeneration) {
+            throw createFuelCacheResetError();
+        }
+
+        await cacheWriter(trajectorySnapshotCacheKey, mergedSnapshot);
+
+        if (requestGeneration !== fuelCacheGeneration) {
+            await removeCachedEntry(trajectorySnapshotCacheKey);
+            throw createFuelCacheResetError();
+        }
+
+        return {
+            debugState,
+            snapshot: mergedSnapshot,
+            trajectoryPlan,
+        };
+    })().finally(() => {
+        if (inflightTrajectoryRequests.get(trajectoryCacheKey) === request) {
+            inflightTrajectoryRequests.delete(trajectoryCacheKey);
+        }
+    });
+
+    inflightTrajectoryRequests.set(trajectoryCacheKey, request);
+    return request;
+}
+
+async function refreshFuelPriceSnapshotWithTrajectoryFallback({
+    courseDegrees,
+    speedMps,
+    routeProvider,
+    lookaheadMeters,
+    routeTargetMeters,
+    fallbackSnapshotFetcher = refreshFuelPriceSnapshot,
+    ...baseQuery
+}) {
+    try {
+        return await refreshFuelPriceSnapshotAlongTrajectory({
+            ...baseQuery,
+            courseDegrees,
+            speedMps,
+            routeProvider,
+            lookaheadMeters,
+            routeTargetMeters,
+        });
+    } catch (error) {
+        if (!isTrajectoryRouteUnavailableError(error)) {
+            throw error;
+        }
+
+        return fallbackSnapshotFetcher(baseQuery);
+    }
+}
+
 async function clearFuelPriceCache() {
     fuelCacheGeneration += 1;
     inflightRequests.clear();
-    return clearCachedEntries('fuel:');
+    inflightTrajectoryRequests.clear();
+    await clearCachedEntries('fuel:');
+    return clearCachedEntries(TRAJECTORY_CACHE_PREFIX);
 }
 
 module.exports = {
@@ -2025,4 +2327,6 @@ module.exports = {
     getCachedFuelPriceSnapshot,
     isFuelCacheResetError,
     refreshFuelPriceSnapshot,
+    refreshFuelPriceSnapshotAlongTrajectory,
+    refreshFuelPriceSnapshotWithTrajectoryFallback,
 };

@@ -10,6 +10,18 @@ import * as FileSystem from 'expo-file-system/legacy';
 import OnboardingScreen from '../src/screens/OnboardingScreen';
 import ProgressiveBlurReveal from '../src/components/ProgressiveBlurReveal';
 import '../src/lib/predictiveLocation';
+import { getDrivingRouteAsync } from '../src/lib/FuelUpMapKitRouting';
+import { subscribeToPredictiveLocationUpdates } from '../src/lib/predictiveLocation';
+import { refreshFuelPriceSnapshotAlongTrajectory } from '../src/services/fuel';
+import { runPredictiveSystemProbeAsync } from '../src/lib/predictiveSystemProbe';
+import {
+    resetLocationProbeLaunchOverrides,
+    setLocationProbeLaunchOverrides,
+} from '../src/lib/locationProbeOverrides';
+
+const {
+    createPredictiveLocationPrefetchController,
+} = require('../src/lib/predictiveLocationPrefetchController.js');
 
 const CLUSTER_DEBUG_PROBE_REQUEST_FILE_NAME = 'cluster-debug-probe-request.json';
 const CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME = 'cluster-debug-probe.json';
@@ -38,6 +50,21 @@ function isTruthyRouteParam(value) {
     }
 
     return value === true || value === 1;
+}
+
+function applyLocationProbeOverridesFromQueryParams(queryParams = {}) {
+    resetLocationProbeLaunchOverrides();
+
+    if (!__DEV__) {
+        return;
+    }
+
+    setLocationProbeLaunchOverrides({
+        forceNullLastKnownPosition: isTruthyRouteParam(
+            queryParams.locationProbeForceNullLastKnown ||
+            queryParams.forceNullLastKnownPosition
+        ),
+    });
 }
 
 async function writeClusterProbeQueueMarker(payload) {
@@ -70,10 +97,15 @@ function AppGate() {
     } = useAppState();
     const { isDark, themeColors } = useTheme();
     const lastClusterProbeUrlRef = useRef('');
+    const lastPredictiveSystemProbeUrlRef = useRef('');
     const [hasPendingClusterProbeRequest, setHasPendingClusterProbeRequest] = useState(false);
+    const [hasPendingLocationProbeOverride, setHasPendingLocationProbeOverride] = useState(false);
+    const [hasPendingPredictiveSystemProbe, setHasPendingPredictiveSystemProbe] = useState(false);
     const [hasLatchedClusterProbeBypass, setHasLatchedClusterProbeBypass] = useState(false);
     const shouldBypassOnboardingForClusterProbe = __DEV__ && (
         hasPendingClusterProbeRequest ||
+        hasPendingLocationProbeOverride ||
+        hasPendingPredictiveSystemProbe ||
         Boolean(clusterProbeRequest) ||
         isClusterProbeSessionActive ||
         hasLatchedClusterProbeBypass
@@ -82,13 +114,21 @@ function AppGate() {
     useEffect(() => {
         if (
             __DEV__ &&
-            (hasPendingClusterProbeRequest || Boolean(clusterProbeRequest) || isClusterProbeSessionActive) &&
+            (
+                hasPendingClusterProbeRequest ||
+                hasPendingLocationProbeOverride ||
+                hasPendingPredictiveSystemProbe ||
+                Boolean(clusterProbeRequest) ||
+                isClusterProbeSessionActive
+            ) &&
             !hasLatchedClusterProbeBypass
         ) {
             setHasLatchedClusterProbeBypass(true);
         }
     }, [
         hasPendingClusterProbeRequest,
+        hasPendingLocationProbeOverride,
+        hasPendingPredictiveSystemProbe,
         clusterProbeRequest,
         isClusterProbeSessionActive,
         hasLatchedClusterProbeBypass,
@@ -102,12 +142,38 @@ function AppGate() {
         let isCancelled = false;
 
         const queueProbeFromUrl = (url) => {
-            if (!url || lastClusterProbeUrlRef.current === url) {
+            if (!url) {
                 return;
             }
 
             const parsedUrl = Linking.parse(url);
             const queryParams = parsedUrl?.queryParams || {};
+            applyLocationProbeOverridesFromQueryParams(queryParams);
+            if (
+                isTruthyRouteParam(queryParams.locationProbeForceNullLastKnown) ||
+                isTruthyRouteParam(queryParams.forceNullLastKnownPosition)
+            ) {
+                setHasPendingLocationProbeOverride(true);
+            }
+            if (
+                isTruthyRouteParam(queryParams.predictiveSystemProbe) &&
+                lastPredictiveSystemProbeUrlRef.current !== url
+            ) {
+                lastPredictiveSystemProbeUrlRef.current = url;
+                setHasPendingPredictiveSystemProbe(true);
+                void runPredictiveSystemProbeAsync({
+                    token: getFirstRouteParamValue(queryParams.predictiveSystemProbeToken) || 'default',
+                }).finally(() => {
+                    if (!isCancelled) {
+                        setHasPendingPredictiveSystemProbe(false);
+                    }
+                });
+            }
+
+            if (lastClusterProbeUrlRef.current === url) {
+                return;
+            }
+
             const isProbeUrl = (
                 isTruthyRouteParam(queryParams.clusterProbe) ||
                 isTruthyRouteParam(queryParams.runClusterProbe)
@@ -210,6 +276,35 @@ function AppGate() {
             clearInterval(intervalId);
         };
     }, [requestClusterProbe]);
+
+    useEffect(() => {
+        if (!preferences.hasCompletedOnboarding) {
+            return undefined;
+        }
+
+        const controller = createPredictiveLocationPrefetchController({
+            prefetchSnapshot: (input) => refreshFuelPriceSnapshotAlongTrajectory({
+                ...input,
+                routeProvider: getDrivingRouteAsync,
+            }),
+        });
+        const unsubscribe = subscribeToPredictiveLocationUpdates(payload => {
+            void controller.handleLocationPayload(payload, {
+                radiusMiles: preferences.searchRadiusMiles,
+                fuelType: preferences.preferredOctane,
+                preferredProvider: preferences.preferredProvider,
+            }).catch(error => {
+                console.warn('Predictive trajectory prefetch failed:', error?.message || error);
+            });
+        });
+
+        return unsubscribe;
+    }, [
+        preferences.hasCompletedOnboarding,
+        preferences.preferredOctane,
+        preferences.preferredProvider,
+        preferences.searchRadiusMiles,
+    ]);
 
     if (isLoading) {
         return <View style={{ flex: 1, backgroundColor: themeColors.background }} />;

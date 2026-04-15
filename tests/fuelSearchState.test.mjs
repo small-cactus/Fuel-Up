@@ -16,12 +16,41 @@ test('normalizeFuelSearchPreferences preserves diesel and normalizes defaults', 
         minimumRating: '4.5',
     });
 
+    // `navigationApp` was added alongside the in-card Navigate button so the
+    // user can pick Apple Maps or Google Maps for the deep-link target. It
+    // defaults to apple-maps when the caller omits it, which is what this
+    // test asserts.
     assert.deepEqual(normalized, {
         preferredOctane: 'diesel',
         searchRadiusMiles: 15,
         preferredProvider: 'all',
         minimumRating: 4.5,
+        navigationApp: 'apple-maps',
     });
+});
+
+test('normalizeFuelSearchPreferences accepts google-maps as navigationApp', () => {
+    const normalized = normalizeFuelSearchPreferences({
+        preferredOctane: 'regular',
+        searchRadiusMiles: 5,
+        preferredProvider: 'gasbuddy',
+        minimumRating: 0,
+        navigationApp: 'google-maps',
+    });
+
+    assert.equal(normalized.navigationApp, 'google-maps');
+});
+
+test('normalizeFuelSearchPreferences falls back to apple-maps for unknown navigation apps', () => {
+    const normalized = normalizeFuelSearchPreferences({
+        preferredOctane: 'regular',
+        searchRadiusMiles: 5,
+        preferredProvider: 'gasbuddy',
+        minimumRating: 0,
+        navigationApp: 'waze-something-invalid',
+    });
+
+    assert.equal(normalized.navigationApp, 'apple-maps');
 });
 
 test('fuel search request keys change for location and every request-affecting preference', () => {

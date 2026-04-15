@@ -88,6 +88,42 @@ function buildStationHistoryById(rows, origin) {
     return historyById;
 }
 
+test('same-day trend history falls back to hourly chart buckets', () => {
+    const { buildAveragePriceTrendSeries } = require('../src/services/fuel/trendAggregation.js');
+    const rows = [
+        {
+            created_at: '2026-04-14T13:10:00.000Z',
+            price: 3.99,
+        },
+        {
+            created_at: '2026-04-14T13:45:00.000Z',
+            price: 4.01,
+        },
+        {
+            created_at: '2026-04-14T14:05:00.000Z',
+            price: 3.97,
+        },
+        {
+            created_at: '2026-04-14T15:20:00.000Z',
+            price: 3.95,
+        },
+    ];
+
+    const series = buildAveragePriceTrendSeries(rows);
+
+    assert.equal(series.length, 3);
+    assert.deepEqual(
+        series.map(point => point.date),
+        [
+            '2026-04-14T13:00:00.000Z',
+            '2026-04-14T14:00:00.000Z',
+            '2026-04-14T15:00:00.000Z',
+        ]
+    );
+    assert.equal(series[0].price, 4.0);
+    assert.equal(series[series.length - 1].price, 3.95);
+});
+
 test('trend projection upgrades the latest displayed station row to the current validated quote', async () => {
     const supabasePath = require.resolve('../src/lib/supabase.js');
     const indexPath = require.resolve('../src/services/fuel/index.js');

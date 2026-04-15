@@ -15,6 +15,10 @@ export function isFuelUpMapKitRoutingAvailable() {
     return typeof nativeModule?.getDrivingRouteAsync === 'function';
 }
 
+export function canOpenDrivingDirectionsInMaps() {
+    return typeof nativeModule?.openDrivingDirectionsInMapsAsync === 'function';
+}
+
 export async function getDrivingRouteAsync({ origin, destination }) {
     if (!isFuelUpMapKitRoutingAvailable()) {
         throw createUnavailableError();
@@ -23,7 +27,17 @@ export async function getDrivingRouteAsync({ origin, destination }) {
     return nativeModule.getDrivingRouteAsync(origin, destination);
 }
 
+export async function openDrivingDirectionsInMapsAsync({ destination }) {
+    if (typeof nativeModule?.openDrivingDirectionsInMapsAsync !== 'function') {
+        throw createUnavailableError();
+    }
+
+    return nativeModule.openDrivingDirectionsInMapsAsync(destination);
+}
+
 export default {
+    canOpenDrivingDirectionsInMaps,
     getDrivingRouteAsync,
     isFuelUpMapKitRoutingAvailable,
+    openDrivingDirectionsInMapsAsync,
 };

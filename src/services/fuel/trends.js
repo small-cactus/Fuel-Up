@@ -5,6 +5,7 @@ import { buildFuelSearchRequestKey } from '../../lib/fuelSearchState.js';
 const { buildLatestFuelStationQuotesFromRows } = require('./index');
 const { buildValidationState } = require('./priceValidation');
 const { applyCurrentStationQuoteProjection } = require('./trendProjection');
+const { buildAveragePriceTrendSeries } = require('./trendAggregation');
 const { buildTrendLeaderboard } = require('./trendLeaderboard');
 
 const cachedTrendDataByRequestKey = {};
@@ -256,22 +257,7 @@ export async function fetchTrendData({
     });
 
     // 1. Average prices grouped by day (for the main chart)
-    const dayAggregation = {};
-    displayedRows.forEach(row => {
-        const dateStr = new Date(row.created_at).toISOString().split('T')[0];
-        if (!dayAggregation[dateStr]) {
-            dayAggregation[dateStr] = { sum: 0, count: 0 };
-        }
-        dayAggregation[dateStr].sum += row.price;
-        dayAggregation[dateStr].count += 1;
-    });
-
-    const averagePricesByDay = Object.keys(dayAggregation).sort().map(date => {
-        return {
-            date,
-            price: dayAggregation[date].sum / dayAggregation[date].count
-        };
-    });
+    const averagePricesByDay = buildAveragePriceTrendSeries(displayedRows);
 
     // Determine overall area trend
     let overallTrend = null;

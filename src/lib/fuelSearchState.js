@@ -1,8 +1,25 @@
 import { normalizeFuelGrade } from './fuelGrade.js';
 
+// The supported search radius range was determined by testing the live
+// GasBuddy return set across ~20 US cities (dense urban → extreme rural).
+// GasBuddy adaptively returns stations within its own cluster, so our
+// `radiusMiles` is ONLY a client-side filter on the returned set:
+//
+//   - Urban centers (SF, NYC, LA, Sacramento) return 10–17 stations
+//     with a max distance of 1.4–2.8 mi. A radius < 2 mi filters some
+//     of those to zero (e.g. Sacramento, NYC, Anchorage), which is a
+//     broken UX, so 2 mi is the effective minimum.
+//   - Small towns (Fallon NV) return stations up to ~5 mi.
+//   - Remote rural (Death Valley) returns a single station at ~12 mi.
+//   - Above 15 mi we never saw any additional stations in testing, so
+//     15 mi is the effective maximum. Anything larger is wasted scale.
 export const DEFAULT_SEARCH_RADIUS_MILES = 10;
+export const MIN_SEARCH_RADIUS_MILES = 2;
+export const MAX_SEARCH_RADIUS_MILES = 15;
 export const DEFAULT_PREFERRED_PROVIDER = 'gasbuddy';
 export const DEFAULT_MINIMUM_RATING = 0;
+export const DEFAULT_NAVIGATION_APP = 'apple-maps';
+export const SUPPORTED_NAVIGATION_APPS = ['apple-maps', 'google-maps'];
 const LOCATION_PRECISION = 2;
 
 function toFiniteNumber(value) {
@@ -16,7 +33,15 @@ function toPositiveNumber(value) {
 }
 
 export function normalizeSearchRadiusMiles(value) {
-    return Math.max(1, Math.round(toPositiveNumber(value) || DEFAULT_SEARCH_RADIUS_MILES));
+    const resolvedValue = toPositiveNumber(value) || DEFAULT_SEARCH_RADIUS_MILES;
+    const rounded = Math.round(resolvedValue);
+    // Clamp to the empirically-validated [MIN, MAX] range so legacy
+    // preference values persisted from the old [3, 25] slider snap into
+    // the new range (e.g. a stored 25 becomes 15, a stored 1 becomes 2).
+    return Math.max(
+        MIN_SEARCH_RADIUS_MILES,
+        Math.min(MAX_SEARCH_RADIUS_MILES, rounded)
+    );
 }
 
 export function normalizeMinimumRating(value) {
@@ -28,12 +53,20 @@ export function normalizePreferredProvider(value) {
     return normalizedValue === 'all' ? 'all' : DEFAULT_PREFERRED_PROVIDER;
 }
 
+export function normalizeNavigationApp(value) {
+    const normalizedValue = String(value || DEFAULT_NAVIGATION_APP).trim().toLowerCase();
+    return SUPPORTED_NAVIGATION_APPS.includes(normalizedValue)
+        ? normalizedValue
+        : DEFAULT_NAVIGATION_APP;
+}
+
 export function normalizeFuelSearchPreferences(preferences = {}) {
     return {
         searchRadiusMiles: normalizeSearchRadiusMiles(preferences.searchRadiusMiles),
         preferredOctane: normalizeFuelGrade(preferences.preferredOctane),
         preferredProvider: normalizePreferredProvider(preferences.preferredProvider),
         minimumRating: normalizeMinimumRating(preferences.minimumRating),
+        navigationApp: normalizeNavigationApp(preferences.navigationApp),
     };
 }
 

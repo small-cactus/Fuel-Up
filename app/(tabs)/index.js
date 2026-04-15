@@ -1,5 +1,5 @@
 import React, { startTransition, useCallback, useEffect, useRef, useState, useMemo } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
+import { AppState, FlatList, Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
@@ -19,6 +19,7 @@ import {
     getFuelFailureMessage,
     isFuelCacheResetError,
     refreshFuelPriceSnapshot,
+    refreshFuelPriceSnapshotWithTrajectoryFallback,
 } from '../../src/services/fuel';
 import { prefetchTrendData } from '../../src/services/fuel/trends';
 import { useTheme } from '../../src/ThemeContext';
@@ -30,8 +31,25 @@ import StationMarker from '../../src/components/cluster/StationMarker';
 import { consumeFreshLaunchMapBootstrap } from '../../src/lib/appLaunchState';
 import {
     getLastDeviceLocationRegion,
+    getLastDeviceLocationSnapshot,
     persistLastDeviceLocationRegion,
 } from '../../src/lib/deviceLocationCache';
+import {
+    LOCATION_COLD_FETCH_TIMEOUT_MS,
+    LOCATION_FAST_FETCH_TIMEOUT_MS,
+    LOCATION_LAST_KNOWN_MAX_AGE_MS,
+    LOCATION_LAST_KNOWN_REQUIRED_ACCURACY_METERS,
+    LOCATION_MOVEMENT_THRESHOLD_METERS,
+    buildRegionFromLocation,
+    calculateDistanceMeters,
+    hasMovedBeyondThreshold,
+} from '../../src/lib/locationRefresh';
+import {
+    flushLocationProbeReportAsync,
+    recordLocationProbeEvent,
+} from '../../src/lib/locationProbe';
+import { getLocationProbeLaunchOverrides } from '../../src/lib/locationProbeOverrides';
+import { openStationNavigation } from '../../src/lib/openNavigation';
 import {
     normalizeFuelGrade,
     rankQuotesForFuelGrade,
@@ -61,6 +79,7 @@ import {
     shouldRevealDuringInitialHomeFit,
     shouldDelayHomeLaunchReveal,
 } from '../../src/lib/homeLaunch';
+import { getDrivingRouteAsync } from '../../src/lib/FuelUpMapKitRouting';
 import { groupStationsIntoClusters } from '../../src/cluster/grouping';
 import {
     CLUSTER_PILL_HEIGHT,
@@ -86,6 +105,9 @@ const {
     CLUSTER_MERGE_LNG_FACTOR,
     CLUSTER_SPLIT_MULTIPLIER,
 } = require('../../src/lib/clusterAnimationMath.cjs');
+const {
+    buildTrajectorySeedFromLocationObject,
+} = require('../../src/lib/trajectoryFuelFetch.js');
 
 const DEFAULT_REGION = {
     latitude: 37.3346,
@@ -95,7 +117,7 @@ const DEFAULT_REGION = {
 };
 const TAB_BAR_CLEARANCE = 34;
 const CARD_GAP = 0;
-const SIDE_MARGIN = 16;
+const SIDE_MARGIN = 12;
 const TOP_CANOPY_HEIGHT = 72;
 const CLUSTER_DEBUG_JUMP_THRESHOLD = 5;
 const MAP_REGION_EPSILON = 0.000001;
@@ -134,6 +156,7 @@ const INITIAL_HOME_SUPPRESSION_DELAY_MS = 900;
 const INITIAL_STATIONS_FIT_MAX_ATTEMPTS = 4;
 const INITIAL_STATIONS_FIT_RETRY_DELAY_MS = 120;
 const INITIAL_SMOOTH_LAUNCH_TRANSITION_MAX_DISTANCE_METERS = 6000;
+const LAUNCH_MOVEMENT_RECOVERY_TIMEOUT_MS = 5000;
 const ENABLE_CLUSTER_MERGE_TRANSITIONS = false;
 const HOME_DARK_GLASS_TINT = '#373737ff';
 
@@ -693,6 +716,177 @@ function shouldAnimateSmoothLaunchTransition(fromRegion, toRegion) {
     return getDistanceMetersBetweenRegions(fromRegion, toRegion) <= INITIAL_SMOOTH_LAUNCH_TRANSITION_MAX_DISTANCE_METERS;
 }
 
+function waitForMillisecondsWithValue(value, durationMs) {
+    return new Promise(resolve => {
+        setTimeout(() => resolve(value), durationMs);
+    });
+}
+
+/**
+ * Fetch the device's last-known position with a hard timeout. This is the
+ * fast path we use on cold launch and foreground resume because it returns
+ * immediately from the platform's cached reading instead of firing up GPS.
+ * Anything slower would add perceptible startup delay, so we short-circuit
+ * with `null` as soon as the timeout elapses.
+ */
+async function fetchLastKnownPositionWithTimeout({
+    timeoutMs = LOCATION_FAST_FETCH_TIMEOUT_MS,
+    maxAgeMs = LOCATION_LAST_KNOWN_MAX_AGE_MS,
+    requiredAccuracyMeters = LOCATION_LAST_KNOWN_REQUIRED_ACCURACY_METERS,
+} = {}) {
+    try {
+        const launchOverrides = getLocationProbeLaunchOverrides();
+
+        if (__DEV__ && launchOverrides.forceNullLastKnownPosition) {
+            recordLocationProbeEvent({
+                type: 'last-known-position-overridden-null',
+            });
+            return null;
+        }
+
+        const lastKnownPromise = Location
+            .getLastKnownPositionAsync({
+                maxAge: maxAgeMs,
+                requiredAccuracy: requiredAccuracyMeters,
+            })
+            .catch(() => null);
+        const timeoutPromise = waitForMillisecondsWithValue(null, timeoutMs);
+
+        return await Promise.race([lastKnownPromise, timeoutPromise]);
+    } catch (error) {
+        return null;
+    }
+}
+
+/**
+ * Fall back to `getCurrentPositionAsync` with a low-accuracy / short-timeout
+ * request. We only call this when the device has no usable last-known
+ * reading (typically first ever launch). The promise never rejects; it
+ * resolves to `null` on timeout or error so callers can cleanly fall back
+ * to cached data.
+ */
+async function fetchCurrentPositionWithTimeout({
+    timeoutMs = LOCATION_COLD_FETCH_TIMEOUT_MS,
+    accuracy = Location.Accuracy.Low,
+} = {}) {
+    try {
+        recordLocationProbeEvent({
+            type: 'current-position-fetch-start',
+            details: {
+                timeoutMs,
+                accuracy,
+            },
+        });
+
+        const currentPromise = Location
+            .getCurrentPositionAsync({
+                accuracy,
+            })
+            .catch(() => null);
+        const timeoutPromise = waitForMillisecondsWithValue(null, timeoutMs);
+        const resolvedPositionObject = await Promise.race([currentPromise, timeoutPromise]);
+
+        recordLocationProbeEvent({
+            type: 'current-position-fetch-end',
+            details: {
+                timeoutMs,
+                accuracy,
+                hasFix: Boolean(resolvedPositionObject),
+            },
+        });
+
+        return resolvedPositionObject;
+    } catch (error) {
+        recordLocationProbeEvent({
+            type: 'current-position-fetch-end',
+            details: {
+                timeoutMs,
+                accuracy,
+                hasFix: false,
+                error: error?.message || String(error || 'unknown-error'),
+            },
+        });
+        return null;
+    }
+}
+
+/**
+ * Resolve the position object used by the cold-launch movement check.
+ *
+ * We prefer the platform's last-known cache because it's effectively
+ * instant. If the OS has no usable last-known reading yet, fall back to a
+ * bounded low-accuracy current-position request so a stale cached city does
+ * not survive the whole launch. This preserves the fast path while still
+ * fixing the "reopen after travel before iOS rebuilds last-known" case.
+ */
+async function resolveLaunchMovementCheckPosition({
+    currentFallbackTimeoutMs = LOCATION_COLD_FETCH_TIMEOUT_MS,
+} = {}) {
+    const lastKnownPositionObject = await fetchLastKnownPositionWithTimeout({
+        timeoutMs: LOCATION_FAST_FETCH_TIMEOUT_MS,
+        maxAgeMs: LOCATION_LAST_KNOWN_MAX_AGE_MS,
+        requiredAccuracyMeters: LOCATION_LAST_KNOWN_REQUIRED_ACCURACY_METERS,
+    });
+
+    if (lastKnownPositionObject) {
+        return {
+            positionObject: lastKnownPositionObject,
+            resolver: 'last-known',
+        };
+    }
+
+    const currentPositionObject = await fetchCurrentPositionWithTimeout({
+        timeoutMs: currentFallbackTimeoutMs,
+        accuracy: Location.Accuracy.Low,
+    });
+
+    return {
+        positionObject: currentPositionObject,
+        resolver: currentPositionObject ? 'current-fallback' : 'none',
+    };
+}
+
+function startLaunchMovementCheck({
+    currentFallbackTimeoutMs = LOCATION_COLD_FETCH_TIMEOUT_MS,
+} = {}) {
+    const fastResultPromise = fetchLastKnownPositionWithTimeout({
+        timeoutMs: LOCATION_FAST_FETCH_TIMEOUT_MS,
+        maxAgeMs: LOCATION_LAST_KNOWN_MAX_AGE_MS,
+        requiredAccuracyMeters: LOCATION_LAST_KNOWN_REQUIRED_ACCURACY_METERS,
+    }).then(lastKnownPositionObject => (
+        lastKnownPositionObject
+            ? {
+                positionObject: lastKnownPositionObject,
+                resolver: 'last-known',
+            }
+            : {
+                positionObject: null,
+                resolver: 'none',
+            }
+    ));
+
+    const completionPromise = fastResultPromise.then(async (fastResult) => {
+        if (fastResult.positionObject) {
+            return fastResult;
+        }
+
+        const currentPositionObject = await fetchCurrentPositionWithTimeout({
+            timeoutMs: currentFallbackTimeoutMs,
+            accuracy: Location.Accuracy.Low,
+        });
+
+        return {
+            positionObject: currentPositionObject,
+            resolver: currentPositionObject ? 'current-fallback' : 'none',
+        };
+    });
+
+    return {
+        fastResultPromise,
+        completionPromise,
+    };
+}
+
 function buildSingleQuoteClusters(stationQuotes) {
     return (stationQuotes || []).map(quote => ({
         quotes: [quote],
@@ -1207,6 +1401,7 @@ function AnimatedCardItem({
     themeColors,
     glassTintColor,
     fuelGrade,
+    onNavigatePress,
 }) {
     const animatedDimStyle = useAnimatedStyle(() => {
         if (isDark) return { opacity: 0 };
@@ -1234,6 +1429,7 @@ function AnimatedCardItem({
                 quote={item}
                 themeColors={themeColors}
                 rank={index + 1}
+                onNavigatePress={onNavigatePress}
             />
             {!isDark && (
                 <Animated.View
@@ -1287,6 +1483,13 @@ export default function HomeScreen() {
     const isLaunchVisualReadyRef = useRef(false);
     const isLaunchCriticalFitPendingRef = useRef(false);
     const initialSuppressionDelayTimeoutRef = useRef(null);
+    const launchMovementCheckRef = useRef(null);
+    const launchCachedCapturedAtRef = useRef(null);
+    const lastDeviceLocationCheckAtRef = useRef(0);
+    const isDeviceLocationCheckInFlightRef = useRef(false);
+    const appStateRef = useRef(AppState.currentState);
+    const hasBeenBackgroundedSinceLastActiveRef = useRef(false);
+    const pendingForegroundResumeCheckRef = useRef(false);
     const isFocused = useIsFocused();
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
@@ -1383,6 +1586,7 @@ export default function HomeScreen() {
     const searchRadiusMiles = normalizedFuelSearchPreferences.searchRadiusMiles;
     const preferredProvider = normalizedFuelSearchPreferences.preferredProvider;
     const minimumRating = normalizedFuelSearchPreferences.minimumRating;
+    const navigationApp = normalizedFuelSearchPreferences.navigationApp;
     const buildResolvedHomeQuerySignature = useCallback((nextRegion) => buildHomeQuerySignature({
         origin: nextRegion,
         radiusMiles: searchRadiusMiles,
@@ -1416,13 +1620,33 @@ export default function HomeScreen() {
             lastVisibleHomeRequestKeyRef.current !== currentVisibleHomeRequestKey
         )
     );
+
+    const handleStationNavigatePress = useCallback((stationQuote) => {
+        if (!stationQuote) {
+            return;
+        }
+        void openStationNavigation({
+            latitude: stationQuote.latitude,
+            longitude: stationQuote.longitude,
+            label: stationQuote.stationName,
+            navigationApp,
+        });
+    }, [navigationApp]);
+
     const markMapLoaded = () => {
         if (mapLoadedFallbackTimeoutRef.current) {
             clearTimeout(mapLoadedFallbackTimeoutRef.current);
             mapLoadedFallbackTimeoutRef.current = null;
         }
 
-        setIsMapLoaded(currentValue => currentValue || true);
+        setIsMapLoaded(currentValue => {
+            if (!currentValue) {
+                recordLocationProbeEvent({
+                    type: 'map-loaded',
+                });
+            }
+            return currentValue || true;
+        });
     };
 
     useEffect(() => {
@@ -1581,6 +1805,24 @@ export default function HomeScreen() {
         setMapRegionIfNeeded(nextRegion);
     };
 
+    const recordLocationAppliedProbeEvent = (nextRegion, source, extraDetails = null) => {
+        if (!nextRegion) {
+            return;
+        }
+
+        recordLocationProbeEvent({
+            type: 'location-applied',
+            details: {
+                region: {
+                    latitude: Number(nextRegion.latitude),
+                    longitude: Number(nextRegion.longitude),
+                },
+                source,
+                ...(extraDetails || {}),
+            },
+        });
+    };
+
     const popMapToRegionWithoutAnimation = (nextRegion) => {
         if (!nextRegion) {
             return;
@@ -1588,12 +1830,34 @@ export default function HomeScreen() {
 
         pendingInstantMapRegionRef.current = nextRegion;
 
+        recordLocationProbeEvent({
+            type: 'pop-map-to-region-requested',
+            details: {
+                region: {
+                    latitude: Number(nextRegion.latitude),
+                    longitude: Number(nextRegion.longitude),
+                },
+                hasMapRef: Boolean(mapRef.current),
+                isMapLoaded,
+            },
+        });
+
         if (!mapRef.current || !isMapLoaded) {
             return;
         }
 
         mapRef.current.animateToRegion(nextRegion, 0);
         pendingInstantMapRegionRef.current = null;
+
+        recordLocationProbeEvent({
+            type: 'pop-map-to-region-applied',
+            details: {
+                region: {
+                    latitude: Number(nextRegion.latitude),
+                    longitude: Number(nextRegion.longitude),
+                },
+            },
+        });
     };
 
     const animateMapToRegion = (nextRegion, duration = FOREGROUND_RECENTER_ANIMATION_MS) => {
@@ -1611,10 +1875,32 @@ export default function HomeScreen() {
         mapRef.current.animateToRegion(nextRegion, duration);
     };
 
+    const getOrStartLaunchMovementCheck = ({
+        currentFallbackTimeoutMs = LOCATION_COLD_FETCH_TIMEOUT_MS,
+    } = {}) => {
+        if (!launchMovementCheckRef.current) {
+            launchMovementCheckRef.current = startLaunchMovementCheck({
+                currentFallbackTimeoutMs,
+            });
+        }
+
+        return launchMovementCheckRef.current;
+    };
+
     useEffect(() => {
         let isActive = true;
 
         void (async () => {
+            launchMovementCheckRef.current = null;
+
+            recordLocationProbeEvent({
+                type: 'home-mount',
+                details: {
+                    usesLaunchBootstrap: shouldUseLaunchLocationBootstrapRef.current,
+                    hasManualOverride: Boolean(manualLocationOverride),
+                },
+            });
+
             if (!shouldUseLaunchLocationBootstrapRef.current || manualLocationOverride) {
                 if (isActive && isMountedRef.current) {
                     setIsInitialMapRegionReady(true);
@@ -1622,18 +1908,100 @@ export default function HomeScreen() {
                 return;
             }
 
-            const cachedRegion = await getLastDeviceLocationRegion();
+            const cachedSnapshot = await getLastDeviceLocationSnapshot();
 
             if (!isActive || !isMountedRef.current) {
                 return;
             }
 
+            const cachedRegion = cachedSnapshot?.region || null;
+
             launchCachedRegionRef.current = cachedRegion;
+            launchCachedCapturedAtRef.current = cachedSnapshot?.capturedAt || null;
+
+            // Before we set the MapView's initialRegion, run a fast
+            // movement check so the map renders directly at the resolved
+            // coordinates. This prevents the visible flash where the map
+            // paints the cached region (e.g. the previous city) and then
+            // animates over to the fresh one. The fast check is bounded
+            // by LOCATION_FAST_FETCH_TIMEOUT_MS so the launch never stalls.
+            let resolvedInitialRegion = cachedRegion;
+            let resolvedInitialSource = 'device-cache';
+            let freshLaunchPositionObject = null;
+            let mountMovementDiag = {
+                permissionStatus: 'unknown',
+                hasFastFix: false,
+                distanceMeters: null,
+                didMove: false,
+                resolver: 'none',
+            };
 
             if (cachedRegion) {
-                setInitialMapRegion(cachedRegion);
-                applyResolvedRegion(cachedRegion);
+                try {
+                    const permissionState = await Location.getForegroundPermissionsAsync();
+                    mountMovementDiag.permissionStatus = permissionState.status;
+                    if (permissionState.status === 'granted') {
+                        const launchMovementCheck = getOrStartLaunchMovementCheck({
+                            currentFallbackTimeoutMs: LAUNCH_MOVEMENT_RECOVERY_TIMEOUT_MS,
+                        });
+                        const fastLaunchMovementResult = await launchMovementCheck.fastResultPromise;
+                        freshLaunchPositionObject = fastLaunchMovementResult.positionObject;
+                        mountMovementDiag.resolver = fastLaunchMovementResult.resolver;
+                        const freshRegion = buildRegionFromLocation(freshLaunchPositionObject);
+                        mountMovementDiag.hasFastFix = Boolean(freshRegion);
+                        if (freshRegion) {
+                            mountMovementDiag.distanceMeters = calculateDistanceMeters(cachedRegion, freshRegion);
+                        }
+                        if (
+                            freshRegion &&
+                            hasMovedBeyondThreshold({
+                                fromRegion: cachedRegion,
+                                toRegion: freshRegion,
+                                thresholdMeters: LOCATION_MOVEMENT_THRESHOLD_METERS,
+                            })
+                        ) {
+                            mountMovementDiag.didMove = true;
+                            resolvedInitialRegion = freshRegion;
+                            resolvedInitialSource = 'launch-movement-check';
+                            launchCachedRegionRef.current = freshRegion;
+                            launchCachedCapturedAtRef.current = Date.now();
+                            void persistLastDeviceLocationRegion(freshRegion, {
+                                capturedAt: Date.now(),
+                                accuracyMeters: freshLaunchPositionObject?.coords?.accuracy ?? null,
+                            });
+                        }
+                    }
+                } catch (permissionError) {
+                    // Permission check failed — fall back to cached region.
+                }
             }
+
+            recordLocationProbeEvent({
+                type: 'mount-movement-check-diag',
+                details: mountMovementDiag,
+            });
+
+            if (!isActive || !isMountedRef.current) {
+                return;
+            }
+
+            if (resolvedInitialRegion) {
+                setInitialMapRegion(resolvedInitialRegion);
+                applyResolvedRegion(resolvedInitialRegion);
+                recordLocationAppliedProbeEvent(resolvedInitialRegion, resolvedInitialSource, {
+                    capturedAt: cachedSnapshot?.capturedAt || null,
+                    inlineMovementResolved: resolvedInitialSource === 'launch-movement-check',
+                });
+            }
+
+            recordLocationProbeEvent({
+                type: 'initial-map-region-ready',
+                details: {
+                    hasCachedRegion: Boolean(cachedRegion),
+                    cachedCapturedAt: cachedSnapshot?.capturedAt || null,
+                    resolvedSource: resolvedInitialSource,
+                },
+            });
 
             setIsInitialMapRegionReady(true);
         })();
@@ -1669,7 +2037,24 @@ export default function HomeScreen() {
 
         mapRef.current.animateToRegion(nextRegion, 0);
         pendingInstantMapRegionRef.current = null;
+
+        recordLocationProbeEvent({
+            type: 'pop-map-to-region-flushed',
+            details: {
+                region: {
+                    latitude: Number(nextRegion.latitude),
+                    longitude: Number(nextRegion.longitude),
+                },
+            },
+        });
     }, [isMapLoaded]);
+
+    const recordDeviceLocationCheckTimestamp = (timestamp = Date.now()) => {
+        const numericTimestamp = Number(timestamp);
+        if (Number.isFinite(numericTimestamp) && numericTimestamp > 0) {
+            lastDeviceLocationCheckAtRef.current = numericTimestamp;
+        }
+    };
 
     const resolveCurrentLocation = async ({ allowLaunchBootstrap }) => {
         if (manualLocationOverride) {
@@ -1752,101 +2137,195 @@ export default function HomeScreen() {
                 setHasLocationPermission(true);
             }
 
-            const cachedRegion = allowLaunchBootstrap
-                ? (launchCachedRegionRef.current || await getLastDeviceLocationRegion())
-                : null;
+            // The launch-bootstrap path paints the cached region immediately
+            // and then lets the AppState-driven refresh machinery decide
+            // whether a follow-up fresh check is warranted. We intentionally
+            // do NOT kick off a background `getCurrentPositionAsync` here any
+            // more — that was the source of the launch stutter, because a
+            // fresh fetch would land mid-render and replay the fuel fetch.
+            let cachedRegion = null;
+            let cachedCapturedAt = null;
+
+            if (allowLaunchBootstrap) {
+                cachedRegion = launchCachedRegionRef.current || null;
+                cachedCapturedAt = launchCachedCapturedAtRef.current || null;
+
+                if (!cachedRegion) {
+                    const freshSnapshot = await getLastDeviceLocationSnapshot();
+                    cachedRegion = freshSnapshot?.region || null;
+                    cachedCapturedAt = freshSnapshot?.capturedAt || null;
+                }
+            }
 
             if (allowLaunchBootstrap && cachedRegion) {
                 launchCachedRegionRef.current = cachedRegion;
+                launchCachedCapturedAtRef.current = cachedCapturedAt;
+
                 applyResolvedRegion(cachedRegion);
+                recordLocationAppliedProbeEvent(cachedRegion, 'device-cache', {
+                    cachedCapturedAt,
+                    bootstrap: true,
+                });
+                recordLocationProbeEvent({
+                    type: 'launch-bootstrap',
+                    details: {
+                        hasCachedRegion: true,
+                        cachedCapturedAt,
+                    },
+                });
                 updateResolvedFuelSearchContext(cachedRegion, 'device-cache');
                 if (isMountedRef.current) {
                     setIsLoadingLocation(false);
                 }
 
-                void (async () => {
-                    try {
-                        const freshLocation = await Location.getCurrentPositionAsync({
-                            accuracy: Location.Accuracy.Balanced,
-                        });
+                // Run the movement check inline with a hard timeout. We
+                // await it so the caller gets the resolved coordinates
+                // back (either cached, or the new location if the user
+                // moved). This lets `refreshForCurrentView` issue exactly
+                // one fuel fetch instead of two — the cached region first,
+                // then re-fetching after the background check lands. The
+                // timeout is capped at LOCATION_FAST_FETCH_TIMEOUT_MS so
+                // the launch never stalls waiting on a slow GPS.
+                recordLocationProbeEvent({
+                    type: 'launch-movement-check-scheduled',
+                    details: { cachedCapturedAt },
+                });
 
-                        if (!isMountedRef.current) {
-                            return;
-                        }
+                const launchMovementPosition = allowLaunchBootstrap
+                    ? await getOrStartLaunchMovementCheck({
+                        currentFallbackTimeoutMs: LAUNCH_MOVEMENT_RECOVERY_TIMEOUT_MS,
+                    }).completionPromise
+                    : await resolveLaunchMovementCheckPosition({
+                        currentFallbackTimeoutMs: LAUNCH_MOVEMENT_RECOVERY_TIMEOUT_MS,
+                    });
+                const fastPositionObject = launchMovementPosition.positionObject;
 
-                        const freshRegion = {
-                            latitude: freshLocation.coords.latitude,
-                            longitude: freshLocation.coords.longitude,
-                            latitudeDelta: 0.05,
-                            longitudeDelta: 0.05,
-                        };
+                const freshLaunchRegion = buildRegionFromLocation(fastPositionObject);
+                const launchMovementMeters = freshLaunchRegion
+                    ? calculateDistanceMeters(cachedRegion, freshLaunchRegion)
+                    : null;
+                const didLaunchMove = Boolean(
+                    freshLaunchRegion &&
+                    hasMovedBeyondThreshold({
+                        fromRegion: cachedRegion,
+                        toRegion: freshLaunchRegion,
+                        thresholdMeters: LOCATION_MOVEMENT_THRESHOLD_METERS,
+                    })
+                );
 
-                        await persistLastDeviceLocationRegion(freshRegion);
+                recordLocationProbeEvent({
+                    type: 'launch-movement-check-result',
+                    details: {
+                        didMove: didLaunchMove,
+                        hasFix: Boolean(freshLaunchRegion),
+                        distanceMeters: launchMovementMeters,
+                        resolver: launchMovementPosition.resolver,
+                    },
+                });
 
-                        if (!areRegionsEquivalent(cachedRegion, freshRegion)) {
-                            const shouldDeferBootstrapRegionRefresh = (
-                                !hasVisibleFuelStateRef.current ||
-                                pendingHomeRefitRequestRef.current?.reason === 'initial-load'
-                            );
+                recordDeviceLocationCheckTimestamp();
 
-                            if (shouldDeferBootstrapRegionRefresh) {
-                                return;
-                            }
+                if (didLaunchMove && freshLaunchRegion) {
+                    const trajectorySeed = buildTrajectorySeedFromLocationObject(fastPositionObject);
+                    applyResolvedRegion(freshLaunchRegion);
+                    recordLocationAppliedProbeEvent(freshLaunchRegion, 'device', {
+                        resolver: 'launch-movement-check',
+                    });
+                    updateResolvedFuelSearchContext(freshLaunchRegion, 'device');
 
-                            const shouldAnimateLocationTransition = shouldAnimateSmoothLaunchTransition(cachedRegion, freshRegion);
-                            applyResolvedRegion(freshRegion);
-                            updateResolvedFuelSearchContext(freshRegion, 'device');
-                            if (shouldAnimateLocationTransition) {
-                                animateMapToRegion(freshRegion);
-                            } else {
-                                popMapToRegionWithoutAnimation(freshRegion);
-                            }
-                            await loadFuelData({
-                                latitude: freshRegion.latitude,
-                                longitude: freshRegion.longitude,
-                                locationSource: 'device',
-                                preferCached: true,
-                                querySignature: buildResolvedHomeQuerySignature(freshRegion),
-                            });
-                        }
-                    } catch (error) {
-                        // Cached location is already applied; ignore background refresh failures.
+                    const shouldAnimateLaunchTransition = shouldAnimateSmoothLaunchTransition(
+                        cachedRegion,
+                        freshLaunchRegion
+                    );
+                    if (shouldAnimateLaunchTransition) {
+                        animateMapToRegion(freshLaunchRegion);
+                    } else {
+                        popMapToRegionWithoutAnimation(freshLaunchRegion);
                     }
-                })();
+
+                    await persistLastDeviceLocationRegion(freshLaunchRegion, {
+                        capturedAt: Date.now(),
+                        accuracyMeters: fastPositionObject?.coords?.accuracy ?? null,
+                    });
+                    launchCachedCapturedAtRef.current = Date.now();
+                    launchCachedRegionRef.current = freshLaunchRegion;
+
+                    return {
+                        ...freshLaunchRegion,
+                        locationSource: 'device',
+                        trajectorySeed,
+                    };
+                }
+
+                if (freshLaunchRegion) {
+                    await persistLastDeviceLocationRegion(cachedRegion, {
+                        capturedAt: Date.now(),
+                        accuracyMeters: fastPositionObject?.coords?.accuracy ?? null,
+                    });
+                    launchCachedCapturedAtRef.current = Date.now();
+                }
 
                 return {
                     ...cachedRegion,
                     locationSource: 'device-cache',
+                    trajectorySeed: buildTrajectorySeedFromLocationObject(fastPositionObject),
                 };
             }
 
-            const freshLocation = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.Balanced,
+            // Non-bootstrap path: the map is already showing something and
+            // the caller just wants the freshest usable position without a
+            // long GPS wait. We try `getLastKnownPositionAsync` first and
+            // only fall back to a low-accuracy current-position fix if the
+            // last-known cache is empty (typical only on the very first
+            // launch of the app).
+            let resolvedPositionObject = await fetchLastKnownPositionWithTimeout({
+                timeoutMs: LOCATION_FAST_FETCH_TIMEOUT_MS,
+                maxAgeMs: LOCATION_LAST_KNOWN_MAX_AGE_MS,
+                requiredAccuracyMeters: LOCATION_LAST_KNOWN_REQUIRED_ACCURACY_METERS,
             });
+
+            if (!resolvedPositionObject) {
+                resolvedPositionObject = await fetchCurrentPositionWithTimeout({
+                    timeoutMs: LOCATION_COLD_FETCH_TIMEOUT_MS,
+                    accuracy: Location.Accuracy.Low,
+                });
+            }
 
             if (!isMountedRef.current) {
                 return null;
             }
 
-            const nextRegion = {
-                latitude: freshLocation.coords.latitude,
-                longitude: freshLocation.coords.longitude,
-                latitudeDelta: 0.05,
-                longitudeDelta: 0.05,
-            };
+            const nextRegion = buildRegionFromLocation(resolvedPositionObject);
+
+            if (!nextRegion) {
+                if (isMountedRef.current) {
+                    setHasLocationPermission(true);
+                    clearVisibleFuelState('Unable to get your current location. In the iOS Simulator, set a location in Features > Location.');
+                }
+                return null;
+            }
 
             applyResolvedRegion(nextRegion);
+            recordLocationAppliedProbeEvent(nextRegion, 'device', {
+                accuracyMeters: resolvedPositionObject?.coords?.accuracy ?? null,
+                resolver: allowLaunchBootstrap ? 'cold-fetch' : 'fast-fetch',
+            });
             updateResolvedFuelSearchContext(nextRegion, 'device');
             if (allowLaunchBootstrap || !bestQuote) {
                 popMapToRegionWithoutAnimation(nextRegion);
             } else {
                 animateMapToRegion(nextRegion);
             }
-            await persistLastDeviceLocationRegion(nextRegion);
+            await persistLastDeviceLocationRegion(nextRegion, {
+                capturedAt: Date.now(),
+                accuracyMeters: resolvedPositionObject?.coords?.accuracy ?? null,
+            });
+            recordDeviceLocationCheckTimestamp();
 
             return {
                 ...nextRegion,
                 locationSource: 'device',
+                trajectorySeed: buildTrajectorySeedFromLocationObject(resolvedPositionObject),
             };
         } catch (error) {
             if (isMountedRef.current) {
@@ -1861,11 +2340,166 @@ export default function HomeScreen() {
         }
     };
 
+    /**
+     * Fast, non-blocking movement check. Invoked from the launch bootstrap
+     * and from the AppState-resume handler. Uses the platform's last-known
+     * cache so it never waits on a fresh GPS fix. If the resolved position
+     * is genuinely different from the reference region (beyond the movement
+     * threshold), it applies the new region, smoothly animates the map, and
+     * refetches fuel data. Otherwise it simply bumps the cache timestamp so
+     * the next check stays debounced.
+     *
+     * This function is a plain const (not a useCallback) so it always has
+     * access to the latest closures for `loadFuelData`, `applyResolvedRegion`,
+     * etc. Consumers that need a stable identity across renders call it via
+     * `maybeRefreshDeviceLocationFromLastKnownRef` below.
+     */
+    const maybeRefreshDeviceLocationFromLastKnown = async ({
+        reason = 'unknown',
+        referenceRegion = null,
+        forceFreshFetch = false,
+    } = {}) => {
+        if (manualLocationOverride) {
+            return { applied: false, reason: 'manual-override' };
+        }
+
+        if (isDeviceLocationCheckInFlightRef.current) {
+            return { applied: false, reason: 'in-flight' };
+        }
+
+        isDeviceLocationCheckInFlightRef.current = true;
+
+        try {
+            const permissionState = await Location.getForegroundPermissionsAsync();
+
+            if (permissionState.status !== 'granted') {
+                return { applied: false, reason: 'permission-denied' };
+            }
+
+            let resolvedPositionObject = null;
+
+            if (!forceFreshFetch) {
+                resolvedPositionObject = await fetchLastKnownPositionWithTimeout({
+                    timeoutMs: LOCATION_FAST_FETCH_TIMEOUT_MS,
+                    maxAgeMs: LOCATION_LAST_KNOWN_MAX_AGE_MS,
+                    requiredAccuracyMeters: LOCATION_LAST_KNOWN_REQUIRED_ACCURACY_METERS,
+                });
+            }
+
+            if (!resolvedPositionObject) {
+                resolvedPositionObject = await fetchCurrentPositionWithTimeout({
+                    timeoutMs: LOCATION_COLD_FETCH_TIMEOUT_MS,
+                    accuracy: Location.Accuracy.Low,
+                });
+            }
+
+            if (!resolvedPositionObject || !isMountedRef.current) {
+                return { applied: false, reason: 'no-fix' };
+            }
+
+            const freshRegion = buildRegionFromLocation(resolvedPositionObject);
+            const trajectorySeed = buildTrajectorySeedFromLocationObject(resolvedPositionObject);
+
+            if (!freshRegion) {
+                return { applied: false, reason: 'invalid-fix' };
+            }
+
+            const compareRegion = referenceRegion || mapRegionRef.current || location;
+            const didMove = hasMovedBeyondThreshold({
+                fromRegion: compareRegion,
+                toRegion: freshRegion,
+                thresholdMeters: LOCATION_MOVEMENT_THRESHOLD_METERS,
+            });
+
+            // Record the check timestamp regardless — even a no-op check
+            // counts, because we know the device is near the cached point.
+            recordDeviceLocationCheckTimestamp();
+
+            recordLocationProbeEvent({
+                type: 'movement-check-result',
+                details: {
+                    reason,
+                    didMove,
+                    freshRegion: {
+                        latitude: Number(freshRegion.latitude),
+                        longitude: Number(freshRegion.longitude),
+                    },
+                    compareRegion: compareRegion && {
+                        latitude: Number(compareRegion.latitude),
+                        longitude: Number(compareRegion.longitude),
+                    },
+                },
+            });
+
+            if (!didMove) {
+                // Persist the fresh timestamp so the next launch debounces.
+                await persistLastDeviceLocationRegion(compareRegion, {
+                    capturedAt: Date.now(),
+                    accuracyMeters: resolvedPositionObject?.coords?.accuracy ?? null,
+                });
+                launchCachedCapturedAtRef.current = Date.now();
+                return {
+                    applied: false,
+                    reason: 'within-threshold',
+                    distanceMeters: 0,
+                };
+            }
+
+            // The user actually moved. Update location state, nudge the map,
+            // re-persist the cache, and refetch fuel so the stations reflect
+            // the new neighborhood. This is the "reopen-after-travel" path
+            // the user experiences when they take the phone to a new city
+            // while the app was closed.
+            applyResolvedRegion(freshRegion);
+            recordLocationAppliedProbeEvent(freshRegion, 'device', {
+                resolver: 'movement-check',
+                reason,
+            });
+            updateResolvedFuelSearchContext(freshRegion, 'device');
+
+            const shouldAnimateLocationTransition = shouldAnimateSmoothLaunchTransition(
+                compareRegion,
+                freshRegion
+            );
+            if (shouldAnimateLocationTransition) {
+                animateMapToRegion(freshRegion);
+            } else {
+                popMapToRegionWithoutAnimation(freshRegion);
+            }
+
+            await persistLastDeviceLocationRegion(freshRegion, {
+                capturedAt: Date.now(),
+                accuracyMeters: resolvedPositionObject?.coords?.accuracy ?? null,
+            });
+            launchCachedCapturedAtRef.current = Date.now();
+
+            await loadFuelData({
+                latitude: freshRegion.latitude,
+                longitude: freshRegion.longitude,
+                locationSource: 'device',
+                preferCached: false,
+                trajectorySeed,
+                querySignature: buildResolvedHomeQuerySignature(freshRegion),
+            });
+
+            return {
+                applied: true,
+                reason,
+                freshRegion,
+            };
+        } catch (error) {
+            return { applied: false, reason: 'error', error };
+        } finally {
+            isDeviceLocationCheckInFlightRef.current = false;
+        }
+    };
+
     const loadFuelData = async ({
         latitude,
         longitude,
         locationSource,
         preferCached,
+        trajectorySeed = null,
         querySignature = null,
     }) => {
         const requestQuerySignature = querySignature || buildResolvedHomeQuerySignature({
@@ -1916,6 +2550,27 @@ export default function HomeScreen() {
         try {
             activeHomeQuerySignatureRef.current = requestQuerySignature;
 
+            recordLocationProbeEvent({
+                type: 'fuel-fetch-start',
+                details: {
+                    query: {
+                        latitude,
+                        longitude,
+                        radiusMiles: searchRadiusMiles,
+                        fuelType: snapshotFuelGrade,
+                        preferredProvider,
+                    },
+                    locationSource,
+                    preferCached: Boolean(preferCached),
+                    trajectorySeed: trajectorySeed
+                        ? {
+                            courseDegrees: trajectorySeed.courseDegrees,
+                            speedMps: trajectorySeed.speedMps,
+                        }
+                        : null,
+                },
+            });
+
             if (isMountedRef.current) {
                 setFuelDebugState(baseDebugState);
             }
@@ -1941,6 +2596,18 @@ export default function HomeScreen() {
 
                     if (cachedSnapshot?.quote) {
                         lastVisibleHomeRequestKeyRef.current = requestDisplayKey;
+                        recordLocationProbeEvent({
+                            type: 'fuel-fetch-cached-snapshot',
+                            details: {
+                                query: {
+                                    latitude,
+                                    longitude,
+                                    radiusMiles: searchRadiusMiles,
+                                    fuelType: snapshotFuelGrade,
+                                    preferredProvider,
+                                },
+                            },
+                        });
                     }
                 }
             }
@@ -1950,9 +2617,16 @@ export default function HomeScreen() {
                 setIsRefreshingPrices(true);
             }
 
-            const result = await refreshFuelPriceSnapshot({
-                ...query,
-            });
+            const result = trajectorySeed
+                ? await refreshFuelPriceSnapshotWithTrajectoryFallback({
+                    ...query,
+                    courseDegrees: trajectorySeed.courseDegrees,
+                    speedMps: trajectorySeed.speedMps,
+                    routeProvider: getDrivingRouteAsync,
+                })
+                : await refreshFuelPriceSnapshot({
+                    ...query,
+                });
             const freshSnapshot = result?.snapshot;
             const nextDebugState = result?.debugState
                 ? {
@@ -2024,6 +2698,41 @@ export default function HomeScreen() {
                 setFuelDebugState(nextDebugState);
             }
 
+            const stationDistanceSamples = Array.isArray(freshSnapshot?.topStations)
+                ? freshSnapshot.topStations
+                    .map(station => Number(station?.distanceMiles))
+                    .filter(value => Number.isFinite(value))
+                    .sort((left, right) => left - right)
+                : [];
+            const stationDistanceStats = stationDistanceSamples.length > 0
+                ? {
+                    min: stationDistanceSamples[0],
+                    max: stationDistanceSamples[stationDistanceSamples.length - 1],
+                    median: stationDistanceSamples[Math.floor(stationDistanceSamples.length / 2)],
+                    samples: stationDistanceSamples,
+                }
+                : null;
+
+            recordLocationProbeEvent({
+                type: 'fuel-fetch-end',
+                details: {
+                    query: {
+                        latitude,
+                        longitude,
+                        radiusMiles: searchRadiusMiles,
+                        fuelType: snapshotFuelGrade,
+                        preferredProvider,
+                    },
+                    status: 'completed',
+                    stationCount: Array.isArray(freshSnapshot?.topStations)
+                        ? freshSnapshot.topStations.length
+                        : 0,
+                    hasBestQuote: Boolean(freshSnapshot?.quote),
+                    locationSource,
+                    stationDistanceStats,
+                },
+            });
+
             router.prefetch?.('/trends');
             void prefetchTrendData({
                 latitude,
@@ -2062,10 +2771,28 @@ export default function HomeScreen() {
                     })
                 );
             }
+
+            recordLocationProbeEvent({
+                type: 'fuel-fetch-end',
+                details: {
+                    query: {
+                        latitude,
+                        longitude,
+                        radiusMiles: searchRadiusMiles,
+                        fuelType: snapshotFuelGrade,
+                        preferredProvider,
+                    },
+                    status: 'failed',
+                    error: error?.message || String(error || 'unknown-error'),
+                    locationSource,
+                },
+            });
         } finally {
             if (isMountedRef.current) {
                 setIsRefreshingPrices(false);
             }
+
+            void flushLocationProbeReportAsync();
         }
     };
 
@@ -2161,9 +2888,137 @@ export default function HomeScreen() {
             longitude: nextRegion.longitude,
             locationSource: nextRegion.locationSource || 'device',
             preferCached,
+            trajectorySeed: nextRegion.trajectorySeed || null,
             querySignature: nextQuerySignature,
         });
     };
+
+    // Keep a ref that always points at the latest closure of the movement
+    // check so the AppState listener below (which registers once) never sees
+    // a stale `loadFuelData` or `applyResolvedRegion`. This mirrors the
+    // "ref-of-latest-callback" pattern from React Hook FAQ.
+    const maybeRefreshDeviceLocationFromLastKnownRef = useRef(null);
+    maybeRefreshDeviceLocationFromLastKnownRef.current = maybeRefreshDeviceLocationFromLastKnown;
+
+    useEffect(() => {
+        recordLocationProbeEvent({
+            type: 'app-state-listener-registered',
+            details: {
+                initialState: AppState.currentState,
+                refCurrent: appStateRef.current,
+            },
+        });
+
+        const handleAppStateChange = (nextAppState) => {
+            const previousAppState = appStateRef.current;
+            appStateRef.current = nextAppState;
+
+            recordLocationProbeEvent({
+                type: 'app-state-change',
+                details: {
+                    previousAppState,
+                    nextAppState,
+                    hasBeenBackgroundedSinceLastActive: hasBeenBackgroundedSinceLastActiveRef.current,
+                },
+            });
+
+            if (nextAppState === 'background') {
+                // The user (or the OS) sent the app fully away from the
+                // foreground. Arm the tripwire so the NEXT `active`
+                // transition fires a movement check. We intentionally
+                // do NOT set the flag on `inactive` because the iOS
+                // control center pull-down fires `inactive` without
+                // actually backgrounding the app.
+                hasBeenBackgroundedSinceLastActiveRef.current = true;
+                return;
+            }
+
+            if (nextAppState === 'inactive') {
+                // `inactive` is the transient state between active and
+                // background. Ignore it — the subsequent `background`
+                // or `active` event tells us what actually happened.
+                return;
+            }
+
+            // nextAppState === 'active' from this point on.
+            // Cold-launch delivery order on iOS is `inactive → active`,
+            // so the first time we reach this branch the app just
+            // finished launching and the bootstrap path has already
+            // resolved the location. We only want to fire a movement
+            // check if the app has been fully backgrounded since that
+            // last active state.
+            if (!hasBeenBackgroundedSinceLastActiveRef.current) {
+                return;
+            }
+
+            hasBeenBackgroundedSinceLastActiveRef.current = false;
+
+            const isMovingToActive = true;
+
+            if (!isMovingToActive) {
+                return;
+            }
+
+            if (!isMountedRef.current) {
+                return;
+            }
+
+            recordLocationProbeEvent({
+                type: 'foreground-resume',
+                details: {
+                    previousAppState,
+                    nextAppState,
+                    isFocused: isFocusedRef.current,
+                    lastCheckAt: lastDeviceLocationCheckAtRef.current,
+                },
+            });
+
+            // Always run the movement check on a genuine background →
+            // active transition. The movement threshold (250m) and the
+            // in-flight guard protect us from wasted work when nothing
+            // has changed, so there is no need for an additional
+            // time-based debounce here. The `hasSeenBackgroundTransitionRef`
+            // flag above already rejects inactive → active flips.
+            if (isFocusedRef.current) {
+                const refresher = maybeRefreshDeviceLocationFromLastKnownRef.current;
+                if (refresher) {
+                    void refresher({
+                        reason: 'foreground-resume',
+                    });
+                }
+            } else {
+                pendingForegroundResumeCheckRef.current = true;
+            }
+        };
+
+        const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+        return () => {
+            subscription.remove();
+        };
+    }, []);
+
+    // If the app resumed while we were on a non-Home tab, run the deferred
+    // movement check as soon as Home gains focus again. This keeps the fuel
+    // state accurate without forcing a GPS fetch on every tab change.
+    useEffect(() => {
+        if (!isFocused) {
+            return;
+        }
+
+        if (!pendingForegroundResumeCheckRef.current) {
+            return;
+        }
+
+        pendingForegroundResumeCheckRef.current = false;
+
+        const refresher = maybeRefreshDeviceLocationFromLastKnownRef.current;
+        if (refresher) {
+            void refresher({
+                reason: 'foreground-resume-tab-return',
+            });
+        }
+    }, [isFocused]);
 
     useEffect(() => {
         if (!isInitialMapRegionReady || isMapLoaded) {
@@ -3996,6 +4851,17 @@ export default function HomeScreen() {
                     }}
                     onRegionChangeComplete={(region) => {
                         markMapLoaded();
+                        recordLocationProbeEvent({
+                            type: 'map-region-change-complete',
+                            details: {
+                                region: {
+                                    latitude: Number(region?.latitude),
+                                    longitude: Number(region?.longitude),
+                                    latitudeDelta: Number(region?.latitudeDelta),
+                                    longitudeDelta: Number(region?.longitudeDelta),
+                                },
+                            },
+                        });
                         if (suppressionRegionAnimationFrameRef.current != null) {
                             cancelAnimationFrame(suppressionRegionAnimationFrameRef.current);
                             suppressionRegionAnimationFrameRef.current = null;
@@ -4142,7 +5008,15 @@ export default function HomeScreen() {
                         key={isDark ? 'reload-dark' : 'reload-light'}
                     >
                         <Ionicons color={themeColors.text} name="refresh" size={16} />
-                        <Text style={[styles.reloadButtonText, { color: themeColors.text }]}>Reload</Text>
+                        <Text
+                            style={[styles.reloadButtonText, { color: themeColors.text }]}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.75}
+                            allowFontScaling={false}
+                        >
+                            Reload
+                        </Text>
                     </GlassView>
                 </Pressable>
             </View>
@@ -4255,6 +5129,7 @@ export default function HomeScreen() {
                                 isRefreshing={isRefreshingPrices || isLoadingLocation}
                                 themeColors={themeColors}
                                 glassTintColor={homeGlassTintColor}
+                                onNavigatePress={handleStationNavigatePress}
                             />
                         )}
                     />
@@ -4269,6 +5144,7 @@ export default function HomeScreen() {
                             isRefreshing={isRefreshingPrices || isLoadingLocation}
                             quote={displayBestQuote}
                             themeColors={themeColors}
+                            onNavigatePress={handleStationNavigatePress}
                         />
                     </View>
                 )}

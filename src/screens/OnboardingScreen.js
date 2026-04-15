@@ -32,9 +32,9 @@ import FuelUpHeaderLogo from '../components/FuelUpHeaderLogo';
 import PredictiveFuelingStep from './onboarding/predictive/PredictiveFuelingStep';
 import { registerForPushNotificationsAsync, savePushTokenToSupabase } from '../lib/notifications';
 import {
+    enablePredictiveLocationTrackingAsync,
     getPredictiveLocationPermissionStateAsync,
     openPredictiveLocationSettingsAsync,
-    requestPredictiveLocationPermissionsAsync,
 } from '../lib/predictiveLocation';
 import { FUEL_GRADE_ORDER, getFuelGradeMeta } from '../lib/fuelGrade';
 import {
@@ -158,11 +158,17 @@ const OnboardingChip = ({ price, isCheapest, isDark, top, left, isActive }) => {
                     tintColor={isDark ? '#FFFFFF' : '#000000'}
                     style={styles.demoChipIcon}
                 />
-                <Text style={[
-                    styles.demoChipText,
-                    { color: isDark ? '#FFFFFF' : '#000000' },
-                    isCheapest && styles.demoChipTextCheapest,
-                ]}>
+                <Text
+                    style={[
+                        styles.demoChipText,
+                        { color: isDark ? '#FFFFFF' : '#000000' },
+                        isCheapest && styles.demoChipTextCheapest,
+                    ]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.75}
+                    allowFontScaling={false}
+                >
                     ${price.toFixed(2)}
                 </Text>
             </GlassView>
@@ -399,10 +405,22 @@ function OctaneStep({ isDark, themeColors, insets, value, onChange }) {
                                         isSelected && { backgroundColor: isDark ? 'rgba(0,122,255,0.2)' : 'rgba(0,122,255,0.1)' },
                                     ]}
                                 >
-                                    <Text style={[styles.octaneNumber, { color: isSelected ? '#007AFF' : themeColors.text }]}>
+                                    <Text
+                                        style={[styles.octaneNumber, { color: isSelected ? '#007AFF' : themeColors.text }]}
+                                        numberOfLines={1}
+                                        adjustsFontSizeToFit
+                                        minimumFontScale={0.75}
+                                        allowFontScaling={false}
+                                    >
                                         {option.octane}
                                     </Text>
-                                    <Text style={[styles.octaneLabel, { color: themeColors.text }]}>
+                                    <Text
+                                        style={[styles.octaneLabel, { color: themeColors.text }]}
+                                        numberOfLines={1}
+                                        adjustsFontSizeToFit
+                                        minimumFontScale={0.75}
+                                        allowFontScaling={false}
+                                    >
                                         {option.label}
                                     </Text>
                                 </GlassView>
@@ -577,7 +595,15 @@ function AnimatedButtonContent({ text, icon, isDark }) {
     return (
         <View style={styles.continueButtonInnerWrapper}>
             <Animated.View style={[styles.continueButtonInner, animatedContentStyle]}>
-                <Text style={styles.continueText}>{currentText}</Text>
+                <Text
+                    style={styles.continueText}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.75}
+                    allowFontScaling={false}
+                >
+                    {currentText}
+                </Text>
                 <SymbolView
                     name={currentIcon}
                     size={18}
@@ -649,31 +675,38 @@ export default function OnboardingScreen() {
     }, []);
 
     const handleRequestPermission = async () => {
-        const nextPermissionState = await requestPredictiveLocationPermissionsAsync();
-        setLocationPermissionState(nextPermissionState);
+        try {
+            const nextPermissionState = await enablePredictiveLocationTrackingAsync();
+            setLocationPermissionState(nextPermissionState);
 
-        if (nextPermissionState.isReady) {
-            setTimeout(() => {
-                scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * SCREEN_WIDTH, animated: true });
-            }, 600);
-            return;
-        }
+            if (nextPermissionState.isReady) {
+                setTimeout(() => {
+                    scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * SCREEN_WIDTH, animated: true });
+                }, 600);
+                return;
+            }
 
-        if (nextPermissionState.needsSettings) {
-            Alert.alert(
-                'Finish Location Setup',
-                nextPermissionState.servicesEnabled
-                    ? 'Fuel Up still needs Always Allow and Precise Location in iPhone Settings to run predictive fueling in the background.'
-                    : 'Turn on Location Services in iPhone Settings, then come back and enable Always Allow and Precise Location.',
-                [
-                    { text: 'Not Now', style: 'cancel' },
-                    {
-                        text: 'Open Settings',
-                        onPress: () => {
-                            void openPredictiveLocationSettingsAsync();
+            if (nextPermissionState.needsSettings) {
+                Alert.alert(
+                    'Finish Location Setup',
+                    nextPermissionState.servicesEnabled
+                        ? 'Fuel Up still needs Always Allow and Precise Location in iPhone Settings to run predictive fueling in the background.'
+                        : 'Turn on Location Services in iPhone Settings, then come back and enable Always Allow and Precise Location.',
+                    [
+                        { text: 'Not Now', style: 'cancel' },
+                        {
+                            text: 'Open Settings',
+                            onPress: () => {
+                                void openPredictiveLocationSettingsAsync();
+                            },
                         },
-                    },
-                ]
+                    ]
+                );
+            }
+        } catch (error) {
+            Alert.alert(
+                'Unable To Enable Predictive Tracking',
+                'Background tracking can only be enabled from a development or production build.'
             );
         }
     };

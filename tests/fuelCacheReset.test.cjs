@@ -198,7 +198,7 @@ test('clearFuelPriceCache prevents in-flight requests from repopulating cached f
     }
 });
 
-test('refreshFuelPriceSnapshot does not call live GasBuddy without an explicit live opt-in', async () => {
+test('refreshFuelPriceSnapshot falls through to live GasBuddy when the Supabase cache is empty', async () => {
     const asyncStorageMock = createAsyncStorageMock();
     const asyncStoragePath = require.resolve('@react-native-async-storage/async-storage');
     const devCounterPath = require.resolve('../src/lib/devCounter.js');
@@ -247,11 +247,16 @@ test('refreshFuelPriceSnapshot does not call live GasBuddy without an explicit l
     const originalFetch = global.fetch;
     const originalDevFlag = global.__DEV__;
     let fetchCalled = false;
+    let fetchedUrl = null;
 
     global.__DEV__ = false;
-    global.fetch = async () => {
+    global.fetch = async (url) => {
         fetchCalled = true;
-        throw new Error('Live GasBuddy fetch should not run');
+        fetchedUrl = typeof url === 'string' ? url : url?.url || null;
+        // Simulate a network-level failure so the live path cannot produce
+        // quotes and we verify that the error propagates with the expected
+        // "no usable data" message.
+        throw new Error('Simulated GasBuddy live fetch failure');
     };
 
     try {
@@ -267,14 +272,18 @@ test('refreshFuelPriceSnapshot does not call live GasBuddy without an explicit l
             }),
             error => {
                 assert.equal(
-                    error?.userMessage,
-                    'No cached nearby GasBuddy prices are available yet. Try again after the next hourly refresh.'
+                    error?.message,
+                    'No fuel price providers returned usable data.'
                 );
                 return true;
             }
         );
 
-        assert.equal(fetchCalled, false);
+        assert.equal(fetchCalled, true, 'Expected live GasBuddy fetch to be invoked on cache miss.');
+        assert.ok(
+            fetchedUrl && fetchedUrl.includes('gasbuddy.com'),
+            `Expected live fetch to target gasbuddy.com, got ${fetchedUrl}`
+        );
     } finally {
         global.fetch = originalFetch;
         global.__DEV__ = originalDevFlag;

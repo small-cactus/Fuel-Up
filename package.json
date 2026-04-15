@@ -11,8 +11,11 @@
     "push:send": "node ./scripts/sendPushNotification.cjs",
     "route:probe": "swift ./scripts/predictiveRouteProbe.swift",
     "web": "expo start --web",
-    "test": "node --test ./tests/fuelDataContracts.test.cjs ./tests/fuelCacheReset.test.cjs ./tests/trendData.test.cjs ./tests/priceValidation.test.cjs ./tests/fuelGradeValidation.test.mjs ./tests/homeLaunch.test.mjs ./tests/homeState.test.mjs ./tests/clusterMarkerOverlayMemo.test.mjs ./tests/predictiveFuelingDemo.test.cjs",
-    "test:cluster": "node --test ./tests/clusterAnimationMath.test.cjs ./tests/clusterProbe.integration.test.cjs"
+    "test": "node --test ./tests/fuelDataContracts.test.cjs ./tests/fuelCacheReset.test.cjs ./tests/trendData.test.cjs ./tests/priceValidation.test.cjs ./tests/fuelGradeValidation.test.mjs ./tests/homeLaunch.test.mjs ./tests/homeState.test.mjs ./tests/clusterMarkerOverlayMemo.test.mjs ./tests/predictiveFuelingDemo.test.cjs ./tests/locationRefresh.test.mjs ./tests/locationMovementScenarios.test.mjs ./tests/horizontalTextLayout.test.mjs ./tests/searchRadiusRange.test.mjs",
+    "test:predictive": "node --test ./tests/predictiveFuelingEngine.test.cjs ./tests/predictiveRecommender.test.cjs ./tests/rangeEstimator.test.cjs ./tests/mlPredictor.test.cjs ./tests/userFuelingProfile.test.cjs ./tests/fuelerSimulation.test.cjs ./tests/trajectoryFuelFetch.test.cjs ./tests/trajectoryFuelService.test.cjs ./tests/predictiveLocationPrefetchController.test.cjs ./tests/predictiveSystem.test.cjs",
+    "test:predictive:sim": "node --test ./tests/predictiveSystem.integration.test.cjs",
+    "test:cluster": "node --test ./tests/clusterAnimationMath.test.cjs ./tests/clusterProbe.integration.test.cjs",
+    "test:location": "node --test ./tests/locationRefresh.test.mjs ./tests/locationMovementScenarios.test.mjs ./tests/locationProbe.integration.test.cjs"
   },
   "dependencies": {
     "@callstack/liquid-glass": "^0.7.0",

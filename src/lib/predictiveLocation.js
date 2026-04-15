@@ -126,6 +126,17 @@ export async function requestPredictiveLocationPermissionsAsync() {
     });
 }
 
+export async function enablePredictiveLocationTrackingAsync(options = {}) {
+    const permissionState = await requestPredictiveLocationPermissionsAsync();
+
+    if (!permissionState.isReady) {
+        return permissionState;
+    }
+
+    await startPredictiveLocationUpdatesAsync(options);
+    return permissionState;
+}
+
 export function subscribeToPredictiveLocationUpdates(listener) {
     backgroundLocationListeners.add(listener);
 
@@ -153,6 +164,12 @@ export async function startPredictiveLocationUpdatesAsync(options = {}) {
 
     if (!isTaskManagerAvailable) {
         throw new Error('Background location requires a development or production build.');
+    }
+
+    const hasStarted = await Location.hasStartedLocationUpdatesAsync(PREDICTIVE_LOCATION_TASK_NAME);
+
+    if (hasStarted) {
+        return;
     }
 
     await Location.startLocationUpdatesAsync(
