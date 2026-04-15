@@ -256,12 +256,23 @@ export async function fetchTrendData({
         }
     });
 
-    // 1. Average prices grouped by day (for the main chart)
-    const averagePricesByDay = buildAveragePriceTrendSeries(displayedRows);
+    // 1. Average prices grouped by day (for the main chart). If we only have
+    // a single history bucket, fall back to the live current average so the
+    // chart stays truthful without inventing a synthetic trend.
+    const historicalAveragePricesByDay = buildAveragePriceTrendSeries(displayedRows);
+    const hasHistoricalTrendSeries = historicalAveragePricesByDay.length >= 2;
+    const averagePricesByDay = hasHistoricalTrendSeries
+        ? historicalAveragePricesByDay
+        : buildAveragePriceTrendSeries(displayedRows, {
+            fallbackLatestQuotes: rankedLatestQuotes,
+        });
+    const trendSeriesMode = hasHistoricalTrendSeries
+        ? 'historical'
+        : (averagePricesByDay.length >= 2 ? 'current_average_snapshot' : 'empty');
 
     // Determine overall area trend
     let overallTrend = null;
-    if (averagePricesByDay.length >= 2) {
+    if (hasHistoricalTrendSeries && averagePricesByDay.length >= 2) {
         const firstPrice = averagePricesByDay[0].price;
         const lastPrice = averagePricesByDay[averagePricesByDay.length - 1].price;
         const delta = lastPrice - firstPrice;
@@ -408,6 +419,7 @@ export async function fetchTrendData({
     return {
         overallTrend,
         averagePricesByDay,
+        trendSeriesMode,
         leaderboard,
         leaderboardLastChangedAt,
         competitorClusters: competitorClusters.slice(0, 5), // Top 5 competitive blocks

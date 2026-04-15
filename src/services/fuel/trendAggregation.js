@@ -31,7 +31,55 @@ function buildAggregatedAveragePrices(rows, getBucketStart) {
         }));
 }
 
-function buildAveragePriceTrendSeries(rows) {
+function resolveSnapshotObservedAtMs(latestQuotes, fallbackNowMs) {
+    const observedAtCandidates = (latestQuotes || [])
+        .map(quote => (
+            Date.parse(quote?.updatedAt || '') ||
+            Date.parse(quote?.fetchedAt || '')
+        ))
+        .filter(timestampMs => Number.isFinite(timestampMs));
+
+    if (observedAtCandidates.length > 0) {
+        return Math.max(...observedAtCandidates);
+    }
+
+    return fallbackNowMs;
+}
+
+function buildCurrentAverageSnapshotSeries(latestQuotes, options = {}) {
+    const {
+        nowMs = Date.now(),
+        fallbackWindowMs = 60 * 60 * 1000,
+    } = options;
+    const currentPrices = (latestQuotes || [])
+        .map(quote => Number(quote?.price))
+        .filter(price => Number.isFinite(price) && price > 0);
+
+    if (currentPrices.length === 0) {
+        return [];
+    }
+
+    const averageCurrentPrice = currentPrices.reduce((sum, price) => sum + price, 0) / currentPrices.length;
+    const observedAtMs = resolveSnapshotObservedAtMs(latestQuotes, nowMs);
+    const startTimestampMs = Math.max(0, observedAtMs - fallbackWindowMs);
+
+    return [
+        {
+            date: new Date(startTimestampMs).toISOString(),
+            price: averageCurrentPrice,
+        },
+        {
+            date: new Date(observedAtMs).toISOString(),
+            price: averageCurrentPrice,
+        },
+    ];
+}
+
+function buildAveragePriceTrendSeries(rows, options = {}) {
+    const {
+        fallbackLatestQuotes = [],
+        nowMs = Date.now(),
+    } = options;
     const averagePricesByDay = buildAggregatedAveragePrices(rows, timestampMs => {
         const bucketStart = new Date(timestampMs);
         bucketStart.setUTCHours(0, 0, 0, 0);
@@ -52,9 +100,22 @@ function buildAveragePriceTrendSeries(rows) {
         return averagePricesByHour;
     }
 
+    if (averagePricesByDay.length >= 2) {
+        return averagePricesByDay;
+    }
+
+    const currentAverageSnapshotSeries = buildCurrentAverageSnapshotSeries(fallbackLatestQuotes, {
+        nowMs,
+    });
+
+    if (currentAverageSnapshotSeries.length >= 2) {
+        return currentAverageSnapshotSeries;
+    }
+
     return averagePricesByDay;
 }
 
 module.exports = {
     buildAveragePriceTrendSeries,
+    buildCurrentAverageSnapshotSeries,
 };

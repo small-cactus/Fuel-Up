@@ -53,79 +53,6 @@ const COLORS = {
     GRADIENT_RED_ALPHA_DARK: 1,
 };
 
-function buildMockTrendData() {
-    const now = new Date();
-    const buildDay = (daysAgo, price) => {
-        const date = new Date(now);
-        date.setDate(now.getDate() - daysAgo);
-        return {
-            date: date.toISOString(),
-            price,
-        };
-    };
-
-    return {
-        averagePricesByDay: [
-            buildDay(6, 3.79),
-            buildDay(5, 3.76),
-            buildDay(4, 3.74),
-            buildDay(3, 3.71),
-            buildDay(2, 3.69),
-            buildDay(1, 3.67),
-            buildDay(0, 3.64),
-        ],
-        overallTrend: {
-            isDecrease: true,
-            delta: -0.15,
-        },
-        leaderboardLastChangedAt: new Date(now.getTime() - (12 * 60 * 1000)).toISOString(),
-        leaderboard: [
-            {
-                stationId: 'mock-1',
-                name: 'Shell',
-                address: '1200 Main St, Cupertino, CA',
-                distanceMiles: 0.8,
-                latestPrice: 3.59,
-                rankShift: 1,
-            },
-            {
-                stationId: 'mock-2',
-                name: 'Chevron',
-                address: '1980 Stevens Creek Blvd, Cupertino, CA',
-                distanceMiles: 1.1,
-                latestPrice: 3.62,
-                rankShift: 0,
-            },
-            {
-                stationId: 'mock-3',
-                name: '76',
-                address: '10455 N De Anza Blvd, Cupertino, CA',
-                distanceMiles: 1.5,
-                latestPrice: 3.64,
-                rankShift: -1,
-            },
-        ],
-        competitorClusters: [
-            {
-                stations: [
-                    { name: 'Shell' },
-                    { name: 'Chevron' },
-                ],
-                totalUpdates: 18,
-                averageJumpAmount: 0.06,
-            },
-            {
-                stations: [
-                    { name: 'Arco' },
-                    { name: '76' },
-                ],
-                totalUpdates: 11,
-                averageJumpAmount: 0.04,
-            },
-        ],
-    };
-}
-
 function clamp01(value) {
     return Math.min(1, Math.max(0, value));
 }
@@ -250,10 +177,10 @@ function areGradientColorSetsEqual(left, right) {
     return left.every((color, index) => color === right[index]);
 }
 
-function ContainerlessAreaChart({ data, width, height, isDark, trendColor }) {
+function ContainerlessAreaChart({ data, width, height, isDark, trendColor, topBleed = 40 }) {
     if (!data || data.length === 0) return null;
 
-    const margin = { top: 40, right: 0, bottom: 0, left: 0 };
+    const margin = { top: topBleed, right: 0, bottom: 0, left: 0 };
     const chartWidth = width - margin.left - margin.right;
     const chartHeight = height - margin.top - margin.bottom;
 
@@ -383,7 +310,7 @@ export default function TrendsScreen() {
         const initialGradientData = liveCachedTrendData || getLastResolvedTrendData(currentTrendRequestKey) || null;
         return buildTrendBackgroundGradientColors({
             direction: getTrendDirectionFromData(initialGradientData),
-            isDark: false,
+            isDark,
         });
     });
     const [incomingGradientColors, setIncomingGradientColors] = useState(null);
@@ -730,28 +657,20 @@ export default function TrendsScreen() {
         })();
     }, [currentTrendRequestKey, loadTrendData]);
 
-    const mockTrendData = useMemo(() => buildMockTrendData(), []);
     const resolvedTrendData = trendData || liveCachedTrendData || null;
     const fallbackResolvedTrendData = currentTrendRequestKey
         ? getLastResolvedTrendData(currentTrendRequestKey)
         : null;
     const realDisplayTrendData = resolvedTrendData || fallbackResolvedTrendData || null;
     const displayTrendData = realDisplayTrendData;
-    const hasRealHeroTrendData = Boolean(realDisplayTrendData?.averagePricesByDay?.length > 1);
-    const heroTrendData = hasRealHeroTrendData
-        ? realDisplayTrendData
-        : mockTrendData;
-    const isHeroPreview = !hasRealHeroTrendData;
-    const gradientSourceData = realDisplayTrendData || null;
+    const heroTrendData = displayTrendData;
+    const hasHeroTrendData = Boolean(heroTrendData?.averagePricesByDay?.length > 1);
+    const gradientSourceData = displayTrendData || null;
     const heroTrendDirection = useMemo(
-        () => getTrendDirectionFromData(heroTrendData),
+        () => getTrendDirectionFromData(heroTrendData || null),
         [heroTrendData]
     );
     const primaryTrendColor = useMemo(() => {
-        if (isHeroPreview) {
-            return isDark ? 'rgba(255,255,255,0.82)' : 'rgba(15,23,42,0.82)';
-        }
-
         if (heroTrendDirection === 'lower') {
             return COLORS.GREEN;
         }
@@ -761,7 +680,7 @@ export default function TrendsScreen() {
         }
 
         return themeColors.text;
-    }, [heroTrendDirection, isDark, isHeroPreview, themeColors.text]);
+    }, [heroTrendDirection, themeColors.text]);
     const targetGradientColors = useMemo(() => (
         buildTrendBackgroundGradientColors({
             direction: getTrendDirectionFromData(gradientSourceData),
@@ -820,6 +739,11 @@ export default function TrendsScreen() {
             heroTrendData.averagePricesByDay[0]?.price
         );
     }, [heroTrendData]);
+    const shouldShowAwaitingLocalHistoryText = hasHeroTrendData && (
+        heroTrendDirection === 'flat' ||
+        heroTrendDirection == null ||
+        !heroTrendData?.overallTrend
+    );
     const darkModeWeightStyle = useMemo(() => ({
         heroSub: { fontWeight: isDark ? '600' : '700' },
         heroPrice: { fontWeight: isDark ? '700' : '800' },
@@ -879,28 +803,30 @@ export default function TrendsScreen() {
                 >
                     <View style={styles.contentWrap}>
                             {/* 1. Containerless Area Chart (Bleeding Edges) */}
-                            {heroTrendData?.averagePricesByDay?.length > 1 ? (
+                            {hasHeroTrendData ? (
                                 <View style={styles.heroGraphSection}>
                                     <View style={styles.heroGraphPad}>
                                         <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>
-                                            {isHeroPreview
-                                                ? `${selectedFuelGradeMeta.label} Trend Preview`
-                                                : `Your ${selectedFuelGradeMeta.label} Local Average`}
+                                            Your {selectedFuelGradeMeta.label} Local Average
                                         </Text>
                                         <View style={styles.heroPriceRow}>
                                             <Text style={[styles.heroPrice, numericTextStyle, darkModeWeightStyle.heroPrice, { color: themeColors.text }]}>
                                                 ${heroTrendData.averagePricesByDay[heroTrendData.averagePricesByDay.length - 1].price.toFixed(2)}
                                             </Text>
-                                            <Text style={[styles.heroDelta, numericTextStyle, darkModeWeightStyle.heroDelta, { color: primaryTrendColor }]}>
-                                                {heroDeltaLabel}
-                                            </Text>
+                                            {heroDeltaLabel ? (
+                                                <Text style={[styles.heroDelta, numericTextStyle, darkModeWeightStyle.heroDelta, { color: primaryTrendColor }]}>
+                                                    {heroDeltaLabel}
+                                                </Text>
+                                            ) : null}
                                         </View>
-                                        {isHeroPreview ? (
-                                            <Text style={[styles.heroPreviewText, darkModeWeightStyle.itemSub, { color: themeColors.textOpacity }]}>
+                                    </View>
+                                    {shouldShowAwaitingLocalHistoryText ? (
+                                        <View style={styles.heroStatusWrap}>
+                                            <Text style={[styles.heroPreviewText, darkModeWeightStyle.itemSub, { color: themeColors.text }]}>
                                                 We&apos;re still collecting enough local history to replace this preview with live trend data.
                                             </Text>
-                                        ) : null}
-                                    </View>
+                                        </View>
+                                    ) : null}
 
                                     <ContainerlessAreaChart
                                         data={heroTrendData.averagePricesByDay}
@@ -908,6 +834,7 @@ export default function TrendsScreen() {
                                         height={CHART_HEIGHT}
                                         isDark={isDark}
                                         trendColor={primaryTrendColor}
+                                        topBleed={shouldShowAwaitingLocalHistoryText ? 0 : 40}
                                     />
 
                                     <View style={styles.heroAxis}>
@@ -1183,10 +1110,15 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
     heroPreviewText: {
-        marginTop: 8,
         fontSize: 13,
         lineHeight: 18,
         letterSpacing: -0.2,
+    },
+    heroStatusWrap: {
+        minHeight: 40,
+        paddingHorizontal: 24,
+        paddingTop: 8,
+        paddingBottom: 12,
     },
     heroChartPlaceholderWrap: {
         width: '100%',

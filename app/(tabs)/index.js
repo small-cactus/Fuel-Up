@@ -60,7 +60,6 @@ import {
 } from '../../src/lib/fuelSearchState';
 import {
     buildPersistentSuppressedStationIds,
-    canRevealActiveStation,
     buildHomeFilterSignature,
     buildHomeQuerySignature,
     buildVisibleSuppressedStationIds,
@@ -941,7 +940,8 @@ function buildSuppressedOverlapStationIds(
     screenWidth,
     screenHeight,
     userLocation = null,
-    previousSuppressedStationIds = null
+    previousSuppressedStationIds = null,
+    activeStationId = null
 ) {
     if (!Array.isArray(stationQuotes) || stationQuotes.length <= 1 || !mapRegion) {
         return new Set();
@@ -963,6 +963,7 @@ function buildSuppressedOverlapStationIds(
     const previousSuppressedIds = previousSuppressedStationIds instanceof Set
         ? previousSuppressedStationIds
         : new Set(previousSuppressedStationIds || []);
+    const normalizedActiveStationId = activeStationId == null ? null : String(activeStationId);
     const hasValidUserLocation = (
         typeof userLocation?.latitude === 'number' &&
         typeof userLocation?.longitude === 'number'
@@ -977,6 +978,9 @@ function buildSuppressedOverlapStationIds(
         : null;
 
     orderedQuotes.forEach(quote => {
+        const stationIdString = String(quote.stationId);
+        const isActiveStation = normalizedActiveStationId != null &&
+            stationIdString === normalizedActiveStationId;
         const x = (quote.longitude - centerLng) * ptPerLng;
         const y = -(quote.latitude - centerLat) * ptPerLat;
         const rect = {
@@ -993,21 +997,32 @@ function buildSuppressedOverlapStationIds(
         };
 
         const overlapsVisible = visibleRects.some(visibleRect => doRectsTouch(rect, visibleRect));
-        const shouldKeepSuppressedForRevealSpacing = previousSuppressedIds.has(String(quote.stationId)) &&
+        const shouldKeepSuppressedForRevealSpacing = previousSuppressedIds.has(stationIdString) &&
             visibleRects.some(visibleRect => doRectsTouch(rect, expandRect(visibleRect, SUPPRESSION_REVEAL_PADDING)));
         const overlapsUserLocationBubble = userLocationRect
             ? doRectsTouch(userOverlapRect, userLocationRect)
             : false;
-        const shouldKeepSuppressedNearUserLocation = previousSuppressedIds.has(String(quote.stationId)) && userLocationRect
+        const shouldKeepSuppressedNearUserLocation = previousSuppressedIds.has(stationIdString) && userLocationRect
             ? doRectsTouch(userOverlapRect, expandRect(userLocationRect, SUPPRESSION_REVEAL_PADDING))
             : false;
+        // The station the user just explicitly focused (by tapping its marker or
+        // scrolling the carousel to it) always bypasses every suppression rule —
+        // reveal-spacing stability AND the underlying hard-overlap check. At the
+        // densest real-world zoom the map allows, two stations can still sit on top
+        // of each other (e.g. adjacent gas stations on opposite corners of an
+        // intersection), and without this bypass the chip the user is trying to
+        // view would stay stuck hidden. Because ActiveStationOverlay is rendered
+        // with a higher z-index than the base StationMarkers, the active pill reads
+        // clearly even when the underlying pills visually overlap.
         if (
-            overlapsVisible ||
-            overlapsUserLocationBubble ||
-            shouldKeepSuppressedForRevealSpacing ||
-            shouldKeepSuppressedNearUserLocation
+            !isActiveStation && (
+                overlapsVisible ||
+                overlapsUserLocationBubble ||
+                shouldKeepSuppressedForRevealSpacing ||
+                shouldKeepSuppressedNearUserLocation
+            )
         ) {
-            suppressedIds.add(String(quote.stationId));
+            suppressedIds.add(stationIdString);
             return;
         }
 
@@ -3281,6 +3296,7 @@ export default function HomeScreen() {
         const previousSuppressedStationIds = previousSuppressedStationSignatureRef.current === stationQuotesSignature
             ? previousSuppressedStationIdsRef.current
             : new Set();
+        const activeStationId = stationQuotes[activeIndex]?.stationId ?? null;
 
         return buildSuppressedOverlapStationIds(
             stationQuotes,
@@ -3288,9 +3304,10 @@ export default function HomeScreen() {
             width,
             height,
             hasLocationPermission ? userLocationBubble : null,
-            previousSuppressedStationIds
+            previousSuppressedStationIds,
+            activeStationId
         );
-    }, [stationQuotes, stationQuotesSignature, suppressionRegion, width, height, hasLocationPermission, userLocationBubble]);
+    }, [activeIndex, stationQuotes, stationQuotesSignature, suppressionRegion, width, height, hasLocationPermission, userLocationBubble]);
     useEffect(() => {
         if (suppressionRevealDelayTimeoutRef.current) {
             clearTimeout(suppressionRevealDelayTimeoutRef.current);
@@ -3343,12 +3360,20 @@ export default function HomeScreen() {
         setEffectiveSuppressedStationIds(currentValue => {
             const visibleStationIds = new Set(stationQuotes.map(quote => String(quote.stationId)));
             const activeStationId = stationQuotes[activeIndex]?.stationId ?? null;
-            const shouldRevealCommittedActiveStation = canRevealActiveStation({
-                activeStationId,
-                currentSuppressedStationIds: rawSuppressedOverlapStationIds,
-                isMapMoving,
-                isSuppressionRevealAllowed,
-            });
+            // The active station bypasses every suppression rule in
+            // buildSuppressedOverlapStationIds, so it is never in
+            // rawSuppressedOverlapStationIds. Reveal it as soon as the user
+            // selects it — waiting for isMapMoving/isSuppressionRevealAllowed to
+            // settle would introduce a ~1s delay (600 ms map-idle grace +
+            // 360 ms stability window) between the tap/scroll and the pill
+            // reappearing, which reads as "the bug isn't fixed" to the user.
+            // The isMapMoving/isSuppressionRevealAllowed gating was meant to
+            // avoid flicker from overlap transients during passive panning, but
+            // this is an explicit user commit, so immediate reveal is correct.
+            const shouldRevealCommittedActiveStation = (
+                activeStationId != null &&
+                !rawSuppressedOverlapStationIds.has(String(activeStationId))
+            );
             const nextSuppressedIds = buildPersistentSuppressedStationIds({
                 currentSuppressedStationIds: rawSuppressedOverlapStationIds,
                 previousPersistentSuppressedStationIds: currentValue,

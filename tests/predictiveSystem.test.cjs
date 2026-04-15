@@ -113,6 +113,32 @@ function createRouteProvider({
     });
 }
 
+function habitVisit(stationId, timestampMs, visitCount = 5) {
+    return {
+        stationId,
+        visitCount,
+        lastVisitMs: timestampMs - 86_400_000,
+        visitTimestamps: [
+            timestampMs - 86_400_000,
+            timestampMs - (3 * 86_400_000),
+            timestampMs - (8 * 86_400_000),
+        ],
+        contextCounts: {
+            total: visitCount,
+            highway: 0,
+            suburban: 0,
+            city: visitCount,
+            city_grid: 0,
+            weekday: visitCount,
+            weekend: 0,
+            morning: visitCount,
+            midday: 0,
+            evening: 0,
+            night: 0,
+        },
+    };
+}
+
 async function runIntegratedScenario({
     timestampMs,
     locationPayload,
@@ -243,7 +269,7 @@ test('predictive system matrix covers broad live scenarios and edge cases', asyn
             profile: {
                 preferredBrands: ['Shell'],
                 brandLoyalty: 0.6,
-                visitHistory: [{ stationId: 'habit-shell', visitCount: 5, lastVisitMs: timestampMs - 86_400_000, visitTimestamps: [timestampMs - 86_400_000] }],
+                visitHistory: [habitVisit('habit-shell', timestampMs)],
                 fillUpHistory: [],
             },
             urgency: 0.95,
@@ -262,7 +288,7 @@ test('predictive system matrix covers broad live scenarios and edge cases', asyn
         const profile = {
             preferredBrands: ['Shell'],
             brandLoyalty: 0.6,
-            visitHistory: [{ stationId: 'habit-shell', visitCount: 5, lastVisitMs: timestampMs - 86_400_000, visitTimestamps: [timestampMs - 86_400_000] }],
+            visitHistory: [habitVisit('habit-shell', timestampMs)],
             fillUpHistory: [],
         };
         const baseParams = {
@@ -345,7 +371,7 @@ test('predictive system matrix covers broad live scenarios and edge cases', asyn
             profile: {
                 preferredBrands: ['Shell'],
                 brandLoyalty: 0.6,
-                visitHistory: [{ stationId: 'habit-shell', visitCount: 5, lastVisitMs: timestampMs - 86_400_000, visitTimestamps: [timestampMs - 86_400_000] }],
+                visitHistory: [habitVisit('habit-shell', timestampMs)],
                 fillUpHistory: [],
             },
             urgency: 0.95,

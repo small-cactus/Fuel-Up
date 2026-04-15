@@ -104,6 +104,47 @@ function projectStationOntoTrajectory(window, station) {
   return { alongTrack, crossTrack, motionLength, distance };
 }
 
+function computeTurnTowardStationScore(window, station) {
+  if (!Array.isArray(window) || window.length < 4) return 0;
+  const startA = window[0];
+  const startB = window[Math.min(2, window.length - 1)];
+  const endA = window[Math.max(0, window.length - 3)];
+  const endB = window[window.length - 1];
+  const startHeading = calculateHeadingDegrees(
+    { latitude: startA.latitude, longitude: startA.longitude },
+    { latitude: startB.latitude, longitude: startB.longitude }
+  );
+  const endHeading = calculateHeadingDegrees(
+    { latitude: endA.latitude, longitude: endA.longitude },
+    { latitude: endB.latitude, longitude: endB.longitude }
+  );
+  const startBearing = calculateHeadingDegrees(
+    { latitude: startA.latitude, longitude: startA.longitude },
+    { latitude: station.latitude, longitude: station.longitude }
+  );
+  const endBearing = calculateHeadingDegrees(
+    { latitude: endB.latitude, longitude: endB.longitude },
+    { latitude: station.latitude, longitude: station.longitude }
+  );
+  const startDelta = angularDifference(startHeading, startBearing);
+  const endDelta = angularDifference(endHeading, endBearing);
+  return clamp((startDelta - endDelta) / 50, 0, 1);
+}
+
+function computeCrossTrackConvergenceScore(window, station) {
+  if (!Array.isArray(window) || window.length < 6) return 0;
+  const midpoint = Math.floor(window.length / 2);
+  const earlyWindow = window.slice(0, midpoint + 1);
+  const lateWindow = window.slice(midpoint);
+  if (earlyWindow.length < 3 || lateWindow.length < 3) return 0;
+  const earlyProjection = projectStationOntoTrajectory(earlyWindow, station);
+  const lateProjection = projectStationOntoTrajectory(lateWindow, station);
+  if (!Number.isFinite(earlyProjection.crossTrack) || !Number.isFinite(lateProjection.crossTrack)) {
+    return 0;
+  }
+  return clamp((earlyProjection.crossTrack - lateProjection.crossTrack) / 120, 0, 1);
+}
+
 // Fit a simple least-squares line to distance-vs-time, returning slope in
 // meters/second (negative = approaching, positive = receding).
 function fitDistanceSlope(window, station) {
@@ -184,6 +225,7 @@ function scoreStation(window, station, opts, allCandidateStations) {
       decelScore: 0,
       pathScore: 0,
       cpaScore: 0,
+      captureScore: 0,
       historyScore: 0,
       timePatternScore: 0,
       intentScore: 0,
@@ -301,6 +343,12 @@ function scoreStation(window, station, opts, allCandidateStations) {
     // Allow slight overshoot (e.g. ~30m) without hard-penalizing — GPS is noisy.
     cpaScore = 1 - smoothstep(-30, -200, proj.alongTrack);
   }
+  const captureScore = clamp(
+    (computeTurnTowardStationScore(window, station) * 0.58) +
+    (computeCrossTrackConvergenceScore(window, station) * 0.42),
+    0,
+    1
+  );
 
   // --- Intent signals (history, time pattern, urgency) ---
   // Use the newest sample's timestamp as "now" so unit tests can simulate
@@ -325,6 +373,9 @@ function scoreStation(window, station, opts, allCandidateStations) {
     decelScore * decelWeight +
     pathScore * pathWeight +
     intentScore * intentWeight;
+  if (captureScore > 0) {
+    base += captureScore * 0.12;
+  }
 
   // CPA gate (multiplicative). Station behind vehicle hard-suppresses trigger.
   base *= cpaScore;
@@ -438,6 +489,7 @@ function scoreStation(window, station, opts, allCandidateStations) {
     decelScore,
     pathScore,
     cpaScore,
+    captureScore,
     historyScore,
     timePatternScore,
     intentScore,

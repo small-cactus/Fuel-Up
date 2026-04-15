@@ -60,6 +60,10 @@ const PROFILE_PRESETS = {
   },
 };
 
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
 /**
  * Compute a profile-based bonus score (0–0.25) for a station.
  * Higher score = user more likely to choose this station based on history/preference.
@@ -195,6 +199,205 @@ function computeHistoryScore(station, profile, nowMs) {
   return Math.min(1, recency * frequency);
 }
 
+function classifyVisitDaypart(hour) {
+  const normalizedHour = Number.isFinite(Number(hour)) ? Number(hour) : 12;
+  if (normalizedHour < 6) return 'night';
+  if (normalizedHour < 11) return 'morning';
+  if (normalizedHour < 16) return 'midday';
+  if (normalizedHour < 21) return 'evening';
+  return 'night';
+}
+
+function inferContextCounts(entry = {}) {
+  const inferred = {
+    total: Number(entry.visitCount) || 0,
+    highway: 0,
+    suburban: 0,
+    city: 0,
+    city_grid: 0,
+    weekday: 0,
+    weekend: 0,
+    morning: 0,
+    midday: 0,
+    evening: 0,
+    night: 0,
+  };
+  const timestamps = Array.isArray(entry.visitTimestamps) ? entry.visitTimestamps : [];
+  if (!timestamps.length) {
+    return inferred;
+  }
+  inferred.total = Math.max(inferred.total, timestamps.length);
+  for (const timestamp of timestamps) {
+    const date = new Date(timestamp);
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    inferred[isWeekend ? 'weekend' : 'weekday'] += 1;
+    inferred[classifyVisitDaypart(date.getHours())] += 1;
+  }
+  return inferred;
+}
+
+function getEntryContextCounts(entry = {}) {
+  const stored = entry.contextCounts && typeof entry.contextCounts === 'object'
+    ? entry.contextCounts
+    : null;
+  if (!stored) {
+    return inferContextCounts(entry);
+  }
+  const inferred = inferContextCounts(entry);
+  return {
+    total: Math.max(Number(stored.total) || 0, inferred.total),
+    highway: Number(stored.highway) || 0,
+    suburban: Number(stored.suburban) || 0,
+    city: Number(stored.city) || 0,
+    city_grid: Number(stored.city_grid) || 0,
+    weekday: Math.max(Number(stored.weekday) || 0, inferred.weekday),
+    weekend: Math.max(Number(stored.weekend) || 0, inferred.weekend),
+    morning: Math.max(Number(stored.morning) || 0, inferred.morning),
+    midday: Math.max(Number(stored.midday) || 0, inferred.midday),
+    evening: Math.max(Number(stored.evening) || 0, inferred.evening),
+    night: Math.max(Number(stored.night) || 0, inferred.night),
+  };
+}
+
+function computeContextMatchFromCounts(counts = {}, nowMs, context = {}) {
+  const totalVisits = Math.max(
+    1,
+    Number(counts.total) ||
+    Number(counts.exposureCount) ||
+    Number(counts.visitCount) ||
+    0
+  );
+  const date = new Date(nowMs || Date.now());
+  const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+  const weekdayMatch = (counts[isWeekend ? 'weekend' : 'weekday'] || 0) / totalVisits;
+  const daypartMatch = (counts[classifyVisitDaypart(date.getHours())] || 0) / totalVisits;
+  const driveContextKey = inferDriveContextKey(context);
+  const driveContextMatch = (counts[driveContextKey] || 0) / totalVisits;
+  return Math.max(
+    0,
+    Math.min(
+      1,
+      (weekdayMatch * 0.28) +
+      (daypartMatch * 0.34) +
+      (driveContextMatch * 0.38)
+    )
+  );
+}
+
+function inferDriveContextKey(context = {}) {
+  if (context.scenarioHint === 'highway' || context.isHighwayCruise) return 'highway';
+  if (context.scenarioHint === 'city_grid' || context.isCityGridLike) return 'city_grid';
+  const meanSpeedMps = Number(context.meanSpeedMps) || 0;
+  if (meanSpeedMps >= 20) return 'highway';
+  if (meanSpeedMps >= 11) return 'suburban';
+  return 'city';
+}
+
+function computeContextualHistoryScore(station, profile, nowMs, context = {}) {
+  if (!profile || !Array.isArray(profile.visitHistory) || profile.visitHistory.length === 0) {
+    return 0;
+  }
+  const entry = profile.visitHistory.find(h => h.stationId === station.stationId);
+  if (!entry) return 0;
+
+  const baseHistory = computeHistoryScore(station, profile, nowMs);
+  const counts = getEntryContextCounts(entry);
+  const contextMatch = computeContextMatchFromCounts(counts, nowMs, context);
+
+  return Math.min(1, baseHistory * (0.30 + (contextMatch * 0.70)));
+}
+
+function computeHistoryContextMatch(station, profile, nowMs, context = {}) {
+  const baseHistory = computeHistoryScore(station, profile, nowMs);
+  if (baseHistory <= 0) return 0;
+  return Math.max(0, Math.min(1, computeContextualHistoryScore(station, profile, nowMs, context) / baseHistory));
+}
+
+function computeVisitShare(station, profile) {
+  if (!profile || !Array.isArray(profile.visitHistory) || profile.visitHistory.length === 0) return 0;
+  const totalVisits = profile.visitHistory.reduce((sum, entry) => sum + (Number(entry?.visitCount) || 0), 0);
+  if (totalVisits <= 0) return 0;
+  const entry = profile.visitHistory.find(historyEntry => historyEntry.stationId === station.stationId);
+  return entry ? Math.min(1, (Number(entry.visitCount) || 0) / totalVisits) : 0;
+}
+
+function computeProfileHistoryConcentration(profile) {
+  if (!profile || !Array.isArray(profile.visitHistory) || profile.visitHistory.length === 0) return 0;
+  const totalVisits = profile.visitHistory.reduce((sum, entry) => sum + (Number(entry?.visitCount) || 0), 0);
+  if (totalVisits <= 0) return 0;
+  const maxVisits = profile.visitHistory.reduce(
+    (currentMax, entry) => Math.max(currentMax, Number(entry?.visitCount) || 0),
+    0
+  );
+  return Math.min(1, maxVisits / totalVisits);
+}
+
+function getExposureEntry(station, profile) {
+  if (!station || !profile || !Array.isArray(profile.exposureHistory)) return null;
+  return profile.exposureHistory.find(entry => entry.stationId === station.stationId) || null;
+}
+
+function computeObservedConversionRate(station, profile) {
+  if (!station || !profile) return 0;
+  const exposureEntry = getExposureEntry(station, profile);
+  if (!exposureEntry) return 0;
+  const exposureCount = Math.max(
+    0,
+    Number(exposureEntry.exposureCount) ||
+    Number(exposureEntry?.contextCounts?.total) ||
+    0
+  );
+  if (exposureCount <= 0) return 0;
+  const visitEntry = Array.isArray(profile.visitHistory)
+    ? profile.visitHistory.find(entry => entry.stationId === station.stationId)
+    : null;
+  const visitCount = Math.max(0, Number(visitEntry?.visitCount) || 0);
+  return Math.max(0, Math.min(1, visitCount / exposureCount));
+}
+
+function computeExposureContextMatch(station, profile, nowMs, context = {}) {
+  const exposureEntry = getExposureEntry(station, profile);
+  if (!exposureEntry) return 0;
+  const counts = getEntryContextCounts({
+    contextCounts: exposureEntry.contextCounts,
+    visitCount: exposureEntry.exposureCount,
+  });
+  return computeContextMatchFromCounts(counts, nowMs, context);
+}
+
+function computeContextualObservedConversionRate(station, profile, nowMs, context = {}) {
+  const overallConversionRate = computeObservedConversionRate(station, profile);
+  if (overallConversionRate <= 0) return 0;
+  const fillContextMatch = computeHistoryContextMatch(station, profile, nowMs, context);
+  const exposureContextMatch = computeExposureContextMatch(station, profile, nowMs, context);
+  if (exposureContextMatch <= 0.05) {
+    return overallConversionRate * (0.25 + (fillContextMatch * 0.35));
+  }
+  const contextualLift = clamp(
+    fillContextMatch / Math.max(0.15, exposureContextMatch),
+    0,
+    1.4
+  );
+  return clamp(
+    overallConversionRate * (0.35 + (contextualLift * 0.65)),
+    0,
+    1
+  );
+}
+
+function computeObservedSkipScore(station, profile, nowMs, context = {}) {
+  const overallConversionRate = computeObservedConversionRate(station, profile);
+  const contextualConversionRate = computeContextualObservedConversionRate(station, profile, nowMs, context);
+  const exposureContextMatch = computeExposureContextMatch(station, profile, nowMs, context);
+  if (exposureContextMatch <= 0) return 0;
+  return clamp(
+    (exposureContextMatch * (1 - contextualConversionRate)) *
+    (0.55 + ((1 - overallConversionRate) * 0.45)),
+    0,
+    1
+  );
+}
+
 /**
  * Compute a time-of-day / day-of-week pattern match score for a station.
  * If the user has visited this station several times at a similar hour and
@@ -251,6 +454,14 @@ module.exports = {
   computeProfileBonus,
   computeProfilePenalty,
   computeHistoryScore,
+  computeContextualHistoryScore,
+  computeHistoryContextMatch,
+  computeVisitShare,
+  computeProfileHistoryConcentration,
+  computeObservedConversionRate,
+  computeContextualObservedConversionRate,
+  computeExposureContextMatch,
+  computeObservedSkipScore,
   computeTimePatternScore,
   isRushHour,
 };

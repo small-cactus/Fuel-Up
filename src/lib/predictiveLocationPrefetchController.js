@@ -61,8 +61,9 @@ function createPredictiveLocationPrefetchController({
             preferredProvider: settings.preferredProvider,
         });
         const nowMs = now();
+        const effectiveCooldownMs = Math.max(0, Number(settings.cooldownMs) || cooldownMs);
 
-        if (prefetchKey === lastPrefetchKey && (nowMs - lastPrefetchAt) < cooldownMs) {
+        if (prefetchKey === lastPrefetchKey && (nowMs - lastPrefetchAt) < effectiveCooldownMs) {
             return { queued: false, reason: 'cooldown' };
         }
 

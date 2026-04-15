@@ -1,27 +1,132 @@
 import { Linking, Platform } from 'react-native';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
+import AsyncStorageModule from '@react-native-async-storage/async-storage';
+import {
+    getLatestPredictiveDrivingActivityAsync,
+    isPredictiveDrivingActivityAutomotive,
+} from './predictiveDrivingActivity';
+const {
+    loadPredictiveDrivingSessionAsync,
+    markPredictiveDrivingAutomotiveAsync,
+} = require('./predictiveDrivingSessionStore.js');
+const {
+    loadPredictiveFuelingBackgroundConfigAsync,
+} = require('./predictiveFuelingPreferencesStore.js');
 
 export const PREDICTIVE_LOCATION_TASK_NAME = 'fuelup.predictive-location-updates';
 export const PREDICTIVE_GEOFENCING_TASK_NAME = 'fuelup.predictive-geofencing';
 
+const PREDICTIVE_LOCATION_OPTIONS_SIGNATURE_KEY = '@fuelup/predictive-location-options-signature';
+const PREDICTIVE_TASK_EVENT_INBOX_KEY = '@fuelup/predictive-task-event-inbox';
+const MAX_QUEUED_TASK_EVENTS = 20;
+const PREDICTIVE_DRIVE_ACTIVITY_LOOKBACK_MS = 12 * 60 * 1000;
+const PREDICTIVE_DRIVE_STOP_GRACE_MS = 3 * 60 * 1000;
+
 const backgroundLocationListeners = new Set();
 const geofencingListeners = new Set();
+const AsyncStorage = AsyncStorageModule?.default || AsyncStorageModule;
+let inboxMutationPromise = Promise.resolve();
+let appliedLocationOptionsSignature = null;
+const predictiveLocationDebugListeners = new Set();
+let predictiveLocationDebugState = {
+    queueSize: 0,
+    lastDispatch: null,
+    lastTaskPayload: null,
+    lastBackgroundDecision: null,
+    lastTrackingActivation: null,
+    lastGeofenceSync: null,
+    lastQueueMutation: null,
+};
 
-const DEFAULT_BACKGROUND_LOCATION_OPTIONS = Object.freeze({
-    accuracy: Location.Accuracy.BestForNavigation,
-    activityType: Location.ActivityType.AutomotiveNavigation,
-    distanceInterval: 25,
-    deferredUpdatesDistance: 50,
-    deferredUpdatesInterval: 60_000,
-    pausesUpdatesAutomatically: false,
-    showsBackgroundLocationIndicator: true,
-    foregroundService: {
-        notificationTitle: 'Fuel Up is tracking fuel opportunities',
-        notificationBody: 'Background location stays on so Fuel Up can predict the best stop.',
-        killServiceOnDestroy: false,
+const ANDROID_FOREGROUND_SERVICE_OPTIONS = Object.freeze({
+    notificationTitle: 'Fuel Up is tracking fuel opportunities',
+    notificationBody: 'Background location stays on so Fuel Up can predict the best stop.',
+    killServiceOnDestroy: false,
+});
+
+const TRACKING_MODE_OPTIONS = Object.freeze({
+    monitoring: {
+        accuracy: Location.Accuracy.Balanced,
+        activityType: Location.ActivityType.AutomotiveNavigation,
+        distanceInterval: 125,
+        deferredUpdatesDistance: 250,
+        deferredUpdatesInterval: 180_000,
+        pausesUpdatesAutomatically: true,
+        showsBackgroundLocationIndicator: true,
+    },
+    engaged: {
+        accuracy: Location.Accuracy.High,
+        activityType: Location.ActivityType.AutomotiveNavigation,
+        distanceInterval: 40,
+        deferredUpdatesDistance: 90,
+        deferredUpdatesInterval: 45_000,
+        pausesUpdatesAutomatically: true,
+        showsBackgroundLocationIndicator: true,
     },
 });
+
+function emitPredictiveLocationDebugState() {
+    predictiveLocationDebugListeners.forEach(listener => {
+        try {
+            listener(predictiveLocationDebugState);
+        } catch (error) {
+            console.warn('Predictive location debug listener failed:', error?.message || error);
+        }
+    });
+}
+
+function updatePredictiveLocationDebugState(patch = {}) {
+    predictiveLocationDebugState = {
+        ...predictiveLocationDebugState,
+        ...patch,
+    };
+    emitPredictiveLocationDebugState();
+}
+
+function summarizeTaskPayload(kind, payload) {
+    if (kind === 'geofence') {
+        return {
+            at: Date.now(),
+            kind,
+            eventType: payload?.eventType ?? null,
+            regionIdentifier: String(payload?.region?.identifier || ''),
+        };
+    }
+
+    const locations = Array.isArray(payload?.locations) ? payload.locations : [];
+    const latestLocation = locations[locations.length - 1];
+    return {
+        at: Date.now(),
+        kind,
+        sampleCount: locations.length,
+        speedMps: Number(latestLocation?.coords?.speed ?? latestLocation?.speed) || 0,
+        accuracyMeters: Number(latestLocation?.coords?.accuracy ?? latestLocation?.accuracy) || null,
+        timestamp: Number(latestLocation?.timestamp ?? latestLocation?.coords?.timestamp) || null,
+        eventType: latestLocation?.eventType || null,
+    };
+}
+
+export function getPredictiveLocationDebugState() {
+    return predictiveLocationDebugState;
+}
+
+export function subscribeToPredictiveLocationDebugState(listener) {
+    if (typeof listener !== 'function') {
+        return () => { };
+    }
+
+    predictiveLocationDebugListeners.add(listener);
+    try {
+        listener(predictiveLocationDebugState);
+    } catch (error) {
+        console.warn('Predictive location debug initial emit failed:', error?.message || error);
+    }
+
+    return () => {
+        predictiveLocationDebugListeners.delete(listener);
+    };
+}
 
 function emitTaskPayload(listeners, payload) {
     listeners.forEach(listener => {
@@ -30,6 +135,319 @@ function emitTaskPayload(listeners, payload) {
         } catch (error) {
             console.error('Predictive location listener failed:', error);
         }
+    });
+}
+
+function mutateTaskInboxAsync(mutation) {
+    const run = inboxMutationPromise
+        .catch(() => { })
+        .then(mutation);
+    inboxMutationPromise = run.catch(() => { });
+    return run;
+}
+
+async function appendQueuedPredictiveTaskEventAsync(event) {
+    if (!AsyncStorage) {
+        return;
+    }
+
+    await mutateTaskInboxAsync(async () => {
+        let existingEvents = [];
+        try {
+            const rawValue = await AsyncStorage.getItem(PREDICTIVE_TASK_EVENT_INBOX_KEY);
+            existingEvents = rawValue ? JSON.parse(rawValue) : [];
+        } catch (error) {
+            existingEvents = [];
+        }
+        const nextEvents = [
+            ...(Array.isArray(existingEvents) ? existingEvents : []),
+            event,
+        ].slice(-MAX_QUEUED_TASK_EVENTS);
+        await AsyncStorage.setItem(PREDICTIVE_TASK_EVENT_INBOX_KEY, JSON.stringify(nextEvents));
+        updatePredictiveLocationDebugState({
+            queueSize: nextEvents.length,
+            lastQueueMutation: {
+                at: Date.now(),
+                action: 'append',
+                queueSize: nextEvents.length,
+                kind: event?.kind || null,
+            },
+        });
+    });
+}
+
+async function dispatchPredictiveTaskPayloadAsync(kind, payload) {
+    const listeners = kind === 'location'
+        ? backgroundLocationListeners
+        : geofencingListeners;
+    updatePredictiveLocationDebugState({
+        lastTaskPayload: summarizeTaskPayload(kind, payload),
+    });
+
+    if (listeners.size > 0) {
+        emitTaskPayload(listeners, payload);
+        updatePredictiveLocationDebugState({
+            lastDispatch: {
+                at: Date.now(),
+                kind,
+                path: 'listener',
+                listenerCount: listeners.size,
+                reason: 'active-listeners',
+            },
+        });
+        return;
+    }
+
+    const backgroundResult = await processPredictiveTaskPayloadInBackgroundAsync(kind, payload);
+    updatePredictiveLocationDebugState({
+        lastDispatch: {
+            at: Date.now(),
+            kind,
+            path: backgroundResult?.handled
+                ? 'background'
+                : (backgroundResult?.queue === false ? 'discarded' : 'queued'),
+            listenerCount: listeners.size,
+            reason: backgroundResult?.reason || 'unknown',
+        },
+    });
+    if (backgroundResult?.handled || backgroundResult?.queue === false) {
+        return;
+    }
+
+    await appendQueuedPredictiveTaskEventAsync({
+        kind,
+        payload,
+        receivedAt: Date.now(),
+    });
+}
+
+async function processPredictiveTaskPayloadInBackgroundAsync(kind, payload) {
+    let backgroundConfig = null;
+    try {
+        backgroundConfig = await loadPredictiveFuelingBackgroundConfigAsync();
+    } catch (error) {
+        updatePredictiveLocationDebugState({
+            lastBackgroundDecision: {
+                at: Date.now(),
+                kind,
+                outcome: 'queued',
+                reason: 'preferences-unavailable',
+            },
+        });
+        return { handled: false, queue: true, reason: 'preferences-unavailable' };
+    }
+
+    if (!backgroundConfig?.enabled) {
+        updatePredictiveLocationDebugState({
+            lastBackgroundDecision: {
+                at: Date.now(),
+                kind,
+                outcome: 'discarded',
+                reason: 'predictive-disabled',
+            },
+        });
+        return { handled: false, queue: false, reason: 'predictive-disabled' };
+    }
+
+    const {
+        ensurePredictiveFuelingBootstrapActiveAsync,
+        processPredictiveFuelingGeofenceEventAsync,
+        processPredictiveFuelingLocationPayloadAsync,
+        stopPredictiveFuelingBackend,
+    } = require('./predictiveFuelingBackend.js');
+
+    try {
+        await ensurePredictiveFuelingBootstrapActiveAsync();
+    } catch (error) {
+        updatePredictiveLocationDebugState({
+            lastBackgroundDecision: {
+                at: Date.now(),
+                kind,
+                outcome: 'queued',
+                reason: 'bootstrap-failed',
+                error: error?.message || String(error),
+            },
+        });
+        return { handled: false, queue: true, reason: 'bootstrap-failed' };
+    }
+
+    if (kind === 'geofence') {
+        try {
+            await processPredictiveFuelingGeofenceEventAsync(payload, backgroundConfig.preferences);
+            updatePredictiveLocationDebugState({
+                lastBackgroundDecision: {
+                    at: Date.now(),
+                    kind,
+                    outcome: 'handled',
+                    reason: 'processed-geofence',
+                    regionIdentifier: String(payload?.region?.identifier || ''),
+                    eventType: payload?.eventType ?? null,
+                },
+            });
+            return { handled: true, queue: false, reason: 'processed-geofence' };
+        } catch (error) {
+            updatePredictiveLocationDebugState({
+                lastBackgroundDecision: {
+                    at: Date.now(),
+                    kind,
+                    outcome: 'queued',
+                    reason: 'geofence-processing-failed',
+                    error: error?.message || String(error),
+                },
+            });
+            return { handled: false, queue: true, reason: 'geofence-processing-failed' };
+        }
+    }
+
+    let latestActivity = null;
+    try {
+        latestActivity = await getLatestPredictiveDrivingActivityAsync({
+            lookbackMs: PREDICTIVE_DRIVE_ACTIVITY_LOOKBACK_MS,
+        });
+    } catch (error) {
+        latestActivity = null;
+    }
+
+    const nowMs = Date.now();
+    if (isPredictiveDrivingActivityAutomotive(latestActivity)) {
+        const activityTimestamp = Number(latestActivity?.timestamp) || nowMs;
+        void markPredictiveDrivingAutomotiveAsync(activityTimestamp).catch(() => { });
+    }
+
+    let lastAutomotiveAt = 0;
+    try {
+        const session = await loadPredictiveDrivingSessionAsync();
+        lastAutomotiveAt = Number(session?.lastAutomotiveAt) || 0;
+    } catch (error) {
+        lastAutomotiveAt = 0;
+    }
+
+    const withinGrace = lastAutomotiveAt > 0 && (nowMs - lastAutomotiveAt) < PREDICTIVE_DRIVE_STOP_GRACE_MS;
+    const drivingHeuristic = inferDrivingFromLocationPayload(payload);
+    const latestLocation = Array.isArray(payload?.locations) ? payload.locations[payload.locations.length - 1] : null;
+    const speedMps = Number(latestLocation?.coords?.speed ?? latestLocation?.speed) || 0;
+    const accuracyMeters = Number(latestLocation?.coords?.accuracy ?? latestLocation?.accuracy) || null;
+    const shouldProcessLocation = (
+        isPredictiveDrivingActivityAutomotive(latestActivity) ||
+        withinGrace ||
+        drivingHeuristic
+    );
+
+    if (!shouldProcessLocation) {
+        stopPredictiveFuelingBackend();
+        updatePredictiveLocationDebugState({
+            lastBackgroundDecision: {
+                at: Date.now(),
+                kind,
+                outcome: 'discarded',
+                reason: 'not-driving',
+                automotive: Boolean(isPredictiveDrivingActivityAutomotive(latestActivity)),
+                withinGrace,
+                drivingHeuristic,
+                speedMps,
+                accuracyMeters,
+            },
+        });
+        return { handled: false, queue: false, reason: 'not-driving' };
+    }
+
+    try {
+        await processPredictiveFuelingLocationPayloadAsync(payload, backgroundConfig.preferences);
+        updatePredictiveLocationDebugState({
+            lastBackgroundDecision: {
+                at: Date.now(),
+                kind,
+                outcome: 'handled',
+                reason: 'processed-location',
+                automotive: Boolean(isPredictiveDrivingActivityAutomotive(latestActivity)),
+                withinGrace,
+                drivingHeuristic,
+                speedMps,
+                accuracyMeters,
+            },
+        });
+        return { handled: true, queue: false, reason: 'processed-location' };
+    } catch (error) {
+        updatePredictiveLocationDebugState({
+            lastBackgroundDecision: {
+                at: Date.now(),
+                kind,
+                outcome: 'queued',
+                reason: 'location-processing-failed',
+                automotive: Boolean(isPredictiveDrivingActivityAutomotive(latestActivity)),
+                withinGrace,
+                drivingHeuristic,
+                speedMps,
+                accuracyMeters,
+                error: error?.message || String(error),
+            },
+        });
+        return { handled: false, queue: true, reason: 'location-processing-failed' };
+    }
+}
+
+function inferDrivingFromLocationPayload(payload) {
+    const locations = Array.isArray(payload?.locations) ? payload.locations : [];
+    const latestLocation = locations[locations.length - 1];
+    const speedMps = Number(latestLocation?.coords?.speed ?? latestLocation?.speed);
+    const accuracyMeters = Number(latestLocation?.coords?.accuracy ?? latestLocation?.accuracy);
+
+    if (!Number.isFinite(speedMps) || speedMps < 8) {
+        return false;
+    }
+
+    if (Number.isFinite(accuracyMeters) && accuracyMeters > 120) {
+        return false;
+    }
+
+    return true;
+}
+
+export async function drainQueuedPredictiveTaskEventsAsync() {
+    if (!AsyncStorage) {
+        return [];
+    }
+
+    return mutateTaskInboxAsync(async () => {
+        let parsedEvents = [];
+        try {
+            const rawValue = await AsyncStorage.getItem(PREDICTIVE_TASK_EVENT_INBOX_KEY);
+            parsedEvents = rawValue ? JSON.parse(rawValue) : [];
+        } catch (error) {
+            parsedEvents = [];
+        }
+        await AsyncStorage.removeItem(PREDICTIVE_TASK_EVENT_INBOX_KEY);
+        const nextEvents = (Array.isArray(parsedEvents) ? parsedEvents : [])
+            .filter(event => event?.kind === 'location' || event?.kind === 'geofence')
+            .sort((left, right) => Number(left?.receivedAt || 0) - Number(right?.receivedAt || 0));
+        updatePredictiveLocationDebugState({
+            queueSize: 0,
+            lastQueueMutation: {
+                at: Date.now(),
+                action: 'drain',
+                queueSize: 0,
+                drainedCount: nextEvents.length,
+            },
+        });
+        return nextEvents;
+    });
+}
+
+export async function clearQueuedPredictiveTaskEventsAsync() {
+    if (!AsyncStorage) {
+        return;
+    }
+
+    await mutateTaskInboxAsync(async () => {
+        await AsyncStorage.removeItem(PREDICTIVE_TASK_EVENT_INBOX_KEY);
+        updatePredictiveLocationDebugState({
+            queueSize: 0,
+            lastQueueMutation: {
+                at: Date.now(),
+                action: 'clear',
+                queueSize: 0,
+            },
+        });
     });
 }
 
@@ -76,6 +494,87 @@ async function getBackgroundCapabilityAvailabilityAsync() {
     } catch (error) {
         return false;
     }
+}
+
+async function readAppliedLocationOptionsSignatureAsync() {
+    if (appliedLocationOptionsSignature !== null) {
+        return appliedLocationOptionsSignature;
+    }
+
+    if (!AsyncStorage) {
+        return null;
+    }
+
+    try {
+        appliedLocationOptionsSignature = await AsyncStorage.getItem(PREDICTIVE_LOCATION_OPTIONS_SIGNATURE_KEY);
+    } catch (error) {
+        appliedLocationOptionsSignature = null;
+    }
+    return appliedLocationOptionsSignature;
+}
+
+async function writeAppliedLocationOptionsSignatureAsync(signature) {
+    appliedLocationOptionsSignature = signature || null;
+
+    if (!AsyncStorage) {
+        return;
+    }
+
+    if (!signature) {
+        await AsyncStorage.removeItem(PREDICTIVE_LOCATION_OPTIONS_SIGNATURE_KEY);
+        return;
+    }
+
+    await AsyncStorage.setItem(PREDICTIVE_LOCATION_OPTIONS_SIGNATURE_KEY, signature);
+}
+
+function createLocationOptionsSignature(options) {
+    const foregroundService = options?.foregroundService || {};
+    return JSON.stringify({
+        accuracy: Number(options?.accuracy) || 0,
+        activityType: Number(options?.activityType) || 0,
+        deferredUpdatesDistance: Number(options?.deferredUpdatesDistance) || 0,
+        deferredUpdatesInterval: Number(options?.deferredUpdatesInterval) || 0,
+        distanceInterval: Number(options?.distanceInterval) || 0,
+        foregroundNotificationBody: String(foregroundService.notificationBody || ''),
+        foregroundNotificationTitle: String(foregroundService.notificationTitle || ''),
+        killServiceOnDestroy: Boolean(foregroundService.killServiceOnDestroy),
+        pausesUpdatesAutomatically: options?.pausesUpdatesAutomatically !== false,
+        showsBackgroundLocationIndicator: options?.showsBackgroundLocationIndicator !== false,
+    });
+}
+
+function isPredictiveTaskMissingError(error) {
+    const serializedError = [
+        error?.message,
+        error?.reason,
+        error?.details,
+        (() => {
+            try {
+                return JSON.stringify(error);
+            } catch (serializationError) {
+                return null;
+            }
+        })(),
+        String(error || ''),
+    ]
+        .filter(Boolean)
+        .join(' | ');
+
+    return serializedError.includes('not found for app ID');
+}
+
+export function getPredictiveLocationTaskOptions(mode = 'monitoring', overrides = {}) {
+    const baseOptions = TRACKING_MODE_OPTIONS[mode] || TRACKING_MODE_OPTIONS.monitoring;
+
+    return {
+        ...baseOptions,
+        ...overrides,
+        foregroundService: {
+            ...ANDROID_FOREGROUND_SERVICE_OPTIONS,
+            ...(overrides.foregroundService || {}),
+        },
+    };
 }
 
 export async function getPredictiveLocationPermissionStateAsync() {
@@ -126,6 +625,111 @@ export async function requestPredictiveLocationPermissionsAsync() {
     });
 }
 
+export async function ensurePredictiveLocationTrackingActiveAsync({
+    mode = 'monitoring',
+    options = {},
+} = {}) {
+    const permissionState = await getPredictiveLocationPermissionStateAsync();
+
+    if (!permissionState.isReady) {
+        updatePredictiveLocationDebugState({
+            lastTrackingActivation: {
+                at: Date.now(),
+                mode,
+                started: false,
+                restarted: false,
+                reason: 'permission-not-ready',
+                permissionReady: false,
+            },
+        });
+        return {
+            mode,
+            permissionState,
+            restarted: false,
+            started: false,
+        };
+    }
+
+    const isTaskManagerAvailable = await TaskManager.isAvailableAsync();
+
+    if (!isTaskManagerAvailable) {
+        updatePredictiveLocationDebugState({
+            lastTrackingActivation: {
+                at: Date.now(),
+                mode,
+                started: false,
+                restarted: false,
+                reason: 'task-manager-unavailable',
+                permissionReady: true,
+            },
+        });
+        throw new Error('Background location requires a development or production build.');
+    }
+
+    const nextOptions = getPredictiveLocationTaskOptions(mode, options);
+    const nextSignature = createLocationOptionsSignature(nextOptions);
+    let hasStarted = false;
+    try {
+        hasStarted = await Location.hasStartedLocationUpdatesAsync(PREDICTIVE_LOCATION_TASK_NAME);
+    } catch (error) {
+        if (!isPredictiveTaskMissingError(error)) {
+            throw error;
+        }
+    }
+    const currentSignature = await readAppliedLocationOptionsSignatureAsync();
+
+    if (hasStarted && currentSignature === nextSignature) {
+        updatePredictiveLocationDebugState({
+            lastTrackingActivation: {
+                at: Date.now(),
+                mode,
+                started: true,
+                restarted: false,
+                reason: 'already-active',
+                permissionReady: true,
+            },
+        });
+        return {
+            mode,
+            options: nextOptions,
+            permissionState,
+            restarted: false,
+            started: true,
+        };
+    }
+
+    if (hasStarted) {
+        try {
+            await Location.stopLocationUpdatesAsync(PREDICTIVE_LOCATION_TASK_NAME);
+        } catch (error) {
+            if (!isPredictiveTaskMissingError(error)) {
+                throw error;
+            }
+        }
+    }
+
+    await Location.startLocationUpdatesAsync(PREDICTIVE_LOCATION_TASK_NAME, nextOptions);
+    await writeAppliedLocationOptionsSignatureAsync(nextSignature);
+    updatePredictiveLocationDebugState({
+        lastTrackingActivation: {
+            at: Date.now(),
+            mode,
+            started: true,
+            restarted: hasStarted,
+            reason: hasStarted ? 'restarted-with-new-options' : 'started',
+            permissionReady: true,
+        },
+    });
+
+    return {
+        mode,
+        options: nextOptions,
+        permissionState,
+        restarted: hasStarted,
+        started: true,
+    };
+}
+
 export async function enablePredictiveLocationTrackingAsync(options = {}) {
     const permissionState = await requestPredictiveLocationPermissionsAsync();
 
@@ -160,29 +764,16 @@ export async function startPredictiveLocationUpdatesAsync(options = {}) {
         throw new Error('Predictive location permissions are not fully granted.');
     }
 
-    const isTaskManagerAvailable = await TaskManager.isAvailableAsync();
+    const mode = typeof options?.mode === 'string'
+        ? options.mode
+        : 'monitoring';
+    const overrideOptions = { ...(options || {}) };
+    delete overrideOptions.mode;
 
-    if (!isTaskManagerAvailable) {
-        throw new Error('Background location requires a development or production build.');
-    }
-
-    const hasStarted = await Location.hasStartedLocationUpdatesAsync(PREDICTIVE_LOCATION_TASK_NAME);
-
-    if (hasStarted) {
-        return;
-    }
-
-    await Location.startLocationUpdatesAsync(
-        PREDICTIVE_LOCATION_TASK_NAME,
-        {
-            ...DEFAULT_BACKGROUND_LOCATION_OPTIONS,
-            ...options,
-            foregroundService: {
-                ...DEFAULT_BACKGROUND_LOCATION_OPTIONS.foregroundService,
-                ...(options.foregroundService || {}),
-            },
-        }
-    );
+    await ensurePredictiveLocationTrackingActiveAsync({
+        mode,
+        options: overrideOptions,
+    });
 }
 
 function normalizeRegions(regions) {
@@ -214,22 +805,76 @@ export async function syncPredictiveGeofencesAsync(regions) {
         PREDICTIVE_GEOFENCING_TASK_NAME,
         normalizeRegions(regions)
     );
+    updatePredictiveLocationDebugState({
+        lastGeofenceSync: {
+            at: Date.now(),
+            regionCount: normalizeRegions(regions).length,
+            reason: 'started-geofencing',
+        },
+    });
 }
 
 export async function stopPredictiveLocationUpdatesAsync() {
-    const hasStarted = await Location.hasStartedLocationUpdatesAsync(PREDICTIVE_LOCATION_TASK_NAME);
+    let hasStarted = false;
+    try {
+        hasStarted = await Location.hasStartedLocationUpdatesAsync(PREDICTIVE_LOCATION_TASK_NAME);
+    } catch (error) {
+        if (!isPredictiveTaskMissingError(error)) {
+            throw error;
+        }
+    }
 
     if (hasStarted) {
-        await Location.stopLocationUpdatesAsync(PREDICTIVE_LOCATION_TASK_NAME);
+        try {
+            await Location.stopLocationUpdatesAsync(PREDICTIVE_LOCATION_TASK_NAME);
+        } catch (error) {
+            if (!isPredictiveTaskMissingError(error)) {
+                throw error;
+            }
+            hasStarted = false;
+        }
     }
+
+    await writeAppliedLocationOptionsSignatureAsync(null);
+    updatePredictiveLocationDebugState({
+        lastTrackingActivation: {
+            at: Date.now(),
+            mode: null,
+            started: false,
+            restarted: false,
+            reason: hasStarted ? 'stopped' : 'already-stopped',
+            permissionReady: null,
+        },
+    });
 }
 
 export async function stopPredictiveGeofencingAsync() {
-    const hasStarted = await Location.hasStartedGeofencingAsync(PREDICTIVE_GEOFENCING_TASK_NAME);
+    let hasStarted = false;
+    try {
+        hasStarted = await Location.hasStartedGeofencingAsync(PREDICTIVE_GEOFENCING_TASK_NAME);
+    } catch (error) {
+        if (!isPredictiveTaskMissingError(error)) {
+            throw error;
+        }
+    }
 
     if (hasStarted) {
-        await Location.stopGeofencingAsync(PREDICTIVE_GEOFENCING_TASK_NAME);
+        try {
+            await Location.stopGeofencingAsync(PREDICTIVE_GEOFENCING_TASK_NAME);
+        } catch (error) {
+            if (!isPredictiveTaskMissingError(error)) {
+                throw error;
+            }
+            hasStarted = false;
+        }
     }
+    updatePredictiveLocationDebugState({
+        lastGeofenceSync: {
+            at: Date.now(),
+            regionCount: 0,
+            reason: hasStarted ? 'stopped-geofencing' : 'geofencing-already-stopped',
+        },
+    });
 }
 
 export async function openPredictiveLocationSettingsAsync() {
@@ -243,7 +888,7 @@ if (!TaskManager.isTaskDefined(PREDICTIVE_LOCATION_TASK_NAME)) {
             return;
         }
 
-        emitTaskPayload(backgroundLocationListeners, {
+        await dispatchPredictiveTaskPayloadAsync('location', {
             executionInfo,
             locations: Array.isArray(data?.locations) ? data.locations : [],
         });
@@ -257,7 +902,7 @@ if (!TaskManager.isTaskDefined(PREDICTIVE_GEOFENCING_TASK_NAME)) {
             return;
         }
 
-        emitTaskPayload(geofencingListeners, {
+        await dispatchPredictiveTaskPayloadAsync('geofence', {
             executionInfo,
             eventType: data?.eventType ?? null,
             region: data?.region ?? null,

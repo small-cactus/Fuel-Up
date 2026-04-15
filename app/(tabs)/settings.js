@@ -11,10 +11,10 @@ import TopCanopy from '../../src/components/TopCanopy';
 import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
 import NativeSettingsForm from '../../src/components/settings/NativeSettingsForm';
 import {
-    enablePredictiveLocationTrackingAsync,
-    getPredictiveLocationPermissionStateAsync,
-    openPredictiveLocationSettingsAsync,
-} from '../../src/lib/predictiveLocation';
+    enablePredictiveTrackingAsync,
+    getPredictiveTrackingPermissionStateAsync,
+    openPredictiveTrackingSettingsAsync,
+} from '../../src/lib/predictiveTrackingAccess';
 
 const TOP_CANOPY_HEIGHT = 44;
 
@@ -37,7 +37,7 @@ export default function SettingsScreen() {
 
         void (async () => {
             try {
-                const nextPermissionState = await getPredictiveLocationPermissionStateAsync();
+                const nextPermissionState = await getPredictiveTrackingPermissionStateAsync();
 
                 if (isActive) {
                     setTrackingPermissionState(nextPermissionState);
@@ -132,13 +132,13 @@ export default function SettingsScreen() {
         fireTapHaptic();
 
         try {
-            const nextPermissionState = await enablePredictiveLocationTrackingAsync();
+            const nextPermissionState = await enablePredictiveTrackingAsync();
             setTrackingPermissionState(nextPermissionState);
 
             if (nextPermissionState.isReady) {
                 Alert.alert(
                     'Predictive Tracking Enabled',
-                    'Always-on precise location is enabled for background fuel predictions.'
+                    'Always-on precise location and Motion & Fitness access are enabled. Fuel Up will wait for Apple to classify you as driving before starting predictive fueling.'
                 );
                 return;
             }
@@ -146,14 +146,14 @@ export default function SettingsScreen() {
             Alert.alert(
                 'Finish Tracking Setup',
                 nextPermissionState.servicesEnabled
-                    ? 'Fuel Up still needs Always Allow and Precise Location in iPhone Settings to fully enable predictive fueling.'
-                    : 'Turn on Location Services in iPhone Settings first, then come back and enable Always Allow and Precise Location.',
+                    ? 'Fuel Up still needs Always Allow, Precise Location, and Motion & Fitness access in iPhone Settings to fully enable predictive fueling.'
+                    : 'Turn on Location Services in iPhone Settings first, then come back and enable Always Allow, Precise Location, and Motion & Fitness.',
                 [
                     { text: 'Not Now', style: 'cancel' },
                     {
                         text: 'Open Settings',
                         onPress: () => {
-                            void openPredictiveLocationSettingsAsync();
+                            void openPredictiveTrackingSettingsAsync();
                         },
                     },
                 ]
@@ -169,9 +169,9 @@ export default function SettingsScreen() {
     const trackingReady = Boolean(trackingPermissionState?.isReady);
     const trackingFooterCopy = useMemo(() => {
         if (trackingReady) {
-            return 'Always-on precise location is enabled. Tap to review.';
+            return 'Always-on location and Motion & Fitness are enabled. Fuel Up waits for Apple to classify you as driving before it starts predictive fueling.';
         }
-        return 'Fuel Up needs Always Allow and Precise Location to run predictive fueling in the background.';
+        return 'Fuel Up needs Always Allow, Precise Location, and Motion & Fitness access. Predictive fueling will only start after Apple marks you as driving.';
     }, [trackingReady]);
 
     const onboardingFooterCopy = 'Resets only affect this device. You can always restart onboarding to change your grade or octane preferences.';

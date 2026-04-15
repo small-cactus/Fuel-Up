@@ -1,6 +1,12 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { estimateRange, formatUrgencyMessage, SYNTHETIC_FILL_UP_HISTORIES } = require('../src/lib/rangeEstimator.js');
+const {
+  estimateRange,
+  estimateFuelState,
+  inferTypicalIntervalMiles,
+  formatUrgencyMessage,
+  SYNTHETIC_FILL_UP_HISTORIES,
+} = require('../src/lib/rangeEstimator.js');
 
 test('estimates remaining range from odometer history', () => {
   const history = SYNTHETIC_FILL_UP_HISTORIES.frequent_filler;
@@ -27,4 +33,25 @@ test('formatUrgencyMessage includes range and station count', () => {
   const result = estimateRange(SYNTHETIC_FILL_UP_HISTORIES.frequent_filler, null);
   const msg = formatUrgencyMessage(result, 3);
   assert.ok(typeof msg === 'string' && msg.length > 0);
+});
+
+test('inferTypicalIntervalMiles falls back to gallons when only one fill exists', () => {
+  const history = [
+    { timestamp: Date.now() - 2 * 86400 * 1000, odometer: 20000, gallons: 12.4, pricePerGallon: 3.39 },
+  ];
+  const interval = inferTypicalIntervalMiles(history, { defaultMpg: 25 });
+  assert.ok(interval >= 250 && interval <= 330, `unexpected inferred interval: ${interval}`);
+});
+
+test('estimateFuelState respects an explicit milesSinceLastFill input', () => {
+  const history = [
+    { timestamp: Date.now() - 4 * 86400 * 1000, odometer: 15000, gallons: 11.5, pricePerGallon: 3.29 },
+  ];
+  const result = estimateFuelState(history, {
+    milesSinceLastFill: 220,
+    typicalIntervalMiles: 280,
+  });
+  assert.equal(result.milesSinceLastFill, 220);
+  assert.ok(result.estimatedRemainingMiles <= 80, `remaining miles should be low, got ${result.estimatedRemainingMiles}`);
+  assert.ok(result.fuelNeedScore >= result.urgency, `fuelNeedScore should dominate urgency when near empty: ${JSON.stringify(result)}`);
 });

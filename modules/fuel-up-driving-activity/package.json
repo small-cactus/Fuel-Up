@@ -1,0 +1,9 @@
+{
+  "name": "fuel-up-driving-activity",
+  "version": "1.0.0",
+  "description": "Local Expo module for Apple motion activity driving detection in Fuel Up.",
+  "main": "index.js",
+  "private": true,
+  "license": "MIT",
+  "author": "Fuel Up"
+}

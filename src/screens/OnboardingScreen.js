@@ -32,10 +32,10 @@ import FuelUpHeaderLogo from '../components/FuelUpHeaderLogo';
 import PredictiveFuelingStep from './onboarding/predictive/PredictiveFuelingStep';
 import { registerForPushNotificationsAsync, savePushTokenToSupabase } from '../lib/notifications';
 import {
-    enablePredictiveLocationTrackingAsync,
-    getPredictiveLocationPermissionStateAsync,
-    openPredictiveLocationSettingsAsync,
-} from '../lib/predictiveLocation';
+    enablePredictiveTrackingAsync,
+    getPredictiveTrackingPermissionStateAsync,
+    openPredictiveTrackingSettingsAsync,
+} from '../lib/predictiveTrackingAccess';
 import { FUEL_GRADE_ORDER, getFuelGradeMeta } from '../lib/fuelGrade';
 import {
     buildOnboardingPreferenceUpdates,
@@ -97,6 +97,10 @@ function getLocationActionLabel(permissionState) {
         return 'Enable Always-On Location';
     }
 
+    if (!permissionState?.motionGranted) {
+        return 'Enable Motion Access';
+    }
+
     if (!permissionState?.preciseLocationGranted) {
         return 'Enable Precise Location';
     }
@@ -106,7 +110,7 @@ function getLocationActionLabel(permissionState) {
 
 function getLocationStatusCopy(permissionState) {
     if (!permissionState) {
-        return 'Choose Always Allow and keep Precise Location on when iOS asks.';
+        return 'Choose Always Allow, keep Precise Location on, and allow Motion & Fitness when iOS asks.';
     }
 
     if (!permissionState.servicesEnabled) {
@@ -114,7 +118,7 @@ function getLocationStatusCopy(permissionState) {
     }
 
     if (permissionState.isReady) {
-        return 'Always-on precise location is enabled.';
+        return 'Always-on location and Motion & Fitness access are enabled.';
     }
 
     if (!permissionState.foregroundGranted) {
@@ -123,6 +127,10 @@ function getLocationStatusCopy(permissionState) {
 
     if (!permissionState.backgroundGranted) {
         return 'Choose Always Allow so Fuel Up can keep watching for likely fuel stops.';
+    }
+
+    if (!permissionState.motionGranted) {
+        return 'Enable Motion & Fitness so Fuel Up only starts predictive fueling when Apple detects you are driving.';
     }
 
     if (!permissionState.preciseLocationGranted) {
@@ -660,7 +668,7 @@ export default function OnboardingScreen() {
         let isActive = true;
 
         void (async () => {
-            const permissionState = await getPredictiveLocationPermissionStateAsync();
+            const permissionState = await getPredictiveTrackingPermissionStateAsync();
 
             if (!isActive) {
                 return;
@@ -676,7 +684,7 @@ export default function OnboardingScreen() {
 
     const handleRequestPermission = async () => {
         try {
-            const nextPermissionState = await enablePredictiveLocationTrackingAsync();
+            const nextPermissionState = await enablePredictiveTrackingAsync();
             setLocationPermissionState(nextPermissionState);
 
             if (nextPermissionState.isReady) {
@@ -690,14 +698,14 @@ export default function OnboardingScreen() {
                 Alert.alert(
                     'Finish Location Setup',
                     nextPermissionState.servicesEnabled
-                        ? 'Fuel Up still needs Always Allow and Precise Location in iPhone Settings to run predictive fueling in the background.'
-                        : 'Turn on Location Services in iPhone Settings, then come back and enable Always Allow and Precise Location.',
+                        ? 'Fuel Up still needs Always Allow, Precise Location, and Motion & Fitness access in iPhone Settings before predictive fueling can start when you begin driving.'
+                        : 'Turn on Location Services in iPhone Settings, then come back and enable Always Allow, Precise Location, and Motion & Fitness.',
                     [
                         { text: 'Not Now', style: 'cancel' },
                         {
                             text: 'Open Settings',
                             onPress: () => {
-                                void openPredictiveLocationSettingsAsync();
+                                void openPredictiveTrackingSettingsAsync();
                             },
                         },
                     ]
@@ -706,7 +714,7 @@ export default function OnboardingScreen() {
         } catch (error) {
             Alert.alert(
                 'Unable To Enable Predictive Tracking',
-                'Background tracking can only be enabled from a development or production build.'
+                'Predictive tracking permissions can only be enabled from a development or production build.'
             );
         }
     };

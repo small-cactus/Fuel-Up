@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { AppStateProvider, useAppState } from '../src/AppStateContext';
 import { ThemeProvider, useTheme } from '../src/ThemeContext';
@@ -10,21 +10,24 @@ import * as FileSystem from 'expo-file-system/legacy';
 import OnboardingScreen from '../src/screens/OnboardingScreen';
 import ProgressiveBlurReveal from '../src/components/ProgressiveBlurReveal';
 import '../src/lib/predictiveLocation';
-import { getDrivingRouteAsync } from '../src/lib/FuelUpMapKitRouting';
-import { subscribeToPredictiveLocationUpdates } from '../src/lib/predictiveLocation';
-import { refreshFuelPriceSnapshotAlongTrajectory } from '../src/services/fuel';
 import { runPredictiveSystemProbeAsync } from '../src/lib/predictiveSystemProbe';
+import { runPredictiveDebugQueryAsync } from '../src/lib/predictiveDebugQuery';
+import {
+    disablePredictiveFuelingInfrastructureAsync,
+} from '../src/lib/predictiveFuelingBackend';
+import { createPredictiveFuelingDriveGate } from '../src/lib/predictiveFuelingDriveGate';
+import {
+    enablePredictiveTrackingAsync,
+    getPredictiveTrackingPermissionStateAsync,
+} from '../src/lib/predictiveTrackingAccess';
 import {
     resetLocationProbeLaunchOverrides,
     setLocationProbeLaunchOverrides,
 } from '../src/lib/locationProbeOverrides';
 
-const {
-    createPredictiveLocationPrefetchController,
-} = require('../src/lib/predictiveLocationPrefetchController.js');
-
 const CLUSTER_DEBUG_PROBE_REQUEST_FILE_NAME = 'cluster-debug-probe-request.json';
 const CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME = 'cluster-debug-probe.json';
+const PREDICTIVE_DEBUG_QUERY_REQUEST_FILE_NAME = 'predictive-debug-query-request.json';
 
 function getFirstRouteParamValue(value) {
     if (Array.isArray(value)) {
@@ -96,6 +99,11 @@ function AppGate() {
         hideRootReveal,
     } = useAppState();
     const { isDark, themeColors } = useTheme();
+    const predictiveDriveGateRef = useRef(null);
+    const predictivePermissionRecoveryRef = useRef({
+        attempted: false,
+        signature: null,
+    });
     const lastClusterProbeUrlRef = useRef('');
     const lastPredictiveSystemProbeUrlRef = useRef('');
     const [hasPendingClusterProbeRequest, setHasPendingClusterProbeRequest] = useState(false);
@@ -140,6 +148,7 @@ function AppGate() {
         }
 
         let isCancelled = false;
+        let isPredictiveDebugRequestInFlight = false;
 
         const queueProbeFromUrl = (url) => {
             if (!url) {
@@ -167,6 +176,15 @@ function AppGate() {
                     if (!isCancelled) {
                         setHasPendingPredictiveSystemProbe(false);
                     }
+                });
+            }
+
+            if (isTruthyRouteParam(queryParams.predictiveDebugQuery)) {
+                void runPredictiveDebugQueryAsync({
+                    token: getFirstRouteParamValue(queryParams.predictiveDebugToken) || 'default',
+                    query: getFirstRouteParamValue(queryParams.predictiveDebugKind) || 'all',
+                }).catch(error => {
+                    console.warn('Predictive debug query failed:', error?.message || error);
                 });
             }
 
@@ -260,14 +278,56 @@ function AppGate() {
             }
         };
 
+        const pollPendingPredictiveDebugRequest = async () => {
+            if (!FileSystem.documentDirectory) {
+                return;
+            }
+
+            if (isPredictiveDebugRequestInFlight) {
+                return;
+            }
+
+            try {
+                const requestFileUri = `${FileSystem.documentDirectory}${PREDICTIVE_DEBUG_QUERY_REQUEST_FILE_NAME}`;
+                const requestFileInfo = await FileSystem.getInfoAsync(requestFileUri);
+
+                if (!requestFileInfo.exists) {
+                    return;
+                }
+
+                isPredictiveDebugRequestInFlight = true;
+                const rawRequest = await FileSystem.readAsStringAsync(requestFileUri);
+                const parsedRequest = rawRequest ? JSON.parse(rawRequest) : {};
+                await FileSystem.deleteAsync(requestFileUri, { idempotent: true });
+                await runPredictiveDebugQueryAsync({
+                    token: (
+                        getFirstRouteParamValue(parsedRequest?.token) ||
+                        getFirstRouteParamValue(parsedRequest?.predictiveDebugToken) ||
+                        'file-request'
+                    ),
+                    query: (
+                        getFirstRouteParamValue(parsedRequest?.query) ||
+                        getFirstRouteParamValue(parsedRequest?.predictiveDebugKind) ||
+                        'all'
+                    ),
+                });
+            } catch (error) {
+                console.warn('Predictive debug request file failed:', error?.message || error);
+            } finally {
+                isPredictiveDebugRequestInFlight = false;
+            }
+        };
+
         void Linking.getInitialURL().then(queueProbeFromUrl);
         void pollPendingProbeRequest();
+        void pollPendingPredictiveDebugRequest();
 
         const urlSubscription = Linking.addEventListener('url', event => {
             queueProbeFromUrl(event?.url || '');
         });
         const intervalId = setInterval(() => {
             void pollPendingProbeRequest();
+            void pollPendingPredictiveDebugRequest();
         }, 750);
 
         return () => {
@@ -277,34 +337,90 @@ function AppGate() {
         };
     }, [requestClusterProbe]);
 
-    useEffect(() => {
-        if (!preferences.hasCompletedOnboarding) {
-            return undefined;
-        }
-
-        const controller = createPredictiveLocationPrefetchController({
-            prefetchSnapshot: (input) => refreshFuelPriceSnapshotAlongTrajectory({
-                ...input,
-                routeProvider: getDrivingRouteAsync,
-            }),
-        });
-        const unsubscribe = subscribeToPredictiveLocationUpdates(payload => {
-            void controller.handleLocationPayload(payload, {
-                radiusMiles: preferences.searchRadiusMiles,
-                fuelType: preferences.preferredOctane,
-                preferredProvider: preferences.preferredProvider,
-            }).catch(error => {
-                console.warn('Predictive trajectory prefetch failed:', error?.message || error);
-            });
-        });
-
-        return unsubscribe;
-    }, [
-        preferences.hasCompletedOnboarding,
+    const predictiveBackendPreferences = useMemo(() => ({
+        searchRadiusMiles: preferences.searchRadiusMiles,
+        preferredOctane: preferences.preferredOctane,
+        preferredProvider: preferences.preferredProvider,
+        navigationApp: preferences.navigationApp,
+    }), [
+        preferences.navigationApp,
         preferences.preferredOctane,
         preferences.preferredProvider,
         preferences.searchRadiusMiles,
     ]);
+
+    useEffect(() => {
+        if (!preferences.hasCompletedOnboarding) {
+            if (predictiveDriveGateRef.current) {
+                void predictiveDriveGateRef.current.stop();
+                predictiveDriveGateRef.current = null;
+            }
+            predictivePermissionRecoveryRef.current = {
+                attempted: false,
+                signature: null,
+            };
+            void disablePredictiveFuelingInfrastructureAsync();
+            return undefined;
+        }
+
+        if (!predictiveDriveGateRef.current) {
+            predictiveDriveGateRef.current = createPredictiveFuelingDriveGate();
+        }
+
+        void (async () => {
+            try {
+                const permissionState = await getPredictiveTrackingPermissionStateAsync();
+                const permissionSignature = JSON.stringify({
+                    foregroundGranted: Boolean(permissionState?.foregroundGranted),
+                    backgroundGranted: Boolean(permissionState?.backgroundGranted),
+                    preciseLocationGranted: Boolean(permissionState?.preciseLocationGranted),
+                    motionActivityAvailable: Boolean(permissionState?.motionActivityAvailable),
+                    motionAuthorizationStatus: permissionState?.motionAuthorizationStatus || 'unknown',
+                    isReady: Boolean(permissionState?.isReady),
+                });
+
+                if (permissionState?.isReady) {
+                    predictivePermissionRecoveryRef.current = {
+                        attempted: true,
+                        signature: permissionSignature,
+                    };
+                    return;
+                }
+
+                if (
+                    predictivePermissionRecoveryRef.current.attempted &&
+                    predictivePermissionRecoveryRef.current.signature === permissionSignature
+                ) {
+                    return;
+                }
+
+                predictivePermissionRecoveryRef.current = {
+                    attempted: true,
+                    signature: permissionSignature,
+                };
+
+                await enablePredictiveTrackingAsync();
+            } catch (error) {
+                console.warn('Predictive tracking permission recovery failed:', error?.message || error);
+            }
+        })();
+
+        predictiveDriveGateRef.current.updatePreferences(predictiveBackendPreferences);
+        void predictiveDriveGateRef.current.start().catch(error => {
+            console.warn('Predictive fueling drive gate failed to start:', error?.message || error);
+        });
+
+        return undefined;
+    }, [preferences.hasCompletedOnboarding, predictiveBackendPreferences]);
+
+    useEffect(() => {
+        return () => {
+            if (predictiveDriveGateRef.current) {
+                void predictiveDriveGateRef.current.stop();
+                predictiveDriveGateRef.current = null;
+            }
+        };
+    }, []);
 
     if (isLoading) {
         return <View style={{ flex: 1, backgroundColor: themeColors.background }} />;

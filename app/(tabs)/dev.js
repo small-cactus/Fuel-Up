@@ -28,6 +28,25 @@ const { createBackgroundFetchSimulator, NETWORK_CONDITIONS } = require('../../sr
 const { estimateRange, formatUrgencyMessage, SYNTHETIC_FILL_UP_HISTORIES } = require('../../src/lib/rangeEstimator.js');
 const { PROFILE_PRESETS } = require('../../src/lib/userFuelingProfile.js');
 const { EXPANDED_TEST_ROUTES, EXPANDED_STATIONS } = require('../../src/data/expandedTestRoutes.js');
+const {
+    getPredictiveFuelingBackendDebugState,
+    getPredictiveFuelingBackendState,
+    resetPredictiveFuelingBackendData,
+    subscribeToPredictiveFuelingBackend,
+    subscribeToPredictiveFuelingBackendDebug,
+} = require('../../src/lib/predictiveFuelingBackend.js');
+const {
+    getPredictiveFuelingDriveGateDebugState,
+    subscribeToPredictiveFuelingDriveGateDebugState,
+} = require('../../src/lib/predictiveFuelingDriveGate.js');
+const {
+    getPredictiveLocationDebugState,
+    subscribeToPredictiveLocationDebugState,
+} = require('../../src/lib/predictiveLocation.js');
+const {
+    SIM_SCENARIOS: LIVE_ACTIVITY_SCENARIOS,
+    createPredictiveFuelingLiveActivitySim,
+} = require('../../src/lib/predictiveFuelingLiveActivitySim.js');
 
 const TOP_CANOPY_HEIGHT = 44;
 
@@ -75,11 +94,30 @@ export default function DevStatsScreen() {
     const [fetchStats, setFetchStats] = useState(null);
     const [fetchLog, setFetchLog] = useState([]);
     const [useExpandedRoutes, setUseExpandedRoutes] = useState(false);
+    const [liveActivitySimScenarioId, setLiveActivitySimScenarioId] = useState(
+        LIVE_ACTIVITY_SCENARIOS[0].id
+    );
+    const [liveActivitySimPhase, setLiveActivitySimPhase] = useState('idle');
+    const [liveActivitySimState, setLiveActivitySimState] = useState(null);
+    const [predictiveBackendState, setPredictiveBackendState] = useState(() => (
+        getPredictiveFuelingBackendState()
+    ));
+    const [predictiveBackendDebugState, setPredictiveBackendDebugState] = useState(() => (
+        getPredictiveFuelingBackendDebugState()
+    ));
+    const [predictiveDriveGateState, setPredictiveDriveGateState] = useState(() => (
+        getPredictiveFuelingDriveGateDebugState()
+    ));
+    const [predictiveLocationDebugState, setPredictiveLocationDebugState] = useState(() => (
+        getPredictiveLocationDebugState()
+    ));
+    const [isResettingPredictiveBackendData, setIsResettingPredictiveBackendData] = useState(false);
 
     const engineRef = useRef(null);
     const harnessRef = useRef(null);
     const mlPredictorRef = useRef(null);
     const fetchSimRef = useRef(null);
+    const liveActivitySimRef = useRef(null);
 
     const canopyEdgeLine = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
     const topCanopyHeight = insets.top + TOP_CANOPY_HEIGHT;
@@ -90,6 +128,34 @@ export default function DevStatsScreen() {
             getApiStats().then(setStats);
         }, [])
     );
+
+    useEffect(() => {
+        setPredictiveBackendState(getPredictiveFuelingBackendState());
+        return subscribeToPredictiveFuelingBackend(nextState => {
+            setPredictiveBackendState(nextState);
+        });
+    }, []);
+
+    useEffect(() => {
+        setPredictiveBackendDebugState(getPredictiveFuelingBackendDebugState());
+        return subscribeToPredictiveFuelingBackendDebug(nextState => {
+            setPredictiveBackendDebugState(nextState);
+        });
+    }, []);
+
+    useEffect(() => {
+        setPredictiveDriveGateState(getPredictiveFuelingDriveGateDebugState());
+        return subscribeToPredictiveFuelingDriveGateDebugState(nextState => {
+            setPredictiveDriveGateState(nextState);
+        });
+    }, []);
+
+    useEffect(() => {
+        setPredictiveLocationDebugState(getPredictiveLocationDebugState());
+        return subscribeToPredictiveLocationDebugState(nextState => {
+            setPredictiveLocationDebugState(nextState);
+        });
+    }, []);
 
     useEffect(() => {
         engineRef.current = createPredictiveFuelingEngine({
@@ -111,6 +177,10 @@ export default function DevStatsScreen() {
         return () => {
             if (harnessRef.current) {
                 harnessRef.current.reset();
+            }
+            if (liveActivitySimRef.current) {
+                liveActivitySimRef.current.stop();
+                liveActivitySimRef.current = null;
             }
         };
     }, []);
@@ -437,6 +507,99 @@ export default function DevStatsScreen() {
         Alert.alert('Ended', 'Live Activity stopped.');
     };
 
+    const handleResetPredictiveFuelingData = useCallback(() => {
+        if (isResettingPredictiveBackendData) {
+            return;
+        }
+
+        Alert.alert(
+            'Reset Predictive Fueling Data',
+            'This clears all learned predictive fueling data for this user, including visits, inferred fill-ups, pending recommendations, geofences, and live activity state.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Reset',
+                    style: 'destructive',
+                    onPress: () => {
+                        void (async () => {
+                            setIsResettingPredictiveBackendData(true);
+                            try {
+                                await resetPredictiveFuelingBackendData();
+                                Alert.alert('Predictive Fueling Reset', 'All predictive fueling data for this user has been cleared.');
+                            } catch (error) {
+                                Alert.alert(
+                                    'Reset Failed',
+                                    error?.message || 'Unable to reset predictive fueling data.'
+                                );
+                            } finally {
+                                setIsResettingPredictiveBackendData(false);
+                            }
+                        })();
+                    },
+                },
+            ]
+        );
+    }, [isResettingPredictiveBackendData]);
+
+    // Drive simulation for the predictive Live Activity. Starts a real
+    // iOS Live Activity and ticks its state forward every second so the
+    // distance / ETA / progress bar all move visibly on the lock screen
+    // and Dynamic Island.
+    function getOrCreateLiveActivitySim() {
+        if (!liveActivitySimRef.current) {
+            liveActivitySimRef.current = createPredictiveFuelingLiveActivitySim({
+                scenarioId: liveActivitySimScenarioId,
+                onStateChange: (state) => {
+                    setLiveActivitySimState(state);
+                },
+                onComplete: () => {
+                    setLiveActivitySimPhase('complete');
+                },
+            });
+        }
+        return liveActivitySimRef.current;
+    }
+
+    const handleStartLiveActivitySim = () => {
+        const sim = getOrCreateLiveActivitySim();
+        sim.start(liveActivitySimScenarioId);
+        setLiveActivitySimPhase('running');
+    };
+
+    const handleStopLiveActivitySim = () => {
+        if (liveActivitySimRef.current) {
+            liveActivitySimRef.current.stop();
+        }
+        setLiveActivitySimPhase('idle');
+        setLiveActivitySimState(null);
+    };
+
+    const handlePauseLiveActivitySim = () => {
+        if (liveActivitySimRef.current && liveActivitySimPhase === 'running') {
+            liveActivitySimRef.current.pause();
+            setLiveActivitySimPhase('paused');
+        }
+    };
+
+    const handleResumeLiveActivitySim = () => {
+        if (liveActivitySimRef.current && liveActivitySimPhase === 'paused') {
+            liveActivitySimRef.current.resume();
+            setLiveActivitySimPhase('running');
+        }
+    };
+
+    const handleSelectLiveActivityScenario = (nextId) => {
+        setLiveActivitySimScenarioId(nextId);
+        // If a sim is in flight, stop it so the new scenario takes effect
+        // cleanly on the next start. We don't auto-start the new one —
+        // picking a scenario is a setup action, not a trigger.
+        if (liveActivitySimRef.current && liveActivitySimPhase !== 'idle') {
+            liveActivitySimRef.current.stop();
+            setLiveActivitySimPhase('idle');
+            setLiveActivitySimState(null);
+        }
+    };
+
     const stationNameMap = useMemo(() => {
         const allStations = [...DENVER_STATIONS, ...EXPANDED_STATIONS];
         return new Map(allStations.map(station => [station.stationId, station.stationName]));
@@ -481,12 +644,34 @@ export default function DevStatsScreen() {
         onSetClusterDebugEnabled: (isEnabled) => updatePreference('debugClusterAnimations', isEnabled),
     };
 
+    const promptForText = (title, currentValue, onSave) => {
+        Alert.prompt(
+            title,
+            null,
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Save',
+                    onPress: (nextValue) => {
+                        if (typeof nextValue === 'string') {
+                            onSave(nextValue);
+                        }
+                    },
+                },
+            ],
+            'plain-text',
+            currentValue
+        );
+    };
+
     const notifications = {
         testTitle,
         testBody,
         liveActivityActive: Boolean(liveActivityInstance),
         onChangeTitle: setTestTitle,
         onChangeBody: setTestBody,
+        onEditTitle: () => promptForText('Push Title', testTitle, setTestTitle),
+        onEditBody: () => promptForText('Push Body', testBody, setTestBody),
         onSendNow: () => handleLocalPush(0),
         onSendDelayed: () => handleLocalPush(5),
         onStartLiveActivity: handleStartLiveActivity,
@@ -494,7 +679,103 @@ export default function DevStatsScreen() {
         onEndLiveActivity: handleEndLiveActivity,
     };
 
+    const liveActivitySim = {
+        scenarioId: liveActivitySimScenarioId,
+        scenarioOptions: LIVE_ACTIVITY_SCENARIOS.map(scenario => ({
+            key: scenario.id,
+            label: scenario.label,
+        })),
+        phase: liveActivitySimPhase,
+        isRunning: liveActivitySimPhase === 'running',
+        isPaused: liveActivitySimPhase === 'paused',
+        isComplete: liveActivitySimPhase === 'complete',
+        state: liveActivitySimState,
+        onSelectScenario: handleSelectLiveActivityScenario,
+        onStart: handleStartLiveActivitySim,
+        onStop: handleStopLiveActivitySim,
+        onPause: handlePauseLiveActivitySim,
+        onResume: handleResumeLiveActivitySim,
+    };
+
     const predictive = {
+        backend: predictiveBackendState
+            ? (() => {
+                const knownStations = predictiveBackendState.runtimeState?.knownStations || [];
+                const stationNameById = new Map(
+                    knownStations.map(station => [
+                        station.stationId,
+                        station.stationName || station.brand || station.stationId,
+                    ])
+                );
+                const activeRecommendation = predictiveBackendState.runtimeState?.activeRecommendation || null;
+                const pendingRecommendation = predictiveBackendState.runtimeState?.pendingRecommendation || null;
+                const focusedStationId = activeRecommendation?.stationId || pendingRecommendation?.stationId || null;
+
+                return {
+                    isRunning: Boolean(predictiveBackendState),
+                    activeRecommendation,
+                    pendingRecommendation,
+                    isResetting: isResettingPredictiveBackendData,
+                    trackingMode: predictiveBackendState.tracking?.mode || 'monitoring',
+                    prefetchCooldownMs: predictiveBackendState.tracking?.prefetchCooldownMs || null,
+                    trackingReason: predictiveBackendState.tracking?.reason || null,
+                    urgency: predictiveBackendState.tracking?.urgency ?? 0,
+                    focusedStationLabel: focusedStationId
+                        ? stationNameById.get(focusedStationId) || focusedStationId
+                        : null,
+                    liveActivity: predictiveBackendState.runtimeState?.liveActivity || null,
+                    geofenceCount: predictiveBackendState.runtimeState?.geofences?.length || 0,
+                    recentSampleCount: predictiveBackendState.runtimeState?.recentSamples?.length || 0,
+                    knownStationCount: knownStations.length,
+                    lastProcessedAt: predictiveBackendState.runtimeState?.lastProcessedAt || null,
+                    lastNotificationAt: predictiveBackendState.runtimeState?.lastNotificationAt || null,
+                    lastNotificationStationId: predictiveBackendState.runtimeState?.lastNotificationStationId || null,
+                    arrivalSession: predictiveBackendState.runtimeState?.arrivalSession || null,
+                    milesSinceLastFill: predictiveBackendState.profile?.estimatedMilesSinceLastFill ?? null,
+                    odometerMiles: predictiveBackendState.profile?.odometerMiles ?? null,
+                    visitHistoryCount: predictiveBackendState.profile?.visitHistory?.length || 0,
+                    fillUpHistoryCount: predictiveBackendState.profile?.fillUpHistory?.length || 0,
+                    debug: predictiveBackendState.debug || null,
+                };
+            })()
+            : {
+                isRunning: false,
+                isResetting: isResettingPredictiveBackendData,
+                debug: null,
+            },
+        backendDebug: predictiveBackendDebugState
+            ? {
+                started: Boolean(predictiveBackendDebugState.started),
+                lastLifecycle: predictiveBackendDebugState.lastLifecycle || null,
+                lastQueuedDrain: predictiveBackendDebugState.lastQueuedDrain || null,
+            }
+            : null,
+        driveGate: predictiveDriveGateState
+            ? {
+                activityUpdatesRunning: Boolean(predictiveDriveGateState.activityUpdatesRunning),
+                backendRunning: Boolean(predictiveDriveGateState.backendRunning),
+                latestActivity: predictiveDriveGateState.latestActivity || null,
+                lastAutomotiveAt: predictiveDriveGateState.lastAutomotiveAt || null,
+                lastDecision: predictiveDriveGateState.lastDecision || null,
+                lastRefresh: predictiveDriveGateState.lastRefresh || null,
+                lastSupportCheck: predictiveDriveGateState.lastSupportCheck || null,
+                motionAuthorizationStatus: predictiveDriveGateState.motionAuthorizationStatus || 'unknown',
+                motionAvailable: Boolean(predictiveDriveGateState.motionAvailable),
+                motionSupported: Boolean(predictiveDriveGateState.motionSupported),
+                started: Boolean(predictiveDriveGateState.started),
+            }
+            : null,
+        locationDebug: predictiveLocationDebugState
+            ? {
+                queueSize: predictiveLocationDebugState.queueSize || 0,
+                lastDispatch: predictiveLocationDebugState.lastDispatch || null,
+                lastTaskPayload: predictiveLocationDebugState.lastTaskPayload || null,
+                lastBackgroundDecision: predictiveLocationDebugState.lastBackgroundDecision || null,
+                lastTrackingActivation: predictiveLocationDebugState.lastTrackingActivation || null,
+                lastGeofenceSync: predictiveLocationDebugState.lastGeofenceSync || null,
+                lastQueueMutation: predictiveLocationDebugState.lastQueueMutation || null,
+            }
+            : null,
         selectedRouteId,
         routeOptions: TEST_ROUTES.map(route => ({
             key: route.id,
@@ -509,6 +790,7 @@ export default function DevStatsScreen() {
         harnessPhase,
         harnessStep,
         harnessTotal,
+        onResetBackendData: handleResetPredictiveFuelingData,
         onSelectRoute: handleRouteSelect,
         onSelectSpeed: setSpeedMult,
         onPlay: handlePlay,
@@ -602,6 +884,7 @@ export default function DevStatsScreen() {
                         predictive={predictive}
                         analysis={analysis}
                         simulation={simulation}
+                        liveActivitySim={liveActivitySim}
                     />
                 </View>
 

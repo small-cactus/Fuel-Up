@@ -124,6 +124,46 @@ test('same-day trend history falls back to hourly chart buckets', () => {
     assert.equal(series[series.length - 1].price, 3.95);
 });
 
+test('trend history falls back to a flat live average snapshot when only current prices exist', () => {
+    const { buildAveragePriceTrendSeries } = require('../src/services/fuel/trendAggregation.js');
+    const rows = [
+        {
+            created_at: '2026-04-14T13:10:00.000Z',
+            price: 3.99,
+        },
+    ];
+    const fallbackLatestQuotes = [
+        {
+            price: 3.79,
+            updatedAt: '2026-04-15T14:30:00.000Z',
+        },
+        {
+            price: 3.89,
+            updatedAt: '2026-04-15T14:15:00.000Z',
+        },
+        {
+            price: 4.02,
+            fetchedAt: '2026-04-15T14:20:00.000Z',
+        },
+    ];
+
+    const series = buildAveragePriceTrendSeries(rows, {
+        fallbackLatestQuotes,
+        nowMs: Date.parse('2026-04-15T15:00:00.000Z'),
+    });
+
+    assert.equal(series.length, 2);
+    assert.deepEqual(
+        series.map(point => point.date),
+        [
+            '2026-04-15T13:30:00.000Z',
+            '2026-04-15T14:30:00.000Z',
+        ]
+    );
+    assert.equal(series[0].price, 3.9);
+    assert.equal(series[1].price, 3.9);
+});
+
 test('trend projection upgrades the latest displayed station row to the current validated quote', async () => {
     const supabasePath = require.resolve('../src/lib/supabase.js');
     const indexPath = require.resolve('../src/services/fuel/index.js');

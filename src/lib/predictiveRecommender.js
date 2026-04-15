@@ -34,8 +34,19 @@
  */
 
 const { haversineDistanceMeters, calculateHeadingDegrees } = require('../screens/onboarding/predictive/simulationMath.cjs');
-const { computeHistoryScore, computeTimePatternScore } = require('./userFuelingProfile.js');
-const { estimateRange } = require('./rangeEstimator.js');
+const {
+  computeHistoryScore,
+  computeContextualHistoryScore,
+  computeHistoryContextMatch,
+  computeVisitShare,
+  computeProfileHistoryConcentration,
+  computeObservedConversionRate,
+  computeContextualObservedConversionRate,
+  computeExposureContextMatch,
+  computeObservedSkipScore,
+  computeTimePatternScore,
+} = require('./userFuelingProfile.js');
+const { estimateRange, estimateFuelState } = require('./rangeEstimator.js');
 const { scoreStation } = require('./predictiveFuelingEngine.js');
 
 const DEFAULT_OPTIONS = {
@@ -109,8 +120,50 @@ const DEFAULT_OPTIONS = {
   minColdStartBranchTripFuelIntentHighway: 0.62,
   minColdStartBranchLead: 0.12,
   minColdStartBranchValueEdge: 0.18,
+  lowSpecificityColdStartMaxDistanceMeters: 7000,
+  lowSpecificityColdStartIntentBuffer: 0.12,
+  lowSpecificityColdStartMinIntentEvidence: 0.46,
+  lowSpecificityColdStartMinConfidence: 0.52,
+  lowSpecificityColdStartBrandValueFloor: 0.72,
+  weakPatternHistoryMaxDistanceMeters: 6500,
+  weakPatternHistoryIntentBuffer: 0.12,
+  weakPatternHistoryMinIntentEvidence: 0.48,
+  enableHistoryRecoveryProposals: false,
+  historyRecoveryMinHistoryStrength: 0.32,
+  historyRecoveryMinProbability: 0.22,
+  historyRecoveryMinIntentEvidence: 0.30,
+  historyRecoveryMinValueScore: 0.44,
+  historyRecoveryMinPathScore: 0.72,
+  historyRecoveryMinFuelNeed: 0.40,
+  historyRecoveryMinHighwayFuelNeed: 0.45,
+  historyRecoveryTripIntentBuffer: 0.12,
+  historyRecoveryCityMaxDistanceMeters: 4800,
+  historyRecoveryHighwayMaxDistanceMeters: 9000,
+  historyRecoveryMinConfidence: 0.36,
+  fuelNeedHighThreshold: 0.60,
+  fuelNeedMediumThreshold: 0.54,
+  lowSpecificityFuelNeedBuffer: 0.10,
+  singleCandidateTurnInMaxDistanceMeters: 3600,
+  singleCandidateTurnInMinPhysicalIntent: 0.70,
+  singleCandidateTurnInMinCapture: 0.30,
+  singleCandidateTurnInMinConfidence: 0.52,
+  turnInCommitmentMaxDistanceMeters: 2600,
+  turnInCommitmentMaxCrossTrackMeters: 90,
+  turnInCommitmentMinScore: 0.70,
+  turnInCommitmentMinPhysicalIntent: 0.80,
+  turnInCommitmentMinApproach: 0.95,
+  turnInCommitmentMinPath: 0.90,
+  turnInCommitmentMinDominance: 0.14,
+  turnInCommitmentMinCapture: 0.72,
+  turnInCommitmentMinDecel: 0.88,
+  turnInCommitmentMinFuelNeed: 0.30,
+  turnInCommitmentHistoryAssistFuelNeed: 0.18,
+  turnInCommitmentMinHistoryStrength: 0.45,
+  turnInCommitmentMinValueScoreCity: 0.82,
+  turnInCommitmentMinValueScoreHighway: 0.65,
   minStableRecommendationCount: 4,
   minStableRecommendationCountWithHistory: 3,
+  minStableRecommendationCountCommitment: 2,
   minStableRecommendationCountUrgent: 1,
 };
 
@@ -519,6 +572,65 @@ function computeBrandAffinity(station, profile) {
   return clamp(0.55 + ((profile.brandLoyalty || 0) * 0.45), 0, 1);
 }
 
+function computeProfileValueSeekingScore(profile, stationCatalog = []) {
+  if (!profile) return 0;
+  const preferredBrands = Array.isArray(profile.preferredBrands) ? profile.preferredBrands : [];
+  const catalogByStationId = new Map(
+    (stationCatalog || [])
+      .filter(station => station?.stationId)
+      .map(station => [station.stationId, station])
+  );
+  const pricedCatalog = [...catalogByStationId.values()]
+    .map(station => Number(station?.price))
+    .filter(price => Number.isFinite(price))
+    .sort((left, right) => left - right);
+
+  let weightedCheapVisitShare = 0;
+  let totalVisits = 0;
+  for (const entry of profile.visitHistory || []) {
+    const visitCount = Number(entry?.visitCount) || 0;
+    if (visitCount <= 0) continue;
+    totalVisits += visitCount;
+    const station = catalogByStationId.get(entry.stationId);
+    const price = Number(station?.price);
+    if (!Number.isFinite(price) || pricedCatalog.length <= 1) continue;
+    const cheaperCount = pricedCatalog.filter(value => value < price).length;
+    const cheapness = clamp(1 - (cheaperCount / (pricedCatalog.length - 1)), 0, 1);
+    weightedCheapVisitShare += visitCount * cheapness;
+  }
+
+  const preferredCheapBrandShare = preferredBrands.length
+    ? preferredBrands.filter(brand => {
+      const normalizedBrand = String(brand || '').toLowerCase();
+      return [...catalogByStationId.values()].some(station => {
+        const stationBrand = String(station?.brand || '').toLowerCase();
+        const price = Number(station?.price);
+        if (!stationBrand.includes(normalizedBrand) || !Number.isFinite(price) || pricedCatalog.length <= 1) {
+          return false;
+        }
+        const cheaperCount = pricedCatalog.filter(value => value < price).length;
+        const cheapness = clamp(1 - (cheaperCount / (pricedCatalog.length - 1)), 0, 1);
+        return cheapness >= 0.6;
+      });
+    }).length / preferredBrands.length
+    : 0;
+
+  const weightedCheapness = totalVisits > 0 ? (weightedCheapVisitShare / totalVisits) : 0;
+  return clamp((weightedCheapness * 0.72) + (preferredCheapBrandShare * 0.28), 0, 1);
+}
+
+function computeOpportunisticFillScore(profile, fuelState) {
+  const intervalUtilization = fuelState?.avgIntervalMiles
+    ? clamp((fuelState?.milesSinceLastFill || 0) / Math.max(1, fuelState.avgIntervalMiles), 0, 2)
+    : null;
+  const earlyFillBias = intervalUtilization == null
+    ? 0
+    : clamp(1 - (intervalUtilization / 0.75), 0, 1);
+  const fillCount = Array.isArray(profile?.fillUpHistory) ? profile.fillUpHistory.length : 0;
+  const fillHistoryConfidence = smoothstep(1, 4, fillCount);
+  return clamp((earlyFillBias * 0.55) + (fillHistoryConfidence * 0.15), 0, 1);
+}
+
 function computePriceRank(station, stationPool) {
   const prices = (stationPool || [])
     .map(entry => Number(entry?.price))
@@ -564,6 +676,7 @@ function computeIntentEvidence(candidate, opts, urgency, historyStrength, isHigh
   const decelSignal = clamp(Number(candidate?.physicalFeatures?.decelScore) || 0, 0, 1);
   const pathSignal = clamp(Number(candidate?.physicalFeatures?.pathScore) || 0, 0, 1);
   const approachSignal = clamp(Number(candidate?.physicalFeatures?.approachScore) || 0, 0, 1);
+  const captureSignal = clamp(Number(candidate?.physicalFeatures?.captureScore) || 0, 0, 1);
   const crossTrackFit = clamp(1 - ((Number(candidate?.crossTrack) || 0) / opts.corridorHalfWidthMeters), 0, 1);
   const closeDistanceEdge = isHighwayCruise ? opts.strongSpeculativeDistanceMeters + 1500 : opts.strongSpeculativeDistanceMeters;
   const farDistanceEdge = isHighwayCruise ? opts.maxSpeculativeDistanceMeters + 1500 : opts.maxSpeculativeDistanceMeters;
@@ -575,9 +688,10 @@ function computeIntentEvidence(candidate, opts, urgency, historyStrength, isHigh
   const urgencySignal = clamp(urgency / 0.95, 0, 1);
 
   return clamp(
-    (physicalIntentScore * 0.36) +
-    (decelSignal * 0.18) +
-    (approachSignal * 0.16) +
+    (physicalIntentScore * 0.30) +
+    (captureSignal * 0.20) +
+    (decelSignal * 0.16) +
+    (approachSignal * 0.12) +
     (pathSignal * 0.10) +
     (crossTrackFit * 0.08) +
     (distanceSignal * 0.08) +
@@ -616,9 +730,10 @@ function computeTripFuelIntentScore(scoredCandidates, opts, urgency, isHighwayCr
   return clamp(
     ((best.intentEvidence || 0) * 0.44) +
     ((best.physicalIntentScore || 0) * 0.18) +
+    (clamp(Number(best?.physicalFeatures?.captureScore) || 0, 0, 1) * 0.10) +
     (clamp(Number(best?.physicalFeatures?.approachScore) || 0, 0, 1) * 0.12) +
-    (clamp(Number(best?.physicalFeatures?.pathScore) || 0, 0, 1) * 0.10) +
-    (clamp(Number(best?.physicalFeatures?.decelScore) || 0, 0, 1) * 0.08) +
+    (clamp(Number(best?.physicalFeatures?.pathScore) || 0, 0, 1) * 0.08) +
+    (clamp(Number(best?.physicalFeatures?.decelScore) || 0, 0, 1) * 0.06) +
     (separation * 0.04) +
     (distanceSignal * 0.02) +
     (clamp(urgency / 0.9, 0, 1) * 0.02) +
@@ -639,6 +754,24 @@ function computeTripFuelIntentThreshold(opts, urgency, historyStrength, isHighwa
   );
 }
 
+function computeTurnInCommitmentScore(candidate) {
+  if (!candidate) return 0;
+  const physicalIntentScore = clamp(Number(candidate?.physicalIntentScore) || 0, 0, 1);
+  const captureScore = clamp(Number(candidate?.physicalFeatures?.captureScore) || 0, 0, 1);
+  const approachScore = clamp(Number(candidate?.physicalFeatures?.approachScore) || 0, 0, 1);
+  const pathScore = clamp(Number(candidate?.physicalFeatures?.pathScore) || 0, 0, 1);
+  const decelScore = clamp(Number(candidate?.physicalFeatures?.decelScore) || 0, 0, 1);
+  return clamp(
+    (physicalIntentScore * 0.44) +
+    (captureScore * 0.18) +
+    (approachScore * 0.18) +
+    (pathScore * 0.12) +
+    (decelScore * 0.08),
+    0,
+    1
+  );
+}
+
 /**
  * Score a candidate station's likelihood of being the user's intended stop.
  * Returns a "destinationProbability" (0-1) that reflects how likely this
@@ -648,7 +781,15 @@ function computeTripFuelIntentThreshold(opts, urgency, historyStrength, isHighwa
  */
 function scoreDestinationLikelihood(station, profile, nowMs, context = {}) {
   if (!profile) return 0;
-  const historyScore = computeHistoryScore(station, profile, nowMs);
+  const historyScore = context.candidate
+    ? (Number(context.candidate.genericHistoryScore) || 0)
+    : computeHistoryScore(station, profile, nowMs);
+  const contextualHistoryScore = context.candidate
+    ? (Number(context.candidate.contextualHistoryScore) || 0)
+    : computeContextualHistoryScore(station, profile, nowMs, context.historyContext || {});
+  const historyContextMatch = context.candidate
+    ? (Number(context.candidate.historyContextMatch) || 0)
+    : computeHistoryContextMatch(station, profile, nowMs, context.historyContext || {});
   const timePatternScore = computeTimePatternScore(station, profile, nowMs);
   const brandAffinity = computeBrandAffinity(station, profile);
   const coldStartScore = context.candidate
@@ -662,9 +803,15 @@ function scoreDestinationLikelihood(station, profile, nowMs, context = {}) {
       context.options || DEFAULT_OPTIONS
     )
     : brandAffinity * 0.35;
-  const historicalStrength = Math.max(historyScore, timePatternScore);
+  const historicalStrength = Math.max(
+    contextualHistoryScore,
+    timePatternScore,
+    historyScore * (0.22 + (historyContextMatch * 0.78))
+  );
   const learnedIntent = clamp(
-    Math.max(historyScore, timePatternScore * 1.1) + (brandAffinity * 0.22),
+    (historicalStrength * 0.72) +
+    (contextualHistoryScore * 0.12) +
+    (brandAffinity * 0.16),
     0,
     1
   );
@@ -710,15 +857,46 @@ function recommend(window, profile, stations, options = {}) {
   const nowMs = window[window.length - 1].timestamp || Date.now();
 
   // Corridor lookup.
+  const trackedMilesSinceLastFill = Number.isFinite(Number(options.milesSinceLastFill))
+    ? Number(options.milesSinceLastFill)
+    : (Number.isFinite(Number(profile?.estimatedMilesSinceLastFill))
+      ? Number(profile.estimatedMilesSinceLastFill)
+      : null);
+  const fuelState = profile && profile.fillUpHistory
+    ? estimateFuelState(profile.fillUpHistory, {
+      milesSinceLastFill: trackedMilesSinceLastFill,
+      typicalIntervalMiles: profile.typicalFillUpIntervalMiles,
+    })
+    : null;
   const urgency = typeof options.urgency === 'number'
     ? options.urgency
-    : (profile && profile.fillUpHistory ? estimateRange(profile.fillUpHistory).urgency : 0);
+    : (fuelState ? fuelState.urgency : 0);
+  const fuelNeedScore = clamp(Math.max(
+    fuelState?.fuelNeedScore || 0,
+    urgency,
+  ), 0, 1);
+  const effectiveCorridorHalfWidthMeters = clamp(
+    opts.corridorHalfWidthMeters + (fuelNeedScore * 140) + (computeMeanSpeed(window) <= 5 ? 60 : 0),
+    opts.corridorHalfWidthMeters,
+    opts.corridorHalfWidthMeters + 220
+  );
+  const effectiveMinTriggerDistanceMeters = fuelNeedScore >= opts.fuelNeedMediumThreshold
+    ? Math.max(1000, opts.minTriggerDistanceMeters - 500)
+    : opts.minTriggerDistanceMeters;
   const effectiveProjectionDistance = computeProjectionDistance(window, opts, urgency);
   const isHighwayCruise = detectHighwayCruise(window, opts);
+  const meanSpeedMps = computeMeanSpeed(window);
+  const roadComplexity = computeRoadComplexity(window, opts);
+  const liveHistoryContext = {
+    isHighwayCruise,
+    isCityGridLike: roadComplexity.gridlock || (!isHighwayCruise && roadComplexity.meanHeadingDelta >= opts.complexHeadingDeltaDegrees && meanSpeedMps <= 8),
+    meanSpeedMps,
+  };
 
   const candidates = findCorridorCandidates(window, stations, {
     ...opts,
     projectionDistanceMeters: effectiveProjectionDistance,
+    corridorHalfWidthMeters: effectiveCorridorHalfWidthMeters,
   });
   if (candidates.length === 0) return null;
 
@@ -733,6 +911,13 @@ function recommend(window, profile, stations, options = {}) {
       isRoadTripHint: false,
     }, corridorStations);
     const physicalIntentScore = clamp(Number(physicalFeatures?.confidence) || 0, 0, 1);
+    const genericHistoryScore = computeHistoryScore(candidate.station, profile, nowMs);
+    const contextualHistoryScore = computeContextualHistoryScore(candidate.station, profile, nowMs, liveHistoryContext);
+    const historyContextMatch = computeHistoryContextMatch(candidate.station, profile, nowMs, liveHistoryContext);
+    const observedConversionRate = computeObservedConversionRate(candidate.station, profile);
+    const contextualObservedConversionRate = computeContextualObservedConversionRate(candidate.station, profile, nowMs, liveHistoryContext);
+    const exposureContextMatch = computeExposureContextMatch(candidate.station, profile, nowMs, liveHistoryContext);
+    const observedSkipScore = computeObservedSkipScore(candidate.station, profile, nowMs, liveHistoryContext);
     const coldStartScore = computeColdStartScore({
       ...candidate,
       accessPenaltyPrice,
@@ -746,12 +931,20 @@ function recommend(window, profile, stations, options = {}) {
         coldStartScore,
         physicalIntentScore,
         physicalFeatures,
+        genericHistoryScore,
+        contextualHistoryScore,
+        historyContextMatch,
+        observedConversionRate,
+        contextualObservedConversionRate,
+        exposureContextMatch,
+        observedSkipScore,
       },
       corridorCandidates: candidates,
       allStations: stations,
       urgency,
       projectionDistanceMeters: effectiveProjectionDistance,
       options: opts,
+      historyContext: liveHistoryContext,
     });
 
     return {
@@ -760,16 +953,26 @@ function recommend(window, profile, stations, options = {}) {
       brandAffinity: computeBrandAffinity(candidate.station, profile),
       coldStartScore,
       destinationProbability,
+      genericHistoryScore,
+      contextualHistoryScore,
+      historyContextMatch,
+      observedConversionRate,
+      contextualObservedConversionRate,
+      exposureContextMatch,
+      observedSkipScore,
       physicalIntentScore,
       physicalFeatures,
     };
   }).map(candidate => {
+    const timePatternScore = computeTimePatternScore(candidate.station, profile, nowMs);
     const historyStrengthCandidate = Math.max(
-      computeHistoryScore(candidate.station, profile, nowMs),
-      computeTimePatternScore(candidate.station, profile, nowMs)
+      candidate.contextualHistoryScore || 0,
+      timePatternScore,
+      (candidate.genericHistoryScore || 0) * (0.22 + ((candidate.historyContextMatch || 0) * 0.78))
     );
     return {
       ...candidate,
+      visitShare: computeVisitShare(candidate.station, profile),
       historyStrength: historyStrengthCandidate,
       intentEvidence: computeIntentEvidence(candidate, opts, urgency, historyStrengthCandidate, isHighwayCruise),
       netStationCost: computeNetStationCost(candidate, opts, isHighwayCruise),
@@ -811,8 +1014,9 @@ function recommend(window, profile, stations, options = {}) {
   const learnedPredictedDefault = rankedByDestination[0] || null;
   const learnedHistoryStrength = learnedPredictedDefault
     ? Math.max(
-      computeHistoryScore(learnedPredictedDefault.station, profile, nowMs),
-      computeTimePatternScore(learnedPredictedDefault.station, profile, nowMs)
+      learnedPredictedDefault.contextualHistoryScore || 0,
+      computeTimePatternScore(learnedPredictedDefault.station, profile, nowMs),
+      (learnedPredictedDefault.genericHistoryScore || 0) * (0.22 + ((learnedPredictedDefault.historyContextMatch || 0) * 0.78))
     )
     : 0;
   const predictedDefault = (learnedHistoryStrength < 0.20)
@@ -824,8 +1028,9 @@ function recommend(window, profile, stations, options = {}) {
     : (predictedDefault ? predictedDefault.effectiveDestinationProbability : 0);
   const historyStrength = predictedDefault
     ? Math.max(
-      computeHistoryScore(predictedDefault.station, profile, nowMs),
-      computeTimePatternScore(predictedDefault.station, profile, nowMs)
+      predictedDefault.contextualHistoryScore || 0,
+      computeTimePatternScore(predictedDefault.station, profile, nowMs),
+      (predictedDefault.genericHistoryScore || 0) * (0.22 + ((predictedDefault.historyContextMatch || 0) * 0.78))
     )
     : 0;
   const timePatternStrength = predictedDefault
@@ -834,14 +1039,198 @@ function recommend(window, profile, stations, options = {}) {
   const intentLeader = [...scored].sort((a, b) =>
     (b.intentEvidence || 0) - (a.intentEvidence || 0)
   )[0] || null;
+  const valueLeader = [...scored].sort((a, b) =>
+    (b.valueScore || 0) - (a.valueScore || 0)
+  )[0] || null;
   const tripFuelIntentScore = computeTripFuelIntentScore(scored, opts, urgency, isHighwayCruise);
   const tripFuelIntentThreshold = computeTripFuelIntentThreshold(opts, urgency, historyStrength, isHighwayCruise);
+  const predictedBrandAffinity = clamp(predictedDefault?.brandAffinity || 0, 0, 1);
+  const profileValueSeekingScore = computeProfileValueSeekingScore(profile, stations);
+  const opportunisticFillScore = computeOpportunisticFillScore(profile, fuelState);
+  const lowSpecificityColdStart = Boolean(
+    predictedDefault &&
+    historyStrength < 0.20 &&
+    timePatternStrength < 0.20 &&
+    fuelNeedScore < 0.88 &&
+    !isHighwayCruise
+  );
+  const speculativeUrbanHistoryMode = Boolean(
+    predictedDefault &&
+    !isHighwayCruise &&
+    historyStrength >= 0.45 &&
+    timePatternStrength < 0.20 &&
+    predictedDefault.alongTrack > opts.maxSpeculativeDistanceMeters &&
+    fuelNeedScore < 0.55
+  );
+  const predictedDefaultPathScore = clamp(Number(predictedDefault?.physicalFeatures?.pathScore) || 0, 0, 1);
+  const predictedDefaultCaptureScore = clamp(Number(predictedDefault?.physicalFeatures?.captureScore) || 0, 0, 1);
+  const predictedDefaultTurnInCommitmentScore = predictedDefault
+    ? computeTurnInCommitmentScore(predictedDefault)
+    : 0;
+  const historyRecoveryMinFuelNeed = isHighwayCruise
+    ? opts.historyRecoveryMinHighwayFuelNeed
+    : opts.historyRecoveryMinFuelNeed;
+  const historyRecoveryTripIntentFloor = Math.max(
+    0.18,
+    tripFuelIntentThreshold - (isHighwayCruise ? opts.historyRecoveryTripIntentBuffer : (opts.historyRecoveryTripIntentBuffer * 0.5))
+  );
+  const historyRecoveryMaxDistanceMeters = isHighwayCruise
+    ? opts.historyRecoveryHighwayMaxDistanceMeters
+    : opts.historyRecoveryCityMaxDistanceMeters;
+  const historyRecoveryConfidence = predictedDefault
+    ? clamp(
+      (predictedDefault.effectiveDestinationProbability * 0.20) +
+      ((predictedDefault.intentEvidence || 0) * 0.24) +
+      (historyStrength * 0.22) +
+      ((predictedDefault.valueScore || 0) * 0.12) +
+      (fuelNeedScore * 0.10) +
+      (predictedDefaultPathScore * 0.05) +
+      (predictedDefaultCaptureScore * 0.03) +
+      (predictedDefaultTurnInCommitmentScore * 0.02) +
+      ((intentLeader?.station?.stationId === predictedDefault.station?.stationId) ? 0.04 : 0) +
+      ((valueLeader?.station?.stationId === predictedDefault.station?.stationId) ? 0.02 : 0),
+      0,
+      1
+    )
+    : 0;
+  const historyRecoveryEligible = Boolean(
+    opts.enableHistoryRecoveryProposals &&
+    predictedDefault &&
+    !speculativeUrbanHistoryMode &&
+    historyStrength >= opts.historyRecoveryMinHistoryStrength &&
+    predictedDefault.alongTrack >= effectiveMinTriggerDistanceMeters &&
+    predictedDefault.alongTrack <= historyRecoveryMaxDistanceMeters &&
+    predictedDefault.effectiveDestinationProbability >= opts.historyRecoveryMinProbability &&
+    (predictedDefault.intentEvidence || 0) >= opts.historyRecoveryMinIntentEvidence &&
+    (predictedDefault.valueScore || 0) >= opts.historyRecoveryMinValueScore &&
+    predictedDefaultPathScore >= opts.historyRecoveryMinPathScore &&
+    fuelNeedScore >= historyRecoveryMinFuelNeed &&
+    tripFuelIntentScore >= historyRecoveryTripIntentFloor
+  );
+
+  function rankCandidate(candidates, candidate, key) {
+    if (!candidate || !Array.isArray(candidates) || candidates.length === 0) return null;
+    const sorted = [...candidates].sort((left, right) => {
+      const leftValue = Number(left?.[key]) || 0;
+      const rightValue = Number(right?.[key]) || 0;
+      return rightValue - leftValue;
+    });
+    const index = sorted.findIndex(entry => entry.station?.stationId === candidate.station?.stationId);
+    return index >= 0 ? index + 1 : null;
+  }
+
+  function buildMlFeatureEnvelope(candidate, recommendation) {
+    if (!candidate) {
+      return {
+        candidateCount: scored.length,
+        tripFuelIntentScore,
+        tripFuelIntentThreshold,
+        historyStrength,
+        timePatternStrength,
+        leadMargin,
+        urgency,
+        fuelNeedScore,
+        isHighwayCruise,
+        lowSpecificityColdStart,
+        speculativeUrbanHistoryMode,
+        historyRecoveryEligible,
+        historyRecoveryConfidence,
+        estimatedRemainingMiles: fuelState?.estimatedRemainingMiles ?? null,
+        avgIntervalMiles: fuelState?.avgIntervalMiles ?? null,
+        intervalUtilization: fuelState?.avgIntervalMiles
+          ? clamp((fuelState?.milesSinceLastFill || 0) / Math.max(1, fuelState.avgIntervalMiles), 0, 2)
+          : null,
+        profileHistoryConcentration: computeProfileHistoryConcentration(profile),
+        profileStationCount: Array.isArray(profile?.visitHistory) ? profile.visitHistory.length : 0,
+        profileValueSeekingScore,
+        opportunisticFillScore,
+      };
+    }
+
+    const physicalFeatures = candidate.physicalFeatures || {};
+    const bestByValue = [...scored].sort((left, right) => (right.valueScore || 0) - (left.valueScore || 0))[0] || null;
+    const bestByIntent = [...scored].sort((left, right) => (right.intentEvidence || 0) - (left.intentEvidence || 0))[0] || null;
+    const cheapestByNet = [...scored].sort((left, right) => (left.netStationCost || 0) - (right.netStationCost || 0))[0] || null;
+
+    return {
+      candidateCount: scored.length,
+      candidateAlongTrack: candidate.alongTrack,
+      candidateCrossTrack: candidate.crossTrack,
+      candidateSignedCrossTrack: candidate.signedCrossTrack,
+      candidateAccessPenaltyPrice: candidate.accessPenaltyPrice || 0,
+      candidateNetStationCost: candidate.netStationCost || 0,
+      candidateNetCostDeltaFromBest: Math.max(0, (candidate.netStationCost || 0) - (cheapestByNet?.netStationCost || 0)),
+      candidateColdStartScore: candidate.coldStartScore || 0,
+      candidateValueScore: candidate.valueScore || 0,
+      candidateIntentEvidence: candidate.intentEvidence || 0,
+      candidatePhysicalIntentScore: candidate.physicalIntentScore || 0,
+      candidateDestinationProbability: candidate.destinationProbability || 0,
+      candidateEffectiveDestinationProbability: candidate.effectiveDestinationProbability || 0,
+      candidateHistoryStrength: candidate.historyStrength || 0,
+      candidateGenericHistoryScore: candidate.genericHistoryScore || 0,
+      candidateContextualHistoryScore: candidate.contextualHistoryScore || 0,
+      candidateHistoryContextMatch: candidate.historyContextMatch || 0,
+      candidateVisitShare: candidate.visitShare || 0,
+      candidateObservedConversionRate: candidate.observedConversionRate || 0,
+      candidateContextualObservedConversionRate: candidate.contextualObservedConversionRate || 0,
+      candidateExposureContextMatch: candidate.exposureContextMatch || 0,
+      candidateObservedSkipScore: candidate.observedSkipScore || 0,
+      candidateBrandAffinity: candidate.brandAffinity || 0,
+      candidatePathScore: Number(physicalFeatures.pathScore) || 0,
+      candidateCaptureScore: Number(physicalFeatures.captureScore) || 0,
+      candidateApproachScore: Number(physicalFeatures.approachScore) || 0,
+      candidateDecelScore: Number(physicalFeatures.decelScore) || 0,
+      candidateTurnInCommitmentScore: computeTurnInCommitmentScore(candidate),
+      candidateDistanceMeters: Number(physicalFeatures.distanceMeters) || null,
+      candidateValueRank: rankCandidate(scored, candidate, 'valueScore'),
+      candidateIntentRank: rankCandidate(scored, candidate, 'intentEvidence'),
+      candidateDestinationRank: rankCandidate(scored, candidate, 'effectiveDestinationProbability'),
+      predictedDefaultStationId: predictedDefault?.station?.stationId || null,
+      predictedDefaultSameStation: Boolean(predictedDefault?.station?.stationId && predictedDefault.station.stationId === candidate.station?.stationId),
+      predictedDefaultIntentEvidence: predictedDefault?.intentEvidence || 0,
+      predictedDefaultValueScore: predictedDefault?.valueScore || 0,
+      predictedDefaultAlongTrack: predictedDefault?.alongTrack || null,
+      predictedDefaultContextualHistoryScore: predictedDefault?.contextualHistoryScore || 0,
+      predictedDefaultHistoryContextMatch: predictedDefault?.historyContextMatch || 0,
+      predictedDefaultObservedConversionRate: predictedDefault?.observedConversionRate || 0,
+      predictedDefaultContextualObservedConversionRate: predictedDefault?.contextualObservedConversionRate || 0,
+      bestByIntentSameStation: Boolean(bestByIntent?.station?.stationId && bestByIntent.station.stationId === candidate.station?.stationId),
+      bestByValueSameStation: Boolean(bestByValue?.station?.stationId && bestByValue.station.stationId === candidate.station?.stationId),
+      tripFuelIntentScore,
+      tripFuelIntentThreshold,
+      tripFuelIntentSurplus: tripFuelIntentScore - tripFuelIntentThreshold,
+      historyStrength,
+      timePatternStrength,
+      leadMargin,
+      urgency,
+      fuelNeedScore,
+      isHighwayCruise,
+      lowSpecificityColdStart,
+      speculativeUrbanHistoryMode,
+      historyRecoveryEligible,
+      historyRecoveryConfidence,
+      effectiveProjectionDistance,
+      effectiveMinTriggerDistanceMeters,
+      estimatedRemainingMiles: fuelState?.estimatedRemainingMiles ?? null,
+      avgIntervalMiles: fuelState?.avgIntervalMiles ?? null,
+      intervalUtilization: fuelState?.avgIntervalMiles
+        ? clamp((fuelState?.milesSinceLastFill || 0) / Math.max(1, fuelState.avgIntervalMiles), 0, 2)
+        : null,
+      profileHistoryConcentration: computeProfileHistoryConcentration(profile),
+      profileStationCount: Array.isArray(profile?.visitHistory) ? profile.visitHistory.length : 0,
+      profileValueSeekingScore,
+      opportunisticFillScore,
+      recommendationConfidence: recommendation?.confidence || 0,
+    };
+  }
 
   function finalizeRecommendation(recommendation, candidate = null) {
     if (!recommendation) return null;
-    if ((recommendation.forwardDistance || 0) < opts.minTriggerDistanceMeters) return null;
+    if ((recommendation.forwardDistance || 0) < effectiveMinTriggerDistanceMeters) return null;
     return {
       ...recommendation,
+      fuelNeedScore,
+      mlFeatures: buildMlFeatureEnvelope(candidate, recommendation),
       presentation: buildPresentationPlan(window, recommendation, candidate, opts),
     };
   }
@@ -849,6 +1238,9 @@ function recommend(window, profile, stations, options = {}) {
   // If we have a strong predicted default AND there's a cheaper one on the
   // same corridor that's not too much of a detour, recommend the cheaper one.
   if (predictedDefault && predictedDefault.effectiveDestinationProbability >= 0.32) {
+    if (speculativeUrbanHistoryMode) {
+      return null;
+    }
     const defaultPrice = Number.isFinite(Number(predictedDefault.station?.effectivePrice))
       ? Number(predictedDefault.station.effectivePrice)
       : predictedDefault.station.price;
@@ -897,6 +1289,7 @@ function recommend(window, profile, stations, options = {}) {
           return null;
         }
         const historyNeedsConfirmation = (
+          fuelNeedScore < opts.fuelNeedMediumThreshold &&
           historyStrength >= 0.20 &&
           predictedDefault.intentEvidence < Math.max(0.46, (intentLeader?.intentEvidence || 0) - 0.08) &&
           best.intentEvidence < Math.max(0.42, (intentLeader?.intentEvidence || 0) - 0.04) &&
@@ -906,13 +1299,28 @@ function recommend(window, profile, stations, options = {}) {
           return null;
         }
         const weakSpecificityHistory = (
-          historyStrength >= 0.45 &&
+          historyStrength >= 0.35 &&
           timePatternStrength < 0.20 &&
-          urgency < 0.88 &&
-          best.alongTrack > 5500
+          fuelNeedScore < 0.88
         );
         if (weakSpecificityHistory) {
-          return null;
+          const mediumFuelNeed = fuelNeedScore >= opts.fuelNeedMediumThreshold;
+          const weakSpecificityUrbanHistory = !isHighwayCruise && historyStrength >= 0.45;
+          if (
+            best.alongTrack > opts.weakPatternHistoryMaxDistanceMeters ||
+            tripFuelIntentScore < (tripFuelIntentThreshold + opts.weakPatternHistoryIntentBuffer - (mediumFuelNeed ? opts.lowSpecificityFuelNeedBuffer : 0)) ||
+            Math.max(predictedDefault.intentEvidence, fuelNeedScore) < (mediumFuelNeed ? opts.weakPatternHistoryMinIntentEvidence - 0.06 : opts.weakPatternHistoryMinIntentEvidence) ||
+            best.intentEvidence < Math.max(0.42, (mediumFuelNeed ? opts.weakPatternHistoryMinIntentEvidence - 0.08 : opts.weakPatternHistoryMinIntentEvidence - 0.02)) ||
+            (
+              weakSpecificityUrbanHistory && (
+                fuelNeedScore < 0.55 ||
+                tripFuelIntentScore < (tripFuelIntentThreshold + 0.10) ||
+                Math.max(predictedDefault.intentEvidence, best.intentEvidence) < 0.60
+              )
+            )
+          ) {
+            return null;
+          }
         }
 
         const urgencyFactor = clamp(urgency / 0.6 + 0.3, 0.3, 1.0);
@@ -968,7 +1376,7 @@ function recommend(window, profile, stations, options = {}) {
           : (Number(candidate.station.price) + (candidate.accessPenaltyPrice || 0)))
       )) >= opts.minPriceSavingsPerGal &&
       candidate.crossTrack <= opts.corridorHalfWidthMeters * 0.95 &&
-      candidate.alongTrack >= opts.minTriggerDistanceMeters
+      candidate.alongTrack >= effectiveMinTriggerDistanceMeters
     )
   );
 
@@ -977,6 +1385,9 @@ function recommend(window, profile, stations, options = {}) {
   // driver knows the app is tracking them — this is the "confirm the plan"
   // notification.
   if (predictedDefault && !shouldSuppressDefaultForCheaperOption) {
+    if (speculativeUrbanHistoryMode) {
+      return null;
+    }
     const insufficientLiveIntent = (
       tripFuelIntentScore < tripFuelIntentThreshold ||
       (
@@ -990,6 +1401,7 @@ function recommend(window, profile, stations, options = {}) {
       return null;
     }
     const historyNeedsConfirmation = (
+      fuelNeedScore < opts.fuelNeedMediumThreshold &&
       historyStrength >= 0.20 &&
       predictedDefault.intentEvidence < Math.max(
         historyStrength >= 0.45 ? 0.50 : 0.44,
@@ -1002,12 +1414,49 @@ function recommend(window, profile, stations, options = {}) {
       return null;
     }
     const weakSpecificityHistory = (
+      historyStrength >= 0.35 &&
+      timePatternStrength < 0.20 &&
+      fuelNeedScore < 0.88
+    );
+    const speculativeWeakHistoryCityGuard = (
+      !isHighwayCruise &&
       historyStrength >= 0.45 &&
       timePatternStrength < 0.20 &&
-      urgency < 0.88 &&
-      predictedDefault.alongTrack > 5500
+      predictedDefault.alongTrack > opts.strongSpeculativeDistanceMeters &&
+      fuelNeedScore < opts.turnInCommitmentHistoryAssistFuelNeed
     );
+    if (speculativeWeakHistoryCityGuard) {
+      return null;
+    }
     if (weakSpecificityHistory) {
+      const mediumFuelNeed = fuelNeedScore >= opts.fuelNeedMediumThreshold;
+      const weakSpecificityUrbanHistory = !isHighwayCruise && historyStrength >= 0.45;
+      if (
+        predictedDefault.alongTrack > opts.weakPatternHistoryMaxDistanceMeters ||
+        tripFuelIntentScore < (tripFuelIntentThreshold + opts.weakPatternHistoryIntentBuffer - (mediumFuelNeed ? opts.lowSpecificityFuelNeedBuffer : 0)) ||
+        Math.max(predictedDefault.intentEvidence, fuelNeedScore) < (mediumFuelNeed ? opts.weakPatternHistoryMinIntentEvidence - 0.06 : opts.weakPatternHistoryMinIntentEvidence) ||
+        (
+          weakSpecificityUrbanHistory && (
+            fuelNeedScore < 0.55 ||
+            tripFuelIntentScore < (tripFuelIntentThreshold + 0.10) ||
+            predictedDefault.intentEvidence < 0.60
+          )
+        )
+      ) {
+        return null;
+      }
+    }
+    const diffuseHistoryDominatedCandidate = (
+      historyStrength >= 0.20 &&
+      fuelNeedScore < 0.30 &&
+      (predictedDefault.visitShare || 0) < 0.08 &&
+      computeProfileHistoryConcentration(profile) < 0.34 &&
+      (predictedDefault.valueScore || 0) < 0.30 &&
+      !predictedDefault.station?.routeApproach?.isOnRoute &&
+      leadMargin < 0.10 &&
+      predictedDefault.alongTrack <= Math.min(4500, effectiveProjectionDistance * 0.45)
+    );
+    if (diffuseHistoryDominatedCandidate) {
       return null;
     }
     const minimumProbability = historyStrength >= 0.20
@@ -1037,6 +1486,22 @@ function recommend(window, profile, stations, options = {}) {
       0,
       1
     );
+    if (lowSpecificityColdStart) {
+      const coldStartBrandValueSignal = (
+        predictedBrandAffinity >= 0.45 &&
+        (predictedDefault.valueScore || 0) >= opts.lowSpecificityColdStartBrandValueFloor
+      );
+      const mediumFuelNeed = fuelNeedScore >= opts.fuelNeedMediumThreshold;
+      if (
+        (!coldStartBrandValueSignal && !mediumFuelNeed) ||
+        predictedDefault.alongTrack > opts.lowSpecificityColdStartMaxDistanceMeters ||
+        tripFuelIntentScore < (tripFuelIntentThreshold + opts.lowSpecificityColdStartIntentBuffer - (mediumFuelNeed ? opts.lowSpecificityFuelNeedBuffer : 0)) ||
+        Math.max(predictedDefault.intentEvidence, fuelNeedScore) < (mediumFuelNeed ? opts.lowSpecificityColdStartMinIntentEvidence - 0.06 : opts.lowSpecificityColdStartMinIntentEvidence) ||
+        confidence < Math.max(opts.triggerThreshold, opts.lowSpecificityColdStartMinConfidence)
+      ) {
+        return null;
+      }
+    }
     if (predictedDefault.effectiveDestinationProbability >= minimumProbability && confidence >= opts.triggerThreshold) {
       return finalizeRecommendation({
         stationId: predictedDefault.station.stationId,
@@ -1052,9 +1517,35 @@ function recommend(window, profile, stations, options = {}) {
     }
   }
 
-  if (historyStrength < 0.20 && scored.length >= 2) {
+  if (
+    historyRecoveryEligible &&
+    predictedDefault &&
+    !shouldSuppressDefaultForCheaperOption &&
+    historyRecoveryConfidence >= Math.max(opts.historyRecoveryMinConfidence, opts.triggerThreshold - 0.18)
+  ) {
+    return finalizeRecommendation({
+      stationId: predictedDefault.station.stationId,
+      type: 'history_recovery_stop',
+      confidence: historyRecoveryConfidence,
+      reason: `History-backed stop ahead (${Math.round(historyRecoveryConfidence * 100)}% confidence)`,
+      forwardDistance: predictedDefault.alongTrack,
+      predictedDefault: predictedDefault.station.stationId,
+      savings: 0,
+    }, predictedDefault);
+  }
+
+  const weakContextualHistoryMode = Boolean(
+    predictedDefault &&
+    historyStrength >= 0.20 &&
+    historyStrength < 0.38 &&
+    timePatternStrength < 0.20 &&
+    (predictedDefault.historyContextMatch || 0) < 0.38 &&
+    profileValueSeekingScore >= 0.40
+  );
+
+  if ((historyStrength < 0.20 || weakContextualHistoryMode) && scored.length >= 2) {
     const coldStartRanked = [...scored]
-      .filter(candidate => candidate.alongTrack >= opts.minTriggerDistanceMeters)
+      .filter(candidate => candidate.alongTrack >= effectiveMinTriggerDistanceMeters)
       .map(candidate => {
         const pathFit = clamp(1 - candidate.crossTrack / opts.corridorHalfWidthMeters, 0, 1);
         return {
@@ -1072,7 +1563,12 @@ function recommend(window, profile, stations, options = {}) {
       .sort((a, b) => b.coldStartChoiceScore - a.coldStartChoiceScore);
     const bestColdStart = coldStartRanked[0] || null;
     const nextColdStart = coldStartRanked[1] || null;
-    if (bestColdStart) {
+      if (bestColdStart) {
+      const bestColdStartLowSpecificity = (
+        timePatternStrength < 0.20 &&
+        fuelNeedScore < 0.88 &&
+        !isHighwayCruise
+      );
       const coldStartLead = bestColdStart.coldStartChoiceScore - (nextColdStart?.coldStartChoiceScore || 0);
       const coldStartNetAdvantage = nextColdStart
         ? Math.max(0, (nextColdStart.netStationCost || 0) - (bestColdStart.netStationCost || 0))
@@ -1086,19 +1582,41 @@ function recommend(window, profile, stations, options = {}) {
         0,
         1
       );
+      const coldStartLeadFloor = weakContextualHistoryMode
+        ? Math.max(0.02, opts.minColdStartBranchLead - 0.03)
+        : Math.max(opts.coldStartLeadMargin, opts.minColdStartBranchLead);
+      const coldStartValueEdgeFloor = weakContextualHistoryMode
+        ? Math.max(0.10, opts.minColdStartBranchValueEdge - 0.05)
+        : opts.minColdStartBranchValueEdge;
       const coldStartEligible = (
         tripFuelIntentScore >= Math.max(
           isHighwayCruise ? opts.minColdStartBranchTripFuelIntentHighway : opts.minColdStartBranchTripFuelIntent,
-          tripFuelIntentThreshold
+          weakContextualHistoryMode ? (tripFuelIntentThreshold - 0.04) : tripFuelIntentThreshold
         ) &&
         bestColdStart.coldStartScore >= opts.coldStartThreshold &&
-        coldStartLead >= Math.max(opts.coldStartLeadMargin, opts.minColdStartBranchLead) &&
+        coldStartLead >= coldStartLeadFloor &&
         (
           coldStartNetAdvantage >= opts.minPriceSavingsPerGal ||
-          (bestColdStart.valueScore || 0) >= ((nextColdStart?.valueScore || 0) + opts.minColdStartBranchValueEdge)
+          (bestColdStart.valueScore || 0) >= ((nextColdStart?.valueScore || 0) + coldStartValueEdgeFloor)
         ) &&
-        coldStartConfidence >= opts.triggerThreshold
+        coldStartConfidence >= (weakContextualHistoryMode ? (opts.triggerThreshold - 0.04) : opts.triggerThreshold)
       );
+      if (bestColdStartLowSpecificity) {
+        const coldStartBrandValueSignal = (
+          (bestColdStart.brandAffinity || 0) >= 0.45 &&
+          (bestColdStart.valueScore || 0) >= opts.lowSpecificityColdStartBrandValueFloor
+        );
+        const mediumFuelNeed = fuelNeedScore >= opts.fuelNeedMediumThreshold;
+        if (
+          (!coldStartBrandValueSignal && !mediumFuelNeed) ||
+          bestColdStart.alongTrack > opts.lowSpecificityColdStartMaxDistanceMeters ||
+          tripFuelIntentScore < (tripFuelIntentThreshold + opts.lowSpecificityColdStartIntentBuffer - (mediumFuelNeed ? opts.lowSpecificityFuelNeedBuffer : 0)) ||
+          Math.max(bestColdStart.intentEvidence || 0, fuelNeedScore) < (mediumFuelNeed ? opts.lowSpecificityColdStartMinIntentEvidence - 0.06 : opts.lowSpecificityColdStartMinIntentEvidence) ||
+          coldStartConfidence < Math.max(opts.triggerThreshold, opts.lowSpecificityColdStartMinConfidence)
+        ) {
+          return null;
+        }
+      }
       if (coldStartEligible) {
         return finalizeRecommendation({
           stationId: bestColdStart.station.stationId,
@@ -1113,13 +1631,185 @@ function recommend(window, profile, stations, options = {}) {
     }
   }
 
+  const bestByValue = [...scored].sort((left, right) =>
+    (right.valueScore || 0) - (left.valueScore || 0) ||
+    (right.intentEvidence || 0) - (left.intentEvidence || 0)
+  )[0] || null;
+  const runnerUpByValue = [...scored].sort((left, right) =>
+    (right.valueScore || 0) - (left.valueScore || 0) ||
+    (right.intentEvidence || 0) - (left.intentEvidence || 0)
+  )[1] || null;
+  if (bestByValue && bestByValue.alongTrack >= effectiveMinTriggerDistanceMeters) {
+    const valueEdge = (bestByValue.valueScore || 0) - (runnerUpByValue?.valueScore || 0);
+    const netCostAdvantage = runnerUpByValue
+      ? Math.max(0, (runnerUpByValue.netStationCost || 0) - (bestByValue.netStationCost || 0))
+      : 0;
+    const contextualHistorySupport = Math.max(
+      bestByValue.contextualHistoryScore || 0,
+      bestByValue.historyContextMatch || 0
+    );
+    const profileAlignedValueSupport = Math.max(
+      bestByValue.brandAffinity || 0,
+      profileValueSeekingScore
+    );
+    const opportunisticIntentSupport = clamp(
+      (tripFuelIntentScore * 0.34) +
+      ((bestByValue.intentEvidence || 0) * 0.24) +
+      ((bestByValue.valueScore || 0) * 0.20) +
+      (profileAlignedValueSupport * 0.14) +
+      (contextualHistorySupport * 0.08),
+      0,
+      1
+    );
+    const opportunisticValueEligible = (
+      fuelNeedScore < opts.fuelNeedHighThreshold &&
+      Math.max(profileValueSeekingScore, opportunisticFillScore, bestByValue.brandAffinity || 0) >= 0.45 &&
+      (bestByValue.valueScore || 0) >= 0.72 &&
+      valueEdge >= 0.12 &&
+      netCostAdvantage >= Math.max(0.08, opts.minPriceSavingsPerGal) &&
+      bestByValue.alongTrack <= (isHighwayCruise ? 11_000 : 6_500) &&
+      tripFuelIntentScore >= Math.max(0.30, tripFuelIntentThreshold - 0.08) &&
+      (bestByValue.intentEvidence || 0) >= 0.48 &&
+      (
+        historyStrength < 0.20 ||
+        contextualHistorySupport >= 0.18 ||
+        (bestByValue.brandAffinity || 0) >= 0.45
+      ) &&
+      opportunisticIntentSupport >= Math.max(opts.triggerThreshold - 0.08, 0.44)
+    );
+    if (opportunisticValueEligible) {
+      return finalizeRecommendation({
+        stationId: bestByValue.station.stationId,
+        type: 'predicted_stop',
+        confidence: opportunisticIntentSupport,
+        reason: `High-value stop ahead (${Math.round(opportunisticIntentSupport * 100)}% confidence, ${Math.round(bestByValue.alongTrack)}m out)`,
+        forwardDistance: bestByValue.alongTrack,
+        predictedDefault: bestByValue.station.stationId,
+        savings: netCostAdvantage,
+        accessPenaltyPrice: bestByValue.accessPenaltyPrice || 0,
+        stationSide: (bestByValue.signedCrossTrack || 0) > 0 ? 'left' : 'right',
+      }, bestByValue);
+    }
+  }
+
+  if (scored.length === 1) {
+    const onlyCandidate = scored[0];
+    const captureScore = clamp(Number(onlyCandidate?.physicalFeatures?.captureScore) || 0, 0, 1);
+    const singleCandidateConfidence = clamp(
+      (onlyCandidate.physicalIntentScore * 0.40) +
+      (captureScore * 0.22) +
+      ((onlyCandidate.intentEvidence || 0) * 0.18) +
+      (fuelNeedScore * 0.12) +
+      ((onlyCandidate.valueScore || 0) * 0.08),
+      0,
+      1
+    );
+    if (
+      fuelNeedScore >= opts.fuelNeedMediumThreshold &&
+      onlyCandidate.alongTrack >= effectiveMinTriggerDistanceMeters &&
+      onlyCandidate.alongTrack <= opts.singleCandidateTurnInMaxDistanceMeters &&
+      onlyCandidate.physicalIntentScore >= opts.singleCandidateTurnInMinPhysicalIntent &&
+      captureScore >= opts.singleCandidateTurnInMinCapture &&
+      singleCandidateConfidence >= Math.max(opts.triggerThreshold, opts.singleCandidateTurnInMinConfidence)
+    ) {
+      return finalizeRecommendation({
+        stationId: onlyCandidate.station.stationId,
+        type: historyStrength >= 0.20 ? 'predicted_stop' : 'cold_start_best_value',
+        confidence: singleCandidateConfidence,
+        reason: `Likely turn-in stop (${Math.round(singleCandidateConfidence * 100)}% confidence, ${Math.round(onlyCandidate.alongTrack)}m out)`,
+        forwardDistance: onlyCandidate.alongTrack,
+        predictedDefault: onlyCandidate.station.stationId,
+        savings: 0,
+      }, onlyCandidate);
+    }
+  }
+
+  const rankedByTurnInCommitment = [...scored]
+    .map(candidate => ({
+      ...candidate,
+      turnInCommitmentScore: computeTurnInCommitmentScore(candidate),
+    }))
+    .sort((a, b) =>
+      (b.turnInCommitmentScore || 0) - (a.turnInCommitmentScore || 0) ||
+      (b.physicalIntentScore || 0) - (a.physicalIntentScore || 0)
+    );
+  const turnInLeader = rankedByTurnInCommitment[0] || null;
+  const turnInRunnerUp = rankedByTurnInCommitment[1] || null;
+  if (turnInLeader) {
+    const turnInCapture = clamp(Number(turnInLeader?.physicalFeatures?.captureScore) || 0, 0, 1);
+    const turnInApproach = clamp(Number(turnInLeader?.physicalFeatures?.approachScore) || 0, 0, 1);
+    const turnInPath = clamp(Number(turnInLeader?.physicalFeatures?.pathScore) || 0, 0, 1);
+    const turnInDecel = clamp(Number(turnInLeader?.physicalFeatures?.decelScore) || 0, 0, 1);
+    const turnInDominance = clamp(
+      (turnInLeader.turnInCommitmentScore || 0) - (turnInRunnerUp?.turnInCommitmentScore || 0),
+      0,
+      1
+    );
+    const historyStrengthSupport = Math.max(
+      historyStrength,
+      Number(turnInLeader.historyStrength) || 0
+    );
+    const historyOrNeedSupportsTurnIn = (
+      fuelNeedScore >= opts.turnInCommitmentMinFuelNeed ||
+      (
+        fuelNeedScore >= opts.turnInCommitmentHistoryAssistFuelNeed &&
+        historyStrengthSupport >= opts.turnInCommitmentMinHistoryStrength
+      )
+    );
+    const turnInValueFloor = isHighwayCruise
+      ? opts.turnInCommitmentMinValueScoreHighway
+      : opts.turnInCommitmentMinValueScoreCity;
+    if (
+      historyOrNeedSupportsTurnIn &&
+      turnInLeader.alongTrack >= effectiveMinTriggerDistanceMeters &&
+      turnInLeader.alongTrack <= opts.turnInCommitmentMaxDistanceMeters &&
+      turnInLeader.crossTrack <= opts.turnInCommitmentMaxCrossTrackMeters &&
+      turnInLeader.physicalIntentScore >= opts.turnInCommitmentMinPhysicalIntent &&
+      turnInLeader.turnInCommitmentScore >= opts.turnInCommitmentMinScore &&
+      turnInApproach >= opts.turnInCommitmentMinApproach &&
+      turnInPath >= opts.turnInCommitmentMinPath &&
+      turnInDominance >= opts.turnInCommitmentMinDominance &&
+      (turnInLeader.valueScore || 0) >= turnInValueFloor &&
+      (
+        isHighwayCruise
+          ? turnInDecel >= opts.turnInCommitmentMinDecel
+          : turnInCapture >= opts.turnInCommitmentMinCapture
+      )
+    ) {
+      const commitmentConfidence = clamp(
+        (turnInLeader.turnInCommitmentScore * 0.62) +
+        (Math.max(fuelNeedScore, turnInLeader.historyStrength || 0) * 0.18) +
+        (turnInDominance * 0.12) +
+        ((turnInLeader.valueScore || 0) * 0.08),
+        0,
+        1
+      );
+      if (commitmentConfidence >= opts.triggerThreshold) {
+        return finalizeRecommendation({
+          stationId: turnInLeader.station.stationId,
+          type: 'turn_in_commitment',
+          confidence: commitmentConfidence,
+          reason: `Likely committed turn-in (${Math.round(commitmentConfidence * 100)}% confidence, ${Math.round(turnInLeader.alongTrack)}m out)`,
+          forwardDistance: turnInLeader.alongTrack,
+          predictedDefault: turnInLeader.station.stationId,
+          savings: 0,
+        }, turnInLeader);
+      }
+    }
+  }
+
   // Urgent-any mode: tank is near-empty, any station on the corridor is good.
   if (urgency >= opts.urgencyOnlyThreshold && isHighwayCruise) {
-    // Pick the cheapest/closest ahead.
+    // In urgent highway mode we still want the best viable value on-route,
+    // not simply the very first station encountered.
     const sorted = [...scored].sort((a, b) => {
-      const pa = (a.station.price || 99) + a.alongTrack / 50000;
-      const pb = (b.station.price || 99) + b.alongTrack / 50000;
-      return pa - pb;
+      const pa = Number.isFinite(Number(a.netStationCost))
+        ? Number(a.netStationCost)
+        : ((a.station.price || 99) + (a.alongTrack / 50000));
+      const pb = Number.isFinite(Number(b.netStationCost))
+        ? Number(b.netStationCost)
+        : ((b.station.price || 99) + (b.alongTrack / 50000));
+      return pa - pb || (a.alongTrack - b.alongTrack);
     });
     const pick = sorted[0];
     const urgentCityGuard = (
@@ -1169,6 +1859,8 @@ function createPredictiveRecommender(options = {}) {
   let window = [];
   let stations = [];
   let profile = null;
+  let lastSample = null;
+  let milesSinceLastFill = null;
   const cooldowns = new Map(); // stationId -> expiry ms
   const firedEvents = []; // history of all recommendations this session
   let pendingRecommendation = null;
@@ -1180,30 +1872,82 @@ function createPredictiveRecommender(options = {}) {
     return profile.visitHistory.reduce((sum, entry) => sum + (Number(entry?.visitCount) || 0), 0);
   }
 
+  function initializeFuelStateFromProfile(nextProfile) {
+    if (Number.isFinite(Number(nextProfile?.estimatedMilesSinceLastFill))) {
+      return Number(nextProfile.estimatedMilesSinceLastFill);
+    }
+    const fillUpHistory = Array.isArray(nextProfile?.fillUpHistory) ? nextProfile.fillUpHistory : [];
+    if (fillUpHistory.length === 0) {
+      return null;
+    }
+    return estimateFuelState(fillUpHistory, {
+      typicalIntervalMiles: nextProfile?.typicalFillUpIntervalMiles,
+    }).milesSinceLastFill;
+  }
+
+  function updateFuelState(sample) {
+    if (!lastSample) {
+      lastSample = sample;
+      return;
+    }
+    const elapsedMs = Math.max(0, Number(sample?.timestamp) - Number(lastSample?.timestamp));
+    const deltaMeters = haversineDistanceMeters(
+      { latitude: lastSample.latitude, longitude: lastSample.longitude },
+      { latitude: sample.latitude, longitude: sample.longitude }
+    );
+    lastSample = sample;
+    if (!Number.isFinite(deltaMeters) || deltaMeters <= 3 || deltaMeters > 2500) {
+      return;
+    }
+    if (elapsedMs > 0) {
+      const inferredSpeed = deltaMeters / (elapsedMs / 1000);
+      if (inferredSpeed > opts.maxDrivingSpeedMps * 1.5) {
+        return;
+      }
+    }
+    if (milesSinceLastFill == null) {
+      milesSinceLastFill = initializeFuelStateFromProfile(profile) || 0;
+    }
+    milesSinceLastFill += deltaMeters / 1609.344;
+  }
+
   function getRequiredConsistencyCount(recommendation) {
     if (!recommendation) return opts.minStableRecommendationCount;
+    const fuelNeed = clamp(Number(recommendation.fuelNeedScore) || 0, 0, 1);
     if (recommendation.type === 'urgent_any') {
       return opts.minStableRecommendationCountUrgent;
     }
+    if (recommendation.type === 'turn_in_commitment') {
+      return opts.minStableRecommendationCountCommitment;
+    }
     const hasHistory = getTotalHistoryVisits() > 0;
+    let required = hasHistory
+      ? opts.minStableRecommendationCountWithHistory
+      : opts.minStableRecommendationCount;
     if (recommendation.type === 'cheaper_alternative') {
-      return hasHistory
+      required = hasHistory
         ? Math.max(2, opts.minStableRecommendationCountWithHistory - 1)
         : opts.minStableRecommendationCount;
     }
-    return hasHistory
-      ? opts.minStableRecommendationCountWithHistory
-      : opts.minStableRecommendationCount;
+    if (fuelNeed >= opts.fuelNeedHighThreshold) {
+      return Math.max(1, required - 2);
+    }
+    if (fuelNeed >= opts.fuelNeedMediumThreshold) {
+      return Math.max(2, required - 1);
+    }
+    return required;
   }
 
   function pushLocation(sample, extraContext = {}) {
     window.push(sample);
     const windowCap = opts.windowCap || 20;
     if (window.length > windowCap) window = window.slice(window.length - windowCap);
+    updateFuelState(sample);
 
     const nowMs = sample.timestamp || Date.now();
     const recommendation = recommend(window, profile, stations, {
       ...opts,
+      milesSinceLastFill,
       ...extraContext,
     });
     if (!recommendation) {
@@ -1245,14 +1989,40 @@ function createPredictiveRecommender(options = {}) {
 
     const expiry = cooldowns.get(recommendation.stationId) || 0;
     if (nowMs < expiry) return null;
-    cooldowns.set(recommendation.stationId, nowMs + opts.cooldownMs);
     const triggerDistance = recommendation.forwardDistance;
     const event = {
       ...recommendation,
       triggeredAt: nowMs,
       triggerDistance,
       location: sample,
+      historyVisitCount: getTotalHistoryVisits(),
+      milesSinceLastFill,
+      tripDurationSeconds: Math.round(computeTripDurationMs(window) / 1000),
+      meanSpeedMps: computeMeanSpeed(window),
+      recommendationStreak: recommendationCandidate.streak,
     };
+    if (opts.mlGate && typeof opts.mlGate.evaluate === 'function') {
+      const gateDecision = opts.mlGate.evaluate({
+        event,
+        recommendation,
+        sample,
+        window: window.slice(),
+        profile,
+        stations,
+        milesSinceLastFill,
+        historyVisitCount: event.historyVisitCount,
+      }) || null;
+      if (gateDecision?.allow === false) {
+        return null;
+      }
+      if (Number.isFinite(Number(gateDecision?.score))) {
+        event.mlGateScore = Number(gateDecision.score);
+      }
+      if (typeof gateDecision?.model === 'string' && gateDecision.model) {
+        event.mlGateModel = gateDecision.model;
+      }
+    }
+    cooldowns.set(recommendation.stationId, nowMs + opts.cooldownMs);
     firedEvents.push(event);
     pendingRecommendation = null;
     recommendationCandidate = null;
@@ -1264,10 +2034,15 @@ function createPredictiveRecommender(options = {}) {
 
   return {
     setStations(s) { stations = s || []; },
-    setProfile(p) { profile = p; },
+    setProfile(p) {
+      profile = p;
+      milesSinceLastFill = initializeFuelStateFromProfile(profile);
+    },
     pushLocation,
     reset() {
       window = [];
+      lastSample = null;
+      milesSinceLastFill = initializeFuelStateFromProfile(profile);
       cooldowns.clear();
       firedEvents.length = 0;
       pendingRecommendation = null;

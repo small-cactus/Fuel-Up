@@ -5,50 +5,79 @@
  * If odometer not available, we infer from timestamps + typical interval.
  */
 
-function estimateRange(fillUpHistory, currentOdometer, options = {}) {
+function inferTypicalIntervalMiles(fillUpHistory, options = {}) {
   const {
     typicalIntervalMiles = 280,
-    lowFuelThresholdMiles = 50,
-    urgentFuelThresholdMiles = 25,
+    defaultMpg = 25,
+    defaultTankGallons = 12.5,
   } = options;
 
-  // Sort history oldest-first
   const sorted = [...(fillUpHistory || [])].sort((a, b) => a.timestamp - b.timestamp);
-
-  let avgIntervalMiles = typicalIntervalMiles;
-  let milesSinceLastFill = null;
-
   if (sorted.length >= 2) {
-    // Compute average interval from odometer readings
     const intervals = [];
     for (let i = 1; i < sorted.length; i++) {
       if (sorted[i].odometer && sorted[i - 1].odometer) {
-        intervals.push(sorted[i].odometer - sorted[i - 1].odometer);
+        const delta = sorted[i].odometer - sorted[i - 1].odometer;
+        if (Number.isFinite(delta) && delta > 40 && delta < 700) {
+          intervals.push(delta);
+        }
       }
     }
     if (intervals.length > 0) {
-      avgIntervalMiles = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+      return intervals.reduce((a, b) => a + b, 0) / intervals.length;
     }
   }
 
-  if (sorted.length >= 1) {
+  const gallons = sorted
+    .map(entry => Number(entry?.gallons))
+    .filter(value => Number.isFinite(value) && value > 4);
+  if (gallons.length > 0) {
+    const avgGallons = gallons.reduce((a, b) => a + b, 0) / gallons.length;
+    return Math.max(160, avgGallons * defaultMpg);
+  }
+
+  return Math.max(160, typicalIntervalMiles || (defaultTankGallons * defaultMpg));
+}
+
+function estimateFuelState(fillUpHistory, context = {}) {
+  const {
+    currentOdometer,
+    milesSinceLastFill,
+    typicalIntervalMiles = 280,
+    lowFuelThresholdMiles = 50,
+    urgentFuelThresholdMiles = 25,
+    defaultMpg = 25,
+    defaultTankGallons = 12.5,
+  } = context;
+
+  const avgIntervalMiles = inferTypicalIntervalMiles(fillUpHistory, {
+    typicalIntervalMiles,
+    defaultMpg,
+    defaultTankGallons,
+  });
+
+  let resolvedMilesSinceLastFill = Number.isFinite(Number(milesSinceLastFill))
+    ? Number(milesSinceLastFill)
+    : null;
+
+  const sorted = [...(fillUpHistory || [])].sort((a, b) => a.timestamp - b.timestamp);
+  if (resolvedMilesSinceLastFill == null && sorted.length >= 1) {
     const lastFill = sorted[sorted.length - 1];
     if (currentOdometer && lastFill.odometer) {
-      milesSinceLastFill = currentOdometer - lastFill.odometer;
+      resolvedMilesSinceLastFill = currentOdometer - lastFill.odometer;
     } else {
-      // Infer from time elapsed
       const elapsed = Date.now() - lastFill.timestamp;
       const daysElapsed = elapsed / (1000 * 86400);
-      // Assume ~30 miles/day average driving
-      milesSinceLastFill = daysElapsed * 30;
+      resolvedMilesSinceLastFill = daysElapsed * 30;
     }
   }
 
-  const estimatedRemainingMiles = milesSinceLastFill !== null
-    ? Math.max(0, avgIntervalMiles - milesSinceLastFill)
-    : avgIntervalMiles * 0.5; // unknown → assume half tank
+  if (resolvedMilesSinceLastFill == null) {
+    resolvedMilesSinceLastFill = avgIntervalMiles * 0.5;
+  }
 
-  // Urgency: 0 = plenty of fuel, 1 = need fuel NOW
+  const estimatedRemainingMiles = Math.max(0, avgIntervalMiles - resolvedMilesSinceLastFill);
+
   let urgency = 0;
   if (estimatedRemainingMiles <= urgentFuelThresholdMiles) {
     urgency = 1.0;
@@ -56,17 +85,25 @@ function estimateRange(fillUpHistory, currentOdometer, options = {}) {
     urgency = 0.5 + 0.5 * (1 - (estimatedRemainingMiles - urgentFuelThresholdMiles) / (lowFuelThresholdMiles - urgentFuelThresholdMiles));
   } else {
     urgency = Math.max(0, 1 - estimatedRemainingMiles / avgIntervalMiles);
-    urgency = urgency * urgency; // quadratic: urgency rises steeply as tank empties
+    urgency = urgency * urgency;
   }
 
   return {
     estimatedRemainingMiles: Math.round(estimatedRemainingMiles),
     avgIntervalMiles: Math.round(avgIntervalMiles),
-    milesSinceLastFill: milesSinceLastFill !== null ? Math.round(milesSinceLastFill) : null,
+    milesSinceLastFill: Math.round(resolvedMilesSinceLastFill),
     urgency: Math.round(urgency * 100) / 100,
     lowFuel: estimatedRemainingMiles <= lowFuelThresholdMiles,
     urgent: estimatedRemainingMiles <= urgentFuelThresholdMiles,
+    fuelNeedScore: Math.round((Math.max(urgency, 1 - (estimatedRemainingMiles / Math.max(avgIntervalMiles, 1)))) * 100) / 100,
   };
+}
+
+function estimateRange(fillUpHistory, currentOdometer, options = {}) {
+  return estimateFuelState(fillUpHistory, {
+    currentOdometer,
+    ...options,
+  });
 }
 
 /**
@@ -110,4 +147,10 @@ const SYNTHETIC_FILL_UP_HISTORIES = {
   ], // current odometer would be ~38300 → 300 miles since fill, interval ~280 → overdue
 };
 
-module.exports = { estimateRange, formatUrgencyMessage, SYNTHETIC_FILL_UP_HISTORIES };
+module.exports = {
+  estimateRange,
+  estimateFuelState,
+  inferTypicalIntervalMiles,
+  formatUrgencyMessage,
+  SYNTHETIC_FILL_UP_HISTORIES,
+};

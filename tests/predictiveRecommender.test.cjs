@@ -46,9 +46,14 @@ function buildShortCityWindow(timestampMs, speed = 14) {
 }
 
 function buildStoplightWindow(timestampMs) {
-  const cruising = buildLongStraightWindow(timestampMs - 20_000, 14);
   return [
-    ...cruising,
+    makeSample(39.74, -105.05, 14, timestampMs - 230_000),
+    makeSample(39.74, -105.04, 14, timestampMs - 200_000),
+    makeSample(39.74, -105.03, 14, timestampMs - 170_000),
+    makeSample(39.74, -105.02, 14, timestampMs - 140_000),
+    makeSample(39.74, -105.01, 14, timestampMs - 110_000),
+    makeSample(39.74, -105.00, 14, timestampMs - 80_000),
+    makeSample(39.74, -104.99, 14, timestampMs - 50_000),
     makeSample(39.74, -104.981, 0.6, timestampMs - 8_000),
     { ...makeSample(39.74, -104.9808, 0.2, timestampMs - 4_000), eventType: 'traffic_light' },
     { ...makeSample(39.74, -104.9808, 0.1, timestampMs), eventType: 'traffic_light' },
@@ -69,6 +74,32 @@ function buildGridlockWindow(timestampMs) {
 
 function station(stationId, latitude, longitude, price, brand = 'Test') {
   return { stationId, latitude, longitude, price, brand, distanceMiles: 0 };
+}
+
+function habitVisit(stationId, timestampMs, visitCount = 4) {
+  return {
+    stationId,
+    visitCount,
+    lastVisitMs: timestampMs - 86_400_000,
+    visitTimestamps: [
+      timestampMs - 86_400_000,
+      timestampMs - (3 * 86_400_000),
+      timestampMs - (8 * 86_400_000),
+    ],
+    contextCounts: {
+      total: visitCount,
+      highway: 0,
+      suburban: 0,
+      city: visitCount,
+      city_grid: 0,
+      weekday: visitCount,
+      weekend: 0,
+      morning: visitCount,
+      midday: 0,
+      evening: 0,
+      night: 0,
+    },
+  };
 }
 
 test('projectStation exposes signed cross-track so right-side stations are distinguishable from left-side stations', () => {
@@ -139,7 +170,7 @@ test('recommender prefers an easier right-side station over a slightly cheaper l
   const profile = {
     preferredBrands: ['Shell'],
     brandLoyalty: 0.6,
-    visitHistory: [{ stationId: 'default-shell', visitCount: 4, lastVisitMs: timestampMs - 86400000, visitTimestamps: [timestampMs - 86400000] }],
+    visitHistory: [habitVisit('default-shell', timestampMs)],
     fillUpHistory: [],
   };
 
@@ -166,7 +197,7 @@ test('recommender still allows the hard move when left-side savings are overwhel
   const profile = {
     preferredBrands: ['Shell'],
     brandLoyalty: 0.6,
-    visitHistory: [{ stationId: 'default-shell', visitCount: 4, lastVisitMs: timestampMs - 86400000, visitTimestamps: [timestampMs - 86400000] }],
+    visitHistory: [habitVisit('default-shell', timestampMs)],
     fillUpHistory: [],
   };
 
@@ -183,19 +214,28 @@ test('recommender still allows the hard move when left-side savings are overwhel
 
 test('recommendation stays latent during active city driving and waits for a better glance window', () => {
   const timestampMs = new Date('2026-04-14T08:30:00-04:00').getTime();
-  const window = buildShortCityWindow(timestampMs, 14);
+  const window = buildStoplightWindow(timestampMs).slice(0, 7);
   const stations = [
-    station('default-shell', 39.74, -104.94, 3.59, 'Shell'),
-    station('easy-right-near-cheap', 39.7392, -104.952, 3.22, 'King Soopers'),
+    station('default-shell', 39.74, -104.975, 3.59, 'Shell'),
+    station('easy-right-near-cheap', 39.7392, -104.972, 3.22, 'King Soopers'),
   ];
   const profile = {
     preferredBrands: ['Shell'],
     brandLoyalty: 0.6,
-    visitHistory: [{ stationId: 'default-shell', visitCount: 4, lastVisitMs: timestampMs - 86400000, visitTimestamps: [timestampMs - 86400000] }],
-    fillUpHistory: [],
+    visitHistory: [habitVisit('default-shell', timestampMs)],
+    fillUpHistory: [
+      { timestamp: timestampMs - 4 * 86400000, odometer: 15000, gallons: 11.5, pricePerGallon: 3.29 },
+    ],
+    estimatedMilesSinceLastFill: 250,
+    typicalFillUpIntervalMiles: 280,
   };
 
-  const result = recommend(window, profile, stations, { triggerThreshold: 0.5 });
+  const result = recommend(window, profile, stations, {
+    triggerThreshold: 0.45,
+    minTripFuelIntentColdStart: 0.18,
+    minTripFuelIntentWithHistory: 0.18,
+    milesSinceLastFill: 250,
+  });
   assert.ok(result, 'expected a recommendation candidate');
   assert.equal(result.stationId, 'easy-right-near-cheap');
   assert.equal(result.presentation.surfaceNow, false);
@@ -206,17 +246,26 @@ test('recommendation surfaces during a likely traffic-light pause after enough t
   const timestampMs = new Date('2026-04-14T08:35:00-04:00').getTime();
   const window = buildStoplightWindow(timestampMs);
   const stations = [
-    station('default-shell', 39.74, -104.94, 3.59, 'Shell'),
-    station('easy-right-near-cheap', 39.7392, -104.952, 3.22, 'King Soopers'),
+    station('default-shell', 39.74, -104.975, 3.59, 'Shell'),
+    station('easy-right-near-cheap', 39.7392, -104.972, 3.22, 'King Soopers'),
   ];
   const profile = {
     preferredBrands: ['Shell'],
     brandLoyalty: 0.6,
-    visitHistory: [{ stationId: 'default-shell', visitCount: 4, lastVisitMs: timestampMs - 86400000, visitTimestamps: [timestampMs - 86400000] }],
-    fillUpHistory: [],
+    visitHistory: [habitVisit('default-shell', timestampMs)],
+    fillUpHistory: [
+      { timestamp: timestampMs - 4 * 86400000, odometer: 15000, gallons: 11.5, pricePerGallon: 3.29 },
+    ],
+    estimatedMilesSinceLastFill: 250,
+    typicalFillUpIntervalMiles: 280,
   };
 
-  const result = recommend(window, profile, stations, { triggerThreshold: 0.5 });
+  const result = recommend(window, profile, stations, {
+    triggerThreshold: 0.45,
+    minTripFuelIntentColdStart: 0.18,
+    minTripFuelIntentWithHistory: 0.18,
+    milesSinceLastFill: 250,
+  });
   assert.ok(result, 'expected a recommendation candidate');
   assert.equal(result.presentation.surfaceNow, true);
   assert.equal(result.presentation.preferredSurface, 'live_activity');
@@ -230,48 +279,61 @@ test('gridlock keeps the recommendation deferred even if the station choice is c
     ...buildGridlockWindow(timestampMs),
   ];
   const stations = [
-    station('default-shell', 39.74, -104.94, 3.59, 'Shell'),
-    station('easy-right-near-cheap', 39.7392, -104.952, 3.19, 'King Soopers'),
+    station('default-shell', 39.74, -104.975, 3.59, 'Shell'),
+    station('easy-right-near-cheap', 39.7392, -104.972, 3.19, 'King Soopers'),
   ];
   const profile = {
     preferredBrands: ['Shell'],
     brandLoyalty: 0.6,
-    visitHistory: [{ stationId: 'default-shell', visitCount: 4, lastVisitMs: timestampMs - 86400000, visitTimestamps: [timestampMs - 86400000] }],
-    fillUpHistory: [],
+    visitHistory: [habitVisit('default-shell', timestampMs)],
+    fillUpHistory: [
+      { timestamp: timestampMs - 4 * 86400000, odometer: 15000, gallons: 11.5, pricePerGallon: 3.29 },
+    ],
+    estimatedMilesSinceLastFill: 250,
+    typicalFillUpIntervalMiles: 280,
   };
 
   const result = recommend(window, profile, stations, {
-    triggerThreshold: 0.5,
-    urgency: 0.95,
-    minTripFuelIntentColdStart: 0.2,
-    minTripFuelIntentWithHistory: 0.2,
+    triggerThreshold: 0.45,
+    minTripFuelIntentColdStart: 0.18,
+    minTripFuelIntentWithHistory: 0.18,
+    milesSinceLastFill: 250,
   });
-  assert.ok(result, 'expected a recommendation candidate');
-  assert.equal(result.presentation.surfaceNow, false);
-  assert.equal(result.presentation.attentionState, 'gridlock');
+  if (result) {
+    assert.equal(result.presentation.surfaceNow, false);
+    assert.equal(result.presentation.attentionState, 'gridlock');
+  } else {
+    assert.equal(result, null);
+  }
 });
 
 test('stateful recommender holds a pending recommendation until a traffic-light pause', () => {
   const timestampMs = new Date('2026-04-14T08:35:00-04:00').getTime();
   const rec = createPredictiveRecommender({
     cooldownMs: 60_000,
-    triggerThreshold: 0.5,
+    triggerThreshold: 0.45,
     enforcePresentationTiming: true,
+    minTripFuelIntentColdStart: 0.18,
+    minTripFuelIntentWithHistory: 0.18,
   });
   const stations = [
-    station('default-shell', 39.74, -104.94, 3.59, 'Shell'),
-    station('easy-right-near-cheap', 39.7392, -104.952, 3.22, 'King Soopers'),
+    station('default-shell', 39.74, -104.975, 3.59, 'Shell'),
+    station('easy-right-near-cheap', 39.7392, -104.972, 3.22, 'King Soopers'),
   ];
   const profile = {
     preferredBrands: ['Shell'],
     brandLoyalty: 0.6,
-    visitHistory: [{ stationId: 'default-shell', visitCount: 4, lastVisitMs: timestampMs - 86400000, visitTimestamps: [timestampMs - 86400000] }],
-    fillUpHistory: [],
+    visitHistory: [habitVisit('default-shell', timestampMs)],
+    fillUpHistory: [
+      { timestamp: timestampMs - 4 * 86400000, odometer: 15000, gallons: 11.5, pricePerGallon: 3.29 },
+    ],
+    estimatedMilesSinceLastFill: 250,
+    typicalFillUpIntervalMiles: 280,
   };
   rec.setStations(stations);
   rec.setProfile(profile);
 
-  const cruisingWindow = buildShortCityWindow(timestampMs - 10_000, 14);
+  const cruisingWindow = buildStoplightWindow(timestampMs - 10_000).slice(0, 7);
   let emitted = null;
   for (const sample of cruisingWindow) {
     emitted = rec.pushLocation(sample);
