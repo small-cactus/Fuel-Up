@@ -15,6 +15,11 @@ const { addDrivingNoise } = require('./driveNoise.js');
 const { routeToSamples } = require('./predictionMetrics.js');
 const { haversineDistanceMeters } = require('../screens/onboarding/predictive/simulationMath.cjs');
 const { inferTypicalIntervalMiles, estimateFuelState } = require('./rangeEstimator.js');
+const {
+  GROUNDED_SIM_STATIONS,
+  getGroundedRouteFixture,
+  getGroundedRouteStations,
+} = require('./groundedSimulationData.js');
 
 function mulberry32(seed) {
   return function rand() {
@@ -81,7 +86,54 @@ function stitchInterpolatedPoints(controlPoints, segmentPointCount, speedFns = [
 }
 
 function findStationById(stationId) {
-  return SIM_STATIONS.find(station => station.stationId === stationId) || null;
+  return [...SIM_STATIONS, ...GROUNDED_SIM_STATIONS].find(station => station.stationId === stationId) || null;
+}
+
+function buildWaypointsFromGroundedRoute(template, fallbackPointCount = 5) {
+  const groundedRoute = getGroundedRouteFixture(template?.groundedRouteId || template?.id);
+  if (!groundedRoute || !Array.isArray(groundedRoute.routeCoordinates) || groundedRoute.routeCoordinates.length < 2) {
+    return stitchInterpolatedPoints(template.controlPoints, fallbackPointCount, template.speedFns);
+  }
+
+  const routeDistanceMiles = groundedRoute.distanceMeters > 0
+    ? groundedRoute.distanceMeters / 1609.344
+    : routeDistanceMilesFromWaypoints(
+      groundedRoute.routeCoordinates.map(coordinate => ({
+        lat: coordinate.latitude,
+        lon: coordinate.longitude,
+      }))
+    );
+  const averageSpeedMph = groundedRoute.expectedTravelTimeSeconds > 0
+    ? Math.max(10, Math.min(72, routeDistanceMiles / (groundedRoute.expectedTravelTimeSeconds / 3600)))
+    : 28;
+
+  return groundedRoute.routeCoordinates.map((coordinate, index, coordinates) => {
+    const progress = coordinates.length > 1 ? index / (coordinates.length - 1) : 0;
+    const taper = progress < 0.08 || progress > 0.92 ? 0.78 : (progress < 0.20 || progress > 0.80 ? 0.88 : 1);
+    return {
+      lat: coordinate.latitude,
+      lon: coordinate.longitude,
+      speedMph: Math.round(averageSpeedMph * taper * 10) / 10,
+    };
+  });
+}
+
+function getTemplateCandidateStationIds(template) {
+  const groundedStations = getGroundedRouteStations(template?.groundedRouteId || template?.id);
+  if (groundedStations.length > 0) {
+    return groundedStations.map(station => station.stationId);
+  }
+  return Array.isArray(template?.candidateStationIds) ? template.candidateStationIds.slice() : [];
+}
+
+function getTemplateStationMarket(template) {
+  const groundedStations = getGroundedRouteStations(template?.groundedRouteId || template?.id);
+  if (groundedStations.length > 0) {
+    return groundedStations;
+  }
+  return getTemplateCandidateStationIds(template)
+    .map(findStationById)
+    .filter(Boolean);
 }
 
 function choose(rand, items) {
@@ -107,6 +159,7 @@ function routeDistanceMilesFromWaypoints(waypoints) {
 const HIDDEN_INTENT_BLUEPRINTS = [
   {
     id: 'city-cross-town',
+    groundedRouteId: 'weekday-urban-commute',
     scenario: 'city',
     defaultHour: 8,
     dayOfWeek: 2,
@@ -122,6 +175,7 @@ const HIDDEN_INTENT_BLUEPRINTS = [
   },
   {
     id: 'south-errand-arc',
+    groundedRouteId: 'south-urban-errand',
     scenario: 'city',
     defaultHour: 13,
     dayOfWeek: 4,
@@ -137,6 +191,7 @@ const HIDDEN_INTENT_BLUEPRINTS = [
   },
   {
     id: 'north-suburban-run',
+    groundedRouteId: 'north-club-run',
     scenario: 'suburban',
     defaultHour: 11,
     dayOfWeek: 6,
@@ -152,6 +207,7 @@ const HIDDEN_INTENT_BLUEPRINTS = [
   },
   {
     id: 'airport-corridor',
+    groundedRouteId: 'airport-corridor-run',
     scenario: 'highway',
     defaultHour: 10,
     dayOfWeek: 3,
@@ -167,6 +223,7 @@ const HIDDEN_INTENT_BLUEPRINTS = [
   },
   {
     id: 'downtown-grid',
+    groundedRouteId: 'downtown-grid-hop',
     scenario: 'city_grid',
     defaultHour: 17,
     dayOfWeek: 2,
@@ -186,6 +243,7 @@ const HIDDEN_INTENT_BLUEPRINTS = [
 const HIDDEN_COMMIT_BLUEPRINTS = [
   {
     id: 'city-turnin-east',
+    groundedRouteId: 'weekday-urban-commute',
     scenario: 'city',
     defaultHour: 8,
     dayOfWeek: 2,
@@ -201,6 +259,7 @@ const HIDDEN_COMMIT_BLUEPRINTS = [
   },
   {
     id: 'suburban-club-turnin',
+    groundedRouteId: 'north-club-run',
     scenario: 'suburban',
     defaultHour: 11,
     dayOfWeek: 6,
@@ -216,6 +275,7 @@ const HIDDEN_COMMIT_BLUEPRINTS = [
   },
   {
     id: 'highway-loves-turnin',
+    groundedRouteId: 'airport-corridor-run',
     scenario: 'highway',
     defaultHour: 10,
     dayOfWeek: 3,
@@ -231,6 +291,7 @@ const HIDDEN_COMMIT_BLUEPRINTS = [
   },
   {
     id: 'grid-chevron-turnin',
+    groundedRouteId: 'downtown-grid-hop',
     scenario: 'city_grid',
     defaultHour: 17,
     dayOfWeek: 2,
@@ -255,7 +316,11 @@ function buildHiddenIntentRoute({
   destinationStationIdOverride,
   hiddenDecisionIndexOverride,
 }) {
-  const baseWaypoints = stitchInterpolatedPoints(blueprint.controlPoints, 5, blueprint.speedFns);
+  const resolvedBlueprint = {
+    ...blueprint,
+    candidateStationIds: getTemplateCandidateStationIds(blueprint),
+  };
+  const baseWaypoints = buildWaypointsFromGroundedRoute(resolvedBlueprint, 5);
   const willStop = typeof willStopOverride === 'boolean'
     ? willStopOverride
     : rand() < blueprint.hiddenFuelProbability;
@@ -272,7 +337,7 @@ function buildHiddenIntentRoute({
   let targetStation = null;
 
   if (willStop) {
-    destinationStationId = destinationStationIdOverride || choose(rand, blueprint.candidateStationIds);
+    destinationStationId = destinationStationIdOverride || choose(rand, resolvedBlueprint.candidateStationIds);
     recommendationStationId = destinationStationId;
     targetStation = findStationById(destinationStationId);
     const pivot = baseWaypoints[hiddenDecisionIndex];
@@ -417,7 +482,11 @@ function buildAdaptiveHiddenIntentStressRoutes({ seed = 2026, routeCount = 72, h
 
   for (let index = 0; index < routeCount; index += 1) {
     const noFuelBlueprint = choose(rand, HIDDEN_INTENT_BLUEPRINTS);
-    const baseWaypoints = stitchInterpolatedPoints(noFuelBlueprint.controlPoints, 5, noFuelBlueprint.speedFns);
+    const noFuelCandidateStationIds = getTemplateCandidateStationIds(noFuelBlueprint);
+    const baseWaypoints = buildWaypointsFromGroundedRoute({
+      ...noFuelBlueprint,
+      candidateStationIds: noFuelCandidateStationIds,
+    }, 5);
     const fuelStateBefore = estimateFuelState(profile.fillUpHistory, {
       milesSinceLastFill,
       typicalIntervalMiles: profile.typicalFillUpIntervalMiles,
@@ -474,11 +543,14 @@ function buildAdaptiveHiddenIntentStressRoutes({ seed = 2026, routeCount = 72, h
         })))
       : noFuelBlueprint;
     const realizedRouteDistanceMiles = routeDistanceMilesFromWaypoints(
-      stitchInterpolatedPoints(blueprint.controlPoints, 5, blueprint.speedFns)
+      buildWaypointsFromGroundedRoute({
+        ...blueprint,
+        candidateStationIds: getTemplateCandidateStationIds(blueprint),
+      }, 5)
     );
 
     const destinationStationId = willStop
-      ? chooseWeighted(rand, blueprint.candidateStationIds
+      ? chooseWeighted(rand, getTemplateCandidateStationIds(blueprint)
         .map((stationId, stationIndex) => ({
           station: findStationById(stationId),
           stationIndex,
@@ -493,7 +565,7 @@ function buildAdaptiveHiddenIntentStressRoutes({ seed = 2026, routeCount = 72, h
             blueprint,
             remainingMiles,
             entry.stationIndex,
-            blueprint.candidateStationIds.length
+            getTemplateCandidateStationIds(blueprint).length
           ),
         })))
       : null;
@@ -809,7 +881,7 @@ function buildRealisticDriverSpec({ seed = 2026, historyLevel = 'none' } = {}) {
   const weightedMpg = (mpgCity * (1 - highwayShare)) + (mpgHighway * highwayShare);
   const typicalIntervalMiles = Math.round(tankGallons * weightedMpg * (0.60 + (lowFuelConservatism * 0.24)));
   const stationAffinity = Object.fromEntries(
-    SIM_STATIONS.map((station, index) => [
+    GROUNDED_SIM_STATIONS.map((station, index) => [
       station.stationId,
       clamp(
         scoreDriverStationAffinity(
@@ -828,7 +900,7 @@ function buildRealisticDriverSpec({ seed = 2026, historyLevel = 'none' } = {}) {
             purpose: ['Pilot', "Love's", 'TA', 'Sinclair'].includes(station.brand) ? 'roadtrip' : 'errand',
           },
           index,
-          SIM_STATIONS.length
+          GROUNDED_SIM_STATIONS.length
         ) / 2,
         0,
         0.35
@@ -1220,7 +1292,7 @@ function buildFactTablesForRoute({
 
 function buildRealisticStressProfile(driver, historyLevel = 'none') {
   const now = Date.now();
-  const topStations = [...SIM_STATIONS]
+  const topStations = [...GROUNDED_SIM_STATIONS]
     .sort((left, right) => (driver.stationAffinity[right.stationId] || 0) - (driver.stationAffinity[left.stationId] || 0))
     .slice(0, historyLevel === 'rich' ? 5 : (historyLevel === 'light' ? 3 : 1));
   const visitHistory = historyLevel === 'none'
@@ -1518,7 +1590,7 @@ function chooseTemplateForDriver(rand, driver, routeIndex) {
     if (template.scenario !== 'highway') {
       weight += (1 - driver.highwayShare) * 0.06;
     }
-    if (driver.memberships.costco && template.candidateStationIds.includes('sim-costco-n')) {
+    if (driver.memberships.costco && getTemplateStationMarket(template).some(station => station.brand === 'Costco')) {
       weight += 0.06;
     }
     return { item: template, weight };
@@ -1541,16 +1613,19 @@ function buildRealisticRoute({
   milesSinceLastFill,
 }) {
   const { template, dayOfWeek, hour } = chooseTemplateForDriver(rand, driver, routeIndex);
-  const baseWaypoints = stitchInterpolatedPoints(template.controlPoints, 5, template.speedFns);
+  const templateCandidateStationIds = getTemplateCandidateStationIds(template);
+  const templateStationMarket = getTemplateStationMarket(template);
+  const baseWaypoints = buildWaypointsFromGroundedRoute({
+    ...template,
+    candidateStationIds: templateCandidateStationIds,
+  }, 5);
   const fuelStateBefore = estimateFuelState(profile.fillUpHistory, {
     milesSinceLastFill,
     typicalIntervalMiles: driver.typicalIntervalMiles,
   });
   const remainingMiles = fuelStateBefore.estimatedRemainingMiles;
   const routeDistanceMiles = routeDistanceMilesFromWaypoints(baseWaypoints);
-  const candidateStations = template.candidateStationIds
-    .map(findStationById)
-    .filter(Boolean);
+  const candidateStations = templateStationMarket;
   const routeConsumptionPressure = clamp(routeDistanceMiles / Math.max(1, driver.typicalIntervalMiles), 0, 1);
   const remainingRatio = clamp(remainingMiles / Math.max(1, driver.typicalIntervalMiles), 0, 2);
   const lowFuelNeed = clamp(1 - remainingRatio, 0, 1);
@@ -1597,11 +1672,12 @@ function buildRealisticRoute({
   const route = buildHiddenIntentRoute({
     blueprint: {
       id: template.id,
+      groundedRouteId: template.id,
       scenario: template.scenario,
       defaultHour: hour,
       dayOfWeek,
       hiddenFuelProbability: stopProbability,
-      candidateStationIds: template.candidateStationIds,
+      candidateStationIds: templateCandidateStationIds,
       controlPoints: template.controlPoints,
       speedFns: template.speedFns,
     },
@@ -1617,6 +1693,7 @@ function buildRealisticRoute({
   route.fuelStateBefore = fuelStateBefore;
   route.intentClass = remainingMiles <= 100 ? 'probable' : 'impulsive';
   route.routeDistanceMiles = Math.round(routeDistanceMiles * 10) / 10;
+  route.marketStations = templateStationMarket;
   return route;
 }
 
@@ -1673,6 +1750,9 @@ function simulateRealisticHiddenIntentBatch({
       profile,
       onTrigger: event => triggers.push(event),
     });
+    if (typeof engine?.setStations === 'function') {
+      engine.setStations((route.marketStations || []).length ? route.marketStations : GROUNDED_SIM_STATIONS);
+    }
     const samples = routeToSamples(route);
     const noisyRun = applyNoise
       ? addDrivingNoise(samples, {
@@ -1713,6 +1793,8 @@ function simulateRealisticHiddenIntentBatch({
       triggerDistance,
       triggeredStationId: firstTrigger?.stationId || null,
       targetStationId: route.targetStationId,
+      groundedStationCount: (route.marketStations || []).length,
+      groundedRoutePointCount: Array.isArray(route.waypoints) ? route.waypoints.length : 0,
       hiddenDecisionIndex: route.hiddenDecisionIndex,
       startingMilesSinceLastFill: route.startingMilesSinceLastFill,
       estimatedRemainingMiles: route.fuelStateBefore?.estimatedRemainingMiles ?? null,
@@ -1866,7 +1948,12 @@ function buildRealisticCohortRoute({
     dayOfWeek,
     hour,
   });
-  const baseWaypoints = stitchInterpolatedPoints(template.controlPoints, 5, template.speedFns);
+  const templateCandidateStationIds = getTemplateCandidateStationIds(template);
+  const templateStationMarket = getTemplateStationMarket(template);
+  const baseWaypoints = buildWaypointsFromGroundedRoute({
+    ...template,
+    candidateStationIds: templateCandidateStationIds,
+  }, 5);
   const fuelStateBefore = estimateFuelState(profile.fillUpHistory, {
     milesSinceLastFill,
     typicalIntervalMiles: driver.typicalIntervalMiles,
@@ -1876,7 +1963,7 @@ function buildRealisticCohortRoute({
   const routeConsumptionPressure = clamp(routeDistanceMiles / Math.max(1, driver.typicalIntervalMiles), 0, 1);
   const remainingRatio = clamp(remainingMiles / Math.max(1, driver.typicalIntervalMiles), 0, 2);
   const lowFuelNeed = clamp(1 - remainingRatio, 0, 1);
-  const exposure = buildRouteExposure(template.candidateStationIds, rand, template, context);
+  const exposure = buildRouteExposure(templateCandidateStationIds, rand, template, context);
   const visibleStations = exposure.visibleStationIds.map(findStationById).filter(Boolean);
 
   const weatherPenalty = context.weather === 'snow'
@@ -1920,6 +2007,7 @@ function buildRealisticCohortRoute({
   const route = buildHiddenIntentRoute({
     blueprint: {
       id: template.id,
+      groundedRouteId: template.id,
       scenario: template.scenario,
       defaultHour: hour,
       dayOfWeek,
@@ -1939,6 +2027,7 @@ function buildRealisticCohortRoute({
   route.driverId = `driver-${driverIndex}`;
   route.driverArchetype = driver.archetype;
   route.routeDistanceMiles = Math.round(routeDistanceMiles * 10) / 10;
+  route.marketStations = templateStationMarket;
   route.startingMilesSinceLastFill = Math.round(milesSinceLastFill);
   route.fuelStateBefore = fuelStateBefore;
   route.intentClass = remainingMiles <= 100 ? 'probable' : 'impulsive';
@@ -2038,6 +2127,9 @@ function simulateRealisticCohortBatch({
         profile,
         onTrigger: event => triggers.push(event),
       });
+      if (typeof engine?.setStations === 'function') {
+        engine.setStations((route.marketStations || []).length ? route.marketStations : GROUNDED_SIM_STATIONS);
+      }
       const samples = routeToSamples(route);
       const noisyRun = applyNoise
         ? addDrivingNoise(samples, {
@@ -2083,6 +2175,8 @@ function simulateRealisticCohortBatch({
         triggerDistance,
         triggeredStationId: firstTrigger?.stationId || null,
         targetStationId: route.targetStationId,
+        groundedStationCount: (route.marketStations || []).length,
+        groundedRoutePointCount: Array.isArray(route.waypoints) ? route.waypoints.length : 0,
         hiddenDecisionIndex: route.hiddenDecisionIndex,
         startingMilesSinceLastFill: route.startingMilesSinceLastFill,
         estimatedRemainingMiles: route.fuelStateBefore?.estimatedRemainingMiles ?? null,

@@ -320,7 +320,10 @@ function createPredictiveFuelingRuntime(options = {}) {
   let profile = normalizePredictiveFuelingProfile();
   let controller = null;
   let recommender = null;
-  let liveActivityInstance = null;
+  // NOTE: Live Activity instance lifetime lives in src/lib/notifications.js
+  // as a singleton. This runtime only tracks logical state (station, phase,
+  // throttle timers) in `runtimeState.liveActivity` — it does NOT own an
+  // instance handle. See notifications.js's `trackedLiveActivityInstance`.
   let latestGeofenceSignature = geofenceSignature(runtimeState.geofences);
   let lastPersistAt = 0;
   let operationQueue = Promise.resolve();
@@ -585,15 +588,22 @@ function createPredictiveFuelingRuntime(options = {}) {
   }
 
   async function clearLiveActivity() {
-    if (liveActivityInstance && typeof notifications.endLiveActivity === 'function') {
+    if (typeof notifications.endAllLiveActivities === 'function') {
       try {
-        notifications.endLiveActivity(liveActivityInstance);
+        await notifications.endAllLiveActivities();
       } catch (error) {
         console.warn('Failed to end predictive live activity:', error?.message || error);
       }
+    } else if (typeof notifications.endLiveActivity === 'function') {
+      // Fallback for older notifications stubs (e.g., tests that haven't
+      // been updated yet). endLiveActivity now ignores its argument.
+      try {
+        notifications.endLiveActivity(null);
+      } catch (error) {
+        console.warn('Failed to end predictive live activity (legacy path):', error?.message || error);
+      }
     }
 
-    liveActivityInstance = null;
     runtimeState.liveActivity = {
       active: false,
       stationId: null,
@@ -614,10 +624,7 @@ function createPredictiveFuelingRuntime(options = {}) {
   }
 
   async function ensureLiveActivity({ recommendation, station, source = 'pending', phase = 'approaching' }) {
-    if (
-      typeof notifications.startPredictiveLiveActivity !== 'function' ||
-      typeof notifications.updatePredictiveLiveActivity !== 'function'
-    ) {
+    if (typeof notifications.startPredictiveLiveActivity !== 'function') {
       return;
     }
 
@@ -664,16 +671,18 @@ function createPredictiveFuelingRuntime(options = {}) {
       return;
     }
 
-    const hadLiveActivityInstance = Boolean(liveActivityInstance);
-
+    // Update the tracked singleton in notifications.js if one is alive;
+    // otherwise start a fresh activity. notifications.js enforces the
+    // "at most one" guarantee — we don't hold an instance handle here.
+    let outcome = 'updated';
     try {
-      if (!liveActivityInstance) {
-        liveActivityInstance = notifications.startPredictiveLiveActivity(props);
-      } else {
-        const updatedExistingActivity = notifications.updatePredictiveLiveActivity(liveActivityInstance, props);
-        if (!updatedExistingActivity) {
-          liveActivityInstance = notifications.startPredictiveLiveActivity(props);
-        }
+      const updated = typeof notifications.updateTrackedLiveActivity === 'function'
+        ? notifications.updateTrackedLiveActivity(props)
+        : false;
+
+      if (!updated) {
+        outcome = 'started';
+        await notifications.startPredictiveLiveActivity(props);
       }
     } catch (error) {
       console.warn('Predictive live activity update failed:', error?.message || error);
@@ -686,10 +695,11 @@ function createPredictiveFuelingRuntime(options = {}) {
         source,
         error: error?.message || String(error),
       };
+      return;
     }
 
     runtimeState.liveActivity = {
-      active: Boolean(liveActivityInstance),
+      active: true,
       stationId: recommendation.stationId,
       phase,
       initialForwardDistance: runtimeState.liveActivity?.stationId === recommendation.stationId
@@ -701,14 +711,14 @@ function createPredictiveFuelingRuntime(options = {}) {
     };
     debugState.lastLiveActivityDecision = {
       at: now(),
-      outcome: hadLiveActivityInstance ? 'updated' : 'started',
-      reason: hadLiveActivityInstance ? 'live-activity-updated' : 'live-activity-started',
+      outcome,
+      reason: outcome === 'started' ? 'live-activity-started' : 'live-activity-updated',
       stationId: recommendation.stationId,
       phase,
       source,
     };
     pushDebugEvent('live-activity', {
-      outcome: debugState.lastLiveActivityDecision.outcome,
+      outcome,
       stationId: recommendation.stationId,
       phase,
       source,

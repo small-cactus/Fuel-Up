@@ -95,8 +95,17 @@ test('eta formatting falls back to "<1" when near arrival and "0" at arrival', (
     assert.equal(arrived.etaMinutes, '0');
 });
 
-test('createPredictiveFuelingLiveActivitySim honors scenario selection and state callbacks without notifications', () => {
+test('createPredictiveFuelingLiveActivitySim honors scenario selection and state callbacks without notifications', async () => {
     // Stub the notifications module so we don't touch the iOS Live Activity API.
+    //
+    // The sim now awaits `startPredictiveLiveActivity` (it went async so
+    // the notifications.js dedup guarantee can settle before we start
+    // the new activity). The stub returns a plain object — awaiting a
+    // non-promise resolves in the next microtask, so the test must
+    // `await sim.start()` before asserting on emitted state.
+    //
+    // Stubs also include `endAllLiveActivities` and `updateTrackedLiveActivity`
+    // to match the new public API.
     const notificationsPath = require.resolve('../src/lib/notifications.js');
     const originalModule = require.cache[notificationsPath];
     require.cache[notificationsPath] = {
@@ -106,7 +115,9 @@ test('createPredictiveFuelingLiveActivitySim honors scenario selection and state
         exports: {
             startPredictiveLiveActivity: () => ({ id: 'stub' }),
             updatePredictiveLiveActivity: () => {},
+            updateTrackedLiveActivity: () => true,
             endLiveActivity: () => {},
+            endAllLiveActivities: () => ({ ended: 0, errors: 0 }),
         },
     };
 
@@ -119,7 +130,7 @@ test('createPredictiveFuelingLiveActivitySim honors scenario selection and state
             tickIntervalMs: 10_000,
         });
 
-        sim.start();
+        await sim.start();
         assert.equal(sim.getState().phase, 'running');
         assert.equal(sim.getState().scenarioId, scenarioId);
         assert.ok(observed.length >= 1, 'expected at least an initial state emission');

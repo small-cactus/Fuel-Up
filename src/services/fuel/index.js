@@ -23,7 +23,13 @@ const {
     selectPreferredQuote,
 } = require('./core');
 const { BLS_SERIES_BY_FUEL, EIA_PRODUCT_BY_FUEL, FRED_SERIES_BY_FUEL, getFuelServiceConfig } = require('./config');
-const { clearCachedEntries, getCachedEntry, removeCachedEntry, setCachedEntry } = require('./cacheStore');
+const {
+    clearCachedEntries,
+    getCachedEntry,
+    listSpatialCacheEntries,
+    removeCachedEntry,
+    setCachedEntry,
+} = require('./cacheStore');
 const {
     buildValidationState,
     normalizePrice,
@@ -1871,7 +1877,224 @@ function mergeTrajectorySnapshotResults({
     });
 }
 
+// Default portion of a cache window we consider "safe" before triggering a
+// refetch. A 0.5 buffer means we refetch when the user has moved past
+// halfway out from the cached center (5 miles for a 10 mile fetch). This
+// keeps a fresh roll of stations around the user as they move — waiting
+// until they were near the outer ring left the home feed sparse for too
+// long, because stations on the "behind" side of the original fetch kept
+// getting farther from the user until the refetch finally fired.
+const DEFAULT_CACHE_EDGE_BUFFER_FRACTION = 0.5;
+
+function haversineDistanceMiles(lat1, lng1, lat2, lng2) {
+    const latA = Number(lat1);
+    const lngA = Number(lng1);
+    const latB = Number(lat2);
+    const lngB = Number(lng2);
+
+    if (
+        !Number.isFinite(latA) ||
+        !Number.isFinite(lngA) ||
+        !Number.isFinite(latB) ||
+        !Number.isFinite(lngB)
+    ) {
+        return Number.POSITIVE_INFINITY;
+    }
+
+    const earthRadiusMiles = 3958.7613;
+    const toRadians = (degrees) => (degrees * Math.PI) / 180;
+    const deltaLat = toRadians(latB - latA);
+    const deltaLng = toRadians(lngB - lngA);
+    const haversineA = (
+        Math.sin(deltaLat / 2) ** 2 +
+        Math.cos(toRadians(latA)) *
+        Math.cos(toRadians(latB)) *
+        Math.sin(deltaLng / 2) ** 2
+    );
+    const haversineC = 2 * Math.atan2(Math.sqrt(haversineA), Math.sqrt(1 - haversineA));
+
+    return earthRadiusMiles * haversineC;
+}
+
+/**
+ * Scan the in-memory spatial cache index for an entry whose fetched window
+ * still covers the requested origin. Returns the metadata for the best match
+ * (closest center) or `null` if no window is usable. A match must:
+ *   - target the same fuel type and preferred provider
+ *   - be within `radiusMiles * (1 - edgeBufferFraction)` of the origin
+ *   - still be fresh according to the TTL for station/area snapshots
+ */
+function findUsableCachedFuelWindow({
+    latitude,
+    longitude,
+    fuelType,
+    preferredProvider,
+    radiusMiles,
+    edgeBufferFraction = DEFAULT_CACHE_EDGE_BUFFER_FRACTION,
+    nowMs = Date.now(),
+}) {
+    const latitudeNumber = Number(latitude);
+    const longitudeNumber = Number(longitude);
+    if (!Number.isFinite(latitudeNumber) || !Number.isFinite(longitudeNumber)) {
+        return null;
+    }
+
+    const normFuelType = String(fuelType || '').trim().toLowerCase();
+    const normProvider = String(preferredProvider || '').trim().toLowerCase();
+    const bufferFraction = Math.max(0, Math.min(0.95, Number(edgeBufferFraction) || 0));
+    const requestedRadius = Number(radiusMiles);
+    const config = getFuelServiceConfig();
+    const stationTtlMs = Number(config.stationCacheTtlMs) || 0;
+    const areaTtlMs = Number(config.areaCacheTtlMs) || 0;
+    // We cannot tell from the spatial entry alone whether the underlying
+    // snapshot was a station or area fetch, so we treat any entry as usable
+    // if it is still inside the more generous of the two TTLs. The downstream
+    // snapshot loader re-checks the precise TTL before returning data.
+    const effectiveTtlMs = Math.max(stationTtlMs, areaTtlMs);
+
+    let bestMatch = null;
+
+    for (const entry of listSpatialCacheEntries()) {
+        if (normFuelType && entry.fuelType && entry.fuelType !== normFuelType) {
+            continue;
+        }
+        if (normProvider && entry.preferredProvider && entry.preferredProvider !== normProvider) {
+            continue;
+        }
+
+        // Only reuse a window if the cached query radius is at least as big as
+        // what the caller currently wants; otherwise we could miss stations the
+        // new request would have picked up on the outer ring.
+        if (Number.isFinite(requestedRadius) && entry.radiusMiles < requestedRadius) {
+            continue;
+        }
+
+        // Skip windows that have aged past the cache TTL. Without this, the
+        // home screen tracker would happily skip refetches against stale
+        // snapshots and the UI would drift out of sync with the real prices.
+        if (effectiveTtlMs > 0 && entry.fetchedAt) {
+            const ageMs = nowMs - entry.fetchedAt;
+            if (!Number.isFinite(ageMs) || ageMs > effectiveTtlMs) {
+                continue;
+            }
+        }
+
+        const distanceMiles = haversineDistanceMiles(
+            latitudeNumber,
+            longitudeNumber,
+            entry.centerLat,
+            entry.centerLng
+        );
+        const safeRadius = entry.radiusMiles * (1 - bufferFraction);
+
+        if (distanceMiles > safeRadius) {
+            continue;
+        }
+
+        if (!bestMatch || distanceMiles < bestMatch.distanceMiles) {
+            bestMatch = {
+                ...entry,
+                distanceMiles,
+                safeRadius,
+                ttlMs: effectiveTtlMs,
+                isWithinWindow: true,
+                nowMs,
+            };
+        }
+    }
+
+    return bestMatch;
+}
+
+/**
+ * Locate the best cached snapshot whose fetched window still contains the
+ * caller's origin, rebase the quote distances to the new origin, and tag the
+ * result with `reusedWindow` metadata so the caller knows the entry was
+ * served from the spatial cache instead of an exact-key lookup.
+ */
+async function findUsableCachedFuelSnapshot({
+    latitude,
+    longitude,
+    radiusMiles,
+    fuelType,
+    preferredProvider = 'gasbuddy',
+    edgeBufferFraction = DEFAULT_CACHE_EDGE_BUFFER_FRACTION,
+}) {
+    const window = findUsableCachedFuelWindow({
+        latitude,
+        longitude,
+        fuelType,
+        preferredProvider,
+        radiusMiles,
+        edgeBufferFraction,
+    });
+
+    if (!window) {
+        return null;
+    }
+
+    const cacheEntry = await getCachedEntry(window.cacheKey);
+
+    if (!cacheEntry) {
+        return null;
+    }
+
+    if (!snapshotHasCurrentValidation(cacheEntry)) {
+        return null;
+    }
+
+    const config = getFuelServiceConfig();
+    const ttlMs = cacheEntry.quote?.isEstimated ? config.areaCacheTtlMs : config.stationCacheTtlMs;
+
+    if (!isCacheEntryFresh(cacheEntry, ttlMs)) {
+        return null;
+    }
+
+    const origin = { latitude, longitude };
+    const rebasedQuote = rebaseQuoteToOrigin(cacheEntry.quote, origin);
+    const rebasedTopStations = Array.isArray(cacheEntry.topStations)
+        ? cacheEntry.topStations.map(quote => rebaseQuoteToOrigin(quote, origin))
+        : [];
+    const rebasedRegionalQuotes = Array.isArray(cacheEntry.regionalQuotes)
+        ? cacheEntry.regionalQuotes.map(quote => rebaseQuoteToOrigin(quote, origin))
+        : [];
+
+    return sanitizeSnapshotForFuelType({
+        ...cacheEntry,
+        quote: rebasedQuote,
+        topStations: rebasedTopStations,
+        regionalQuotes: rebasedRegionalQuotes,
+        isFresh: true,
+        reusedWindow: {
+            cacheKey: window.cacheKey,
+            centerLat: window.centerLat,
+            centerLng: window.centerLng,
+            radiusMiles: window.radiusMiles,
+            distanceMiles: window.distanceMiles,
+            safeRadius: window.safeRadius,
+            edgeBufferFraction,
+            fetchedAt: window.fetchedAt,
+        },
+    }, fuelType);
+}
+
 async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fuelType, preferredProvider = 'gasbuddy' }) {
+    // First try the spatial lookup so we can reuse an already-fetched window
+    // when the user is still inside the safe portion of it. Falling back to
+    // the exact cache key keeps the existing behavior intact when the spatial
+    // index is cold (e.g. right after a cold launch before any new fetches).
+    const spatialSnapshot = await findUsableCachedFuelSnapshot({
+        latitude,
+        longitude,
+        radiusMiles,
+        fuelType,
+        preferredProvider,
+    });
+
+    if (spatialSnapshot) {
+        return spatialSnapshot;
+    }
+
     const cacheKey = buildCacheKey({
         latitude,
         longitude,
@@ -1896,6 +2119,30 @@ async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fu
             cacheEntry.quote?.isEstimated ? getFuelServiceConfig().areaCacheTtlMs : getFuelServiceConfig().stationCacheTtlMs
         ),
     }, fuelType);
+}
+
+/**
+ * Decide whether the caller still has a usable cached window around `origin`
+ * without fetching anything. The home screen uses this to keep cache returns
+ * minimal while the user is moving — we only schedule a refetch when the
+ * user passes the safe edge of the last fetched window.
+ */
+function hasUsableCachedFuelWindow({
+    latitude,
+    longitude,
+    radiusMiles,
+    fuelType,
+    preferredProvider,
+    edgeBufferFraction,
+}) {
+    return Boolean(findUsableCachedFuelWindow({
+        latitude,
+        longitude,
+        radiusMiles,
+        fuelType,
+        preferredProvider,
+        edgeBufferFraction,
+    }));
 }
 
 async function refreshFuelPriceSnapshot({
@@ -2110,7 +2357,14 @@ async function refreshFuelPriceSnapshot({
             throw createFuelCacheResetError();
         }
 
-        await setCachedEntry(cacheKey, snapshot);
+        await setCachedEntry(cacheKey, snapshot, {
+            centerLat: latitude,
+            centerLng: longitude,
+            radiusMiles: normalizedRadius,
+            fuelType: normalizedFuelType,
+            preferredProvider,
+            fetchedAt: Date.now(),
+        });
 
         if (requestGeneration !== fuelCacheGeneration) {
             await removeCachedEntry(cacheKey);
@@ -2263,7 +2517,14 @@ async function refreshFuelPriceSnapshotAlongTrajectory({
             throw createFuelCacheResetError();
         }
 
-        await cacheWriter(trajectorySnapshotCacheKey, mergedSnapshot);
+        await cacheWriter(trajectorySnapshotCacheKey, mergedSnapshot, {
+            centerLat: latitude,
+            centerLng: longitude,
+            radiusMiles: normalizedRadius,
+            fuelType: normalizedFuelType,
+            preferredProvider,
+            fetchedAt: Date.now(),
+        });
 
         if (requestGeneration !== fuelCacheGeneration) {
             await removeCachedEntry(trajectorySnapshotCacheKey);
@@ -2323,8 +2584,10 @@ async function clearFuelPriceCache() {
 module.exports = {
     buildLatestFuelStationQuotesFromRows: buildLatestQuotesFromRows,
     clearFuelPriceCache,
+    findUsableCachedFuelSnapshot,
     getFuelFailureMessage,
     getCachedFuelPriceSnapshot,
+    hasUsableCachedFuelWindow,
     isFuelCacheResetError,
     refreshFuelPriceSnapshot,
     refreshFuelPriceSnapshotAlongTrajectory,

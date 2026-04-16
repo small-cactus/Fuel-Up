@@ -1,6 +1,24 @@
 /**
  * Predictive Fueling Live Activity — driving-centric, brand-forward design.
  *
+ * ╔═════════════════════════════════════════════════════════════════╗
+ * ║ KEEP IN SYNC WITH src/lib/PriceDropActivityLivePreview.jsx       ║
+ * ╠═════════════════════════════════════════════════════════════════╣
+ * ║ PriceDropActivityLivePreview.jsx is the in-app design previewer  ║
+ * ║ for this widget. It hand-mirrors the JSX below using the same   ║
+ * ║ `@expo/ui/swift-ui` primitives wrapped in `<Host>` so you can    ║
+ * ║ iterate on layout/colors inside the app without swiping home.    ║
+ * ║ Any change to the banner, compact, minimal, or expanded layouts  ║
+ * ║ — or to the shared color constants / headline logic — MUST be    ║
+ * ║ mirrored in that file, or the previews will drift from the      ║
+ * ║ real Live Activity.                                              ║
+ * ║                                                                  ║
+ * ║ The duplication is forced by the babel widgets-plugin, which    ║
+ * ║ replaces this function with a serialized string literal — the    ║
+ * ║ preview needs a normal React callable, so it lives in its own    ║
+ * ║ non-widget file. See that file's header for details.             ║
+ * ╚═════════════════════════════════════════════════════════════════╝
+ *
  * The user is ACTIVELY DRIVING. They get at most a one-second glance at
  * the lock screen or a shorter glance at the Dynamic Island. Everything
  * on screen answers ONE question: "Is it worth pulling into this station
@@ -173,83 +191,38 @@ const PriceDropActivity = (props: PredictiveFuelingActivityProps) => {
         </ZStack>
     );
 
-    // ── Hand-drawn action buttons ──
+    // ── Action buttons ──
     //
-    // Each button is:
-    //   Button(buttonStyle=plain, frame=full-width)
-    //     └ ZStack
-    //         ├ RoundedRectangle (filled rectangle background)
-    //         └ HStack (icon + text centered on top)
+    // Using the native `label` + `systemImage` props instead of custom
+    // children (ZStack + RoundedRectangle). The widget extension's
+    // DynamicView.swift render method silently swallows errors from the
+    // `Children()` path and returns EmptyView, which made the hand-drawn
+    // buttons invisible. The `label` prop takes the reliable Text/Label
+    // rendering path in LiveActivityButtonView.swift and always renders.
     //
-    // The outer Button has `buttonStyle('plain')` so SwiftUI doesn't
-    // add its own pill background — we draw the rectangle ourselves.
-    // `frame({maxWidth: 999999, height: 54})` makes the button fill
-    // its container's width (999999 is clamped to parent bounds) and
-    // fixes the height so both buttons align perfectly.
-    //
-    // The RoundedRectangle is also given the same `maxWidth/height`
-    // frame so it fills the ZStack and matches the tap area exactly.
+    // `borderedProminent` gives a filled, tinted pill — the native look
+    // for Live Activity action buttons.
     const navigateButton = (
         <Button
             target="navigate"
+            systemImage="location.north.fill"
+            label="Navigate"
             modifiers={[
-                buttonStyle('plain'),
-                frame({ maxWidth: 999999, height: 54 }),
+                buttonStyle('borderedProminent'),
+                foregroundStyle('#FFFFFF'),
             ]}
-        >
-            <ZStack alignment="center">
-                <RoundedRectangle
-                    cornerRadius={14}
-                    modifiers={[
-                        frame({ maxWidth: 999999, height: 54 }),
-                        foregroundStyle(ACTION_BLUE),
-                    ]}
-                />
-                <HStack spacing={7} alignment="center">
-                    <Image
-                        systemName="location.north.fill"
-                        color="#FFFFFF"
-                        size={15}
-                    />
-                    <Text
-                        modifiers={[
-                            font({ size: 17, weight: 'semibold', design: 'rounded' }),
-                            foregroundStyle('#FFFFFF'),
-                        ]}
-                    >
-                        Navigate
-                    </Text>
-                </HStack>
-            </ZStack>
-        </Button>
+        />
     );
 
     const cancelButton = (
         <Button
             target="cancel"
+            label="Cancel"
+            role="destructive"
             modifiers={[
-                buttonStyle('plain'),
-                frame({ maxWidth: 999999, height: 54 }),
+                buttonStyle('bordered'),
             ]}
-        >
-            <ZStack alignment="center">
-                <RoundedRectangle
-                    cornerRadius={14}
-                    modifiers={[
-                        frame({ maxWidth: 999999, height: 54 }),
-                        foregroundStyle(ACTION_RED),
-                    ]}
-                />
-                <Text
-                    modifiers={[
-                        font({ size: 17, weight: 'semibold', design: 'rounded' }),
-                        foregroundStyle('#FFFFFF'),
-                    ]}
-                >
-                    Cancel
-                </Text>
-            </ZStack>
-        </Button>
+        />
     );
 
     return {
@@ -412,61 +385,21 @@ const PriceDropActivity = (props: PredictiveFuelingActivityProps) => {
                 <HStack spacing={8} alignment="center">
                     <Button
                         target="navigate"
+                        systemImage="location.north.fill"
+                        label="Navigate"
                         modifiers={[
-                            buttonStyle('plain'),
-                            frame({ maxWidth: 999999, height: 44 }),
+                            buttonStyle('borderedProminent'),
+                            foregroundStyle('#FFFFFF'),
                         ]}
-                    >
-                        <ZStack alignment="center">
-                            <RoundedRectangle
-                                cornerRadius={12}
-                                modifiers={[
-                                    frame({ maxWidth: 999999, height: 44 }),
-                                    foregroundStyle(ACTION_BLUE),
-                                ]}
-                            />
-                            <HStack spacing={6} alignment="center">
-                                <Image
-                                    systemName="location.north.fill"
-                                    color="#FFFFFF"
-                                    size={13}
-                                />
-                                <Text
-                                    modifiers={[
-                                        font({ size: 15, weight: 'semibold', design: 'rounded' }),
-                                        foregroundStyle('#FFFFFF'),
-                                    ]}
-                                >
-                                    Navigate
-                                </Text>
-                            </HStack>
-                        </ZStack>
-                    </Button>
+                    />
                     <Button
                         target="cancel"
+                        label="Cancel"
+                        role="destructive"
                         modifiers={[
-                            buttonStyle('plain'),
-                            frame({ maxWidth: 999999, height: 44 }),
+                            buttonStyle('bordered'),
                         ]}
-                    >
-                        <ZStack alignment="center">
-                            <RoundedRectangle
-                                cornerRadius={12}
-                                modifiers={[
-                                    frame({ maxWidth: 999999, height: 44 }),
-                                    foregroundStyle(ACTION_RED),
-                                ]}
-                            />
-                            <Text
-                                modifiers={[
-                                    font({ size: 15, weight: 'semibold', design: 'rounded' }),
-                                    foregroundStyle('#FFFFFF'),
-                                ]}
-                            >
-                                Cancel
-                            </Text>
-                        </ZStack>
-                    </Button>
+                    />
                 </HStack>
             </VStack>
         ),

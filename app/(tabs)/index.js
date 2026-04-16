@@ -17,6 +17,7 @@ import ResetToCheapestButton from '../../src/components/ResetToCheapestButton';
 import {
     getCachedFuelPriceSnapshot,
     getFuelFailureMessage,
+    hasUsableCachedFuelWindow,
     isFuelCacheResetError,
     refreshFuelPriceSnapshot,
     refreshFuelPriceSnapshotWithTrajectoryFallback,
@@ -105,6 +106,7 @@ const {
     CLUSTER_SPLIT_MULTIPLIER,
 } = require('../../src/lib/clusterAnimationMath.cjs');
 const {
+    MIN_PREFETCH_SPEED_MPS,
     buildTrajectorySeedFromLocationObject,
 } = require('../../src/lib/trajectoryFuelFetch.js');
 
@@ -158,6 +160,59 @@ const INITIAL_SMOOTH_LAUNCH_TRANSITION_MAX_DISTANCE_METERS = 6000;
 const LAUNCH_MOVEMENT_RECOVERY_TIMEOUT_MS = 5000;
 const ENABLE_CLUSTER_MERGE_TRANSITIONS = false;
 const HOME_DARK_GLASS_TINT = '#373737ff';
+// Continuous tracking settings. The rules are intentionally minimal:
+//   - The map is centered on the user at a fixed overview zoom (~8 miles
+//     across). We never preserve the map's current delta when following,
+//     so station fits never leave us with an unusable close-up.
+//   - We subscribe with distanceInterval=0 and High accuracy so iOS emits
+//     every GPS update available. timeInterval is iOS-ignored.
+//   - A separate interval timer (the "driver") runs at 2 Hz and is
+//     responsible for calling animateToRegion. This decouples camera
+//     motion from GPS tick rate. Each driver tick uses position-based
+//     velocity (computed from consecutive GPS fixes) to extrapolate the
+//     user's current position and animate the camera there over a short
+//     500 ms animation. Back-to-back short animations give the illusion
+//     of continuous motion the same way Apple Maps does in its native
+//     userTrackingMode=.follow mode.
+//   - This is necessary because react-native-maps' `animateToRegion`
+//     duration argument is effectively ignored on iOS: it wraps
+//     `setRegion:animated:YES` in a UIView animation block but MKMapView
+//     uses its own internal ~0.5 s animation, not UIView timing. So the
+//     only way to get continuous motion is to chain many short MKMapView
+//     animations together.
+//   - A user pan pauses auto-follow for 10 s so the user can explore the
+//     surrounding area without being yanked back.
+//   - React state is only updated every 50 m of movement to keep the
+//     render loop quiet while still refreshing distance-based filtering.
+const LIVE_TRACKING_LATITUDE_DELTA = 0.12;
+const LIVE_TRACKING_LONGITUDE_DELTA = 0.12;
+const LIVE_TRACKING_DISTANCE_INTERVAL_METERS = 0;
+const LIVE_TRACKING_DRIVER_INTERVAL_MS = 500;
+const LIVE_TRACKING_DRIVER_ANIMATION_MS = 550;
+// Cap how long we extrapolate past the most recent GPS fix. If GPS goes
+// silent for a while (common on iOS Simulator with some location preset
+// combinations) the camera will still smoothly glide for up to this many
+// ms after the last known fix, then come to rest instead of running off
+// indefinitely on a stale velocity.
+const LIVE_TRACKING_MAX_EXTRAPOLATION_MS = 5000;
+const LIVE_TRACKING_PAN_SUPPRESS_MS = 10_000;
+const LIVE_TRACKING_STATE_UPDATE_METERS = 50;
+// Minimum gap between back-to-back device-watch refetches. Without this
+// throttle, a fast-moving user keeps crossing the safe edge of the
+// cached window on consecutive GPS ticks, and `handleLiveLocationUpdate`
+// fires a new fetch each time — they stack up, each one replaces the
+// previous state with a point-centered snapshot, and the feed looks
+// sparse in the middle because the in-flight fetches never get to
+// settle before the next one wipes their data out. 1.5 s is long
+// enough for a trajectory fetch to resolve before we queue the next
+// one, but short enough that the feed stays fresh during normal
+// driving speeds.
+const LIVE_TRACKING_REFETCH_MIN_INTERVAL_MS = 1500;
+// Speed floor below which we don't bother computing a trajectory seed
+// from differencing velocity. `MIN_PREFETCH_SPEED_MPS` is the same
+// threshold the trajectory planner uses to decide whether prefetching
+// is worthwhile at all.
+const LIVE_TRACKING_TRAJECTORY_MIN_SPEED_MPS = MIN_PREFETCH_SPEED_MPS;
 
 function waitForMilliseconds(duration) {
     return new Promise(resolve => {
@@ -186,6 +241,62 @@ function hasUsableHomeRegion(region) {
         Number.isFinite(region?.latitude) &&
         Number.isFinite(region?.longitude)
     );
+}
+
+// Build a trajectory seed (`{ latitude, longitude, courseDegrees,
+// speedMps }`) from the differencing velocity we compute inside
+// `handleLiveLocationUpdate`. The live tracker stores velocity in
+// degrees-per-millisecond so the 2 Hz animation driver can extrapolate
+// without allocations; here we convert it back to speed + bearing so
+// the trajectory fetch planner can use it.
+//
+// Returns null if we don't have enough motion to justify an ahead-fetch
+// — slower than LIVE_TRACKING_TRAJECTORY_MIN_SPEED_MPS or a zero
+// velocity vector (user is stationary / just opened the app). The
+// caller falls back to `buildTrajectorySeedFromLocationObject`, which
+// reads GPS `coords.course/speed` when those are valid.
+function buildTrajectorySeedFromVelocity({ latitude, longitude, velocity }) {
+    if (
+        !Number.isFinite(latitude) ||
+        !Number.isFinite(longitude) ||
+        !velocity
+    ) {
+        return null;
+    }
+
+    const latPerMs = Number(velocity.latPerMs);
+    const lngPerMs = Number(velocity.lngPerMs);
+
+    if (
+        !Number.isFinite(latPerMs) ||
+        !Number.isFinite(lngPerMs) ||
+        (latPerMs === 0 && lngPerMs === 0)
+    ) {
+        return null;
+    }
+
+    const metersPerDegreeLatitude = 111_320;
+    const metersPerDegreeLongitude = 111_320 * Math.cos((latitude * Math.PI) / 180);
+    const latMetersPerSecond = latPerMs * 1000 * metersPerDegreeLatitude;
+    const lngMetersPerSecond = lngPerMs * 1000 * metersPerDegreeLongitude;
+    const speedMps = Math.sqrt(
+        latMetersPerSecond * latMetersPerSecond +
+        lngMetersPerSecond * lngMetersPerSecond
+    );
+
+    if (!Number.isFinite(speedMps) || speedMps < LIVE_TRACKING_TRAJECTORY_MIN_SPEED_MPS) {
+        return null;
+    }
+
+    const courseDegreesRaw = (Math.atan2(lngMetersPerSecond, latMetersPerSecond) * 180) / Math.PI;
+    const courseDegrees = ((courseDegreesRaw % 360) + 360) % 360;
+
+    return {
+        latitude,
+        longitude,
+        courseDegrees,
+        speedMps,
+    };
 }
 
 function buildClusterDebugAutomationSeedRegion(quotes, fallbackRegion) {
@@ -1629,12 +1740,13 @@ export default function HomeScreen() {
         searchRadiusMiles,
         selectedFuelGrade,
     ]);
-    const isShowingStaleHomeRequestData = (
-        Boolean(
-            lastVisibleHomeRequestKeyRef.current &&
-            lastVisibleHomeRequestKeyRef.current !== currentVisibleHomeRequestKey
-        )
-    );
+    // We used to compute `isShowingStaleHomeRequestData` here to blank the
+    // feed when the request key changed. That flip-flopped during tracking
+    // because the request key changes every time the user crosses a
+    // 2-decimal grid cell (~1.1 km), causing single-frame flashes of the
+    // "No Prices Returned" fallback marker. The new rule is simpler: keep
+    // showing whatever the last fetch returned until a fresh snapshot
+    // replaces it. The tracker's cache-window refetch keeps data fresh.
 
     const handleStationNavigatePress = useCallback((stationQuote) => {
         if (!stationQuote) {
@@ -2461,10 +2573,10 @@ export default function HomeScreen() {
             }
 
             // The user actually moved. Update location state, nudge the map,
-            // re-persist the cache, and refetch fuel so the stations reflect
-            // the new neighborhood. This is the "reopen-after-travel" path
-            // the user experiences when they take the phone to a new city
-            // while the app was closed.
+            // re-persist the cache, and optionally refetch fuel data so the
+            // stations reflect the new neighborhood. This is the
+            // "reopen-after-travel" path the user experiences when they take
+            // the phone to a new city while the app was closed.
             applyResolvedRegion(freshRegion);
             recordLocationAppliedProbeEvent(freshRegion, 'device', {
                 resolver: 'movement-check',
@@ -2472,6 +2584,10 @@ export default function HomeScreen() {
             });
             updateResolvedFuelSearchContext(freshRegion, 'device');
 
+            // Launch transitions across huge distances (e.g. cached SF →
+            // live NYC) still fall back to a pop so we don't animate the
+            // camera for hundreds of miles. In-session moves always
+            // animate so the map glides into place instead of jumping.
             const shouldAnimateLocationTransition = shouldAnimateSmoothLaunchTransition(
                 compareRegion,
                 freshRegion
@@ -2487,15 +2603,44 @@ export default function HomeScreen() {
                 accuracyMeters: resolvedPositionObject?.coords?.accuracy ?? null,
             });
             launchCachedCapturedAtRef.current = Date.now();
+            launchCachedRegionRef.current = freshRegion;
 
-            await loadFuelData({
+            // Skip the fuel refetch if the user is still comfortably inside
+            // the previously cached window. The in-memory spatial index is
+            // the source of truth here — as long as the window covers the
+            // user (edge buffer and TTL respected), we can reuse its data.
+            const movementFuelGrade = preferredProvider === 'gasbuddy'
+                ? 'regular'
+                : selectedFuelGrade;
+            const hasUsableWindowForMovement = hasUsableCachedFuelWindow({
                 latitude: freshRegion.latitude,
                 longitude: freshRegion.longitude,
-                locationSource: 'device',
-                preferCached: false,
-                trajectorySeed,
-                querySignature: buildResolvedHomeQuerySignature(freshRegion),
+                radiusMiles: searchRadiusMiles,
+                fuelType: movementFuelGrade,
+                preferredProvider,
             });
+
+            if (!hasUsableWindowForMovement) {
+                await loadFuelData({
+                    latitude: freshRegion.latitude,
+                    longitude: freshRegion.longitude,
+                    locationSource: 'device',
+                    preferCached: false,
+                    trajectorySeed,
+                    querySignature: buildResolvedHomeQuerySignature(freshRegion),
+                });
+            } else {
+                recordLocationProbeEvent({
+                    type: 'movement-check-reused-window',
+                    details: {
+                        region: {
+                            latitude: Number(freshRegion.latitude),
+                            longitude: Number(freshRegion.longitude),
+                        },
+                        reason,
+                    },
+                });
+            }
 
             return {
                 applied: true,
@@ -2915,6 +3060,309 @@ export default function HomeScreen() {
     const maybeRefreshDeviceLocationFromLastKnownRef = useRef(null);
     maybeRefreshDeviceLocationFromLastKnownRef.current = maybeRefreshDeviceLocationFromLastKnown;
 
+    // Continuous tracking. The event-driven GPS handler ONLY records the
+    // latest fix + velocity. A separate interval-driven "driver" (below)
+    // does the actual map animation at 2 Hz, which is the only way to get
+    // continuous motion because react-native-maps' duration argument is
+    // a no-op on iOS Apple Maps (see the tracking settings comment above).
+    const liveTrackingSubscriptionRef = useRef(null);
+    const liveTrackingDriverIntervalRef = useRef(null);
+    const hasUserRecentlyPannedRef = useRef(false);
+    const userPanSuppressTimeoutRef = useRef(null);
+    const loadFuelDataRef = useRef(null);
+    loadFuelDataRef.current = loadFuelData;
+    // Latest GPS fix: { latitude, longitude, timestampMs }
+    const latestFixRef = useRef(null);
+    // Velocity computed by differencing consecutive fixes, in
+    // degrees-per-millisecond. Kept as a plain struct so the driver can
+    // read it without allocating.
+    const latestVelocityRef = useRef({ latPerMs: 0, lngPerMs: 0 });
+    // Timestamp of the last device-watch refetch we kicked off. Used by
+    // the cool-down guard in `handleLiveLocationUpdate` so rapid movement
+    // cannot stack multiple back-to-back refetches that each replace the
+    // station set with a point-centered snapshot. See
+    // LIVE_TRACKING_REFETCH_MIN_INTERVAL_MS for the rationale.
+    const lastDeviceWatchFetchAtRef = useRef(0);
+
+    const handleLiveLocationUpdate = (positionObject) => {
+        if (!isMountedRef.current || manualLocationOverride) {
+            return;
+        }
+
+        const latitude = Number(positionObject?.coords?.latitude);
+        const longitude = Number(positionObject?.coords?.longitude);
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+            return;
+        }
+
+        const reportedTimestamp = Number(positionObject?.timestamp);
+        const timestampMs = Number.isFinite(reportedTimestamp) && reportedTimestamp > 0
+            ? reportedTimestamp
+            : Date.now();
+
+        // Differencing-based velocity. This is robust in both real and
+        // simulator environments — we don't rely on `coords.speed` /
+        // `coords.heading` being accurate (iOS Simulator often reports
+        // invalid values for those fields, which was leaving the tracker
+        // without a direction to extrapolate in, producing the "move,
+        // stop, move" stutter).
+        const previousFix = latestFixRef.current;
+        if (previousFix) {
+            const dtMs = timestampMs - previousFix.timestampMs;
+            if (dtMs > 50 && dtMs < 30_000) {
+                latestVelocityRef.current = {
+                    latPerMs: (latitude - previousFix.latitude) / dtMs,
+                    lngPerMs: (longitude - previousFix.longitude) / dtMs,
+                };
+            } else if (dtMs <= 0) {
+                // Identical or backwards timestamp; leave velocity alone.
+            } else if (dtMs >= 30_000) {
+                // Long gap — treat as fresh start to avoid wildly stale
+                // velocity driving the camera off the map.
+                latestVelocityRef.current = { latPerMs: 0, lngPerMs: 0 };
+            }
+        }
+        latestFixRef.current = { latitude, longitude, timestampMs };
+
+        const actualRegion = {
+            latitude,
+            longitude,
+            latitudeDelta: LIVE_TRACKING_LATITUDE_DELTA,
+            longitudeDelta: LIVE_TRACKING_LONGITUDE_DELTA,
+        };
+
+        // Only push React state when the user has moved far enough to
+        // matter. The actual camera motion is handled by the driver, so
+        // we don't touch the map here.
+        const distanceFromStateMeters = calculateDistanceMeters(
+            location,
+            actualRegion
+        );
+        if (
+            !location ||
+            !Number.isFinite(distanceFromStateMeters) ||
+            distanceFromStateMeters >= LIVE_TRACKING_STATE_UPDATE_METERS
+        ) {
+            applyResolvedRegion(actualRegion);
+            updateResolvedFuelSearchContext(actualRegion, 'device');
+        }
+
+        // Refetch only when the user crossed the safe edge of the cached
+        // window. Inside the window we skip entirely.
+        const snapshotFuelGrade = preferredProvider === 'gasbuddy'
+            ? 'regular'
+            : selectedFuelGrade;
+        const windowStillCovers = hasUsableCachedFuelWindow({
+            latitude,
+            longitude,
+            radiusMiles: searchRadiusMiles,
+            fuelType: snapshotFuelGrade,
+            preferredProvider,
+        });
+        if (windowStillCovers) {
+            return;
+        }
+
+        // Rapid-movement cool-down. `watchPositionAsync` can fire several
+        // ticks per second on a fast-moving user, and each tick that
+        // falls outside the cached window would otherwise queue its own
+        // full-radius refetch. Stacked refetches each complete in turn,
+        // with each `applySnapshot` wiping the last one's data, so the
+        // feed ends up reflecting only whichever fetch happened to win
+        // the race — usually the one centered on the user's latest
+        // position, with zero coverage of everything the user just
+        // drove through. One refetch per LIVE_TRACKING_REFETCH_MIN_INTERVAL_MS
+        // is enough to keep data fresh at highway speed while leaving
+        // each in-flight trajectory fetch room to resolve before the
+        // next one starts.
+        const nowMs = Date.now();
+        const lastDeviceWatchFetchAt = lastDeviceWatchFetchAtRef.current;
+        if (
+            lastDeviceWatchFetchAt &&
+            nowMs - lastDeviceWatchFetchAt < LIVE_TRACKING_REFETCH_MIN_INTERVAL_MS
+        ) {
+            return;
+        }
+
+        const loader = loadFuelDataRef.current;
+        if (!loader) {
+            return;
+        }
+
+        lastDeviceWatchFetchAtRef.current = nowMs;
+
+        void persistLastDeviceLocationRegion(actualRegion, {
+            capturedAt: Date.now(),
+            accuracyMeters: positionObject?.coords?.accuracy ?? null,
+        }).catch(() => {
+            // Persistence is best-effort; tracking continues regardless.
+        });
+        launchCachedCapturedAtRef.current = Date.now();
+        launchCachedRegionRef.current = actualRegion;
+
+        // Prefer a trajectory seed derived from our own differencing
+        // velocity over the GPS `course`/`speed` fields — iOS Simulator
+        // and low-accuracy readings routinely report invalid values for
+        // those, which was leaving the live tracker without a direction
+        // to prefetch in. With a valid seed, `loadFuelData` takes the
+        // trajectory fetch path and pulls both an origin-centered and
+        // an ahead-of-motion snapshot in parallel, merging the stations
+        // so the feed stays full as the user pushes through the edge
+        // of the cached window instead of briefly collapsing to just
+        // whatever the single fresh point returned.
+        const velocity = latestVelocityRef.current;
+        const derivedTrajectorySeed = buildTrajectorySeedFromVelocity({
+            latitude,
+            longitude,
+            velocity,
+        });
+        const trajectorySeed = derivedTrajectorySeed
+            || buildTrajectorySeedFromLocationObject(positionObject);
+
+        void loader({
+            latitude,
+            longitude,
+            locationSource: 'device-watch',
+            preferCached: false,
+            trajectorySeed,
+            querySignature: buildResolvedHomeQuerySignature(actualRegion),
+        });
+    };
+
+    const handleLiveLocationUpdateRef = useRef(null);
+    handleLiveLocationUpdateRef.current = handleLiveLocationUpdate;
+
+    // The tracking driver. Runs at LIVE_TRACKING_DRIVER_INTERVAL_MS (2 Hz)
+    // whenever tracking is active. Each tick computes an interpolated
+    // target position from the last fix + velocity + elapsed time, then
+    // asks the map to animate there over LIVE_TRACKING_DRIVER_ANIMATION_MS.
+    // Back-to-back short animations are the only way to get continuous
+    // smooth motion on react-native-maps + Apple Maps.
+    const runLiveTrackingDriverTick = () => {
+        if (
+            !isMountedRef.current ||
+            manualLocationOverride ||
+            hasUserRecentlyPannedRef.current ||
+            !mapRef.current ||
+            !isMapLoaded
+        ) {
+            return;
+        }
+
+        const fix = latestFixRef.current;
+        if (!fix) {
+            return;
+        }
+
+        const elapsedMsRaw = Date.now() - fix.timestampMs;
+        const elapsedMs = Math.max(
+            0,
+            Math.min(elapsedMsRaw, LIVE_TRACKING_MAX_EXTRAPOLATION_MS)
+        );
+        const velocity = latestVelocityRef.current;
+        const targetLatitude = fix.latitude + velocity.latPerMs * elapsedMs;
+        const targetLongitude = fix.longitude + velocity.lngPerMs * elapsedMs;
+
+        if (!Number.isFinite(targetLatitude) || !Number.isFinite(targetLongitude)) {
+            return;
+        }
+
+        const targetRegion = {
+            latitude: targetLatitude,
+            longitude: targetLongitude,
+            latitudeDelta: LIVE_TRACKING_LATITUDE_DELTA,
+            longitudeDelta: LIVE_TRACKING_LONGITUDE_DELTA,
+        };
+
+        animateMapToRegion(targetRegion, LIVE_TRACKING_DRIVER_ANIMATION_MS);
+    };
+
+    const runLiveTrackingDriverTickRef = useRef(null);
+    runLiveTrackingDriverTickRef.current = runLiveTrackingDriverTick;
+
+    const suppressAutoFollowAfterUserPan = () => {
+        hasUserRecentlyPannedRef.current = true;
+
+        if (userPanSuppressTimeoutRef.current) {
+            clearTimeout(userPanSuppressTimeoutRef.current);
+        }
+
+        userPanSuppressTimeoutRef.current = setTimeout(() => {
+            userPanSuppressTimeoutRef.current = null;
+            hasUserRecentlyPannedRef.current = false;
+        }, LIVE_TRACKING_PAN_SUPPRESS_MS);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (userPanSuppressTimeoutRef.current) {
+                clearTimeout(userPanSuppressTimeoutRef.current);
+                userPanSuppressTimeoutRef.current = null;
+            }
+        };
+    }, []);
+
+    // Subscribe to continuous location updates and start the driver
+    // interval while we have permission and the home tab is focused. The
+    // subscription + driver are torn down whenever any of those conditions
+    // flips so we don't tick in the background.
+    useEffect(() => {
+        if (manualLocationOverride || !hasLocationPermission || !isFocused) {
+            return undefined;
+        }
+
+        let cancelled = false;
+
+        // Driver interval: drives the map animation at 2 Hz, independent
+        // of GPS tick rate. This is what makes motion smooth.
+        liveTrackingDriverIntervalRef.current = setInterval(() => {
+            runLiveTrackingDriverTickRef.current?.();
+        }, LIVE_TRACKING_DRIVER_INTERVAL_MS);
+
+        (async () => {
+            try {
+                const subscription = await Location.watchPositionAsync(
+                    {
+                        // iOS silently ignores `timeInterval`, so we rely on
+                        // High accuracy + distanceInterval=0 to get every
+                        // GPS update the system is willing to deliver.
+                        accuracy: Location.Accuracy.High,
+                        distanceInterval: LIVE_TRACKING_DISTANCE_INTERVAL_METERS,
+                    },
+                    (positionObject) => {
+                        if (cancelled) {
+                            return;
+                        }
+                        handleLiveLocationUpdateRef.current?.(positionObject);
+                    }
+                );
+
+                if (cancelled) {
+                    subscription.remove();
+                    return;
+                }
+
+                liveTrackingSubscriptionRef.current = subscription;
+            } catch (error) {
+                // watchPositionAsync failed; tracking stays off.
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+            if (liveTrackingDriverIntervalRef.current) {
+                clearInterval(liveTrackingDriverIntervalRef.current);
+                liveTrackingDriverIntervalRef.current = null;
+            }
+            if (liveTrackingSubscriptionRef.current) {
+                liveTrackingSubscriptionRef.current.remove();
+                liveTrackingSubscriptionRef.current = null;
+            }
+            latestFixRef.current = null;
+            latestVelocityRef.current = { latPerMs: 0, lngPerMs: 0 };
+        };
+    }, [hasLocationPermission, isFocused, manualLocationOverride]);
+
     useEffect(() => {
         recordLocationProbeEvent({
             type: 'app-state-listener-registered',
@@ -3083,26 +3531,25 @@ export default function HomeScreen() {
         setFuelDebugState(null);
     }, [fuelResetToken, setFuelDebugState]);
 
+    // Track the latest visible request key so snapshots know which query
+    // they belong to. We no longer *clear* visible results when the key
+    // changes — the tracker keeps the home feed populated with the last
+    // fetch's stations until a fresh snapshot replaces them, which is the
+    // simplest way to guarantee "stations always in view" as the user
+    // moves through and across cache windows.
     useEffect(() => {
-        const hasVisibleFuelState = Boolean(bestQuote) || topStations.length > 0 || regionalQuotes.length > 0 || Boolean(errorMsg);
-        const previousVisibleRequestKey = lastVisibleHomeRequestKeyRef.current;
+        const hasVisibleFuelState = (
+            Boolean(bestQuote) ||
+            topStations.length > 0 ||
+            regionalQuotes.length > 0 ||
+            Boolean(errorMsg)
+        );
 
-        if (
-            !hasVisibleFuelState ||
-            !previousVisibleRequestKey ||
-            previousVisibleRequestKey === currentVisibleHomeRequestKey
-        ) {
-            if (hasVisibleFuelState) {
-                lastVisibleHomeRequestKeyRef.current = currentVisibleHomeRequestKey;
-            }
-            return;
+        if (hasVisibleFuelState) {
+            lastVisibleHomeRequestKeyRef.current = currentVisibleHomeRequestKey;
         }
-
-        lastVisibleHomeRequestKeyRef.current = currentVisibleHomeRequestKey;
-        clearVisibleHomeResultsForReload();
     }, [
         bestQuote,
-        clearVisibleHomeResultsForReload,
         currentVisibleHomeRequestKey,
         errorMsg,
         regionalQuotes.length,
@@ -3219,26 +3666,30 @@ export default function HomeScreen() {
 
     const minRating = minimumRating;
     const rawStationQuotes = useMemo(() => (
-        isShowingStaleHomeRequestData
-            ? []
-            : [
-                ...(Array.isArray(topStations) ? topStations : []),
-                bestQuote,
-            ]
-                .filter(Boolean)
-                .filter(quote => quote?.providerTier === 'station' && !quote?.isEstimated)
-    ), [bestQuote, isShowingStaleHomeRequestData, topStations]);
+        [
+            ...(Array.isArray(topStations) ? topStations : []),
+            bestQuote,
+        ]
+            .filter(Boolean)
+            .filter(quote => quote?.providerTier === 'station' && !quote?.isEstimated)
+    ), [bestQuote, topStations]);
     const filteredStationQuotes = useMemo(() => (
+        // Do NOT pass radiusMiles here. If we filtered the already-cached
+        // set by distance-from-current-user, stations on the "behind" side
+        // would drop out of the list as the user moves through the window,
+        // leaving the feed with a single station or nothing just before the
+        // cache edge is crossed and a refetch happens. Instead we show
+        // everything the last fetch returned and trust the cache-window
+        // refetch path in the tracker to roll the window forward before
+        // stations get unreasonably far away.
         filterStationQuotesForHome({
             quotes: rawStationQuotes,
             origin: location,
-            radiusMiles: searchRadiusMiles,
             minimumRating: minRating,
         })
     ), [
         location,
         minRating,
-        searchRadiusMiles,
         rawStationQuotes,
     ]);
     const rankedStationQuotes = useMemo(() => {
@@ -3351,9 +3802,51 @@ export default function HomeScreen() {
         );
 
         if (shouldPauseSuppressionPersistence) {
-            setEffectiveSuppressedStationIds(currentValue => (
-                currentValue.size === 0 ? currentValue : new Set()
-            ));
+            // Do NOT wipe the effective suppressed set during the pause.
+            // The pause is a transient window between "new data arrived"
+            // and "home layout committed" — the very next state refresh
+            // recomputes the persistent set from scratch anyway. Clearing
+            // here causes a one-frame flicker where already-hidden chips
+            // pop visible, then snap hidden again the instant the pause
+            // releases. That flicker is strictly unwanted because those
+            // chips are going to end up hidden regardless.
+            //
+            // Two sub-cases:
+            //
+            // 1. Re-fetch (currentValue is non-empty): prune station IDs
+            //    whose station is no longer in the fresh dataset and
+            //    keep everything else. This carries the suppression state
+            //    through the pause untouched.
+            //
+            // 2. First start (currentValue is empty): seed directly from
+            //    rawSuppressedOverlapStationIds so overlap suppression
+            //    takes effect immediately instead of waiting for the
+            //    layout to commit. Without this, overlapping chips stay
+            //    visible during the entire initial map-fit animation
+            //    because there is nothing to "preserve" yet.
+            setEffectiveSuppressedStationIds(currentValue => {
+                if (currentValue.size === 0 && rawSuppressedOverlapStationIds.size > 0) {
+                    return rawSuppressedOverlapStationIds;
+                }
+
+                if (currentValue.size === 0) {
+                    return currentValue;
+                }
+
+                const visibleStationIds = new Set(
+                    stationQuotes.map(quote => String(quote.stationId))
+                );
+                const nextSuppressedIds = new Set();
+                currentValue.forEach(stationId => {
+                    if (visibleStationIds.has(String(stationId))) {
+                        nextSuppressedIds.add(stationId);
+                    }
+                });
+
+                return areStationIdSetsEqual(currentValue, nextSuppressedIds)
+                    ? currentValue
+                    : nextSuppressedIds;
+            });
             return;
         }
 
@@ -3699,6 +4192,14 @@ export default function HomeScreen() {
             return;
         }
 
+        // With continuous tracking on, the map is centered on the user's
+        // live position at a fixed overview zoom. Station fits would fight
+        // that tracker on every fresh snapshot, so we skip the camera work
+        // and let downstream commit-settled-layout paths continue normally.
+        if (hasLocationPermission && !manualLocationOverride) {
+            return;
+        }
+
         const buildFitCoordinates = (quotes, suppressedStationIds = null) => (
             (quotes || [])
                 .filter(q => Number.isFinite(q?.latitude) && Number.isFinite(q?.longitude))
@@ -3774,9 +4275,11 @@ export default function HomeScreen() {
         }
     }, [
         bottomPadding,
+        hasLocationPermission,
         height,
         horizontalPadding.left,
         horizontalPadding.right,
+        manualLocationOverride,
         sideInset,
         stationQuotes,
         topCanopyHeight,
@@ -3800,6 +4303,9 @@ export default function HomeScreen() {
             offset: index * itemWidth,
             animated: true,
         });
+        // Pause auto-follow so the tracker's next tick doesn't immediately
+        // override the station focus the user just asked for.
+        suppressAutoFollowAfterUserPan();
         primeCommittedSelectionMapMotion();
         setActiveIndex(index);
 
@@ -3825,6 +4331,9 @@ export default function HomeScreen() {
             offset: 0,
             animated: true,
         });
+        // Same story as marker taps — give the fit-to-stations animation
+        // room to breathe before the tracker reclaims the camera.
+        suppressAutoFollowAfterUserPan();
         primeCommittedSelectionMapMotion();
         setActiveIndex(currentValue => resolveCommittedHomeActiveIndex({
             currentActiveIndex: currentValue,
@@ -4868,6 +5377,15 @@ export default function HomeScreen() {
                         });
                     }}
                     userInterfaceStyle={isDark ? 'dark' : 'light'}
+                    onPanDrag={() => {
+                        // Fires while the user is actively dragging the
+                        // map. This is the only reliable way to detect a
+                        // user-initiated pan while the 2 Hz driver is
+                        // constantly firing programmatic animations — we
+                        // can't rely on `isAnimatingRef` because it stays
+                        // true for almost every `onRegionChange` event.
+                        suppressAutoFollowAfterUserPan();
+                    }}
                     onRegionChange={(region) => {
                         clearMapIdleSettleTimeout();
                         setMapMotionState(true);

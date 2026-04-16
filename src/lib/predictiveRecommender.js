@@ -1119,6 +1119,117 @@ function recommend(window, profile, stations, options = {}) {
     return index >= 0 ? index + 1 : null;
   }
 
+  function computeLeaderMargin(sortedCandidates, candidate, key) {
+    if (!candidate || !Array.isArray(sortedCandidates) || sortedCandidates.length === 0) return 0;
+    const leaderValue = Number(sortedCandidates[0]?.[key]) || 0;
+    const candidateValue = Number(candidate?.[key]) || 0;
+    return leaderValue - candidateValue;
+  }
+
+  function buildDecisionSnapshot(selectedCandidate = null, recommendation = null) {
+    const rankedByIntentScore = [...scored].sort((left, right) =>
+      (right.intentEvidence || 0) - (left.intentEvidence || 0) ||
+      (right.valueScore || 0) - (left.valueScore || 0)
+    );
+    const rankedByValueScore = [...scored].sort((left, right) =>
+      (right.valueScore || 0) - (left.valueScore || 0) ||
+      (right.intentEvidence || 0) - (left.intentEvidence || 0)
+    );
+
+    return {
+      timestampMs: nowMs,
+      historyVisitCount: Array.isArray(profile?.visitHistory)
+        ? profile.visitHistory.reduce((sum, entry) => sum + (Number(entry?.visitCount) || 0), 0)
+        : 0,
+      predictedDefaultStationId: predictedDefault?.station?.stationId || null,
+      intentLeaderStationId: intentLeader?.station?.stationId || null,
+      valueLeaderStationId: valueLeader?.station?.stationId || null,
+      candidateCount: scored.length,
+      tripFuelIntentScore,
+      tripFuelIntentThreshold,
+      tripFuelIntentSurplus: tripFuelIntentScore - tripFuelIntentThreshold,
+      historyStrength,
+      timePatternStrength,
+      leadMargin,
+      urgency,
+      fuelNeedScore,
+      isHighwayCruise,
+      lowSpecificityColdStart,
+      speculativeUrbanHistoryMode,
+      historyRecoveryEligible,
+      historyRecoveryConfidence,
+      estimatedRemainingMiles: fuelState?.estimatedRemainingMiles ?? null,
+      avgIntervalMiles: fuelState?.avgIntervalMiles ?? null,
+      profileHistoryConcentration: computeProfileHistoryConcentration(profile),
+      recommendation: recommendation
+        ? {
+          stationId: recommendation.stationId,
+          type: recommendation.type,
+          confidence: recommendation.confidence,
+          forwardDistance: recommendation.forwardDistance,
+        }
+        : null,
+      candidates: scored.map(candidate => {
+        const physicalFeatures = candidate.physicalFeatures || {};
+        return {
+          stationId: candidate.station?.stationId || null,
+          brand: candidate.station?.brand || null,
+          alongTrack: candidate.alongTrack,
+          crossTrack: candidate.crossTrack,
+          signedCrossTrack: candidate.signedCrossTrack,
+          accessPenaltyPrice: candidate.accessPenaltyPrice || 0,
+          netStationCost: candidate.netStationCost || 0,
+          coldStartScore: candidate.coldStartScore || 0,
+          valueScore: candidate.valueScore || 0,
+          intentEvidence: candidate.intentEvidence || 0,
+          physicalIntentScore: candidate.physicalIntentScore || 0,
+          destinationProbability: candidate.destinationProbability || 0,
+          effectiveDestinationProbability: candidate.effectiveDestinationProbability || 0,
+          historyStrength: candidate.historyStrength || 0,
+          genericHistoryScore: candidate.genericHistoryScore || 0,
+          contextualHistoryScore: candidate.contextualHistoryScore || 0,
+          historyContextMatch: candidate.historyContextMatch || 0,
+          visitShare: candidate.visitShare || 0,
+          observedConversionRate: candidate.observedConversionRate || 0,
+          contextualObservedConversionRate: candidate.contextualObservedConversionRate || 0,
+          exposureContextMatch: candidate.exposureContextMatch || 0,
+          observedSkipScore: candidate.observedSkipScore || 0,
+          brandAffinity: candidate.brandAffinity || 0,
+          pathScore: Number(physicalFeatures.pathScore) || 0,
+          captureScore: Number(physicalFeatures.captureScore) || 0,
+          approachScore: Number(physicalFeatures.approachScore) || 0,
+          decelScore: Number(physicalFeatures.decelScore) || 0,
+          turnInCommitmentScore: computeTurnInCommitmentScore(candidate),
+          valueRank: rankCandidate(rankedByValueScore, candidate, 'valueScore'),
+          intentRank: rankCandidate(rankedByIntentScore, candidate, 'intentEvidence'),
+          destinationRank: rankCandidate(rankedByDestination, candidate, 'effectiveDestinationProbability'),
+          destinationMarginToLeader: computeLeaderMargin(rankedByDestination, candidate, 'effectiveDestinationProbability'),
+          intentMarginToLeader: computeLeaderMargin(rankedByIntentScore, candidate, 'intentEvidence'),
+          valueMarginToLeader: computeLeaderMargin(rankedByValueScore, candidate, 'valueScore'),
+          predictedDefaultAligned: Boolean(
+            predictedDefault?.station?.stationId &&
+            predictedDefault.station.stationId === candidate.station?.stationId
+          ),
+          predictedDefaultGap: predictedDefault
+            ? ((predictedDefault.effectiveDestinationProbability || 0) - (candidate.effectiveDestinationProbability || 0))
+            : 0,
+          intentLeaderAligned: Boolean(
+            intentLeader?.station?.stationId &&
+            intentLeader.station.stationId === candidate.station?.stationId
+          ),
+          valueLeaderAligned: Boolean(
+            valueLeader?.station?.stationId &&
+            valueLeader.station.stationId === candidate.station?.stationId
+          ),
+          selected: Boolean(
+            selectedCandidate?.station?.stationId &&
+            selectedCandidate.station.stationId === candidate.station?.stationId
+          ),
+        };
+      }),
+    };
+  }
+
   function buildMlFeatureEnvelope(candidate, recommendation) {
     if (!candidate) {
       return {
@@ -1231,8 +1342,14 @@ function recommend(window, profile, stations, options = {}) {
       ...recommendation,
       fuelNeedScore,
       mlFeatures: buildMlFeatureEnvelope(candidate, recommendation),
+      decisionSnapshot: buildDecisionSnapshot(candidate, recommendation),
       presentation: buildPresentationPlan(window, recommendation, candidate, opts),
     };
+  }
+
+  const baseDecisionSnapshot = buildDecisionSnapshot();
+  if (typeof opts.onDecisionSnapshot === 'function') {
+    opts.onDecisionSnapshot(baseDecisionSnapshot);
   }
 
   // If we have a strong predicted default AND there's a cheaper one on the

@@ -197,7 +197,11 @@ function createPredictiveFuelingLiveActivitySim({
     tickIntervalMs = 1000,
 } = {}) {
     let scenario = SIM_SCENARIOS.find(s => s.id === scenarioId) || SIM_SCENARIOS[0];
-    let instance = null;
+    // True once we've asked notifications.js to start an activity for
+    // this sim run. We don't hold an instance handle — notifications.js
+    // is the singleton owner (see its `trackedLiveActivityInstance`).
+    // This flag is purely "should tick() push updates or skip?".
+    let hasStartedActivity = false;
     let intervalHandle = null;
     let startTimestamp = 0;
     let lastState = null;
@@ -226,8 +230,13 @@ function createPredictiveFuelingLiveActivitySim({
         const clamped = Math.max(0, Math.min(1, progress));
         const props = computePropsForProgress(scenario, clamped);
 
-        if (instance) {
-            getNotifications().updatePredictiveLiveActivity(instance, props);
+        if (hasStartedActivity) {
+            const notifications = getNotifications();
+            // Prefer the tracked-singleton path — notifications.js owns
+            // the instance handle so we don't have to.
+            if (typeof notifications.updateTrackedLiveActivity === 'function') {
+                notifications.updateTrackedLiveActivity(props);
+            }
         }
         emitState(props);
 
@@ -252,15 +261,16 @@ function createPredictiveFuelingLiveActivitySim({
     }
 
     /**
-     * Start the simulation. If the activity isn't running yet we create
-     * one; otherwise we just reset the clock and keep pushing updates to
-     * the existing instance.
+     * Start the simulation. Awaits the notifications.js singleton
+     * guarantee — any pre-existing activity (from the runtime, the
+     * legacy dev button, a prior sim run) is ended before the new one
+     * is started.
      *
      * Also wires up the Live Activity button listener: Navigate opens
      * Maps with directions to the scenario's station, Cancel stops the
      * sim and ends the activity.
      */
-    function start(nextScenarioId) {
+    async function start(nextScenarioId) {
         if (nextScenarioId) {
             const next = SIM_SCENARIOS.find(s => s.id === nextScenarioId);
             if (next) scenario = next;
@@ -272,11 +282,8 @@ function createPredictiveFuelingLiveActivitySim({
 
         const initialProps = computePropsForProgress(scenario, 0);
         const notifications = getNotifications();
-        if (!instance) {
-            instance = notifications.startPredictiveLiveActivity(initialProps);
-        } else {
-            notifications.updatePredictiveLiveActivity(instance, initialProps);
-        }
+        await notifications.startPredictiveLiveActivity(initialProps);
+        hasStartedActivity = true;
         emitState(initialProps);
 
         // Tear down any stale listener from a previous run before wiring
@@ -306,6 +313,10 @@ function createPredictiveFuelingLiveActivitySim({
      * Stop the simulation AND end the Live Activity. Used when the user
      * taps "End Simulation" in the dev screen, or when the Cancel button
      * inside the Live Activity fires.
+     *
+     * Fire-and-forget on the end — `stop()` is called from button
+     * handlers and shouldn't block the UI on a native teardown round
+     * trip. notifications.js handles errors internally.
      */
     function stop() {
         stopTicking();
@@ -314,9 +325,15 @@ function createPredictiveFuelingLiveActivitySim({
             try { removeInteractionListener(); } catch (err) { /* noop */ }
             removeInteractionListener = null;
         }
-        if (instance) {
-            getNotifications().endLiveActivity(instance);
-            instance = null;
+        if (hasStartedActivity) {
+            const notifications = getNotifications();
+            if (typeof notifications.endAllLiveActivities === 'function') {
+                notifications.endAllLiveActivities();
+            } else if (typeof notifications.endLiveActivity === 'function') {
+                // Legacy fallback path for older stubs.
+                notifications.endLiveActivity(null);
+            }
+            hasStartedActivity = false;
         }
         lastState = null;
     }

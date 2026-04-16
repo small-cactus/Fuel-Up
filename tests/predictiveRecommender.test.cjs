@@ -354,3 +354,78 @@ test('stateful recommender holds a pending recommendation until a traffic-light 
   assert.equal(emitted.stationId, 'easy-right-near-cheap');
   assert.equal(emitted.presentation.preferredSurface, 'live_activity');
 });
+
+test('recommend exports a per-station decision snapshot with native comparison signals', () => {
+  const timestampMs = new Date('2026-04-14T08:30:00-04:00').getTime();
+  const window = buildEastboundWindow(timestampMs);
+  const stations = [
+    station('default-shell', 39.74, -104.965, 3.59, 'Shell'),
+    station('hard-left-cheap', 39.7414, -104.990, 3.19, 'Budget'),
+    station('easy-right-near-cheap', 39.7392, -104.989, 3.22, 'King Soopers'),
+  ];
+  const profile = {
+    preferredBrands: ['Shell'],
+    brandLoyalty: 0.6,
+    visitHistory: [habitVisit('default-shell', timestampMs)],
+    fillUpHistory: [],
+  };
+
+  const result = recommend(window, profile, stations, {
+    triggerThreshold: 0.5,
+    urgency: 0.9,
+    minTripFuelIntentColdStart: 0.2,
+    minTripFuelIntentWithHistory: 0.2,
+  });
+
+  assert.ok(result?.decisionSnapshot, 'expected recommendation to include decisionSnapshot');
+  assert.equal(result.decisionSnapshot.predictedDefaultStationId, 'default-shell');
+  assert.equal(result.decisionSnapshot.recommendation.stationId, result.stationId);
+  assert.ok(result.decisionSnapshot.candidateCount >= 2);
+
+  const selectedCandidate = result.decisionSnapshot.candidates.find(candidate => candidate.selected);
+  assert.ok(selectedCandidate, 'expected selected candidate to be marked in decisionSnapshot');
+  assert.equal(selectedCandidate.stationId, result.stationId);
+  assert.equal(typeof selectedCandidate.destinationProbability, 'number');
+  assert.equal(typeof selectedCandidate.intentEvidence, 'number');
+  assert.equal(typeof selectedCandidate.valueScore, 'number');
+  assert.equal(typeof selectedCandidate.observedSkipScore, 'number');
+  assert.equal(typeof selectedCandidate.predictedDefaultAligned, 'boolean');
+});
+
+test('stateful recommender emits decision snapshots before trigger gating', () => {
+  const timestampMs = new Date('2026-04-14T08:35:00-04:00').getTime();
+  const snapshots = [];
+  const rec = createPredictiveRecommender({
+    cooldownMs: 60_000,
+    triggerThreshold: 0.45,
+    minTripFuelIntentColdStart: 0.18,
+    minTripFuelIntentWithHistory: 0.18,
+    onDecisionSnapshot: snapshot => snapshots.push(snapshot),
+  });
+  const stations = [
+    station('default-shell', 39.74, -104.975, 3.59, 'Shell'),
+    station('easy-right-near-cheap', 39.7392, -104.972, 3.22, 'King Soopers'),
+  ];
+  const profile = {
+    preferredBrands: ['Shell'],
+    brandLoyalty: 0.6,
+    visitHistory: [habitVisit('default-shell', timestampMs)],
+    fillUpHistory: [
+      { timestamp: timestampMs - 4 * 86400000, odometer: 15000, gallons: 11.5, pricePerGallon: 3.29 },
+    ],
+    estimatedMilesSinceLastFill: 250,
+    typicalFillUpIntervalMiles: 280,
+  };
+  rec.setStations(stations);
+  rec.setProfile(profile);
+
+  for (const sample of buildStoplightWindow(timestampMs).slice(0, 7)) {
+    rec.pushLocation(sample);
+  }
+
+  assert.ok(snapshots.length > 0, 'expected decision snapshots to be emitted');
+  const lastSnapshot = snapshots[snapshots.length - 1];
+  assert.ok(lastSnapshot.candidates.length >= 1);
+  assert.equal(typeof lastSnapshot.tripFuelIntentScore, 'number');
+  assert.equal(typeof lastSnapshot.candidates[0].destinationRank, 'number');
+});

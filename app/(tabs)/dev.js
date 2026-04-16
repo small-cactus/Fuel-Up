@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/ThemeContext';
@@ -52,6 +52,7 @@ const TOP_CANOPY_HEIGHT = 44;
 
 export default function DevStatsScreen() {
     const insets = useSafeAreaInsets();
+    const router = useRouter();
     const { isDark, themeColors } = useTheme();
     const {
         manualLocationOverride,
@@ -475,16 +476,25 @@ export default function DevStatsScreen() {
         }
     };
 
-    const handleStartLiveActivity = () => {
-        const instance = startLiveActivity('Wawa - Route 73', '$2.99');
-        if (instance) {
-            setLiveActivityInstance(instance);
-            Alert.alert('Started', 'Live Activity started. Swipe home to inspect it.');
+    const handleStartLiveActivity = async () => {
+        try {
+            const instance = await startLiveActivity('Wawa - Route 73', '$2.99');
+            if (instance) {
+                setLiveActivityInstance(instance);
+                Alert.alert('Started', 'Live Activity started. Swipe home to inspect it.');
+                return;
+            }
+        } catch (error) {
+            Alert.alert('Error', error?.message || 'Failed to start the Live Activity.');
             return;
         }
 
         Alert.alert('Error', 'Could not start the activity. Make sure this is running in a supported iOS build.');
     };
+
+    const handleOpenLiveActivityDesigner = useCallback(() => {
+        router.push('/live-activity-designer');
+    }, [router]);
 
     const handleUpdateLiveActivity = () => {
         if (!liveActivityInstance) {
@@ -677,6 +687,7 @@ export default function DevStatsScreen() {
         onStartLiveActivity: handleStartLiveActivity,
         onUpdateLiveActivity: handleUpdateLiveActivity,
         onEndLiveActivity: handleEndLiveActivity,
+        onOpenLiveActivityDesigner: handleOpenLiveActivityDesigner,
     };
 
     const liveActivitySim = {

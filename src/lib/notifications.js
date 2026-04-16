@@ -211,6 +211,33 @@ export async function schedulePredictiveRecommendationNotification({
 // but the layout itself takes rich "predictive fueling" props — station
 // name, distance, ETA, progress, per-gallon savings, and so on.
 //
+// ──────────────────────────────────────────────────────────────────────
+// Single-instance guarantee
+// ──────────────────────────────────────────────────────────────────────
+//
+// iOS's ActivityKit does NOT enforce one-activity-per-type — calling
+// `Activity.request()` twice happily creates two. We have three call
+// sites that start activities (predictive runtime, drive simulator, dev
+// screen legacy button), and if any of them lose track of their handle,
+// we'd end up with a stale activity + a fresh one side by side.
+//
+// This module is the single authoritative owner of activity lifetime:
+//
+//   1. `trackedLiveActivityInstance` holds the one and only instance we
+//      care about — the most recent successful start.
+//   2. Before every start, `endAllLiveActivityInstances()` ends the
+//      tracked instance AND every stray activity `getInstances()` hands
+//      back (defensive: catches instances left over from a crashed
+//      process, a previous runtime, or a race).
+//   3. `pendingStartPromise` serializes concurrent start() calls. Two
+//      back-to-back Start buttons are queued — the second waits for the
+//      first to finish (including its dedup) before running.
+//
+// Callers (runtime, sim, dev screen, designer) NO LONGER need to track
+// their own instance handle. They get back a LiveActivity object for
+// convenience, but all the update/end paths go through the tracked
+// singleton via `updateTrackedLiveActivity` / `endAllLiveActivities`.
+//
 // We expose two APIs:
 //
 //   startLiveActivity / updateLiveActivity — legacy, accepts just a
@@ -220,11 +247,10 @@ export async function schedulePredictiveRecommendationNotification({
 //   startPredictiveLiveActivity / updatePredictiveLiveActivity — the
 //     richer API used by the drive-simulation section and (eventually)
 //     by the real recommender to paint the full layout.
-//
-// Both talk to the same native widget target — there is only one activity
-// type and iOS only supports one active instance per user request.
 
 let cachedPriceDropActivity = null;
+let trackedLiveActivityInstance = null;
+let pendingStartPromise = Promise.resolve(undefined);
 
 function isMissingLiveActivityError(error) {
     const serializedError = [
@@ -307,30 +333,147 @@ function buildPredictiveProps(partial) {
 }
 
 /**
+ * Ends every Live Activity instance this module knows about — the
+ * tracked singleton AND every stray the factory hands back via
+ * `getInstances()`. Called before every start and exposed publicly as
+ * `endAllLiveActivities()` below.
+ *
+ * Never throws. Errors are logged and counted but never propagated —
+ * the whole point is to be safe to call from any code path (including
+ * start) without risking a cascading failure.
+ *
+ * @returns {Promise<{ ended: number, errors: number }>}
+ */
+async function endAllLiveActivityInstances() {
+    if (Platform.OS !== 'ios') {
+        return { ended: 0, errors: 0 };
+    }
+
+    const PriceDropActivity = getPriceDropActivity();
+    if (!PriceDropActivity) {
+        trackedLiveActivityInstance = null;
+        return { ended: 0, errors: 0 };
+    }
+
+    // Collect into a Set so a tracked instance that also shows up in
+    // getInstances() doesn't get .end()'d twice (the second call would
+    // hit the "Can't find live activity with id" path, which is already
+    // handled — but the Set keeps the logs clean).
+    const instances = new Set();
+    if (trackedLiveActivityInstance) {
+        instances.add(trackedLiveActivityInstance);
+    }
+
+    if (typeof PriceDropActivity.getInstances === 'function') {
+        try {
+            const factoryInstances = PriceDropActivity.getInstances() || [];
+            for (const instance of factoryInstances) {
+                if (instance) instances.add(instance);
+            }
+        } catch (error) {
+            // getInstances() is best-effort — if it fails we still end
+            // the tracked instance below and let the start proceed.
+            console.warn(
+                'Failed to enumerate Live Activity instances; falling back to tracked instance only:',
+                error?.message || error,
+            );
+        }
+    }
+
+    let ended = 0;
+    let errors = 0;
+
+    for (const instance of instances) {
+        try {
+            const result = instance.end();
+            // LiveActivity.end() returns a Promise; await it so we know
+            // when the native-side teardown has landed before we start
+            // a replacement.
+            if (result && typeof result.then === 'function') {
+                await result;
+            }
+            ended += 1;
+        } catch (error) {
+            if (isMissingLiveActivityError(error)) {
+                // Already gone — treat as success; that's the desired
+                // state anyway.
+                ended += 1;
+                continue;
+            }
+            errors += 1;
+            console.warn('Failed to end Live Activity instance:', error?.message || error);
+        }
+    }
+
+    trackedLiveActivityInstance = null;
+    return { ended, errors };
+}
+
+/**
+ * Public: end every Live Activity this app has started (or that iOS
+ * reports as still alive). Safe to call from any thread, on any
+ * platform, at any time. No-op on non-iOS.
+ *
+ * @returns {Promise<{ ended: number, errors: number }>}
+ */
+export async function endAllLiveActivities() {
+    if (Platform.OS !== 'ios') {
+        return { ended: 0, errors: 0 };
+    }
+    return endAllLiveActivityInstances();
+}
+
+/**
  * Starts a Live Activity with rich predictive-fueling props.
  *
+ * Before starting, ALL existing activities are ended — the tracked
+ * singleton plus any strays the factory reports. Concurrent start()
+ * calls are serialized through `pendingStartPromise` so a second
+ * caller doesn't race ahead and accidentally end its own fresh start.
+ *
  * @param {object} props — Complete predictive props with real values.
- * @returns {object|undefined} The Live Activity instance, or undefined on
- *   non-iOS platforms, missing data, or if the widget module couldn't load.
+ * @returns {Promise<object|undefined>} The Live Activity instance, or
+ *   undefined on non-iOS platforms, missing data, or if the widget
+ *   module couldn't load.
  */
 export function startPredictiveLiveActivity(props) {
+    const next = pendingStartPromise.then(() => startPredictiveLiveActivityInternal(props));
+    // Swallow rejections on the chained tail so the next queued start
+    // is never skipped by an earlier failure. The caller still sees
+    // the original promise (`next`) with any rejection intact.
+    pendingStartPromise = next.catch(() => undefined);
+    return next;
+}
+
+async function startPredictiveLiveActivityInternal(props) {
     if (Platform.OS !== 'ios') return undefined;
     const PriceDropActivity = getPriceDropActivity();
     if (!PriceDropActivity) return undefined;
 
     const fullProps = buildPredictiveProps(props || {});
 
+    // Flush anything that's still alive — tracked instance, strays
+    // from a previous process, leftovers from a crashed runtime.
+    await endAllLiveActivityInstances();
+
     try {
         console.log('Starting predictive Live Activity:', fullProps);
-        return PriceDropActivity.start(fullProps);
+        const instance = PriceDropActivity.start(fullProps);
+        trackedLiveActivityInstance = instance;
+        return instance;
     } catch (error) {
         console.error('Core error starting predictive Live Activity:', error);
+        trackedLiveActivityInstance = null;
         return undefined;
     }
 }
 
 /**
  * Updates an active predictive Live Activity with new props.
+ *
+ * Kept for callers that still hold an instance handle; new code should
+ * prefer `updateTrackedLiveActivity` which uses the singleton tracked
+ * by this module.
  *
  * @param {object} instance — The instance returned by start.
  * @param {object} props — Complete predictive props with real values.
@@ -353,10 +496,29 @@ export function updatePredictiveLiveActivity(instance, props) {
 }
 
 /**
+ * Updates the tracked Live Activity singleton, if one is alive. Returns
+ * true if the update was dispatched, false if there's nothing to update
+ * (caller should fall through to `startPredictiveLiveActivity`).
+ *
+ * This is the preferred update path — callers don't need to hold an
+ * instance handle. The tracked instance is owned by notifications.js.
+ *
+ * @param {object} props — Complete predictive props with real values.
+ * @returns {boolean}
+ */
+export function updateTrackedLiveActivity(props) {
+    if (Platform.OS !== 'ios') return false;
+    if (!trackedLiveActivityInstance) return false;
+
+    return updatePredictiveLiveActivity(trackedLiveActivityInstance, props);
+}
+
+/**
  * Legacy wrapper — starts the activity with just a station name and price.
  * All the other fields get safe defaults so the layout still renders.
  * @param {string} stationName
  * @param {string} price
+ * @returns {Promise<object|undefined>}
  */
 export function startLiveActivity(stationName, price) {
     return startPredictiveLiveActivity({
@@ -394,20 +556,16 @@ export function updateLiveActivity(instance, newPrice) {
 }
 
 /**
- * Ends an active Live Activity.
- * @param {object} instance
+ * Ends the active Live Activity. The `instance` parameter is retained
+ * for call-site compatibility but IGNORED — we end every activity
+ * this module knows about, tracked singleton plus any strays. Callers
+ * no longer need to hold a handle.
+ *
+ * @param {object} [_instance] — Ignored.
+ * @returns {Promise<{ ended: number, errors: number }>}
  */
-export function endLiveActivity(instance) {
-    if (Platform.OS !== 'ios' || !instance) return;
-
-    try {
-        instance.end();
-    } catch (error) {
-        if (isMissingLiveActivityError(error)) {
-            return;
-        }
-        console.error('Error ending Live Activity:', error);
-    }
+export function endLiveActivity(_instance) {
+    return endAllLiveActivities();
 }
 
 // ──────────────────────────────────────────────────────────────────────

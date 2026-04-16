@@ -443,6 +443,14 @@ function AppGate() {
                         sheetGrabberVisible: true,
                     }}
                 />
+                <Stack.Screen
+                    name="live-activity-designer"
+                    options={{
+                        headerShown: true,
+                        title: 'Live Activity Designer',
+                        presentation: 'card',
+                    }}
+                />
             </Stack>
             <ProgressiveBlurReveal
                 key={`root-reveal-${rootRevealVersion}`}

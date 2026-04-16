@@ -1162,6 +1162,11 @@ export default function NativeDevForm({
                         label="End Activity"
                         modifiers={notifications.liveActivityActive ? [] : [disabled(true)]}
                     />
+                    <Button
+                        systemImage="paintpalette.fill"
+                        onPress={ensureFn(notifications.onOpenLiveActivityDesigner)}
+                        label="Open Design Previewer"
+                    />
                 </Section>
 
                 {/* ─────────── Predictive Drive Simulation ───────────
