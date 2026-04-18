@@ -86,6 +86,10 @@ export function areClusterMarkerOverlayPropsEqual(previousProps, nextProps) {
     return false;
   }
 
+  if (previousProps.useOnboardingColors !== nextProps.useOnboardingColors) {
+    return false;
+  }
+
   return !didClusterActiveSelectionChange(
     nextProps.cluster,
     previousProps.activeIndex,

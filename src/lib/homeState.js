@@ -243,6 +243,55 @@ export function shouldDelayStationMarkerSuppression({
     return new Set(initialSuppressionStationIds || []).has(String(stationId));
 }
 
+export function buildPausedSuppressedStationIds({
+    currentEffectiveSuppressedStationIds,
+    rawSuppressedOverlapStationIds,
+    visibleStationIds,
+    activeStationId = null,
+}) {
+    const currentSet = currentEffectiveSuppressedStationIds || new Set();
+    const rawSet = rawSuppressedOverlapStationIds || new Set();
+    const visibleSet = visibleStationIds || new Set();
+    const normalizedActiveStationId = activeStationId == null
+        ? null
+        : String(activeStationId);
+
+    // Seed case: nothing suppressed yet — first start. Use the raw
+    // overlap set directly. The active station is already excluded
+    // from the raw set by buildSuppressedOverlapStationIds, so no
+    // extra work is needed here.
+    if (currentSet.size === 0 && rawSet.size > 0) {
+        return rawSet;
+    }
+
+    if (currentSet.size === 0) {
+        return currentSet;
+    }
+
+    // Prune case: keep only stations that still exist in the fresh
+    // dataset so dead IDs don't accumulate.
+    const nextSuppressedIds = new Set();
+    currentSet.forEach(stationId => {
+        if (visibleSet.has(String(stationId))) {
+            nextSuppressedIds.add(stationId);
+        }
+    });
+
+    // Active-station reveal: if the user tapped/scrolled to a station
+    // that is not genuinely overlapping in the current raw pass, remove
+    // it from suppression even during the pause. Without this, tapping
+    // a station while new data is settling leaves it suppressed and
+    // invisible until the pause releases.
+    if (
+        normalizedActiveStationId != null &&
+        !rawSet.has(normalizedActiveStationId)
+    ) {
+        nextSuppressedIds.delete(normalizedActiveStationId);
+    }
+
+    return nextSuppressedIds;
+}
+
 export function resolveHomeCardIndexFromOffset({
     offsetX,
     itemWidth,

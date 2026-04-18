@@ -80,3 +80,82 @@ test('updateProfileMileage does not invent an odometer baseline when none exists
   assert.equal(updated.odometerMiles, null);
   assert.equal(updated.estimatedMilesSinceLastFill, 14.6);
 });
+
+test('normalizePredictiveFuelingProfile preserves contextual visit/exposure history and route station habits', () => {
+  const profile = normalizePredictiveFuelingProfile({
+    visitHistory: [
+      {
+        stationId: 'shell-1',
+        stationName: 'Shell Downtown',
+        brand: 'Shell',
+        visitCount: 3,
+        lastVisitMs: 1_700_000_000_000,
+        visitTimestamps: [1_700_000_000_000, 1_700_010_000_000],
+        contextCounts: {
+          total: 3,
+          city: 2,
+          weekday: 2,
+          evening: 1,
+        },
+      },
+    ],
+    exposureHistory: [
+      {
+        stationId: 'shell-1',
+        exposureCount: 7,
+        lastExposureMs: 1_700_020_000_000,
+        contextCounts: {
+          total: 7,
+          city: 5,
+          weekday: 6,
+          evening: 2,
+        },
+      },
+    ],
+    routeStationHabits: {
+      'template:weekday-urban-commute': {
+        'shell-1': {
+          count: 4,
+          lastVisitMs: 1_700_030_000_000,
+        },
+      },
+    },
+    routeStationExposures: {
+      'template:weekday-urban-commute': {
+        'shell-1': {
+          count: 9,
+          lastExposureMs: 1_700_040_000_000,
+        },
+      },
+    },
+  });
+
+  assert.deepEqual(profile.visitHistory[0].contextCounts, {
+    total: 3,
+    city: 2,
+    weekday: 2,
+    evening: 1,
+  });
+  assert.deepEqual(profile.exposureHistory[0].contextCounts, {
+    total: 7,
+    city: 5,
+    weekday: 6,
+    evening: 2,
+  });
+  assert.deepEqual(profile.routeStationHabits, {
+    'template:weekday-urban-commute': {
+      'shell-1': {
+        count: 4,
+        lastVisitMs: 1_700_030_000_000,
+      },
+    },
+  });
+  assert.deepEqual(profile.routeStationExposures, {
+    'template:weekday-urban-commute': {
+      'shell-1': {
+        count: 9,
+        lastExposureMs: 1_700_040_000_000,
+      },
+    },
+  });
+});

@@ -36,20 +36,35 @@ const AnimatedText = Animated.createAnimatedComponent(Text);
 const BEST_PRICE_BLUE_LIGHT = '#007AFF';
 const BEST_PRICE_BLUE_DARK = '#11f050ff';
 const INACTIVE_TEXT_DARK = '#F5F7FA';
+const ONBOARDING_TINT_CHEAPEST = 'rgba(0, 255, 47, 0.3)';
+const ONBOARDING_TINT_EXPENSIVE = 'rgba(255, 25, 0, 0.3)';
 
-function PricePill({ quote, isActive, isBest, isDark, themeColors, animatedTextStyle, showDivider = false, plusCount = null, plusOpacity = 1, priceOpacity = 1 }) {
+function PricePill({ quote, isActive, isBest, isDark, themeColors, animatedTextStyle, showDivider = false, plusCount = null, plusOpacity = 1, priceOpacity = 1, useOnboardingColors = false }) {
   const inactiveIconTintColor = isDark ? '#D3D6DE' : '#888888';
   const inactiveTextColor = isDark ? INACTIVE_TEXT_DARK : '#888888';
   const bestTintColor = isDark ? BEST_PRICE_BLUE_DARK : BEST_PRICE_BLUE_LIGHT;
-  const iconTintColor = isBest
-    ? bestTintColor
-    : (isActive ? themeColors.text : inactiveIconTintColor);
-  const textColor = isBest
-    ? bestTintColor
-    : (isActive ? themeColors.text : inactiveTextColor);
+
+  let iconTintColor;
+  let textColor;
+  let glassTintColor;
+
+  if (useOnboardingColors) {
+    const plainColor = isDark ? '#FFFFFF' : '#000000';
+    iconTintColor = plainColor;
+    textColor = plainColor;
+    glassTintColor = isBest ? ONBOARDING_TINT_CHEAPEST : ONBOARDING_TINT_EXPENSIVE;
+  } else {
+    iconTintColor = isBest
+      ? bestTintColor
+      : (isActive ? themeColors.text : inactiveIconTintColor);
+    textColor = isBest
+      ? bestTintColor
+      : (isActive ? themeColors.text : inactiveTextColor);
+    glassTintColor = undefined;
+  }
 
   return (
-    <AnimatedLiquidGlassView effect="clear" style={styles.pillShell}>
+    <AnimatedLiquidGlassView effect="clear" tintColor={glassTintColor} style={styles.pillShell}>
       {plusCount != null ? (
         <Animated.View style={[styles.rowItem, { opacity: plusOpacity }]}>
           {showDivider ? (
@@ -89,6 +104,7 @@ function ClusterMarkerOverlay({
   isDebugRecording = false,
   mapRegion,
   isMapMoving = false,
+  useOnboardingColors = false,
 }) {
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
   const previousClusterRef = useRef(null);
@@ -181,6 +197,10 @@ function ClusterMarkerOverlay({
   }, [splitMover]);
 
   const animatedTextStyle = useAnimatedStyle(() => {
+    if (useOnboardingColors) {
+      return { color: isDark ? '#FFFFFF' : '#000000' };
+    }
+
     if (primaryQuote.originalIndex === 0) {
       return { color: isDark ? BEST_PRICE_BLUE_DARK : BEST_PRICE_BLUE_LIGHT };
     }
@@ -190,7 +210,7 @@ function ClusterMarkerOverlay({
     const inactiveTextColor = isDark ? INACTIVE_TEXT_DARK : '#888888';
     const color = interpolateColor(scrollX.value, inputRange, [inactiveTextColor, themeColors.text, inactiveTextColor]);
     return { color };
-  }, [isDark, itemWidth, primaryQuote.originalIndex, scrollX, themeColors.text]);
+  }, [isDark, itemWidth, primaryQuote.originalIndex, scrollX, themeColors.text, useOnboardingColors]);
 
   const suppressionStyle = useAnimatedStyle(() => ({
     transform: [
@@ -638,6 +658,7 @@ function ClusterMarkerOverlay({
               themeColors={themeColors}
               animatedTextStyle={animatedTextStyle}
               priceOpacity={1}
+              useOnboardingColors={useOnboardingColors}
             />
           </Animated.View>
         </Animated.View>
@@ -664,6 +685,7 @@ function ClusterMarkerOverlay({
               themeColors={themeColors}
               animatedTextStyle={animatedTextStyle}
               priceOpacity={1}
+              useOnboardingColors={useOnboardingColors}
             />
           </Animated.View>
         ))}
@@ -690,6 +712,7 @@ function ClusterMarkerOverlay({
               themeColors={themeColors}
               animatedTextStyle={animatedTextStyle}
               priceOpacity={1}
+              useOnboardingColors={useOnboardingColors}
             />
           </Animated.View>
         ))}
@@ -716,6 +739,7 @@ function ClusterMarkerOverlay({
               animatedTextStyle={animatedTextStyle}
               plusOpacity={1}
               priceOpacity={0}
+              useOnboardingColors={useOnboardingColors}
             />
           </Animated.View>
         ) : null}
@@ -730,6 +754,7 @@ function ClusterMarkerOverlay({
               themeColors={themeColors}
               animatedTextStyle={animatedTextStyle}
               priceOpacity={1}
+              useOnboardingColors={useOnboardingColors}
             />
           </Animated.View>
         ) : null}
@@ -745,6 +770,7 @@ function ClusterMarkerOverlay({
               isDark={isDark}
               themeColors={themeColors}
               animatedTextStyle={animatedTextStyle}
+              useOnboardingColors={useOnboardingColors}
               plusOpacity={Math.max(0, 1 - splitProgress.value * 1.6)}
               priceOpacity={Math.max(0, Math.min(1, (splitProgress.value - 0.65) / 0.35))}
             />

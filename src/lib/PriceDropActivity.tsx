@@ -89,12 +89,15 @@ import {
     ZStack,
 } from '@expo/ui/swift-ui';
 import {
+    background,
     buttonStyle,
     font,
     foregroundStyle,
     frame,
+    lineLimit,
     monospacedDigit,
     padding,
+    shapes,
 } from '@expo/ui/swift-ui/modifiers';
 import { createLiveActivity } from 'expo-widgets';
 
@@ -193,23 +196,26 @@ const PriceDropActivity = (props: PredictiveFuelingActivityProps) => {
 
     // ── Action buttons ──
     //
-    // Using the native `label` + `systemImage` props instead of custom
-    // children (ZStack + RoundedRectangle). The widget extension's
-    // DynamicView.swift render method silently swallows errors from the
-    // `Children()` path and returns EmptyView, which made the hand-drawn
-    // buttons invisible. The `label` prop takes the reliable Text/Label
-    // rendering path in LiveActivityButtonView.swift and always renders.
+    // Uses `label` + `systemImage` props (NOT custom children) because
+    // the widget extension's DynamicView.swift silently swallows errors
+    // from the `Children()` path.
     //
-    // `borderedProminent` gives a filled, tinted pill — the native look
-    // for Live Activity action buttons.
+    // `buttonStyle('plain')` strips the default pill chrome. We draw
+    // the rectangle ourselves via `background(color, shape)` +
+    // `frame(maxWidth)` so the buttons fill the parent HStack and
+    // look like flat, full-width rectangular tiles.
     const navigateButton = (
         <Button
             target="navigate"
             systemImage="location.north.fill"
             label="Navigate"
             modifiers={[
-                buttonStyle('borderedProminent'),
+                buttonStyle('plain'),
+                font({ size: 17, weight: 'semibold', design: 'rounded' }),
                 foregroundStyle('#FFFFFF'),
+                padding({ vertical: 14 }),
+                frame({ maxWidth: 999999 }),
+                background(ACTION_BLUE, shapes.roundedRectangle({ cornerRadius: 14 })),
             ]}
         />
     );
@@ -218,9 +224,13 @@ const PriceDropActivity = (props: PredictiveFuelingActivityProps) => {
         <Button
             target="cancel"
             label="Cancel"
-            role="destructive"
             modifiers={[
-                buttonStyle('bordered'),
+                buttonStyle('plain'),
+                font({ size: 17, weight: 'semibold', design: 'rounded' }),
+                foregroundStyle('#FFFFFF'),
+                padding({ vertical: 14 }),
+                frame({ maxWidth: 999999 }),
+                background(ACTION_RED, shapes.roundedRectangle({ cornerRadius: 14 })),
             ]}
         />
     );
@@ -334,29 +344,21 @@ const PriceDropActivity = (props: PredictiveFuelingActivityProps) => {
                 alignment="trailing"
                 spacing={2}
             >
-                <HStack spacing={1} alignment="lastTextBaseline">
-                    <Text
-                        modifiers={[
-                            font({ size: 14, weight: 'semibold', design: 'rounded' }),
-                            foregroundStyle(accent),
-                        ]}
-                    >
-                        SAVE $
-                    </Text>
-                    <Text
-                        modifiers={[
-                            font({ size: 26, weight: 'bold', design: 'rounded' }),
-                            monospacedDigit(),
-                            foregroundStyle(accent),
-                        ]}
-                    >
-                        {totalSavingsLabel}
-                    </Text>
-                </HStack>
+                <Text
+                    modifiers={[
+                        font({ size: 20, weight: 'bold', design: 'rounded' }),
+                        monospacedDigit(),
+                        foregroundStyle(accent),
+                        lineLimit(1),
+                    ]}
+                >
+                    {'Save $' + totalSavingsLabel}
+                </Text>
                 <Text
                     modifiers={[
                         font({ size: 11, weight: 'medium' }),
                         foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
+                        lineLimit(1),
                     ]}
                 >
                     at {props.stationName}
@@ -388,16 +390,24 @@ const PriceDropActivity = (props: PredictiveFuelingActivityProps) => {
                         systemImage="location.north.fill"
                         label="Navigate"
                         modifiers={[
-                            buttonStyle('borderedProminent'),
+                            buttonStyle('plain'),
+                            font({ size: 15, weight: 'semibold', design: 'rounded' }),
                             foregroundStyle('#FFFFFF'),
+                            padding({ vertical: 12 }),
+                            frame({ maxWidth: 999999 }),
+                            background(ACTION_BLUE, shapes.roundedRectangle({ cornerRadius: 12 })),
                         ]}
                     />
                     <Button
                         target="cancel"
                         label="Cancel"
-                        role="destructive"
                         modifiers={[
-                            buttonStyle('bordered'),
+                            buttonStyle('plain'),
+                            font({ size: 15, weight: 'semibold', design: 'rounded' }),
+                            foregroundStyle('#FFFFFF'),
+                            padding({ vertical: 12 }),
+                            frame({ maxWidth: 999999 }),
+                            background(ACTION_RED, shapes.roundedRectangle({ cornerRadius: 12 })),
                         ]}
                     />
                 </HStack>

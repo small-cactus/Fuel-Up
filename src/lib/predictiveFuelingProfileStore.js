@@ -12,6 +12,9 @@ const DEFAULT_PROFILE = Object.freeze({
   priceWeight: 0.5,
   preferredGrade: 'regular',
   visitHistory: [],
+  exposureHistory: [],
+  routeStationHabits: {},
+  routeStationExposures: {},
   fillUpHistory: [],
   typicalFillUpIntervalMiles: 280,
   rushHourPatterns: {
@@ -48,6 +51,20 @@ function normalizeVisitTimestamps(values) {
     .slice(-24);
 }
 
+function normalizeContextCounts(counts) {
+  if (!counts || typeof counts !== 'object') {
+    return undefined;
+  }
+  const normalized = {};
+  for (const [key, value] of Object.entries(counts)) {
+    const numericValue = toFiniteNumber(value);
+    normalized[key] = numericValue === null
+      ? 0
+      : Math.max(0, numericValue);
+  }
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
+}
+
 function normalizeVisitHistoryEntry(entry) {
   const stationId = String(entry?.stationId || '').trim();
   if (!stationId) {
@@ -64,10 +81,90 @@ function normalizeVisitHistoryEntry(entry) {
     brand: String(entry?.brand || '').trim(),
     visitCount,
     lastVisitMs,
+    contextCounts: normalizeContextCounts(entry?.contextCounts),
     visitTimestamps: visitTimestamps.length > 0
       ? visitTimestamps
       : [lastVisitMs],
   };
+}
+
+function normalizeExposureHistoryEntry(entry) {
+  const stationId = String(entry?.stationId || '').trim();
+  if (!stationId) {
+    return null;
+  }
+
+  const exposureCount = Math.max(1, Math.round(toFiniteNumber(entry?.exposureCount) || 1));
+  const lastExposureMs = toFiniteNumber(entry?.lastExposureMs) || Date.now();
+
+  return {
+    stationId,
+    exposureCount,
+    lastExposureMs,
+    contextCounts: normalizeContextCounts(entry?.contextCounts),
+  };
+}
+
+function normalizeRouteStationHabits(routeStationHabits) {
+  if (!routeStationHabits || typeof routeStationHabits !== 'object') {
+    return {};
+  }
+  return Object.fromEntries(
+    Object.entries(routeStationHabits)
+      .map(([habitKey, habitMap]) => {
+        if (!habitMap || typeof habitMap !== 'object') {
+          return [habitKey, {}];
+        }
+        const normalizedHabitMap = Object.fromEntries(
+          Object.entries(habitMap)
+            .map(([stationId, value]) => {
+              const count = Math.max(0, Math.round(toFiniteNumber(value?.count) || 0));
+              const lastVisitMs = toFiniteNumber(value?.lastVisitMs);
+              if (!stationId || count <= 0 || lastVisitMs === null) {
+                return null;
+              }
+              return [String(stationId), {
+                count,
+                lastVisitMs,
+              }];
+            })
+            .filter(Boolean)
+        );
+        return [String(habitKey), normalizedHabitMap];
+      })
+      .filter(([, habitMap]) => Object.keys(habitMap).length > 0)
+  );
+}
+
+function normalizeRouteStationExposures(routeStationExposures) {
+  if (!routeStationExposures || typeof routeStationExposures !== 'object') {
+    return {};
+  }
+  return Object.fromEntries(
+    Object.entries(routeStationExposures)
+      .map(([habitKey, exposureMap]) => {
+        if (!exposureMap || typeof exposureMap !== 'object') {
+          return [habitKey, {}];
+        }
+        const normalizedExposureMap = Object.fromEntries(
+          Object.entries(exposureMap)
+            .map(([stationId, value]) => {
+              const count = Math.max(0, Math.round(toFiniteNumber(value?.count) || 0));
+              const lastExposureMs = toFiniteNumber(value?.lastExposureMs);
+              if (!stationId || count <= 0 || lastExposureMs === null) {
+                return null;
+              }
+              return [String(stationId), {
+                count,
+                lastExposureMs,
+              }];
+            })
+            .filter(Boolean)
+        );
+        return [String(habitKey), normalizedExposureMap];
+      })
+      .filter(([, exposureMap]) => Object.keys(exposureMap).length > 0)
+  );
 }
 
 function normalizeFillUpHistoryEntry(entry) {
@@ -92,6 +189,9 @@ function cloneDefaultProfile() {
     ...DEFAULT_PROFILE,
     preferredBrands: [],
     visitHistory: [],
+    exposureHistory: [],
+    routeStationHabits: {},
+    routeStationExposures: {},
     fillUpHistory: [],
     rushHourPatterns: {
       ...DEFAULT_PROFILE.rushHourPatterns,
@@ -133,6 +233,13 @@ function normalizePredictiveFuelingProfile(profile = {}) {
     .filter(Boolean)
     .sort((left, right) => right.lastVisitMs - left.lastVisitMs)
     .slice(0, 48);
+  nextProfile.exposureHistory = (Array.isArray(profile?.exposureHistory) ? profile.exposureHistory : [])
+    .map(normalizeExposureHistoryEntry)
+    .filter(Boolean)
+    .sort((left, right) => right.lastExposureMs - left.lastExposureMs)
+    .slice(0, 96);
+  nextProfile.routeStationHabits = normalizeRouteStationHabits(profile?.routeStationHabits);
+  nextProfile.routeStationExposures = normalizeRouteStationExposures(profile?.routeStationExposures);
   nextProfile.fillUpHistory = (Array.isArray(profile?.fillUpHistory) ? profile.fillUpHistory : [])
     .map(normalizeFillUpHistoryEntry)
     .sort((left, right) => left.timestamp - right.timestamp)

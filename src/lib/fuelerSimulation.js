@@ -16,8 +16,25 @@ const { routeToSamples } = require('./predictionMetrics.js');
 const { haversineDistanceMeters } = require('../screens/onboarding/predictive/simulationMath.cjs');
 const { inferTypicalIntervalMiles, estimateFuelState } = require('./rangeEstimator.js');
 const {
+  findCorridorCandidates,
+  DEFAULT_OPTIONS: RECOMMENDER_DEFAULT_OPTIONS,
+} = require('./predictiveRecommender.js');
+const {
+  computeHistoryScore,
+  computeContextualHistoryScore,
+  computeHistoryContextMatch,
+  computeVisitShare,
+  computeProfileHistoryConcentration,
+  computeObservedConversionRate,
+  computeContextualObservedConversionRate,
+  computeObservedSkipScore,
+  computeTimePatternScore,
+} = require('./userFuelingProfile.js');
+const { computeRouteHabitShareForKeys } = require('./routeHabit.js');
+const {
   GROUNDED_SIM_STATIONS,
   getGroundedRouteFixture,
+  getGroundedRouteStationContexts,
   getGroundedRouteStations,
 } = require('./groundedSimulationData.js');
 
@@ -118,22 +135,122 @@ function buildWaypointsFromGroundedRoute(template, fallbackPointCount = 5) {
   });
 }
 
-function getTemplateCandidateStationIds(template) {
+function getTemplateCandidateStationIds(template, options = {}) {
+  const preferExplicit = options.preferExplicit === true;
+  const explicitCandidateStationIds = Array.isArray(template?.candidateStationIds)
+    ? template.candidateStationIds.slice()
+    : [];
+  if (preferExplicit && explicitCandidateStationIds.length > 0) {
+    return explicitCandidateStationIds;
+  }
   const groundedStations = getGroundedRouteStations(template?.groundedRouteId || template?.id);
   if (groundedStations.length > 0) {
     return groundedStations.map(station => station.stationId);
   }
-  return Array.isArray(template?.candidateStationIds) ? template.candidateStationIds.slice() : [];
+  return explicitCandidateStationIds;
 }
 
-function getTemplateStationMarket(template) {
+function getTemplateStationMarket(template, options = {}) {
+  const preferExplicit = options.preferExplicit === true;
+  const explicitCandidateStationIds = Array.isArray(template?.candidateStationIds)
+    ? template.candidateStationIds.slice()
+    : [];
+  if (preferExplicit && explicitCandidateStationIds.length > 0) {
+    return explicitCandidateStationIds
+      .map(findStationById)
+      .filter(Boolean);
+  }
   const groundedStations = getGroundedRouteStations(template?.groundedRouteId || template?.id);
   if (groundedStations.length > 0) {
     return groundedStations;
   }
-  return getTemplateCandidateStationIds(template)
+  return explicitCandidateStationIds
     .map(findStationById)
     .filter(Boolean);
+}
+
+function getTemplateStationContexts(template) {
+  return getGroundedRouteStationContexts(template?.groundedRouteId || template?.id);
+}
+
+function estimateSimulatedRouteApproachPenalty(template, context, stationContext) {
+  const scenario = template?.scenario || 'city';
+  const trafficLevel = context?.trafficLevel || 'steady';
+  const peakLikeTraffic = trafficLevel === 'gridlock' || trafficLevel === 'congested';
+  const offsetMeters = Math.abs(Number(stationContext?.corridorDistanceMeters) || 0);
+  const isLeftSide = String(stationContext?.sideOfRoad || 'right') === 'left';
+
+  let penalty = 0;
+  if (isLeftSide) {
+    penalty += scenario === 'highway'
+      ? (peakLikeTraffic ? 0.07 : 0.04)
+      : (peakLikeTraffic ? 0.12 : 0.06);
+    if (peakLikeTraffic && offsetMeters >= 150) penalty += 0.05;
+    if (peakLikeTraffic && offsetMeters >= 230) penalty += 0.05;
+  } else if (offsetMeters <= 90) {
+    penalty -= 0.01;
+  }
+
+  if (scenario === 'highway' && offsetMeters >= 180) {
+    penalty += peakLikeTraffic ? 0.05 : 0.03;
+  }
+
+  return Math.max(0, Math.round(penalty * 1000) / 1000);
+}
+
+function computeSimulatedEffectiveRouteOffsetMeters(template, stationContext) {
+  const rawOffsetMeters = Math.abs(Number(stationContext?.corridorDistanceMeters) || 0);
+  if (!Number.isFinite(rawOffsetMeters) || rawOffsetMeters <= 0) {
+    return 0;
+  }
+  const scenario = template?.scenario || 'city';
+  const directKeepThreshold = scenario === 'highway'
+    ? 180
+    : (scenario === 'suburban' ? 160 : (scenario === 'city_grid' ? 120 : 140));
+  const maxEffectiveOffset = scenario === 'highway'
+    ? 250
+    : (scenario === 'suburban' ? 280 : (scenario === 'city_grid' ? 210 : 240));
+  const compressionScale = scenario === 'highway'
+    ? 5.2
+    : (scenario === 'suburban' ? 6.0 : (scenario === 'city_grid' ? 4.6 : 5.4));
+  if (rawOffsetMeters <= directKeepThreshold) {
+    return Math.round(rawOffsetMeters);
+  }
+  const compressedOffsetMeters = directKeepThreshold +
+    (Math.sqrt(rawOffsetMeters - directKeepThreshold) * compressionScale);
+  return Math.round(clamp(
+    compressedOffsetMeters,
+    directKeepThreshold,
+    maxEffectiveOffset,
+  ));
+}
+
+function buildSimulatedRouteApproach(template, decisionProgress, context, stationContext) {
+  const groundedRoute = getGroundedRouteFixture(template?.groundedRouteId || template?.id);
+  const fallbackDistanceMeters = Math.max(
+    Number(groundedRoute?.distanceMeters) || 0,
+    Number(stationContext?.alongTrackMeters) || 0,
+  );
+  const decisionAlongTrackMeters = Math.max(
+    0,
+    fallbackDistanceMeters * clamp(Number(decisionProgress) || 0, 0, 1),
+  );
+  const aheadDistanceMeters = Math.max(
+    0,
+    (Number(stationContext?.alongTrackMeters) || 0) - decisionAlongTrackMeters,
+  );
+
+  return {
+    isOnRoute: true,
+    alongRouteDistanceMeters: Math.round(aheadDistanceMeters),
+    offsetFromRouteMeters: computeSimulatedEffectiveRouteOffsetMeters(template, stationContext),
+    signedOffsetFromRouteMeters: Math.round(
+      computeSimulatedEffectiveRouteOffsetMeters(template, stationContext) *
+      ((Number(stationContext?.signedCorridorOffsetMeters) || 0) >= 0 ? 1 : -1)
+    ),
+    sideOfRoad: stationContext?.sideOfRoad || ((Number(stationContext?.signedCorridorOffsetMeters) || 0) >= 0 ? 'left' : 'right'),
+    maneuverPenaltyPrice: estimateSimulatedRouteApproachPenalty(template, context, stationContext),
+  };
 }
 
 function choose(rand, items) {
@@ -318,7 +435,7 @@ function buildHiddenIntentRoute({
 }) {
   const resolvedBlueprint = {
     ...blueprint,
-    candidateStationIds: getTemplateCandidateStationIds(blueprint),
+    candidateStationIds: getTemplateCandidateStationIds(blueprint, { preferExplicit: true }),
   };
   const baseWaypoints = buildWaypointsFromGroundedRoute(resolvedBlueprint, 5);
   const willStop = typeof willStopOverride === 'boolean'
@@ -361,8 +478,10 @@ function buildHiddenIntentRoute({
     destinationStationId,
     recommendationStationId,
     expectsTrigger: willStop,
+    willFuel: willStop,
     willStop,
     hiddenDecisionIndex,
+    actualFuelStopStationId: destinationStationId,
     targetStationId: destinationStationId,
     groundTruthOnly: {
       hiddenDecisionIndex,
@@ -425,6 +544,9 @@ function cloneProfile(profile) {
   return {
     ...profile,
     preferredBrands: [...(profile?.preferredBrands || [])],
+    routeStationHabits: Object.fromEntries(
+      Object.entries(profile?.routeStationHabits || {}).map(([key, value]) => [key, { ...(value || {}) }])
+    ),
     visitHistory: (profile?.visitHistory || []).map(entry => ({
       ...entry,
       visitTimestamps: [...(entry.visitTimestamps || [])],
@@ -668,6 +790,7 @@ const REALISTIC_ROUTE_TEMPLATES = [
   },
   {
     id: 'north-club-run',
+    groundedRouteId: 'north-club-run',
     scenario: 'suburban',
     purpose: 'shopping',
     defaultHour: 11,
@@ -979,17 +1102,107 @@ function chooseOccupancy(rand, driver, template, dayOfWeek) {
   return 'solo';
 }
 
-function buildRouteExposure(candidateStationIds, rand, template, context) {
-  const deduped = Array.from(new Set(candidateStationIds || []));
+function buildRouteExposure(candidateStationIds, rand, template, context, options = {}) {
+  const stationContexts = getTemplateStationContexts(template)
+    .filter(entry => (candidateStationIds || []).includes(entry.stationId));
   const targetVisibleCount = template.scenario === 'highway'
-    ? 2 + (context.trafficLevel === 'free_flow' ? 1 : 0)
-    : (context.trafficLevel === 'gridlock' ? 1 : 2);
-  const shuffled = [...deduped];
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(rand() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    ? 3 + (context.trafficLevel === 'free_flow' ? 1 : 0)
+    : template.scenario === 'city_grid'
+      ? (context.trafficLevel === 'gridlock' ? 1 : 2)
+      : (context.trafficLevel === 'gridlock' ? 2 : 3);
+
+  let visibleStationIds = [];
+  if (stationContexts.length > 0) {
+    const decisionProgress = clamp(Number(options.decisionProgress) || 0.52, 0.08, 0.94);
+    const predictiveWindow = computePredictiveDecisionWindow(template, decisionProgress, context);
+    const weighted = stationContexts
+      .map(entry => {
+        const stationDecisionPosition = computeStationDecisionPosition(template, decisionProgress, entry);
+        const aheadDistanceMeters = stationDecisionPosition.aheadDistanceMeters;
+        const visibleEligible = aheadDistanceMeters >= predictiveWindow.visibleMinAheadMeters &&
+          aheadDistanceMeters <= predictiveWindow.visibleMaxAheadMeters;
+        const predictiveEligible = aheadDistanceMeters >= predictiveWindow.minAheadMeters &&
+          aheadDistanceMeters <= predictiveWindow.maxAheadMeters;
+        const tooCloseAhead = aheadDistanceMeters >= 0 && aheadDistanceMeters < predictiveWindow.minAheadMeters;
+        const aheadProgressDistance = aheadDistanceMeters >= 0
+          ? aheadDistanceMeters
+          : Math.abs(aheadDistanceMeters) * 1.25;
+        const corridorPenalty = clamp(entry.corridorDistanceMeters / (template.scenario === 'highway' ? 4500 : 2600), 0, 1);
+        const salienceBoost = Math.max(0, 1 - corridorPenalty) * 0.45;
+        const priceBoost = Math.max(0, 4.2 - Number(entry.station?.price || 4.2)) * (0.05 + (Number(context.cheapnessBias) || 0) * 0.08);
+        const predictiveDistanceBoost = predictiveEligible
+          ? Math.max(
+            0,
+            1 - (
+              Math.abs(aheadDistanceMeters - predictiveWindow.preferredAheadMeters) /
+              Math.max(1600, predictiveWindow.maxAheadMeters - predictiveWindow.minAheadMeters)
+            )
+          ) * 0.32
+          : 0;
+        const visibleDistanceBoost = visibleEligible
+          ? Math.max(
+            0,
+            1 - (aheadProgressDistance / Math.max(1800, predictiveWindow.visibleMaxAheadMeters))
+          ) * 0.18
+          : 0;
+        const aheadBoost = aheadDistanceMeters >= 0 ? 0.24 : 0.02;
+        const tooClosePenalty = tooCloseAhead
+          ? clamp((predictiveWindow.minAheadMeters - aheadDistanceMeters) / predictiveWindow.minAheadMeters, 0, 1) * 0.52
+          : 0;
+        const behindPenalty = aheadDistanceMeters < predictiveWindow.visibleMinAheadMeters
+          ? clamp(Math.abs(aheadDistanceMeters - predictiveWindow.visibleMinAheadMeters) / 900, 0, 1) * 0.36
+          : 0;
+        const jitter = rand() * 0.03;
+        return {
+          stationId: entry.stationId,
+          score: (predictiveEligible ? 1.05 : (visibleEligible ? 0.45 : 0.10)) +
+            salienceBoost +
+            priceBoost +
+            aheadBoost +
+            predictiveDistanceBoost +
+            visibleDistanceBoost -
+            tooClosePenalty -
+            behindPenalty +
+            jitter,
+          visibleEligible,
+          predictiveEligible,
+          aheadDistanceMeters,
+        };
+      })
+      .sort((left, right) => right.score - left.score);
+
+    visibleStationIds = weighted
+      .filter(entry => entry.visibleEligible)
+      .slice(0, targetVisibleCount)
+      .map(entry => entry.stationId);
+
+    if (visibleStationIds.length < Math.max(2, targetVisibleCount - 1)) {
+      for (const entry of weighted) {
+        if (!visibleStationIds.includes(entry.stationId)) {
+          visibleStationIds.push(entry.stationId);
+        }
+        if (visibleStationIds.length >= targetVisibleCount) {
+          break;
+        }
+      }
+    }
+
+    if (options.targetStationId && !visibleStationIds.includes(options.targetStationId)) {
+      visibleStationIds = [
+        options.targetStationId,
+        ...visibleStationIds.filter(stationId => stationId !== options.targetStationId),
+      ].slice(0, Math.max(targetVisibleCount, 1));
+    }
+  } else {
+    const deduped = Array.from(new Set(candidateStationIds || []));
+    const shuffled = [...deduped];
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(rand() * (index + 1));
+      [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+    visibleStationIds = shuffled.slice(0, Math.max(1, Math.min(shuffled.length, targetVisibleCount)));
   }
-  const visibleStationIds = shuffled.slice(0, Math.max(1, Math.min(shuffled.length, targetVisibleCount)));
+
   return {
     visibleStationIds,
     visibleStationCount: visibleStationIds.length,
@@ -997,6 +1210,471 @@ function buildRouteExposure(candidateStationIds, rand, template, context) {
       ? (context.trafficLevel === 'free_flow' ? 'long_corridor' : 'compressed_corridor')
       : (context.trafficLevel === 'gridlock' ? 'short_horizon' : 'city_corridor'),
   };
+}
+
+function computeFeasibleCorridorDistanceLimit(template, context, options = {}) {
+  const scenario = template?.scenario || 'city';
+  const trafficLevel = context?.trafficLevel || 'steady';
+  const detourTolerance = clamp(Number(options.detourTolerance) || 0.35, 0, 1);
+
+  if (scenario === 'highway') {
+    return 220 + (detourTolerance * 220) + (trafficLevel === 'free_flow' ? 40 : 0);
+  }
+  if (scenario === 'suburban') {
+    return 170 + (detourTolerance * 180) - (trafficLevel === 'gridlock' ? 20 : 0);
+  }
+  if (scenario === 'city_grid') {
+    return 120 + (detourTolerance * 120) - (trafficLevel === 'gridlock' ? 20 : 0);
+  }
+  return 150 + (detourTolerance * 150) - (trafficLevel === 'gridlock' ? 20 : 0);
+}
+
+function computePredictiveDecisionWindow(template, decisionProgress, context = {}) {
+  const groundedRoute = getGroundedRouteFixture(template?.groundedRouteId || template?.id);
+  const routeDistanceMeters = Math.max(0, Number(groundedRoute?.distanceMeters) || 0);
+  const decisionAlongTrackMeters = routeDistanceMeters * clamp(Number(decisionProgress) || 0, 0, 1);
+  const remainingRouteMeters = Math.max(0, routeDistanceMeters - decisionAlongTrackMeters);
+  const scenario = template?.scenario || 'city';
+  const trafficLevel = context?.trafficLevel || 'steady';
+
+  const minAheadMeters = scenario === 'highway'
+    ? 1800
+    : (scenario === 'suburban' ? 1400 : 1200);
+  const preferredAheadMeters = scenario === 'highway'
+    ? 5200
+    : (scenario === 'suburban' ? 3600 : (scenario === 'city_grid' ? 2100 : 2800));
+  const maxAheadMeters = Math.max(
+    minAheadMeters + 600,
+    Math.min(
+      remainingRouteMeters + 1200,
+      scenario === 'highway'
+        ? 16000
+        : (scenario === 'suburban' ? 11000 : (trafficLevel === 'gridlock' ? 5200 : 7800))
+    )
+  );
+
+  return {
+    decisionAlongTrackMeters,
+    remainingRouteMeters,
+    minAheadMeters,
+    preferredAheadMeters,
+    maxAheadMeters,
+    visibleMinAheadMeters: scenario === 'highway' ? -500 : -250,
+    visibleMaxAheadMeters: maxAheadMeters + (scenario === 'highway' ? 2400 : 1400),
+  };
+}
+
+function computeStationDecisionPosition(template, decisionProgress, stationContext) {
+  const predictiveWindow = computePredictiveDecisionWindow(template, decisionProgress);
+  const aheadDistanceMeters = Math.max(
+    Number.NEGATIVE_INFINITY,
+    (Number(stationContext?.alongTrackMeters) || 0) - predictiveWindow.decisionAlongTrackMeters,
+  );
+  return {
+    ...predictiveWindow,
+    aheadDistanceMeters,
+  };
+}
+
+function buildRouteMarketStationContexts(template, decisionProgress, context, options = {}) {
+  const stationContexts = getTemplateStationContexts(template);
+  if (stationContexts.length === 0) {
+    return getTemplateStationMarket(template).map(station => ({ stationId: station.stationId, station }));
+  }
+  const feasibleCorridorDistanceLimit = computeFeasibleCorridorDistanceLimit(template, context, options);
+  const feasibleStationContexts = stationContexts.filter(entry =>
+    (Number(entry?.corridorDistanceMeters) || Number.POSITIVE_INFINITY) <= feasibleCorridorDistanceLimit
+  );
+  const candidateStationContexts = feasibleStationContexts.length > 0
+    ? feasibleStationContexts
+    : stationContexts;
+
+  const predictiveWindow = computePredictiveDecisionWindow(template, decisionProgress, context);
+  const limit = template.scenario === 'highway' ? 10 : 8;
+
+  const scored = candidateStationContexts
+    .map(entry => {
+      const stationDecisionPosition = computeStationDecisionPosition(template, decisionProgress, entry);
+      const aheadDistanceMeters = stationDecisionPosition.aheadDistanceMeters;
+      const predictiveEligible = aheadDistanceMeters >= predictiveWindow.minAheadMeters &&
+        aheadDistanceMeters <= predictiveWindow.maxAheadMeters;
+      const visibleEligible = aheadDistanceMeters >= predictiveWindow.visibleMinAheadMeters &&
+        aheadDistanceMeters <= predictiveWindow.visibleMaxAheadMeters;
+      const tooCloseAhead = aheadDistanceMeters >= 0 && aheadDistanceMeters < predictiveWindow.minAheadMeters;
+      const corridorPenalty = clamp(entry.corridorDistanceMeters / (template.scenario === 'highway' ? 4500 : 2600), 0, 1);
+      const predictiveDistancePenalty = predictiveEligible
+        ? Math.abs(aheadDistanceMeters - predictiveWindow.preferredAheadMeters) /
+          Math.max(2000, predictiveWindow.maxAheadMeters - predictiveWindow.minAheadMeters)
+        : 1;
+      const tooClosePenalty = tooCloseAhead
+        ? clamp((predictiveWindow.minAheadMeters - aheadDistanceMeters) / predictiveWindow.minAheadMeters, 0, 1) * 0.60
+        : 0;
+      const behindPenalty = aheadDistanceMeters < predictiveWindow.visibleMinAheadMeters
+        ? clamp(Math.abs(aheadDistanceMeters - predictiveWindow.visibleMinAheadMeters) / 1100, 0, 1) * 0.42
+        : 0;
+      const tooFarPenalty = aheadDistanceMeters > predictiveWindow.maxAheadMeters
+        ? clamp((aheadDistanceMeters - predictiveWindow.maxAheadMeters) / Math.max(1600, predictiveWindow.maxAheadMeters), 0, 1) * 0.24
+        : 0;
+      const score = (predictiveEligible ? 1.18 : (visibleEligible ? 0.38 : 0.08)) +
+        ((1 - corridorPenalty) * 0.45) +
+        (aheadDistanceMeters >= 0 ? 0.22 : 0.03) +
+        (predictiveEligible ? ((1 - predictiveDistancePenalty) * 0.24) : 0) -
+        tooClosePenalty -
+        behindPenalty -
+        tooFarPenalty;
+      return {
+        ...entry,
+        aheadDistanceMeters,
+        predictiveEligible,
+        visibleEligible,
+        score,
+      };
+    })
+    .sort((left, right) => right.score - left.score);
+
+  let selected = scored.filter(entry => entry.predictiveEligible).slice(0, limit);
+  if (selected.length < Math.max(4, limit - 2)) {
+    selected = scored.filter(entry => entry.visibleEligible).slice(0, limit);
+  }
+  if (selected.length < Math.max(4, limit - 2)) {
+    selected = scored.slice(0, limit);
+  }
+
+  if (options.targetStationId && !selected.some(entry => entry.stationId === options.targetStationId)) {
+    const targetEntry = scored.find(entry => entry.stationId === options.targetStationId);
+    if (targetEntry) {
+      selected = [targetEntry, ...selected.filter(entry => entry.stationId !== options.targetStationId)].slice(0, limit);
+    }
+  }
+
+  return selected
+    .sort((left, right) => left.alongTrackMeters - right.alongTrackMeters)
+    .map(entry => {
+      const routeApproach = buildSimulatedRouteApproach(template, decisionProgress, context, entry);
+      return {
+        ...entry,
+        station: {
+          ...entry.station,
+          distanceMiles: routeApproach.alongRouteDistanceMeters / 1609.344,
+          simulationRouteContext: {
+            routeHabitKeys: buildRouteHabitKeys(template),
+            alongTrackMeters: Number(entry.alongTrackMeters) || 0,
+            offsetFromRouteMeters: Math.round(Math.abs(Number(entry.corridorDistanceMeters) || 0)),
+            signedOffsetFromRouteMeters: Math.round(Number(entry.signedCorridorOffsetMeters) || 0),
+            sideOfRoad: routeApproach.sideOfRoad,
+            maneuverPenaltyPrice: routeApproach.maneuverPenaltyPrice,
+          },
+          routeApproach,
+        },
+      };
+    });
+}
+
+function buildDynamicRouteApproachStations(stations, routeDistanceMeters, progressRatio, currentAlongTrackMetersOverride = null) {
+  if (!Array.isArray(stations) || stations.length === 0) {
+    return [];
+  }
+  const currentAlongTrackMeters = Number.isFinite(Number(currentAlongTrackMetersOverride))
+    ? Math.max(0, Number(currentAlongTrackMetersOverride))
+    : Math.max(
+      0,
+      (Number(routeDistanceMeters) || 0) * clamp(Number(progressRatio) || 0, 0, 1),
+    );
+
+  return stations.map(station => {
+    const simulationRouteContext = station?.simulationRouteContext;
+    if (!simulationRouteContext || !Number.isFinite(Number(simulationRouteContext.alongTrackMeters))) {
+      return station;
+    }
+    const aheadDistanceMeters = Math.max(
+      0,
+      (Number(simulationRouteContext.alongTrackMeters) || 0) - currentAlongTrackMeters,
+    );
+    return {
+      ...station,
+      distanceMiles: aheadDistanceMeters / 1609.344,
+      routeApproach: {
+        isOnRoute: true,
+        alongRouteDistanceMeters: Math.round(aheadDistanceMeters),
+        offsetFromRouteMeters: Number(simulationRouteContext.offsetFromRouteMeters) || 0,
+        signedOffsetFromRouteMeters: Number(simulationRouteContext.signedOffsetFromRouteMeters) || 0,
+        sideOfRoad: simulationRouteContext.sideOfRoad || 'right',
+        maneuverPenaltyPrice: Number(simulationRouteContext.maneuverPenaltyPrice) || 0,
+        routeHabitKeys: Array.isArray(simulationRouteContext.routeHabitKeys)
+          ? [...simulationRouteContext.routeHabitKeys]
+          : undefined,
+      },
+    };
+  });
+}
+
+function computeLiveActionableRecommendationStationIds(route, acceptableRecommendationStationIds) {
+  if (!Array.isArray(acceptableRecommendationStationIds) || acceptableRecommendationStationIds.length === 0) {
+    return [];
+  }
+  if (!Array.isArray(route?.marketStations) || route.marketStations.length === 0) {
+    return [];
+  }
+
+  const acceptableIds = new Set(
+    acceptableRecommendationStationIds
+      .filter(Boolean)
+      .map(stationId => String(stationId))
+  );
+  const routeDistanceMeters = Math.max(0, Number(route?.routeDistanceMiles) || 0) * 1609.344;
+  const samples = routeToSamples(route);
+  if (samples.length < RECOMMENDER_DEFAULT_OPTIONS.minWindowSize) {
+    return [];
+  }
+
+  const maxActionableProgress = (
+    Number.isInteger(route?.hiddenDecisionIndex) &&
+    Array.isArray(route?.waypoints) &&
+    route.waypoints.length > 1
+  )
+    ? clamp(route.hiddenDecisionIndex / (route.waypoints.length - 1), 0, 1)
+    : 1;
+  const matchedIds = new Set();
+
+  for (let sampleIndex = RECOMMENDER_DEFAULT_OPTIONS.minWindowSize - 1; sampleIndex < samples.length; sampleIndex += 1) {
+    const sample = samples[sampleIndex];
+    const progressRatio = samples.length > 1
+      ? sampleIndex / (samples.length - 1)
+      : 0;
+    if (progressRatio > maxActionableProgress) {
+      break;
+    }
+    const dynamicStations = buildDynamicRouteApproachStations(
+      route.marketStations,
+      routeDistanceMeters,
+      progressRatio,
+      sample?.alongRouteMeters,
+    );
+    const window = samples.slice(Math.max(0, sampleIndex - RECOMMENDER_DEFAULT_OPTIONS.minWindowSize + 1), sampleIndex + 1);
+    const candidates = findCorridorCandidates(window, dynamicStations, {
+      ...RECOMMENDER_DEFAULT_OPTIONS,
+      projectionDistanceMeters: RECOMMENDER_DEFAULT_OPTIONS.maxProjectionDistanceMeters,
+    });
+    for (const candidate of candidates) {
+      const stationId = String(candidate?.station?.stationId || '');
+      if (acceptableIds.has(stationId)) {
+        matchedIds.add(stationId);
+      }
+    }
+    if (matchedIds.size === acceptableIds.size) {
+      break;
+    }
+  }
+
+  return Array.from(matchedIds);
+}
+
+function computeLiveObservableRecommendationStationIds(
+  route,
+  acceptableRecommendationStationIds,
+  {
+    historyVisitCount = 0,
+    minSavingsPerGal = RECOMMENDER_DEFAULT_OPTIONS.minPriceSavingsPerGal,
+  } = {}
+) {
+  if (!Array.isArray(route?.marketStations) || route.marketStations.length === 0) {
+    return [];
+  }
+
+  const routeDistanceMeters = Math.max(0, Number(route?.routeDistanceMiles) || 0) * 1609.344;
+  const samples = routeToSamples(route);
+  if (samples.length < RECOMMENDER_DEFAULT_OPTIONS.minWindowSize) {
+    return [];
+  }
+
+  const maxActionableProgress = (
+    Number.isInteger(route?.hiddenDecisionIndex) &&
+    Array.isArray(route?.waypoints) &&
+    route.waypoints.length > 1
+  )
+    ? clamp(route.hiddenDecisionIndex / (route.waypoints.length - 1), 0, 1)
+    : 1;
+  const observableIds = new Set();
+  const priceTieTolerance = Math.max(0.01, Math.min(0.04, Number(minSavingsPerGal) * 0.5));
+  let bestObservablePrice = Number.POSITIVE_INFINITY;
+
+  for (let sampleIndex = RECOMMENDER_DEFAULT_OPTIONS.minWindowSize - 1; sampleIndex < samples.length; sampleIndex += 1) {
+    const sample = samples[sampleIndex];
+    const progressRatio = samples.length > 1
+      ? sampleIndex / (samples.length - 1)
+      : 0;
+    if (progressRatio > maxActionableProgress) {
+      break;
+    }
+    const dynamicStations = buildDynamicRouteApproachStations(
+      route.marketStations,
+      routeDistanceMeters,
+      progressRatio,
+      sample?.alongRouteMeters,
+    );
+    const window = samples.slice(Math.max(0, sampleIndex - RECOMMENDER_DEFAULT_OPTIONS.minWindowSize + 1), sampleIndex + 1);
+    const candidates = findCorridorCandidates(window, dynamicStations, {
+      ...RECOMMENDER_DEFAULT_OPTIONS,
+      projectionDistanceMeters: RECOMMENDER_DEFAULT_OPTIONS.maxProjectionDistanceMeters,
+    });
+    if (!candidates.length) {
+      continue;
+    }
+
+    const currentStationContexts = candidates.map(candidate => ({
+      stationId: candidate?.station?.stationId || null,
+      station: candidate?.station || null,
+      predictiveEligible: true,
+      visibleEligible: true,
+      corridorDistanceMeters: candidate?.crossTrack ?? null,
+      aheadDistanceMeters: candidate?.alongTrack ?? null,
+      maneuverPenaltyPrice: candidate?.accessPenaltyPrice ?? null,
+    }));
+    const currentObservableIds = buildObservableRecommendationStationIds({
+      acceptableRecommendationStationIds,
+      stationContexts: currentStationContexts,
+      historyVisitCount,
+      minSavingsPerGal,
+    });
+    const currentObservablePrice = currentStationContexts
+      .filter(entry => currentObservableIds.includes(String(entry?.stationId || '')))
+      .map(entry => getObservableStationEffectivePrice(entry))
+      .filter(price => Number.isFinite(price))
+      .sort((left, right) => left - right)[0];
+
+    if (!Number.isFinite(currentObservablePrice)) {
+      continue;
+    }
+
+    if (currentObservablePrice < (bestObservablePrice - priceTieTolerance)) {
+      bestObservablePrice = currentObservablePrice;
+      observableIds.clear();
+      for (const stationId of currentObservableIds) {
+        observableIds.add(String(stationId));
+      }
+      continue;
+    }
+
+    if (currentObservablePrice <= (bestObservablePrice + priceTieTolerance)) {
+      for (const stationId of currentObservableIds) {
+        observableIds.add(String(stationId));
+      }
+    }
+  }
+
+  return Array.from(observableIds);
+}
+
+function countProfileHistoryVisits(profile) {
+  return Array.isArray(profile?.visitHistory)
+    ? profile.visitHistory.reduce((sum, entry) => sum + (Number(entry?.visitCount) || 0), 0)
+    : 0;
+}
+
+function getObservableStationEffectivePrice(entry) {
+  if (!entry) {
+    return Number.POSITIVE_INFINITY;
+  }
+  const stationPrice = Number(entry?.station?.price);
+  const maneuverPenaltyPrice = Number(
+    entry?.station?.routeApproach?.maneuverPenaltyPrice ??
+    entry?.station?.simulationRouteContext?.maneuverPenaltyPrice ??
+    entry?.maneuverPenaltyPrice
+  ) || 0;
+  if (!Number.isFinite(stationPrice)) {
+    return Number.POSITIVE_INFINITY;
+  }
+  return stationPrice + maneuverPenaltyPrice;
+}
+
+function buildObservableRecommendationStationIds({
+  acceptableRecommendationStationIds,
+  stationContexts,
+  historyVisitCount = 0,
+  minSavingsPerGal = RECOMMENDER_DEFAULT_OPTIONS.minPriceSavingsPerGal,
+}) {
+  const acceptableIds = new Set(
+    (Array.isArray(acceptableRecommendationStationIds) ? acceptableRecommendationStationIds : [])
+      .filter(Boolean)
+      .map(stationId => String(stationId))
+  );
+  const visibleAcceptableIds = (Array.isArray(stationContexts) ? stationContexts : [])
+    .filter(entry => (entry?.predictiveEligible || entry?.visibleEligible) && acceptableIds.has(String(entry?.stationId || '')))
+    .map(entry => String(entry.stationId || ''));
+  const visibleEntries = (Array.isArray(stationContexts) ? stationContexts : [])
+    .filter(entry => entry?.predictiveEligible || entry?.visibleEligible)
+    .reduce((entries, entry) => {
+      const stationId = String(entry?.stationId || '');
+      if (!stationId || entries.some(existing => existing.stationId === stationId)) {
+        return entries;
+      }
+      return [...entries, entry];
+    }, []);
+
+  if (!visibleEntries.length) {
+    return [];
+  }
+
+  const observableEntries = visibleEntries
+    .map(entry => ({
+      entry,
+      stationId: String(entry.stationId || ''),
+      effectivePrice: getObservableStationEffectivePrice(entry),
+    }))
+    .filter(entry => Number.isFinite(entry.effectivePrice))
+    .sort((left, right) =>
+      left.effectivePrice - right.effectivePrice ||
+      (Number(left.entry?.corridorDistanceMeters) || 0) - (Number(right.entry?.corridorDistanceMeters) || 0) ||
+      (Number(left.entry?.aheadDistanceMeters) || 0) - (Number(right.entry?.aheadDistanceMeters) || 0)
+    );
+
+  if (!observableEntries.length) {
+    return [];
+  }
+
+  const visibleBest = observableEntries[0];
+  const visibleRunnerUp = observableEntries[1] || null;
+  const priceTieTolerance = Math.max(0.01, Math.min(0.04, Number(minSavingsPerGal) * 0.5));
+  const meaningfulObservableEdge = visibleRunnerUp
+    ? Math.max(0, visibleRunnerUp.effectivePrice - visibleBest.effectivePrice)
+    : 0;
+
+  if (visibleRunnerUp && meaningfulObservableEdge >= Number(minSavingsPerGal)) {
+    const observableBestIds = observableEntries
+      .filter(candidate => candidate.effectivePrice <= (visibleBest.effectivePrice + priceTieTolerance))
+      .map(candidate => candidate.stationId);
+    return Array.from(new Set([...visibleAcceptableIds, ...observableBestIds]));
+  }
+
+  if (
+    observableEntries.length === 1 &&
+    historyVisitCount >= 6 &&
+    acceptableIds.has(visibleBest.stationId)
+  ) {
+    return [visibleBest.stationId];
+  }
+
+  if (historyVisitCount === 0 && observableEntries.length > 1) {
+    return [];
+  }
+
+  return Array.from(new Set(visibleAcceptableIds));
+}
+
+function resolveActionableRecommendationStationIds({
+  actionableLabelMode = 'legacy',
+  acceptableRecommendationStationIds,
+  stationContexts,
+  historyVisitCount = 0,
+}) {
+  if (actionableLabelMode === 'observable') {
+    return buildObservableRecommendationStationIds({
+      acceptableRecommendationStationIds,
+      stationContexts,
+      historyVisitCount,
+    });
+  }
+  return buildActionableRecommendationStationIds(acceptableRecommendationStationIds, stationContexts);
 }
 
 function buildRealisticTripContext({ rand, driver, template, routeIndex, dayOfWeek, hour }) {
@@ -1045,31 +1723,245 @@ function buildRealisticTripContext({ rand, driver, template, routeIndex, dayOfWe
   };
 }
 
-function scoreCohortStationChoice(driver, station, template, context, remainingMiles, stationIndex = 0, candidateCount = 1) {
-  const baseAffinity = scoreDriverStationAffinity(driver, station, template, stationIndex, candidateCount);
+function estimateDecisionProgress(template, remainingMiles, rand) {
+  const baseProgress = remainingMiles <= 60
+    ? 0.28
+    : remainingMiles <= 120
+      ? 0.36
+      : remainingMiles <= 180
+        ? 0.44
+        : 0.52;
+  const scenarioAdjustment = template.scenario === 'highway'
+    ? -0.08
+    : (template.scenario === 'city_grid' ? 0.02 : 0);
+  const jitter = ((rand() * 2) - 1) * 0.05;
+  return clamp(baseProgress + scenarioAdjustment + jitter, 0.18, 0.84);
+}
+
+function approximateScenarioMeanSpeedMps(scenario) {
+  switch (scenario) {
+    case 'highway':
+      return 24;
+    case 'suburban':
+      return 14;
+    case 'city_grid':
+      return 5;
+    case 'city':
+    default:
+      return 8;
+  }
+}
+
+function buildLatentHistoryContext(template) {
+  return {
+    scenarioHint: template?.scenario || null,
+    isHighwayCruise: template?.scenario === 'highway',
+    isCityGridLike: template?.scenario === 'city_grid',
+    meanSpeedMps: approximateScenarioMeanSpeedMps(template?.scenario),
+  };
+}
+
+function computeLatentHistoryUtility(profile, station, template, nowMs) {
+  if (!profile || !station) return 0;
+  const historyContext = buildLatentHistoryContext(template);
+  const genericHistory = computeHistoryScore(station, profile, nowMs);
+  const contextualHistory = computeContextualHistoryScore(station, profile, nowMs, historyContext);
+  const historyContextMatch = computeHistoryContextMatch(station, profile, nowMs, historyContext);
+  const profileHistoryConcentration = computeProfileHistoryConcentration(profile);
+  const visitShare = computeVisitShare(station, profile);
+  const conversionRate = computeObservedConversionRate(station, profile);
+  const contextualConversionRate = computeContextualObservedConversionRate(station, profile, nowMs, historyContext);
+  const observedSkipScore = computeObservedSkipScore(station, profile, nowMs, historyContext);
+  const timePatternScore = computeTimePatternScore(station, profile, nowMs);
+  const coherentHistorySignal = clamp(
+    (historyContextMatch * 0.32) +
+    (contextualConversionRate * 0.26) +
+    (timePatternScore * 0.18) +
+    (visitShare * 0.12) +
+    (profileHistoryConcentration * 0.12),
+    0,
+    1
+  );
+  const negativeExposurePenalty = (
+    observedSkipScore * (
+      0.20 +
+      ((1 - contextualConversionRate) * 0.14) +
+      ((1 - historyContextMatch) * 0.08)
+    )
+  ) + (
+    conversionRate <= 0.02 && observedSkipScore >= 0.35
+      ? 0.08
+      : 0
+  ) + (
+    profileHistoryConcentration >= 0.34 &&
+    historyContextMatch <= 0.16 &&
+    observedSkipScore >= 0.24
+      ? 0.05
+      : 0
+  );
+
+  return clamp(
+    (contextualHistory * (0.18 + (historyContextMatch * 0.10))) +
+    (genericHistory * 0.05) +
+    (visitShare * (0.05 + (profileHistoryConcentration * 0.07))) +
+    (contextualConversionRate * (0.14 + (historyContextMatch * 0.10))) +
+    (conversionRate * 0.05) +
+    (timePatternScore * (0.06 + (historyContextMatch * 0.08))) +
+    (coherentHistorySignal * 0.12) -
+    negativeExposurePenalty,
+    -0.34,
+    0.60
+  );
+}
+
+function computeStationSelectionSharpness(profile, context = {}) {
+  const totalHistoryVisits = Array.isArray(profile?.visitHistory)
+    ? profile.visitHistory.reduce((sum, entry) => sum + (Number(entry?.visitCount) || 0), 0)
+    : 0;
+  const historyFactor = clamp(totalHistoryVisits / 24, 0, 1.4);
+  const concentrationFactor = computeProfileHistoryConcentration(profile);
+  const routineFactor = clamp(Number(context?.routineStrength) || 0, 0, 1);
+  const lowFuelNeed = clamp(Number(context?.lowFuelNeed) || 0, 0, 1);
+  return 1 + (historyFactor * 0.56) + (concentrationFactor * 0.72) + (routineFactor * 0.22) + (lowFuelNeed * 0.12);
+}
+
+function computeLowFuelOpportunityCap({
+  lowFuelNeed,
+  scenario,
+  purpose,
+  strongOpportunity = false,
+  routineStrength = 0,
+  timePressure = 0,
+}) {
+  const normalizedLowFuelNeed = clamp(Number(lowFuelNeed) || 0, 0, 1);
+  const normalizedRoutine = clamp(Number(routineStrength) || 0, 0, 1);
+  const normalizedPressure = clamp(Number(timePressure) || 0, 0, 1);
+  const routinePurpose = ['commute', 'commute_return', 'pickup', 'shopping'].includes(purpose);
+  const discretionaryPurpose = ['social', 'city_grid', 'airport'].includes(purpose);
+
+  if (normalizedLowFuelNeed < 0.15) {
+    let cap = strongOpportunity
+      ? (routinePurpose ? 0.06 : 0.04)
+      : (scenario === 'highway' ? 0.03 : 0.015);
+    if (discretionaryPurpose && !strongOpportunity) {
+      cap *= 0.6;
+    }
+    cap += normalizedRoutine * 0.015;
+    cap -= normalizedPressure * 0.015;
+    return clamp(cap, 0.006, 0.08);
+  }
+
+  if (normalizedLowFuelNeed < 0.30) {
+    let cap = strongOpportunity
+      ? (routinePurpose ? 0.12 : 0.08)
+      : (scenario === 'highway' ? 0.06 : 0.04);
+    if (discretionaryPurpose && !strongOpportunity) {
+      cap *= 0.7;
+    }
+    cap += normalizedRoutine * 0.03;
+    cap -= normalizedPressure * 0.02;
+    return clamp(cap, 0.02, 0.16);
+  }
+
+  return null;
+}
+
+function chooseStationForStop(rand, weightedStations, profile, context = {}, driver = null) {
+  if (!Array.isArray(weightedStations) || weightedStations.length === 0) return null;
+  const sorted = [...weightedStations].sort((left, right) => (right.weight || 0) - (left.weight || 0));
+  const totalHistoryVisits = Array.isArray(profile?.visitHistory)
+    ? profile.visitHistory.reduce((sum, entry) => sum + (Number(entry?.visitCount) || 0), 0)
+    : 0;
+  const historyFactor = clamp(totalHistoryVisits / 24, 0, 1.4);
+  const concentrationFactor = computeProfileHistoryConcentration(profile);
+  const routineFactor = clamp(Number(context?.routineStrength) || 0, 0, 1);
+  const lowFuelNeed = clamp(Number(context?.lowFuelNeed) || 0, 0, 1);
+  const spontaneity = clamp(Number(driver?.spontaneity) || 0, 0, 1);
+  const topWeight = Math.max(0, Number(sorted[0]?.weight) || 0);
+  const secondWeight = Math.max(0, Number(sorted[1]?.weight) || 0);
+  const leadShare = topWeight > 0
+    ? clamp((topWeight - secondWeight) / topWeight, 0, 1)
+    : 0;
+  const ratioAdvantage = secondWeight > 0
+    ? clamp(Math.log(Math.max(topWeight, 0.0001) / Math.max(secondWeight, 0.0001)) / 2.2, 0, 1)
+    : (topWeight > 0 ? 1 : 0);
+  const topChoiceProbability = clamp(
+    0.44 +
+    (historyFactor * 0.08) +
+    (concentrationFactor * 0.20) +
+    (routineFactor * 0.12) +
+    (lowFuelNeed * 0.08) +
+    (leadShare * 0.24) +
+    (ratioAdvantage * 0.12) -
+    (spontaneity * 0.08),
+    0.40,
+    0.97
+  );
+  if (rand() < topChoiceProbability) {
+    return sorted[0]?.item || null;
+  }
+  return chooseWeighted(rand, weightedStations);
+}
+
+function scoreCohortStationChoice(driver, station, template, context, remainingMiles, stationIndex = 0, candidateCount = 1, stationContext = null, profile = null, nowMs = null) {
   const normalizedIndex = candidateCount > 1 ? stationIndex / (candidateCount - 1) : 0.5;
+  const alongTrackFraction = Number(stationContext?.alongTrackFraction);
+  const corridorDistanceMeters = Number(stationContext?.corridorDistanceMeters);
+  const routeAccessibilityIndex = Number.isFinite(alongTrackFraction)
+    ? alongTrackFraction
+    : normalizedIndex;
+  const corridorPenalty = Number.isFinite(corridorDistanceMeters)
+    ? clamp(corridorDistanceMeters / (template.scenario === 'highway' ? 4500 : 2600), 0, 1)
+    : normalizedIndex;
+  const baseAffinity = scoreDriverStationAffinity(driver, station, template, routeAccessibilityIndex, candidateCount);
   const easierAccessBias = template.scenario === 'highway'
-    ? (1 - normalizedIndex) * 0.18
-    : ((1 - Math.abs(normalizedIndex - 0.5) * 2) * 0.10);
-  const timePressurePenalty = context.timePressure * (template.scenario === 'highway' ? normalizedIndex * 0.08 : 0.12);
+    ? (1 - routeAccessibilityIndex) * 0.18
+    : ((1 - Math.abs(routeAccessibilityIndex - 0.5) * 2) * 0.10);
+  const timePressurePenalty = context.timePressure * (template.scenario === 'highway' ? routeAccessibilityIndex * 0.08 : 0.12);
   const familyPenalty = context.occupancy === 'kids'
-    ? normalizedIndex * 0.10
-    : (context.occupancy === 'passenger' ? normalizedIndex * 0.04 : 0);
+    ? routeAccessibilityIndex * 0.10
+    : (context.occupancy === 'passenger' ? routeAccessibilityIndex * 0.04 : 0);
   const nightHabitBoost = context.weather === 'snow' || context.weather === 'rain'
     ? (Number(driver.stationAffinity[station.stationId]) || 0) * 0.30
     : 0;
-  const fuelUrgencyBonus = remainingMiles <= 75 ? (1 - normalizedIndex) * 0.12 : 0;
+  const fuelUrgencyBonus = remainingMiles <= 75 ? (1 - routeAccessibilityIndex) * 0.12 : 0;
   const priceBias = Math.max(0, 3.80 - Number(station.price || 3.80)) * (0.08 + (context.cheapnessBias * 0.14));
-  const detourPenalty = (1 - driver.detourTolerance) * normalizedIndex * 0.08;
+  const detourPenalty = (1 - driver.detourTolerance) * corridorPenalty * 0.12;
+  const historyContext = buildLatentHistoryContext(template);
+  const latentHistoryUtility = computeLatentHistoryUtility(profile, station, template, nowMs);
+  const historyContextMatch = computeHistoryContextMatch(station, profile, nowMs, historyContext);
+  const profileHistoryConcentration = computeProfileHistoryConcentration(profile);
+  const contextualConversionRate = computeContextualObservedConversionRate(station, profile, nowMs, historyContext);
+  const observedSkipScore = computeObservedSkipScore(station, profile, nowMs, historyContext);
+  const routeHabitShare = computeRouteStationHabitShare(profile, template, station?.stationId, nowMs);
+  const routeHabitBoost = routeHabitShare * (
+    0.22 +
+    (driver.routeFamiliarity * 0.18) +
+    ((Number(context?.routineStrength) || 0) * 0.14)
+  );
+  const coherentHistoryBoost = (
+    historyContextMatch * (0.06 + (profileHistoryConcentration * 0.06)) +
+    contextualConversionRate * (0.05 + (routeHabitShare * 0.08))
+  );
+  const skipHistoryPenalty = observedSkipScore * (
+    0.05 +
+    ((Number(context?.routineStrength) || 0) * 0.05) +
+    ((1 - contextualConversionRate) * 0.05)
+  );
   return clamp(
     baseAffinity +
     easierAccessBias +
     fuelUrgencyBonus +
     nightHabitBoost +
     priceBias -
+    0 +
+    latentHistoryUtility +
+    (routeHabitBoost * (0.82 + (historyContextMatch * 0.42) + (profileHistoryConcentration * 0.28))) +
+    coherentHistoryBoost -
     timePressurePenalty -
     familyPenalty -
-    detourPenalty,
+    detourPenalty -
+    skipHistoryPenalty,
     0.01,
     1.6
   );
@@ -1189,6 +2081,8 @@ function buildFactTablesForRoute({
   fillTimestamp,
 }) {
   const observedFuel = buildObservedFuelState(route, vehicle, driver, rand);
+  const actualFuelStopStationId = getActualFuelStopStationId(route);
+  const actualFuelingDecision = routeWillFuel(route);
   const decisionId = `decision-${route.driverId}-${routeOrdinal}`;
   const visibleStations = (route.context?.visibleStationIds || []).map(findStationById).filter(Boolean);
   const plannedMilesNext24h = Math.round(
@@ -1208,7 +2102,7 @@ function buildFactTablesForRoute({
     weather_bucket: route.context.weather,
     day_type: route.context.dayOfWeek === 0 || route.context.dayOfWeek === 6 ? 'weekend' : 'weekday',
     current_route_id: route.routeId,
-    refuel_now_label: route.expectsTrigger ? 1 : 0,
+    refuel_now_label: actualFuelingDecision ? 1 : 0,
     planned_miles_next_24h: plannedMilesNext24h,
     fuel_display_pct: observedFuel.fuel_display_pct,
     observed_range_miles: Math.round((observedFuel.observed_fuel_gal * driver.weightedMpg) * 10) / 10,
@@ -1234,7 +2128,7 @@ function buildFactTablesForRoute({
     return {
       decision_id: decisionId,
       station_id: station.stationId,
-      chosen_label: station.stationId === route.targetStationId ? 1 : 0,
+      chosen_label: station.stationId === actualFuelStopStationId ? 1 : 0,
       effective_price: effectivePrice,
       detour_minutes: detourMinutes,
       extra_miles: Math.round((detourMinutes * (route.scenario === 'highway' ? 0.9 : 0.45)) * 10) / 10,
@@ -1256,14 +2150,14 @@ function buildFactTablesForRoute({
     };
   });
 
-  const transaction = route.expectsTrigger && route.targetStationId
+  const transaction = actualFuelingDecision && actualFuelStopStationId
     ? {
       transaction_id: `txn-${route.driverId}-${routeOrdinal}`,
       decision_id: decisionId,
-      station_id: route.targetStationId,
+      station_id: actualFuelStopStationId,
       timestamp: fillTimestamp,
       gallons_bought: Math.round(Math.max(4.0, Math.min(vehicle.tank_capacity_gal, vehicle.tank_capacity_gal - observedFuel.true_fuel_gal)) * 10) / 10,
-      dollars_spent: Math.round((candidateStations.find(station => station.station_id === route.targetStationId)?.effective_price || 3.35) * Math.max(4.0, Math.min(vehicle.tank_capacity_gal, vehicle.tank_capacity_gal - observedFuel.true_fuel_gal)) * 100) / 100,
+      dollars_spent: Math.round((candidateStations.find(station => station.station_id === actualFuelStopStationId)?.effective_price || 3.35) * Math.max(4.0, Math.min(vehicle.tank_capacity_gal, vehicle.tank_capacity_gal - observedFuel.true_fuel_gal)) * 100) / 100,
       grade_bought: vehicle.required_octane,
       fill_type: observedFuel.fuel_display_pct <= 25 ? 'fill_to_full' : (driver.cashConstraintLevel >= 0.65 ? 'target_dollars' : 'range_target'),
     }
@@ -1328,6 +2222,7 @@ function buildRealisticStressProfile(driver, historyLevel = 'none') {
     fillUpHistory,
     visitHistory,
     exposureHistory: [],
+    routeStationHabits: {},
     estimatedMilesSinceLastFill,
     odometerMiles: 40480,
   };
@@ -1410,6 +2305,19 @@ function buildVisitContextCounts(visitTimestamp, visitContext = {}) {
   return counts;
 }
 
+function buildRouteHabitKeys(template = {}) {
+  // Prefer stable template families over per-route instance ids so long-span
+  // history learns repeat corridors instead of one-off route records.
+  const templateId = template?.templateId || template?.id || null;
+  const purpose = template?.purpose || null;
+  const scenario = template?.scenario || null;
+  const keys = [];
+  if (templateId) keys.push(`template:${templateId}`);
+  if (purpose && scenario) keys.push(`purpose_scenario:${purpose}:${scenario}`);
+  if (purpose) keys.push(`purpose:${purpose}`);
+  return keys;
+}
+
 function mergeVisitContextCounts(existingCounts = {}, nextCounts = {}) {
   return {
     total: (Number(existingCounts.total) || 0) + (Number(nextCounts.total) || 0),
@@ -1424,6 +2332,53 @@ function mergeVisitContextCounts(existingCounts = {}, nextCounts = {}) {
     evening: (Number(existingCounts.evening) || 0) + (Number(nextCounts.evening) || 0),
     night: (Number(existingCounts.night) || 0) + (Number(nextCounts.night) || 0),
   };
+}
+
+function recordRouteStationHabit(profile, template, stationId, visitTimestamp) {
+  if (!profile || !stationId) return;
+  if (!profile.routeStationHabits || typeof profile.routeStationHabits !== 'object') {
+    profile.routeStationHabits = {};
+  }
+  const timestamp = Number(visitTimestamp) || Date.now();
+  for (const habitKey of buildRouteHabitKeys(template)) {
+    const existing = profile.routeStationHabits[habitKey] || {};
+    const stationHabit = existing[stationId] || { count: 0, lastVisitMs: timestamp };
+    profile.routeStationHabits[habitKey] = {
+      ...existing,
+      [stationId]: {
+        count: (Number(stationHabit.count) || 0) + 1,
+        lastVisitMs: timestamp,
+      },
+    };
+  }
+}
+
+function computeRouteStationHabitShare(profile, template, stationId, nowMs = null) {
+  return computeRouteHabitShareForKeys(
+    profile?.routeStationHabits,
+    buildRouteHabitKeys(template),
+    stationId,
+    nowMs,
+  );
+}
+
+function recordRouteStationExposureEvent(profile, template, stationId, exposureTimestamp) {
+  if (!profile || !stationId) return;
+  if (!profile.routeStationExposures || typeof profile.routeStationExposures !== 'object') {
+    profile.routeStationExposures = {};
+  }
+  const timestamp = Number(exposureTimestamp) || Date.now();
+  for (const habitKey of buildRouteHabitKeys(template)) {
+    const existing = profile.routeStationExposures[habitKey] || {};
+    const stationExposure = existing[stationId] || { count: 0, lastExposureMs: timestamp };
+    profile.routeStationExposures[habitKey] = {
+      ...existing,
+      [stationId]: {
+        count: (Number(stationExposure.count) || 0) + 1,
+        lastExposureMs: timestamp,
+      },
+    };
+  }
 }
 
 function recordProfileVisit(profile, stationId, visitTimestamp, visitContext = null) {
@@ -1474,12 +2429,51 @@ function recordRouteStationExposure(profile, route, exposureTimestamp) {
     : [];
   if (!visibleStationIds.length) return;
   for (const stationId of visibleStationIds) {
+    recordRouteStationExposureEvent(profile, route, stationId, exposureTimestamp);
     recordProfileExposure(profile, stationId, exposureTimestamp, {
       scenario: route?.scenario || route?.context?.scenario || null,
       dayOfWeek: route?.context?.dayOfWeek,
       hour: route?.context?.hour,
     });
   }
+}
+
+function routeWillFuel(route) {
+  if (typeof route?.willFuel === 'boolean') {
+    return route.willFuel;
+  }
+  if (typeof route?.willStop === 'boolean') {
+    return route.willStop;
+  }
+  return Boolean(route?.expectsTrigger);
+}
+
+function getActualFuelStopStationId(route) {
+  return route?.actualFuelStopStationId || route?.destinationStationId || route?.targetStationId || null;
+}
+
+function buildActionableRecommendationStationIds(acceptableRecommendationStationIds, stationContexts) {
+  if (!Array.isArray(acceptableRecommendationStationIds) || acceptableRecommendationStationIds.length === 0) {
+    return [];
+  }
+  const acceptableIds = new Set(
+    acceptableRecommendationStationIds
+      .filter(Boolean)
+      .map(stationId => String(stationId))
+  );
+  return Array.from(new Set(
+    (Array.isArray(stationContexts) ? stationContexts : [])
+      .filter(entry => entry?.predictiveEligible || entry?.visibleEligible)
+      .map(entry => String(entry.stationId || ''))
+      .filter(stationId => acceptableIds.has(stationId))
+  ));
+}
+
+function getAcceptableRecommendationStationIds(route) {
+  const preferredIds = Array.isArray(route?.acceptableRecommendationStationIds)
+    ? route.acceptableRecommendationStationIds
+    : (route?.targetStationId ? [route.targetStationId] : []);
+  return Array.from(new Set(preferredIds.filter(Boolean).map(stationId => String(stationId))));
 }
 
 function applyFuelingOutcomeToProfile({
@@ -1493,10 +2487,12 @@ function applyFuelingOutcomeToProfile({
 }) {
   let nextMilesSinceLastFill = milesSinceLastFill + route.routeDistanceMiles;
   const nextOdometerMiles = odometerMiles + route.routeDistanceMiles;
+  const actualFuelingDecision = routeWillFuel(route);
+  const actualFuelStopStationId = getActualFuelStopStationId(route);
 
   recordRouteStationExposure(profile, route, fillTimestamp);
 
-  if (route.expectsTrigger && route.targetStationId) {
+  if (actualFuelingDecision && actualFuelStopStationId) {
     const gallons = Math.round(
       Math.max(
         7.8,
@@ -1507,14 +2503,15 @@ function applyFuelingOutcomeToProfile({
       timestamp: fillTimestamp,
       odometer: nextOdometerMiles,
       gallons,
-      pricePerGallon: findStationById(route.targetStationId)?.price || 3.35,
+      pricePerGallon: findStationById(actualFuelStopStationId)?.price || 3.35,
     });
     if (mutateVisitHistory) {
-      recordProfileVisit(profile, route.targetStationId, fillTimestamp, {
+      recordProfileVisit(profile, actualFuelStopStationId, fillTimestamp, {
         scenario: route?.scenario || route?.context?.scenario || null,
         dayOfWeek: route?.context?.dayOfWeek,
         hour: route?.context?.hour,
       });
+      recordRouteStationHabit(profile, route, actualFuelStopStationId, fillTimestamp);
     }
     nextMilesSinceLastFill = 0;
   }
@@ -1576,10 +2573,14 @@ function applyRealisticHistoryBurnIn({
 function chooseTemplateForDriver(rand, driver, routeIndex) {
   const dayOfWeek = routeIndex % 7;
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+  const workerLike = ['office', 'hybrid', 'local', 'mobile'].includes(driver.workMode);
   const weighted = REALISTIC_ROUTE_TEMPLATES.map(template => {
     let weight = isWeekend ? template.weekendWeight : template.weekdayWeight;
     if (!isWeekend && template.purpose === 'commute') {
       weight += driver.weekdayRoutineStrength * 0.22;
+    }
+    if (!isWeekend && template.purpose === 'commute_return') {
+      weight += driver.weekdayRoutineStrength * 0.18;
     }
     if (isWeekend && ['shopping', 'errand'].includes(template.purpose)) {
       weight += driver.weekendErrandShare * 0.18;
@@ -1592,6 +2593,40 @@ function chooseTemplateForDriver(rand, driver, routeIndex) {
     }
     if (driver.memberships.costco && getTemplateStationMarket(template).some(station => station.brand === 'Costco')) {
       weight += 0.06;
+    }
+    if (!isWeekend && workerLike) {
+      if (template.purpose === 'commute') {
+        weight += 0.18 + (driver.weekdayRoutineStrength * 0.18);
+      }
+      if (template.purpose === 'commute_return') {
+        weight += 0.14 + (driver.weekdayRoutineStrength * 0.16);
+      }
+      if (template.purpose === 'pickup' && driver.familyLoad >= 0.45) {
+        weight += 0.12 + (driver.familyLoad * 0.12);
+      }
+      if (['social', 'roadtrip', 'roadtrip_return', 'airport'].includes(template.purpose)) {
+        weight *= 0.55;
+      }
+      if (driver.workMode !== 'remote' && ['shopping', 'errand', 'city_grid'].includes(template.purpose)) {
+        weight *= 0.82;
+      }
+    }
+    if (!isWeekend && driver.workMode === 'remote' && ['errand', 'shopping'].includes(template.purpose)) {
+      weight += 0.10 + (driver.weekendErrandShare * 0.08);
+    }
+    if (!isWeekend && driver.urbanBias >= 0.60 && template.purpose === 'city_grid') {
+      weight += 0.08 + (driver.urbanBias * 0.06);
+    }
+    if (isWeekend) {
+      if (template.purpose === 'pickup' && driver.familyLoad >= 0.45) {
+        weight += 0.06 + (driver.familyLoad * 0.08);
+      }
+      if (template.purpose === 'social') {
+        weight += driver.nightDrivingShare * 0.10;
+      }
+      if (['roadtrip', 'roadtrip_return'].includes(template.purpose)) {
+        weight += driver.highwayShare * 0.12;
+      }
     }
     return { item: template, weight };
   });
@@ -1611,10 +2646,10 @@ function buildRealisticRoute({
   profile,
   routeIndex,
   milesSinceLastFill,
+  actionableLabelMode = 'legacy',
 }) {
   const { template, dayOfWeek, hour } = chooseTemplateForDriver(rand, driver, routeIndex);
   const templateCandidateStationIds = getTemplateCandidateStationIds(template);
-  const templateStationMarket = getTemplateStationMarket(template);
   const baseWaypoints = buildWaypointsFromGroundedRoute({
     ...template,
     candidateStationIds: templateCandidateStationIds,
@@ -1625,13 +2660,52 @@ function buildRealisticRoute({
   });
   const remainingMiles = fuelStateBefore.estimatedRemainingMiles;
   const routeDistanceMiles = routeDistanceMilesFromWaypoints(baseWaypoints);
-  const candidateStations = templateStationMarket;
+  const decisionProgress = estimateDecisionProgress(template, remainingMiles, rand);
+  const routeTimestampMs = buildSimulatedRouteTimestampMs(routeIndex, hour);
   const routeConsumptionPressure = clamp(routeDistanceMiles / Math.max(1, driver.typicalIntervalMiles), 0, 1);
   const remainingRatio = clamp(remainingMiles / Math.max(1, driver.typicalIntervalMiles), 0, 2);
   const lowFuelNeed = clamp(1 - remainingRatio, 0, 1);
-  const opportunityValue = candidateStations.length
-    ? candidateStations
-      .map((station, stationIndex) => scoreDriverStationAffinity(driver, station, template, stationIndex, candidateStations.length))
+  const latentContext = {
+    trafficLevel: template.scenario === 'highway' ? 'free_flow' : 'steady',
+    occupancy: 'solo',
+    timePressure: clamp(driver.timePressureBias * 0.45, 0, 1),
+    weather: 'clear',
+    cheapnessBias: clamp(driver.savingsSensitivity + (driver.memberships.costco || driver.memberships.sams ? 0.08 : 0), 0, 1),
+    routineStrength: driver.weekdayRoutineStrength,
+    lowFuelNeed,
+  };
+  const marketStationContexts = buildRouteMarketStationContexts(template, decisionProgress, {
+    trafficLevel: template.scenario === 'highway' ? 'free_flow' : 'steady',
+  }, {
+    detourTolerance: driver.detourTolerance,
+  });
+  const marketStationIds = marketStationContexts.map(entry => entry.stationId);
+  const candidateStations = marketStationContexts.map(entry => entry.station);
+  const selectionSharpness = computeStationSelectionSharpness(profile, {
+    routineStrength: driver.weekdayRoutineStrength,
+    lowFuelNeed,
+  });
+  const candidateStationWeights = candidateStations.map((station, stationIndex) => ({
+    item: station.stationId,
+    weight: Math.pow(Math.max(0.02, scoreCohortStationChoice(
+      driver,
+      station,
+      template,
+      latentContext,
+      remainingMiles,
+      stationIndex,
+      candidateStations.length,
+      marketStationContexts.find(entry => entry.stationId === station.stationId) || null,
+      profile,
+      routeTimestampMs
+    ) +
+      (lowFuelNeed * 0.18) +
+      (template.scenario === 'highway' ? ((1 - (stationIndex / Math.max(1, candidateStations.length - 1))) * 0.18) : 0) -
+      ((1 - driver.detourTolerance) * clamp((marketStationContexts.find(entry => entry.stationId === station.stationId)?.corridorDistanceMeters || 0) / (template.scenario === 'highway' ? 4500 : 2600), 0, 1) * 0.10)), selectionSharpness),
+  }));
+  const opportunityValue = candidateStationWeights.length
+    ? candidateStationWeights
+      .map(entry => entry.weight)
       .reduce((maxValue, value) => Math.max(maxValue, value), 0)
     : 0;
   const membershipOpportunity = candidateStations.some(station => (
@@ -1645,6 +2719,15 @@ function buildRealisticRoute({
       : remainingRatio >= 0.55
         ? 0.12
         : 0.92;
+  const strongOpportunity = membershipOpportunity === 1 || opportunityValue >= 1.2;
+  const lowFuelOpportunityCap = computeLowFuelOpportunityCap({
+    lowFuelNeed,
+    scenario: template.scenario,
+    purpose: template.purpose,
+    strongOpportunity,
+    routineStrength: driver.weekdayRoutineStrength,
+    timePressure: latentContext.timePressure,
+  });
   const stopProbability = clamp(
     (driver.spontaneity * 0.14) +
     (lowFuelNeed * (0.42 + (driver.lowFuelConservatism * 0.12))) +
@@ -1653,31 +2736,45 @@ function buildRealisticRoute({
     (membershipOpportunity * Math.max(0, lowFuelNeed - 0.22) * 0.05) +
     (template.scenario === 'highway' ? 0.02 : 0),
     0.002,
-    earlyFuelCap
+    lowFuelOpportunityCap != null
+      ? Math.min(earlyFuelCap, lowFuelOpportunityCap)
+      : earlyFuelCap
   );
   const willStop = rand() < stopProbability;
   const destinationStationId = willStop
-    ? chooseWeighted(rand, candidateStations.map((station, stationIndex) => ({
-      item: station.stationId,
-      weight: scoreDriverStationAffinity(driver, station, template, stationIndex, candidateStations.length) +
-        (lowFuelNeed * 0.18) +
-        (template.scenario === 'highway' ? ((1 - (stationIndex / Math.max(1, candidateStations.length - 1))) * 0.18) : 0),
-    })))
+    ? chooseStationForStop(rand, candidateStationWeights, profile, latentContext, driver)
     : null;
-  const hiddenDecisionLowerBound = Math.max(4, Math.floor(baseWaypoints.length * (remainingMiles <= 45 ? 0.24 : 0.36)));
-  const hiddenDecisionUpperBound = Math.max(hiddenDecisionLowerBound + 1, Math.floor(baseWaypoints.length * (remainingMiles <= 45 ? 0.54 : 0.76)));
+  const destinationStationWeight = destinationStationId
+    ? (candidateStationWeights.find(entry => entry.item === destinationStationId)?.weight || 0)
+    : null;
+  const latentAcceptableRecommendationStationIds = willStop
+    ? candidateStationWeights
+      .filter(entry => entry.weight >= ((destinationStationWeight || 0) - 0.01))
+      .map(entry => entry.item)
+    : [];
+  const actionableRecommendationStationIds = willStop
+    ? resolveActionableRecommendationStationIds({
+      actionableLabelMode,
+      acceptableRecommendationStationIds: latentAcceptableRecommendationStationIds,
+      stationContexts: marketStationContexts,
+      historyVisitCount: countProfileHistoryVisits(profile),
+    })
+    : [];
+  const progressIndexCenter = Math.round(baseWaypoints.length * decisionProgress);
+  const hiddenDecisionLowerBound = Math.max(4, progressIndexCenter - Math.max(2, Math.round(baseWaypoints.length * 0.08)));
+  const hiddenDecisionUpperBound = Math.max(hiddenDecisionLowerBound + 1, Math.min(baseWaypoints.length - 3, progressIndexCenter + Math.max(2, Math.round(baseWaypoints.length * 0.08))));
   const hiddenDecisionIndex = willStop
     ? randomInt(rand, hiddenDecisionLowerBound, hiddenDecisionUpperBound)
     : null;
   const route = buildHiddenIntentRoute({
     blueprint: {
       id: template.id,
-      groundedRouteId: template.id,
+      groundedRouteId: template.groundedRouteId || template.id,
       scenario: template.scenario,
       defaultHour: hour,
       dayOfWeek,
       hiddenFuelProbability: stopProbability,
-      candidateStationIds: templateCandidateStationIds,
+      candidateStationIds: marketStationIds,
       controlPoints: template.controlPoints,
       speedFns: template.speedFns,
     },
@@ -1693,8 +2790,244 @@ function buildRealisticRoute({
   route.fuelStateBefore = fuelStateBefore;
   route.intentClass = remainingMiles <= 100 ? 'probable' : 'impulsive';
   route.routeDistanceMiles = Math.round(routeDistanceMiles * 10) / 10;
-  route.marketStations = templateStationMarket;
+  route.marketStations = candidateStations;
+  route.groundedRouteStationCount = getGroundedRouteStations(template.groundedRouteId || template.id).length;
+  route.latentStationUtilities = candidateStationWeights.map(entry => ({
+    stationId: entry.item,
+    utility: Number(entry.weight) || 0,
+  }));
+  route.latentChosenStationUtility = Number(destinationStationWeight) || null;
+  route.willFuel = willStop;
+  route.actualFuelStopStationId = destinationStationId;
+  route.acceptableRecommendationStationIds = actionableLabelMode === 'observable'
+    ? computeLiveObservableRecommendationStationIds(
+      route,
+      latentAcceptableRecommendationStationIds,
+      { historyVisitCount: countProfileHistoryVisits(profile) }
+    )
+    : computeLiveActionableRecommendationStationIds(route, actionableRecommendationStationIds);
+  route.expectsTrigger = Boolean(willStop && route.acceptableRecommendationStationIds.length > 0);
   return route;
+}
+
+function incrementBreakdownCounter(breakdown, key) {
+  const normalizedKey = key || 'unknown';
+  breakdown[normalizedKey] = (breakdown[normalizedKey] || 0) + 1;
+}
+
+function findFirstIndexedTrace(entries, predicate) {
+  const sorted = (entries || [])
+    .filter(entry => Number.isInteger(entry?.routeSampleIndex))
+    .sort((left, right) => left.routeSampleIndex - right.routeSampleIndex);
+  return sorted.find(predicate) || null;
+}
+
+function computeTracePeak(targetSnapshots, accessor) {
+  const values = targetSnapshots
+    .map(entry => Number(accessor(entry)) || 0)
+    .filter(value => Number.isFinite(value));
+  if (!values.length) return 0;
+  return values.reduce((maxValue, value) => Math.max(maxValue, value), 0);
+}
+
+function classifyNoCorridorMarket(route) {
+  const marketStations = Array.isArray(route?.marketStations) ? route.marketStations : [];
+  if (!marketStations.length) {
+    return 'empty_market';
+  }
+
+  const scenario = route?.scenario || 'city';
+  const predictiveMinAheadMeters = scenario === 'highway'
+    ? 1800
+    : (scenario === 'suburban' ? 1400 : 1200);
+  const corridorLimit = computeFeasibleCorridorDistanceLimit(
+    { scenario },
+    { trafficLevel: route?.context?.trafficLevel || 'steady' },
+    { detourTolerance: 0.35 }
+  );
+
+  const routeApproaches = marketStations
+    .map(station => station?.routeApproach || null)
+    .filter(Boolean);
+  if (!routeApproaches.length) {
+    return 'unannotated_market';
+  }
+
+  const predictiveCandidateCount = routeApproaches.filter(approach =>
+    Number.isFinite(Number(approach?.alongRouteDistanceMeters)) &&
+    Number.isFinite(Number(approach?.offsetFromRouteMeters)) &&
+    Number(approach.alongRouteDistanceMeters) >= predictiveMinAheadMeters &&
+    Number(approach.offsetFromRouteMeters) <= corridorLimit
+  ).length;
+  if (predictiveCandidateCount > 0) {
+    return 'unexpected_predictive_market';
+  }
+
+  const tooCloseCandidateCount = routeApproaches.filter(approach =>
+    Number.isFinite(Number(approach?.alongRouteDistanceMeters)) &&
+    Number.isFinite(Number(approach?.offsetFromRouteMeters)) &&
+    Number(approach.alongRouteDistanceMeters) >= 0 &&
+    Number(approach.alongRouteDistanceMeters) < predictiveMinAheadMeters &&
+    Number(approach.offsetFromRouteMeters) <= corridorLimit
+  ).length;
+  if (tooCloseCandidateCount > 0) {
+    return 'too_close_market';
+  }
+
+  const minimumOffsetMeters = routeApproaches
+    .map(approach => Number(approach?.offsetFromRouteMeters))
+    .filter(value => Number.isFinite(value))
+    .reduce((minValue, value) => Math.min(minValue, value), Number.POSITIVE_INFINITY);
+  if (Number.isFinite(minimumOffsetMeters) && minimumOffsetMeters > (corridorLimit * 1.45)) {
+    return 'off_route_market';
+  }
+
+  const minimumAheadMeters = routeApproaches
+    .map(approach => Number(approach?.alongRouteDistanceMeters))
+    .filter(value => Number.isFinite(value))
+    .reduce((minValue, value) => Math.min(minValue, value), Number.POSITIVE_INFINITY);
+  if (Number.isFinite(minimumAheadMeters) && minimumAheadMeters > predictiveMinAheadMeters) {
+    return 'too_far_market';
+  }
+
+  return 'mixed_market';
+}
+
+function summarizeRouteStatefulTrace({
+  route,
+  decisionSnapshots = [],
+  recommendationEvaluations = [],
+  recommendationSuppressions = [],
+  recommendationSkips = [],
+  triggers = [],
+}) {
+  const acceptableTargetIds = new Set(getAcceptableRecommendationStationIds(route));
+  const targetSnapshots = decisionSnapshots
+    .map(snapshot => {
+      const targetCandidate = Array.isArray(snapshot?.candidates)
+        ? snapshot.candidates.find(candidate => acceptableTargetIds.has(String(candidate?.stationId || '')))
+        : null;
+      if (!targetCandidate) return null;
+      return {
+        routeSampleIndex: Number.isInteger(snapshot?.routeSampleIndex) ? snapshot.routeSampleIndex : null,
+        routeProgress: Number.isFinite(Number(snapshot?.routeProgress)) ? Number(snapshot.routeProgress) : null,
+        snapshot,
+        candidate: targetCandidate,
+      };
+    })
+    .filter(Boolean);
+  const targetEvaluations = recommendationEvaluations.filter(evaluation =>
+    acceptableTargetIds.has(String(evaluation?.recommendation?.stationId || ''))
+  );
+  const targetSuppressions = recommendationSuppressions.filter(suppression =>
+    acceptableTargetIds.has(String(suppression?.candidateStationId || '')) ||
+    acceptableTargetIds.has(String(suppression?.predictedDefaultStationId || ''))
+  );
+  const firstTargetVisible = findFirstIndexedTrace(targetSnapshots, () => true);
+  const firstTargetProposal = findFirstIndexedTrace(targetEvaluations, evaluation =>
+    Boolean(evaluation?.recommendation?.stationId)
+  );
+  const firstTargetDeferred = findFirstIndexedTrace(targetEvaluations, evaluation =>
+    evaluation?.status === 'deferred_presentation'
+  );
+  const firstTargetTriggered = findFirstIndexedTrace(targetEvaluations, evaluation =>
+    evaluation?.status === 'triggered' || evaluation?.status === 'triggered_pending_release'
+  );
+  const firstTargetSuppression = findFirstIndexedTrace(targetSuppressions, () => true);
+  const dominantEvaluationStatus = Object.entries(
+    targetEvaluations.reduce((counts, evaluation) => {
+      const key = String(evaluation?.status || 'unknown');
+      counts[key] = (counts[key] || 0) + 1;
+      return counts;
+    }, {})
+  ).sort((left, right) => right[1] - left[1])[0]?.[0] || null;
+  const dominantSuppressionReason = Object.entries(
+    targetSuppressions.reduce((counts, suppression) => {
+      const key = String(suppression?.reason || 'unknown');
+      counts[key] = (counts[key] || 0) + 1;
+      return counts;
+    }, {})
+  ).sort((left, right) => right[1] - left[1])[0]?.[0] || null;
+  const dominantSkipReason = Object.entries(
+    recommendationSkips.reduce((counts, skip) => {
+      const key = String(skip?.reason || 'unknown');
+      counts[key] = (counts[key] || 0) + 1;
+      return counts;
+    }, {})
+  ).sort((left, right) => right[1] - left[1])[0]?.[0] || null;
+  const noCorridorClassification = dominantSkipReason === 'no_corridor_candidates'
+    ? classifyNoCorridorMarket(route)
+    : null;
+
+  let failureStage = 'correct_silent';
+  if (route.expectsTrigger) {
+    if (route.firstTriggerCorrect) {
+      failureStage = 'correct_trigger';
+    } else if (route.triggered) {
+      failureStage = 'wrong_station_trigger';
+    } else if (!decisionSnapshots.length) {
+      failureStage = dominantSkipReason
+        ? `skipped:${dominantSkipReason}`
+        : 'no_decision_snapshot';
+    } else if (!targetSnapshots.length) {
+      failureStage = 'target_never_visible';
+    } else if (!targetEvaluations.length) {
+      failureStage = dominantSuppressionReason
+        ? `suppressed:${dominantSuppressionReason}`
+        : 'visible_no_target_proposal';
+    } else if (targetEvaluations.some(evaluation => evaluation?.status === 'blocked_ml_gate')) {
+      failureStage = 'blocked_ml_gate';
+    } else if (targetEvaluations.some(evaluation => evaluation?.status === 'blocked_consistency')) {
+      failureStage = 'blocked_consistency';
+    } else if (targetEvaluations.some(evaluation => evaluation?.status === 'blocked_cooldown')) {
+      failureStage = 'blocked_cooldown';
+    } else if (targetEvaluations.some(evaluation =>
+      evaluation?.status === 'dropped_pending_mode' ||
+      evaluation?.status === 'dropped_pending_support'
+    )) {
+      failureStage = 'pending_dropped';
+    } else if (targetEvaluations.some(evaluation => evaluation?.status === 'deferred_presentation')) {
+      failureStage = 'deferred_presentation';
+    } else {
+      failureStage = dominantEvaluationStatus
+        ? `evaluated:${dominantEvaluationStatus}`
+        : 'unclassified_hidden_miss';
+    }
+  } else if (route.triggered) {
+    failureStage = 'false_positive_trigger';
+  }
+
+  return {
+    failureStage,
+    targetEverVisible: targetSnapshots.length > 0,
+    targetVisibleSampleCount: targetSnapshots.length,
+    firstTargetVisibleSampleIndex: firstTargetVisible?.routeSampleIndex ?? null,
+    firstTargetVisibleProgress: firstTargetVisible?.routeProgress ?? null,
+    firstTargetProposalSampleIndex: firstTargetProposal?.routeSampleIndex ?? null,
+    firstTargetProposalProgress: firstTargetProposal?.routeProgress ?? null,
+    firstTargetDeferredSampleIndex: firstTargetDeferred?.routeSampleIndex ?? null,
+    firstTargetTriggeredSampleIndex: firstTargetTriggered?.routeSampleIndex ?? null,
+    firstTargetSuppressionSampleIndex: firstTargetSuppression?.routeSampleIndex ?? null,
+    dominantEvaluationStatus,
+    dominantSuppressionReason,
+    dominantSkipReason,
+    noCorridorClassification,
+    targetPeakEffectiveDestinationProbability: computeTracePeak(targetSnapshots, entry => entry.candidate?.effectiveDestinationProbability),
+    targetPeakObservedConversionRate: computeTracePeak(targetSnapshots, entry => entry.candidate?.observedConversionRate),
+    targetPeakContextualObservedConversionRate: computeTracePeak(targetSnapshots, entry => entry.candidate?.contextualObservedConversionRate),
+    targetPeakObservedBehaviorStrength: computeTracePeak(targetSnapshots, entry => entry.candidate?.observedBehaviorStrength),
+    targetPeakVisitShare: computeTracePeak(targetSnapshots, entry => entry.candidate?.visitShare),
+    targetPeakRouteHabitShare: computeTracePeak(targetSnapshots, entry => entry.candidate?.routeHabitShare),
+    targetPeakIntentEvidence: computeTracePeak(targetSnapshots, entry => entry.candidate?.intentEvidence),
+    targetPeakTripFuelIntentScore: computeTracePeak(targetSnapshots, entry => entry.snapshot?.tripFuelIntentScore),
+    targetPeakFuelNeedScore: computeTracePeak(targetSnapshots, entry => entry.snapshot?.fuelNeedScore),
+    recommendationEvaluationCount: recommendationEvaluations.length,
+    targetEvaluationCount: targetEvaluations.length,
+    suppressionCount: recommendationSuppressions.length,
+    targetSuppressionCount: targetSuppressions.length,
+    skipCount: recommendationSkips.length,
+    triggerCount: triggers.length,
+  };
 }
 
 function simulateRealisticHiddenIntentBatch({
@@ -1703,9 +3036,11 @@ function simulateRealisticHiddenIntentBatch({
   noiseSeed = 2026,
   routeCount = 96,
   historyLevel = 'none',
-  latentPlanHistoryLevel = 'none',
+  latentPlanHistoryLevel = 'match',
   freezeVisitHistory = true,
   collectRouteEvents = false,
+  collectDecisionSnapshots = false,
+  collectRecommendationEvaluations = false,
 } = {}) {
   if (typeof createEngineFn !== 'function') {
     throw new Error('simulateRealisticHiddenIntentBatch requires a createEngineFn');
@@ -1728,7 +3063,9 @@ function simulateRealisticHiddenIntentBatch({
   });
   const seedProfile = burnedInProfile.profile;
   const profile = cloneProfile(seedProfile);
-  const latentPlanProfile = cloneProfile(buildRealisticStressProfile(driver, latentPlanHistoryLevel === 'none' ? 'none' : latentPlanHistoryLevel));
+  const latentPlanProfile = latentPlanHistoryLevel === 'match'
+    ? cloneProfile(seedProfile)
+    : cloneProfile(buildRealisticStressProfile(driver, latentPlanHistoryLevel === 'none' ? 'none' : latentPlanHistoryLevel));
   const routeResults = [];
   let milesSinceLastFill = Number(profile.estimatedMilesSinceLastFill) || burnedInProfile.milesSinceLastFill || 0;
   let odometerMiles = Number(profile.odometerMiles) || burnedInProfile.odometerMiles || 40000;
@@ -1746,9 +3083,23 @@ function simulateRealisticHiddenIntentBatch({
     });
     const historyVisitCount = profile.visitHistory.reduce((sum, entry) => sum + (Number(entry?.visitCount) || 0), 0);
     const triggers = [];
+    let lastDecisionSnapshot = null;
+    const decisionSnapshots = [];
+    const recommendationEvaluations = [];
     const engine = createEngineFn({
       profile,
       onTrigger: event => triggers.push(event),
+      onDecisionSnapshot: snapshot => {
+        lastDecisionSnapshot = snapshot;
+        if (collectDecisionSnapshots) {
+          decisionSnapshots.push(snapshot);
+        }
+      },
+      onRecommendationEvaluation: evaluation => {
+        if (collectRecommendationEvaluations) {
+          recommendationEvaluations.push(evaluation);
+        }
+      },
     });
     if (typeof engine?.setStations === 'function') {
       engine.setStations((route.marketStations || []).length ? route.marketStations : GROUNDED_SIM_STATIONS);
@@ -1764,22 +3115,41 @@ function simulateRealisticHiddenIntentBatch({
       })
       : { samples, noiseEvents: [] };
 
-    for (const sample of noisyRun.samples) {
+    const routeDistanceMeters = Math.max(0, Number(route.routeDistanceMiles) || 0) * 1609.344;
+    for (let sampleIndex = 0; sampleIndex < noisyRun.samples.length; sampleIndex += 1) {
+      const sample = noisyRun.samples[sampleIndex];
+      if (typeof engine?.setStations === 'function' && Array.isArray(route.marketStations) && route.marketStations.length > 0) {
+        const progressRatio = noisyRun.samples.length > 1
+          ? sampleIndex / (noisyRun.samples.length - 1)
+          : 0;
+        engine.setStations(buildDynamicRouteApproachStations(
+          route.marketStations,
+          routeDistanceMeters,
+          progressRatio,
+          sample.alongRouteMeters,
+        ));
+      }
       engine.pushLocation(sample);
     }
 
     const firstTrigger = triggers[0] || null;
-    const matchedTrigger = route.targetStationId
-      ? triggers.find(trigger => trigger.stationId === route.targetStationId)
-      : null;
-    const triggered = triggers.length > 0;
-    const firstTriggerCorrect = Boolean(firstTrigger && route.targetStationId && firstTrigger.stationId === route.targetStationId);
+      const acceptableRecommendationStationIds = getAcceptableRecommendationStationIds(route);
+      const matchedTrigger = acceptableRecommendationStationIds.length
+        ? triggers.find(trigger => acceptableRecommendationStationIds.includes(String(trigger.stationId)))
+        : null;
+      const triggered = triggers.length > 0;
+      const firstTriggerCorrect = Boolean(
+        firstTrigger &&
+        acceptableRecommendationStationIds.includes(String(firstTrigger.stationId))
+      );
     const triggerDistance = matchedTrigger?.triggerDistance ??
       matchedTrigger?.forwardDistance ??
       firstTrigger?.triggerDistance ??
       firstTrigger?.forwardDistance ??
       null;
-    const correct = route.expectsTrigger ? firstTriggerCorrect : !triggered;
+      const correct = route.expectsTrigger ? firstTriggerCorrect : !triggered;
+      const willFuel = routeWillFuel(route);
+      const actualFuelStopStationId = getActualFuelStopStationId(route);
 
     routeResults.push({
       routeId: route.id,
@@ -1787,13 +3157,17 @@ function simulateRealisticHiddenIntentBatch({
       purpose: route.purpose,
       scenario: route.scenario,
       intentClass: route.intentClass,
+      willFuel,
+      actualFuelStopStationId,
       expectsTrigger: route.expectsTrigger,
       triggered,
       firstTriggerCorrect,
       triggerDistance,
-      triggeredStationId: firstTrigger?.stationId || null,
-      targetStationId: route.targetStationId,
-      groundedStationCount: (route.marketStations || []).length,
+        triggeredStationId: firstTrigger?.stationId || null,
+        targetStationId: route.targetStationId,
+        acceptableRecommendationStationIds,
+        groundedStationCount: (route.marketStations || []).length,
+        groundedRouteStationCount: Number(route.groundedRouteStationCount) || 0,
       groundedRoutePointCount: Array.isArray(route.waypoints) ? route.waypoints.length : 0,
       hiddenDecisionIndex: route.hiddenDecisionIndex,
       startingMilesSinceLastFill: route.startingMilesSinceLastFill,
@@ -1808,6 +3182,17 @@ function simulateRealisticHiddenIntentBatch({
       ...(collectRouteEvents
         ? {
           routeEvents: triggers.map(event => ({ ...event })),
+        }
+        : {}),
+      ...(collectDecisionSnapshots
+        ? {
+          lastDecisionSnapshot,
+          decisionSnapshots,
+        }
+        : {}),
+      ...(collectRecommendationEvaluations
+        ? {
+          recommendationEvaluations,
         }
         : {}),
     });
@@ -1841,6 +3226,7 @@ function simulateRealisticHiddenIntentBatch({
     latentMilesSinceLastFill = nextLatentState.milesSinceLastFill;
   }
 
+  const actualFuelRoutes = routeResults.filter(route => route.willFuel);
   const noFuelRoutes = routeResults.filter(route => !route.expectsTrigger);
   const hiddenIntentRoutes = routeResults.filter(route => route.expectsTrigger);
   const truePositives = hiddenIntentRoutes.filter(route => route.firstTriggerCorrect).length;
@@ -1922,6 +3308,11 @@ function simulateRealisticHiddenIntentBatch({
       wrongStationRate: scorecard.wrongStationRate,
       hiddenIntentCount: scorecard.hiddenIntentCount,
       noFuelCount: scorecard.noFuelCount,
+      actualFuelStopCount: actualFuelRoutes.length,
+      nonActionableFuelStopCount: actualFuelRoutes.filter(route => !route.expectsTrigger).length,
+      actionableOpportunityRateAmongFuelStops: actualFuelRoutes.length
+        ? Math.round((hiddenIntentRoutes.length / actualFuelRoutes.length) * 100)
+        : null,
       avgCorrectTriggerDistanceMeters: scorecard.avgCorrectTriggerDistanceMeters,
       precisionFirstScore: scorecard.precisionFirstScore,
       scorecard,
@@ -1938,6 +3329,7 @@ function buildRealisticCohortRoute({
   routeIndex,
   driverIndex,
   milesSinceLastFill,
+  actionableLabelMode = 'legacy',
 }) {
   const { template, dayOfWeek, hour } = chooseTemplateForDriver(rand, driver, routeIndex);
   const context = buildRealisticTripContext({
@@ -1949,7 +3341,6 @@ function buildRealisticCohortRoute({
     hour,
   });
   const templateCandidateStationIds = getTemplateCandidateStationIds(template);
-  const templateStationMarket = getTemplateStationMarket(template);
   const baseWaypoints = buildWaypointsFromGroundedRoute({
     ...template,
     candidateStationIds: templateCandidateStationIds,
@@ -1963,8 +3354,23 @@ function buildRealisticCohortRoute({
   const routeConsumptionPressure = clamp(routeDistanceMiles / Math.max(1, driver.typicalIntervalMiles), 0, 1);
   const remainingRatio = clamp(remainingMiles / Math.max(1, driver.typicalIntervalMiles), 0, 2);
   const lowFuelNeed = clamp(1 - remainingRatio, 0, 1);
-  const exposure = buildRouteExposure(templateCandidateStationIds, rand, template, context);
-  const visibleStations = exposure.visibleStationIds.map(findStationById).filter(Boolean);
+  const routeTimestampMs = buildSimulatedRouteTimestampMs(routeIndex, hour);
+  const decisionProgress = estimateDecisionProgress(template, remainingMiles, rand);
+  const marketStationContexts = buildRouteMarketStationContexts(template, decisionProgress, context, {
+    detourTolerance: driver.detourTolerance,
+  });
+  const marketStationIds = marketStationContexts.map(entry => entry.stationId);
+  const exposure = buildRouteExposure(marketStationIds, rand, template, context, {
+    decisionProgress,
+  });
+  const visibleStationContexts = exposure.visibleStationIds
+    .map(stationId => marketStationContexts.find(entry => entry.stationId === stationId) || null)
+    .filter(Boolean);
+  const visibleStations = visibleStationContexts.map(entry => entry.station);
+  const selectionSharpness = computeStationSelectionSharpness(profile, {
+    ...context,
+    lowFuelNeed,
+  });
 
   const weatherPenalty = context.weather === 'snow'
     ? 0.10
@@ -1972,42 +3378,110 @@ function buildRealisticCohortRoute({
   const trafficPenalty = context.trafficLevel === 'gridlock'
     ? 0.08
     : (context.trafficLevel === 'congested' ? 0.04 : 0);
+  const marketStationUtilities = marketStationContexts.map((entry, stationIndex) => ({
+    stationId: entry.station.stationId,
+    utility: scoreCohortStationChoice(
+      driver,
+      entry.station,
+      template,
+      context,
+      remainingMiles,
+      stationIndex,
+      marketStationContexts.length,
+      entry,
+      profile,
+      routeTimestampMs
+    ),
+  }));
+  const visibleStationWeights = visibleStationContexts.map((entry, stationIndex) => ({
+    item: entry.station.stationId,
+    weight: Math.pow(Math.max(0.02, scoreCohortStationChoice(
+      driver,
+      entry.station,
+      template,
+      context,
+      remainingMiles,
+      stationIndex,
+      visibleStations.length,
+      entry,
+      profile,
+      routeTimestampMs
+    )), selectionSharpness),
+  }));
+  const topVisibleUtility = visibleStationWeights.length
+    ? Math.max(...visibleStationWeights.map(entry => Number(entry.weight) || 0))
+    : 0;
+  const membershipOpportunity = visibleStations.some(station => (
+    (driver.memberships.costco && station.brand === 'Costco') ||
+    (driver.memberships.sams && station.brand === "Sam's Club")
+  )) ? 1 : 0;
+  const visibleUtilityLead = visibleStationWeights.length > 1
+    ? (() => {
+      const sorted = [...visibleStationWeights].sort((left, right) => (right.weight || 0) - (left.weight || 0));
+      return Math.max(0, (Number(sorted[0]?.weight) || 0) - (Number(sorted[1]?.weight) || 0));
+    })()
+    : topVisibleUtility;
   const stopProbability = clamp(
     (driver.spontaneity * 0.10) +
     (lowFuelNeed * (0.48 + (driver.lowFuelConservatism * 0.18))) +
     (Math.max(0, lowFuelNeed - 0.24) * context.cheapnessBias * 0.12) +
     (routeConsumptionPressure * 0.06) +
+    (Math.max(0, topVisibleUtility - 0.62) * 0.12) +
+    (Math.max(0, visibleUtilityLead) * 0.06) +
     ((context.weather === 'snow' || context.weather === 'rain') ? (driver.weatherSensitivity * 0.08) : 0) +
     (template.scenario === 'highway' ? 0.03 : 0) -
     trafficPenalty -
     (context.timePressure * 0.04),
     0.001,
-    remainingRatio >= 0.95 ? 0.03 : remainingRatio >= 0.75 ? 0.08 : remainingRatio >= 0.58 ? 0.16 : 0.94
+    (() => {
+      const baseCap = remainingRatio >= 0.95 ? 0.03 : remainingRatio >= 0.75 ? 0.08 : remainingRatio >= 0.58 ? 0.16 : 0.94;
+      const strongOpportunity = membershipOpportunity === 1 || visibleUtilityLead >= 0.18 || topVisibleUtility >= 1.2;
+      const lowFuelOpportunityCap = computeLowFuelOpportunityCap({
+        lowFuelNeed,
+        scenario: template.scenario,
+        purpose: template.purpose,
+        strongOpportunity,
+        routineStrength: context.routineStrength,
+        timePressure: context.timePressure,
+      });
+      return lowFuelOpportunityCap != null
+        ? Math.min(baseCap, lowFuelOpportunityCap)
+        : baseCap;
+    })()
   );
   const willStop = rand() < stopProbability;
   const chosenStationId = willStop && visibleStations.length
-    ? chooseWeighted(rand, visibleStations.map((station, stationIndex) => ({
-      item: station.stationId,
-      weight: scoreCohortStationChoice(
-        driver,
-        station,
-        template,
-        context,
-        remainingMiles,
-        stationIndex,
-        visibleStations.length
-      ),
-    })))
+    ? chooseStationForStop(rand, visibleStationWeights, profile, {
+      ...context,
+      lowFuelNeed,
+    }, driver)
     : null;
-  const hiddenDecisionLowerBound = Math.max(4, Math.floor(baseWaypoints.length * (remainingMiles <= 50 ? 0.26 : 0.38)));
-  const hiddenDecisionUpperBound = Math.max(hiddenDecisionLowerBound + 1, Math.floor(baseWaypoints.length * (remainingMiles <= 50 ? 0.58 : 0.78)));
+  const chosenStationUtility = chosenStationId
+    ? (marketStationUtilities.find(entry => entry.stationId === chosenStationId)?.utility || 0)
+    : null;
+  const latentAcceptableRecommendationStationIds = willStop
+    ? marketStationUtilities
+      .filter(entry => entry.utility >= ((chosenStationUtility || 0) - 0.01))
+      .map(entry => entry.stationId)
+    : [];
+  const actionableRecommendationStationIds = willStop
+    ? resolveActionableRecommendationStationIds({
+      actionableLabelMode,
+      acceptableRecommendationStationIds: latentAcceptableRecommendationStationIds,
+      stationContexts: visibleStationContexts,
+      historyVisitCount: countProfileHistoryVisits(profile),
+    })
+    : [];
+  const progressIndexCenter = Math.round(baseWaypoints.length * decisionProgress);
+  const hiddenDecisionLowerBound = Math.max(4, progressIndexCenter - Math.max(2, Math.round(baseWaypoints.length * 0.08)));
+  const hiddenDecisionUpperBound = Math.max(hiddenDecisionLowerBound + 1, Math.min(baseWaypoints.length - 3, progressIndexCenter + Math.max(2, Math.round(baseWaypoints.length * 0.08))));
   const hiddenDecisionIndex = willStop
     ? randomInt(rand, hiddenDecisionLowerBound, hiddenDecisionUpperBound)
     : null;
   const route = buildHiddenIntentRoute({
     blueprint: {
       id: template.id,
-      groundedRouteId: template.id,
+      groundedRouteId: template.groundedRouteId || template.id,
       scenario: template.scenario,
       defaultHour: hour,
       dayOfWeek,
@@ -2027,7 +3501,23 @@ function buildRealisticCohortRoute({
   route.driverId = `driver-${driverIndex}`;
   route.driverArchetype = driver.archetype;
   route.routeDistanceMiles = Math.round(routeDistanceMiles * 10) / 10;
-  route.marketStations = templateStationMarket;
+  route.marketStations = marketStationContexts.map(entry => entry.station);
+  route.groundedRouteStationCount = getGroundedRouteStations(template.groundedRouteId || template.id).length;
+  route.latentStationUtilities = marketStationUtilities.map(entry => ({
+    stationId: entry.stationId,
+    utility: Number(entry.utility) || 0,
+  }));
+  route.latentChosenStationUtility = Number(chosenStationUtility) || null;
+  route.willFuel = willStop;
+  route.actualFuelStopStationId = chosenStationId;
+  route.acceptableRecommendationStationIds = actionableLabelMode === 'observable'
+    ? computeLiveObservableRecommendationStationIds(
+      route,
+      latentAcceptableRecommendationStationIds,
+      { historyVisitCount: countProfileHistoryVisits(profile) }
+    )
+    : computeLiveActionableRecommendationStationIds(route, actionableRecommendationStationIds);
+  route.expectsTrigger = Boolean(willStop && route.acceptableRecommendationStationIds.length > 0);
   route.startingMilesSinceLastFill = Math.round(milesSinceLastFill);
   route.fuelStateBefore = fuelStateBefore;
   route.intentClass = remainingMiles <= 100 ? 'probable' : 'impulsive';
@@ -2035,6 +3525,9 @@ function buildRealisticCohortRoute({
     ...context,
     dayOfWeek,
     hour,
+    decisionProgress,
+    marketStationIds,
+    marketStationCount: marketStationIds.length,
     visibleStationIds: exposure.visibleStationIds.slice(),
     visibleStationCount: exposure.visibleStationCount,
     exposureQuality: exposure.exposureQuality,
@@ -2052,9 +3545,14 @@ function simulateRealisticCohortBatch({
   driverCount = 6,
   routesPerDriver = 28,
   historyLevel = 'none',
-  latentPlanHistoryLevel = 'none',
+  actionableLabelMode = 'legacy',
+  latentPlanHistoryLevel = 'match',
   freezeVisitHistory = true,
   collectRouteEvents = false,
+  collectDecisionSnapshots = false,
+  collectRecommendationEvaluations = false,
+  collectRecommendationSuppressions = false,
+  collectStatefulTrace = false,
 } = {}) {
   if (typeof createEngineFn !== 'function') {
     throw new Error('simulateRealisticCohortBatch requires a createEngineFn');
@@ -2074,6 +3572,10 @@ function simulateRealisticCohortBatch({
   const weatherDistribution = {};
   const occupancyDistribution = {};
   const archetypeDistribution = {};
+  const effectiveCollectDecisionSnapshots = collectDecisionSnapshots || collectStatefulTrace;
+  const effectiveCollectRecommendationEvaluations = collectRecommendationEvaluations || collectStatefulTrace;
+  const effectiveCollectRecommendationSuppressions = collectRecommendationSuppressions || collectStatefulTrace;
+  const effectiveCollectRecommendationSkips = collectStatefulTrace;
 
   for (let driverIndex = 0; driverIndex < driverCount; driverIndex += 1) {
     const driverSeed = noiseSeed + (driverIndex * 997);
@@ -2093,11 +3595,14 @@ function simulateRealisticCohortBatch({
         routeIndex,
         driverIndex: historicalDriverIndex,
         milesSinceLastFill,
+        actionableLabelMode,
       }),
     });
     const seedProfile = burnedInProfile.profile;
     const profile = cloneProfile(seedProfile);
-    const latentPlanProfile = cloneProfile(buildRealisticStressProfile(driver, latentPlanHistoryLevel === 'none' ? 'none' : latentPlanHistoryLevel));
+    const latentPlanProfile = latentPlanHistoryLevel === 'match'
+      ? cloneProfile(seedProfile)
+      : cloneProfile(buildRealisticStressProfile(driver, latentPlanHistoryLevel === 'none' ? 'none' : latentPlanHistoryLevel));
     const household = buildHouseholdRecord(driver, driverIndex);
     const person = buildPersonRecord(driver, driverIndex, household);
     const vehicle = buildVehicleRecord(driver, driverIndex, household, person);
@@ -2120,12 +3625,39 @@ function simulateRealisticCohortBatch({
         routeIndex: absoluteRouteIndex,
         driverIndex,
         milesSinceLastFill: latentMilesSinceLastFill,
+        actionableLabelMode,
       });
       const historyVisitCount = profile.visitHistory.reduce((sum, entry) => sum + (Number(entry?.visitCount) || 0), 0);
       const triggers = [];
+      let lastDecisionSnapshot = null;
+      const decisionSnapshots = [];
+      const recommendationEvaluations = [];
+      const recommendationSuppressions = [];
+      const recommendationSkips = [];
       const engine = createEngineFn({
         profile,
         onTrigger: event => triggers.push(event),
+        onDecisionSnapshot: snapshot => {
+          lastDecisionSnapshot = snapshot;
+          if (effectiveCollectDecisionSnapshots) {
+            decisionSnapshots.push(snapshot);
+          }
+        },
+        onRecommendationEvaluation: evaluation => {
+          if (effectiveCollectRecommendationEvaluations) {
+            recommendationEvaluations.push(evaluation);
+          }
+        },
+        onRecommendationSuppressed: suppression => {
+          if (effectiveCollectRecommendationSuppressions) {
+            recommendationSuppressions.push(suppression);
+          }
+        },
+        onRecommendationSkipped: skip => {
+          if (effectiveCollectRecommendationSkips) {
+            recommendationSkips.push(skip);
+          }
+        },
       });
       if (typeof engine?.setStations === 'function') {
         engine.setStations((route.marketStations || []).length ? route.marketStations : GROUNDED_SIM_STATIONS);
@@ -2141,22 +3673,48 @@ function simulateRealisticCohortBatch({
         })
         : { samples, noiseEvents: [] };
 
-      for (const sample of noisyRun.samples) {
-        engine.pushLocation(sample);
+      const routeDistanceMeters = Math.max(0, Number(route.routeDistanceMiles) || 0) * 1609.344;
+      for (let sampleIndex = 0; sampleIndex < noisyRun.samples.length; sampleIndex += 1) {
+        const sample = noisyRun.samples[sampleIndex];
+        if (typeof engine?.setStations === 'function' && Array.isArray(route.marketStations) && route.marketStations.length > 0) {
+          const progressRatio = noisyRun.samples.length > 1
+            ? sampleIndex / (noisyRun.samples.length - 1)
+            : 0;
+          engine.setStations(buildDynamicRouteApproachStations(
+            route.marketStations,
+            routeDistanceMeters,
+            progressRatio,
+            sample.alongRouteMeters,
+          ));
+        }
+        engine.pushLocation(sample, {
+          routeId: route.id,
+          routeSampleIndex: sampleIndex,
+          routeSampleCount: noisyRun.samples.length,
+          routeProgress: noisyRun.samples.length > 1
+            ? sampleIndex / (noisyRun.samples.length - 1)
+            : 0,
+        });
       }
 
       const firstTrigger = triggers[0] || null;
-      const matchedTrigger = route.targetStationId
-        ? triggers.find(trigger => trigger.stationId === route.targetStationId)
+      const acceptableRecommendationStationIds = getAcceptableRecommendationStationIds(route);
+      const matchedTrigger = acceptableRecommendationStationIds.length
+        ? triggers.find(trigger => acceptableRecommendationStationIds.includes(String(trigger.stationId)))
         : null;
       const triggered = triggers.length > 0;
-      const firstTriggerCorrect = Boolean(firstTrigger && route.targetStationId && firstTrigger.stationId === route.targetStationId);
+      const firstTriggerCorrect = Boolean(
+        firstTrigger &&
+        acceptableRecommendationStationIds.includes(String(firstTrigger.stationId))
+      );
       const triggerDistance = matchedTrigger?.triggerDistance ??
         matchedTrigger?.forwardDistance ??
         firstTrigger?.triggerDistance ??
         firstTrigger?.forwardDistance ??
         null;
       const correct = route.expectsTrigger ? firstTriggerCorrect : !triggered;
+      const willFuel = routeWillFuel(route);
+      const actualFuelStopStationId = getActualFuelStopStationId(route);
 
       const result = {
         routeId: route.id,
@@ -2169,13 +3727,17 @@ function simulateRealisticCohortBatch({
         purpose: route.purpose,
         scenario: route.scenario,
         intentClass: route.intentClass,
+        willFuel,
+        actualFuelStopStationId,
         expectsTrigger: route.expectsTrigger,
         triggered,
         firstTriggerCorrect,
         triggerDistance,
         triggeredStationId: firstTrigger?.stationId || null,
         targetStationId: route.targetStationId,
+        acceptableRecommendationStationIds,
         groundedStationCount: (route.marketStations || []).length,
+        groundedRouteStationCount: Number(route.groundedRouteStationCount) || 0,
         groundedRoutePointCount: Array.isArray(route.waypoints) ? route.waypoints.length : 0,
         hiddenDecisionIndex: route.hiddenDecisionIndex,
         startingMilesSinceLastFill: route.startingMilesSinceLastFill,
@@ -2191,6 +3753,38 @@ function simulateRealisticCohortBatch({
         ...(collectRouteEvents
           ? {
             routeEvents: triggers.map(event => ({ ...event })),
+          }
+          : {}),
+        ...(collectDecisionSnapshots
+          ? {
+            lastDecisionSnapshot,
+            decisionSnapshots,
+          }
+          : {}),
+        ...(collectRecommendationEvaluations
+          ? {
+            recommendationEvaluations,
+          }
+          : {}),
+        ...(collectRecommendationSuppressions
+          ? {
+            recommendationSuppressions,
+          }
+          : {}),
+        ...(collectStatefulTrace
+          ? {
+            statefulTraceSummary: summarizeRouteStatefulTrace({
+              route: {
+                ...route,
+                triggered,
+                firstTriggerCorrect,
+              },
+              decisionSnapshots,
+              recommendationEvaluations,
+              recommendationSuppressions,
+              recommendationSkips,
+              triggers,
+            }),
           }
           : {}),
       };
@@ -2225,7 +3819,7 @@ function simulateRealisticCohortBatch({
         date: new Date(fillTimestamp).toISOString().slice(0, 10),
         miles_driven: route.routeDistanceMiles,
         gallons_burned: Math.round((route.routeDistanceMiles / Math.max(1, driver.weightedMpg)) * 100) / 100,
-        fills_count: route.expectsTrigger ? 1 : 0,
+        fills_count: willFuel ? 1 : 0,
         gallons_bought_total: facts.transaction?.gallons_bought || 0,
         stations_passed_count: route.context.visibleStationCount || 0,
       });
@@ -2279,6 +3873,7 @@ function simulateRealisticCohortBatch({
     });
   }
 
+  const actualFuelRoutes = routeResults.filter(route => route.willFuel);
   const noFuelRoutes = routeResults.filter(route => !route.expectsTrigger);
   const hiddenIntentRoutes = routeResults.filter(route => route.expectsTrigger);
   const truePositives = hiddenIntentRoutes.filter(route => route.firstTriggerCorrect).length;
@@ -2344,10 +3939,34 @@ function simulateRealisticCohortBatch({
     avgVisibleStationCount: routeResults.length
       ? Math.round((routeResults.reduce((sum, route) => sum + (route.context?.visibleStationCount || 0), 0) / routeResults.length) * 100) / 100
       : 0,
-    visibleTargetCoverageRate: hiddenIntentRoutes.length
-      ? Math.round((hiddenIntentRoutes.filter(route => (route.context?.visibleStationIds || []).includes(route.targetStationId)).length / hiddenIntentRoutes.length) * 100)
+    visibleTargetCoverageRate: actualFuelRoutes.length
+      ? Math.round((actualFuelRoutes.filter(route => (route.context?.visibleStationIds || []).includes(route.actualFuelStopStationId)).length / actualFuelRoutes.length) * 100)
       : 0,
   };
+  if (collectStatefulTrace) {
+    const statefulOutcomeBreakdown = {};
+    const hiddenMissFailureBreakdown = {};
+    const falsePositiveFailureBreakdown = {};
+    for (const route of routeResults) {
+      const noCorridorClassification = route.statefulTraceSummary?.noCorridorClassification;
+      const failureStage = (
+        route.statefulTraceSummary?.failureStage === 'skipped:no_corridor_candidates' &&
+        noCorridorClassification
+      )
+        ? `skipped:no_corridor_candidates:${noCorridorClassification}`
+        : (route.statefulTraceSummary?.failureStage || 'unknown');
+      incrementBreakdownCounter(statefulOutcomeBreakdown, failureStage);
+      if (route.expectsTrigger && !route.firstTriggerCorrect) {
+        incrementBreakdownCounter(hiddenMissFailureBreakdown, failureStage);
+      }
+      if (!route.expectsTrigger && route.triggered) {
+        incrementBreakdownCounter(falsePositiveFailureBreakdown, failureStage);
+      }
+    }
+    diagnostics.statefulOutcomeBreakdown = statefulOutcomeBreakdown;
+    diagnostics.hiddenMissFailureBreakdown = hiddenMissFailureBreakdown;
+    diagnostics.falsePositiveFailureBreakdown = falsePositiveFailureBreakdown;
+  }
 
   return {
     historyLevel,
@@ -2374,6 +3993,11 @@ function simulateRealisticCohortBatch({
       wrongStationRate: scorecard.wrongStationRate,
       hiddenIntentCount: scorecard.hiddenIntentCount,
       noFuelCount: scorecard.noFuelCount,
+      actualFuelStopCount: actualFuelRoutes.length,
+      nonActionableFuelStopCount: actualFuelRoutes.filter(route => !route.expectsTrigger).length,
+      actionableOpportunityRateAmongFuelStops: actualFuelRoutes.length
+        ? Math.round((hiddenIntentRoutes.length / actualFuelRoutes.length) * 100)
+        : null,
       avgCorrectTriggerDistanceMeters: scorecard.avgCorrectTriggerDistanceMeters,
       precisionFirstScore: scorecard.precisionFirstScore,
       scorecard,
@@ -2987,7 +4611,20 @@ function simulateHiddenIntentStressBatch({
       })
       : { samples, noiseEvents: [] };
 
-    for (const sample of noisyRun.samples) {
+    const routeDistanceMeters = Math.max(0, Number(route.routeDistanceMiles) || 0) * 1609.344;
+    for (let sampleIndex = 0; sampleIndex < noisyRun.samples.length; sampleIndex += 1) {
+      const sample = noisyRun.samples[sampleIndex];
+      if (typeof engine?.setStations === 'function' && Array.isArray(route.marketStations) && route.marketStations.length > 0) {
+        const progressRatio = noisyRun.samples.length > 1
+          ? sampleIndex / (noisyRun.samples.length - 1)
+          : 0;
+        engine.setStations(buildDynamicRouteApproachStations(
+          route.marketStations,
+          routeDistanceMeters,
+          progressRatio,
+          sample.alongRouteMeters,
+        ));
+      }
       engine.pushLocation(sample);
     }
 

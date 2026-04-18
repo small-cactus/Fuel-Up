@@ -26,6 +26,8 @@ const TRACKS_VIEW_CHANGES_IDLE_MS = 180;
 const BEST_PRICE_BLUE_LIGHT = '#007AFF';
 const BEST_PRICE_BLUE_DARK = '#11f050ff';
 const INACTIVE_TEXT_DARK = '#F5F7FA';
+const ONBOARDING_TINT_CHEAPEST = 'rgba(0, 255, 47, 0.3)';
+const ONBOARDING_TINT_EXPENSIVE = 'rgba(255, 25, 0, 0.3)';
 const AnimatedView = Animated.createAnimatedComponent(View);
 
 function StationMarker({
@@ -33,8 +35,10 @@ function StationMarker({
   isSuppressed = false,
   shouldDelaySuppression = false,
   isBest = false,
+  isActive = false,
   isDark = false,
   onPress,
+  useOnboardingColors = false,
 }) {
   const appearProgress = useSharedValue(1);
   const suppressionProgress = useSharedValue(isSuppressed && !shouldDelaySuppression ? 1 : 0);
@@ -119,12 +123,21 @@ function StationMarker({
   const inactiveIconTintColor = isDark ? '#D3D6DE' : '#888888';
   const inactiveTextColor = isDark ? INACTIVE_TEXT_DARK : '#888888';
   const bestTintColor = isDark ? BEST_PRICE_BLUE_DARK : BEST_PRICE_BLUE_LIGHT;
-  const iconTintColor = isBest
-    ? bestTintColor
-    : inactiveIconTintColor;
-  const textColor = isBest
-    ? bestTintColor
-    : inactiveTextColor;
+
+  let iconTintColor;
+  let textColor;
+  let glassTintColor;
+
+  if (useOnboardingColors) {
+    const plainColor = isDark ? '#FFFFFF' : '#000000';
+    iconTintColor = plainColor;
+    textColor = plainColor;
+    glassTintColor = isBest ? ONBOARDING_TINT_CHEAPEST : ONBOARDING_TINT_EXPENSIVE;
+  } else {
+    iconTintColor = isBest ? bestTintColor : inactiveIconTintColor;
+    textColor = isBest ? bestTintColor : inactiveTextColor;
+    glassTintColor = undefined;
+  }
   const visualStateSignature = [
     quote?.stationId ?? '',
     quote?.price ?? '',
@@ -132,7 +145,9 @@ function StationMarker({
     shouldDelaySuppression ? '1' : '0',
     isContentHidden ? '1' : '0',
     isBest ? '1' : '0',
+    isActive ? '1' : '0',
     isDark ? '1' : '0',
+    useOnboardingColors ? '1' : '0',
   ].join('|');
 
   useEffect(() => {
@@ -155,7 +170,7 @@ function StationMarker({
       tracksViewChangesTimeoutRef.current = null;
       setTracksViewChanges(false);
     }, trackingDuration);
-  }, [isBest, isContentHidden, isDark, isSuppressed, quote?.price, quote?.stationId, shouldDelaySuppression, visualStateSignature]);
+  }, [isActive, isBest, isContentHidden, isDark, isSuppressed, quote?.price, quote?.stationId, shouldDelaySuppression, visualStateSignature]);
 
   return (
     <Marker
@@ -172,19 +187,21 @@ function StationMarker({
         {isContentHidden ? (
           <View style={styles.hiddenPlaceholder} />
         ) : (
-          <LiquidGlassView effect="clear" style={styles.pillShell}>
-            <View style={styles.rowItem}>
-              <SymbolView
-                name="fuelpump.fill"
-                size={14}
-                tintColor={iconTintColor}
-                style={styles.priceIcon}
-              />
-              <Text style={[styles.priceText, isBest && styles.bestPriceText, { color: textColor }]}>
-                ${quote.price.toFixed(2)}
-              </Text>
-            </View>
-          </LiquidGlassView>
+          <View style={isActive && !isSuppressed && !useOnboardingColors ? [styles.activeRing, { borderColor: bestTintColor }] : null}>
+            <LiquidGlassView effect="clear" tintColor={glassTintColor} style={styles.pillShell}>
+              <View style={styles.rowItem}>
+                <SymbolView
+                  name="fuelpump.fill"
+                  size={14}
+                  tintColor={iconTintColor}
+                  style={styles.priceIcon}
+                />
+                <Text style={[styles.priceText, isBest && styles.bestPriceText, { color: textColor }]}>
+                  ${quote.price.toFixed(2)}
+                </Text>
+              </View>
+            </LiquidGlassView>
+          </View>
         )}
       </AnimatedView>
     </Marker>
@@ -197,8 +214,10 @@ function areStationMarkerPropsEqual(previousProps, nextProps) {
     previousProps.isSuppressed === nextProps.isSuppressed &&
     previousProps.shouldDelaySuppression === nextProps.shouldDelaySuppression &&
     previousProps.isBest === nextProps.isBest &&
+    previousProps.isActive === nextProps.isActive &&
     previousProps.isDark === nextProps.isDark &&
-    previousProps.onPress === nextProps.onPress
+    previousProps.onPress === nextProps.onPress &&
+    previousProps.useOnboardingColors === nextProps.useOnboardingColors
   );
 }
 
@@ -219,6 +238,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  activeRing: {
+    borderWidth: 2,
+    borderRadius: CLUSTER_PILL_HEIGHT / 2 + 3,
+    padding: 1,
   },
   hiddenPlaceholder: {
     width: 1,

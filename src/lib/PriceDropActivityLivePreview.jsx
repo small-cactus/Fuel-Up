@@ -64,12 +64,15 @@ import {
     ZStack,
 } from '@expo/ui/swift-ui';
 import {
+    background,
     buttonStyle,
     font,
     foregroundStyle,
     frame,
+    lineLimit,
     monospacedDigit,
     padding,
+    shapes,
 } from '@expo/ui/swift-ui/modifiers';
 
 /**
@@ -139,15 +142,18 @@ function renderContent(props) {
 
     // ── Action buttons ──
     //
-    // Using native `label` + `systemImage` props (not custom children).
-    // Must match PriceDropActivity.tsx.
+    // Must match PriceDropActivity.tsx — plain style + background shape.
     const navigateButton = (
         <Button
             systemImage="location.north.fill"
             label="Navigate"
             modifiers={[
-                buttonStyle('borderedProminent'),
+                buttonStyle('plain'),
+                font({ size: 17, weight: 'semibold', design: 'rounded' }),
                 foregroundStyle('#FFFFFF'),
+                padding({ vertical: 14 }),
+                frame({ maxWidth: 999999 }),
+                background(ACTION_BLUE, shapes.roundedRectangle({ cornerRadius: 14 })),
             ]}
         />
     );
@@ -157,7 +163,12 @@ function renderContent(props) {
             label="Cancel"
             role="destructive"
             modifiers={[
-                buttonStyle('bordered'),
+                buttonStyle('plain'),
+                font({ size: 17, weight: 'semibold', design: 'rounded' }),
+                foregroundStyle('#FFFFFF'),
+                padding({ vertical: 14 }),
+                frame({ maxWidth: 999999 }),
+                background(ACTION_RED, shapes.roundedRectangle({ cornerRadius: 14 })),
             ]}
         />
     );
@@ -253,29 +264,21 @@ function renderContent(props) {
                 alignment="trailing"
                 spacing={2}
             >
-                <HStack spacing={1} alignment="lastTextBaseline">
-                    <Text
-                        modifiers={[
-                            font({ size: 14, weight: 'semibold', design: 'rounded' }),
-                            foregroundStyle(accent),
-                        ]}
-                    >
-                        SAVE $
-                    </Text>
-                    <Text
-                        modifiers={[
-                            font({ size: 26, weight: 'bold', design: 'rounded' }),
-                            monospacedDigit(),
-                            foregroundStyle(accent),
-                        ]}
-                    >
-                        {totalSavingsLabel}
-                    </Text>
-                </HStack>
+                <Text
+                    modifiers={[
+                        font({ size: 20, weight: 'bold', design: 'rounded' }),
+                        monospacedDigit(),
+                        foregroundStyle(accent),
+                        lineLimit(1),
+                    ]}
+                >
+                    {'Save $' + totalSavingsLabel}
+                </Text>
                 <Text
                     modifiers={[
                         font({ size: 11, weight: 'medium' }),
                         foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
+                        lineLimit(1),
                     ]}
                 >
                     at {props.stationName}
@@ -306,15 +309,23 @@ function renderContent(props) {
                         systemImage="location.north.fill"
                         label="Navigate"
                         modifiers={[
-                            buttonStyle('borderedProminent'),
+                            buttonStyle('plain'),
+                            font({ size: 15, weight: 'semibold', design: 'rounded' }),
                             foregroundStyle('#FFFFFF'),
+                            padding({ vertical: 12 }),
+                            frame({ maxWidth: 999999 }),
+                            background(ACTION_BLUE, shapes.roundedRectangle({ cornerRadius: 12 })),
                         ]}
                     />
                     <Button
                         label="Cancel"
-                        role="destructive"
                         modifiers={[
-                            buttonStyle('bordered'),
+                            buttonStyle('plain'),
+                            font({ size: 15, weight: 'semibold', design: 'rounded' }),
+                            foregroundStyle('#FFFFFF'),
+                            padding({ vertical: 12 }),
+                            frame({ maxWidth: 999999 }),
+                            background(ACTION_RED, shapes.roundedRectangle({ cornerRadius: 12 })),
                         ]}
                     />
                 </HStack>

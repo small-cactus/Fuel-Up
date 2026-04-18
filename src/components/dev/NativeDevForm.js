@@ -1562,6 +1562,12 @@ export default function NativeDevForm({
                         isOn={Boolean(maintenance.clusterDebugEnabled)}
                         onIsOnChange={ensureFn(maintenance.onSetClusterDebugEnabled)}
                     />
+                    <Toggle
+                        label="Onboarding Chip Colors"
+                        systemImage="paintpalette.fill"
+                        isOn={Boolean(maintenance.onboardingChipColorsEnabled)}
+                        onIsOnChange={ensureFn(maintenance.onSetOnboardingChipColorsEnabled)}
+                    />
                 </Section>
 
             </Form>

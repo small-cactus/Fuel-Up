@@ -13,10 +13,21 @@ function makeEngine({ profile, onTrigger }) {
     onTrigger,
     cooldownMs: 60 * 1000,
     triggerThreshold: 0.5,
+    enforcePresentationTiming: true,
   });
   recommender.setStations(SIM_STATIONS);
   recommender.setProfile(profile);
   return recommender;
+}
+
+function routeIsActualFuelingStop(route) {
+  return typeof route?.willFuel === 'boolean'
+    ? route.willFuel
+    : Boolean(route?.expectsTrigger);
+}
+
+function routeActualTargetStationId(route) {
+  return route?.actualFuelStopStationId || route?.targetStationId || null;
 }
 
 function summarizeNeedBuckets(routes) {
@@ -25,16 +36,16 @@ function summarizeNeedBuckets(routes) {
   return {
     lowNeedCount: lowNeedRoutes.length,
     lowNeedStopRate: lowNeedRoutes.length
-      ? Math.round((lowNeedRoutes.filter(route => route.expectsTrigger).length / lowNeedRoutes.length) * 100)
+      ? Math.round((lowNeedRoutes.filter(route => routeIsActualFuelingStop(route)).length / lowNeedRoutes.length) * 100)
       : null,
     highReserveCount: highReserveRoutes.length,
     highReserveStopRate: highReserveRoutes.length
-      ? Math.round((highReserveRoutes.filter(route => route.expectsTrigger).length / highReserveRoutes.length) * 100)
+      ? Math.round((highReserveRoutes.filter(route => routeIsActualFuelingStop(route)).length / highReserveRoutes.length) * 100)
       : null,
   };
 }
 
-test('realistic hidden-intent sim keeps the same latent route world across history levels', () => {
+test('realistic hidden-intent sim keeps the same route context world across history levels while allowing habit-dependent choices', () => {
   const runs = Object.fromEntries(
     ['none', 'light', 'rich'].map(historyLevel => [
       historyLevel,
@@ -52,21 +63,30 @@ test('realistic hidden-intent sim keeps the same latent route world across histo
     templateId: route.templateId,
     purpose: route.purpose,
     scenario: route.scenario,
-    expectsTrigger: route.expectsTrigger,
-    targetStationId: route.targetStationId,
-    hiddenDecisionIndex: route.hiddenDecisionIndex,
-    startingMilesSinceLastFill: route.startingMilesSinceLastFill,
   }));
 
   assert.deepEqual(
     latentPlan(runs.none),
     latentPlan(runs.light),
-    'light-history batch should evaluate the same latent route world as no-history'
+    'light-history batch should evaluate the same route context world as no-history'
   );
   assert.deepEqual(
     latentPlan(runs.none),
     latentPlan(runs.rich),
-    'rich-history batch should evaluate the same latent route world as no-history'
+    'rich-history batch should evaluate the same route context world as no-history'
+  );
+  const matchedOutcomeCount = runs.none.routes.reduce((count, route, index) => {
+    const richRoute = runs.rich.routes[index];
+    return count + (
+      routeIsActualFuelingStop(route) === routeIsActualFuelingStop(richRoute) &&
+      routeActualTargetStationId(route) === routeActualTargetStationId(richRoute)
+        ? 1
+        : 0
+    );
+  }, 0);
+  assert.ok(
+    matchedOutcomeCount < runs.none.routes.length,
+    'expected some hidden-intent outcomes to differ once latent history is introduced',
   );
 
   assert.equal(runs.none.burnInRouteCount, 0);
@@ -101,12 +121,12 @@ test('realistic hidden-intent sim produces a no-fuel majority and diverse trip p
   });
 
   assert.ok(
-    result.summary.noFuelCount > result.summary.hiddenIntentCount,
-    `expected most drives to be non-fueling, got noFuel=${result.summary.noFuelCount} hidden=${result.summary.hiddenIntentCount}`,
+    result.routeCount - result.summary.actualFuelStopCount > result.summary.actualFuelStopCount,
+    `expected most drives to be non-fueling, got noFuel=${result.routeCount - result.summary.actualFuelStopCount} fuel=${result.summary.actualFuelStopCount}`,
   );
   assert.ok(
-    result.summary.hiddenIntentCount >= 12 && result.summary.hiddenIntentCount <= 40,
-    `expected realistic hidden-intent count between 12 and 40, got ${result.summary.hiddenIntentCount}`,
+    result.summary.actualFuelStopCount >= 6 && result.summary.actualFuelStopCount <= 24,
+    `expected realistic fuel-stop count between 6 and 24, got ${result.summary.actualFuelStopCount}`,
   );
 
   const purposeCount = new Set(result.routes.map(route => route.purpose)).size;
@@ -134,9 +154,9 @@ test('realistic hidden-intent sim increases stop propensity as remaining fuel dr
     });
     const bucketSummary = summarizeNeedBuckets(result.routes);
     aggregate.lowNeedCount += bucketSummary.lowNeedCount;
-    aggregate.lowNeedStopCount += result.routes.filter(route => route.estimatedRemainingMiles != null && route.estimatedRemainingMiles <= 110 && route.expectsTrigger).length;
+    aggregate.lowNeedStopCount += result.routes.filter(route => route.estimatedRemainingMiles != null && route.estimatedRemainingMiles <= 110 && routeIsActualFuelingStop(route)).length;
     aggregate.highReserveCount += bucketSummary.highReserveCount;
-    aggregate.highReserveStopCount += result.routes.filter(route => route.estimatedRemainingMiles != null && route.estimatedRemainingMiles >= 160 && route.expectsTrigger).length;
+    aggregate.highReserveStopCount += result.routes.filter(route => route.estimatedRemainingMiles != null && route.estimatedRemainingMiles >= 160 && routeIsActualFuelingStop(route)).length;
   }
 
   const lowNeedStopRate = Math.round((aggregate.lowNeedStopCount / aggregate.lowNeedCount) * 100);

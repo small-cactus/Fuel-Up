@@ -60,6 +60,7 @@ import {
     buildResolvedFuelSearchContext,
 } from '../../src/lib/fuelSearchState';
 import {
+    buildPausedSuppressedStationIds,
     buildPersistentSuppressedStationIds,
     buildHomeFilterSignature,
     buildHomeQuerySignature,
@@ -160,10 +161,14 @@ const INITIAL_SMOOTH_LAUNCH_TRANSITION_MAX_DISTANCE_METERS = 6000;
 const LAUNCH_MOVEMENT_RECOVERY_TIMEOUT_MS = 5000;
 const ENABLE_CLUSTER_MERGE_TRANSITIONS = false;
 const HOME_DARK_GLASS_TINT = '#373737ff';
-// Continuous tracking settings. The rules are intentionally minimal:
-//   - The map is centered on the user at a fixed overview zoom (~8 miles
-//     across). We never preserve the map's current delta when following,
-//     so station fits never leave us with an unusable close-up.
+// Continuous tracking settings.
+//   - The driver only engages when the user is on card 0 (cheapest station
+//     overview) and has been idle for TRACKING_IDLE_GRACE_MS. This prevents
+//     the tracker from fighting station-focus zoom when the user is browsing
+//     individual station cards or has just interacted with the map.
+//   - Zoom is dynamic: the driver computes a region that frames both the
+//     user's extrapolated position and the cheapest station, so the cheapest
+//     station is always visible regardless of user movement.
 //   - We subscribe with distanceInterval=0 and High accuracy so iOS emits
 //     every GPS update available. timeInterval is iOS-ignored.
 //   - A separate interval timer (the "driver") runs at 2 Hz and is
@@ -184,8 +189,11 @@ const HOME_DARK_GLASS_TINT = '#373737ff';
 //     surrounding area without being yanked back.
 //   - React state is only updated every 50 m of movement to keep the
 //     render loop quiet while still refreshing distance-based filtering.
-const LIVE_TRACKING_LATITUDE_DELTA = 0.12;
-const LIVE_TRACKING_LONGITUDE_DELTA = 0.12;
+const TRACKING_IDLE_GRACE_MS = 3000;
+const TRACKING_MIN_LATITUDE_DELTA = 0.008;
+const TRACKING_MAX_LATITUDE_DELTA = 0.25;
+const TRACKING_BOUNDING_PADDING = 1.45;
+const TRACKING_CHEAPEST_CHANGE_ANIMATION_MS = 650;
 const LIVE_TRACKING_DISTANCE_INTERVAL_METERS = 0;
 const LIVE_TRACKING_DRIVER_INTERVAL_MS = 500;
 const LIVE_TRACKING_DRIVER_ANIMATION_MS = 550;
@@ -1251,6 +1259,60 @@ function buildStationsFitZoomRegion(stationQuotes, fallbackRegion = null) {
     };
 }
 
+// Compute a map region that frames the user's current position and ALL
+// visible stations. The bounding box includes every station with valid
+// coordinates plus the user, padded by TRACKING_BOUNDING_PADDING, so the
+// default view always shows every chip within the search radius. Falls
+// back to a user-centered region with min delta when no stations exist.
+function computeTrackingRegion({
+    userLatitude,
+    userLongitude,
+    stationQuotes,
+}) {
+    const validQuotes = (stationQuotes || []).filter(q => (
+        Number.isFinite(q?.latitude) && Number.isFinite(q?.longitude)
+    ));
+
+    if (validQuotes.length === 0) {
+        return {
+            latitude: userLatitude,
+            longitude: userLongitude,
+            latitudeDelta: TRACKING_MIN_LATITUDE_DELTA,
+            longitudeDelta: TRACKING_MIN_LATITUDE_DELTA,
+        };
+    }
+
+    // Seed the bounding box with the user's position so they're always
+    // visible, then expand to include every station.
+    let minLat = userLatitude;
+    let maxLat = userLatitude;
+    let minLng = userLongitude;
+    let maxLng = userLongitude;
+
+    validQuotes.forEach(q => {
+        minLat = Math.min(minLat, q.latitude);
+        maxLat = Math.max(maxLat, q.latitude);
+        minLng = Math.min(minLng, q.longitude);
+        maxLng = Math.max(maxLng, q.longitude);
+    });
+
+    const latSpan = maxLat - minLat;
+    const lngSpan = maxLng - minLng;
+
+    return {
+        latitude: (minLat + maxLat) / 2,
+        longitude: (minLng + maxLng) / 2,
+        latitudeDelta: Math.max(
+            TRACKING_MIN_LATITUDE_DELTA,
+            Math.min(TRACKING_MAX_LATITUDE_DELTA, latSpan * TRACKING_BOUNDING_PADDING)
+        ),
+        longitudeDelta: Math.max(
+            TRACKING_MIN_LATITUDE_DELTA,
+            Math.min(TRACKING_MAX_LATITUDE_DELTA, lngSpan * TRACKING_BOUNDING_PADDING)
+        ),
+    };
+}
+
 function formatDebugMetric(value, digits = 2) {
     if (typeof value !== 'number' || Number.isNaN(value)) {
         return '--';
@@ -2000,6 +2062,31 @@ export default function HomeScreen() {
         isAnimatingRef.current = true;
         setMapMotionState(true);
         mapRef.current.animateToRegion(nextRegion, duration);
+    };
+
+    // Immediately animate to a region that frames the user's position
+    // and all visible stations. Used when transitioning to card 0 while
+    // location permission is active, replacing the old fitMapToStations
+    // call which would return early and leave the map static. The
+    // tracking driver takes over after the grace period.
+    const animateToTrackingOverview = () => {
+        const fix = latestFixRef.current;
+        const userLat = fix?.latitude ?? location.latitude;
+        const userLng = fix?.longitude ?? location.longitude;
+        const currentStationQuotes = stationQuotesRef.current || [];
+
+        const region = computeTrackingRegion({
+            userLatitude: userLat,
+            userLongitude: userLng,
+            stationQuotes: currentStationQuotes,
+        });
+
+        const cheapestQuote = currentStationQuotes[0] || null;
+        lastTrackedCheapestStationIdRef.current = cheapestQuote
+            ? String(cheapestQuote.stationId)
+            : null;
+
+        animateMapToRegion(region, FOREGROUND_RECENTER_ANIMATION_MS);
     };
 
     const getOrStartLaunchMovementCheck = ({
@@ -3083,6 +3170,14 @@ export default function HomeScreen() {
     // station set with a point-centered snapshot. See
     // LIVE_TRACKING_REFETCH_MIN_INTERVAL_MS for the rationale.
     const lastDeviceWatchFetchAtRef = useRef(0);
+    // Timestamp of the last user interaction (card swipe, pan, marker tap)
+    // that should delay tracking engagement. The driver waits
+    // TRACKING_IDLE_GRACE_MS after this before re-engaging.
+    const lastUserInteractionAtRef = useRef(0);
+    // The stationId of the cheapest station that the tracking driver last
+    // computed its zoom for. Used to detect cheapest-station changes and
+    // trigger a slower, smoother re-zoom animation.
+    const lastTrackedCheapestStationIdRef = useRef(null);
 
     const handleLiveLocationUpdate = (positionObject) => {
         if (!isMountedRef.current || manualLocationOverride) {
@@ -3127,8 +3222,8 @@ export default function HomeScreen() {
         const actualRegion = {
             latitude,
             longitude,
-            latitudeDelta: LIVE_TRACKING_LATITUDE_DELTA,
-            longitudeDelta: LIVE_TRACKING_LONGITUDE_DELTA,
+            latitudeDelta: DEFAULT_REGION.latitudeDelta,
+            longitudeDelta: DEFAULT_REGION.longitudeDelta,
         };
 
         // Only push React state when the user has moved far enough to
@@ -3233,11 +3328,11 @@ export default function HomeScreen() {
     handleLiveLocationUpdateRef.current = handleLiveLocationUpdate;
 
     // The tracking driver. Runs at LIVE_TRACKING_DRIVER_INTERVAL_MS (2 Hz)
-    // whenever tracking is active. Each tick computes an interpolated
-    // target position from the last fix + velocity + elapsed time, then
-    // asks the map to animate there over LIVE_TRACKING_DRIVER_ANIMATION_MS.
-    // Back-to-back short animations are the only way to get continuous
-    // smooth motion on react-native-maps + Apple Maps.
+    // whenever the GPS subscription is active. Each tick checks whether
+    // tracking should engage (card 0 + idle grace period elapsed), then
+    // computes a dynamic zoom region that frames both the user's extrapolated
+    // position and the cheapest station. When the cheapest station changes
+    // (data refresh), it uses a longer animation for a smooth re-zoom.
     const runLiveTrackingDriverTick = () => {
         if (
             !isMountedRef.current ||
@@ -3246,6 +3341,17 @@ export default function HomeScreen() {
             !mapRef.current ||
             !isMapLoaded
         ) {
+            return;
+        }
+
+        // Only track when on the cheapest-station overview card.
+        if (activeIndexRef.current !== 0) {
+            return;
+        }
+
+        // Respect idle grace period — don't fight with recent user
+        // interactions (card swipes, marker taps, pan gestures).
+        if (Date.now() - lastUserInteractionAtRef.current < TRACKING_IDLE_GRACE_MS) {
             return;
         }
 
@@ -3267,20 +3373,39 @@ export default function HomeScreen() {
             return;
         }
 
-        const targetRegion = {
-            latitude: targetLatitude,
-            longitude: targetLongitude,
-            latitudeDelta: LIVE_TRACKING_LATITUDE_DELTA,
-            longitudeDelta: LIVE_TRACKING_LONGITUDE_DELTA,
-        };
+        // Dynamic zoom: frame the user and all visible stations.
+        const currentStationQuotes = stationQuotesRef.current;
+        const targetRegion = computeTrackingRegion({
+            userLatitude: targetLatitude,
+            userLongitude: targetLongitude,
+            stationQuotes: currentStationQuotes,
+        });
 
-        animateMapToRegion(targetRegion, LIVE_TRACKING_DRIVER_ANIMATION_MS);
+        // Detect cheapest station change for a smoother transition.
+        const cheapestQuote = currentStationQuotes[0] || null;
+        const currentCheapestId = cheapestQuote
+            ? String(cheapestQuote.stationId)
+            : null;
+        const previousCheapestId = lastTrackedCheapestStationIdRef.current;
+        const isCheapestChange = (
+            previousCheapestId !== null &&
+            currentCheapestId !== null &&
+            previousCheapestId !== currentCheapestId
+        );
+        lastTrackedCheapestStationIdRef.current = currentCheapestId;
+
+        const animationDuration = isCheapestChange
+            ? TRACKING_CHEAPEST_CHANGE_ANIMATION_MS
+            : LIVE_TRACKING_DRIVER_ANIMATION_MS;
+
+        animateMapToRegion(targetRegion, animationDuration);
     };
 
     const runLiveTrackingDriverTickRef = useRef(null);
     runLiveTrackingDriverTickRef.current = runLiveTrackingDriverTick;
 
     const suppressAutoFollowAfterUserPan = () => {
+        lastUserInteractionAtRef.current = Date.now();
         hasUserRecentlyPannedRef.current = true;
 
         if (userPanSuppressTimeoutRef.current) {
@@ -3360,6 +3485,7 @@ export default function HomeScreen() {
             }
             latestFixRef.current = null;
             latestVelocityRef.current = { latPerMs: 0, lngPerMs: 0 };
+            lastTrackedCheapestStationIdRef.current = null;
         };
     }, [hasLocationPermission, isFocused, manualLocationOverride]);
 
@@ -3802,45 +3928,18 @@ export default function HomeScreen() {
         );
 
         if (shouldPauseSuppressionPersistence) {
-            // Do NOT wipe the effective suppressed set during the pause.
             // The pause is a transient window between "new data arrived"
-            // and "home layout committed" — the very next state refresh
-            // recomputes the persistent set from scratch anyway. Clearing
-            // here causes a one-frame flicker where already-hidden chips
-            // pop visible, then snap hidden again the instant the pause
-            // releases. That flicker is strictly unwanted because those
-            // chips are going to end up hidden regardless.
-            //
-            // Two sub-cases:
-            //
-            // 1. Re-fetch (currentValue is non-empty): prune station IDs
-            //    whose station is no longer in the fresh dataset and
-            //    keep everything else. This carries the suppression state
-            //    through the pause untouched.
-            //
-            // 2. First start (currentValue is empty): seed directly from
-            //    rawSuppressedOverlapStationIds so overlap suppression
-            //    takes effect immediately instead of waiting for the
-            //    layout to commit. Without this, overlapping chips stay
-            //    visible during the entire initial map-fit animation
-            //    because there is nothing to "preserve" yet.
+            // and "home layout committed". Instead of clearing the
+            // effective set (which flickers hidden chips visible for one
+            // frame), preserve the existing set, prune dead stations,
+            // and still apply the active-station-reveal so tapping a
+            // station during data settlement works immediately.
             setEffectiveSuppressedStationIds(currentValue => {
-                if (currentValue.size === 0 && rawSuppressedOverlapStationIds.size > 0) {
-                    return rawSuppressedOverlapStationIds;
-                }
-
-                if (currentValue.size === 0) {
-                    return currentValue;
-                }
-
-                const visibleStationIds = new Set(
-                    stationQuotes.map(quote => String(quote.stationId))
-                );
-                const nextSuppressedIds = new Set();
-                currentValue.forEach(stationId => {
-                    if (visibleStationIds.has(String(stationId))) {
-                        nextSuppressedIds.add(stationId);
-                    }
+                const nextSuppressedIds = buildPausedSuppressedStationIds({
+                    currentEffectiveSuppressedStationIds: currentValue,
+                    rawSuppressedOverlapStationIds,
+                    visibleStationIds: new Set(stationQuotes.map(q => String(q.stationId))),
+                    activeStationId: stationQuotes[activeIndex]?.stationId ?? null,
                 });
 
                 return areStationIdSetsEqual(currentValue, nextSuppressedIds)
@@ -4192,11 +4291,12 @@ export default function HomeScreen() {
             return;
         }
 
-        // With continuous tracking on, the map is centered on the user's
-        // live position at a fixed overview zoom. Station fits would fight
-        // that tracker on every fresh snapshot, so we skip the camera work
-        // and let downstream commit-settled-layout paths continue normally.
-        if (hasLocationPermission && !manualLocationOverride) {
+        // When on card 0 with location permission, the tracking driver
+        // owns the camera — it dynamically frames the user + cheapest
+        // station. Skip fitToCoordinates to avoid fighting the driver.
+        // When on card > 0 (viewing a specific station), the driver is
+        // dormant, so fitToCoordinates is safe.
+        if (hasLocationPermission && !manualLocationOverride && activeIndexRef.current === 0) {
             return;
         }
 
@@ -4286,6 +4386,7 @@ export default function HomeScreen() {
     ]);
 
     const handleStationMarkerPress = useCallback((quote) => {
+        lastUserInteractionAtRef.current = Date.now();
         const index = resolveCommittedHomeActiveIndex({
             currentActiveIndex: activeIndexRef.current,
             nextIndex: quote?.originalIndex,
@@ -4310,17 +4411,22 @@ export default function HomeScreen() {
         setActiveIndex(index);
 
         if (index === 0) {
-            fitMapToStations({
-                animated: true,
-                runSettlePass: false,
-            });
+            if (hasLocationPermission && !manualLocationOverride) {
+                animateToTrackingOverview();
+            } else {
+                fitMapToStations({
+                    animated: true,
+                    runSettlePass: false,
+                });
+            }
             return;
         }
 
         zoomToStation(quote);
-    }, [fitMapToStations, itemWidth, stationQuotes.length, zoomToStation]);
+    }, [fitMapToStations, hasLocationPermission, itemWidth, manualLocationOverride, stationQuotes.length, zoomToStation]);
 
     const handleResetToCheapest = useCallback(() => {
+        lastUserInteractionAtRef.current = Date.now();
         if (stationQuotes.length === 0) {
             return;
         }
@@ -4340,11 +4446,15 @@ export default function HomeScreen() {
             stationCount: stationQuotes.length,
             reason: 'reset',
         }));
-        fitMapToStations({
-            animated: true,
-            runSettlePass: false,
-        });
-    }, [fitMapToStations, stationQuotes.length]);
+        if (hasLocationPermission && !manualLocationOverride) {
+            animateToTrackingOverview();
+        } else {
+            fitMapToStations({
+                animated: true,
+                runSettlePass: false,
+            });
+        }
+    }, [fitMapToStations, hasLocationPermission, manualLocationOverride, stationQuotes.length]);
 
     const setMapMotionState = (moving) => {
         if (mapMotionRef.current === moving) {
@@ -4693,6 +4803,7 @@ export default function HomeScreen() {
     };
 
     const settleCardSelection = (offsetX) => {
+        lastUserInteractionAtRef.current = Date.now();
         const nextIndex = resolveCardIndexFromOffset(offsetX);
 
         isUserScrollingRef.current = false;
@@ -4716,10 +4827,14 @@ export default function HomeScreen() {
         primeCommittedSelectionMapMotion();
 
         if (nextIndex === 0) {
-            fitMapToStations({
-                animated: true,
-                runSettlePass: false,
-            });
+            if (hasLocationPermission && !manualLocationOverride) {
+                animateToTrackingOverview();
+            } else {
+                fitMapToStations({
+                    animated: true,
+                    runSettlePass: false,
+                });
+            }
             return;
         }
 
@@ -5333,10 +5448,7 @@ export default function HomeScreen() {
         };
     });
     const activeStationQuote = stationQuotes[activeIndex] || null;
-    const shouldShowActiveStationOverlay = !ENABLE_CLUSTER_MERGE_TRANSITIONS && isMapLoaded && shouldShowActiveStationDecoration({
-        activeQuote: activeStationQuote,
-        suppressedStationIds: visibleSuppressedStationIds,
-    });
+    const activeStationId = activeStationQuote ? String(activeStationQuote.stationId) : null;
     const hasRenderableClusters = renderClusterEntries.length > 0;
     const showResetToCheapestButton = stationQuotes.length > 1 && activeIndex !== 0;
 
@@ -5445,7 +5557,8 @@ export default function HomeScreen() {
                                 <>
                                     {renderClusterEntries.map(entry => {
                                         const quote = entry.cluster.quotes[0];
-                                        const isSuppressed = visibleSuppressedStationIds.has(String(entry.primaryStationId));
+                                        const entryStationId = String(entry.primaryStationId);
+                                        const isSuppressed = visibleSuppressedStationIds.has(entryStationId);
 
                                         return (
                                             <StationMarker
@@ -5459,24 +5572,13 @@ export default function HomeScreen() {
                                                     initialSuppressionStationIds: initialSuppressionDelayStationIds,
                                                 })}
                                                 isBest={quote.originalIndex === 0}
+                                                isActive={entryStationId === activeStationId}
                                                 isDark={isDark}
                                                 onPress={handleStationMarkerPress}
+                                                useOnboardingColors={Boolean(preferences.useOnboardingChipColors)}
                                             />
                                         );
                                     })}
-                                    {shouldShowActiveStationOverlay ? (
-                                        <ActiveStationOverlay
-                                            key={[
-                                                activeStationQuote?.stationId ?? 'none',
-                                                isDark ? 'dark' : 'light',
-                                                activeStationQuote?.originalIndex === 0 ? 'best' : 'normal',
-                                            ].join('-')}
-                                            quote={activeStationQuote}
-                                            isBest={activeStationQuote?.originalIndex === 0}
-                                            isDark={isDark}
-                                            themeColors={themeColors}
-                                        />
-                                    ) : null}
                                 </>
                             ) : (
                                 <Marker
@@ -5515,6 +5617,7 @@ export default function HomeScreen() {
                             isDebugRecording={isClusterDebugRecording}
                             mapRegion={mapRenderRegion}
                             isMapMoving={isMapMoving}
+                            useOnboardingColors={Boolean(preferences.useOnboardingChipColors)}
                         />
                     ))}
                 </View>

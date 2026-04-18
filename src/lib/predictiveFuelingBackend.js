@@ -161,11 +161,13 @@ function buildRuntime(preferences) {
     preferences,
     notifications: {
       addPredictiveNotificationResponseListener,
+      endAllLiveActivities: require('./notifications.js').endAllLiveActivities,
       endLiveActivity: require('./notifications.js').endLiveActivity,
       openNavigationForStation,
       schedulePredictiveRecommendationNotification: require('./notifications.js').schedulePredictiveRecommendationNotification,
       startPredictiveLiveActivity: require('./notifications.js').startPredictiveLiveActivity,
       updatePredictiveLiveActivity: require('./notifications.js').updatePredictiveLiveActivity,
+      updateTrackedLiveActivity: require('./notifications.js').updateTrackedLiveActivity,
     },
     prefetchSnapshot: (input) => refreshFuelPriceSnapshotAlongTrajectory({
       ...input,

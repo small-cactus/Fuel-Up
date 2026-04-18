@@ -27,44 +27,59 @@ function routeToSamples(route) {
     baseTimestamp = d.getTime();
   }
 
-  for (let i = 0; i < waypoints.length; i++) {
-    const wp = waypoints[i];
-    const speedMs = (wp.speedMph || 25) * 0.44704;
-    const timestamp = baseTimestamp + i * 5000;
-
-    let heading = 0;
-    if (i < waypoints.length - 1) {
-      heading = calculateHeadingDegrees(
-        { latitude: wp.lat, longitude: wp.lon },
-        { latitude: waypoints[i + 1].lat, longitude: waypoints[i + 1].lon }
-      );
-    } else if (i > 0) {
-      heading = calculateHeadingDegrees(
-        { latitude: waypoints[i - 1].lat, longitude: waypoints[i - 1].lon },
-        { latitude: wp.lat, longitude: wp.lon }
-      );
-    }
-
-    // Add intermediate samples between waypoints for a denser window
-    if (i < waypoints.length - 1) {
-      const next = waypoints[i + 1];
-      const interpCount = 4; // 4 intermediate points between each waypoint
-      for (let j = 0; j <= interpCount; j++) {
-        const t = j / interpCount;
-        const lat = wp.lat + (next.lat - wp.lat) * t;
-        const lon = wp.lon + (next.lon - wp.lon) * t;
-        samples.push({
-          latitude: lat,
-          longitude: lon,
-          heading,
-          speed: speedMs,
-          timestamp: timestamp + j * 1200,
-        });
-      }
-    } else {
-      samples.push({ latitude: wp.lat, longitude: wp.lon, heading, speed: speedMs, timestamp });
-    }
+  if (!Array.isArray(waypoints) || waypoints.length === 0) {
+    return samples;
   }
+
+  let currentTimestamp = baseTimestamp;
+  let cumulativeDistanceMeters = 0;
+  for (let i = 0; i < waypoints.length - 1; i++) {
+    const wp = waypoints[i];
+    const next = waypoints[i + 1];
+    const startSpeedMs = Math.max(1.5, (wp.speedMph || 25) * 0.44704);
+    const endSpeedMs = Math.max(1.5, (next.speedMph || wp.speedMph || 25) * 0.44704);
+    const segmentDistanceMeters = haversineDistanceMeters(
+      { latitude: wp.lat, longitude: wp.lon },
+      { latitude: next.lat, longitude: next.lon }
+    );
+    const segmentDurationMs = Math.max(
+      3000,
+      Math.round((segmentDistanceMeters / Math.max(1.5, (startSpeedMs + endSpeedMs) / 2)) * 1000)
+    );
+    const heading = calculateHeadingDegrees(
+      { latitude: wp.lat, longitude: wp.lon },
+      { latitude: next.lat, longitude: next.lon }
+    );
+    const interpCount = Math.max(1, Math.min(6, Math.round(segmentDistanceMeters / 90)));
+
+    for (let j = 0; j < interpCount; j++) {
+      const t = j / interpCount;
+      samples.push({
+        latitude: wp.lat + ((next.lat - wp.lat) * t),
+        longitude: wp.lon + ((next.lon - wp.lon) * t),
+        heading,
+        speed: startSpeedMs + ((endSpeedMs - startSpeedMs) * t),
+        timestamp: currentTimestamp + Math.round(segmentDurationMs * t),
+        alongRouteMeters: cumulativeDistanceMeters + (segmentDistanceMeters * t),
+      });
+    }
+    cumulativeDistanceMeters += segmentDistanceMeters;
+    currentTimestamp += segmentDurationMs;
+  }
+
+  const lastWaypoint = waypoints[waypoints.length - 1];
+  const previousWaypoint = waypoints[waypoints.length - 2] || lastWaypoint;
+  samples.push({
+    latitude: lastWaypoint.lat,
+    longitude: lastWaypoint.lon,
+    heading: calculateHeadingDegrees(
+      { latitude: previousWaypoint.lat, longitude: previousWaypoint.lon },
+      { latitude: lastWaypoint.lat, longitude: lastWaypoint.lon }
+    ),
+    speed: Math.max(0.5, (lastWaypoint.speedMph || previousWaypoint.speedMph || 25) * 0.44704),
+    timestamp: currentTimestamp,
+    alongRouteMeters: cumulativeDistanceMeters,
+  });
 
   return samples;
 }

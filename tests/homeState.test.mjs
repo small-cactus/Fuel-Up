@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
     canRevealActiveStation,
+    buildPausedSuppressedStationIds,
     buildPersistentSuppressedStationIds,
     buildHomeFilterSignature,
     buildHomeQuerySignature,
@@ -290,6 +291,73 @@ test('buildPersistentSuppressedStationIds keeps hidden chips hidden by default a
         })).sort(),
         ['station-a', 'station-b']
     );
+});
+
+test('buildPausedSuppressedStationIds seeds from raw set on first start', () => {
+    const result = buildPausedSuppressedStationIds({
+        currentEffectiveSuppressedStationIds: new Set(),
+        rawSuppressedOverlapStationIds: new Set(['station-b', 'station-c']),
+        visibleStationIds: new Set(['station-a', 'station-b', 'station-c']),
+        activeStationId: null,
+    });
+
+    assert.deepEqual(Array.from(result).sort(), ['station-b', 'station-c']);
+});
+
+test('buildPausedSuppressedStationIds returns empty when both current and raw are empty', () => {
+    const empty = new Set();
+    const result = buildPausedSuppressedStationIds({
+        currentEffectiveSuppressedStationIds: empty,
+        rawSuppressedOverlapStationIds: new Set(),
+        visibleStationIds: new Set(['station-a']),
+        activeStationId: null,
+    });
+
+    assert.equal(result, empty);
+});
+
+test('buildPausedSuppressedStationIds prunes stations no longer in the visible set', () => {
+    const result = buildPausedSuppressedStationIds({
+        currentEffectiveSuppressedStationIds: new Set(['station-a', 'station-b', 'station-gone']),
+        rawSuppressedOverlapStationIds: new Set(['station-a']),
+        visibleStationIds: new Set(['station-a', 'station-b', 'station-c']),
+        activeStationId: null,
+    });
+
+    assert.deepEqual(Array.from(result).sort(), ['station-a', 'station-b']);
+});
+
+test('buildPausedSuppressedStationIds reveals the active station during pause when it has no raw overlap', () => {
+    const result = buildPausedSuppressedStationIds({
+        currentEffectiveSuppressedStationIds: new Set(['station-a', 'station-b']),
+        rawSuppressedOverlapStationIds: new Set(['station-b']),
+        visibleStationIds: new Set(['station-a', 'station-b', 'station-c']),
+        activeStationId: 'station-a',
+    });
+
+    assert.deepEqual(Array.from(result).sort(), ['station-b']);
+});
+
+test('buildPausedSuppressedStationIds keeps the active station suppressed when it has raw overlap', () => {
+    const result = buildPausedSuppressedStationIds({
+        currentEffectiveSuppressedStationIds: new Set(['station-a', 'station-b']),
+        rawSuppressedOverlapStationIds: new Set(['station-a', 'station-b']),
+        visibleStationIds: new Set(['station-a', 'station-b', 'station-c']),
+        activeStationId: 'station-a',
+    });
+
+    assert.deepEqual(Array.from(result).sort(), ['station-a', 'station-b']);
+});
+
+test('buildPausedSuppressedStationIds does not delete anything when active station is null', () => {
+    const result = buildPausedSuppressedStationIds({
+        currentEffectiveSuppressedStationIds: new Set(['station-a', 'station-b']),
+        rawSuppressedOverlapStationIds: new Set(),
+        visibleStationIds: new Set(['station-a', 'station-b']),
+        activeStationId: null,
+    });
+
+    assert.deepEqual(Array.from(result).sort(), ['station-a', 'station-b']);
 });
 
 test('home auto-fit skips passive focus restoration when there is no pending refit request', () => {

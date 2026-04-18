@@ -123,6 +123,7 @@ export default function DevStatsScreen() {
     const canopyEdgeLine = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
     const topCanopyHeight = insets.top + TOP_CANOPY_HEIGHT;
     const debugEnabled = Boolean(preferences.debugClusterAnimations);
+    const onboardingChipColorsEnabled = Boolean(preferences.useOnboardingChipColors);
 
     useFocusEffect(
         useCallback(() => {
@@ -652,6 +653,8 @@ export default function DevStatsScreen() {
         onResetCounters: handleReset,
         clusterDebugEnabled: debugEnabled,
         onSetClusterDebugEnabled: (isEnabled) => updatePreference('debugClusterAnimations', isEnabled),
+        onboardingChipColorsEnabled,
+        onSetOnboardingChipColorsEnabled: (isEnabled) => updatePreference('useOnboardingChipColors', isEnabled),
     };
 
     const promptForText = (title, currentValue, onSave) => {

@@ -55,3 +55,38 @@ test('estimateFuelState respects an explicit milesSinceLastFill input', () => {
   assert.ok(result.estimatedRemainingMiles <= 80, `remaining miles should be low, got ${result.estimatedRemainingMiles}`);
   assert.ok(result.fuelNeedScore >= result.urgency, `fuelNeedScore should dominate urgency when near empty: ${JSON.stringify(result)}`);
 });
+
+test('inferTypicalIntervalMiles does not collapse from opportunistic short-interval fills', () => {
+  const now = Date.now();
+  const history = [
+    { timestamp: now - 20 * 86400 * 1000, odometer: 40000, gallons: 9.2, pricePerGallon: 3.39 },
+    { timestamp: now - 15 * 86400 * 1000, odometer: 40062, gallons: 9.6, pricePerGallon: 3.35 },
+    { timestamp: now - 10 * 86400 * 1000, odometer: 40118, gallons: 9.4, pricePerGallon: 3.33 },
+    { timestamp: now - 5 * 86400 * 1000, odometer: 40179, gallons: 9.5, pricePerGallon: 3.31 },
+  ];
+  const interval = inferTypicalIntervalMiles(history, {
+    typicalIntervalMiles: 290,
+    defaultMpg: 25,
+    defaultTankGallons: 12.5,
+  });
+  assert.ok(interval >= 180, `expected a robust interval floor, got ${interval}`);
+});
+
+test('estimateFuelState lowers confidence when fill intervals disagree with gallons-based capacity', () => {
+  const now = Date.now();
+  const history = [
+    { timestamp: now - 20 * 86400 * 1000, odometer: 40000, gallons: 9.2, pricePerGallon: 3.39 },
+    { timestamp: now - 15 * 86400 * 1000, odometer: 40062, gallons: 9.6, pricePerGallon: 3.35 },
+    { timestamp: now - 10 * 86400 * 1000, odometer: 40118, gallons: 9.4, pricePerGallon: 3.33 },
+    { timestamp: now - 5 * 86400 * 1000, odometer: 40179, gallons: 9.5, pricePerGallon: 3.31 },
+  ];
+  const result = estimateFuelState(history, {
+    milesSinceLastFill: 58,
+    typicalIntervalMiles: 290,
+    defaultMpg: 25,
+    defaultTankGallons: 12.5,
+  });
+  assert.ok(result.avgIntervalMiles >= 180, `expected interval estimate to remain realistic, got ${result.avgIntervalMiles}`);
+  assert.ok(result.intervalConfidence < 0.9, `expected disagreement to reduce confidence, got ${result.intervalConfidence}`);
+  assert.ok(result.fuelNeedScore < 0.5, `expected low fuel need after a short interval top-off, got ${result.fuelNeedScore}`);
+});

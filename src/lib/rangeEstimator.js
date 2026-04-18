@@ -3,40 +3,156 @@
  *
  * fillUpHistory entries: { timestamp: ms, odometer: miles, gallons: number, pricePerGallon: number }
  * If odometer not available, we infer from timestamps + typical interval.
+ *
+ * The tricky case is opportunistic topping off: drivers may add fuel after
+ * short intervals even though their true tank range is much larger. If we
+ * simply average odometer deltas, the inferred interval collapses and the app
+ * starts believing the driver is near empty all the time. We therefore blend:
+ *   - a prior interval estimate
+ *   - a robust upper-half interval summary
+ *   - a gallons-based capacity proxy
+ * and reduce confidence when those sources disagree sharply.
  */
 
-function inferTypicalIntervalMiles(fillUpHistory, options = {}) {
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function mean(values) {
+  if (!Array.isArray(values) || values.length === 0) return 0;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function quantile(values, q) {
+  if (!Array.isArray(values) || values.length === 0) return 0;
+  const sorted = [...values].sort((left, right) => left - right);
+  const clampedQ = clamp(q, 0, 1);
+  const index = (sorted.length - 1) * clampedQ;
+  const lowerIndex = Math.floor(index);
+  const upperIndex = Math.ceil(index);
+  if (lowerIndex === upperIndex) {
+    return sorted[lowerIndex];
+  }
+  const weight = index - lowerIndex;
+  return sorted[lowerIndex] + ((sorted[upperIndex] - sorted[lowerIndex]) * weight);
+}
+
+function buildIntervalInference(fillUpHistory, options = {}) {
   const {
     typicalIntervalMiles = 280,
     defaultMpg = 25,
     defaultTankGallons = 12.5,
   } = options;
 
+  const priorIntervalMiles = Math.max(160, typicalIntervalMiles || (defaultTankGallons * defaultMpg));
   const sorted = [...(fillUpHistory || [])].sort((a, b) => a.timestamp - b.timestamp);
-  if (sorted.length >= 2) {
-    const intervals = [];
-    for (let i = 1; i < sorted.length; i++) {
-      if (sorted[i].odometer && sorted[i - 1].odometer) {
-        const delta = sorted[i].odometer - sorted[i - 1].odometer;
-        if (Number.isFinite(delta) && delta > 40 && delta < 700) {
-          intervals.push(delta);
-        }
-      }
-    }
-    if (intervals.length > 0) {
-      return intervals.reduce((a, b) => a + b, 0) / intervals.length;
+
+  const intervalMiles = [];
+  for (let index = 1; index < sorted.length; index += 1) {
+    const previousEntry = sorted[index - 1];
+    const entry = sorted[index];
+    const delta = Number(entry?.odometer) - Number(previousEntry?.odometer);
+    if (Number.isFinite(delta) && delta > 40 && delta < 700) {
+      intervalMiles.push(delta);
     }
   }
 
-  const gallons = sorted
+  const gallonSamples = sorted
     .map(entry => Number(entry?.gallons))
     .filter(value => Number.isFinite(value) && value > 4);
-  if (gallons.length > 0) {
-    const avgGallons = gallons.reduce((a, b) => a + b, 0) / gallons.length;
-    return Math.max(160, avgGallons * defaultMpg);
+
+  const medianIntervalMiles = intervalMiles.length ? quantile(intervalMiles, 0.5) : 0;
+  const upperHalfIntervals = intervalMiles.length
+    ? intervalMiles.filter(value => value >= medianIntervalMiles)
+    : [];
+  const robustObservedIntervalMiles = upperHalfIntervals.length
+    ? mean(upperHalfIntervals)
+    : 0;
+  const upperQuartileGallons = gallonSamples.length
+    ? quantile(gallonSamples, 0.75)
+    : 0;
+  const gallonsInferredIntervalMiles = upperQuartileGallons > 0
+    ? Math.max(160, upperQuartileGallons * defaultMpg)
+    : 0;
+
+  let intervalEvidenceWeight = 0;
+  if (robustObservedIntervalMiles > 0) {
+    intervalEvidenceWeight += Math.min(0.45, intervalMiles.length * 0.10);
+  }
+  if (gallonsInferredIntervalMiles > 0) {
+    intervalEvidenceWeight += Math.min(0.25, 0.12 + (gallonSamples.length * 0.03));
+  }
+  intervalEvidenceWeight = clamp(intervalEvidenceWeight, 0.12, 0.72);
+
+  const supportIntervalMiles = Math.max(
+    gallonsInferredIntervalMiles * 0.92,
+    priorIntervalMiles * 0.70,
+    160
+  );
+  const observedAgreement = robustObservedIntervalMiles > 0
+    ? clamp(
+      1 - (Math.abs(robustObservedIntervalMiles - supportIntervalMiles) / Math.max(supportIntervalMiles, 1)),
+      0,
+      1
+    )
+    : 0.55;
+  const shortIntervalCompression = (
+    robustObservedIntervalMiles > 0 &&
+    robustObservedIntervalMiles < (supportIntervalMiles * 0.58) &&
+    gallonsInferredIntervalMiles >= (priorIntervalMiles * 0.65)
+  );
+  if (shortIntervalCompression) {
+    intervalEvidenceWeight *= 0.35;
   }
 
-  return Math.max(160, typicalIntervalMiles || (defaultTankGallons * defaultMpg));
+  let blendedObservedIntervalMiles = robustObservedIntervalMiles;
+  if (gallonsInferredIntervalMiles > 0) {
+    blendedObservedIntervalMiles = robustObservedIntervalMiles > 0
+      ? ((robustObservedIntervalMiles * 0.45) + (gallonsInferredIntervalMiles * 0.55))
+      : gallonsInferredIntervalMiles;
+  }
+  if (!Number.isFinite(blendedObservedIntervalMiles) || blendedObservedIntervalMiles <= 0) {
+    blendedObservedIntervalMiles = supportIntervalMiles;
+  }
+
+  const inferredIntervalMiles = clamp(
+    (priorIntervalMiles * (1 - intervalEvidenceWeight)) +
+    (blendedObservedIntervalMiles * intervalEvidenceWeight),
+    Math.max(160, priorIntervalMiles * 0.62),
+    Math.max(priorIntervalMiles * 1.35, supportIntervalMiles * 1.15, 450)
+  );
+
+  const countBasedConfidence = intervalMiles.length >= 3
+    ? 1
+    : intervalMiles.length === 2
+      ? 0.88
+      : intervalMiles.length === 1
+        ? 0.74
+        : gallonSamples.length >= 2
+          ? 0.64
+          : sorted.length >= 1
+            ? 0.56
+            : 0.50;
+  const intervalConfidence = clamp(
+    countBasedConfidence * (0.45 + (Math.max(observedAgreement, shortIntervalCompression ? 0.22 : 0.38) * 0.55)),
+    0.35,
+    1
+  );
+
+  return {
+    inferredIntervalMiles,
+    intervalConfidence,
+    intervalMiles,
+    gallonSamples,
+    priorIntervalMiles,
+    robustObservedIntervalMiles,
+    gallonsInferredIntervalMiles,
+    shortIntervalCompression,
+  };
+}
+
+function inferTypicalIntervalMiles(fillUpHistory, options = {}) {
+  return buildIntervalInference(fillUpHistory, options).inferredIntervalMiles;
 }
 
 function estimateFuelState(fillUpHistory, context = {}) {
@@ -50,17 +166,19 @@ function estimateFuelState(fillUpHistory, context = {}) {
     defaultTankGallons = 12.5,
   } = context;
 
-  const avgIntervalMiles = inferTypicalIntervalMiles(fillUpHistory, {
+  const intervalInference = buildIntervalInference(fillUpHistory, {
     typicalIntervalMiles,
     defaultMpg,
     defaultTankGallons,
   });
+  const avgIntervalMiles = intervalInference.inferredIntervalMiles;
+  const sorted = [...(fillUpHistory || [])].sort((a, b) => a.timestamp - b.timestamp);
+  const intervalConfidence = intervalInference.intervalConfidence;
 
   let resolvedMilesSinceLastFill = Number.isFinite(Number(milesSinceLastFill))
     ? Number(milesSinceLastFill)
     : null;
 
-  const sorted = [...(fillUpHistory || [])].sort((a, b) => a.timestamp - b.timestamp);
   if (resolvedMilesSinceLastFill == null && sorted.length >= 1) {
     const lastFill = sorted[sorted.length - 1];
     if (currentOdometer && lastFill.odometer) {
@@ -87,15 +205,25 @@ function estimateFuelState(fillUpHistory, context = {}) {
     urgency = Math.max(0, 1 - estimatedRemainingMiles / avgIntervalMiles);
     urgency = urgency * urgency;
   }
+  const baseFuelNeed = Math.max(urgency, 1 - (estimatedRemainingMiles / Math.max(avgIntervalMiles, 1)));
+  const confidenceAdjustedFuelNeed = Math.max(
+    urgency,
+    baseFuelNeed * (
+      urgency >= 0.5
+        ? (0.85 + (intervalConfidence * 0.15))
+        : intervalConfidence
+    )
+  );
 
   return {
     estimatedRemainingMiles: Math.round(estimatedRemainingMiles),
     avgIntervalMiles: Math.round(avgIntervalMiles),
     milesSinceLastFill: Math.round(resolvedMilesSinceLastFill),
     urgency: Math.round(urgency * 100) / 100,
+    intervalConfidence: Math.round(intervalConfidence * 100) / 100,
     lowFuel: estimatedRemainingMiles <= lowFuelThresholdMiles,
     urgent: estimatedRemainingMiles <= urgentFuelThresholdMiles,
-    fuelNeedScore: Math.round((Math.max(urgency, 1 - (estimatedRemainingMiles / Math.max(avgIntervalMiles, 1)))) * 100) / 100,
+    fuelNeedScore: Math.round(confidenceAdjustedFuelNeed * 100) / 100,
   };
 }
 

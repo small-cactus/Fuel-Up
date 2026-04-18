@@ -385,18 +385,17 @@ async function endAllLiveActivityInstances() {
 
     for (const instance of instances) {
         try {
-            const result = instance.end();
-            // LiveActivity.end() returns a Promise; await it so we know
-            // when the native-side teardown has landed before we start
-            // a replacement.
+            // 'immediate' removes the activity from the lock screen and
+            // Dynamic Island right away. The default policy ('default')
+            // keeps it visible for up to 4 hours showing the final state,
+            // which makes it look like end() did nothing.
+            const result = instance.end('immediate');
             if (result && typeof result.then === 'function') {
                 await result;
             }
             ended += 1;
         } catch (error) {
             if (isMissingLiveActivityError(error)) {
-                // Already gone — treat as success; that's the desired
-                // state anyway.
                 ended += 1;
                 continue;
             }
