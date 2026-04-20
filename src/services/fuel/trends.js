@@ -13,6 +13,8 @@ const lastResolvedTrendDataByRequestKey = {};
 const lastTrendsScreenViewedAtMsByRequestKey = {};
 const inFlightTrendDataRequestsByRequestKey = {};
 let trendCacheGeneration = 0;
+const TREND_HISTORY_LOOKBACK_MS = 14 * 24 * 60 * 60 * 1000;
+const TREND_HISTORY_MAX_ROWS = 1500;
 const FUEL_GRADE_ALIASES = {
     regular: ['regular', 'regular_gas'],
     midgrade: ['midgrade', 'midgrade_gas'],
@@ -178,14 +180,19 @@ export async function fetchTrendData({
 }) {
     const searchLat = Math.round(latitude * 10) / 10;
     const searchLng = Math.round(longitude * 10) / 10;
+    const lookbackStartIso = new Date(Date.now() - TREND_HISTORY_LOOKBACK_MS).toISOString();
 
-    const { data: rows, error } = await supabase
+    const { data: descendingRows, error } = await supabase
         .from('station_prices')
         .select('*')
         .eq('search_latitude_rounded', searchLat)
         .eq('search_longitude_rounded', searchLng)
         .eq('fuel_type', fuelType)
-        .order('created_at', { ascending: true });
+        .gte('created_at', lookbackStartIso)
+        .order('created_at', { ascending: false })
+        .limit(TREND_HISTORY_MAX_ROWS);
+
+    const rows = Array.isArray(descendingRows) ? descendingRows.slice().reverse() : descendingRows;
 
     const validatedRows = !error && Array.isArray(rows)
         ? buildValidatedTrendRows(rows, fuelType)

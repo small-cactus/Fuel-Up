@@ -258,7 +258,7 @@ test('shouldInitializeInitialSuppressionDelay only allows the launch grace perio
     }), false);
 });
 
-test('buildPersistentSuppressedStationIds keeps hidden chips hidden by default and only releases the active clear station', () => {
+test('buildPersistentSuppressedStationIds mirrors the current overlap set so zoom-in reveals previously hidden chips', () => {
     assert.deepEqual(
         Array.from(buildPersistentSuppressedStationIds({
             currentSuppressedStationIds: new Set(),
@@ -267,7 +267,7 @@ test('buildPersistentSuppressedStationIds keeps hidden chips hidden by default a
             activeStationId: null,
             canRevealActiveStation: false,
         })).sort(),
-        ['station-a', 'station-b']
+        []
     );
 
     assert.deepEqual(
@@ -278,7 +278,7 @@ test('buildPersistentSuppressedStationIds keeps hidden chips hidden by default a
             activeStationId: 'station-a',
             canRevealActiveStation: true,
         })).sort(),
-        ['station-b', 'station-c']
+        ['station-c']
     );
 
     assert.deepEqual(
@@ -289,7 +289,7 @@ test('buildPersistentSuppressedStationIds keeps hidden chips hidden by default a
             activeStationId: 'station-a',
             canRevealActiveStation: true,
         })).sort(),
-        ['station-a', 'station-b']
+        ['station-a']
     );
 });
 

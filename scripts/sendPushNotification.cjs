@@ -34,6 +34,7 @@ function pickFirstNonEmpty(...values) {
 
 function parseArgs(argv) {
     const parsedArgs = {
+        all: false,
         body: '',
         help: false,
         json: false,
@@ -53,6 +54,11 @@ function parseArgs(argv) {
 
         if (arg === '--list') {
             parsedArgs.list = true;
+            continue;
+        }
+
+        if (arg === '--all') {
+            parsedArgs.all = true;
             continue;
         }
 
@@ -113,6 +119,7 @@ function printHelp() {
 Usage:
   node ./scripts/sendPushNotification.cjs
   node ./scripts/sendPushNotification.cjs --list
+  node ./scripts/sendPushNotification.cjs --all
   node ./scripts/sendPushNotification.cjs --token <raw-apns-token> --title "Fuel Up" --body "Price drop"
 
 Credential options:
@@ -143,9 +150,43 @@ function shortToken(token) {
     return `${normalizedToken.slice(0, 10)}...${normalizedToken.slice(-8)}`;
 }
 
+function normalizeEnvironment(value) {
+    const normalizedValue = String(value || '').trim().toLowerCase();
+
+    if (normalizedValue === 'development' || normalizedValue === 'sandbox') {
+        return 'sandbox';
+    }
+
+    if (normalizedValue === 'production') {
+        return 'production';
+    }
+
+    return '';
+}
+
+function getAlternateEnvironment(environment) {
+    return environment === 'production' ? 'sandbox' : 'production';
+}
+
+function isMissingEnvironmentColumnError(error) {
+    return (
+        error?.code === '42703' &&
+        /push_tokens\.environment/i.test(String(error?.message || ''))
+    );
+}
+
+function isBadDeviceTokenResult(result) {
+    return (
+        !result?.ok &&
+        Number(result?.status) === 400 &&
+        String(result?.body?.reason || '') === 'BadDeviceToken'
+    );
+}
+
 function formatTokenRow(row, index) {
     const createdAt = row.created_at ? new Date(row.created_at).toLocaleString() : 'unknown';
-    return `${String(index + 1).padStart(2, ' ')}. ${shortToken(row.token)}  ${createdAt}`;
+    const environment = normalizeEnvironment(row.environment) || 'unknown';
+    return `${String(index + 1).padStart(2, ' ')}. ${shortToken(row.token)}  ${environment}  ${createdAt}`;
 }
 
  function getSupabaseConfig() {
@@ -275,26 +316,79 @@ async function fetchPushTokens() {
     const supabase = createClient(url, key);
     const tokens = [];
     const pageSize = 1000;
+    let supportsEnvironmentColumn = true;
 
     for (let from = 0; ; from += pageSize) {
-        const { data, error } = await supabase
+        let query = supabase
             .from('push_tokens')
-            .select('id, token, created_at')
+            .select(supportsEnvironmentColumn ? 'id, token, created_at, environment' : 'id, token, created_at')
             .order('created_at', { ascending: false })
             .range(from, from + pageSize - 1);
+
+        let { data, error } = await query;
+
+        if (error && supportsEnvironmentColumn && isMissingEnvironmentColumnError(error)) {
+            supportsEnvironmentColumn = false;
+            ({ data, error } = await supabase
+                .from('push_tokens')
+                .select('id, token, created_at')
+                .order('created_at', { ascending: false })
+                .range(from, from + pageSize - 1));
+        }
 
         if (error) {
             throw new Error(`Failed to fetch push tokens: ${error.message}`);
         }
 
-        tokens.push(...(data || []));
+        tokens.push(...((data || []).map((row) => ({
+            ...row,
+            environment: normalizeEnvironment(row.environment),
+        }))));
 
         if (!data || data.length < pageSize) {
             break;
         }
     }
 
-    return tokens;
+    return {
+        supportsEnvironmentColumn,
+        tokens,
+    };
+}
+
+async function updatePushTokenEnvironment({ id, token, environment }) {
+    const normalizedEnvironment = normalizeEnvironment(environment);
+    if (!normalizedEnvironment) {
+        return false;
+    }
+
+    const { url, key } = getSupabaseConfig();
+    if (!url || !key) {
+        return false;
+    }
+
+    const supabase = createClient(url, key);
+    const filterColumn = id ? 'id' : 'token';
+    const filterValue = id || token;
+
+    if (!filterValue) {
+        return false;
+    }
+
+    const { error } = await supabase
+        .from('push_tokens')
+        .update({ environment: normalizedEnvironment })
+        .eq(filterColumn, filterValue);
+
+    if (error) {
+        if (isMissingEnvironmentColumnError(error)) {
+            return false;
+        }
+
+        throw new Error(`Failed to update push token environment: ${error.message}`);
+    }
+
+    return true;
 }
 
 async function promptForSelection(tokens) {
@@ -426,6 +520,68 @@ async function sendPushNotification({ token, title, body, apnsConfig }) {
     });
 }
 
+async function sendWithEnvironmentResolution({ tokenRow, explicitEnvironment, title, body }) {
+    const token = String(tokenRow?.token || '').trim();
+    const storedEnvironment = normalizeEnvironment(tokenRow?.environment);
+    const configuredEnvironment = normalizeEnvironment(explicitEnvironment || getDefaultApnsEnvironment()) || 'sandbox';
+    const attemptedEnvironments = [];
+    const queuedEnvironments = [];
+
+    const pushEnvironment = (environment) => {
+        const normalizedEnvironment = normalizeEnvironment(environment);
+        if (!normalizedEnvironment || queuedEnvironments.includes(normalizedEnvironment)) {
+            return;
+        }
+
+        queuedEnvironments.push(normalizedEnvironment);
+    };
+
+    if (explicitEnvironment) {
+        pushEnvironment(explicitEnvironment);
+    } else {
+        pushEnvironment(storedEnvironment);
+        pushEnvironment(configuredEnvironment);
+        pushEnvironment(getAlternateEnvironment(storedEnvironment || configuredEnvironment));
+    }
+
+    let finalResult = null;
+
+    for (const environment of queuedEnvironments) {
+        attemptedEnvironments.push(environment);
+
+        const result = await sendPushNotification({
+            apnsConfig: getApnsConfig({ environment }),
+            body,
+            title,
+            token,
+        });
+
+        finalResult = result;
+
+        if (result.ok) {
+            return {
+                ...result,
+                attemptedEnvironments,
+                resolvedEnvironment: environment,
+            };
+        }
+
+        if (explicitEnvironment || !isBadDeviceTokenResult(result)) {
+            return {
+                ...result,
+                attemptedEnvironments,
+                resolvedEnvironment: environment,
+            };
+        }
+    }
+
+    return {
+        ...finalResult,
+        attemptedEnvironments,
+        resolvedEnvironment: attemptedEnvironments[attemptedEnvironments.length - 1] || '',
+    };
+}
+
 async function main() {
     const args = parseArgs(process.argv.slice(2));
     if (args.help) {
@@ -433,7 +589,7 @@ async function main() {
         return;
     }
 
-    const tokens = await fetchPushTokens();
+    const { supportsEnvironmentColumn, tokens } = await fetchPushTokens();
     if (args.list) {
         if (!tokens.length) {
             console.log('No push tokens found.');
@@ -450,26 +606,105 @@ async function main() {
         throw new Error('No push tokens found in Supabase.');
     }
 
-    const token = args.token || await promptForSelection(tokens);
     const { title, body } = await promptForText(
         args.title || 'Fuel Up',
         args.body || 'Fuel prices just dropped nearby.'
     );
 
-    const result = await sendPushNotification({
-        apnsConfig: getApnsConfig({ environment: args.environment }),
-        body,
-        title,
-        token,
-    });
+    let targetRows = [];
+
+    if (args.all) {
+        targetRows = tokens.map((row) => ({
+            ...row,
+            token: String(row.token || '').trim(),
+        })).filter((row) => row.token);
+    } else {
+        const selectedToken = args.token || await promptForSelection(tokens);
+        const matchedRow = tokens.find((row) => row.token === selectedToken);
+        targetRows = [{
+            id: matchedRow?.id || null,
+            token: selectedToken,
+            environment: normalizeEnvironment(matchedRow?.environment),
+            created_at: matchedRow?.created_at || null,
+        }];
+    }
+
+    const results = [];
+
+    for (const tokenRow of targetRows) {
+        const result = await sendWithEnvironmentResolution({
+            explicitEnvironment: args.environment,
+            body,
+            title,
+            tokenRow,
+        });
+
+        if (
+            supportsEnvironmentColumn &&
+            !args.environment &&
+            result.ok &&
+            result.resolvedEnvironment &&
+            result.resolvedEnvironment !== normalizeEnvironment(tokenRow.environment)
+        ) {
+            await updatePushTokenEnvironment({
+                id: tokenRow.id,
+                token: tokenRow.token,
+                environment: result.resolvedEnvironment,
+            });
+        }
+
+        results.push({
+            ...result,
+            storedEnvironment: normalizeEnvironment(tokenRow.environment),
+        });
+    }
 
     if (args.json) {
-        console.log(JSON.stringify(result, null, 2));
+        console.log(JSON.stringify(
+            args.all
+                ? {
+                    count: results.length,
+                    results,
+                    supportsEnvironmentColumn,
+                }
+                : results[0],
+            null,
+            2
+        ));
+        if (results.some((result) => !result.ok)) {
+            process.exitCode = 1;
+        }
         return;
     }
 
+    if (args.all) {
+        results.forEach((result) => {
+            if (result.ok) {
+                console.log(
+                    `Sent push notification to ${shortToken(result.token)} via ${result.credentialMode} (${result.environment}).`
+                );
+                return;
+            }
+
+            const reason = result.body?.reason ? `: ${result.body.reason}` : '';
+            console.log(
+                `Failed to send push notification to ${shortToken(result.token)} via ${result.environment} with status ${result.status}${reason}`
+            );
+        });
+
+        const failedCount = results.filter((result) => !result.ok).length;
+        if (failedCount) {
+            throw new Error(`Failed to send ${failedCount} of ${results.length} push notifications.`);
+        }
+
+        return;
+    }
+
+    const result = results[0];
     if (result.ok) {
-        console.log(`Sent push notification to ${shortToken(token)} via ${result.credentialMode} (${result.environment}).`);
+        console.log(
+            `Sent push notification to ${shortToken(result.token)} via ${result.credentialMode} (${result.environment}).`
+        );
         return;
     }
 

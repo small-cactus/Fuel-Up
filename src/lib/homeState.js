@@ -358,27 +358,22 @@ export function shouldInitializeInitialSuppressionDelay({
 
 export function buildPersistentSuppressedStationIds({
     currentSuppressedStationIds,
-    previousPersistentSuppressedStationIds,
+    previousPersistentSuppressedStationIds: _previousPersistentSuppressedStationIds,
     visibleStationIds,
     activeStationId = null,
     canRevealActiveStation = false,
 }) {
     const nextSuppressedIds = new Set();
     const currentSuppressedIds = new Set(currentSuppressedStationIds || []);
-    const previousSuppressedIds = new Set(previousPersistentSuppressedStationIds || []);
     const visibleIds = new Set(visibleStationIds || []);
     const normalizedActiveStationId = activeStationId == null ? null : String(activeStationId);
 
-    previousSuppressedIds.forEach(stationId => {
+    currentSuppressedIds.forEach(stationId => {
         const normalizedStationId = String(stationId);
 
         if (visibleIds.has(normalizedStationId)) {
             nextSuppressedIds.add(normalizedStationId);
         }
-    });
-
-    currentSuppressedIds.forEach(stationId => {
-        nextSuppressedIds.add(String(stationId));
     });
 
     if (

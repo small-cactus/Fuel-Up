@@ -1,4 +1,5 @@
 import * as Device from 'expo-device';
+import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import { Linking, Platform } from 'react-native';
 
@@ -38,6 +39,40 @@ function getSupabaseClient() {
         console.error('Failed to load Supabase client:', error);
         return null;
     }
+}
+
+function normalizeApnsEnvironment(value) {
+    const normalizedValue = String(value || '').trim().toLowerCase();
+
+    if (normalizedValue === 'development' || normalizedValue === 'sandbox') {
+        return 'sandbox';
+    }
+
+    if (normalizedValue === 'production') {
+        return 'production';
+    }
+
+    return '';
+}
+
+function getConfiguredApnsEnvironment() {
+    const expoConfig = Constants?.expoConfig || {};
+    const extra = expoConfig?.extra || {};
+    const iosConfig = expoConfig?.ios || {};
+    const iosEntitlements = iosConfig?.entitlements || {};
+
+    return normalizeApnsEnvironment(
+        process.env.EXPO_PUBLIC_APNS_ENV ||
+        extra.apnsEnvironment ||
+        iosEntitlements['aps-environment']
+    );
+}
+
+function isMissingEnvironmentColumnError(error) {
+    return (
+        error?.code === '42703' &&
+        /push_tokens\.environment/i.test(String(error?.message || ''))
+    );
 }
 
 /**
@@ -101,10 +136,20 @@ export async function savePushTokenToSupabase(token) {
     const supabase = getSupabaseClient();
     if (!supabase) return { success: false, error: 'Supabase not configured' };
 
+    const environment = getConfiguredApnsEnvironment();
+    const payload = environment ? { token, environment } : { token };
+
     try {
-        const { data, error } = await supabase
+        let { error } = await supabase
             .from('push_tokens')
-            .upsert({ token }, { onConflict: 'token' });
+            .upsert(payload, { onConflict: 'token' });
+
+        // Keep token registration working until the DB migration has been applied.
+        if (error && environment && isMissingEnvironmentColumnError(error)) {
+            ({ error } = await supabase
+                .from('push_tokens')
+                .upsert({ token }, { onConflict: 'token' }));
+        }
 
         if (error) {
             console.error('Error saving push token:', error);

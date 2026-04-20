@@ -17,8 +17,8 @@ import {
   CLUSTER_PRIMARY_PILL_WIDTH,
 } from '../../cluster/constants';
 
-const SHRINK_DELAY_MS = 900;
-const SHRINK_DURATION_MS = 150;
+const SHRINK_DELAY_MS = 0;
+const SHRINK_DURATION_MS = 260;
 const SUPPRESSED_SCALE = 0.005;
 const APPEAR_START_SCALE = 0.58;
 const APPEAR_DURATION_MS = 260;
@@ -172,6 +172,9 @@ function StationMarker({
     }, trackingDuration);
   }, [isActive, isBest, isContentHidden, isDark, isSuppressed, quote?.price, quote?.stationId, shouldDelaySuppression, visualStateSignature]);
 
+  const suppressMarkerHit = isSuppressed;
+  const markerZIndex = suppressMarkerHit ? -1 : (isBest ? 2 : 1);
+
   return (
     <Marker
       coordinate={{
@@ -179,8 +182,9 @@ function StationMarker({
         longitude: quote.longitude,
       }}
       anchor={{ x: 0.5, y: 0.5 }}
-      onPress={() => onPress?.(quote)}
-      style={{ zIndex: isBest ? 2 : 1 }}
+      onPress={suppressMarkerHit ? undefined : () => onPress?.(quote)}
+      tappable={!suppressMarkerHit}
+      style={{ zIndex: markerZIndex }}
       tracksViewChanges={tracksViewChanges}
     >
       <AnimatedView style={shrinkStyle}>
