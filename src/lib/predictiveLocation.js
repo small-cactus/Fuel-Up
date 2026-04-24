@@ -53,7 +53,7 @@ const TRACKING_MODE_OPTIONS = Object.freeze({
         deferredUpdatesDistance: 250,
         deferredUpdatesInterval: 180_000,
         pausesUpdatesAutomatically: true,
-        showsBackgroundLocationIndicator: true,
+        showsBackgroundLocationIndicator: false,
     },
     engaged: {
         accuracy: Location.Accuracy.High,
@@ -62,7 +62,7 @@ const TRACKING_MODE_OPTIONS = Object.freeze({
         deferredUpdatesDistance: 90,
         deferredUpdatesInterval: 45_000,
         pausesUpdatesAutomatically: true,
-        showsBackgroundLocationIndicator: true,
+        showsBackgroundLocationIndicator: false,
     },
 });
 
@@ -540,7 +540,7 @@ function createLocationOptionsSignature(options) {
         foregroundNotificationTitle: String(foregroundService.notificationTitle || ''),
         killServiceOnDestroy: Boolean(foregroundService.killServiceOnDestroy),
         pausesUpdatesAutomatically: options?.pausesUpdatesAutomatically !== false,
-        showsBackgroundLocationIndicator: options?.showsBackgroundLocationIndicator !== false,
+        showsBackgroundLocationIndicator: Boolean(options?.showsBackgroundLocationIndicator),
     });
 }
 
@@ -570,6 +570,9 @@ export function getPredictiveLocationTaskOptions(mode = 'monitoring', overrides 
     return {
         ...baseOptions,
         ...overrides,
+        // Keep continuous background updates, but never ask iOS to surface the
+        // blue/Dynamic Island background location indicator.
+        showsBackgroundLocationIndicator: false,
         foregroundService: {
             ...ANDROID_FOREGROUND_SERVICE_OPTIONS,
             ...(overrides.foregroundService || {}),

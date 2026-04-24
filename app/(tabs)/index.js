@@ -1716,6 +1716,7 @@ export default function HomeScreen() {
     const [isLoadingLocation, setIsLoadingLocation] = useState(true);
     const [isRefreshingPrices, setIsRefreshingPrices] = useState(false);
     const [hasLocationPermission, setHasLocationPermission] = useState(false);
+    const [activeAppState, setActiveAppState] = useState(AppState.currentState);
     const [initialMapRegion, setInitialMapRegion] = useState(DEFAULT_REGION);
     const [isInitialMapRegionReady, setIsInitialMapRegionReady] = useState(false);
     const [isMapLoaded, setIsMapLoaded] = useState(false);
@@ -3428,11 +3429,11 @@ export default function HomeScreen() {
     }, []);
 
     // Subscribe to continuous location updates and start the driver
-    // interval while we have permission and the home tab is focused. The
-    // subscription + driver are torn down whenever any of those conditions
-    // flips so we don't tick in the background.
+    // interval while we have permission, the home tab is focused, and the app
+    // is active. The subscription + driver are torn down whenever any of
+    // those conditions flips so we don't tick in the background.
     useEffect(() => {
-        if (manualLocationOverride || !hasLocationPermission || !isFocused) {
+        if (manualLocationOverride || !hasLocationPermission || !isFocused || activeAppState !== 'active') {
             return undefined;
         }
 
@@ -3487,7 +3488,7 @@ export default function HomeScreen() {
             latestVelocityRef.current = { latPerMs: 0, lngPerMs: 0 };
             lastTrackedCheapestStationIdRef.current = null;
         };
-    }, [hasLocationPermission, isFocused, manualLocationOverride]);
+    }, [activeAppState, hasLocationPermission, isFocused, manualLocationOverride]);
 
     useEffect(() => {
         recordLocationProbeEvent({
@@ -3501,6 +3502,7 @@ export default function HomeScreen() {
         const handleAppStateChange = (nextAppState) => {
             const previousAppState = appStateRef.current;
             appStateRef.current = nextAppState;
+            setActiveAppState(nextAppState);
 
             recordLocationProbeEvent({
                 type: 'app-state-change',
@@ -5460,7 +5462,7 @@ export default function HomeScreen() {
                     style={StyleSheet.absoluteFillObject}
                     initialRegion={initialMapRegion}
                     provider={PROVIDER_APPLE}
-                    showsUserLocation={hasLocationPermission}
+                    showsUserLocation={hasLocationPermission && activeAppState === 'active'}
                     onMapReady={() => {
                         markMapLoaded();
                     }}

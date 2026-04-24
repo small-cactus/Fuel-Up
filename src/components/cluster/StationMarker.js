@@ -16,6 +16,7 @@ import {
   CLUSTER_PILL_HEIGHT,
   CLUSTER_PRIMARY_PILL_WIDTH,
 } from '../../cluster/constants';
+import { buildStationMarkerViewTrackingSignature } from '../../cluster/stationMarkerPresentation';
 
 const SHRINK_DELAY_MS = 0;
 const SHRINK_DURATION_MS = 260;
@@ -43,21 +44,14 @@ function StationMarker({
   const appearProgress = useSharedValue(1);
   const suppressionProgress = useSharedValue(isSuppressed && !shouldDelaySuppression ? 1 : 0);
   const tracksViewChangesTimeoutRef = useRef(null);
-  const suppressionHideTimeoutRef = useRef(null);
   const visualStateSignatureRef = useRef('');
   const [tracksViewChanges, setTracksViewChanges] = useState(false);
-  const [isContentHidden, setIsContentHidden] = useState(isSuppressed && !shouldDelaySuppression);
 
   useEffect(() => {
     return () => {
       if (tracksViewChangesTimeoutRef.current) {
         clearTimeout(tracksViewChangesTimeoutRef.current);
         tracksViewChangesTimeoutRef.current = null;
-      }
-
-      if (suppressionHideTimeoutRef.current) {
-        clearTimeout(suppressionHideTimeoutRef.current);
-        suppressionHideTimeoutRef.current = null;
       }
     };
   }, []);
@@ -71,13 +65,7 @@ function StationMarker({
   }, [appearProgress, quote?.stationId]);
 
   useEffect(() => {
-    if (suppressionHideTimeoutRef.current) {
-      clearTimeout(suppressionHideTimeoutRef.current);
-      suppressionHideTimeoutRef.current = null;
-    }
-
     if (isSuppressed) {
-      setIsContentHidden(false);
       const delayMs = shouldDelaySuppression ? SHRINK_DELAY_MS : 0;
       suppressionProgress.value = withDelay(
         delayMs,
@@ -86,15 +74,9 @@ function StationMarker({
           easing: Easing.out(Easing.cubic),
         })
       );
-
-      suppressionHideTimeoutRef.current = setTimeout(() => {
-        suppressionHideTimeoutRef.current = null;
-        setIsContentHidden(true);
-      }, delayMs + SHRINK_DURATION_MS);
       return;
     }
 
-    setIsContentHidden(false);
     suppressionProgress.value = withTiming(0, {
       duration: 120,
       easing: Easing.out(Easing.cubic),
@@ -118,6 +100,12 @@ function StationMarker({
           )),
       },
     ],
+    opacity: interpolate(
+      suppressionProgress.value,
+      [0, 1],
+      [1, 0],
+      Extrapolate.CLAMP
+    ),
   }), [appearProgress, suppressionProgress]);
 
   const inactiveIconTintColor = isDark ? '#D3D6DE' : '#888888';
@@ -138,17 +126,13 @@ function StationMarker({
     textColor = isBest ? bestTintColor : inactiveTextColor;
     glassTintColor = undefined;
   }
-  const visualStateSignature = [
-    quote?.stationId ?? '',
-    quote?.price ?? '',
-    isSuppressed ? '1' : '0',
-    shouldDelaySuppression ? '1' : '0',
-    isContentHidden ? '1' : '0',
-    isBest ? '1' : '0',
-    isActive ? '1' : '0',
-    isDark ? '1' : '0',
-    useOnboardingColors ? '1' : '0',
-  ].join('|');
+  const visualStateSignature = buildStationMarkerViewTrackingSignature({
+    quote,
+    isBest,
+    isActive,
+    isDark,
+    useOnboardingColors,
+  });
 
   useEffect(() => {
     if (visualStateSignatureRef.current === visualStateSignature) {
@@ -162,15 +146,13 @@ function StationMarker({
       clearTimeout(tracksViewChangesTimeoutRef.current);
     }
 
-    const trackingDuration = isSuppressed && shouldDelaySuppression
-      ? Math.max(APPEAR_DURATION_MS, SHRINK_DELAY_MS + SHRINK_DURATION_MS) + TRACKS_VIEW_CHANGES_IDLE_MS
-      : Math.max(APPEAR_DURATION_MS, SHRINK_DURATION_MS) + TRACKS_VIEW_CHANGES_IDLE_MS;
+    const trackingDuration = Math.max(APPEAR_DURATION_MS, SHRINK_DURATION_MS) + TRACKS_VIEW_CHANGES_IDLE_MS;
 
     tracksViewChangesTimeoutRef.current = setTimeout(() => {
       tracksViewChangesTimeoutRef.current = null;
       setTracksViewChanges(false);
     }, trackingDuration);
-  }, [isActive, isBest, isContentHidden, isDark, isSuppressed, quote?.price, quote?.stationId, shouldDelaySuppression, visualStateSignature]);
+  }, [visualStateSignature]);
 
   const suppressMarkerHit = isSuppressed;
   const markerZIndex = suppressMarkerHit ? -1 : (isBest ? 2 : 1);
@@ -188,25 +170,21 @@ function StationMarker({
       tracksViewChanges={tracksViewChanges}
     >
       <AnimatedView style={shrinkStyle}>
-        {isContentHidden ? (
-          <View style={styles.hiddenPlaceholder} />
-        ) : (
-          <View style={isActive && !isSuppressed && !useOnboardingColors ? [styles.activeRing, { borderColor: bestTintColor }] : null}>
-            <LiquidGlassView effect="clear" tintColor={glassTintColor} style={styles.pillShell}>
-              <View style={styles.rowItem}>
-                <SymbolView
-                  name="fuelpump.fill"
-                  size={14}
-                  tintColor={iconTintColor}
-                  style={styles.priceIcon}
-                />
-                <Text style={[styles.priceText, isBest && styles.bestPriceText, { color: textColor }]}>
-                  ${quote.price.toFixed(2)}
-                </Text>
-              </View>
-            </LiquidGlassView>
-          </View>
-        )}
+        <View style={isActive && !isSuppressed && !useOnboardingColors ? [styles.activeRing, { borderColor: bestTintColor }] : null}>
+          <LiquidGlassView effect="clear" tintColor={glassTintColor} style={styles.pillShell}>
+            <View style={styles.rowItem}>
+              <SymbolView
+                name="fuelpump.fill"
+                size={14}
+                tintColor={iconTintColor}
+                style={styles.priceIcon}
+              />
+              <Text style={[styles.priceText, isBest && styles.bestPriceText, { color: textColor }]}>
+                ${quote.price.toFixed(2)}
+              </Text>
+            </View>
+          </LiquidGlassView>
+        </View>
       </AnimatedView>
     </Marker>
   );
@@ -247,11 +225,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: CLUSTER_PILL_HEIGHT / 2 + 3,
     padding: 1,
-  },
-  hiddenPlaceholder: {
-    width: 1,
-    height: 1,
-    opacity: 0,
   },
   priceIcon: {
     marginRight: 2,
