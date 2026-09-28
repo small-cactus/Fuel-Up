@@ -1180,9 +1180,7 @@ function getCameraForProgress(routeMetrics, sceneConfig, progress) {
     ? 1 - smoothstep(0, earlyTurnWindowEndDistanceMeters, currentDistanceMeters)
     : 0;
   const headingWindowConfig = sceneConfig.cameraHeadingWindow || {};
-  const cameraFollowHeading = currentDistanceMeters >= routeMetrics.totalDistanceMeters - 8
-    ? routeMetrics.finalHeading
-    : getWindowHeadingAtDistance(
+  const windowHeading = getWindowHeadingAtDistance(
       routeMetrics,
       currentDistanceMeters,
       headingWindowConfig.behindMeters || 28,
@@ -1191,6 +1189,13 @@ function getCameraForProgress(routeMetrics, sceneConfig, progress) {
         totalHeadingInfluence * (headingWindowConfig.turnAheadBoostMeters || 120)
       )
     );
+  // Blend into the destination bearing over the approach, rather than snapping
+  // to it at eight meters while the route window still spans the final turn.
+  const cameraFollowHeading = interpolateHeadingDegrees(
+    windowHeading,
+    routeMetrics.finalHeading,
+    smoothstep(Math.max(0, routeMetrics.totalDistanceMeters - 80), routeMetrics.totalDistanceMeters, currentDistanceMeters)
+  );
   const routeHeadingLookaheadMeters = clamp(
     lerp(
       headingPathLookahead.baseMeters || 96,

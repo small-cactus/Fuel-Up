@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { AppState, Alert, StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppState } from '../../src/AppStateContext';
@@ -35,22 +35,21 @@ export default function SettingsScreen() {
     useEffect(() => {
         let isActive = true;
 
-        void (async () => {
+        const refreshPermissions = async () => {
             try {
                 const nextPermissionState = await getPredictiveTrackingPermissionStateAsync();
-
-                if (isActive) {
-                    setTrackingPermissionState(nextPermissionState);
-                }
-            } catch (error) {
-                if (isActive) {
-                    setTrackingPermissionState(null);
-                }
+                if (isActive) setTrackingPermissionState(nextPermissionState);
+            } catch {
+                if (isActive) setTrackingPermissionState(null);
             }
-        })();
-
+        };
+        void refreshPermissions();
+        const subscription = AppState.addEventListener('change', state => {
+            if (state === 'active') void refreshPermissions();
+        });
         return () => {
             isActive = false;
+            subscription.remove();
         };
     }, []);
 

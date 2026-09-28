@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AppState, Alert, Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LiquidGlassView as GlassView } from '@callstack/liquid-glass';
 
 
 import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Location from 'expo-location';
+import * as Notifications from 'expo-notifications';
 import MapView, { Circle, Marker, PROVIDER_APPLE } from 'react-native-maps';
 import { LinearGradient } from 'expo-linear-gradient';
 import Slider from '@react-native-community/slider';
@@ -36,6 +36,7 @@ import {
     getPredictiveTrackingPermissionStateAsync,
     openPredictiveTrackingSettingsAsync,
 } from '../lib/predictiveTrackingAccess';
+import { MIN_SEARCH_RADIUS_MILES, MAX_SEARCH_RADIUS_MILES } from '../lib/fuelSearchState';
 import { FUEL_GRADE_ORDER, getFuelGradeMeta } from '../lib/fuelGrade';
 import {
     buildOnboardingPreferenceUpdates,
@@ -367,13 +368,15 @@ function RadiusStep({ isDark, themeColors, insets, value, onChange, mapRegion })
                     style={styles.sliderCard}
                 >
                     <View style={styles.sliderLabels}>
-                        <Text style={[styles.sliderLabel, { color: themeColors.text }]}>5 mi</Text>
-                        <Text style={[styles.sliderLabel, { color: themeColors.text }]}>25 mi</Text>
+                        <Text style={[styles.sliderLabel, { color: themeColors.text }]}>{MIN_SEARCH_RADIUS_MILES} mi</Text>
+                        <Text style={[styles.sliderLabel, { color: themeColors.text }]}>{MAX_SEARCH_RADIUS_MILES} mi</Text>
                     </View>
                     <Slider
+                        testID="onboarding-radius"
+                        accessibilityLabel="Search radius in miles"
                         style={styles.slider}
-                        minimumValue={5}
-                        maximumValue={25}
+                        minimumValue={MIN_SEARCH_RADIUS_MILES}
+                        maximumValue={MAX_SEARCH_RADIUS_MILES}
                         step={1}
                         value={value}
                         onValueChange={onChange}
@@ -404,7 +407,7 @@ function OctaneStep({ isDark, themeColors, insets, value, onChange }) {
                     {OCTANE_OPTIONS.map(option => {
                         const isSelected = value === option.key;
                         return (
-                            <Pressable key={option.key} onPress={() => onChange(option.key)}>
+                            <Pressable key={option.key} testID={`onboarding-grade-${option.key}`} accessibilityRole="radio" accessibilityLabel={option.label} accessibilityState={{ selected: isSelected }} onPress={() => onChange(option.key)}>
                                 <GlassView
                                     tintColor={isDark ? '#000000' : '#FFFFFF'}
                                     key={isDark ? `oct-dark-${option.key}` : `oct-light-${option.key}`}
@@ -446,7 +449,7 @@ function LocationStep({ isDark, themeColors, insets, permissionState }) {
         { icon: 'location.magnifyingglass', text: 'Automatically find stations around you' },
         { icon: 'shield.checkered', text: 'Your data will never be shared with anyone else' },
         { icon: 'sparkles', text: 'Predictive Fueling needs Always Allow to predict when and where you fuel' },
-        { icon: 'cpu', text: 'We don\'t have servers, everything happens on your device' },
+        { icon: 'cpu', text: 'Driving predictions happen on your device' },
     ];
     const hasFullAccess = hasPredictiveLocationAccess(permissionState);
     const statusCopy = getLocationStatusCopy(permissionState);
@@ -586,7 +589,8 @@ function AnimatedButtonContent({ text, icon, isDark }) {
         if (text !== currentText || icon !== currentIcon) {
             // Smoothly transit via scale and opacity
             scale.value = withTiming(0.95, { duration: 150 });
-            opacity.value = withTiming(0, { duration: 150 }, () => {
+            opacity.value = withTiming(0, { duration: 150 }, finished => {
+                if (!finished) return;
                 runOnJS(setCurrentText)(text);
                 runOnJS(setCurrentIcon)(icon);
                 opacity.value = withTiming(1, { duration: 250 });
@@ -622,6 +626,10 @@ function AnimatedButtonContent({ text, icon, isDark }) {
     );
 }
 
+const MemoWelcomeStep = React.memo(WelcomeStep);
+const MemoLocationStep = React.memo(LocationStep);
+const MemoNotificationStep = React.memo(NotificationStep);
+
 export default function OnboardingScreen() {
     const insets = useSafeAreaInsets();
     const { isDark, themeColors } = useTheme();
@@ -648,6 +656,22 @@ export default function OnboardingScreen() {
     }, []);
 
     const scrollViewRef = useRef(null);
+    const activeStepRef = useRef(currentStep);
+    activeStepRef.current = currentStep;
+    const permissionRequestRef = useRef(false);
+    const advanceTimerRef = useRef(null);
+    const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+
+    useEffect(() => () => clearTimeout(advanceTimerRef.current), []);
+
+    const advanceAfterPermission = step => {
+        clearTimeout(advanceTimerRef.current);
+        advanceTimerRef.current = setTimeout(() => {
+            if (activeStepRef.current === step) {
+                scrollViewRef.current?.scrollTo({ x: (step + 1) * SCREEN_WIDTH, animated: true });
+            }
+        }, 600);
+    };
 
     const handleScroll = (event) => {
         const offset = event.nativeEvent.contentOffset.x;
@@ -666,31 +690,33 @@ export default function OnboardingScreen() {
 
     useEffect(() => {
         let isActive = true;
-
-        void (async () => {
-            const permissionState = await getPredictiveTrackingPermissionStateAsync();
-
-            if (!isActive) {
-                return;
-            }
-
-            setLocationPermissionState(permissionState);
-        })();
-
-        return () => {
-            isActive = false;
+        const refreshPermissions = async () => {
+            const [location, notifications] = await Promise.allSettled([
+                getPredictiveTrackingPermissionStateAsync(),
+                Notifications.getPermissionsAsync(),
+            ]);
+            if (!isActive) return;
+            if (location.status === 'fulfilled') setLocationPermissionState(location.value);
+            if (notifications.status === 'fulfilled') setNotifPermissionStatus(notifications.value.status);
         };
+        void refreshPermissions();
+        const subscription = AppState.addEventListener('change', state => {
+            if (state === 'active') void refreshPermissions();
+        });
+        return () => { isActive = false; subscription.remove(); };
     }, []);
 
     const handleRequestPermission = async () => {
+        if (permissionRequestRef.current) return;
+        permissionRequestRef.current = true;
+        setIsRequestingPermission(true);
+        const requestedStep = currentStep;
         try {
             const nextPermissionState = await enablePredictiveTrackingAsync();
             setLocationPermissionState(nextPermissionState);
 
             if (nextPermissionState.isReady) {
-                setTimeout(() => {
-                    scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * SCREEN_WIDTH, animated: true });
-                }, 600);
+                advanceAfterPermission(requestedStep);
                 return;
             }
 
@@ -714,28 +740,39 @@ export default function OnboardingScreen() {
         } catch (error) {
             Alert.alert(
                 'Unable To Enable Predictive Tracking',
-                'Predictive tracking permissions can only be enabled from a development or production build.'
+                'Unable to check tracking permissions. Please try again or review access in iPhone Settings.'
             );
+        } finally {
+            permissionRequestRef.current = false;
+            setIsRequestingPermission(false);
         }
     };
 
 
     const handleRequestNotifications = async () => {
-        const token = await registerForPushNotificationsAsync();
-        if (token) {
-            setNotifPermissionStatus('granted');
-            savePushTokenToSupabase(token); // Fire and forget
-        } else {
-            setNotifPermissionStatus('denied');
+        if (permissionRequestRef.current) return;
+        permissionRequestRef.current = true;
+        setIsRequestingPermission(true);
+        const requestedStep = currentStep;
+        try {
+            const token = await registerForPushNotificationsAsync();
+            // Permission and remote token registration are separate: being offline
+            // must not turn a granted permission into a displayed denial.
+            const permission = await Notifications.getPermissionsAsync();
+            setNotifPermissionStatus(permission.status);
+            if (token) void savePushTokenToSupabase(token);
+            advanceAfterPermission(requestedStep);
+        } catch (error) {
+            Alert.alert('Notification Setup Unavailable', 'Please try again. You can also enable notifications later in iPhone Settings.');
+        } finally {
+            permissionRequestRef.current = false;
+            setIsRequestingPermission(false);
         }
-        setTimeout(() => {
-            scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * SCREEN_WIDTH, animated: true });
-        }, 600);
     };
 
-
     const handleContinue = () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        if (permissionRequestRef.current) return;
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
 
         if (currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState)) {
             handleRequestPermission();
@@ -759,7 +796,7 @@ export default function OnboardingScreen() {
             scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * SCREEN_WIDTH, animated: true });
         } else {
             // Final step
-            completeOnboarding();
+            completeOnboarding({ searchRadiusMiles: radius, preferredOctane: octane });
         }
     };
 
@@ -781,16 +818,18 @@ export default function OnboardingScreen() {
             <View style={styles.content}>
                 <ScrollView
                     ref={scrollViewRef}
+                    testID="onboarding-pages"
                     horizontal
                     pagingEnabled
                     showsHorizontalScrollIndicator={false}
                     onMomentumScrollEnd={handleScroll}
+                    scrollEnabled={!isRequestingPermission}
                     scrollEventThrottle={16}
                     style={styles.scrollView}
                     removeClippedSubviews={false}
                 >
 
-                    <WelcomeStep isDark={isDark} themeColors={themeColors} insets={insets} mapRegion={onboardingMapRegion} />
+                    <MemoWelcomeStep isDark={isDark} themeColors={themeColors} insets={insets} mapRegion={onboardingMapRegion} />
 
                     <PredictiveFuelingStep
                         isDark={isDark}
@@ -798,8 +837,8 @@ export default function OnboardingScreen() {
                         isActive={currentStep === 1}
                     />
 
-                    <LocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionState={locationPermissionState} />
-                    <NotificationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={notifPermissionStatus} />
+                    <MemoLocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionState={locationPermissionState} />
+                    <MemoNotificationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={notifPermissionStatus} />
                     <RadiusStep isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} mapRegion={onboardingMapRegion} />
                     <OctaneStep isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} />
                 </ScrollView>
@@ -830,7 +869,7 @@ export default function OnboardingScreen() {
                     ))}
                 </View>
 
-                <Pressable onPress={handleContinue} style={styles.continueButton}>
+                <Pressable testID="onboarding-continue" accessibilityRole="button" accessibilityState={{ busy: isRequestingPermission, disabled: isRequestingPermission }} disabled={isRequestingPermission} onPress={handleContinue} style={styles.continueButton}>
                     <GlassView
                         effect="regular"
                         tintColor="#007AFF"

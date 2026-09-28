@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
 const ROOT_REVEAL_SESSION_DEFAULT = {
     phase: 'blurred',
@@ -39,6 +39,7 @@ export function AppStateProvider({ children }) {
     const [fuelDebugState, setFuelDebugState] = useState(null);
     const [manualLocationOverride, setManualLocationOverrideState] = useState(null);
     const [resolvedFuelSearchContext, setResolvedFuelSearchContextState] = useState(null);
+    const resolvedFuelSearchContextRef = useRef(null);
     const [resolvedFuelSearchVersion, setResolvedFuelSearchVersion] = useState(0);
     const [clusterProbeRequest, setClusterProbeRequest] = useState(null);
     const [isClusterProbeSessionActive, setIsClusterProbeSessionActive] = useState(false);
@@ -50,16 +51,18 @@ export function AppStateProvider({ children }) {
     const [rootRevealVersion, setRootRevealVersion] = useState(rootRevealSessionState.version);
     const [hasCompletedRootReveal, setHasCompletedRootReveal] = useState(rootRevealSessionState.hasCompleted);
 
-    const requestFuelReset = () => {
+    const requestFuelReset = useCallback(() => {
+        resolvedFuelSearchContextRef.current = null;
         setResolvedFuelSearchContextState(null);
         setResolvedFuelSearchVersion(currentValue => currentValue + 1);
         setFuelResetToken(currentValue => currentValue + 1);
-    };
+    }, []);
 
-    const setManualLocationOverride = nextLocation => {
+    const setManualLocationOverride = useCallback(nextLocation => {
         if (!nextLocation) {
             setManualLocationOverrideState(null);
-            setResolvedFuelSearchContextState(null);
+            resolvedFuelSearchContextRef.current = null;
+        setResolvedFuelSearchContextState(null);
             setResolvedFuelSearchVersion(currentValue => currentValue + 1);
             return;
         }
@@ -70,48 +73,37 @@ export function AppStateProvider({ children }) {
             source: nextLocation.source || 'manual',
             updatedAt: new Date().toISOString(),
         });
+        resolvedFuelSearchContextRef.current = null;
         setResolvedFuelSearchContextState(null);
         setResolvedFuelSearchVersion(currentValue => currentValue + 1);
-    };
+    }, []);
 
-    const clearManualLocationOverride = () => {
+    const clearManualLocationOverride = useCallback(() => {
         setManualLocationOverrideState(null);
+        resolvedFuelSearchContextRef.current = null;
         setResolvedFuelSearchContextState(null);
         setResolvedFuelSearchVersion(currentValue => currentValue + 1);
-    };
+    }, []);
 
-    const setResolvedFuelSearchContext = nextContext => {
-        setResolvedFuelSearchContextState(currentValue => {
-            const nextRequestKey = String(nextContext?.requestKey || '');
-            const currentRequestKey = String(currentValue?.requestKey || '');
+    const setResolvedFuelSearchContext = useCallback(nextContext => {
+        const currentValue = resolvedFuelSearchContextRef.current;
+        if (nextContext?.requestKey && nextContext.requestKey === currentValue?.requestKey &&
+            nextContext.latitude === currentValue.latitude && nextContext.longitude === currentValue.longitude &&
+            nextContext.criteriaSignature === currentValue.criteriaSignature) return;
+        if (!nextContext && !currentValue) return;
+        resolvedFuelSearchContextRef.current = nextContext || null;
+        setResolvedFuelSearchContextState(nextContext || null);
+        setResolvedFuelSearchVersion(value => value + 1);
+    }, []);
 
-            if (
-                nextRequestKey &&
-                nextRequestKey === currentRequestKey &&
-                Number(nextContext?.latitude) === Number(currentValue?.latitude) &&
-                Number(nextContext?.longitude) === Number(currentValue?.longitude) &&
-                String(nextContext?.criteriaSignature || '') === String(currentValue?.criteriaSignature || '')
-            ) {
-                return currentValue;
-            }
+    const clearResolvedFuelSearchContext = useCallback(() => {
+        if (!resolvedFuelSearchContextRef.current) return;
+        resolvedFuelSearchContextRef.current = null;
+        setResolvedFuelSearchContextState(null);
+        setResolvedFuelSearchVersion(value => value + 1);
+    }, []);
 
-            setResolvedFuelSearchVersion(currentVersion => currentVersion + 1);
-            return nextContext || null;
-        });
-    };
-
-    const clearResolvedFuelSearchContext = () => {
-        setResolvedFuelSearchContextState(currentValue => {
-            if (!currentValue) {
-                return currentValue;
-            }
-
-            setResolvedFuelSearchVersion(currentVersion => currentVersion + 1);
-            return null;
-        });
-    };
-
-    const requestClusterProbe = nextRequest => {
+    const requestClusterProbe = useCallback(nextRequest => {
         if (!nextRequest) {
             setClusterProbeRequest(null);
             return;
@@ -126,18 +118,18 @@ export function AppStateProvider({ children }) {
             requestedAt: nextRequest.requestedAt || new Date().toISOString(),
         });
         setIsClusterProbeSessionActive(true);
-    };
+    }, []);
 
-    const clearClusterProbeRequest = () => {
+    const clearClusterProbeRequest = useCallback(() => {
         setClusterProbeRequest(null);
-    };
+    }, []);
 
-    const finishClusterProbeSession = () => {
+    const finishClusterProbeSession = useCallback(() => {
         setClusterProbeRequest(null);
         setIsClusterProbeSessionActive(false);
-    };
+    }, []);
 
-    const holdRootReveal = ({ force = false } = {}) => {
+    const holdRootReveal = useCallback(({ force = false } = {}) => {
         if (rootRevealSessionState.hasConsumed && !force) {
             return;
         }
@@ -153,9 +145,9 @@ export function AppStateProvider({ children }) {
         setRootRevealVersion(nextVersion);
         setHasCompletedRootReveal(false);
         setRootRevealPhase('blurred');
-    };
+    }, []);
 
-    const startRootReveal = () => {
+    const startRootReveal = useCallback(() => {
         if (rootRevealSessionState.hasConsumed || rootRevealSessionState.phase === 'revealing') {
             return;
         }
@@ -166,9 +158,9 @@ export function AppStateProvider({ children }) {
             hasConsumed: true,
         };
         setRootRevealPhase('revealing');
-    };
+    }, []);
 
-    const hideRootReveal = () => {
+    const hideRootReveal = useCallback(() => {
         rootRevealSessionState = {
             ...rootRevealSessionState,
             phase: 'hidden',
@@ -177,38 +169,34 @@ export function AppStateProvider({ children }) {
         };
         setHasCompletedRootReveal(true);
         setRootRevealPhase('hidden');
-    };
+    }, []);
 
-    return (
-        <AppStateContext.Provider
-            value={{
-                fuelDebugState,
-                fuelResetToken,
-                manualLocationOverride,
-                resolvedFuelSearchContext,
-                resolvedFuelSearchVersion,
-                clusterProbeRequest,
-                isClusterProbeSessionActive,
-                rootRevealPhase,
-                rootRevealVersion,
-                hasCompletedRootReveal,
-                setFuelDebugState,
-                setManualLocationOverride,
-                clearManualLocationOverride,
-                setResolvedFuelSearchContext,
-                clearResolvedFuelSearchContext,
-                requestClusterProbe,
-                clearClusterProbeRequest,
-                finishClusterProbeSession,
-                requestFuelReset,
-                holdRootReveal,
-                startRootReveal,
-                hideRootReveal,
-            }}
-        >
-            {children}
-        </AppStateContext.Provider>
-    );
+    const value = useMemo(() => ({
+        fuelDebugState,
+        fuelResetToken,
+        manualLocationOverride,
+        resolvedFuelSearchContext,
+        resolvedFuelSearchVersion,
+        clusterProbeRequest,
+        isClusterProbeSessionActive,
+        rootRevealPhase,
+        rootRevealVersion,
+        hasCompletedRootReveal,
+        setFuelDebugState,
+        setManualLocationOverride,
+        clearManualLocationOverride,
+        setResolvedFuelSearchContext,
+        clearResolvedFuelSearchContext,
+        requestClusterProbe,
+        clearClusterProbeRequest,
+        finishClusterProbeSession,
+        requestFuelReset,
+        holdRootReveal,
+        startRootReveal,
+        hideRootReveal
+    }), [fuelDebugState, fuelResetToken, manualLocationOverride, resolvedFuelSearchContext, resolvedFuelSearchVersion, clusterProbeRequest, isClusterProbeSessionActive, rootRevealPhase, rootRevealVersion, hasCompletedRootReveal, setFuelDebugState, setManualLocationOverride, clearManualLocationOverride, setResolvedFuelSearchContext, clearResolvedFuelSearchContext, requestClusterProbe, clearClusterProbeRequest, finishClusterProbeSession, requestFuelReset, holdRootReveal, startRootReveal, hideRootReveal]);
+
+    return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
 }
 
 export function useAppState() {

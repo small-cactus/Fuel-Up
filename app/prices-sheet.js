@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import FuelSummaryCard from '../src/components/FuelSummaryCard';
 import { usePreferences } from '../src/PreferencesContext';
 import { useTheme } from '../src/ThemeContext';
+import { parsePricesSheetParams } from '../src/lib/pricesSheetParams';
 import { normalizeFuelGrade } from '../src/lib/fuelGrade';
 
 export default function PricesSheet() {
@@ -14,10 +15,9 @@ export default function PricesSheet() {
         typeof fuelGrade === 'string' ? fuelGrade : preferences.preferredOctane
     );
 
-    // Parse incoming data strings
-    const quotes = quotesData ? JSON.parse(quotesData) : [];
-    const benchmarkQuote = benchmarkData ? JSON.parse(benchmarkData) : null;
-    const error = errorMsg || null;
+    const { quotes, benchmarkQuote, error } = useMemo(() => (
+        parsePricesSheetParams({ quotesData, benchmarkData, errorMsg })
+    ), [quotesData, benchmarkData, errorMsg]);
 
     return (
         <View style={[styles.container, { backgroundColor: themeColors.background }]}>

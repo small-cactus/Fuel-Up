@@ -23,6 +23,7 @@ export const SUPPORTED_NAVIGATION_APPS = ['apple-maps', 'google-maps'];
 const LOCATION_PRECISION = 2;
 
 function toFiniteNumber(value) {
+    if (value == null || typeof value === 'boolean' || (typeof value === 'string' && !value.trim())) return null;
     const numericValue = Number(value);
     return Number.isFinite(numericValue) ? numericValue : null;
 }
@@ -89,7 +90,7 @@ export function buildFuelSearchLocationKey(origin) {
     const latitude = toFiniteNumber(origin?.latitude);
     const longitude = toFiniteNumber(origin?.longitude);
 
-    if (latitude === null || longitude === null) {
+    if (latitude === null || longitude === null || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
         return 'unresolved';
     }
 
@@ -128,7 +129,7 @@ export function buildResolvedFuelSearchContext({
     preferredProvider,
     minimumRating = DEFAULT_MINIMUM_RATING,
 }) {
-    if (!origin) {
+    if (!origin || buildFuelSearchLocationKey(origin) === 'unresolved') {
         return null;
     }
 

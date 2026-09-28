@@ -664,12 +664,11 @@ function buildAdaptiveHiddenIntentStressRoutes({ seed = 2026, routeCount = 72, h
           ),
         })))
       : noFuelBlueprint;
-    const realizedRouteDistanceMiles = routeDistanceMilesFromWaypoints(
-      buildWaypointsFromGroundedRoute({
-        ...blueprint,
-        candidateStationIds: getTemplateCandidateStationIds(blueprint),
-      }, 5)
-    );
+    const realizedWaypoints = buildWaypointsFromGroundedRoute({
+      ...blueprint,
+      candidateStationIds: getTemplateCandidateStationIds(blueprint, { preferExplicit: true }),
+    }, 5);
+    const realizedRouteDistanceMiles = routeDistanceMilesFromWaypoints(realizedWaypoints);
 
     const destinationStationId = willStop
       ? chooseWeighted(rand, getTemplateCandidateStationIds(blueprint)
@@ -692,8 +691,8 @@ function buildAdaptiveHiddenIntentStressRoutes({ seed = 2026, routeCount = 72, h
         })))
       : null;
 
-    const hiddenDecisionLowerBound = Math.max(4, Math.floor(baseWaypoints.length * (remainingMiles <= 45 ? 0.28 : 0.40)));
-    const hiddenDecisionUpperBound = Math.max(hiddenDecisionLowerBound + 1, Math.floor(baseWaypoints.length * (remainingMiles <= 45 ? 0.58 : 0.74)));
+    const hiddenDecisionLowerBound = Math.max(4, Math.floor(realizedWaypoints.length * (remainingMiles <= 45 ? 0.28 : 0.40)));
+    const hiddenDecisionUpperBound = Math.max(hiddenDecisionLowerBound + 1, Math.floor(realizedWaypoints.length * (remainingMiles <= 45 ? 0.58 : 0.74)));
     const hiddenDecisionIndex = willStop
       ? randomInt(rand, hiddenDecisionLowerBound, hiddenDecisionUpperBound)
       : null;

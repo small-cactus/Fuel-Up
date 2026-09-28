@@ -17,10 +17,6 @@ import {
 } from '../src/lib/predictiveFuelingBackend';
 import { createPredictiveFuelingDriveGate } from '../src/lib/predictiveFuelingDriveGate';
 import {
-    enablePredictiveTrackingAsync,
-    getPredictiveTrackingPermissionStateAsync,
-} from '../src/lib/predictiveTrackingAccess';
-import {
     resetLocationProbeLaunchOverrides,
     setLocationProbeLaunchOverrides,
 } from '../src/lib/locationProbeOverrides';
@@ -100,10 +96,6 @@ function AppGate() {
     } = useAppState();
     const { isDark, themeColors } = useTheme();
     const predictiveDriveGateRef = useRef(null);
-    const predictivePermissionRecoveryRef = useRef({
-        attempted: false,
-        signature: null,
-    });
     const lastClusterProbeUrlRef = useRef('');
     const lastPredictiveSystemProbeUrlRef = useRef('');
     const [hasPendingClusterProbeRequest, setHasPendingClusterProbeRequest] = useState(false);
@@ -355,10 +347,6 @@ function AppGate() {
                 void predictiveDriveGateRef.current.stop();
                 predictiveDriveGateRef.current = null;
             }
-            predictivePermissionRecoveryRef.current = {
-                attempted: false,
-                signature: null,
-            };
             void disablePredictiveFuelingInfrastructureAsync();
             return undefined;
         }
@@ -367,44 +355,9 @@ function AppGate() {
             predictiveDriveGateRef.current = createPredictiveFuelingDriveGate();
         }
 
-        void (async () => {
-            try {
-                const permissionState = await getPredictiveTrackingPermissionStateAsync();
-                const permissionSignature = JSON.stringify({
-                    foregroundGranted: Boolean(permissionState?.foregroundGranted),
-                    backgroundGranted: Boolean(permissionState?.backgroundGranted),
-                    preciseLocationGranted: Boolean(permissionState?.preciseLocationGranted),
-                    motionActivityAvailable: Boolean(permissionState?.motionActivityAvailable),
-                    motionAuthorizationStatus: permissionState?.motionAuthorizationStatus || 'unknown',
-                    isReady: Boolean(permissionState?.isReady),
-                });
-
-                if (permissionState?.isReady) {
-                    predictivePermissionRecoveryRef.current = {
-                        attempted: true,
-                        signature: permissionSignature,
-                    };
-                    return;
-                }
-
-                if (
-                    predictivePermissionRecoveryRef.current.attempted &&
-                    predictivePermissionRecoveryRef.current.signature === permissionSignature
-                ) {
-                    return;
-                }
-
-                predictivePermissionRecoveryRef.current = {
-                    attempted: true,
-                    signature: permissionSignature,
-                };
-
-                await enablePredictiveTrackingAsync();
-            } catch (error) {
-                console.warn('Predictive tracking permission recovery failed:', error?.message || error);
-            }
-        })();
-
+        // Permission prompts are initiated by the onboarding/settings buttons.
+        // The drive gate checks existing grants and resumes when the app returns
+        // from Settings; launching the app must respect a declined permission.
         predictiveDriveGateRef.current.updatePreferences(predictiveBackendPreferences);
         void predictiveDriveGateRef.current.start().catch(error => {
             console.warn('Predictive fueling drive gate failed to start:', error?.message || error);

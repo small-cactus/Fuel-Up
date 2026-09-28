@@ -1,3 +1,4 @@
+import { isTransientLocationUnavailable } from './locationErrors';
 import { Linking, Platform } from 'react-native';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
@@ -887,6 +888,12 @@ export async function openPredictiveLocationSettingsAsync() {
 if (!TaskManager.isTaskDefined(PREDICTIVE_LOCATION_TASK_NAME)) {
     TaskManager.defineTask(PREDICTIVE_LOCATION_TASK_NAME, async ({ data, error, executionInfo }) => {
         if (error) {
+            if (isTransientLocationUnavailable(error)) {
+                updatePredictiveLocationDebugState({ lastBackgroundDecision: {
+                    at: Date.now(), kind: 'location', outcome: 'waiting', reason: 'location-unavailable',
+                } });
+                return;
+            }
             console.error('Predictive background location task failed:', error);
             return;
         }

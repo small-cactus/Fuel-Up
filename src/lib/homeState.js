@@ -4,6 +4,7 @@ import {
 } from './fuelSearchState.js';
 
 function toFiniteNumber(value) {
+    if (value == null || typeof value === 'boolean' || (typeof value === 'string' && !value.trim())) return null;
     const numericValue = Number(value);
     return Number.isFinite(numericValue) ? numericValue : null;
 }

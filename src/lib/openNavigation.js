@@ -41,6 +41,7 @@ export const NAVIGATION_APPS = {
 };
 
 function toFiniteNumber(value) {
+    if (value == null || typeof value === 'boolean' || (typeof value === 'string' && !value.trim())) return null;
     const numericValue = Number(value);
     return Number.isFinite(numericValue) ? numericValue : null;
 }
@@ -109,7 +110,7 @@ export async function openStationNavigation({
 }) {
     const lat = toFiniteNumber(latitude);
     const lng = toFiniteNumber(longitude);
-    if (lat === null || lng === null) {
+    if (lat === null || lng === null || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
         return false;
     }
 
