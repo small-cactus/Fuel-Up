@@ -22,12 +22,16 @@ final price pill. Position, dimensions, and content share the same progression.
 Glass and glass ancestors always keep alpha 1; only label content crossfades.
 
 Motion is retargeted from its current map coordinate and screen offset. Its
-80–220 ms duration follows measured camera velocity and elapsed movement time.
-Camera completion shortens remaining travel to 80 ms without changing the current
-pose. An elapsed-time viscous curve eases into motion, surges past the destination,
-then returns once. Rebound scales with both travel and measured gesture speed,
+80–220 ms base duration follows measured camera velocity and elapsed movement time.
+Camera completion can shorten an unfinished outward flight to an 80 ms base
+without changing the current pose; an ongoing rebound finishes in full. An elapsed-time viscous curve eases into motion, surges past the destination,
+then returns once. Outward travel keeps its original timing; the rebound runs
+at half its previous speed for twice its previous duration. Rebound scales with
+both travel and measured gesture speed,
 up to 18 screen points. The curve has zero velocity and acceleration at its
-endpoints and turnaround; the stronger response adds no settling delay. There is no fixed points-per-frame speed limit or trailing exponential tail. MapKit's
+endpoints and turnaround. Total duration is 1.32 times the base duration,
+with the added time confined to the return. There is no fixed points-per-frame
+speed limit or trailing exponential tail. MapKit's
 projection is read natively during camera changes, including rotation; there is no
 JS camera-event loop. The display link sleeps when settled, unfocused, detached,
 or backgrounded. Reduced Motion resolves transitions immediately. Older systems

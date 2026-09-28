@@ -54,15 +54,22 @@ enum ClusterLabGeometry {
 
   // One viscous surge and return, with zero velocity/acceleration at both ends
   // and the turnaround. Small drags remain quiet; long or fast moves carry more
-  // momentum. This reshapes the existing flight without extending its deadline.
+  // momentum. Only the return phase is stretched: half speed, twice the time.
   static func rebound(distance: CGFloat, speed: CGFloat) -> CGFloat {
     let travelEnergy = min(1, max(0, distance) / 180)
     let gestureEnergy = min(1, max(0, speed) / 1200)
     return min(maximumRebound, max(0, distance) * (0.025 + 0.07 * travelEnergy + 0.08 * gestureEnergy))
   }
 
+  static func completionDuration(for duration: Double) -> Double {
+    // Original outward phase: 68%. Original rebound: 32%, now doubled.
+    duration * 1.32
+  }
+
   static func progress(elapsed: Double, duration: Double, distance: CGFloat, speed: CGFloat = 0) -> CGFloat {
-    let t = CGFloat(min(1, max(0, elapsed / max(duration, 0.001))))
+    let outwardDuration = duration * 0.68
+    let curveTime = elapsed <= outwardDuration ? elapsed : outwardDuration + (elapsed - outwardDuration) * 0.5
+    let t = CGFloat(min(1, max(0, curveTime / max(duration, 0.001))))
     if t == 0 || t == 1 { return t }
     let overshoot = rebound(distance: distance, speed: speed) / max(distance, 0.001)
     func smooth(_ value: CGFloat) -> CGFloat {

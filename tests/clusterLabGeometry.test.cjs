@@ -30,15 +30,15 @@ for distance in stride(from: 0.1, through: 1000, by: 0.5) {
     let duration = ClusterLabGeometry.duration(distance: distance, speed: speed, movementDuration: 0.18)
     assert(duration >= 0.08 && duration <= 0.18)
     assert(ClusterLabGeometry.progress(elapsed: 0, duration: duration, distance: distance, speed: speed) == 0)
-    assert(ClusterLabGeometry.progress(elapsed: duration, duration: duration, distance: distance, speed: speed) == 1)
-    for t in stride(from: 0.0, through: duration, by: duration / 100) {
+    assert(ClusterLabGeometry.progress(elapsed: ClusterLabGeometry.completionDuration(for: duration), duration: duration, distance: distance, speed: speed) == 1)
+    for t in stride(from: 0.0, through: ClusterLabGeometry.completionDuration(for: duration), by: duration / 100) {
       let p = ClusterLabGeometry.progress(elapsed: t, duration: duration, distance: distance, speed: speed)
       assert(p >= 0 && (p - 1) * distance <= 18.000001)
     }
     // At 60 and 120 Hz the exact destination is reached within one frame of
     // the same deadline, even after a delayed frame. No distance-based tail.
     for dt in [1.0/120, 1.0/60, 0.1] {
-      let finish = ceil(duration / dt) * dt
+      let finish = ceil(ClusterLabGeometry.completionDuration(for: duration) / dt) * dt
       assert(ClusterLabGeometry.progress(elapsed: finish, duration: duration, distance: distance, speed: speed) == 1)
     }
   }
@@ -63,15 +63,24 @@ assert(ClusterLabGeometry.rebound(distance: 180, speed: 1200) == 18)
 let duration = 0.16
 let peak = ClusterLabGeometry.progress(elapsed: duration * 0.68, duration: duration, distance: 180, speed: 1200)
 assert(abs((peak - 1) * 180 - 18) < 0.00001)
+// The original peak still occurs at 68% of the base duration. The old
+// endpoint is now halfway through the return (9 of the same 18 points left).
+// Return lasts 64% of the base duration, exactly twice its previous 32%.
+let halfwayBack = ClusterLabGeometry.progress(elapsed: duration, duration: duration, distance: 180, speed: 1200)
+assert(abs((halfwayBack - 1) * 180 - 9) < 0.00001)
+assert(abs(ClusterLabGeometry.completionDuration(for: duration) - duration * 0.68 - duration * 0.32 * 2) < 0.000001)
+// The original outward midpoint remains exactly half of its full excursion.
+let outwardMidpoint = ClusterLabGeometry.progress(elapsed: duration * 0.34, duration: duration, distance: 180, speed: 1200)
+assert(abs(outwardMidpoint - 0.55) < 0.000001)
 var previous = peak
-for t in stride(from: duration * 0.68, through: duration, by: duration / 1000) {
+for t in stride(from: duration * 0.68, through: ClusterLabGeometry.completionDuration(for: duration), by: duration / 1000) {
   let p = ClusterLabGeometry.progress(elapsed: t, duration: duration, distance: 180, speed: 1200)
   assert(p <= previous + 0.000001 && p >= 1)
   previous = p
 }
 let tiny = duration * 0.0001
 assert(ClusterLabGeometry.progress(elapsed: tiny, duration: duration, distance: 180, speed: 1200) < 0.000001)
-assert(abs(ClusterLabGeometry.progress(elapsed: duration - tiny, duration: duration, distance: 180, speed: 1200) - 1) < 0.000001)
+assert(abs(ClusterLabGeometry.progress(elapsed: ClusterLabGeometry.completionDuration(for: duration) - tiny, duration: duration, distance: 180, speed: 1200) - 1) < 0.000001)
 print("native geometry passed")
 `);
         const binary = path.join(directory, 'geometry-test');

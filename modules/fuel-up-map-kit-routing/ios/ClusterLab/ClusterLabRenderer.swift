@@ -74,6 +74,7 @@ final class ClusterLabRenderer {
     cameraStarted = nil
     // Finish alongside the camera's final settling frames. Snapshot the current
     // pose when shortening a flight, so interruptions never jump to a new curve.
+    // Use the base duration here: the longer return must not be restarted/cut short.
     for motion in motions.values where !motion.settled && motion.duration - motion.elapsed > 0.08 {
       motion.begin(duration: 0.08, travel: motion.travel, speed: motion.launchSpeed, restarting: true)
     }
@@ -205,7 +206,7 @@ final class ClusterLabRenderer {
       motion.offset = motion.startOffset + (targetOffset - motion.startOffset) * progress
       motion.width = motion.startWidth + (targetWidth - motion.startWidth) * progress
       motion.priceMix = min(1, max(0, motion.startMix + (targetMix - motion.startMix) * progress))
-      let arrived = motion.settled || motion.elapsed >= motion.duration || (motion.startedAt == 0 && error < 0.001) || reducedMotion
+      let arrived = motion.settled || motion.elapsed >= ClusterLabGeometry.completionDuration(for: motion.duration) || (motion.startedAt == 0 && error < 0.001) || reducedMotion
       if arrived {
         motion.point = targetPoint; motion.offset = targetOffset
         motion.width = targetWidth; motion.priceMix = targetMix
