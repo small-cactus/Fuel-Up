@@ -68,6 +68,14 @@ async function setup() {
     };
     mocks['@expo/ui/swift-ui'] = { Host: 'Host', Form: 'Form', Picker: 'NativePicker', Section: 'Section', Text: 'NativeText' };
     mocks['@expo/ui/swift-ui/modifiers'] = { pickerStyle: x => x, tag: x => x };
+    mocks['./presentation.js'] = load('src/screens/onboarding/presentation.js', mocks);
+    mocks['./locationCopy.js'] = load('src/screens/onboarding/locationCopy.js', mocks);
+    for (const name of ['TopCanopy', 'BottomCanopy', 'FuelUpHeaderLogo']) {
+        mocks[`../../components/${name}`] = mocks[`../components/${name}`];
+    }
+    for (const name of ['WelcomeStep', 'LocationStep', 'NotificationStep', 'presentation', 'locationCopy']) {
+        mocks[`./onboarding/${name}.js`] = load(`src/screens/onboarding/${name}.js`, mocks);
+    }
     mocks['./onboarding/FuelGradeStep'] = load('src/screens/onboarding/FuelGradeStep.js', mocks);
     mocks['./onboarding/RadiusStep'] = load('src/screens/onboarding/RadiusStep.js', mocks);
     mocks['./onboarding/useOnboardingLocation'] = { __esModule: true, default: () => null };
@@ -76,7 +84,7 @@ async function setup() {
     await act(async () => { renderer = create(React.createElement(Component)); });
     return {
         renderer, store, saved: () => JSON.parse(saved), calls, permissions, tracking, subscriptions,
-        swipe: async step => act(async () => renderer.root.findByType('ScrollView').props.onMomentumScrollEnd({ nativeEvent: { contentOffset: { x: step * 440 } } })),
+        swipe: async step => act(async () => renderer.root.findByProps({ testID: 'onboarding-pages' }).props.onMomentumScrollEnd({ nativeEvent: { contentOffset: { x: step * 440 } } })),
         continue: async () => act(async () => renderer.root.findAllByType('Pressable').find(n => n.props.accessibilityRole === 'button').props.onPress()),
         dispose: async () => act(async () => renderer.unmount()),
     };

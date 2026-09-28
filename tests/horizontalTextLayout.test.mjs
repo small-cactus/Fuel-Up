@@ -282,7 +282,7 @@ test('FuelSummaryCard cardMeta (footer row) Text blocks carry shrink-to-fit prop
 
 test('Onboarding demo chip + continue button Text carry shrink-to-fit props', () => {
     const source = readSource(ONBOARDING_PATH);
-    const demoBlocks = findTextBlocksWithStyle(source, 'styles.demoChipText');
+    const demoBlocks = findTextBlocksWithStyle(readSource('src/screens/onboarding/WelcomeStep.js'), 'styles.demoChipText');
     const continueBlocks = findTextBlocksWithStyle(source, 'styles.continueText');
     assertTextBlockHasShrinkToFitProps({ blocks: demoBlocks, label: 'Onboarding demoChipText' });
     assertTextBlockHasShrinkToFitProps({ blocks: continueBlocks, label: 'Onboarding continueText' });

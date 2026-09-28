@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { AppStateProvider, useAppState } from '../src/AppStateContext';
 import { ThemeProvider, useTheme } from '../src/ThemeContext';
 import { PreferencesProvider, usePreferences } from '../src/PreferencesContext';
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -85,6 +85,7 @@ async function writeClusterProbeQueueMarker(payload) {
 }
 
 function AppGate() {
+    const pathname = usePathname();
     const { preferences, isLoading } = usePreferences();
     const {
         clusterProbeRequest,
@@ -110,6 +111,14 @@ function AppGate() {
         isClusterProbeSessionActive ||
         hasLatchedClusterProbeBypass
     );
+
+    // The launch reveal belongs to Home's map. A direct link to another screen
+    // may never mount Home, so it must not wait for Home's map-ready callback.
+    useEffect(() => {
+        if (pathname && pathname !== '/' && preferences.hasCompletedOnboarding) {
+            hideRootReveal();
+        }
+    }, [pathname, preferences.hasCompletedOnboarding, hideRootReveal]);
 
     useEffect(() => {
         if (
@@ -386,13 +395,18 @@ function AppGate() {
     return (
         <>
             <StatusBar style={isDark ? 'light' : 'dark'} />
-            <Stack screenOptions={{ headerShown: false }}>
+            <Stack screenOptions={{
+                headerShown: false,
+                headerStyle: { backgroundColor: themeColors.background },
+                headerTintColor: themeColors.text,
+                headerBackButtonDisplayMode: 'minimal',
+            }}>
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen
                     name="prices-sheet"
                     options={{
                         presentation: 'formSheet',
-                        sheetAllowedDetents: [0.45, 1],
+                        sheetAllowedDetents: 'fitToContents',
                         sheetGrabberVisible: true,
                     }}
                 />
@@ -405,13 +419,13 @@ function AppGate() {
                     }}
                 />
             </Stack>
-            <ProgressiveBlurReveal
+            {pathname === '/' && <ProgressiveBlurReveal
                 key={`root-reveal-${rootRevealVersion}`}
                 isBlurred={rootRevealPhase === 'blurred'}
                 shouldReveal={rootRevealPhase === 'revealing'}
                 excludeTabs={false}
                 onRevealComplete={hideRootReveal}
-            />
+            />}
         </>
     );
 }

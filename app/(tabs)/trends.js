@@ -8,7 +8,7 @@ import { LinearGradient as ExpoLinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import * as d3Shape from 'd3-shape';
 import * as d3Scale from 'd3-scale';
-import { SymbolView } from 'expo-symbols';
+import TrendLeaderboard from '../../src/screens/trends/TrendLeaderboard';
 import { useFocusEffect } from 'expo-router';
 import {
     buildTrendRequestKey,
@@ -739,11 +739,7 @@ export default function TrendsScreen() {
             heroTrendData.averagePricesByDay[0]?.price
         );
     }, [heroTrendData]);
-    const shouldShowAwaitingLocalHistoryText = hasHeroTrendData && (
-        heroTrendDirection === 'flat' ||
-        heroTrendDirection == null ||
-        !heroTrendData?.overallTrend
-    );
+    const shouldShowAwaitingLocalHistoryText = heroTrendData?.trendSeriesMode === 'current_average_snapshot';
     const darkModeWeightStyle = useMemo(() => ({
         heroSub: { fontWeight: isDark ? '600' : '700' },
         heroPrice: { fontWeight: isDark ? '700' : '800' },
@@ -823,11 +819,12 @@ export default function TrendsScreen() {
                                     {shouldShowAwaitingLocalHistoryText ? (
                                         <View style={styles.heroStatusWrap}>
                                             <Text style={[styles.heroPreviewText, darkModeWeightStyle.itemSub, { color: themeColors.text }]}>
-                                                We&apos;re still collecting enough local history to replace this preview with live trend data.
+                                                Price history will appear as local reports arrive.
                                             </Text>
                                         </View>
                                     ) : null}
 
+                                    {!shouldShowAwaitingLocalHistoryText ? (<>
                                     <ContainerlessAreaChart
                                         data={heroTrendData.averagePricesByDay}
                                         width={SCREEN_WIDTH}
@@ -853,6 +850,7 @@ export default function TrendsScreen() {
                                             )}
                                         </Text>
                                     </View>
+                                    </>) : null}
                                 </View>
                             ) : loading ? (
                                 <View style={styles.heroGraphPlaceholderSection}>
@@ -878,108 +876,13 @@ export default function TrendsScreen() {
                             <View style={styles.contentPad}>
                                 {/* 2. Leaderboard */}
                                 {displayTrendData?.leaderboard?.length > 0 && (
-                                    <GlassView
-                                        style={styles.glassCard}
-                                        glassEffectStyle="regular"
-                                        tintColor={glassTintColor}
-                                    >
-                                        <View style={styles.cardHeaderRow}>
-                                            <Text style={[styles.cardTitle, darkModeWeightStyle.cardTitle, { color: themeColors.text }]}>
-                                                {selectedFuelGradeMeta.label} Leaderboard
-                                            </Text>
-                                            <Text style={[styles.cardMeta, numericTextStyle, darkModeWeightStyle.itemSub, { color: themeColors.textOpacity }]}>
-                                                Updated {leaderboardUpdatedLabel}
-                                            </Text>
-                                        </View>
-                                        {displayTrendData.leaderboard.map((st, idx) => {
-                                            const rankLabel = idx === 0 ? '1st' : idx === 1 ? '2nd' : idx === 2 ? '3rd' : `${idx + 1}th`;
-                                            const medalColor = idx === 0 ? themeColors.text : idx === 1 ? '#8f8f8fff' : idx === 2 ? '#CD7F32' : 'transparent';
-
-                                            const shift = st.rankShift;
-                                            const shiftSymbol = shift > 0 ? 'arrow.up' : shift < 0 ? 'arrow.down' : null;
-                                            const shiftText = shift === 0 ? '—' : `${Math.abs(shift)}`;
-                                            const shiftColor = shift > 0 ? COLORS.GREEN : shift < 0 ? COLORS.RED : themeColors.textOpacity;
-
-                                            return (
-                                                <View key={st.stationId} style={[styles.listItem, idx > 0 && { borderTopWidth: 1, borderTopColor: isDark ? '#333' : '#EEE' }]}>
-                                                    <View style={styles.listTextCol}>
-                                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
-                                                            <Text style={[styles.itemName, darkModeWeightStyle.itemName, { color: themeColors.text }]}>{st.name || 'Unknown Station'}</Text>
-                                                            {idx <= 2 ? (
-                                                                <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
-                                                                    <SymbolView
-                                                                        name="laurel.leading"
-                                                                        tintColor={medalColor}
-                                                                        size={30}
-                                                                        resizeMode="scaleAspectFit"
-                                                                        type="monochrome"
-                                                                    />
-                                                                    <Text style={[numericTextStyle, darkModeWeightStyle.rankPrimary, {
-                                                                        color: medalColor,
-                                                                        fontSize: 18,
-                                                                        marginHorizontal: 0
-                                                                    }]}>
-                                                                        {rankLabel}
-                                                                    </Text>
-                                                                    <SymbolView
-                                                                        name="laurel.trailing"
-                                                                        tintColor={medalColor}
-                                                                        size={30}
-                                                                        resizeMode="scaleAspectFit"
-                                                                        type="monochrome"
-                                                                    />
-                                                                </View>
-                                                            ) : (
-                                                                <Text style={[numericTextStyle, darkModeWeightStyle.rankSecondary, { color: themeColors.textOpacity, fontSize: 13, marginLeft: 8 }]}>
-                                                                    {rankLabel}
-                                                                </Text>
-                                                            )}
-                                                        </View>
-                                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
-                                                            <Text style={[styles.itemSub, darkModeWeightStyle.itemSub, { color: themeColors.textOpacity }]}>{st.address?.split(',')[0]}</Text>
-                                                            {st.distanceMiles != null && (
-                                                                <>
-                                                                    <Text style={[styles.itemSub, darkModeWeightStyle.itemSub, { color: themeColors.textOpacity, marginHorizontal: 6 }]}>•</Text>
-                                                                    <SymbolView
-                                                                        name="car.fill"
-                                                                        tintColor={themeColors.textOpacity}
-                                                                        size={18}
-                                                                        resizeMode="scaleAspectFit"
-                                                                        type="monochrome"
-                                                                        style={{ marginRight: 4 }}
-                                                                    />
-                                                                    <Text style={[styles.itemSub, numericTextStyle, darkModeWeightStyle.itemSub, { color: themeColors.textOpacity }]}>
-                                                                        {st.distanceMiles.toFixed(1)} mi
-                                                                    </Text>
-                                                                </>
-                                                            )}
-                                                        </View>
-                                                    </View>
-                                                    <View style={{ alignItems: 'flex-end', justifyContent: 'center' }}>
-                                                        <Text style={[styles.itemVal, numericTextStyle, darkModeWeightStyle.itemVal, { color: themeColors.text }]}>
-                                                            ${st.latestPrice.toFixed(2)}
-                                                        </Text>
-                                                        <View style={styles.shiftRow}>
-                                                            {shiftSymbol ? (
-                                                                <SymbolView
-                                                                    name={shiftSymbol}
-                                                                    tintColor={shiftColor}
-                                                                    size={13}
-                                                                    weight="bold"
-                                                                    resizeMode="scaleAspectFit"
-                                                                    type="monochrome"
-                                                                    style={styles.shiftSymbol}
-                                                                />
-                                                            ) : null}
-                                                            <Text style={[numericTextStyle, darkModeWeightStyle.shift, { fontSize: 13, color: shiftColor }]}>
-                                                                {shiftText}
-                                                            </Text>
-                                                        </View>
-                                                    </View>
-                                                </View>
-                                            );
-                                        })}
-                                    </GlassView>
+                                    <TrendLeaderboard
+                                        stations={displayTrendData.leaderboard}
+                                        gradeLabel={selectedFuelGradeMeta.label}
+                                        updatedLabel={leaderboardUpdatedLabel}
+                                        isDark={isDark}
+                                        themeColors={themeColors}
+                                    />
                                 )}
 
                                 {/* 3. Competitor Clusters */}
@@ -1158,16 +1061,7 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         letterSpacing: -0.5,
     },
-    cardHeaderRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 16,
-    },
-    cardMeta: {
-        fontSize: 13,
-        fontWeight: '500',
-    },
+
     cardSubTitle: {
         fontSize: 14,
         fontWeight: '500',
@@ -1201,14 +1095,7 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         letterSpacing: -0.5,
     },
-    shiftRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 4,
-    },
-    shiftSymbol: {
-        marginRight: 2,
-    },
+
     emptyState: {
         marginTop: 40,
         padding: 20,

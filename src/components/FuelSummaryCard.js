@@ -94,8 +94,8 @@ function FuelSummaryCard({
     const canNavigate = Boolean(
         !hasFailureState &&
         typeof onNavigatePress === 'function' &&
-        Number.isFinite(Number(quote?.latitude)) &&
-        Number.isFinite(Number(quote?.longitude))
+        typeof quote?.latitude === 'number' && Math.abs(quote.latitude) <= 90 &&
+        typeof quote?.longitude === 'number' && Math.abs(quote.longitude) <= 180
     );
 
     const handleNavigatePress = useCallback(() => {
@@ -288,6 +288,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         gap: 10,
         marginBottom: 8,
+        paddingRight: 82,
     },
     headerContent: {
         flex: 1,
@@ -327,6 +328,7 @@ const styles = StyleSheet.create({
     },
     priceBlock: {
         marginBottom: 6,
+        paddingRight: 82,
     },
     gradeLabelRow: {
         flexDirection: 'row',
@@ -365,10 +367,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         lineHeight: 17,
     },
-    // The footer row hosts the meta info (distance · time) on the left and
-    // the Navigate pill on the right. Combining these into a single row
-    // eliminates the dead space a separate button row used to create and
-    // keeps the card visually compact.
+    // Keep distance and report age together below the address.
     footerRow: {
         flexDirection: 'row',
         alignItems: 'center',

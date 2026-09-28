@@ -1,0 +1,199 @@
+{
+  "flow": "onboarding-native-controls",
+  "device": "E5661CAA-BB65-4806-879A-D00C553836E7",
+  "executionPrerequisite": "Fuel Up is on its onboarding welcome page on iPhone 17 Pro Max (440 x 956 points), default text size, location and notification permissions granted. Changes the fuel type to E85. The SwiftUI Picker row requires one coordinate tap: its AX label is visible, but Argent UIKit projection cannot expose the SwiftUI row even with testID. All other taps use stable identifiers.",
+  "ok": true,
+  "passed": 22,
+  "failed": 0,
+  "skipped": 0,
+  "errored": 0,
+  "steps": [
+    {
+      "index": 0,
+      "kind": "await",
+      "flow": "onboarding-native-controls",
+      "target": "visible id=onboarding-continue",
+      "status": "pass",
+      "durationMs": 21
+    },
+    {
+      "index": 1,
+      "kind": "tap",
+      "flow": "onboarding-native-controls",
+      "target": "id=onboarding-continue",
+      "status": "pass",
+      "durationMs": 352
+    },
+    {
+      "index": 2,
+      "kind": "await",
+      "flow": "onboarding-native-controls",
+      "target": "visible \"Predictive Fueling\"",
+      "status": "pass",
+      "durationMs": 342
+    },
+    {
+      "index": 3,
+      "kind": "idle",
+      "flow": "onboarding-native-controls",
+      "status": "pass",
+      "warning": "the screen never held still for 2 consecutive 200ms intervals spanning 250ms within 7500ms, and was moving again on the last one, so this step went ahead without waiting it out. Either something on it never stops (a video, a looping animation, a carousel, live-updating text) or the screen never finished loading. Look at what is moving, and make sure the next action is gated on a stable element rather than on stillness.",
+      "durationMs": 7501
+    },
+    {
+      "index": 4,
+      "kind": "tap",
+      "flow": "onboarding-native-controls",
+      "target": "id=onboarding-continue",
+      "status": "pass",
+      "durationMs": 3113
+    },
+    {
+      "index": 5,
+      "kind": "await",
+      "flow": "onboarding-native-controls",
+      "target": "visible \"Enable Location\"",
+      "status": "pass",
+      "durationMs": 350
+    },
+    {
+      "index": 6,
+      "kind": "idle",
+      "flow": "onboarding-native-controls",
+      "status": "pass",
+      "warning": "the screen settled, but a small part of it was still changing while it did — a spinner, a caret, a progress dot. If it is a loading spinner then the screen had not finished loading, and stillness cannot tell those apart: look at what is moving, and gate the next action on the element the loading produces rather than on this settle.",
+      "durationMs": 522
+    },
+    {
+      "index": 7,
+      "kind": "tap",
+      "flow": "onboarding-native-controls",
+      "target": "id=onboarding-continue",
+      "status": "pass",
+      "durationMs": 351
+    },
+    {
+      "index": 8,
+      "kind": "await",
+      "flow": "onboarding-native-controls",
+      "target": "visible \"Allow Live Activities\"",
+      "status": "pass",
+      "durationMs": 347
+    },
+    {
+      "index": 9,
+      "kind": "idle",
+      "flow": "onboarding-native-controls",
+      "status": "pass",
+      "warning": "the screen settled, but a small part of it was still changing while it did — a spinner, a caret, a progress dot. If it is a loading spinner then the screen had not finished loading, and stillness cannot tell those apart: look at what is moving, and gate the next action on the element the loading produces rather than on this settle.",
+      "durationMs": 488
+    },
+    {
+      "index": 10,
+      "kind": "tap",
+      "flow": "onboarding-native-controls",
+      "target": "id=onboarding-continue",
+      "status": "pass",
+      "durationMs": 355
+    },
+    {
+      "index": 11,
+      "kind": "await",
+      "flow": "onboarding-native-controls",
+      "target": "visible \"Search Nearby\"",
+      "status": "pass",
+      "durationMs": 1032
+    },
+    {
+      "index": 12,
+      "kind": "idle",
+      "flow": "onboarding-native-controls",
+      "status": "pass",
+      "durationMs": 1252
+    },
+    {
+      "index": 13,
+      "kind": "tap",
+      "flow": "onboarding-native-controls",
+      "target": "id=onboarding-continue",
+      "status": "pass",
+      "durationMs": 356
+    },
+    {
+      "index": 14,
+      "kind": "await",
+      "flow": "onboarding-native-controls",
+      "target": "visible \"Your Fuel\"",
+      "status": "pass",
+      "durationMs": 349
+    },
+    {
+      "index": 15,
+      "kind": "idle",
+      "flow": "onboarding-native-controls",
+      "status": "pass",
+      "durationMs": 777
+    },
+    {
+      "index": 16,
+      "kind": "tool",
+      "flow": "onboarding-native-controls",
+      "status": "pass",
+      "tool": "await-ui-element",
+      "result": {
+        "success": true,
+        "elapsed": 143
+      },
+      "args": {
+        "condition": "visible",
+        "selector": {
+          "text": "E85"
+        },
+        "udid": "E5661CAA-BB65-4806-879A-D00C553836E7"
+      },
+      "durationMs": 143
+    },
+    {
+      "index": 17,
+      "kind": "tap",
+      "flow": "onboarding-native-controls",
+      "target": "(0.5, 0.565)",
+      "status": "pass",
+      "durationMs": 347
+    },
+    {
+      "index": 18,
+      "kind": "await",
+      "flow": "onboarding-native-controls",
+      "target": "visible \"Get Started\"",
+      "status": "pass",
+      "durationMs": 26
+    },
+    {
+      "index": 19,
+      "kind": "tap",
+      "flow": "onboarding-native-controls",
+      "target": "id=onboarding-continue",
+      "status": "pass",
+      "durationMs": 356
+    },
+    {
+      "index": 20,
+      "kind": "await",
+      "flow": "onboarding-native-controls",
+      "target": "visible \"Settings\"",
+      "status": "pass",
+      "durationMs": 529
+    },
+    {
+      "index": 21,
+      "kind": "idle",
+      "flow": "onboarding-native-controls",
+      "status": "pass",
+      "warning": "the screen settled, but a small part of it was still changing while it did — a spinner, a caret, a progress dot. If it is a loading spinner then the screen had not finished loading, and stillness cannot tell those apart: look at what is moving, and gate the next action on the element the loading produces rather than on this settle.",
+      "durationMs": 2563
+    }
+  ],
+  "startedAt": 1790616783306,
+  "durationMs": 21732
+}

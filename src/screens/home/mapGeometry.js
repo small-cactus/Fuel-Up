@@ -134,7 +134,7 @@ export function buildSuppressedOverlapStationIds(
         // densest real-world zoom the map allows, two stations can still sit on top
         // of each other (e.g. adjacent gas stations on opposite corners of an
         // intersection), and without this bypass the chip the user is trying to
-        // view would stay stuck hidden. Because ActiveStationOverlay is rendered
+        // view would stay stuck hidden. The active marker is rendered
         // with a higher z-index than the base StationMarkers, the active pill reads
         // clearly even when the underlying pills visually overlap.
         if (

@@ -396,13 +396,13 @@ export function DynamicIslandCompactPreview({ props, style, colorScheme = 'dark'
     return (
         <View style={[styles.dynamicIslandCompactContainer, style]}>
             <View style={styles.dynamicIslandCompactSide}>
-                <Host matchContents colorScheme={colorScheme}>
+                <Host style={{ width: '100%', height: 24 }} colorScheme={colorScheme}>
                     {compactLeading}
                 </Host>
             </View>
             <View style={styles.dynamicIslandCompactNotch} />
             <View style={styles.dynamicIslandCompactSide}>
-                <Host matchContents colorScheme={colorScheme}>
+                <Host style={{ width: '100%', height: 24 }} colorScheme={colorScheme}>
                     {compactTrailing}
                 </Host>
             </View>
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
     },
     dynamicIslandCompactSide: {
-        minWidth: 40,
+        width: 56,
         alignItems: 'center',
     },
     dynamicIslandCompactNotch: {

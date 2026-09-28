@@ -1,10 +1,45 @@
+import useClusterProbe from '../../src/screens/home/useClusterProbe';
 import { buildTrajectorySeedFromLocationObject } from '../../src/screens/home/constants';
-import { hasUsableHomeRegion, buildTrajectorySeedFromVelocity, areRegionsEquivalent, shouldAnimateSmoothLaunchTransition, fetchLastKnownPositionWithTimeout, fetchCurrentPositionWithTimeout, resolveLaunchMovementCheckPosition, startLaunchMovementCheck } from '../../src/screens/home/locationBootstrap.js';
-import { buildSingleQuoteClusters, areStationIdSetsEqual, buildSuppressedOverlapStationIds, resolveStationFocusZoom, buildStationsFitZoomRegion } from '../../src/screens/home/mapGeometry.js';
-import { waitForMilliseconds, buildClusterDebugAutomationSeedRegion, buildClusterDebugProbePlan, buildProbeStationScreenSnapshot, compareProbeStationScreenSnapshots, buildClusterDebugProbeSummary, buildClusterDebugProbeLog, writeClusterDebugProbeArtifact } from '../../src/screens/home/probePlan.js';
-import { formatDebugMetric, buildClusterDebugRecordingLog } from '../../src/screens/home/probeTelemetry.js';
+import {
+    hasUsableHomeRegion,
+    buildTrajectorySeedFromVelocity,
+    areRegionsEquivalent,
+    shouldAnimateSmoothLaunchTransition,
+    fetchLastKnownPositionWithTimeout,
+    fetchCurrentPositionWithTimeout,
+    resolveLaunchMovementCheckPosition,
+    startLaunchMovementCheck,
+} from '../../src/screens/home/locationBootstrap.js';
+import {
+    buildSingleQuoteClusters,
+    areStationIdSetsEqual,
+    buildSuppressedOverlapStationIds,
+    resolveStationFocusZoom,
+    buildStationsFitZoomRegion,
+} from '../../src/screens/home/mapGeometry.js';
 import { AnimatedCardItem } from '../../src/screens/home/AnimatedCardItem.js';
-import { DEFAULT_REGION, SIDE_MARGIN, TOP_CANOPY_HEIGHT, MAP_REGION_EPSILON, CLUSTER_DEBUG_PROBE_ANIMATION_DURATION, CLUSTER_DEBUG_PROBE_IDLE_TIMEOUT, CLUSTER_DEBUG_PROBE_SETTLE_DURATION, CLUSTER_MAP_IDLE_SETTLE_MS, CLUSTER_DEBUG_PROBE_INITIAL_LOAD_WAIT, CLUSTER_DEBUG_PROBE_RECORDING_DELAY, CLUSTER_DEBUG_PROBE_BETWEEN_STEP_DELAY, SUPPRESSION_REVEAL_STABILITY_MS, STATION_FOCUS_ANIMATION_MS, FOREGROUND_RECENTER_ANIMATION_MS, STATIONS_FIT_SETTLE_PASS_DELAY_MS, INITIAL_HOME_SUPPRESSION_DELAY_MS, INITIAL_STATIONS_FIT_MAX_ATTEMPTS, INITIAL_STATIONS_FIT_RETRY_DELAY_MS, LAUNCH_MOVEMENT_RECOVERY_TIMEOUT_MS, ENABLE_CLUSTER_MERGE_TRANSITIONS, HOME_DARK_GLASS_TINT, TRACKING_IDLE_GRACE_MS, LIVE_TRACKING_DISTANCE_INTERVAL_METERS, LIVE_TRACKING_PAN_SUPPRESS_MS, LIVE_TRACKING_STATE_UPDATE_METERS, LIVE_TRACKING_REFETCH_MIN_INTERVAL_MS } from '../../src/screens/home/constants.js';
+import {
+    DEFAULT_REGION,
+    SIDE_MARGIN,
+    TOP_CANOPY_HEIGHT,
+    MAP_REGION_EPSILON,
+    CLUSTER_DEBUG_PROBE_IDLE_TIMEOUT,
+    CLUSTER_MAP_IDLE_SETTLE_MS,
+    STATION_FOCUS_ANIMATION_MS,
+    FOREGROUND_RECENTER_ANIMATION_MS,
+    STATIONS_FIT_SETTLE_PASS_DELAY_MS,
+    INITIAL_HOME_SUPPRESSION_DELAY_MS,
+    INITIAL_STATIONS_FIT_MAX_ATTEMPTS,
+    INITIAL_STATIONS_FIT_RETRY_DELAY_MS,
+    LAUNCH_MOVEMENT_RECOVERY_TIMEOUT_MS,
+    ENABLE_CLUSTER_MERGE_TRANSITIONS,
+    HOME_DARK_GLASS_TINT,
+    TRACKING_IDLE_GRACE_MS,
+    LIVE_TRACKING_DISTANCE_INTERVAL_METERS,
+    LIVE_TRACKING_PAN_SUPPRESS_MS,
+    LIVE_TRACKING_STATE_UPDATE_METERS,
+    LIVE_TRACKING_REFETCH_MIN_INTERVAL_MS,
+} from '../../src/screens/home/constants.js';
 import { buildOverviewCoordinates, cameraTargetChanged, homeMapPadding } from '../../src/screens/home/mapCamera';
 import { startTransition, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { AppState, Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
@@ -13,8 +48,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { GlassView } from 'expo-glass-effect';
 import * as Location from 'expo-location';
-
-import MapView, { Marker, PROVIDER_APPLE } from 'react-native-maps';
+import MapView, { PROVIDER_APPLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppState } from '../../src/AppStateContext';
 import FuelSummaryCard from '../../src/components/FuelSummaryCard';
@@ -34,7 +68,6 @@ import { prefetchTrendData } from '../../src/services/fuel/trends';
 import { useTheme } from '../../src/ThemeContext';
 import { usePreferences } from '../../src/PreferencesContext';
 import BottomCanopy from '../../src/components/BottomCanopy';
-
 import ClusterMarkerOverlay from '../../src/components/cluster/ClusterMarkerOverlay';
 import StationMarker from '../../src/components/cluster/StationMarker';
 import { consumeFreshLaunchMapBootstrap } from '../../src/lib/appLaunchState';
@@ -49,21 +82,25 @@ import {
     calculateDistanceMeters,
     hasMovedBeyondThreshold,
 } from '../../src/lib/locationRefresh';
-import {
-    flushLocationProbeReportAsync,
-    recordLocationProbeEvent,
-} from '../../src/lib/locationProbe';
-
+import { flushLocationProbeReportAsync, recordLocationProbeEvent } from '../../src/lib/locationProbe';
 import { openStationNavigation } from '../../src/lib/openNavigation';
+import { normalizeFuelGrade, rankQuotesForFuelGrade } from '../../src/lib/fuelGrade';
+import { buildFuelSearchRequestKey, buildResolvedFuelSearchContext } from '../../src/lib/fuelSearchState';
 import {
-    normalizeFuelGrade,
-    rankQuotesForFuelGrade,
-} from '../../src/lib/fuelGrade';
-import {
-    buildFuelSearchRequestKey,
-    buildResolvedFuelSearchContext,
-} from '../../src/lib/fuelSearchState';
-import { buildPausedSuppressedStationIds, buildPersistentSuppressedStationIds, buildHomeFilterSignature, buildHomeQuerySignature, buildVisibleSuppressedStationIds, filterStationQuotesForHome, hasHomeFilterSignatureChanged, resolveCommittedHomeActiveIndex, resolveHomeCardIndexFromOffset, shouldInitializeInitialSuppressionDelay, shouldDelayStationMarkerSuppression, shouldAutoFitHomeMap, resolveHomeFuelSnapshotStrategy } from '../../src/lib/homeState';
+    buildPausedSuppressedStationIds,
+    buildPersistentSuppressedStationIds,
+    buildHomeFilterSignature,
+    buildHomeQuerySignature,
+    buildVisibleSuppressedStationIds,
+    filterStationQuotesForHome,
+    hasHomeFilterSignatureChanged,
+    resolveCommittedHomeActiveIndex,
+    resolveHomeCardIndexFromOffset,
+    shouldInitializeInitialSuppressionDelay,
+    shouldDelayStationMarkerSuppression,
+    shouldAutoFitHomeMap,
+    resolveHomeFuelSnapshotStrategy,
+} from '../../src/lib/homeState';
 import {
     canTriggerHomeLaunchReveal,
     shouldRevealDuringInitialHomeFit,
@@ -71,11 +108,8 @@ import {
 } from '../../src/lib/homeLaunch';
 import { getDrivingRouteAsync } from '../../src/lib/FuelUpMapKitRouting';
 import { groupStationsIntoClusters } from '../../src/cluster/grouping';
-
 import { buildClusterMembershipKey } from '../../src/cluster/layout';
-import { finalizeDebugSample } from '../../src/cluster/telemetry';
 import Animated, { useSharedValue, useAnimatedScrollHandler, ZoomIn, ZoomOut } from 'react-native-reanimated';
-
 export default function HomeScreen() {
     const mapRef = useRef(null);
     const flatListRef = useRef(null);
@@ -83,25 +117,13 @@ export default function HomeScreen() {
     const shouldUseLaunchLocationBootstrapRef = useRef(consumeFreshLaunchMapBootstrap());
     const launchCachedRegionRef = useRef(null);
     const pendingInstantMapRegionRef = useRef(null);
-    const pendingSuppressionRegionRef = useRef(null);
-    const suppressionRegionAnimationFrameRef = useRef(null);
     const mapIdleWaitersRef = useRef([]);
     const mapIdleSettleTimeoutRef = useRef(null);
     const fitSettlePassTimeoutRef = useRef(null);
-    const suppressionRevealDelayTimeoutRef = useRef(null);
     const mapRegionRef = useRef(DEFAULT_REGION);
     const suppressionRegionRef = useRef(DEFAULT_REGION);
     const previousSuppressedStationIdsRef = useRef(new Set());
     const previousSuppressedStationSignatureRef = useRef('');
-    const lastClusterDebugSignatureRef = useRef('');
-    const clusterDebugSamplesRef = useRef([]);
-    const clusterDebugTransitionEventsRef = useRef([]);
-    const clusterDebugTransitionEventKeysRef = useRef(new Set());
-    const clusterDebugWatchedPrimaryIdRef = useRef(null);
-    const clusterDebugProbeModeRef = useRef('idle');
-    const clusterDebugProbeRunIdRef = useRef(0);
-    const clusterDebugAutoProbeHandledKeyRef = useRef('');
-    const clusterDebugAutoProbeSeededKeyRef = useRef('');
     const lastResolvedHomeQuerySignatureRef = useRef('');
     const activeHomeQuerySignatureRef = useRef('');
     const lastVisibleHomeRequestKeyRef = useRef('');
@@ -170,15 +192,11 @@ export default function HomeScreen() {
     const [isInitialSuppressionDelayActive, setIsInitialSuppressionDelayActive] = useState(false);
     const [initialSuppressionDelayStationIds, setInitialSuppressionDelayStationIds] = useState(new Set());
     const [effectiveSuppressedStationIds, setEffectiveSuppressedStationIds] = useState(new Set());
-    const [isSuppressionRevealAllowed, setIsSuppressionRevealAllowed] = useState(false);
     const [isLaunchVisualReady, setIsLaunchVisualReady] = useState(false);
     const [isLaunchCriticalFitPending, setIsLaunchCriticalFitPending] = useState(false);
     const [homeRefitRequestVersion, setHomeRefitRequestVersion] = useState(0);
     const [homeLayoutSettlementVersion, setHomeLayoutSettlementVersion] = useState(0);
     const [stagedHomeRefitRequest, setStagedHomeRefitRequest] = useState(null);
-    const [isClusterDebugRecording, setIsClusterDebugRecording] = useState(false);
-    const [isClusterDebugProbeRunning, setIsClusterDebugProbeRunning] = useState(false);
-    const [clusterDebugProbeSummary, setClusterDebugProbeSummary] = useState('');
     const hasTriggeredInitialRevealRef = useRef(false);
     const pendingHomeRefitRequestRef = useRef(null);
     const renderedHomeRefitRequestVersionRef = useRef(0);
@@ -288,19 +306,10 @@ export default function HomeScreen() {
 
     useEffect(() => {
         return () => {
-            if (suppressionRegionAnimationFrameRef.current != null) {
-                cancelAnimationFrame(suppressionRegionAnimationFrameRef.current);
-                suppressionRegionAnimationFrameRef.current = null;
-            }
 
             if (initialSuppressionDelayTimeoutRef.current) {
                 clearTimeout(initialSuppressionDelayTimeoutRef.current);
                 initialSuppressionDelayTimeoutRef.current = null;
-            }
-
-            if (suppressionRevealDelayTimeoutRef.current) {
-                clearTimeout(suppressionRevealDelayTimeoutRef.current);
-                suppressionRevealDelayTimeoutRef.current = null;
             }
 
             if (fitSettlePassTimeoutRef.current) {
@@ -2241,35 +2250,6 @@ export default function HomeScreen() {
         );
     }, [activeIndex, stationQuotes, stationQuotesSignature, suppressionRegion, width, height, hasLocationPermission, userLocationBubble]);
     useEffect(() => {
-        if (suppressionRevealDelayTimeoutRef.current) {
-            clearTimeout(suppressionRevealDelayTimeoutRef.current);
-            suppressionRevealDelayTimeoutRef.current = null;
-        }
-
-        if (isMapMoving) {
-            setIsSuppressionRevealAllowed(false);
-            return;
-        }
-
-        suppressionRevealDelayTimeoutRef.current = setTimeout(() => {
-            suppressionRevealDelayTimeoutRef.current = null;
-
-            if (!isMountedRef.current) {
-                return;
-            }
-
-            setIsSuppressionRevealAllowed(true);
-        }, SUPPRESSION_REVEAL_STABILITY_MS);
-
-        return () => {
-            if (suppressionRevealDelayTimeoutRef.current) {
-                clearTimeout(suppressionRevealDelayTimeoutRef.current);
-                suppressionRevealDelayTimeoutRef.current = null;
-            }
-        };
-    }, [isMapMoving]);
-
-    useEffect(() => {
         if (ENABLE_CLUSTER_MERGE_TRANSITIONS) {
             setEffectiveSuppressedStationIds(currentValue => (
                 currentValue.size === 0 ? currentValue : new Set()
@@ -2307,16 +2287,8 @@ export default function HomeScreen() {
         setEffectiveSuppressedStationIds(currentValue => {
             const visibleStationIds = new Set(stationQuotes.map(quote => String(quote.stationId)));
             const activeStationId = stationQuotes[activeIndex]?.stationId ?? null;
-            // The active station bypasses every suppression rule in
-            // buildSuppressedOverlapStationIds, so it is never in
-            // rawSuppressedOverlapStationIds. Reveal it as soon as the user
-            // selects it — waiting for isMapMoving/isSuppressionRevealAllowed to
-            // settle would introduce a ~1s delay (600 ms map-idle grace +
-            // 360 ms stability window) between the tap/scroll and the pill
-            // reappearing, which reads as "the bug isn't fixed" to the user.
-            // The isMapMoving/isSuppressionRevealAllowed gating was meant to
-            // avoid flicker from overlap transients during passive panning, but
-            // this is an explicit user commit, so immediate reveal is correct.
+            // Explicit selection reveals the station immediately, without a
+            // timer or waiting for passive map panning to settle.
             const shouldRevealCommittedActiveStation = (
                 activeStationId != null &&
                 !rawSuppressedOverlapStationIds.has(String(activeStationId))
@@ -2338,7 +2310,6 @@ export default function HomeScreen() {
         activeIndex,
         homeLayoutSettlementVersion,
         isMapMoving,
-        isSuppressionRevealAllowed,
         rawSuppressedOverlapStationIds,
         stationQuotes,
     ]);
@@ -2563,34 +2534,6 @@ export default function HomeScreen() {
         clustersSignatureRef.current = clustersSignature;
     }, [clustersSignature]);
 
-    const recordClusterDebugTransitionEvent = (event) => {
-        if (!debugClusterAnimations || !isClusterDebugRecording || !event?.type) {
-            return;
-        }
-
-        const eventKey = [
-            event.type,
-            event.primaryStationId || '',
-            event.fromClusterKey || '',
-            event.toClusterKey || '',
-            event.transitionKey || '',
-            event.moverStationId || '',
-        ].join('|');
-
-        if (clusterDebugTransitionEventKeysRef.current.has(eventKey)) {
-            return;
-        }
-
-        clusterDebugTransitionEventKeysRef.current.add(eventKey);
-        clusterDebugTransitionEventsRef.current = [
-            ...clusterDebugTransitionEventsRef.current,
-            {
-                timestamp: Date.now(),
-                ...event,
-            },
-        ];
-    };
-
     const zoomToStation = useCallback((quote) => {
         if (
             !mapRef.current ||
@@ -2652,13 +2595,6 @@ export default function HomeScreen() {
                 .filter(q => Number.isFinite(q?.latitude) && Number.isFinite(q?.longitude))
                 .filter(q => !suppressedStationIds?.has(String(q.stationId)))
                 .map(q => ({ latitude: q.latitude, longitude: q.longitude }))
-        );
-        const buildCoordinateSignature = (coordinates) => (
-            (coordinates || [])
-                .map(coord => (
-                    `${coord.latitude.toFixed(5)}:${coord.longitude.toFixed(5)}`
-                ))
-                .join('|')
         );
 
         // Frame all visible stations without forcing the user-location bubble into the fit bounds.
@@ -2863,30 +2799,6 @@ export default function HomeScreen() {
                 ? currentRegion
                 : nextRegion
         ));
-    };
-
-    const scheduleSuppressionRegionUpdate = (nextRegion) => {
-        if (!nextRegion) {
-            return;
-        }
-
-        pendingSuppressionRegionRef.current = nextRegion;
-
-        if (suppressionRegionAnimationFrameRef.current != null) {
-            return;
-        }
-
-        suppressionRegionAnimationFrameRef.current = requestAnimationFrame(() => {
-            suppressionRegionAnimationFrameRef.current = null;
-            const pendingRegion = pendingSuppressionRegionRef.current;
-            pendingSuppressionRegionRef.current = null;
-
-            if (!pendingRegion || !isMountedRef.current) {
-                return;
-            }
-
-            setSuppressionRegionIfNeeded(pendingRegion);
-        });
     };
 
     const setMapRegionIfNeeded = (nextRegion) => {
@@ -3141,599 +3053,34 @@ export default function HomeScreen() {
         }
     };
 
-    const fallbackCoordinate = {
-        latitude: location.latitude,
-        longitude: location.longitude,
-    };
+
     const benchmarkQuote = regionalQuotes.find(quote => quote.providerId !== bestQuote?.providerId) || regionalQuotes[0] || null;
-    const watchedCluster = useMemo(() => {
-        if (!debugClusterAnimations) {
-            return null;
-        }
-
-        const multiQuoteClusters = renderedClusters.filter(cluster => cluster.quotes.length > 1);
-        if (multiQuoteClusters.length === 0) {
-            return null;
-        }
-
-        const latScale = mapRegion.latitudeDelta || 1;
-        const lngScale = mapRegion.longitudeDelta || 1;
-
-        return multiQuoteClusters.reduce((closestCluster, cluster) => {
-            if (!closestCluster) {
-                return cluster;
-            }
-
-            const clusterDistance = Math.hypot(
-                (cluster.averageLat - mapRegion.latitude) / latScale,
-                (cluster.averageLng - mapRegion.longitude) / lngScale
-            );
-            const closestDistance = Math.hypot(
-                (closestCluster.averageLat - mapRegion.latitude) / latScale,
-                (closestCluster.averageLng - mapRegion.longitude) / lngScale
-            );
-
-            return clusterDistance < closestDistance ? cluster : closestCluster;
-        }, null);
-    }, [debugClusterAnimations, renderedClusters, mapRegion.latitude, mapRegion.longitude, mapRegion.latitudeDelta, mapRegion.longitudeDelta]);
-    const watchedClusterDiagnostic = null;
-    const activeClusterDebugPrimaryId = isClusterDebugRecording
-        ? clusterDebugWatchedPrimaryIdRef.current
-        : (watchedCluster?.quotes?.[0]?.stationId || null);
-
-    const recordClusterDebugRenderFrame = (frame) => {
-        if (!debugClusterAnimations || !isClusterDebugRecording || !frame) {
-            return false;
-        }
-
-        const probeMode = clusterDebugProbeModeRef.current || 'idle';
-        const signature = [
-            frame.clusterKey || '',
-            frame.stageSignature || '',
-            frame.runtimePhase || 'live',
-            probeMode,
-            formatDebugMetric(frame.spreadProgress, 5),
-            formatDebugMetric(frame.morphProgress, 5),
-            formatDebugMetric(frame.bridgeProgress, 5),
-            formatDebugMetric(frame.outsideX, 4),
-            formatDebugMetric(frame.outsideY, 4),
-            frame.outsideVisible ? '1' : '0',
-            formatDebugMetric(frame.accumulatorX, 4),
-            formatDebugMetric(frame.accumulatorY, 4),
-            frame.accumulatorVisible ? '1' : '0',
-            formatDebugMetric(frame.mergeMoverX, 4),
-            formatDebugMetric(frame.mergeMoverY, 4),
-            frame.mergeMoverVisible ? '1' : '0',
-            formatDebugMetric(frame.splitMoverX, 4),
-            formatDebugMetric(frame.splitMoverY, 4),
-            frame.splitMoverVisible ? '1' : '0',
-        ].join('|');
-
-        const previousSample = clusterDebugSamplesRef.current[clusterDebugSamplesRef.current.length - 1] || null;
-        const nextSample = finalizeDebugSample(frame, previousSample, probeMode);
-
-        clusterDebugSamplesRef.current.push(nextSample);
-        lastClusterDebugSignatureRef.current = signature;
-        return true;
-    };
-
-    const startClusterDebugCapture = (primaryStationId = null) => {
-        clusterDebugSamplesRef.current = [];
-        clusterDebugTransitionEventsRef.current = [];
-        clusterDebugTransitionEventKeysRef.current = new Set();
-        lastClusterDebugSignatureRef.current = '';
-        clusterDebugWatchedPrimaryIdRef.current = primaryStationId;
-        clusterDebugProbeModeRef.current = 'warmup';
-        setIsClusterDebugRecording(true);
-    };
-
-    const stopClusterDebugCapture = () => {
-        const recordedSamples = clusterDebugSamplesRef.current;
-        const recordedTransitionEvents = clusterDebugTransitionEventsRef.current;
-
-        setIsClusterDebugRecording(false);
-        lastClusterDebugSignatureRef.current = '';
-        clusterDebugWatchedPrimaryIdRef.current = null;
-        clusterDebugProbeModeRef.current = 'idle';
-        clusterDebugSamplesRef.current = [];
-        clusterDebugTransitionEventsRef.current = [];
-        clusterDebugTransitionEventKeysRef.current = new Set();
-
-        return {
-            recordedSamples,
-            recordedTransitionEvents,
-            logText: buildClusterDebugRecordingLog(recordedSamples, recordedTransitionEvents),
-        };
-    };
-
-    const handleStartClusterDebugRecording = () => {
-        if (isClusterDebugProbeRunning) {
-            return;
-        }
-
-        startClusterDebugCapture(watchedCluster?.quotes?.[0]?.stationId || null);
-    };
-
-    const handleStopClusterDebugRecording = () => {
-        if (isClusterDebugProbeRunning) {
-            return;
-        }
-
-        const { logText } = stopClusterDebugCapture();
-        console.debug(logText);
-    };
-
-    const animateClusterDebugProbeToRegion = async (nextRegion, runId) => {
-        if (!mapRef.current || !nextRegion || clusterDebugProbeRunIdRef.current !== runId) {
-            return false;
-        }
-
-        if (areRegionsEquivalent(mapRegionRef.current, nextRegion)) {
-            setMapRegionIfNeeded(nextRegion);
-            await waitForMilliseconds(CLUSTER_DEBUG_PROBE_SETTLE_DURATION);
-            return true;
-        }
-
-        isAnimatingRef.current = true;
-        setMapMotionState(true);
-        mapRef.current.animateToRegion(nextRegion, CLUSTER_DEBUG_PROBE_ANIMATION_DURATION);
-
-        const didReachIdle = await waitForMapIdle(
-            CLUSTER_DEBUG_PROBE_ANIMATION_DURATION + CLUSTER_DEBUG_PROBE_IDLE_TIMEOUT
-        );
-
-        if (!didReachIdle && isMountedRef.current && clusterDebugProbeRunIdRef.current === runId) {
-            isAnimatingRef.current = false;
-            setMapMotionState(false);
-            setMapRegionIfNeeded(nextRegion);
-        }
-
-        await waitForMilliseconds(CLUSTER_DEBUG_PROBE_SETTLE_DURATION);
-        return didReachIdle;
-    };
-
-    const waitForClusterDebugProbeResetSettle = async (runId, timeoutMs = 4500) => {
-        const deadline = Date.now() + timeoutMs;
-
-        while (Date.now() < deadline) {
-            if (clusterDebugProbeRunIdRef.current !== runId) {
-                return false;
-            }
-
-            if (!mapMotionRef.current && !isAnimatingRef.current) {
-                await waitForMilliseconds(CLUSTER_DEBUG_PROBE_SETTLE_DURATION);
-
-                if (
-                    clusterDebugProbeRunIdRef.current !== runId ||
-                    mapMotionRef.current ||
-                    isAnimatingRef.current
-                ) {
-                    continue;
-                }
-
-                return true;
-            }
-
-            await waitForMilliseconds(50);
-        }
-
-        return false;
-    };
-
-    const handleRunClusterDebugProbe = async (trigger = 'manual') => {
-        if (!debugClusterAnimations || isClusterDebugProbeRunning || isClusterDebugRecording || !isMapLoaded) {
-            return;
-        }
-
-        if (!watchedCluster || !mapRef.current) {
-            const message = 'Move the map until a multi-station cluster is near center, then run Probe.';
-
-            setClusterDebugProbeSummary(message);
-            await writeClusterDebugProbeArtifact({
-                status: 'blocked',
-                trigger,
-                message,
-                clusterKey: watchedCluster ? buildClusterMembershipKey(watchedCluster) : '',
-                sampleCount: 0,
-                transitionCount: 0,
-                maxFrameDelta: 0,
-                timedOutStages: [],
-                plan: watchedCluster ? buildClusterDebugProbePlan(watchedCluster, mapRegion, location) : null,
-                logText: '',
-            });
-            return;
-        }
-
-        const probePlan = buildClusterDebugProbePlan(watchedCluster, mapRegion, location);
-
-        if (!probePlan) {
-            const message = 'Unable to build a probe plan for the current cluster.';
-
-            setClusterDebugProbeSummary(message);
-            await writeClusterDebugProbeArtifact({
-                status: 'blocked',
-                trigger,
-                message,
-                clusterKey: buildClusterMembershipKey(watchedCluster),
-                sampleCount: 0,
-                transitionCount: 0,
-                maxFrameDelta: 0,
-                timedOutStages: [],
-                plan: null,
-                logText: '',
-            });
-            return;
-        }
-
-        const runId = clusterDebugProbeRunIdRef.current + 1;
-        let didStartCapture = false;
-
-        clusterDebugProbeRunIdRef.current = runId;
-        setIsClusterDebugProbeRunning(true);
-        setClusterDebugProbeSummary('Probe: locking onto the nearest cluster.');
-
-        try {
-            await writeClusterDebugProbeArtifact({
-                status: 'running',
-                trigger,
-                message: 'Probe is waiting for the map to settle before recording.',
-                clusterKey: probePlan.clusterKey,
-                sampleCount: 0,
-                transitionCount: 0,
-                maxFrameDelta: 0,
-                timedOutStages: [],
-                plan: probePlan,
-                logText: '',
-            });
-
-            setClusterDebugProbeSummary('Probe: waiting 3 seconds for the map to load.');
-            await waitForMilliseconds(CLUSTER_DEBUG_PROBE_INITIAL_LOAD_WAIT);
-            if (clusterDebugProbeRunIdRef.current !== runId) {
-                return;
-            }
-
-            if (!areRegionsEquivalent(mapRegionRef.current, probePlan.focusStartRegion)) {
-                setClusterDebugProbeSummary('Probe: centering on your current location before recording.');
-                await animateClusterDebugProbeToRegion(probePlan.focusStartRegion, runId);
-                if (clusterDebugProbeRunIdRef.current !== runId) {
-                    return;
-                }
-            }
-
-            startClusterDebugCapture(watchedCluster.quotes[0].stationId);
-            didStartCapture = true;
-            const startClusterSignature = clustersSignatureRef.current;
-            const startStationScreenSnapshot = buildProbeStationScreenSnapshot(
-                stationQuotesRef.current,
-                mapRegionRef.current,
-                width,
-                height
-            );
-
-            setClusterDebugProbeSummary('Probe: recording started. Holding for 150ms.');
-            await waitForMilliseconds(CLUSTER_DEBUG_PROBE_RECORDING_DELAY);
-            if (clusterDebugProbeRunIdRef.current !== runId) {
-                return;
-            }
-
-            const timedOutStages = [];
-            const totalZoomInSteps = probePlan.zoomInRegions.length;
-            clusterDebugProbeModeRef.current = 'stepped';
-
-            for (let stepIndex = 0; stepIndex < totalZoomInSteps; stepIndex += 1) {
-                if (clusterDebugProbeRunIdRef.current !== runId) {
-                    return;
-                }
-
-                setClusterDebugProbeSummary(
-                    `Probe: zooming in ${stepIndex + 1}/${totalZoomInSteps}.`
-                );
-
-                if (!await animateClusterDebugProbeToRegion(probePlan.zoomInRegions[stepIndex], runId)) {
-                    timedOutStages.push(`zoom-in-${stepIndex + 1}`);
-                }
-
-                if (stepIndex < totalZoomInSteps - 1) {
-                    await waitForMilliseconds(CLUSTER_DEBUG_PROBE_BETWEEN_STEP_DELAY);
-                }
-            }
-
-            const totalZoomOutSteps = probePlan.zoomOutRegions.length;
-
-            for (let stepIndex = 0; stepIndex < totalZoomOutSteps; stepIndex += 1) {
-                if (clusterDebugProbeRunIdRef.current !== runId) {
-                    return;
-                }
-
-                setClusterDebugProbeSummary(
-                    `Probe: zooming out ${stepIndex + 1}/${totalZoomOutSteps}.`
-                );
-
-                if (!await animateClusterDebugProbeToRegion(probePlan.zoomOutRegions[stepIndex], runId)) {
-                    timedOutStages.push(`zoom-out-${stepIndex + 1}`);
-                }
-
-                if (stepIndex < totalZoomOutSteps - 1) {
-                    await waitForMilliseconds(CLUSTER_DEBUG_PROBE_BETWEEN_STEP_DELAY);
-                }
-            }
-
-            clusterDebugProbeModeRef.current = 'one-shot';
-            setClusterDebugProbeSummary('Probe: one-shot zoom in.');
-            if (!await animateClusterDebugProbeToRegion(probePlan.splitRegion, runId)) {
-                timedOutStages.push('zoom-oneshot-in');
-            }
-            if (clusterDebugProbeRunIdRef.current !== runId) {
-                return;
-            }
-
-            await waitForMilliseconds(CLUSTER_DEBUG_PROBE_BETWEEN_STEP_DELAY);
-            if (clusterDebugProbeRunIdRef.current !== runId) {
-                return;
-            }
-
-            setClusterDebugProbeSummary('Probe: one-shot zoom out.');
-            if (!await animateClusterDebugProbeToRegion(probePlan.focusStartRegion, runId)) {
-                timedOutStages.push('zoom-oneshot-out');
-            }
-            if (clusterDebugProbeRunIdRef.current !== runId) {
-                return;
-            }
-
-            clusterDebugProbeModeRef.current = 'settle';
-            setClusterDebugProbeSummary('Probe: final 150ms hold before stopping recording.');
-            await waitForMilliseconds(CLUSTER_DEBUG_PROBE_RECORDING_DELAY);
-            if (clusterDebugProbeRunIdRef.current !== runId) {
-                return;
-            }
-
-            const {
-                recordedSamples,
-                recordedTransitionEvents,
-            } = stopClusterDebugCapture();
-
-            didStartCapture = false;
-
-            if (!areRegionsEquivalent(mapRegionRef.current, probePlan.focusStartRegion)) {
-                setClusterDebugProbeSummary('Probe: restoring the original map view.');
-                await animateClusterDebugProbeToRegion(probePlan.focusStartRegion, runId);
-            }
-            if (clusterDebugProbeRunIdRef.current !== runId) {
-                return;
-            }
-            setClusterDebugProbeSummary('Probe: waiting for split handoffs to settle.');
-            await waitForClusterDebugProbeResetSettle(runId);
-            if (clusterDebugProbeRunIdRef.current !== runId) {
-                return;
-            }
-
-            const endClusterSignature = clustersSignatureRef.current;
-            const endStationScreenSnapshot = buildProbeStationScreenSnapshot(
-                stationQuotesRef.current,
-                mapRegionRef.current,
-                width,
-                height
-            );
-            const resetStationInvariant = compareProbeStationScreenSnapshots(
-                startStationScreenSnapshot,
-                endStationScreenSnapshot
-            );
-            const resetSignaturesMatch = (
-                startClusterSignature === endClusterSignature ||
-                (
-                    (resetStationInvariant?.maxPairDistanceDelta || 0) <= 0.001 &&
-                    (resetStationInvariant?.meanPairDistanceDelta || 0) <= 0.001
-                )
-            );
-            const modesCaptured = Array.from(new Set(
-                recordedSamples
-                    .map(sample => sample?.probeMode || 'unknown')
-                    .filter(Boolean)
-            ));
-
-            const maxFrameDelta = recordedSamples.reduce((maxDelta, sample) => (
-                Math.max(maxDelta, sample?.maxFrameDelta || 0)
-            ), 0);
-            const report = {
-                status: 'completed',
-                trigger,
-                message: timedOutStages.length > 0
-                    ? `Completed with idle timeouts in ${timedOutStages.join(', ')}.`
-                    : 'Completed without timeouts.',
-                clusterKey: probePlan.clusterKey,
-                sampleCount: recordedSamples.length,
-                transitionCount: recordedTransitionEvents.length,
-                maxFrameDelta,
-                timedOutStages,
-                plan: probePlan,
-                modesCaptured,
-                resetInvariant: {
-                    startClusterSignature,
-                    endClusterSignature,
-                    signaturesMatch: resetSignaturesMatch,
-                    startStationScreenSnapshot,
-                    endStationScreenSnapshot,
-                    ...resetStationInvariant,
-                },
-            };
-            const logText = buildClusterDebugProbeLog(report, recordedSamples, recordedTransitionEvents);
-
-            await writeClusterDebugProbeArtifact({
-                ...report,
-                samples: recordedSamples,
-                transitionEvents: recordedTransitionEvents,
-                logText,
-            });
-            console.debug(logText);
-            if (isMountedRef.current && clusterDebugProbeRunIdRef.current === runId) {
-                setClusterDebugProbeSummary(buildClusterDebugProbeSummary(report));
-            }
-        } catch (error) {
-            if (didStartCapture) {
-                stopClusterDebugCapture();
-                didStartCapture = false;
-            }
-
-            const message = error instanceof Error ? error.message : 'Unexpected probe failure.';
-            const logText = `[ClusterDebug Probe]\nstatus=failed\ntrigger=${trigger}\nmessage=${message}`;
-
-            await writeClusterDebugProbeArtifact({
-                status: 'failed',
-                trigger,
-                message,
-                clusterKey: probePlan.clusterKey,
-                sampleCount: 0,
-                transitionCount: 0,
-                maxFrameDelta: 0,
-                timedOutStages: [],
-                plan: probePlan,
-                logText,
-            });
-            console.debug(logText);
-            if (isMountedRef.current && clusterDebugProbeRunIdRef.current === runId) {
-                setClusterDebugProbeSummary(`Probe failed: ${message}`);
-            }
-        } finally {
-            if (didStartCapture) {
-                stopClusterDebugCapture();
-            }
-
-            if (trigger.startsWith('automation:')) {
-                finishClusterProbeSession();
-            }
-
-            if (isMountedRef.current && clusterDebugProbeRunIdRef.current === runId) {
-                setIsClusterDebugProbeRunning(false);
-            }
-        }
-    };
-
-    useEffect(() => {
-        if (!autoClusterProbeRequested) {
-            clusterDebugAutoProbeHandledKeyRef.current = '';
-            clusterDebugAutoProbeSeededKeyRef.current = '';
-        }
-    }, [autoClusterProbeRequested]);
-
-    useEffect(() => {
-        if (
-            !autoClusterProbeRequested ||
-            !debugClusterAnimations ||
-            isClusterDebugProbeRunning ||
-            isClusterDebugRecording ||
-            !isMapLoaded ||
-            watchedCluster ||
-            !mapRef.current ||
-            isAnimatingRef.current ||
-            isMapMoving
-        ) {
-            return;
-        }
-
-        if (clusterDebugAutoProbeSeededKeyRef.current === autoClusterProbeRequestKey) {
-            return;
-        }
-
-        const seedRegion = buildClusterDebugAutomationSeedRegion(stationQuotes, mapRegion);
-
-        if (!seedRegion) {
-            setClusterDebugProbeSummary('Probe automation is waiting for enough stations to form a cluster.');
-            return;
-        }
-
-        clusterDebugAutoProbeSeededKeyRef.current = autoClusterProbeRequestKey;
-        setClusterDebugProbeSummary('Probe automation is preparing a cluster.');
-        console.log(`[ClusterDebug Probe Automation] seeding cluster ${autoClusterProbeRequestKey}`);
-        isAnimatingRef.current = true;
-        setMapMotionState(true);
-        mapRef.current.animateToRegion(seedRegion, CLUSTER_DEBUG_PROBE_ANIMATION_DURATION);
-    }, [
-        autoClusterProbeRequested,
-        autoClusterProbeRequestKey,
+    const { isClusterDebugRecording, isClusterDebugProbeRunning, clusterDebugProbeSummary, recordClusterDebugTransitionEvent, watchedCluster, watchedClusterDiagnostic, activeClusterDebugPrimaryId, recordClusterDebugRenderFrame, handleStartClusterDebugRecording, handleStopClusterDebugRecording, handleRunClusterDebugProbe } = useClusterProbe({
         debugClusterAnimations,
-        isClusterDebugProbeRunning,
-        isClusterDebugRecording,
-        isMapLoaded,
-        watchedCluster,
-        stationQuotes,
+        renderedClusters,
         mapRegion,
-        isMapMoving,
-    ]);
-
-    useEffect(() => {
-        if (
-            !autoClusterProbeRequested ||
-            !debugClusterAnimations ||
-            isClusterDebugProbeRunning ||
-            isClusterDebugRecording ||
-            !isMapLoaded
-        ) {
-            return;
-        }
-
-        if (clusterDebugAutoProbeHandledKeyRef.current === autoClusterProbeRequestKey) {
-            return;
-        }
-
-        if (!watchedCluster || !mapRef.current) {
-            setClusterDebugProbeSummary('Probe automation is waiting for a cluster near the map center.');
-            const waitingTrigger = autoClusterProbeRequestSource === 'file'
-                ? `automation:file:${autoClusterProbeRequestKey}`
-                : `automation:${autoClusterProbeRequestKey}`;
-
-            void writeClusterDebugProbeArtifact({
-                status: 'waiting',
-                trigger: waitingTrigger,
-                message: 'Waiting for a multi-station cluster near the map center.',
-                clusterKey: watchedCluster ? buildClusterMembershipKey(watchedCluster) : '',
-                sampleCount: 0,
-                transitionCount: 0,
-                maxFrameDelta: 0,
-                timedOutStages: [],
-                plan: watchedCluster ? buildClusterDebugProbePlan(watchedCluster, mapRegion, location) : null,
-                logText: '',
-            });
-            return;
-        }
-
-        clusterDebugAutoProbeHandledKeyRef.current = autoClusterProbeRequestKey;
-        clusterDebugAutoProbeSeededKeyRef.current = '';
-        setClusterDebugProbeSummary(`Probe automation requested (${autoClusterProbeRequestKey}).`);
-
-        const automationTrigger = autoClusterProbeRequestSource === 'file'
-            ? `automation:file:${autoClusterProbeRequestKey}`
-            : `automation:${autoClusterProbeRequestKey}`;
-
-        console.log(`[ClusterDebug Probe Automation] starting ${automationTrigger}`);
-        void handleRunClusterDebugProbe(automationTrigger);
-    }, [
-        autoClusterProbeRequested,
-        autoClusterProbeRequestKey,
-        autoClusterProbeRequestSource,
-        debugClusterAnimations,
-        isClusterDebugProbeRunning,
-        isClusterDebugRecording,
+        mapRef,
+        mapRegionRef,
+        setMapRegionIfNeeded,
+        isAnimatingRef,
+        setMapMotionState,
+        waitForMapIdle,
+        isMountedRef,
+        mapMotionRef,
         isMapLoaded,
+        location,
+        clustersSignatureRef,
+        stationQuotesRef,
+        width,
+        height,
         finishClusterProbeSession,
-        watchedCluster,
-    ]);
-
-    useEffect(() => {
-        if (!debugClusterAnimations) {
-            clusterDebugProbeRunIdRef.current += 1;
-            setIsClusterDebugRecording(false);
-            setIsClusterDebugProbeRunning(false);
-            setClusterDebugProbeSummary('');
-            clusterDebugAutoProbeHandledKeyRef.current = '';
-            lastClusterDebugSignatureRef.current = '';
-            clusterDebugWatchedPrimaryIdRef.current = null;
-            clusterDebugSamplesRef.current = [];
-            clusterDebugTransitionEventsRef.current = [];
-            clusterDebugTransitionEventKeysRef.current = new Set();
-            flushMapIdleWaiters(false);
-            return;
-        }
-    }, [debugClusterAnimations]);
+        autoClusterProbeRequested,
+        isMapMoving,
+        autoClusterProbeRequestKey,
+        stationQuotes,
+        autoClusterProbeRequestSource,
+        flushMapIdleWaiters
+    });
 
     const renderClusterEntries = renderedClusters.map(cluster => {
         const primaryStationId = cluster.quotes[0].stationId;
@@ -3809,11 +3156,6 @@ export default function HomeScreen() {
                                 },
                             },
                         });
-                        if (suppressionRegionAnimationFrameRef.current != null) {
-                            cancelAnimationFrame(suppressionRegionAnimationFrameRef.current);
-                            suppressionRegionAnimationFrameRef.current = null;
-                        }
-                        pendingSuppressionRegionRef.current = null;
                         setSuppressionRegionIfNeeded(region);
                         setMapRenderRegion(region);
                         setMapRegionIfNeeded(region);
@@ -3829,24 +3171,7 @@ export default function HomeScreen() {
                         }, CLUSTER_MAP_IDLE_SETTLE_MS);
                     }}
                 >
-                    {isMapLoaded ? (
-                        ENABLE_CLUSTER_MERGE_TRANSITIONS
-                            ? (!hasRenderableClusters ? (
-                                <Marker
-                                    coordinate={fallbackCoordinate}
-                                    title="No Prices Returned"
-                                    description={
-                                        effectiveErrorMsg
-                                            ? effectiveErrorMsg
-                                            : isLoadingLocation
-                                                ? 'Finding your location'
-                                                : 'Checking fuel providers'
-                                    }
-                                    pinColor="#D46A4C"
-                                />
-                            ) : null)
-                            : (hasRenderableClusters ? (
-                                <>
+                    {isMapLoaded && !ENABLE_CLUSTER_MERGE_TRANSITIONS ? (<>
                                     {renderClusterEntries.map(entry => {
                                         const quote = entry.cluster.quotes[0];
                                         const entryStationId = String(entry.primaryStationId);
@@ -3871,22 +3196,7 @@ export default function HomeScreen() {
                                             />
                                         );
                                     })}
-                                </>
-                            ) : (
-                                <Marker
-                                    coordinate={fallbackCoordinate}
-                                    title="No Prices Returned"
-                                    description={
-                                        effectiveErrorMsg
-                                            ? effectiveErrorMsg
-                                            : isLoadingLocation
-                                                ? 'Finding your location'
-                                                : 'Checking fuel providers'
-                                    }
-                                    pinColor="#D46A4C"
-                                />
-                            ))
-                    ) : null}
+                    </>) : null}
                 </MapView>
             ) : null}
 

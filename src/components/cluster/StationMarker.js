@@ -9,7 +9,6 @@ import Animated, {
   interpolate,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
   withTiming,
 } from 'react-native-reanimated';
 import {
@@ -18,9 +17,6 @@ import {
 } from '../../cluster/constants';
 import { buildStationMarkerViewTrackingSignature } from '../../cluster/stationMarkerPresentation';
 
-const SHRINK_DELAY_MS = 0;
-const SHRINK_DURATION_MS = 260;
-const SUPPRESSED_SCALE = 0.005;
 const APPEAR_START_SCALE = 0.58;
 const APPEAR_DURATION_MS = 260;
 const TRACKS_VIEW_CHANGES_IDLE_MS = 180;
@@ -42,7 +38,6 @@ function StationMarker({
   useOnboardingColors = false,
 }) {
   const appearProgress = useSharedValue(1);
-  const suppressionProgress = useSharedValue(isSuppressed && !shouldDelaySuppression ? 1 : 0);
   const tracksViewChangesTimeoutRef = useRef(null);
   const visualStateSignatureRef = useRef('');
   const [tracksViewChanges, setTracksViewChanges] = useState(false);
@@ -64,44 +59,11 @@ function StationMarker({
     });
   }, [appearProgress, quote?.stationId]);
 
-  useEffect(() => {
-    if (isSuppressed) {
-      const delayMs = shouldDelaySuppression ? SHRINK_DELAY_MS : 0;
-      suppressionProgress.value = withDelay(
-        delayMs,
-        withTiming(1, {
-          duration: SHRINK_DURATION_MS,
-          easing: Easing.out(Easing.cubic),
-        })
-      );
-      return;
-    }
-
-    suppressionProgress.value = withTiming(0, {
-      duration: 120,
-      easing: Easing.out(Easing.cubic),
-    });
-  }, [isSuppressed, shouldDelaySuppression, suppressionProgress]);
-
-  const shrinkStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: (
-          interpolate(
-            appearProgress.value,
-            [0, 1],
-            [APPEAR_START_SCALE, 1],
-            Extrapolate.CLAMP
-          ) * interpolate(
-            suppressionProgress.value,
-            [0, 1],
-            [1, SUPPRESSED_SCALE],
-            Extrapolate.CLAMP
-          )),
-      },
-    ],
-
-  }), [appearProgress, suppressionProgress]);
+  const appearStyle = useAnimatedStyle(() => ({
+    transform: [{
+      scale: interpolate(appearProgress.value, [0, 1], [APPEAR_START_SCALE, 1], Extrapolate.CLAMP),
+    }],
+  }), [appearProgress]);
 
   const inactiveIconTintColor = isDark ? '#D3D6DE' : '#888888';
   const inactiveTextColor = isDark ? INACTIVE_TEXT_DARK : '#888888';
@@ -141,7 +103,7 @@ function StationMarker({
       clearTimeout(tracksViewChangesTimeoutRef.current);
     }
 
-    const trackingDuration = Math.max(APPEAR_DURATION_MS, SHRINK_DURATION_MS) + TRACKS_VIEW_CHANGES_IDLE_MS;
+    const trackingDuration = APPEAR_DURATION_MS + TRACKS_VIEW_CHANGES_IDLE_MS;
 
     tracksViewChangesTimeoutRef.current = setTimeout(() => {
       tracksViewChangesTimeoutRef.current = null;
@@ -168,7 +130,7 @@ function StationMarker({
       style={{ zIndex: markerZIndex }}
       tracksViewChanges={tracksViewChanges}
     >
-      <AnimatedView style={shrinkStyle}>
+      <AnimatedView style={appearStyle}>
         <View>
           <LiquidGlassView effect="clear" tintColor={glassTintColor} style={styles.pillShell}>
             <View style={styles.rowItem}>

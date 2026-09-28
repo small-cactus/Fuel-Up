@@ -3,6 +3,7 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const APP_BUNDLE_ID = 'com.anthonyh.fuelup';
+const SIMULATOR_UDID = process.env.FUELUP_SIMULATOR_UDID || 'booted';
 const PROBE_TIMEOUT_MS = 120000;
 const APP_LAUNCH_WAIT_MS = 8000;
 const POLL_INTERVAL_MS = 1000;
@@ -37,7 +38,7 @@ function getProbeReportFilePath() {
     const appContainerPath = runCommand('xcrun', [
         'simctl',
         'get_app_container',
-        'booted',
+        SIMULATOR_UDID,
         APP_BUNDLE_ID,
         'data',
     ]);
@@ -53,7 +54,7 @@ function launchAppIfNeeded() {
     const result = spawnSync('xcrun', [
         'simctl',
         'launch',
-        'booted',
+        SIMULATOR_UDID,
         APP_BUNDLE_ID,
     ], {
         encoding: 'utf8',
@@ -83,7 +84,7 @@ function terminateAppIfRunning() {
     const result = spawnSync('xcrun', [
         'simctl',
         'terminate',
-        'booted',
+        SIMULATOR_UDID,
         APP_BUNDLE_ID,
     ], {
         encoding: 'utf8',
@@ -120,7 +121,7 @@ function triggerProbe(token) {
     runCommand('xcrun', [
         'simctl',
         'openurl',
-        'booted',
+        SIMULATOR_UDID,
         `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`,
     ]);
 }

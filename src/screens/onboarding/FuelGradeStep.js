@@ -18,7 +18,7 @@ export default function FuelGradeStep({ isDark, themeColors, insets, value, onCh
                     <Section>
                         <Picker label="Fuel type" selection={value} onSelectionChange={onChange} modifiers={[pickerStyle('inline')]}>
                             {FUEL_GRADE_ORDER.map(grade => (
-                                <NativeText key={grade} modifiers={[tag(grade)]}>{getFuelGradeMeta(grade).label}</NativeText>
+                                <NativeText key={grade} testID={`onboarding-grade-${grade}`} modifiers={[tag(grade)]}>{getFuelGradeMeta(grade).label}</NativeText>
                             ))}
                         </Picker>
                     </Section>
