@@ -2,6 +2,8 @@
 set -eu
 
 PATCH_FILES="
+./patches/expo-router+55.0.12.patch
+./patches/expo-widgets-build-paths+55.0.2.patch
 ./patches/@sbaiahmed1+react-native-blur+4.5.7.patch
 "
 

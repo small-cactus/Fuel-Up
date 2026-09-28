@@ -46,7 +46,8 @@
         }
       ],
       "expo-video",
-      "expo-router"
+      "expo-router",
+      "./plugins/withIosBuildCompatibility"
     ],
     "orientation": "portrait",
     "icon": "./assets/fuelup-icon.png",
