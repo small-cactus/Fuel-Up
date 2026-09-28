@@ -78,6 +78,7 @@ final class ClusterLabRenderer {
   private var badgeOffsetTargets: [String: CGFloat] = [:]
   private var badgeOffsetCarries: [String: (delta: CGFloat, startedAt: Double)] = [:]
   private var renderedBadgeOffsets: [String: CGFloat] = [:]
+  private var markets: [String: LabMarketAssessment] = [:]
   private(set) var stations: [ClusterLabStation] = []
   private(set) var events: [[String: Any]] = []
   private(set) var frameSamples: [[String: Any]] = []
@@ -104,6 +105,9 @@ final class ClusterLabRenderer {
 
   func setStations(_ next: [ClusterLabStation]) {
     guard next != stations else { return }
+    markets = ClusterLabMarket.assess(next.map {
+      LabMarketQuote(id: $0.id, latitude: $0.latitude, longitude: $0.longitude, price: $0.price)
+    })
     // A data refresh may change price/order; no stale price is retained in a
     // reused pill. Camera state belongs to the map and is left untouched.
     let changed = Set(next.filter { station in motions[station.id]?.station != station }.map(\.id))
@@ -229,7 +233,7 @@ final class ClusterLabRenderer {
           center.x += motion.offset + motion.reaction.offset.x
           center.y += motion.reaction.offset.y
           pill.render(center: center, width: motion.width, priceMix: 0,
-                      count: motion.count, best: false, dark: dark)
+                      count: motion.count, market: markets[motion.owner] ?? .unknown, dark: dark)
           let source = badges[motion.owner]?.view.center ?? center
           event("split-spawn", id: station.id, delta: hypot(pill.view.center.x - source.x, pill.view.center.y - source.y))
         }
@@ -366,8 +370,12 @@ final class ClusterLabRenderer {
       point.x += reaction.x; point.y += reaction.y
       if let pill = motion.pill {
         let previousCenter = pill.view.bounds.isEmpty ? point : pill.view.center
+        // A split duplicate first presents exactly the source badge's tint.
+        // Begin its native color transition on the first movement frame.
+        let market: LabMarketAssessment? = !merged && motion.elapsed == 0 && motion.startedAt > 0 && !reducedMotion ?
+          nil : (markets[merged ? motion.owner : id] ?? .unknown)
         pill.render(center: point, width: motion.width, priceMix: motion.priceMix, count: motion.count,
-                    best: id == stations.first?.id, dark: dark)
+                    market: market, dark: dark)
         if recording {
           // Compare the actual view with the original trajectory in the same
           // map projection, so the probe proves visible resistance at contact.
@@ -378,6 +386,7 @@ final class ClusterLabRenderer {
           unresisted.x += motion.startOffset + (targetOffset - motion.startOffset) * unresistedProgress
           samples.append(["id": id, "x": pill.view.center.x, "y": pill.view.center.y,
                           "width": pill.view.bounds.width, "priceMix": motion.priceMix,
+                          "tintScore": pill.tintScore, "tintUpdates": pill.tintUpdateCount,
                           "rebound": max(0, ((basePoint.x - target.x) * (target.x - start.x) +
                             (basePoint.y - target.y) * (target.y - start.y)) / max(projectedTravel, 0.001)),
                           "reactionX": reaction.x, "reactionY": reaction.y,
@@ -416,13 +425,13 @@ final class ClusterLabRenderer {
       let attachmentOffset = renderedBadgeOffsets[ownerId] ?? ClusterLabGeometry.badgeOffset
       center.x += attachmentOffset + owner.reaction.offset.x
       center.y += owner.reaction.offset.y
-      badge.render(center: center, width: 44, priceMix: 0, count: members.count, best: false, dark: dark)
+      badge.render(center: center, width: 44, priceMix: 0, count: members.count, market: markets[ownerId] ?? .unknown, dark: dark)
       for member in members where member.pill != nil {
         let moverCenter = member.pill!.view.center
         let handoffDelta = hypot(moverCenter.x - badge.view.center.x, moverCenter.y - badge.view.center.y)
         // Match the accumulator's content as well as its geometry in this same
         // transaction before releasing the temporary native effect view.
-        member.pill?.render(center: moverCenter, width: 44, priceMix: 0, count: members.count, best: false, dark: dark)
+        member.pill?.render(center: moverCenter, width: 44, priceMix: 0, count: members.count, market: markets[ownerId] ?? .unknown, dark: dark)
         member.pill?.view.removeFromSuperview(); member.pill = nil
         event("merge-handoff", id: member.station.id, delta: handoffDelta)
       }
@@ -430,6 +439,7 @@ final class ClusterLabRenderer {
         samples.append(["id": "badge:\(ownerId)", "x": badge.view.center.x, "y": badge.view.center.y,
                         "width": badge.view.bounds.width, "count": members.count, "role": "badge",
                         "attachmentOffset": attachmentOffset, "priceMix": 0,
+                        "tintScore": badge.tintScore, "tintUpdates": badge.tintUpdateCount,
                         "reactionX": owner.reaction.offset.x, "reactionY": owner.reaction.offset.y,
                         "contained": container.bounds.contains(badge.view.frame)])
       }

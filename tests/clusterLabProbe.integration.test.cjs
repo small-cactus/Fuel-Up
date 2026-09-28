@@ -24,6 +24,8 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     assert.equal(report.usesNativeGlass, true);
     assert.equal(report.stagesCompleted, 11);
     assert.ok(report.samples.length >= 250, 'insufficient live frame coverage');
+    assert.ok(report.baseline.some(view => view.tintScore > 0), 'below-market stations were not green');
+    assert.ok(report.baseline.some(view => view.tintScore < 0), 'above-market stations were not red');
     const types = new Set(report.events.map(event => event.type));
     for (const type of ['merge-start', 'merge-arrive', 'merge-handoff', 'split-spawn', 'split-handoff', 'merge-impulse', 'split-impulse', 'split-stretch', 'contact-catch']) {
         assert.ok(types.has(type), `missing ${type}`);
@@ -40,6 +42,8 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
                     'visible pill did not follow its physical displacement');
             }
             assert.ok(view.contained, `clipped container edge: ${view.id}`);
+            assert.ok(Math.abs(view.tintScore || 0) <= 1, 'unbounded market tint');
+            assert.ok(view.tintUpdates <= 20, 'native tint was being recreated every frame');
             assert.ok(Number.isFinite(view.x) && Number.isFinite(view.y), 'invalid rendered position');
         }
     }
@@ -75,6 +79,7 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     for (const frame of report.samples) {
         for (const badge of frame.views.filter(view => view.role === 'badge')) {
             const primary = frame.views.find(view => view.id === badge.id.slice(6) && view.primary);
+            if (primary) assert.equal(badge.tintScore, primary.tintScore, 'count tint did not match its displayed cluster price');
             assert.ok(badge.attachmentOffset >= 56 && badge.attachmentOffset <= 74, 'unbounded connected count stretch');
             if (primary) assert.ok(Math.hypot(badge.x - primary.x - badge.attachmentOffset, badge.y - primary.y) < 0.001,
                 'connected price and count did not recoil together');
@@ -127,6 +132,8 @@ test('connected +1 moves outward before its split is triggered', { timeout: 9000
     assert.equal(report.status, 'completed');
     assert.equal(report.baseline.length, 2);
     assert.equal(report.final.length, 2);
+    assert.ok(report.samples.every(frame => frame.views.every(view => view.tintScore === 0)),
+        'a two-station sample was incorrectly presented as a local market');
     const connected = report.samples.flatMap(frame => frame.views.filter(view => view.role === 'badge'));
     const intermediate = connected.filter(view => view.attachmentOffset > 58 && view.attachmentOffset < 73);
     assert.ok(intermediate.length >= 4, '+1 skipped the visible connected travel phase');

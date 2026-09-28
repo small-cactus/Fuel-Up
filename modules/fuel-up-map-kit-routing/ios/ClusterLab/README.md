@@ -9,7 +9,24 @@ screen-space spatial hashing and contact hysteresis (84 × 32 pt to connect,
 hash cells span this retained range so stretched neighbors remain discoverable. `ClusterLabRenderer` owns
 station identity, projection, reversible motion, and atomic handoffs.
 `ClusterLabDynamics` handles mass-weighted impacts and magnetic home springs.
+`ClusterLabMarket` compares each price with the median of up to 12 other loaded
+stations within five miles. The input snapshot already contains only the selected
+fuel grade. At least three peers are required; sparse markets stay neutral.
+Differences within the larger of two cents or 0.5% stay neutral. Tint becomes
+more saturated green below the median and red above it, reaching full
+strength at the larger of 15 cents or 8%. The benchmark excludes the station
+itself and is recomputed only on a data change, so panning and zooming do not
+reclassify a price. Each hue keeps constant brightness and opacity; only its
+saturation increases with the difference from the market.
+
 `ClusterLabGlass` uses the installed Callstack library's public Swift glass views.
+Pills use regular glass with native `UIGlassEffect.tintColor`, high-contrast text,
+and a spoken local-price comparison. The count shares its representative price's
+tint. Departing duplicates start with the count's tint, then transition to their
+own station tint; incoming pills transition to the receiving cluster tint. A
+cached target starts at most one 80 ms native material animation per change;
+ordinary camera frames never rebuild the effect. Reduced Motion applies it
+immediately. Tinting does not alter the movement or rebound curves.
 The shared native container uses Apple's `UIGlassContainerEffect`; it does not
 draw an imitation or place glass in MapKit annotation snapshots. Native glass
 spacing is 36 pt, letting the connecting neck stretch farther before detaching.
@@ -100,6 +117,7 @@ Run with a development build and Metro on the selected simulator:
 
 ```
 node --test tests/clusterLabGeometry.test.cjs tests/clusterLabDynamics.test.cjs
+node --test tests/clusterLabMarket.test.cjs
 FUELUP_SIMULATOR_UDID=<udid> node --test tests/clusterLabProbe.integration.test.cjs
 ```
 

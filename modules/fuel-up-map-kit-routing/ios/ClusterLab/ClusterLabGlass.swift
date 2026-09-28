@@ -33,6 +33,16 @@ enum ClusterLabGlass {
     view.layer.cornerRadius = 16
     return view
   }
+
+  static func marketTint(score: Double) -> UIColor? {
+    guard abs(score) > 0.001 else { return nil }
+    let strength = CGFloat(min(1, abs(score)))
+    // Increase saturation, keeping each hue's brightness and opacity fixed.
+    // Native glass owns the material; these values keep white text legible.
+    return UIColor(hue: score > 0 ? 0.385 : 0.99,
+                   saturation: 0.25 + 0.70 * strength,
+                   brightness: score > 0 ? 0.43 : 0.56, alpha: 0.95)
+  }
 }
 
 final class ClusterLabPill {
@@ -41,8 +51,16 @@ final class ClusterLabPill {
   private let countLabel = UILabel()
   private let icon = UIImageView(image: UIImage(systemName: "fuelpump.fill"))
   private var lastCount = 0
+  private var marketDescription = "Not enough nearby prices for comparison"
+  private var lastMedian: Double?
+  private var lastPeerCount = 0
+  private let price: Double
+  private(set) var tintScore: Double = 0
+  private(set) var tintUpdateCount = 0
+  private var hasTint = false
 
   init(price: Double, name: String) {
+    self.price = price
     view.isUserInteractionEnabled = false
     view.clipsToBounds = false
     let content = ClusterLabGlass.content(of: view)
@@ -58,18 +76,47 @@ final class ClusterLabPill {
     view.accessibilityLabel = name
   }
 
-  func render(center: CGPoint, width: CGFloat, priceMix: CGFloat, count: Int, best: Bool, dark: Bool) {
+  private func applyMarket(_ market: LabMarketAssessment) {
+    if lastMedian != market.median || lastPeerCount != market.peerCount {
+      lastMedian = market.median
+      lastPeerCount = market.peerCount
+      if let median = market.median {
+        let cents = Int((abs(price - median) * 100).rounded())
+        marketDescription = cents <= 2 ? "Near the nearby market price" :
+          "\(cents) cents \(price < median ? "below" : "above") the median of \(market.peerCount) nearby stations"
+      } else { marketDescription = "Not enough nearby prices for comparison" }
+    }
+    let nextScore = (market.score * 20).rounded() / 20
+    guard !hasTint || nextScore != tintScore else { return }
+    let animate = hasTint && !UIAccessibility.isReduceMotionEnabled
+    hasTint = true; tintScore = nextScore; tintUpdateCount += 1
+    let color = ClusterLabGlass.marketTint(score: nextScore)
+    if #available(iOS 26.0, *), let glass = view as? LiquidGlassViewImpl {
+      glass.effectTintColor = color
+      let effect = UIGlassEffect(style: .regular)
+      effect.isInteractive = false
+      effect.tintColor = color
+      if animate {
+        // One native material animation per target change, not one effect per
+        // frame. Its 80 ms finish precedes the shortest split/merge handoff.
+        UIView.animate(withDuration: 0.08, delay: 0,
+                       options: [.beginFromCurrentState, .allowUserInteraction]) { glass.effect = effect }
+      } else { UIView.performWithoutAnimation { glass.effect = effect } }
+    } else { view.backgroundColor = color ?? .secondarySystemBackground }
+  }
+
+  func render(center: CGPoint, width: CGFloat, priceMix: CGFloat, count: Int, market: LabMarketAssessment?, dark: Bool) {
+    if let market { applyMarket(market) }
     view.bounds = CGRect(x: 0, y: 0, width: width, height: 32)
     view.center = center
     if lastCount != count {
       countLabel.text = "+\(max(1, count))"
       lastCount = count
     }
-    let color: UIColor = best ? (dark ? UIColor(red: 0.067, green: 0.94, blue: 0.314, alpha: 1) : .systemBlue) :
-      (dark ? .label : .secondaryLabel)
+    let color: UIColor = abs(tintScore) > 0.001 ? .white : .label
     priceLabel.textColor = color
     icon.tintColor = color
-    countLabel.textColor = dark ? .label : .secondaryLabel
+    countLabel.textColor = color
     // Only text fades. The effect and every glass ancestor stay at alpha 1.
     priceLabel.alpha = priceMix
     icon.alpha = priceMix
@@ -77,6 +124,6 @@ final class ClusterLabPill {
     icon.frame = CGRect(x: (width - 66) / 2, y: 9, width: 14, height: 14)
     priceLabel.frame = CGRect(x: (width - 66) / 2 + 16, y: 0, width: 50, height: 32)
     countLabel.frame = view.bounds
-    view.accessibilityValue = priceMix > 0.5 ? priceLabel.text : countLabel.text
+    view.accessibilityValue = priceMix > 0.5 ? "\(priceLabel.text ?? ""), \(marketDescription)" : countLabel.text
   }
 }
