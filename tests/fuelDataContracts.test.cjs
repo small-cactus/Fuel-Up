@@ -551,3 +551,17 @@ test('GasBuddy station quote wins preferred selection', () => {
     assert.equal(bestQuote.providerId, 'gasbuddy');
     assert.equal(bestQuote.price, 2.61);
 });
+
+test('GasBuddy uses verified diesel and E85 filters with matching product keys', () => {
+    const { buildGasBuddyGraphQLRequest, normalizeGasBuddyResponse } = require('../src/services/fuel/core');
+    for (const [fuelType, filter] of [['diesel', 4], ['e85', 5]]) {
+        const request = buildGasBuddyGraphQLRequest({ latitude: 28, longitude: -82, fuelType });
+        assert.equal(request.body.variables.fuel, filter);
+        assert.equal(request.fuelProduct, fuelType);
+        const response = normalizeGasBuddyResponse({ origin: { latitude: 28, longitude: -82 }, fuelType,
+            payload: { data: { locationBySearchTerm: { stations: { results: [{ id: 'flex', latitude: 28, longitude: -82,
+                prices: [{ fuelProduct: 'regular_gas', credit: { price: 3.69 } }, { fuelProduct: fuelType, credit: { price: 2.59 } }] }] } } } } });
+        assert.equal(response[0].price, 2.59);
+        assert.equal(response[0].fuelType, fuelType);
+    }
+});

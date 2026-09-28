@@ -400,7 +400,7 @@ test('trend leaderboard prices stay identical to the Home ranking pipeline for t
     }
 });
 
-test('buildLatestFuelStationQuotesFromRows keeps uniform multi-grade rows as regular-only for regular queries', async () => {
+test('buildLatestFuelStationQuotesFromRows suppresses duplicate gasoline grades while retaining independently priced diesel', async () => {
     const supabasePath = require.resolve('../src/lib/supabase.js');
     const indexPath = require.resolve('../src/services/fuel/index.js');
     const cacheStorePath = require.resolve('../src/services/fuel/cacheStore.js');
@@ -470,8 +470,8 @@ test('buildLatestFuelStationQuotesFromRows keeps uniform multi-grade rows as reg
         });
 
         assert.equal(quotes.length, 1);
-        assert.deepEqual(quotes[0].allPrices, { regular: 3.39 });
-        assert.deepEqual(quotes[0].availableFuelGrades, ['regular']);
+        assert.deepEqual(quotes[0].allPrices, { regular: 3.39, diesel: 3.39 });
+        assert.deepEqual(quotes[0].availableFuelGrades, ['regular', 'diesel']);
     } finally {
         delete require.cache[supabasePath];
         delete require.cache[indexPath];

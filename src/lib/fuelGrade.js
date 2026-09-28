@@ -1,10 +1,11 @@
-const FUEL_GRADE_ORDER = ['regular', 'midgrade', 'premium', 'diesel'];
+const FUEL_GRADE_ORDER = ['regular', 'midgrade', 'premium', 'diesel', 'e85'];
 
 const FUEL_GRADE_META = {
     regular: { key: 'regular', label: 'Regular', shortLabel: 'Reg', octane: '87' },
     midgrade: { key: 'midgrade', label: 'Midgrade', shortLabel: 'Mid', octane: '89' },
     premium: { key: 'premium', label: 'Premium', shortLabel: 'Prem', octane: '93' },
     diesel: { key: 'diesel', label: 'Diesel', shortLabel: 'Dsl', octane: 'D' },
+    e85: { key: 'e85', label: 'E85', shortLabel: 'E85', octane: 'E85' },
 };
 
 const FUEL_GRADE_ALIASES = {
@@ -12,6 +13,7 @@ const FUEL_GRADE_ALIASES = {
     midgrade: ['midgrade', 'midgrade_gas'],
     premium: ['premium', 'premium_gas'],
     diesel: ['diesel'],
+    e85: ['e85', 'e_85'],
 };
 
 function toPositiveNumber(value) {
@@ -42,7 +44,8 @@ function resolvePriceFromAllPrices(allPrices, fuelGrade) {
 }
 
 function resolveValidatedPriceForFuelGrade(quote, fuelGrade) {
-    const validation = quote?.validationByFuelType?.[fuelGrade] || quote?.validation || null;
+    const validation = quote?.validationByFuelType?.[fuelGrade] ||
+        (normalizeFuelGrade(quote?.validation?.fuelType || quote?.fuelType) === fuelGrade ? quote?.validation : null);
     const finalPrice = toPositiveNumber(validation?.finalPrice);
     return finalPrice !== null ? finalPrice : null;
 }
@@ -80,7 +83,7 @@ function resolveBaseQuotePriceForFuelGrade(
         }
     }
 
-    if (!allowFallbackToQuotePrice) {
+    if (!allowFallbackToQuotePrice || normalizedFuelGrade !== normalizeFuelGrade(quote?.fuelType)) {
         return null;
     }
 
@@ -91,7 +94,7 @@ function shouldSuppressDuplicatePriceGrade(quote, fuelGrade) {
     const normalizedFuelGrade = normalizeFuelGrade(fuelGrade);
     const fuelGradeIndex = FUEL_GRADE_ORDER.indexOf(normalizedFuelGrade);
 
-    if (fuelGradeIndex <= 0) {
+    if (fuelGradeIndex <= 0 || ['diesel', 'e85'].includes(normalizedFuelGrade)) {
         return false;
     }
 
@@ -161,7 +164,8 @@ export function applyFuelGradeToQuote(quote, fuelGrade) {
 
     const normalizedFuelGrade = normalizeFuelGrade(fuelGrade);
     const resolvedPrice = resolveQuotePriceForFuelGrade(quote, normalizedFuelGrade);
-    const validationForGrade = quote.validationByFuelType?.[normalizedFuelGrade] || quote.validation || null;
+    const validationForGrade = quote.validationByFuelType?.[normalizedFuelGrade] ||
+        (normalizeFuelGrade(quote.validation?.fuelType || quote.fuelType) === normalizedFuelGrade ? quote.validation : null);
 
     if (resolvedPrice === null) {
         return null;

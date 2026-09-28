@@ -29,7 +29,7 @@ async function setup() {
         withTiming: v => v, withDelay: (_, v) => v, runOnJS: fn => fn,
         Easing: { out: v => v, exp: v => v, back: () => v => v },
     };
-    const Component = load('src/screens/OnboardingScreen.js', {
+    const mocks = {
         'react-native': {
             View: 'View', Text: 'Text', Image: 'Image', Pressable: 'Pressable', ScrollView,
             StyleSheet: { create: x => x, absoluteFill: {} }, Dimensions: { get: () => ({ width: 440, height: 956 }) },
@@ -65,7 +65,13 @@ async function setup() {
             enablePredictiveTrackingAsync: async () => { calls.location++; return tracking; },
             openPredictiveTrackingSettingsAsync: async () => {},
         },
-    }).default;
+    };
+    mocks['@expo/ui/swift-ui'] = { Host: 'Host', Form: 'Form', Picker: 'NativePicker', Section: 'Section', Text: 'NativeText' };
+    mocks['@expo/ui/swift-ui/modifiers'] = { pickerStyle: x => x, tag: x => x };
+    mocks['./onboarding/FuelGradeStep'] = load('src/screens/onboarding/FuelGradeStep.js', mocks);
+    mocks['./onboarding/RadiusStep'] = load('src/screens/onboarding/RadiusStep.js', mocks);
+    mocks['./onboarding/useOnboardingLocation'] = { __esModule: true, default: () => null };
+    const Component = load('src/screens/OnboardingScreen.js', mocks).default;
     let renderer;
     await act(async () => { renderer = create(React.createElement(Component)); });
     return {
@@ -76,12 +82,12 @@ async function setup() {
     };
 }
 
-for (const grade of ['Regular', 'Midgrade', 'Premium', 'Diesel']) {
+for (const grade of ['Regular', 'Midgrade', 'Premium', 'Diesel', 'E85']) {
     test(`onboarding swipes then Get Started save the actual ${grade} selection`, async () => {
         const app = await setup();
         await act(async () => {
             app.renderer.root.findByType('Slider').props.onValueChange(7);
-            app.renderer.root.findAllByType('Pressable').find(n => n.props.accessibilityLabel === grade).props.onPress();
+            app.renderer.root.findByType('NativePicker').props.onSelectionChange(grade.toLowerCase());
         });
         await app.swipe(5);
         await app.continue();

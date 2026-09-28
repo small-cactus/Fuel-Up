@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 const config = JSON.parse(await readFile(new URL('../app.json', import.meta.url))).expo.extra.supabase;
 const endpoint = process.env.FUEL_FUNCTION_NAME || 'gas-prices';
 const key = config.key;
-const grades = process.argv.includes('--all-grades') ? ['regular', 'midgrade', 'premium', 'diesel'] : ['regular'];
+const grades = process.argv.includes('--all-grades') ? ['regular', 'midgrade', 'premium', 'diesel', 'e85'] : ['regular'];
 for (const fuelType of grades) {
   const body = { latitude: 27.9506, longitude: -82.4572, radiusMiles: 10, fuelType,
     forceRefresh: !process.argv.includes('--cache-only') };

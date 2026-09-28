@@ -19,7 +19,8 @@ const GASBUDDY_FUEL_MAP = {
     regular: { fuelProduct: 'regular_gas', fuelId: 1 },
     midgrade: { fuelProduct: 'midgrade_gas', fuelId: 2 },
     premium: { fuelProduct: 'premium_gas', fuelId: 3 },
-    diesel: { fuelProduct: 'diesel', fuelId: 5 },
+    diesel: { fuelProduct: 'diesel', fuelId: 4 },
+    e85: { fuelProduct: 'e85', fuelId: 5 },
 };
 
 const FUEL_NAME_MAP = {
@@ -27,6 +28,7 @@ const FUEL_NAME_MAP = {
     midgrade: ['midgrade', 'plus'],
     premium: ['premium', 'super'],
     diesel: ['diesel'],
+    e85: ['e85', 'e-85', 'flex fuel'],
 };
 
 function toFiniteNumber(value) {

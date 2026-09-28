@@ -99,7 +99,7 @@ export default function NativeSettingsForm({
                                 foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
                             ]}
                         >
-                            Regular 85–88 · Midgrade 89–90 · Premium 91–94+ · Diesel. Radius limits the list to stations within driving distance of your current location.
+                            Regular 85–88 · Midgrade 89–90 · Premium 91–94+ · Diesel · E85. Radius limits the list to stations within driving distance of your current location.
                         </Text>
                     }
                 >
@@ -152,7 +152,7 @@ export default function NativeSettingsForm({
                     />
 
                     <Picker
-                        label="Preferred Octane"
+                        label="Fuel Type"
                         systemImage="gauge.with.dots.needle.33percent"
                         selection={preferredOctane}
                         onSelectionChange={selection => {

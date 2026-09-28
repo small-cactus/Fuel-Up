@@ -1,3 +1,6 @@
+import RadiusStep from './onboarding/RadiusStep';
+import FuelGradeStep from './onboarding/FuelGradeStep';
+import useOnboardingLocation from './onboarding/useOnboardingLocation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, Alert, Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LiquidGlassView as GlassView } from '@callstack/liquid-glass';
@@ -280,170 +283,6 @@ function WelcomeStep({ isDark, themeColors, insets, mapRegion }) {
     );
 }
 
-function RadiusStep({ isDark, themeColors, insets, value, onChange, mapRegion }) {
-    const [hasMapLoaded, setHasMapLoaded] = useState(false);
-    const MILES_TO_METERS = 1609.34;
-    const radiusMeters = value * MILES_TO_METERS;
-
-    // Calculate map delta to fit the radius nicely (1 degree lat ≈ 111km)
-    const latDelta = (radiusMeters / 111000) * 3.5;
-    const region = {
-        ...mapRegion,
-        latitudeDelta: Math.max(latDelta, 0.02),
-        longitudeDelta: Math.max(latDelta, 0.02),
-    };
-
-    return (
-        <View style={styles.stepContainer}>
-
-            {/* Full-screen map */}
-            <MapView
-                style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
-                initialRegion={region}
-                region={region}
-                provider={PROVIDER_APPLE}
-                scrollEnabled={false}
-                zoomEnabled={false}
-                rotateEnabled={false}
-                pitchEnabled={false}
-                userInterfaceStyle={isDark ? 'dark' : 'light'}
-                onMapLoaded={() => {
-                    setHasMapLoaded(true);
-                }}
-                onRegionChangeComplete={() => {
-                    setHasMapLoaded(currentValue => currentValue || true);
-                }}
-            >
-                {hasMapLoaded ? (
-                    <Circle
-                        center={{ latitude: region.latitude, longitude: region.longitude }}
-                        radius={radiusMeters}
-                        strokeColor="rgba(0, 122, 255, 0.5)"
-                        strokeWidth={2}
-                        fillColor="rgba(0, 122, 255, 0.08)"
-                    />
-                ) : null}
-            </MapView>
-
-            {/* Blur canopies — extend further than gradients */}
-            <TopCanopy edgeColor={isDark ? 'rgba(255,255,255,0.08)' : LIGHT_SCREEN_BACKGROUND_42} height={insets.top + 300} isDark={isDark} topInset={insets.top} />
-            <BottomCanopy height={270} isDark={isDark} />
-
-            {/* White gradients — shorter, sit inside the blur */}
-            <LinearGradient
-                colors={[isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND, isDark ? 'rgba(0,0,0,0.85)' : LIGHT_SCREEN_BACKGROUND_85, isDark ? 'rgba(0,0,0,0)' : LIGHT_SCREEN_BACKGROUND_0]}
-                locations={[0, 0.5, 1]}
-                style={[styles.topGradient, { height: insets.top + 220 }]}
-                pointerEvents="none"
-            />
-
-            {/* Light bottom gradient */}
-            <LinearGradient
-                colors={[isDark ? 'rgba(0,0,0,0)' : LIGHT_SCREEN_BACKGROUND_0, isDark ? 'rgba(0,0,0,0.85)' : LIGHT_SCREEN_BACKGROUND_85, isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND]}
-                locations={[0, 0.5, 1]}
-                style={[styles.footerGradient, { height: 280 }]}
-                pointerEvents="none"
-            />
-
-            {/* Floating header */}
-            <View style={[styles.welcomeOverlay, { paddingTop: insets.top + 40 }]} pointerEvents="none">
-                <SymbolView name="location.magnifyingglass" size={44} tintColor={themeColors.text} />
-                <Text style={[styles.stepTitle, { color: themeColors.text }]}>Search Radius</Text>
-                <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
-                    How far should we look for gas stations? This will affect the stations we recommend.
-                </Text>
-            </View>
-
-            {/* Hero value centered on map */}
-            <View style={styles.radiusHeroCenter} pointerEvents="none">
-                <Text style={[styles.heroValue, { color: '#007AFF', textShadowColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.8)', textShadowRadius: 12 }]}>{value} mi</Text>
-            </View>
-
-            {/* Slider at bottom */}
-            <View style={[styles.radiusControls, { bottom: insets.bottom + 100 }]}>
-                <GlassView
-                    effect="regular"
-                    tintColor={isDark ? '#000000' : '#FFFFFF'}
-                    key={isDark ? 'slider-dark' : 'slider-light'}
-                    style={styles.sliderCard}
-                >
-                    <View style={styles.sliderLabels}>
-                        <Text style={[styles.sliderLabel, { color: themeColors.text }]}>{MIN_SEARCH_RADIUS_MILES} mi</Text>
-                        <Text style={[styles.sliderLabel, { color: themeColors.text }]}>{MAX_SEARCH_RADIUS_MILES} mi</Text>
-                    </View>
-                    <Slider
-                        testID="onboarding-radius"
-                        accessibilityLabel="Search radius in miles"
-                        style={styles.slider}
-                        minimumValue={MIN_SEARCH_RADIUS_MILES}
-                        maximumValue={MAX_SEARCH_RADIUS_MILES}
-                        step={1}
-                        value={value}
-                        onValueChange={onChange}
-                        minimumTrackTintColor="#007AFF"
-                        maximumTrackTintColor={isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'}
-                        thumbTintColor="#007AFF"
-                    />
-                </GlassView>
-            </View>
-        </View>
-    );
-}
-
-function OctaneStep({ isDark, themeColors, insets, value, onChange }) {
-    return (
-        <View style={[styles.stepContainer, { backgroundColor: themeColors.background }]}>
-
-            <View style={[styles.stepHeader, { paddingTop: insets.top + 40 }]}>
-                <SymbolView name="gauge.with.dots.needle.33percent" size={44} tintColor={themeColors.text} />
-                <Text style={[styles.stepTitle, { color: themeColors.text }]}>Preferred Octane</Text>
-                <Text style={[styles.stepSubtitle, { color: themeColors.text }]}>
-                    Which fuel grade do you usually get?
-                </Text>
-            </View>
-
-            <View style={styles.stepContent}>
-                <View style={styles.octaneOptions}>
-                    {OCTANE_OPTIONS.map(option => {
-                        const isSelected = value === option.key;
-                        return (
-                            <Pressable key={option.key} testID={`onboarding-grade-${option.key}`} accessibilityRole="radio" accessibilityLabel={option.label} accessibilityState={{ selected: isSelected }} onPress={() => onChange(option.key)}>
-                                <GlassView
-                                    tintColor={isDark ? '#000000' : '#FFFFFF'}
-                                    key={isDark ? `oct-dark-${option.key}` : `oct-light-${option.key}`}
-                                    style={[
-                                        styles.octaneCard,
-                                        isSelected && { backgroundColor: isDark ? 'rgba(0,122,255,0.2)' : 'rgba(0,122,255,0.1)' },
-                                    ]}
-                                >
-                                    <Text
-                                        style={[styles.octaneNumber, { color: isSelected ? '#007AFF' : themeColors.text }]}
-                                        numberOfLines={1}
-                                        adjustsFontSizeToFit
-                                        minimumFontScale={0.75}
-                                        allowFontScaling={false}
-                                    >
-                                        {option.octane}
-                                    </Text>
-                                    <Text
-                                        style={[styles.octaneLabel, { color: themeColors.text }]}
-                                        numberOfLines={1}
-                                        adjustsFontSizeToFit
-                                        minimumFontScale={0.75}
-                                        allowFontScaling={false}
-                                    >
-                                        {option.label}
-                                    </Text>
-                                </GlassView>
-                            </Pressable>
-                        );
-                    })}
-                </View>
-            </View>
-        </View>
-    );
-}
-
 function LocationStep({ isDark, themeColors, insets, permissionState }) {
     const highlights = [
         { icon: 'location.magnifyingglass', text: 'Automatically find stations around you' },
@@ -686,7 +525,7 @@ export default function OnboardingScreen() {
     const [octane, setOctane] = useState(preferences.preferredOctane);
     const [locationPermissionState, setLocationPermissionState] = useState(null);
     const [notifPermissionStatus, setNotifPermissionStatus] = useState(null);
-    const onboardingMapRegion = DEMO_REGION;
+    const onboardingCoordinate = useOnboardingLocation(locationPermissionState);
 
     useEffect(() => {
         let isActive = true;
@@ -829,7 +668,7 @@ export default function OnboardingScreen() {
                     removeClippedSubviews={false}
                 >
 
-                    <MemoWelcomeStep isDark={isDark} themeColors={themeColors} insets={insets} mapRegion={onboardingMapRegion} />
+                    <MemoWelcomeStep isDark={isDark} themeColors={themeColors} insets={insets} mapRegion={DEMO_REGION} />
 
                     <PredictiveFuelingStep
                         isDark={isDark}
@@ -839,8 +678,8 @@ export default function OnboardingScreen() {
 
                     <MemoLocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionState={locationPermissionState} />
                     <MemoNotificationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={notifPermissionStatus} />
-                    <RadiusStep isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} mapRegion={onboardingMapRegion} />
-                    <OctaneStep isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} />
+                    <RadiusStep width={SCREEN_WIDTH} isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} coordinate={onboardingCoordinate} />
+                    <FuelGradeStep width={SCREEN_WIDTH} isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} />
                 </ScrollView>
             </View>
 
@@ -1042,12 +881,13 @@ const styles = StyleSheet.create({
     },
     // Octane
     octaneOptions: {
+        width: '100%',
         flexDirection: 'row',
         gap: 12,
         marginTop: 16,
     },
     octaneCard: {
-        width: (SCREEN_WIDTH - 96) / 3,
+        width: '100%',
         paddingVertical: 24,
         borderRadius: 20,
         alignItems: 'center',

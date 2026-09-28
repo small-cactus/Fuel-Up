@@ -1,11 +1,19 @@
-import React, { startTransition, useCallback, useEffect, useRef, useState, useMemo } from 'react';
-import { AppState, FlatList, Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
+import { buildTrajectorySeedFromLocationObject } from '../../src/screens/home/constants';
+import { hasUsableHomeRegion, buildTrajectorySeedFromVelocity, areRegionsEquivalent, shouldAnimateSmoothLaunchTransition, fetchLastKnownPositionWithTimeout, fetchCurrentPositionWithTimeout, resolveLaunchMovementCheckPosition, startLaunchMovementCheck } from '../../src/screens/home/locationBootstrap.js';
+import { buildSingleQuoteClusters, areStationIdSetsEqual, buildSuppressedOverlapStationIds, resolveStationFocusZoom, buildStationsFitZoomRegion } from '../../src/screens/home/mapGeometry.js';
+import { waitForMilliseconds, buildClusterDebugAutomationSeedRegion, buildClusterDebugProbePlan, buildProbeStationScreenSnapshot, compareProbeStationScreenSnapshots, buildClusterDebugProbeSummary, buildClusterDebugProbeLog, writeClusterDebugProbeArtifact } from '../../src/screens/home/probePlan.js';
+import { formatDebugMetric, buildClusterDebugRecordingLog } from '../../src/screens/home/probeTelemetry.js';
+import { AnimatedCardItem } from '../../src/screens/home/AnimatedCardItem.js';
+import { DEFAULT_REGION, SIDE_MARGIN, TOP_CANOPY_HEIGHT, MAP_REGION_EPSILON, CLUSTER_DEBUG_PROBE_ANIMATION_DURATION, CLUSTER_DEBUG_PROBE_IDLE_TIMEOUT, CLUSTER_DEBUG_PROBE_SETTLE_DURATION, CLUSTER_MAP_IDLE_SETTLE_MS, CLUSTER_DEBUG_PROBE_INITIAL_LOAD_WAIT, CLUSTER_DEBUG_PROBE_RECORDING_DELAY, CLUSTER_DEBUG_PROBE_BETWEEN_STEP_DELAY, SUPPRESSION_REVEAL_STABILITY_MS, STATION_FOCUS_ANIMATION_MS, FOREGROUND_RECENTER_ANIMATION_MS, STATIONS_FIT_SETTLE_PASS_DELAY_MS, INITIAL_HOME_SUPPRESSION_DELAY_MS, INITIAL_STATIONS_FIT_MAX_ATTEMPTS, INITIAL_STATIONS_FIT_RETRY_DELAY_MS, LAUNCH_MOVEMENT_RECOVERY_TIMEOUT_MS, ENABLE_CLUSTER_MERGE_TRANSITIONS, HOME_DARK_GLASS_TINT, TRACKING_IDLE_GRACE_MS, LIVE_TRACKING_DISTANCE_INTERVAL_METERS, LIVE_TRACKING_PAN_SUPPRESS_MS, LIVE_TRACKING_STATE_UPDATE_METERS, LIVE_TRACKING_REFETCH_MIN_INTERVAL_MS } from '../../src/screens/home/constants.js';
+import { buildOverviewCoordinates, cameraTargetChanged, homeMapPadding } from '../../src/screens/home/mapCamera';
+import { startTransition, useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import { AppState, Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { GlassView } from 'expo-glass-effect';
 import * as Location from 'expo-location';
-import * as FileSystem from 'expo-file-system/legacy';
+
 import MapView, { Marker, PROVIDER_APPLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppState } from '../../src/AppStateContext';
@@ -26,15 +34,11 @@ import { prefetchTrendData } from '../../src/services/fuel/trends';
 import { useTheme } from '../../src/ThemeContext';
 import { usePreferences } from '../../src/PreferencesContext';
 import BottomCanopy from '../../src/components/BottomCanopy';
-import ActiveStationOverlay from '../../src/components/cluster/ActiveStationOverlay';
+
 import ClusterMarkerOverlay from '../../src/components/cluster/ClusterMarkerOverlay';
 import StationMarker from '../../src/components/cluster/StationMarker';
 import { consumeFreshLaunchMapBootstrap } from '../../src/lib/appLaunchState';
-import {
-    getLastDeviceLocationRegion,
-    getLastDeviceLocationSnapshot,
-    persistLastDeviceLocationRegion,
-} from '../../src/lib/deviceLocationCache';
+import { getLastDeviceLocationSnapshot, persistLastDeviceLocationRegion } from '../../src/lib/deviceLocationCache';
 import {
     LOCATION_COLD_FETCH_TIMEOUT_MS,
     LOCATION_FAST_FETCH_TIMEOUT_MS,
@@ -49,7 +53,7 @@ import {
     flushLocationProbeReportAsync,
     recordLocationProbeEvent,
 } from '../../src/lib/locationProbe';
-import { getLocationProbeLaunchOverrides } from '../../src/lib/locationProbeOverrides';
+
 import { openStationNavigation } from '../../src/lib/openNavigation';
 import {
     normalizeFuelGrade,
@@ -59,22 +63,7 @@ import {
     buildFuelSearchRequestKey,
     buildResolvedFuelSearchContext,
 } from '../../src/lib/fuelSearchState';
-import {
-    buildPausedSuppressedStationIds,
-    buildPersistentSuppressedStationIds,
-    buildHomeFilterSignature,
-    buildHomeQuerySignature,
-    buildVisibleSuppressedStationIds,
-    filterStationQuotesForHome,
-    hasHomeFilterSignatureChanged,
-    resolveCommittedHomeActiveIndex,
-    resolveHomeCardIndexFromOffset,
-    shouldInitializeInitialSuppressionDelay,
-    shouldDelayStationMarkerSuppression,
-    shouldShowActiveStationDecoration,
-    shouldAutoFitHomeMap,
-    resolveHomeFuelSnapshotStrategy,
-} from '../../src/lib/homeState';
+import { buildPausedSuppressedStationIds, buildPersistentSuppressedStationIds, buildHomeFilterSignature, buildHomeQuerySignature, buildVisibleSuppressedStationIds, filterStationQuotesForHome, hasHomeFilterSignatureChanged, resolveCommittedHomeActiveIndex, resolveHomeCardIndexFromOffset, shouldInitializeInitialSuppressionDelay, shouldDelayStationMarkerSuppression, shouldAutoFitHomeMap, resolveHomeFuelSnapshotStrategy } from '../../src/lib/homeState';
 import {
     canTriggerHomeLaunchReveal,
     shouldRevealDuringInitialHomeFit,
@@ -82,1559 +71,10 @@ import {
 } from '../../src/lib/homeLaunch';
 import { getDrivingRouteAsync } from '../../src/lib/FuelUpMapKitRouting';
 import { groupStationsIntoClusters } from '../../src/cluster/grouping';
-import {
-    CLUSTER_PILL_HEIGHT,
-    CLUSTER_PRIMARY_PILL_WIDTH,
-    CLUSTER_TOUCH_PILL_HEIGHT,
-} from '../../src/cluster/constants';
+
 import { buildClusterMembershipKey } from '../../src/cluster/layout';
 import { finalizeDebugSample } from '../../src/cluster/telemetry';
-import Animated, {
-    useSharedValue,
-    useAnimatedScrollHandler,
-    useAnimatedStyle,
-    interpolate,
-    Extrapolate,
-    interpolateColor,
-    FadeIn,
-    FadeOut,
-    ZoomIn,
-    ZoomOut,
-} from 'react-native-reanimated';
-const {
-    CLUSTER_MERGE_LAT_FACTOR,
-    CLUSTER_MERGE_LNG_FACTOR,
-    CLUSTER_SPLIT_MULTIPLIER,
-} = require('../../src/lib/clusterAnimationMath.cjs');
-const {
-    MIN_PREFETCH_SPEED_MPS,
-    buildTrajectorySeedFromLocationObject,
-} = require('../../src/lib/trajectoryFuelFetch.js');
-
-const DEFAULT_REGION = {
-    latitude: 37.3346,
-    longitude: -122.009,
-    latitudeDelta: 0.05,
-    longitudeDelta: 0.05,
-};
-const TAB_BAR_CLEARANCE = 34;
-const CARD_GAP = 0;
-const SIDE_MARGIN = 12;
-const TOP_CANOPY_HEIGHT = 72;
-const CLUSTER_DEBUG_JUMP_THRESHOLD = 5;
-const MAP_REGION_EPSILON = 0.000001;
-const CLUSTER_DEBUG_PROBE_ANIMATION_DURATION = 650;
-const CLUSTER_DEBUG_PROBE_IDLE_TIMEOUT = 2400;
-const CLUSTER_DEBUG_PROBE_SETTLE_DURATION = 180;
-const CLUSTER_MAP_IDLE_SETTLE_MS = 600;
-const CLUSTER_DEBUG_PROBE_INITIAL_LOAD_WAIT = 3000;
-const CLUSTER_DEBUG_PROBE_RECORDING_DELAY = 150;
-const CLUSTER_DEBUG_PROBE_ZOOM_IN_STEP_COUNT = 10;
-const CLUSTER_DEBUG_PROBE_ZOOM_OUT_EXTRA_STEPS = 5;
-const CLUSTER_DEBUG_PROBE_BETWEEN_STEP_DELAY = 100;
-const CLUSTER_DEBUG_PROBE_ZOOM_IN_DISTANCE_MULTIPLIER = 1.3;
-const CLUSTER_DEBUG_PROBE_ZOOM_OUT_DISTANCE_MULTIPLIER = 1.3;
-const CLUSTER_DEBUG_PROBE_MIN_DELTA = 0.0005;
-const CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME = 'cluster-debug-probe.json';
-const CLUSTER_DEBUG_PROBE_REPORT_RELATIVE_PATH = `Documents/${CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME}`;
-const CLUSTER_DEBUG_PROBE_REPORT_CACHE_RELATIVE_PATH = `Library/Caches/${CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME}`;
-const USER_LOCATION_BUBBLE_SIZE = 14;
-const USER_LOCATION_OVERLAP_PILL_WIDTH = CLUSTER_PRIMARY_PILL_WIDTH - 28;
-const USER_LOCATION_OVERLAP_PILL_HEIGHT = CLUSTER_PILL_HEIGHT - 14;
-const SUPPRESSION_REVEAL_PADDING = 10;
-const SUPPRESSION_REVEAL_STABILITY_MS = 360;
-const STATION_FOCUS_MIN_LATITUDE_DELTA = 0.002;
-const STATION_FOCUS_MIN_LONGITUDE_DELTA = 0.002;
-const STATION_FOCUS_ZOOM_STEP_MULTIPLIER = 0.82;
-const STATION_FOCUS_MAX_STEPS = 18;
-const STATION_FOCUS_ANIMATION_MS = 420;
-const FOREGROUND_RECENTER_ANIMATION_MS = 420;
-const STATIONS_FIT_TOP_EXTRA_PADDING = 16;
-const STATIONS_FIT_BOTTOM_CONTENT_PADDING = 140;
-const STATIONS_FIT_SIDE_EXTRA_PADDING = 12;
-const STATIONS_FIT_SETTLE_PASS_DELAY_MS = 260;
-const STATIONS_FIT_UPWARD_BIAS_FACTOR = 0.03;
-const INITIAL_HOME_SUPPRESSION_DELAY_MS = 900;
-const INITIAL_STATIONS_FIT_MAX_ATTEMPTS = 4;
-const INITIAL_STATIONS_FIT_RETRY_DELAY_MS = 120;
-const INITIAL_SMOOTH_LAUNCH_TRANSITION_MAX_DISTANCE_METERS = 6000;
-const LAUNCH_MOVEMENT_RECOVERY_TIMEOUT_MS = 5000;
-const ENABLE_CLUSTER_MERGE_TRANSITIONS = false;
-const HOME_DARK_GLASS_TINT = '#373737ff';
-// Continuous tracking settings.
-//   - The driver only engages when the user is on card 0 (cheapest station
-//     overview) and has been idle for TRACKING_IDLE_GRACE_MS. This prevents
-//     the tracker from fighting station-focus zoom when the user is browsing
-//     individual station cards or has just interacted with the map.
-//   - Zoom is dynamic: the driver computes a region that frames both the
-//     user's extrapolated position and the cheapest station, so the cheapest
-//     station is always visible regardless of user movement.
-//   - We subscribe with distanceInterval=0 and High accuracy so iOS emits
-//     every GPS update available. timeInterval is iOS-ignored.
-//   - A separate interval timer (the "driver") runs at 2 Hz and is
-//     responsible for calling animateToRegion. This decouples camera
-//     motion from GPS tick rate. Each driver tick uses position-based
-//     velocity (computed from consecutive GPS fixes) to extrapolate the
-//     user's current position and animate the camera there over a short
-//     500 ms animation. Back-to-back short animations give the illusion
-//     of continuous motion the same way Apple Maps does in its native
-//     userTrackingMode=.follow mode.
-//   - This is necessary because react-native-maps' `animateToRegion`
-//     duration argument is effectively ignored on iOS: it wraps
-//     `setRegion:animated:YES` in a UIView animation block but MKMapView
-//     uses its own internal ~0.5 s animation, not UIView timing. So the
-//     only way to get continuous motion is to chain many short MKMapView
-//     animations together.
-//   - A user pan pauses auto-follow for 10 s so the user can explore the
-//     surrounding area without being yanked back.
-//   - React state is only updated every 50 m of movement to keep the
-//     render loop quiet while still refreshing distance-based filtering.
-const TRACKING_IDLE_GRACE_MS = 3000;
-const TRACKING_MIN_LATITUDE_DELTA = 0.008;
-const TRACKING_MAX_LATITUDE_DELTA = 0.25;
-const TRACKING_BOUNDING_PADDING = 1.45;
-const TRACKING_CHEAPEST_CHANGE_ANIMATION_MS = 650;
-const LIVE_TRACKING_DISTANCE_INTERVAL_METERS = 0;
-const LIVE_TRACKING_DRIVER_INTERVAL_MS = 500;
-const LIVE_TRACKING_DRIVER_ANIMATION_MS = 550;
-// Cap how long we extrapolate past the most recent GPS fix. If GPS goes
-// silent for a while (common on iOS Simulator with some location preset
-// combinations) the camera will still smoothly glide for up to this many
-// ms after the last known fix, then come to rest instead of running off
-// indefinitely on a stale velocity.
-const LIVE_TRACKING_MAX_EXTRAPOLATION_MS = 5000;
-const LIVE_TRACKING_PAN_SUPPRESS_MS = 10_000;
-const LIVE_TRACKING_STATE_UPDATE_METERS = 50;
-// Minimum gap between back-to-back device-watch refetches. Without this
-// throttle, a fast-moving user keeps crossing the safe edge of the
-// cached window on consecutive GPS ticks, and `handleLiveLocationUpdate`
-// fires a new fetch each time — they stack up, each one replaces the
-// previous state with a point-centered snapshot, and the feed looks
-// sparse in the middle because the in-flight fetches never get to
-// settle before the next one wipes their data out. 1.5 s is long
-// enough for a trajectory fetch to resolve before we queue the next
-// one, but short enough that the feed stays fresh during normal
-// driving speeds.
-const LIVE_TRACKING_REFETCH_MIN_INTERVAL_MS = 1500;
-// Speed floor below which we don't bother computing a trajectory seed
-// from differencing velocity. `MIN_PREFETCH_SPEED_MPS` is the same
-// threshold the trajectory planner uses to decide whether prefetching
-// is worthwhile at all.
-const LIVE_TRACKING_TRAJECTORY_MIN_SPEED_MPS = MIN_PREFETCH_SPEED_MPS;
-
-function waitForMilliseconds(duration) {
-    return new Promise(resolve => {
-        setTimeout(resolve, duration);
-    });
-}
-
-function interpolateZoomDelta(startDelta, endDelta, stepNumber, totalSteps, distanceMultiplier = 1) {
-    if (
-        totalSteps <= 0 ||
-        !Number.isFinite(startDelta) ||
-        !Number.isFinite(endDelta) ||
-        startDelta <= 0 ||
-        endDelta <= 0
-    ) {
-        return endDelta;
-    }
-
-    const progress = (stepNumber / totalSteps) * distanceMultiplier;
-
-    return startDelta * Math.pow(endDelta / startDelta, progress);
-}
-
-function hasUsableHomeRegion(region) {
-    return Boolean(
-        Number.isFinite(region?.latitude) &&
-        Number.isFinite(region?.longitude)
-    );
-}
-
-// Build a trajectory seed (`{ latitude, longitude, courseDegrees,
-// speedMps }`) from the differencing velocity we compute inside
-// `handleLiveLocationUpdate`. The live tracker stores velocity in
-// degrees-per-millisecond so the 2 Hz animation driver can extrapolate
-// without allocations; here we convert it back to speed + bearing so
-// the trajectory fetch planner can use it.
-//
-// Returns null if we don't have enough motion to justify an ahead-fetch
-// — slower than LIVE_TRACKING_TRAJECTORY_MIN_SPEED_MPS or a zero
-// velocity vector (user is stationary / just opened the app). The
-// caller falls back to `buildTrajectorySeedFromLocationObject`, which
-// reads GPS `coords.course/speed` when those are valid.
-function buildTrajectorySeedFromVelocity({ latitude, longitude, velocity }) {
-    if (
-        !Number.isFinite(latitude) ||
-        !Number.isFinite(longitude) ||
-        !velocity
-    ) {
-        return null;
-    }
-
-    const latPerMs = Number(velocity.latPerMs);
-    const lngPerMs = Number(velocity.lngPerMs);
-
-    if (
-        !Number.isFinite(latPerMs) ||
-        !Number.isFinite(lngPerMs) ||
-        (latPerMs === 0 && lngPerMs === 0)
-    ) {
-        return null;
-    }
-
-    const metersPerDegreeLatitude = 111_320;
-    const metersPerDegreeLongitude = 111_320 * Math.cos((latitude * Math.PI) / 180);
-    const latMetersPerSecond = latPerMs * 1000 * metersPerDegreeLatitude;
-    const lngMetersPerSecond = lngPerMs * 1000 * metersPerDegreeLongitude;
-    const speedMps = Math.sqrt(
-        latMetersPerSecond * latMetersPerSecond +
-        lngMetersPerSecond * lngMetersPerSecond
-    );
-
-    if (!Number.isFinite(speedMps) || speedMps < LIVE_TRACKING_TRAJECTORY_MIN_SPEED_MPS) {
-        return null;
-    }
-
-    const courseDegreesRaw = (Math.atan2(lngMetersPerSecond, latMetersPerSecond) * 180) / Math.PI;
-    const courseDegrees = ((courseDegreesRaw % 360) + 360) % 360;
-
-    return {
-        latitude,
-        longitude,
-        courseDegrees,
-        speedMps,
-    };
-}
-
-function buildClusterDebugAutomationSeedRegion(quotes, fallbackRegion) {
-    const validQuotes = (quotes || []).filter(quote => (
-        typeof quote?.latitude === 'number' &&
-        typeof quote?.longitude === 'number'
-    ));
-
-    if (validQuotes.length < 2) {
-        return null;
-    }
-
-    let closestPair = null;
-
-    for (let index = 0; index < validQuotes.length - 1; index += 1) {
-        const currentQuote = validQuotes[index];
-
-        for (let compareIndex = index + 1; compareIndex < validQuotes.length; compareIndex += 1) {
-            const candidateQuote = validQuotes[compareIndex];
-            const distance = Math.hypot(
-                currentQuote.latitude - candidateQuote.latitude,
-                currentQuote.longitude - candidateQuote.longitude
-            );
-
-            if (!closestPair || distance < closestPair.distance) {
-                closestPair = {
-                    distance,
-                    firstQuote: currentQuote,
-                    secondQuote: candidateQuote,
-                };
-            }
-        }
-    }
-
-    if (!closestPair) {
-        return null;
-    }
-
-    const latDiff = Math.abs(closestPair.firstQuote.latitude - closestPair.secondQuote.latitude);
-    const lngDiff = Math.abs(closestPair.firstQuote.longitude - closestPair.secondQuote.longitude);
-    const fallbackLatDelta = fallbackRegion?.latitudeDelta || DEFAULT_REGION.latitudeDelta;
-    const fallbackLngDelta = fallbackRegion?.longitudeDelta || DEFAULT_REGION.longitudeDelta;
-
-    return {
-        latitude: (closestPair.firstQuote.latitude + closestPair.secondQuote.latitude) / 2,
-        longitude: (closestPair.firstQuote.longitude + closestPair.secondQuote.longitude) / 2,
-        latitudeDelta: Math.max(
-            0.02,
-            fallbackLatDelta,
-            latDiff > 0 ? (latDiff / CLUSTER_MERGE_LAT_FACTOR) * 1.35 : fallbackLatDelta
-        ),
-        longitudeDelta: Math.max(
-            0.02,
-            fallbackLngDelta,
-            lngDiff > 0 ? (lngDiff / CLUSTER_MERGE_LNG_FACTOR) * 1.35 : fallbackLngDelta
-        ),
-    };
-}
-
-function buildClusterDebugProbePlan(cluster, currentRegion, focusRegion = null) {
-    if (!cluster?.quotes?.length) {
-        return null;
-    }
-
-    const focusLatitude = typeof focusRegion?.latitude === 'number'
-        ? focusRegion.latitude
-        : currentRegion?.latitude;
-    const focusLongitude = typeof focusRegion?.longitude === 'number'
-        ? focusRegion.longitude
-        : currentRegion?.longitude;
-    const startLatitude = typeof currentRegion?.latitude === 'number'
-        ? currentRegion.latitude
-        : (
-            typeof focusLatitude === 'number'
-                ? focusLatitude
-                : cluster.averageLat
-        );
-    const startLongitude = typeof currentRegion?.longitude === 'number'
-        ? currentRegion.longitude
-        : (
-            typeof focusLongitude === 'number'
-                ? focusLongitude
-                : cluster.averageLng
-        );
-    const splitLatitude = typeof focusLatitude === 'number'
-        ? focusLatitude
-        : cluster.averageLat;
-    const splitLongitude = typeof focusLongitude === 'number'
-        ? focusLongitude
-        : cluster.averageLng;
-    const fallbackLatDelta = currentRegion?.latitudeDelta || DEFAULT_REGION.latitudeDelta;
-    const fallbackLngDelta = currentRegion?.longitudeDelta || DEFAULT_REGION.longitudeDelta;
-    const maxLatOffset = Math.max(
-        0,
-        ...cluster.quotes.map(quote => Math.abs((quote.latitude || 0) - (cluster.averageLat || 0)))
-    );
-    const maxLngOffset = Math.max(
-        0,
-        ...cluster.quotes.map(quote => Math.abs((quote.longitude || 0) - (cluster.averageLng || 0)))
-    );
-    const mergeLatThresholdDelta = maxLatOffset > 0
-        ? maxLatOffset / CLUSTER_MERGE_LAT_FACTOR
-        : fallbackLatDelta;
-    const mergeLngThresholdDelta = maxLngOffset > 0
-        ? maxLngOffset / CLUSTER_MERGE_LNG_FACTOR
-        : fallbackLngDelta;
-    const splitLatThresholdDelta = maxLatOffset > 0
-        ? maxLatOffset / (CLUSTER_MERGE_LAT_FACTOR * CLUSTER_SPLIT_MULTIPLIER)
-        : fallbackLatDelta * 0.45;
-    const splitLngThresholdDelta = maxLngOffset > 0
-        ? maxLngOffset / (CLUSTER_MERGE_LNG_FACTOR * CLUSTER_SPLIT_MULTIPLIER)
-        : fallbackLngDelta * 0.45;
-
-    const mergeLatDelta = Math.max(
-        0.02,
-        mergeLatThresholdDelta * 1.2,
-        splitLatThresholdDelta * 1.8
-    );
-    const mergeLngDelta = Math.max(
-        0.02,
-        mergeLngThresholdDelta * 1.2,
-        splitLngThresholdDelta * 1.8
-    );
-    const resolvedSplitLatDelta = Math.max(
-        0.0025,
-        Math.min(mergeLatDelta * 0.45, splitLatThresholdDelta * 0.72)
-    );
-    const resolvedSplitLngDelta = Math.max(
-        0.0025,
-        Math.min(mergeLngDelta * 0.45, splitLngThresholdDelta * 0.72)
-    );
-    const splitLatDelta = resolvedSplitLatDelta < mergeLatDelta
-        ? resolvedSplitLatDelta
-        : Math.max(0.0025, mergeLatDelta * 0.45);
-    const splitLngDelta = resolvedSplitLngDelta < mergeLngDelta
-        ? resolvedSplitLngDelta
-        : Math.max(0.0025, mergeLngDelta * 0.45);
-    const startRegion = {
-        latitude: startLatitude,
-        longitude: startLongitude,
-        latitudeDelta: fallbackLatDelta,
-        longitudeDelta: fallbackLngDelta,
-    };
-    const focusStartRegion = {
-        latitude: splitLatitude,
-        longitude: splitLongitude,
-        latitudeDelta: fallbackLatDelta,
-        longitudeDelta: fallbackLngDelta,
-    };
-    const splitRegion = {
-        latitude: splitLatitude,
-        longitude: splitLongitude,
-        latitudeDelta: splitLatDelta,
-        longitudeDelta: splitLngDelta,
-    };
-    const zoomOutStepCount = CLUSTER_DEBUG_PROBE_ZOOM_IN_STEP_COUNT + CLUSTER_DEBUG_PROBE_ZOOM_OUT_EXTRA_STEPS;
-    const zoomInRegions = Array.from({ length: CLUSTER_DEBUG_PROBE_ZOOM_IN_STEP_COUNT }, (_, index) => {
-        return {
-            latitude: splitRegion.latitude,
-            longitude: splitRegion.longitude,
-            latitudeDelta: Math.max(
-                CLUSTER_DEBUG_PROBE_MIN_DELTA,
-                interpolateZoomDelta(
-                    focusStartRegion.latitudeDelta,
-                    splitRegion.latitudeDelta,
-                    index + 1,
-                    CLUSTER_DEBUG_PROBE_ZOOM_IN_STEP_COUNT,
-                    CLUSTER_DEBUG_PROBE_ZOOM_IN_DISTANCE_MULTIPLIER
-                )
-            ),
-            longitudeDelta: Math.max(
-                CLUSTER_DEBUG_PROBE_MIN_DELTA,
-                interpolateZoomDelta(
-                    focusStartRegion.longitudeDelta,
-                    splitRegion.longitudeDelta,
-                    index + 1,
-                    CLUSTER_DEBUG_PROBE_ZOOM_IN_STEP_COUNT,
-                    CLUSTER_DEBUG_PROBE_ZOOM_IN_DISTANCE_MULTIPLIER
-                )
-            ),
-        };
-    });
-
-    const zoomOutRegions = Array.from({ length: zoomOutStepCount }, (_, index) => {
-        return {
-            latitude: splitRegion.latitude,
-            longitude: splitRegion.longitude,
-            latitudeDelta: interpolateZoomDelta(
-                splitRegion.latitudeDelta,
-                focusStartRegion.latitudeDelta,
-                index + 1,
-                zoomOutStepCount,
-                CLUSTER_DEBUG_PROBE_ZOOM_OUT_DISTANCE_MULTIPLIER
-            ),
-            longitudeDelta: interpolateZoomDelta(
-                splitRegion.longitudeDelta,
-                focusStartRegion.longitudeDelta,
-                index + 1,
-                zoomOutStepCount,
-                CLUSTER_DEBUG_PROBE_ZOOM_OUT_DISTANCE_MULTIPLIER
-            ),
-        };
-    });
-
-    return {
-        clusterKey: buildClusterMembershipKey(cluster),
-        startRegion,
-        focusStartRegion,
-        mergeRegion: {
-            latitude: startLatitude,
-            longitude: startLongitude,
-            latitudeDelta: mergeLatDelta,
-            longitudeDelta: mergeLngDelta,
-        },
-        splitRegion,
-        zoomInRegions,
-        zoomOutRegions,
-        metrics: {
-            maxLatOffset,
-            maxLngOffset,
-            mergeLatThresholdDelta,
-            mergeLngThresholdDelta,
-            splitLatThresholdDelta,
-            splitLngThresholdDelta,
-        },
-    };
-}
-
-function buildProbeStationScreenSnapshot(quotes, mapRegion, screenWidth, screenHeight) {
-    const validQuotes = (quotes || [])
-        .filter(quote => (
-            (typeof quote?.stationId === 'number' || typeof quote?.stationId === 'string') &&
-            typeof quote?.latitude === 'number' &&
-            typeof quote?.longitude === 'number'
-        ))
-        .sort((left, right) => String(left.stationId).localeCompare(String(right.stationId)));
-    const ptPerLng = mapRegion?.longitudeDelta
-        ? screenWidth / mapRegion.longitudeDelta
-        : 0;
-    const ptPerLat = mapRegion?.latitudeDelta
-        ? screenHeight / mapRegion.latitudeDelta
-        : 0;
-    const centerLng = typeof mapRegion?.longitude === 'number'
-        ? mapRegion.longitude
-        : 0;
-    const centerLat = typeof mapRegion?.latitude === 'number'
-        ? mapRegion.latitude
-        : 0;
-    const points = validQuotes.map(quote => ({
-        stationId: quote.stationId,
-        x: (quote.longitude - centerLng) * ptPerLng,
-        y: -(quote.latitude - centerLat) * ptPerLat,
-    }));
-    const pairDistances = [];
-
-    for (let index = 0; index < points.length; index += 1) {
-        const currentPoint = points[index];
-        for (let compareIndex = index + 1; compareIndex < points.length; compareIndex += 1) {
-            const nextPoint = points[compareIndex];
-            pairDistances.push(Math.hypot(
-                nextPoint.x - currentPoint.x,
-                nextPoint.y - currentPoint.y
-            ));
-        }
-    }
-
-    pairDistances.sort((left, right) => left - right);
-    const pairDistanceMean = pairDistances.length > 0
-        ? pairDistances.reduce((sum, value) => sum + value, 0) / pairDistances.length
-        : 0;
-    const pairDistanceP95 = pairDistances.length > 0
-        ? pairDistances[Math.max(0, Math.ceil(pairDistances.length * 0.95) - 1)]
-        : 0;
-
-    return {
-        stationCount: points.length,
-        pairCount: pairDistances.length,
-        pairDistanceMin: pairDistances[0] || 0,
-        pairDistanceMax: pairDistances[pairDistances.length - 1] || 0,
-        pairDistanceMean,
-        pairDistanceP95,
-        pairDistances,
-    };
-}
-
-function compareProbeStationScreenSnapshots(startSnapshot, endSnapshot) {
-    if (!startSnapshot || !endSnapshot) {
-        return {
-            stationCountDelta: Number.POSITIVE_INFINITY,
-            pairCountDelta: Number.POSITIVE_INFINITY,
-            maxPairDistanceDelta: Number.POSITIVE_INFINITY,
-            meanPairDistanceDelta: Number.POSITIVE_INFINITY,
-        };
-    }
-
-    const pairCount = Math.min(
-        startSnapshot.pairDistances.length,
-        endSnapshot.pairDistances.length
-    );
-    const pairDistanceDeltas = [];
-
-    for (let index = 0; index < pairCount; index += 1) {
-        pairDistanceDeltas.push(Math.abs(
-            (endSnapshot.pairDistances[index] || 0) - (startSnapshot.pairDistances[index] || 0)
-        ));
-    }
-
-    const meanPairDistanceDelta = pairDistanceDeltas.length > 0
-        ? pairDistanceDeltas.reduce((sum, value) => sum + value, 0) / pairDistanceDeltas.length
-        : 0;
-
-    return {
-        stationCountDelta: Math.abs((endSnapshot.stationCount || 0) - (startSnapshot.stationCount || 0)),
-        pairCountDelta: Math.abs((endSnapshot.pairCount || 0) - (startSnapshot.pairCount || 0)),
-        maxPairDistanceDelta: pairDistanceDeltas.length > 0 ? Math.max(...pairDistanceDeltas) : 0,
-        meanPairDistanceDelta,
-    };
-}
-
-function buildClusterDebugProbeSummary(report) {
-    if (!report) {
-        return '';
-    }
-
-    if (report.status !== 'completed') {
-        return report.message || 'Probe did not complete.';
-    }
-
-    return (
-        `Probe ${report.sampleCount} samples, ${report.transitionCount} transitions, ` +
-        `max step ${formatDebugMetric(report.maxFrameDelta)}pt.`
-    );
-}
-
-function formatDebugCoordinate(latitude, longitude) {
-    if (typeof latitude !== 'number' || typeof longitude !== 'number') {
-        return '--';
-    }
-
-    return `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
-}
-
-function buildClusterDebugProbeLog(report, samples, transitionEvents) {
-    const metrics = report?.plan?.metrics || {};
-    const startRegion = report?.plan?.startRegion || {};
-    const focusStartRegion = report?.plan?.focusStartRegion || {};
-    const mergeRegion = report?.plan?.mergeRegion || {};
-    const splitRegion = report?.plan?.splitRegion || {};
-    const zoomInRegions = report?.plan?.zoomInRegions || [];
-    const zoomOutRegions = report?.plan?.zoomOutRegions || [];
-
-    return [
-        '[ClusterDebug Probe]',
-        `status=${report?.status || 'unknown'}`,
-        `trigger=${report?.trigger || 'manual'}`,
-        `message=${report?.message || 'none'}`,
-        `cluster=${report?.clusterKey || 'unknown'}`,
-        `samples=${report?.sampleCount ?? samples.length}`,
-        `transitions=${report?.transitionCount ?? transitionEvents.length}`,
-        `maxStep=${formatDebugMetric(report?.maxFrameDelta || 0)}pt`,
-        `timedOutStages=${report?.timedOutStages?.join(',') || 'none'}`,
-        `startRegion=${formatDebugCoordinate(startRegion.latitude, startRegion.longitude)} d=${formatDebugMetric(startRegion.latitudeDelta, 4)},${formatDebugMetric(startRegion.longitudeDelta, 4)}`,
-        `focusStartRegion=${formatDebugCoordinate(focusStartRegion.latitude, focusStartRegion.longitude)} d=${formatDebugMetric(focusStartRegion.latitudeDelta, 4)},${formatDebugMetric(focusStartRegion.longitudeDelta, 4)}`,
-        `mergeRegion=${formatDebugCoordinate(mergeRegion.latitude, mergeRegion.longitude)} d=${formatDebugMetric(mergeRegion.latitudeDelta, 4)},${formatDebugMetric(mergeRegion.longitudeDelta, 4)}`,
-        `splitRegion=${formatDebugCoordinate(splitRegion.latitude, splitRegion.longitude)} d=${formatDebugMetric(splitRegion.latitudeDelta, 4)},${formatDebugMetric(splitRegion.longitudeDelta, 4)}`,
-        `steps=${zoomInRegions.length} in / ${zoomOutRegions.length} out`,
-        `thresholds merge=${formatDebugMetric(metrics.mergeLatThresholdDelta, 4)},${formatDebugMetric(metrics.mergeLngThresholdDelta, 4)} split=${formatDebugMetric(metrics.splitLatThresholdDelta, 4)},${formatDebugMetric(metrics.splitLngThresholdDelta, 4)}`,
-        buildClusterDebugRecordingLog(samples, transitionEvents),
-    ].join('\n');
-}
-
-async function writeClusterDebugProbeArtifact(payload) {
-    const artifactTargets = [
-        FileSystem.documentDirectory
-            ? {
-                uri: `${FileSystem.documentDirectory}${CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME}`,
-                relativePath: CLUSTER_DEBUG_PROBE_REPORT_RELATIVE_PATH,
-                label: 'documents',
-            }
-            : null,
-        FileSystem.cacheDirectory
-            ? {
-                uri: `${FileSystem.cacheDirectory}${CLUSTER_DEBUG_PROBE_REPORT_FILE_NAME}`,
-                relativePath: CLUSTER_DEBUG_PROBE_REPORT_CACHE_RELATIVE_PATH,
-                label: 'cache',
-            }
-            : null,
-    ].filter(Boolean);
-
-    if (artifactTargets.length === 0) {
-        console.error('[ClusterDebug Probe Export] no writable file-system directory is available.');
-        return null;
-    }
-
-    const basePayload = {
-        ...payload,
-        persistedAt: new Date().toISOString(),
-        artifactTargets: artifactTargets.map(target => ({
-            label: target.label,
-            uri: target.uri,
-            relativePath: target.relativePath,
-        })),
-    };
-    const writeResults = [];
-
-    for (const target of artifactTargets) {
-        try {
-            const persistedPayload = {
-                ...basePayload,
-                fileUri: target.uri,
-                relativePath: target.relativePath,
-                artifactLabel: target.label,
-            };
-
-            await FileSystem.writeAsStringAsync(
-                target.uri,
-                JSON.stringify(persistedPayload, null, 2)
-            );
-
-            const fileInfo = await FileSystem.getInfoAsync(target.uri);
-
-            writeResults.push({
-                label: target.label,
-                uri: target.uri,
-                relativePath: target.relativePath,
-                exists: Boolean(fileInfo.exists),
-                size: fileInfo.size || 0,
-            });
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Unknown file write failure.';
-
-            writeResults.push({
-                label: target.label,
-                uri: target.uri,
-                relativePath: target.relativePath,
-                exists: false,
-                size: 0,
-                error: message,
-            });
-        }
-    }
-
-    const successfulWrites = writeResults.filter(result => result.exists);
-
-    if (successfulWrites.length > 0) {
-        successfulWrites.forEach(result => {
-            console.log(
-                `[ClusterDebug Probe Export] ${result.label} ${result.relativePath} exists=${result.exists ? '1' : '0'} size=${result.size}`
-            );
-        });
-    }
-
-    const failedWrites = writeResults.filter(result => result.error);
-
-    if (failedWrites.length > 0) {
-        failedWrites.forEach(result => {
-            console.error(
-                `[ClusterDebug Probe Export] ${result.label} failed: ${result.error}`
-            );
-        });
-    }
-
-    if (successfulWrites.length === 0) {
-        return null;
-    }
-
-    const primaryWrite = successfulWrites[0];
-
-    return {
-        ...basePayload,
-        fileUri: primaryWrite.uri,
-        relativePath: primaryWrite.relativePath,
-        writeResults,
-    };
-}
-
-function areRegionsEquivalent(currentRegion, nextRegion) {
-    if (!currentRegion || !nextRegion) {
-        return false;
-    }
-
-    return (
-        Math.abs((currentRegion.latitude || 0) - (nextRegion.latitude || 0)) <= MAP_REGION_EPSILON &&
-        Math.abs((currentRegion.longitude || 0) - (nextRegion.longitude || 0)) <= MAP_REGION_EPSILON &&
-        Math.abs((currentRegion.latitudeDelta || 0) - (nextRegion.latitudeDelta || 0)) <= MAP_REGION_EPSILON &&
-        Math.abs((currentRegion.longitudeDelta || 0) - (nextRegion.longitudeDelta || 0)) <= MAP_REGION_EPSILON
-    );
-}
-
-function getDistanceMetersBetweenRegions(fromRegion, toRegion) {
-    if (!fromRegion || !toRegion) {
-        return Number.POSITIVE_INFINITY;
-    }
-
-    const fromLatitude = Number(fromRegion.latitude);
-    const fromLongitude = Number(fromRegion.longitude);
-    const toLatitude = Number(toRegion.latitude);
-    const toLongitude = Number(toRegion.longitude);
-
-    if (
-        !Number.isFinite(fromLatitude) ||
-        !Number.isFinite(fromLongitude) ||
-        !Number.isFinite(toLatitude) ||
-        !Number.isFinite(toLongitude)
-    ) {
-        return Number.POSITIVE_INFINITY;
-    }
-
-    const toRadians = degrees => degrees * (Math.PI / 180);
-    const earthRadiusMeters = 6371000;
-    const latitudeDeltaRadians = toRadians(toLatitude - fromLatitude);
-    const longitudeDeltaRadians = toRadians(toLongitude - fromLongitude);
-    const fromLatitudeRadians = toRadians(fromLatitude);
-    const toLatitudeRadians = toRadians(toLatitude);
-    const haversineA = (
-        Math.sin(latitudeDeltaRadians / 2) ** 2 +
-        Math.cos(fromLatitudeRadians) *
-        Math.cos(toLatitudeRadians) *
-        Math.sin(longitudeDeltaRadians / 2) ** 2
-    );
-    const haversineC = 2 * Math.atan2(Math.sqrt(haversineA), Math.sqrt(1 - haversineA));
-
-    return earthRadiusMeters * haversineC;
-}
-
-function shouldAnimateSmoothLaunchTransition(fromRegion, toRegion) {
-    return getDistanceMetersBetweenRegions(fromRegion, toRegion) <= INITIAL_SMOOTH_LAUNCH_TRANSITION_MAX_DISTANCE_METERS;
-}
-
-function waitForMillisecondsWithValue(value, durationMs) {
-    return new Promise(resolve => {
-        setTimeout(() => resolve(value), durationMs);
-    });
-}
-
-/**
- * Fetch the device's last-known position with a hard timeout. This is the
- * fast path we use on cold launch and foreground resume because it returns
- * immediately from the platform's cached reading instead of firing up GPS.
- * Anything slower would add perceptible startup delay, so we short-circuit
- * with `null` as soon as the timeout elapses.
- */
-async function fetchLastKnownPositionWithTimeout({
-    timeoutMs = LOCATION_FAST_FETCH_TIMEOUT_MS,
-    maxAgeMs = LOCATION_LAST_KNOWN_MAX_AGE_MS,
-    requiredAccuracyMeters = LOCATION_LAST_KNOWN_REQUIRED_ACCURACY_METERS,
-} = {}) {
-    try {
-        const launchOverrides = getLocationProbeLaunchOverrides();
-
-        if (__DEV__ && launchOverrides.forceNullLastKnownPosition) {
-            recordLocationProbeEvent({
-                type: 'last-known-position-overridden-null',
-            });
-            return null;
-        }
-
-        const lastKnownPromise = Location
-            .getLastKnownPositionAsync({
-                maxAge: maxAgeMs,
-                requiredAccuracy: requiredAccuracyMeters,
-            })
-            .catch(() => null);
-        const timeoutPromise = waitForMillisecondsWithValue(null, timeoutMs);
-
-        return await Promise.race([lastKnownPromise, timeoutPromise]);
-    } catch (error) {
-        return null;
-    }
-}
-
-/**
- * Fall back to `getCurrentPositionAsync` with a low-accuracy / short-timeout
- * request. We only call this when the device has no usable last-known
- * reading (typically first ever launch). The promise never rejects; it
- * resolves to `null` on timeout or error so callers can cleanly fall back
- * to cached data.
- */
-async function fetchCurrentPositionWithTimeout({
-    timeoutMs = LOCATION_COLD_FETCH_TIMEOUT_MS,
-    accuracy = Location.Accuracy.Low,
-} = {}) {
-    try {
-        recordLocationProbeEvent({
-            type: 'current-position-fetch-start',
-            details: {
-                timeoutMs,
-                accuracy,
-            },
-        });
-
-        const currentPromise = Location
-            .getCurrentPositionAsync({
-                accuracy,
-            })
-            .catch(() => null);
-        const timeoutPromise = waitForMillisecondsWithValue(null, timeoutMs);
-        const resolvedPositionObject = await Promise.race([currentPromise, timeoutPromise]);
-
-        recordLocationProbeEvent({
-            type: 'current-position-fetch-end',
-            details: {
-                timeoutMs,
-                accuracy,
-                hasFix: Boolean(resolvedPositionObject),
-            },
-        });
-
-        return resolvedPositionObject;
-    } catch (error) {
-        recordLocationProbeEvent({
-            type: 'current-position-fetch-end',
-            details: {
-                timeoutMs,
-                accuracy,
-                hasFix: false,
-                error: error?.message || String(error || 'unknown-error'),
-            },
-        });
-        return null;
-    }
-}
-
-/**
- * Resolve the position object used by the cold-launch movement check.
- *
- * We prefer the platform's last-known cache because it's effectively
- * instant. If the OS has no usable last-known reading yet, fall back to a
- * bounded low-accuracy current-position request so a stale cached city does
- * not survive the whole launch. This preserves the fast path while still
- * fixing the "reopen after travel before iOS rebuilds last-known" case.
- */
-async function resolveLaunchMovementCheckPosition({
-    currentFallbackTimeoutMs = LOCATION_COLD_FETCH_TIMEOUT_MS,
-} = {}) {
-    const lastKnownPositionObject = await fetchLastKnownPositionWithTimeout({
-        timeoutMs: LOCATION_FAST_FETCH_TIMEOUT_MS,
-        maxAgeMs: LOCATION_LAST_KNOWN_MAX_AGE_MS,
-        requiredAccuracyMeters: LOCATION_LAST_KNOWN_REQUIRED_ACCURACY_METERS,
-    });
-
-    if (lastKnownPositionObject) {
-        return {
-            positionObject: lastKnownPositionObject,
-            resolver: 'last-known',
-        };
-    }
-
-    const currentPositionObject = await fetchCurrentPositionWithTimeout({
-        timeoutMs: currentFallbackTimeoutMs,
-        accuracy: Location.Accuracy.Low,
-    });
-
-    return {
-        positionObject: currentPositionObject,
-        resolver: currentPositionObject ? 'current-fallback' : 'none',
-    };
-}
-
-function startLaunchMovementCheck({
-    currentFallbackTimeoutMs = LOCATION_COLD_FETCH_TIMEOUT_MS,
-} = {}) {
-    const fastResultPromise = fetchLastKnownPositionWithTimeout({
-        timeoutMs: LOCATION_FAST_FETCH_TIMEOUT_MS,
-        maxAgeMs: LOCATION_LAST_KNOWN_MAX_AGE_MS,
-        requiredAccuracyMeters: LOCATION_LAST_KNOWN_REQUIRED_ACCURACY_METERS,
-    }).then(lastKnownPositionObject => (
-        lastKnownPositionObject
-            ? {
-                positionObject: lastKnownPositionObject,
-                resolver: 'last-known',
-            }
-            : {
-                positionObject: null,
-                resolver: 'none',
-            }
-    ));
-
-    const completionPromise = fastResultPromise.then(async (fastResult) => {
-        if (fastResult.positionObject) {
-            return fastResult;
-        }
-
-        const currentPositionObject = await fetchCurrentPositionWithTimeout({
-            timeoutMs: currentFallbackTimeoutMs,
-            accuracy: Location.Accuracy.Low,
-        });
-
-        return {
-            positionObject: currentPositionObject,
-            resolver: currentPositionObject ? 'current-fallback' : 'none',
-        };
-    });
-
-    return {
-        fastResultPromise,
-        completionPromise,
-    };
-}
-
-function buildSingleQuoteClusters(stationQuotes) {
-    return (stationQuotes || []).map(quote => ({
-        quotes: [quote],
-        averageLat: quote.latitude,
-        averageLng: quote.longitude,
-    }));
-}
-
-function doRectsTouch(left, right) {
-    return (
-        left.left <= right.right &&
-        left.right >= right.left &&
-        left.top <= right.bottom &&
-        left.bottom >= right.top
-    );
-}
-
-function expandRect(rect, padding) {
-    if (!rect || !Number.isFinite(padding) || padding <= 0) {
-        return rect;
-    }
-
-    return {
-        left: rect.left - padding,
-        right: rect.right + padding,
-        top: rect.top - padding,
-        bottom: rect.bottom + padding,
-    };
-}
-
-function areStationIdSetsEqual(left, right) {
-    if (left === right) {
-        return true;
-    }
-
-    if (!left || !right || left.size !== right.size) {
-        return false;
-    }
-
-    for (const value of left) {
-        if (!right.has(value)) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-function buildSuppressedOverlapStationIds(
-    stationQuotes,
-    mapRegion,
-    screenWidth,
-    screenHeight,
-    userLocation = null,
-    previousSuppressedStationIds = null,
-    activeStationId = null
-) {
-    if (!Array.isArray(stationQuotes) || stationQuotes.length <= 1 || !mapRegion) {
-        return new Set();
-    }
-
-    const ptPerLng = mapRegion.longitudeDelta ? screenWidth / mapRegion.longitudeDelta : 0;
-    const ptPerLat = mapRegion.latitudeDelta ? screenHeight / mapRegion.latitudeDelta : 0;
-    const centerLng = mapRegion.longitude || 0;
-    const centerLat = mapRegion.latitude || 0;
-    const orderedQuotes = [...stationQuotes].sort((left, right) => {
-        if (left.price !== right.price) {
-            return left.price - right.price;
-        }
-        return String(left.stationId).localeCompare(String(right.stationId));
-    });
-
-    const visibleRects = [];
-    const suppressedIds = new Set();
-    const previousSuppressedIds = previousSuppressedStationIds instanceof Set
-        ? previousSuppressedStationIds
-        : new Set(previousSuppressedStationIds || []);
-    const normalizedActiveStationId = activeStationId == null ? null : String(activeStationId);
-    const hasValidUserLocation = (
-        typeof userLocation?.latitude === 'number' &&
-        typeof userLocation?.longitude === 'number'
-    );
-    const userLocationRect = hasValidUserLocation
-        ? {
-            left: (userLocation.longitude - centerLng) * ptPerLng - USER_LOCATION_BUBBLE_SIZE / 2,
-            right: (userLocation.longitude - centerLng) * ptPerLng + USER_LOCATION_BUBBLE_SIZE / 2,
-            top: -((userLocation.latitude - centerLat) * ptPerLat) - USER_LOCATION_BUBBLE_SIZE / 2,
-            bottom: -((userLocation.latitude - centerLat) * ptPerLat) + USER_LOCATION_BUBBLE_SIZE / 2,
-        }
-        : null;
-
-    orderedQuotes.forEach(quote => {
-        const stationIdString = String(quote.stationId);
-        const isActiveStation = normalizedActiveStationId != null &&
-            stationIdString === normalizedActiveStationId;
-        const x = (quote.longitude - centerLng) * ptPerLng;
-        const y = -(quote.latitude - centerLat) * ptPerLat;
-        const rect = {
-            left: x - CLUSTER_PRIMARY_PILL_WIDTH / 2,
-            right: x + CLUSTER_PRIMARY_PILL_WIDTH / 2,
-            top: y - CLUSTER_TOUCH_PILL_HEIGHT / 2,
-            bottom: y + CLUSTER_TOUCH_PILL_HEIGHT / 2,
-        };
-        const userOverlapRect = {
-            left: x - USER_LOCATION_OVERLAP_PILL_WIDTH / 2,
-            right: x + USER_LOCATION_OVERLAP_PILL_WIDTH / 2,
-            top: y - USER_LOCATION_OVERLAP_PILL_HEIGHT / 2,
-            bottom: y + USER_LOCATION_OVERLAP_PILL_HEIGHT / 2,
-        };
-
-        const overlapsVisible = visibleRects.some(visibleRect => doRectsTouch(rect, visibleRect));
-        const shouldKeepSuppressedForRevealSpacing = previousSuppressedIds.has(stationIdString) &&
-            visibleRects.some(visibleRect => doRectsTouch(rect, expandRect(visibleRect, SUPPRESSION_REVEAL_PADDING)));
-        const overlapsUserLocationBubble = userLocationRect
-            ? doRectsTouch(userOverlapRect, userLocationRect)
-            : false;
-        const shouldKeepSuppressedNearUserLocation = previousSuppressedIds.has(stationIdString) && userLocationRect
-            ? doRectsTouch(userOverlapRect, expandRect(userLocationRect, SUPPRESSION_REVEAL_PADDING))
-            : false;
-        // The station the user just explicitly focused (by tapping its marker or
-        // scrolling the carousel to it) always bypasses every suppression rule —
-        // reveal-spacing stability AND the underlying hard-overlap check. At the
-        // densest real-world zoom the map allows, two stations can still sit on top
-        // of each other (e.g. adjacent gas stations on opposite corners of an
-        // intersection), and without this bypass the chip the user is trying to
-        // view would stay stuck hidden. Because ActiveStationOverlay is rendered
-        // with a higher z-index than the base StationMarkers, the active pill reads
-        // clearly even when the underlying pills visually overlap.
-        if (
-            !isActiveStation && (
-                overlapsVisible ||
-                overlapsUserLocationBubble ||
-                shouldKeepSuppressedForRevealSpacing ||
-                shouldKeepSuppressedNearUserLocation
-            )
-        ) {
-            suppressedIds.add(stationIdString);
-            return;
-        }
-
-        visibleRects.push(rect);
-    });
-
-    return suppressedIds;
-}
-
-function resolveStationFocusZoom({
-    targetQuote,
-    stationQuotes,
-    baseFitRegion,
-    screenWidth,
-    screenHeight,
-    userLocation = null,
-}) {
-    if (
-        !targetQuote ||
-        !Array.isArray(stationQuotes) ||
-        stationQuotes.length === 0
-    ) {
-        return {
-            latitudeDelta: STATION_FOCUS_MIN_LATITUDE_DELTA,
-            longitudeDelta: STATION_FOCUS_MIN_LONGITUDE_DELTA,
-        };
-    }
-
-    const targetStationId = String(targetQuote.stationId);
-    let latitudeDelta = Math.max(
-        STATION_FOCUS_MIN_LATITUDE_DELTA,
-        Number(baseFitRegion?.latitudeDelta) || STATION_FOCUS_MIN_LATITUDE_DELTA
-    );
-    let longitudeDelta = Math.max(
-        STATION_FOCUS_MIN_LONGITUDE_DELTA,
-        Number(baseFitRegion?.longitudeDelta) || STATION_FOCUS_MIN_LONGITUDE_DELTA
-    );
-
-    for (let step = 0; step < STATION_FOCUS_MAX_STEPS; step += 1) {
-        const candidateRegion = {
-            latitude: targetQuote.latitude,
-            longitude: targetQuote.longitude,
-            latitudeDelta,
-            longitudeDelta,
-        };
-        const suppressedIds = buildSuppressedOverlapStationIds(
-            stationQuotes,
-            candidateRegion,
-            screenWidth,
-            screenHeight,
-            userLocation
-        );
-
-        if (!suppressedIds.has(targetStationId)) {
-            return { latitudeDelta, longitudeDelta };
-        }
-
-        const nextLatitudeDelta = Math.max(
-            STATION_FOCUS_MIN_LATITUDE_DELTA,
-            latitudeDelta * STATION_FOCUS_ZOOM_STEP_MULTIPLIER
-        );
-        const nextLongitudeDelta = Math.max(
-            STATION_FOCUS_MIN_LONGITUDE_DELTA,
-            longitudeDelta * STATION_FOCUS_ZOOM_STEP_MULTIPLIER
-        );
-
-        if (nextLatitudeDelta === latitudeDelta && nextLongitudeDelta === longitudeDelta) {
-            break;
-        }
-
-        latitudeDelta = nextLatitudeDelta;
-        longitudeDelta = nextLongitudeDelta;
-    }
-
-    return { latitudeDelta, longitudeDelta };
-}
-
-function buildStationsFitZoomRegion(stationQuotes, fallbackRegion = null) {
-    const validQuotes = (stationQuotes || []).filter(quote => (
-        Number.isFinite(quote?.latitude) &&
-        Number.isFinite(quote?.longitude)
-    ));
-
-    if (validQuotes.length === 0) {
-        return {
-            latitudeDelta: Math.max(
-                STATION_FOCUS_MIN_LATITUDE_DELTA,
-                Number(fallbackRegion?.latitudeDelta) || STATION_FOCUS_MIN_LATITUDE_DELTA
-            ),
-            longitudeDelta: Math.max(
-                STATION_FOCUS_MIN_LONGITUDE_DELTA,
-                Number(fallbackRegion?.longitudeDelta) || STATION_FOCUS_MIN_LONGITUDE_DELTA
-            ),
-        };
-    }
-
-    let minLat = validQuotes[0].latitude;
-    let maxLat = validQuotes[0].latitude;
-    let minLng = validQuotes[0].longitude;
-    let maxLng = validQuotes[0].longitude;
-
-    validQuotes.forEach(quote => {
-        minLat = Math.min(minLat, quote.latitude);
-        maxLat = Math.max(maxLat, quote.latitude);
-        minLng = Math.min(minLng, quote.longitude);
-        maxLng = Math.max(maxLng, quote.longitude);
-    });
-
-    const latSpan = Math.max(0, maxLat - minLat);
-    const lngSpan = Math.max(0, maxLng - minLng);
-
-    return {
-        latitudeDelta: Math.max(STATION_FOCUS_MIN_LATITUDE_DELTA, latSpan * 1.55, 0.008),
-        longitudeDelta: Math.max(STATION_FOCUS_MIN_LONGITUDE_DELTA, lngSpan * 1.55, 0.008),
-    };
-}
-
-// Compute a map region that frames the user's current position and ALL
-// visible stations. The bounding box includes every station with valid
-// coordinates plus the user, padded by TRACKING_BOUNDING_PADDING, so the
-// default view always shows every chip within the search radius. Falls
-// back to a user-centered region with min delta when no stations exist.
-function computeTrackingRegion({
-    userLatitude,
-    userLongitude,
-    stationQuotes,
-}) {
-    const validQuotes = (stationQuotes || []).filter(q => (
-        Number.isFinite(q?.latitude) && Number.isFinite(q?.longitude)
-    ));
-
-    if (validQuotes.length === 0) {
-        return {
-            latitude: userLatitude,
-            longitude: userLongitude,
-            latitudeDelta: TRACKING_MIN_LATITUDE_DELTA,
-            longitudeDelta: TRACKING_MIN_LATITUDE_DELTA,
-        };
-    }
-
-    // Seed the bounding box with the user's position so they're always
-    // visible, then expand to include every station.
-    let minLat = userLatitude;
-    let maxLat = userLatitude;
-    let minLng = userLongitude;
-    let maxLng = userLongitude;
-
-    validQuotes.forEach(q => {
-        minLat = Math.min(minLat, q.latitude);
-        maxLat = Math.max(maxLat, q.latitude);
-        minLng = Math.min(minLng, q.longitude);
-        maxLng = Math.max(maxLng, q.longitude);
-    });
-
-    const latSpan = maxLat - minLat;
-    const lngSpan = maxLng - minLng;
-
-    return {
-        latitude: (minLat + maxLat) / 2,
-        longitude: (minLng + maxLng) / 2,
-        latitudeDelta: Math.max(
-            TRACKING_MIN_LATITUDE_DELTA,
-            Math.min(TRACKING_MAX_LATITUDE_DELTA, latSpan * TRACKING_BOUNDING_PADDING)
-        ),
-        longitudeDelta: Math.max(
-            TRACKING_MIN_LATITUDE_DELTA,
-            Math.min(TRACKING_MAX_LATITUDE_DELTA, lngSpan * TRACKING_BOUNDING_PADDING)
-        ),
-    };
-}
-
-function formatDebugMetric(value, digits = 2) {
-    if (typeof value !== 'number' || Number.isNaN(value)) {
-        return '--';
-    }
-
-    return value.toFixed(digits);
-}
-
-function summarizeDebugSeries(samples, key) {
-    const values = samples
-        .map(sample => sample[key])
-        .filter(value => typeof value === 'number' && Number.isFinite(value));
-
-    if (values.length === 0) {
-        return null;
-    }
-
-    const start = values[0];
-    const end = values[values.length - 1];
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-
-    return {
-        start,
-        end,
-        min,
-        max,
-        delta: end - start,
-    };
-}
-
-function formatSeriesLine(label, series, unit = '', digits = 2) {
-    if (!series) {
-        return `${label}=--`;
-    }
-
-    const deltaPrefix = series.delta > 0 ? '+' : '';
-
-    return (
-        `${label} ${formatDebugMetric(series.start, digits)} -> ${formatDebugMetric(series.end, digits)} ` +
-        `(d ${deltaPrefix}${formatDebugMetric(series.delta, digits)}, min ${formatDebugMetric(series.min, digits)}, max ${formatDebugMetric(series.max, digits)})${unit}`
-    );
-}
-
-function formatDebugPoint(x, y, digits = 2) {
-    return `(${formatDebugMetric(x, digits)}, ${formatDebugMetric(y, digits)})`;
-}
-
-function getClusterDebugVisibleLayers(sample) {
-    if (!sample) {
-        return [];
-    }
-
-    const isVisible = (layerKey) => {
-        const isRendered = Boolean(sample[`${layerKey}Visible`]);
-        const rawOpacity = sample[`${layerKey}Opacity`];
-        const resolvedOpacity = Number.isFinite(rawOpacity)
-            ? rawOpacity
-            : (isRendered ? 1 : 0);
-
-        return isRendered && resolvedOpacity > 0.001;
-    };
-
-    const layers = [];
-
-    if (isVisible('outside')) {
-        layers.push('outside');
-    }
-    if (isVisible('accumulator')) {
-        layers.push('accumulator');
-    }
-    if (isVisible('mergeMover')) {
-        layers.push('mergeMover');
-    }
-    if (isVisible('splitMover')) {
-        layers.push('splitMover');
-    }
-
-    return layers;
-}
-
-function buildClusterDebugRenderSummary(sample) {
-    if (!sample) {
-        return 'No render sample';
-    }
-
-    const visibleLayers = getClusterDebugVisibleLayers(sample);
-    const layerLabel = visibleLayers.length > 0 ? visibleLayers.join('+') : 'primary-only';
-    const toLabel = sample.toClusterKey ? ` to=[${sample.toClusterKey}]` : '';
-
-    return `${sample.runtimePhase} ${layerLabel} from=[${sample.fromClusterKey}]${toLabel}`;
-}
-
-function computeClusterDebugLayerMotion(previousSample, nextSample, layerKey) {
-    if (!previousSample || !nextSample) {
-        return 0;
-    }
-
-    const visibleKey = `${layerKey}Visible`;
-    const opacityKey = `${layerKey}Opacity`;
-    const xKey = `${layerKey}X`;
-    const yKey = `${layerKey}Y`;
-    const nextVisible = Boolean(nextSample[visibleKey]);
-    const nextOpacityRaw = nextSample[opacityKey];
-    const nextOpacity = Number.isFinite(nextOpacityRaw)
-        ? nextOpacityRaw
-        : (nextVisible ? 1 : 0);
-
-    if (!nextVisible || nextOpacity <= 0.001) {
-        return 0;
-    }
-
-    return Math.hypot(
-        (nextSample[xKey] || 0) - (previousSample[xKey] || 0),
-        (nextSample[yKey] || 0) - (previousSample[yKey] || 0)
-    );
-}
-
-function buildClusterDebugTransitionTimeline(events, startedAt) {
-    if (!events || events.length === 0) {
-        return ['Runtime transitions: none'];
-    }
-
-    return [
-        'Runtime transitions:',
-        ...events.map(event => {
-            const offsetMs = Math.max(0, Math.round((event.timestamp || startedAt) - startedAt));
-            const prefix = `- t+${offsetMs}ms ${event.type}`;
-
-            return (
-                `${prefix} primary=${event.primaryStationId || 'n/a'} ` +
-                `from=[${event.fromClusterKey || ''}] to=[${event.toClusterKey || ''}] ` +
-                `transition=[${event.transitionKey || ''}]`
-            ).trim();
-        }),
-    ];
-}
-
-function buildClusterDebugJumpEvents(samples) {
-    const trackedMetrics = [
-        ['outsideFrameDelta', 'move(outside)'],
-        ['accumulatorFrameDelta', 'move(accumulator)'],
-        ['mergeMoverFrameDelta', 'move(mergeMover)'],
-        ['splitMoverFrameDelta', 'move(splitMover)'],
-        ['maxFrameDelta', 'move(max)'],
-    ];
-    const events = [];
-
-    for (let index = 1; index < samples.length; index += 1) {
-        const previousSample = samples[index - 1];
-        const nextSample = samples[index];
-
-        for (const [metricKey, label] of trackedMetrics) {
-            const previousValue = previousSample[metricKey];
-            const nextValue = nextSample[metricKey];
-
-            if (!Number.isFinite(previousValue) || !Number.isFinite(nextValue)) {
-                continue;
-            }
-
-            const delta = nextValue - previousValue;
-            if (Math.abs(delta) <= CLUSTER_DEBUG_JUMP_THRESHOLD) {
-                continue;
-            }
-
-            const causes = [];
-            const rules = [];
-
-            if (previousSample.clusterKey !== nextSample.clusterKey) {
-                causes.push(`rendered cluster changed (${previousSample.clusterKey} -> ${nextSample.clusterKey})`);
-            }
-            if (previousSample.summary !== nextSample.summary) {
-                causes.push(`summary changed ("${previousSample.summary}" -> "${nextSample.summary}")`);
-            }
-            if (previousSample.runtimePhase !== nextSample.runtimePhase) {
-                causes.push(`runtime phase changed (${previousSample.runtimePhase} -> ${nextSample.runtimePhase})`);
-            }
-            if (previousSample.stageSignature !== nextSample.stageSignature) {
-                causes.push(`stage changed (${previousSample.stageSignature} -> ${nextSample.stageSignature})`);
-            }
-            if (previousSample.visibleLayers !== nextSample.visibleLayers) {
-                causes.push(`visible layers changed (${previousSample.visibleLayers || 'none'} -> ${nextSample.visibleLayers || 'none'})`);
-            }
-            rules.push('Runtime render rule: motion is measured from consecutive on-screen layer positions only.');
-
-            const deltaPrefix = delta > 0 ? '+' : '';
-            events.push(
-                [
-                    `- ${label} jumped ${deltaPrefix}${formatDebugMetric(delta)}pt (${formatDebugMetric(previousValue)} -> ${formatDebugMetric(nextValue)})`,
-                    `  causes: ${causes.length > 0 ? causes.join('; ') : 'same watched overlay, layer moved on screen'}`,
-                    `  rules: ${Array.from(new Set(rules)).join(' | ')}`,
-                    `  factors: spread ${formatDebugMetric(previousSample.spreadProgress)} -> ${formatDebugMetric(nextSample.spreadProgress)}, morph ${formatDebugMetric(previousSample.morphProgress)} -> ${formatDebugMetric(nextSample.morphProgress)}, bridge ${formatDebugMetric(previousSample.bridgeProgress)} -> ${formatDebugMetric(nextSample.bridgeProgress)}, layers ${previousSample.visibleLayers || 'none'} -> ${nextSample.visibleLayers || 'none'}, reach ${formatDebugMetric(previousSample.maxSecondaryRadius)} -> ${formatDebugMetric(nextSample.maxSecondaryRadius)}, shell ${formatDebugMetric(previousSample.secondaryShellWidth)} -> ${formatDebugMetric(nextSample.secondaryShellWidth)}`
-                ].join('\n')
-            );
-        }
-    }
-
-    return events;
-}
-
-function buildClusterDebugRecordingLog(samples, transitionEvents = []) {
-    if (!samples || samples.length === 0) {
-        return '[ClusterDebug Recording]\nNo samples captured.';
-    }
-
-    const startedAt = samples[0].timestamp;
-    const endedAt = samples[samples.length - 1].timestamp;
-    const durationMs = Math.max(0, endedAt - startedAt);
-    const clusterTransitions = samples.reduce((count, sample, index) => {
-        if (index === 0) {
-            return 0;
-        }
-
-        return count + (sample.clusterKey !== samples[index - 1].clusterKey ? 1 : 0);
-    }, 0);
-    const runtimePhaseTransitions = samples.reduce((count, sample, index) => {
-        if (index === 0) {
-            return 0;
-        }
-
-        return count + (sample.runtimePhase !== samples[index - 1].runtimePhase ? 1 : 0);
-    }, 0);
-    const spreadSeries = summarizeDebugSeries(samples, 'spreadProgress');
-    const morphSeries = summarizeDebugSeries(samples, 'morphProgress');
-    const bridgeProgressSeries = summarizeDebugSeries(samples, 'bridgeProgress');
-    const visibleLayerCountSeries = summarizeDebugSeries(samples, 'visibleLayerCount');
-    const maxReachSeries = summarizeDebugSeries(samples, 'maxSecondaryRadius');
-    const shellWidthSeries = summarizeDebugSeries(samples, 'secondaryShellWidth');
-    const outsideMoveSeries = summarizeDebugSeries(samples, 'outsideFrameDelta');
-    const accumulatorMoveSeries = summarizeDebugSeries(samples, 'accumulatorFrameDelta');
-    const mergeMoverMoveSeries = summarizeDebugSeries(samples, 'mergeMoverFrameDelta');
-    const splitMoverMoveSeries = summarizeDebugSeries(samples, 'splitMoverFrameDelta');
-    const maxMoveSeries = summarizeDebugSeries(samples, 'maxFrameDelta');
-    const jumpEvents = buildClusterDebugJumpEvents(samples);
-
-    return [
-        '[ClusterDebug Recording]',
-        `samples=${samples.length} duration=${durationMs}ms clusterChanges=${clusterTransitions}`,
-        `renderedStart=${samples[0].clusterKey}`,
-        `renderedEnd=${samples[samples.length - 1].clusterKey}`,
-        `runtimeStart=${samples[0].runtimePhase || 'live'}`,
-        `runtimeEnd=${samples[samples.length - 1].runtimePhase || 'live'}`,
-        `runtimePhaseChanges=${runtimePhaseTransitions}`,
-        formatSeriesLine('spread(render)', spreadSeries),
-        formatSeriesLine('morph(render)', morphSeries),
-        formatSeriesLine('bridge(progress)', bridgeProgressSeries),
-        formatSeriesLine('layers(visible)', visibleLayerCountSeries),
-        formatSeriesLine('reach(max)', maxReachSeries, 'pt'),
-        formatSeriesLine('shellWidth', shellWidthSeries, 'pt'),
-        formatSeriesLine('move(outside)', outsideMoveSeries, 'pt'),
-        formatSeriesLine('move(accumulator)', accumulatorMoveSeries, 'pt'),
-        formatSeriesLine('move(mergeMover)', mergeMoverMoveSeries, 'pt'),
-        formatSeriesLine('move(splitMover)', splitMoverMoveSeries, 'pt'),
-        formatSeriesLine('move(max)', maxMoveSeries, 'pt'),
-        `summaryStart=${samples[0].summary}`,
-        `summaryEnd=${samples[samples.length - 1].summary}`,
-        `largeStepChanges>${CLUSTER_DEBUG_JUMP_THRESHOLD}pt=${jumpEvents.length}`,
-        ...buildClusterDebugTransitionTimeline(transitionEvents, startedAt),
-        ...(jumpEvents.length > 0
-            ? ['Large step changes:', ...jumpEvents]
-            : ['Large step changes: none']),
-    ].join('\n');
-}
-
-function AnimatedCardItem({
-    item,
-    index,
-    scrollX,
-    itemWidth,
-    isDark,
-    benchmarkQuote,
-    errorMsg,
-    isRefreshing,
-    themeColors,
-    glassTintColor,
-    fuelGrade,
-    onNavigatePress,
-}) {
-    const animatedDimStyle = useAnimatedStyle(() => {
-        if (isDark) return { opacity: 0 };
-
-        const inputRange = [(index - 1) * itemWidth, index * itemWidth, (index + 1) * itemWidth];
-        const dimOpacity = interpolate(
-            scrollX.value,
-            inputRange,
-            [0.3, 0, 0.3],
-            Extrapolate.CLAMP
-        );
-
-        return { opacity: dimOpacity };
-    });
-
-    return (
-        <View style={{ width: itemWidth, paddingHorizontal: 4 }}>
-            <FuelSummaryCard
-                benchmarkQuote={benchmarkQuote}
-                errorMsg={errorMsg}
-                fuelGrade={fuelGrade}
-                glassTintColor={glassTintColor}
-                isDark={isDark}
-                isRefreshing={isRefreshing}
-                quote={item}
-                themeColors={themeColors}
-                rank={index + 1}
-                onNavigatePress={onNavigatePress}
-            />
-            {!isDark && (
-                <Animated.View
-                    pointerEvents="none"
-                    style={[{
-                        position: 'absolute',
-                        top: 0,
-                        bottom: 0,
-                        left: 4,
-                        right: 4,
-                        borderRadius: 32
-                    }, animatedDimStyle]}
-                />
-            )}
-        </View>
-    );
-}
+import Animated, { useSharedValue, useAnimatedScrollHandler, ZoomIn, ZoomOut } from 'react-native-reanimated';
 
 export default function HomeScreen() {
     const mapRef = useRef(null);
@@ -1764,7 +204,10 @@ export default function HomeScreen() {
 
     const USE_SHEET_UX = false; // Temporary toggle for the Form Sheet UX experiment
 
-    const bottomPadding = insets.bottom + TAB_BAR_CLEARANCE + CARD_GAP;
+    const [cardHeight, setCardHeight] = useState(180);
+    const bottomPadding = insets.bottom + 60;
+    const lastTrackingTargetRef = useRef(null);
+    const cameraPadding = homeMapPadding({ topInset: insets.top, bottomInset: insets.bottom, cardHeight, width: Dimensions.get('window').width });
     const horizontalPadding = {
         left: insets.left + SIDE_MARGIN,
         right: insets.right + SIDE_MARGIN,
@@ -2065,29 +508,23 @@ export default function HomeScreen() {
         mapRef.current.animateToRegion(nextRegion, duration);
     };
 
-    // Immediately animate to a region that frames the user's position
-    // and all visible stations. Used when transitioning to card 0 while
-    // location permission is active, replacing the old fitMapToStations
-    // call which would return early and leave the map static. The
-    // tracking driver takes over after the grace period.
-    const animateToTrackingOverview = () => {
-        const fix = latestFixRef.current;
-        const userLat = fix?.latitude ?? location.latitude;
-        const userLng = fix?.longitude ?? location.longitude;
-        const currentStationQuotes = stationQuotesRef.current || [];
-
-        const region = computeTrackingRegion({
-            userLatitude: userLat,
-            userLongitude: userLng,
-            stationQuotes: currentStationQuotes,
-        });
-
-        const cheapestQuote = currentStationQuotes[0] || null;
-        lastTrackedCheapestStationIdRef.current = cheapestQuote
-            ? String(cheapestQuote.stationId)
-            : null;
-
-        animateMapToRegion(region, FOREGROUND_RECENTER_ANIMATION_MS);
+    const animateToTrackingOverview = ({ force = true } = {}) => {
+        if (!mapRef.current || !isMapLoaded) return;
+        const fix = latestFixRef.current || location;
+        const stations = stationQuotesRef.current || [];
+        const target = {
+            latitude: fix.latitude, longitude: fix.longitude,
+            stationSignature: stations.map(q => `${q.stationId}:${q.latitude}:${q.longitude}`).join('|'),
+            paddingSignature: JSON.stringify(cameraPadding),
+        };
+        if (!force && !cameraTargetChanged(lastTrackingTargetRef.current, target)) return;
+        const coordinates = buildOverviewCoordinates(stations, fix);
+        if (!coordinates.length) return;
+        lastTrackingTargetRef.current = target;
+        clearFitSettlePassTimeout();
+        isAnimatingRef.current = true;
+        setMapMotionState(true);
+        mapRef.current.fitToCoordinates(coordinates, { edgePadding: cameraPadding, animated: true });
     };
 
     const getOrStartLaunchMovementCheck = ({
@@ -2767,9 +1204,7 @@ export default function HomeScreen() {
             radiusMiles: searchRadiusMiles,
             preferredProvider,
         });
-        const snapshotFuelGrade = preferredProvider === 'gasbuddy'
-            ? 'regular'
-            : selectedFuelGrade;
+        const snapshotFuelGrade = selectedFuelGrade;
         const query = {
             latitude,
             longitude,
@@ -3150,11 +1585,10 @@ export default function HomeScreen() {
 
     // Continuous tracking. The event-driven GPS handler ONLY records the
     // latest fix + velocity. A separate interval-driven "driver" (below)
-    // does the actual map animation at 2 Hz, which is the only way to get
+    // follows new location fixes, allowing MapKit to finish each transition and
     // continuous motion because react-native-maps' duration argument is
     // a no-op on iOS Apple Maps (see the tracking settings comment above).
     const liveTrackingSubscriptionRef = useRef(null);
-    const liveTrackingDriverIntervalRef = useRef(null);
     const hasUserRecentlyPannedRef = useRef(false);
     const userPanSuppressTimeoutRef = useRef(null);
     const loadFuelDataRef = useRef(null);
@@ -3245,9 +1679,7 @@ export default function HomeScreen() {
 
         // Refetch only when the user crossed the safe edge of the cached
         // window. Inside the window we skip entirely.
-        const snapshotFuelGrade = preferredProvider === 'gasbuddy'
-            ? 'regular'
-            : selectedFuelGrade;
+        const snapshotFuelGrade = selectedFuelGrade;
         const windowStillCovers = hasUsableCachedFuelWindow({
             latitude,
             longitude,
@@ -3328,78 +1760,10 @@ export default function HomeScreen() {
     const handleLiveLocationUpdateRef = useRef(null);
     handleLiveLocationUpdateRef.current = handleLiveLocationUpdate;
 
-    // The tracking driver. Runs at LIVE_TRACKING_DRIVER_INTERVAL_MS (2 Hz)
-    // whenever the GPS subscription is active. Each tick checks whether
-    // tracking should engage (card 0 + idle grace period elapsed), then
-    // computes a dynamic zoom region that frames both the user's extrapolated
-    // position and the cheapest station. When the cheapest station changes
-    // (data refresh), it uses a longer animation for a smooth re-zoom.
     const runLiveTrackingDriverTick = () => {
-        if (
-            !isMountedRef.current ||
-            manualLocationOverride ||
-            hasUserRecentlyPannedRef.current ||
-            !mapRef.current ||
-            !isMapLoaded
-        ) {
-            return;
-        }
-
-        // Only track when on the cheapest-station overview card.
-        if (activeIndexRef.current !== 0) {
-            return;
-        }
-
-        // Respect idle grace period — don't fight with recent user
-        // interactions (card swipes, marker taps, pan gestures).
-        if (Date.now() - lastUserInteractionAtRef.current < TRACKING_IDLE_GRACE_MS) {
-            return;
-        }
-
-        const fix = latestFixRef.current;
-        if (!fix) {
-            return;
-        }
-
-        const elapsedMsRaw = Date.now() - fix.timestampMs;
-        const elapsedMs = Math.max(
-            0,
-            Math.min(elapsedMsRaw, LIVE_TRACKING_MAX_EXTRAPOLATION_MS)
-        );
-        const velocity = latestVelocityRef.current;
-        const targetLatitude = fix.latitude + velocity.latPerMs * elapsedMs;
-        const targetLongitude = fix.longitude + velocity.lngPerMs * elapsedMs;
-
-        if (!Number.isFinite(targetLatitude) || !Number.isFinite(targetLongitude)) {
-            return;
-        }
-
-        // Dynamic zoom: frame the user and all visible stations.
-        const currentStationQuotes = stationQuotesRef.current;
-        const targetRegion = computeTrackingRegion({
-            userLatitude: targetLatitude,
-            userLongitude: targetLongitude,
-            stationQuotes: currentStationQuotes,
-        });
-
-        // Detect cheapest station change for a smoother transition.
-        const cheapestQuote = currentStationQuotes[0] || null;
-        const currentCheapestId = cheapestQuote
-            ? String(cheapestQuote.stationId)
-            : null;
-        const previousCheapestId = lastTrackedCheapestStationIdRef.current;
-        const isCheapestChange = (
-            previousCheapestId !== null &&
-            currentCheapestId !== null &&
-            previousCheapestId !== currentCheapestId
-        );
-        lastTrackedCheapestStationIdRef.current = currentCheapestId;
-
-        const animationDuration = isCheapestChange
-            ? TRACKING_CHEAPEST_CHANGE_ANIMATION_MS
-            : LIVE_TRACKING_DRIVER_ANIMATION_MS;
-
-        animateMapToRegion(targetRegion, animationDuration);
+        if (!isMountedRef.current || manualLocationOverride || hasUserRecentlyPannedRef.current ||
+            activeIndexRef.current !== 0 || Date.now() - lastUserInteractionAtRef.current < TRACKING_IDLE_GRACE_MS) return;
+        animateToTrackingOverview({ force: false });
     };
 
     const runLiveTrackingDriverTickRef = useRef(null);
@@ -3416,6 +1780,7 @@ export default function HomeScreen() {
         userPanSuppressTimeoutRef.current = setTimeout(() => {
             userPanSuppressTimeoutRef.current = null;
             hasUserRecentlyPannedRef.current = false;
+            runLiveTrackingDriverTickRef.current?.();
         }, LIVE_TRACKING_PAN_SUPPRESS_MS);
     };
 
@@ -3428,22 +1793,13 @@ export default function HomeScreen() {
         };
     }, []);
 
-    // Subscribe to continuous location updates and start the driver
-    // interval while we have permission, the home tab is focused, and the app
-    // is active. The subscription + driver are torn down whenever any of
-    // those conditions flips so we don't tick in the background.
+    // Watch actual movement only while Home is visible and the app is active.
     useEffect(() => {
         if (manualLocationOverride || !hasLocationPermission || !isFocused || activeAppState !== 'active') {
             return undefined;
         }
 
         let cancelled = false;
-
-        // Driver interval: drives the map animation at 2 Hz, independent
-        // of GPS tick rate. This is what makes motion smooth.
-        liveTrackingDriverIntervalRef.current = setInterval(() => {
-            runLiveTrackingDriverTickRef.current?.();
-        }, LIVE_TRACKING_DRIVER_INTERVAL_MS);
 
         (async () => {
             try {
@@ -3460,6 +1816,7 @@ export default function HomeScreen() {
                             return;
                         }
                         handleLiveLocationUpdateRef.current?.(positionObject);
+                        runLiveTrackingDriverTickRef.current?.();
                     }
                 );
 
@@ -3476,10 +1833,6 @@ export default function HomeScreen() {
 
         return () => {
             cancelled = true;
-            if (liveTrackingDriverIntervalRef.current) {
-                clearInterval(liveTrackingDriverIntervalRef.current);
-                liveTrackingDriverIntervalRef.current = null;
-            }
             if (liveTrackingSubscriptionRef.current) {
                 liveTrackingSubscriptionRef.current.remove();
                 liveTrackingSubscriptionRef.current = null;
@@ -4011,7 +2364,8 @@ export default function HomeScreen() {
 
     useEffect(() => {
         stationQuotesRef.current = stationQuotes;
-    }, [stationQuotes]);
+        runLiveTrackingDriverTickRef.current?.();
+    }, [stationQuotes, cardHeight, isMapLoaded]);
 
     useEffect(() => {
         previousSuppressedStationIdsRef.current = effectiveSuppressedStationIds;
@@ -4293,15 +2647,6 @@ export default function HomeScreen() {
             return;
         }
 
-        // When on card 0 with location permission, the tracking driver
-        // owns the camera — it dynamically frames the user + cheapest
-        // station. Skip fitToCoordinates to avoid fighting the driver.
-        // When on card > 0 (viewing a specific station), the driver is
-        // dormant, so fitToCoordinates is safe.
-        if (hasLocationPermission && !manualLocationOverride && activeIndexRef.current === 0) {
-            return;
-        }
-
         const buildFitCoordinates = (quotes, suppressedStationIds = null) => (
             (quotes || [])
                 .filter(q => Number.isFinite(q?.latitude) && Number.isFinite(q?.longitude))
@@ -4327,65 +2672,14 @@ export default function HomeScreen() {
 
         isAnimatingRef.current = true;
         setMapMotionState(true);
-        const baseTopPadding = topCanopyHeight + STATIONS_FIT_TOP_EXTRA_PADDING;
-        const baseBottomPadding = bottomPadding + STATIONS_FIT_BOTTOM_CONTENT_PADDING;
-        const upwardBiasPadding = Math.min(
-            Math.round(height * STATIONS_FIT_UPWARD_BIAS_FACTOR),
-            Math.max(0, baseTopPadding - 8)
-        );
-        const fitEdgePadding = {
-            top: baseTopPadding - upwardBiasPadding,
-            right: Math.max(horizontalPadding.right, sideInset) + STATIONS_FIT_SIDE_EXTRA_PADDING,
-            bottom: baseBottomPadding + upwardBiasPadding,
-            left: Math.max(horizontalPadding.left, sideInset) + STATIONS_FIT_SIDE_EXTRA_PADDING,
-        };
+        const fitEdgePadding = cameraPadding;
 
         mapRef.current.fitToCoordinates(coords, {
             edgePadding: fitEdgePadding,
             animated,
         });
 
-        if (runSettlePass) {
-            const initialCoordinateSignature = buildCoordinateSignature(coords);
-
-            fitSettlePassTimeoutRef.current = setTimeout(() => {
-                fitSettlePassTimeoutRef.current = null;
-
-                if (!mapRef.current) {
-                    return;
-                }
-
-                const settledCoords = buildFitCoordinates(
-                    stationQuotesRef.current,
-                    effectiveSuppressedStationIdsRef.current
-                );
-                const nextCoords = settledCoords.length > 0 ? settledCoords : buildFitCoordinates(stationQuotesRef.current);
-
-                if (nextCoords.length === 0) {
-                    return;
-                }
-
-                if (buildCoordinateSignature(nextCoords) === initialCoordinateSignature) {
-                    return;
-                }
-
-                mapRef.current.fitToCoordinates(nextCoords, {
-                    edgePadding: fitEdgePadding,
-                    animated: false,
-                });
-            }, STATIONS_FIT_SETTLE_PASS_DELAY_MS + CLUSTER_MAP_IDLE_SETTLE_MS);
-        }
-    }, [
-        bottomPadding,
-        hasLocationPermission,
-        height,
-        horizontalPadding.left,
-        horizontalPadding.right,
-        manualLocationOverride,
-        sideInset,
-        stationQuotes,
-        topCanopyHeight,
-    ]);
+    }, [stationQuotes, cardHeight, insets.top, insets.bottom, width]);
 
     const handleStationMarkerPress = useCallback((quote) => {
         lastUserInteractionAtRef.current = Date.now();
@@ -5492,19 +3786,15 @@ export default function HomeScreen() {
                     }}
                     userInterfaceStyle={isDark ? 'dark' : 'light'}
                     onPanDrag={() => {
-                        // Fires while the user is actively dragging the
-                        // map. This is the only reliable way to detect a
-                        // user-initiated pan while the 2 Hz driver is
-                        // constantly firing programmatic animations — we
-                        // can't rely on `isAnimatingRef` because it stays
-                        // true for almost every `onRegionChange` event.
+                        // Let the user explore without automatic recentering.
                         suppressAutoFollowAfterUserPan();
                     }}
                     onRegionChange={(region) => {
                         clearMapIdleSettleTimeout();
                         setMapMotionState(true);
                         mapRegionRef.current = region;
-                        scheduleSuppressionRegionUpdate(region);
+                        // Keep collision state stable during native camera movement;
+                        // reconcile once in onRegionChangeComplete.
                     }}
                     onRegionChangeComplete={(region) => {
                         markMapLoaded();
@@ -5684,6 +3974,10 @@ export default function HomeScreen() {
             </View>
 
             <View
+                onLayout={event => {
+                    const measured = event.nativeEvent.layout.height;
+                    setCardHeight(current => Math.abs(current - measured) > 1 ? measured : current);
+                }}
                 style={[
                     styles.contentOverlay,
                     {
@@ -5805,7 +4099,7 @@ export default function HomeScreen() {
                     style={[
                         styles.resetToCheapestShell,
                         {
-                            bottom: insets.bottom + 10,
+                            bottom: insets.bottom + 8,
                             paddingLeft: horizontalPadding.left,
                             paddingRight: horizontalPadding.right,
                         },

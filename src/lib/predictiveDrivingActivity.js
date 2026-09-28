@@ -1,10 +1,11 @@
-import { NativeEventEmitter, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import { requireOptionalNativeModule } from 'expo-modules-core';
 
 const nativeModule = Platform.OS === 'ios'
     ? requireOptionalNativeModule('FuelUpDrivingActivity')
     : null;
-const eventEmitter = nativeModule ? new NativeEventEmitter(nativeModule) : null;
+// Expo modules emit through their own EventEmitter, not RN's legacy global emitter.
+const eventEmitter = typeof nativeModule?.addListener === 'function' ? nativeModule : null;
 
 function createUnavailableError() {
     const error = new Error('FuelUpDrivingActivity is unavailable on this platform.');

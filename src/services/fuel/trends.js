@@ -20,6 +20,7 @@ const FUEL_GRADE_ALIASES = {
     midgrade: ['midgrade', 'midgrade_gas'],
     premium: ['premium', 'premium_gas'],
     diesel: ['diesel'],
+        e85: ['e85', 'e_85'],
 };
 
 // Helper: Calculate distance between two coords in miles

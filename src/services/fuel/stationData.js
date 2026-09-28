@@ -3,7 +3,7 @@ const { buildValidationState, normalizePrice, processValidationRows, validateAnd
 const AREA_HISTORY_LOOKBACK_MS = 14 * 24 * 60 * 60 * 1000;
 const MAX_AREA_HISTORY_ROWS = 1500;
 const PRICE_VALIDATION_VERSION = 2;
-const STANDARD_FUEL_TYPES = ['regular', 'midgrade', 'premium', 'diesel'];
+const STANDARD_FUEL_TYPES = ['regular', 'midgrade', 'premium', 'diesel', 'e85'];
 function buildQuoteIdentity(quote) {
     if (!quote) {
         return '';
@@ -78,6 +78,7 @@ function resolveStoredFuelPrice({ allPrices, fuelType }) {
         midgrade: ['midgrade', 'midgrade_gas'],
         premium: ['premium', 'premium_gas'],
         diesel: ['diesel'],
+        e85: ['e85', 'e_85'],
     };
 
     const aliases = aliasesByFuelType[normalizedFuelType] || [normalizedFuelType];
@@ -155,7 +156,7 @@ function getDuplicateGradePriceIssue(allPrices) {
     for (const { fuelType, price } of standardFuelPrices) {
         const priceKey = Number(price).toFixed(3);
 
-        if (firstFuelTypeByPrice.has(priceKey)) {
+        if (!['diesel', 'e85'].includes(fuelType) && firstFuelTypeByPrice.has(priceKey)) {
             suppressedFuelTypes.push(fuelType);
             continue;
         }

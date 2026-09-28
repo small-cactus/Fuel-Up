@@ -8,7 +8,7 @@ export function validateInput(input) {
     const { latitude, longitude, fuelType = 'regular', radiusMiles = 10, forceRefresh = false } = input || {};
     if (typeof latitude !== 'number' || !Number.isFinite(latitude) || Math.abs(latitude) > 90 ||
         typeof longitude !== 'number' || !Number.isFinite(longitude) || Math.abs(longitude) > 180 ||
-        !['regular', 'midgrade', 'premium', 'diesel'].includes(fuelType) ||
+        !['regular', 'midgrade', 'premium', 'diesel', 'e85'].includes(fuelType) ||
         typeof radiusMiles !== 'number' || !Number.isFinite(radiusMiles) || radiusMiles < 1 || radiusMiles > 100 ||
         typeof forceRefresh !== 'boolean') throw new ServiceError('INVALID_INPUT', 400);
     return { latitude, longitude, fuelType, radiusMiles, forceRefresh };

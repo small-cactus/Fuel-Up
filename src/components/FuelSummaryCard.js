@@ -186,7 +186,7 @@ function FuelSummaryCard({
                                 minimumFontScale={0.85}
                                 allowFontScaling={false}
                             >
-                                {selectedGradeMeta.octane}
+                                {selectedGradeMeta.octane === selectedGradeMeta.label ? '' : selectedGradeMeta.octane}
                             </Text>
                             <PredictedPriceFlag
                                 validation={quote?.validation}

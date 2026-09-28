@@ -181,7 +181,7 @@ function buildFuelSummaryCardLayout() {
         'paddingHorizontal'
     );
     const cardPriceFontSize = extractNumericStyle(cardSource, 'cardPrice', 'fontSize');
-    const sideMargin = extractNumericConstant(homeSource, 'SIDE_MARGIN');
+    const sideMargin = extractNumericConstant(readSource(path.join(REPO_ROOT, 'src/screens/home/constants.js')), 'SIDE_MARGIN');
 
     const cardOuterWidth = IPHONE_17_PRO_WIDTH - sideMargin * 2;
     const contentWidth = cardOuterWidth - contentBlockHorizontalPadding * 2;
@@ -277,89 +277,8 @@ test('FuelSummaryCard cardMeta (footer row) Text blocks carry shrink-to-fit prop
 // OnboardingScreen octane grade selector (4 horizontal buttons)
 // ============================================================================
 
-function buildOnboardingOctaneLayout() {
-    const source = readSource(ONBOARDING_PATH);
-    const octaneNumberFontSize = extractNumericStyle(source, 'octaneNumber', 'fontSize');
-    const octaneLabelFontSize = extractNumericStyle(source, 'octaneLabel', 'fontSize');
-    const octaneOptionsGap = extractNumericStyle(source, 'octaneOptions', 'gap');
-
-    // The octane card uses a literal width formula
-    // `(SCREEN_WIDTH - 96) / 3` inside the StyleSheet. Re-derive the same
-    // expression at the iPhone 17 Pro viewport so the test stays aligned
-    // with the real runtime value.
-    const widthFormulaMatch = source.match(
-        /octaneCard\s*:\s*\{[\s\S]*?width\s*:\s*\(SCREEN_WIDTH\s*-\s*(\d+)\)\s*\/\s*(\d+)[\s\S]*?\}/
-    );
-    if (!widthFormulaMatch) {
-        throw new Error('Could not parse octaneCard.width formula in OnboardingScreen.js');
-    }
-    const widthSubtract = Number(widthFormulaMatch[1]);
-    const widthDivide = Number(widthFormulaMatch[2]);
-    const columnWidth = (IPHONE_17_PRO_WIDTH - widthSubtract) / widthDivide;
-
-    // octaneCard has `paddingVertical: 24` and no horizontal padding, so
-    // the usable text width equals the column width.
-    const columnTextWidth = columnWidth;
-
-    return {
-        octaneNumberFontSize,
-        octaneLabelFontSize,
-        octaneOptionsGap,
-        columnWidth,
-        columnTextWidth,
-    };
-}
-
-test('Onboarding octane grade cards load their layout constants', () => {
-    const layout = buildOnboardingOctaneLayout();
-    assert.ok(layout.octaneNumberFontSize > 0);
-    assert.ok(layout.octaneLabelFontSize > 0);
-    assert.ok(layout.columnWidth > 0);
-    assert.ok(layout.columnTextWidth > 0);
-});
-
-test('Onboarding octane grade labels fit the card width', () => {
-    const layout = buildOnboardingOctaneLayout();
-    const failures = [];
-
-    // The octane "numbers" are 2-3 chars ("87", "89", "91") plus the
-    // edge case of "Diesel" which is displayed via `octaneNumber` slot
-    // for the diesel card too (per the app's fuelGrade meta).
-    const numberCandidates = ['87', '89', '91', '93', 'Diesel'];
-    numberCandidates.forEach(text => {
-        const measured = approximateTextWidth(text, layout.octaneNumberFontSize);
-        if (measured > layout.columnTextWidth) {
-            failures.push(
-                `octaneNumber "${text}" -> ${formatWidth(measured)}pt > column text ${formatWidth(layout.columnTextWidth)}pt`
-            );
-        }
-    });
-
-    const labelCandidates = ['Regular', 'Midgrade', 'Premium', 'Diesel'];
-    labelCandidates.forEach(text => {
-        const measured = approximateTextWidth(text, layout.octaneLabelFontSize);
-        if (measured > layout.columnTextWidth) {
-            failures.push(
-                `octaneLabel "${text}" -> ${formatWidth(measured)}pt > column text ${formatWidth(layout.columnTextWidth)}pt`
-            );
-        }
-    });
-
-    if (failures.length > 0) {
-        assert.fail(
-            `Onboarding octane selector would wrap on iPhone 17 Pro (${IPHONE_17_PRO_WIDTH}pt):\n  ` +
-            failures.join('\n  ')
-        );
-    }
-});
-
-test('Onboarding octaneNumber + octaneLabel Text blocks carry shrink-to-fit props', () => {
-    const source = readSource(ONBOARDING_PATH);
-    const numberBlocks = findTextBlocksWithStyle(source, 'styles.octaneNumber');
-    const labelBlocks = findTextBlocksWithStyle(source, 'styles.octaneLabel');
-    assertTextBlockHasShrinkToFitProps({ blocks: numberBlocks, label: 'Onboarding octaneNumber' });
-    assertTextBlockHasShrinkToFitProps({ blocks: labelBlocks, label: 'Onboarding octaneLabel' });
-});
+// Grade rows now use Apple's inline SwiftUI Picker. Selection and persistence
+// are covered by onboardingInteraction; actual layout is checked on iOS.
 
 test('Onboarding demo chip + continue button Text carry shrink-to-fit props', () => {
     const source = readSource(ONBOARDING_PATH);

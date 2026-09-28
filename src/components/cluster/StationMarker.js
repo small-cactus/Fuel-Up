@@ -100,12 +100,7 @@ function StationMarker({
           )),
       },
     ],
-    opacity: interpolate(
-      suppressionProgress.value,
-      [0, 1],
-      [1, 0],
-      Extrapolate.CLAMP
-    ),
+
   }), [appearProgress, suppressionProgress]);
 
   const inactiveIconTintColor = isDark ? '#D3D6DE' : '#888888';
@@ -154,6 +149,10 @@ function StationMarker({
     }, trackingDuration);
   }, [visualStateSignature]);
 
+  // Native glass cannot recover reliably after an ancestor reaches alpha 0.
+  // Remove the entire annotation, including its text, when it is occluded.
+  if (isSuppressed && !shouldDelaySuppression) return null;
+
   const suppressMarkerHit = isSuppressed;
   const markerZIndex = suppressMarkerHit ? -1 : (isBest ? 2 : 1);
 
@@ -170,7 +169,7 @@ function StationMarker({
       tracksViewChanges={tracksViewChanges}
     >
       <AnimatedView style={shrinkStyle}>
-        <View style={isActive && !isSuppressed && !useOnboardingColors ? [styles.activeRing, { borderColor: bestTintColor }] : null}>
+        <View>
           <LiquidGlassView effect="clear" tintColor={glassTintColor} style={styles.pillShell}>
             <View style={styles.rowItem}>
               <SymbolView
@@ -220,11 +219,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  activeRing: {
-    borderWidth: 2,
-    borderRadius: CLUSTER_PILL_HEIGHT / 2 + 3,
-    padding: 1,
   },
   priceIcon: {
     marginRight: 2,

@@ -179,3 +179,16 @@ test('applyFuelGradeToQuote exposes diesel validation metadata and corrected pri
     assert.equal(dieselQuote?.validation?.fuelType, 'diesel');
     assert.equal(dieselQuote?.validation?.usedPrediction, true);
 });
+
+test('E85 never borrows a regular quote or its validation', () => {
+    const regular = { fuelType: 'regular', price: 3.49, validation: { finalPrice: 3.49 }, allPrices: { regular: 3.49 } };
+    assert.equal(applyFuelGradeToQuote(regular, 'e85'), null);
+    const e85 = applyFuelGradeToQuote({ ...regular, allPrices: { regular: 3.49, e85: 2.59 } }, 'e85');
+    assert.equal(e85.price, 2.59);
+    assert.equal(e85.validation, null);
+});
+test('equal E85 or diesel prices are not gasoline-grade duplicates', () => {
+    const quote = { fuelType: 'regular', price: 3.49, allPrices: { regular: 3.49, diesel: 3.49, e85: 3.49 } };
+    assert.equal(applyFuelGradeToQuote(quote, 'e85').price, 3.49);
+    assert.equal(applyFuelGradeToQuote(quote, 'diesel').price, 3.49);
+});

@@ -38,6 +38,8 @@ function ResetToCheapestButton({
 
 const styles = StyleSheet.create({
     pressable: {
+        minHeight: 44,
+        justifyContent: 'center',
         borderRadius: 15,
     },
     pressablePressed: {
