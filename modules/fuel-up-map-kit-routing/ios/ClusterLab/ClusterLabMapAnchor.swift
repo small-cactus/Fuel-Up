@@ -8,6 +8,7 @@ final class ClusterLabMapAnchor {
   private let container: UIView
   private(set) var rebaseCount = 0
   private var placementDeadline: CFTimeInterval = 0
+  private var cameraJumpDeadline: CFTimeInterval = 0
   var needsPlacementUpdate: Bool { CACurrentMediaTime() < placementDeadline }
 
   init(container: UIView) {
@@ -32,6 +33,7 @@ final class ClusterLabMapAnchor {
     // offscreen visibility reason until the following frame.
     rebaseCount += 1
     placementDeadline = CACurrentMediaTime() + 0.1
+    cameraJumpDeadline = placementDeadline
     annotation.coordinate = coordinate
   }
 
@@ -63,7 +65,7 @@ final class ClusterLabMapAnchor {
       // A nonanimated camera jump can cull the old coordinate before MapKit
       // applies the annotation's new one. Repair only that stale placement;
       // ordinary subpixel positioning remains entirely owned by MapKit.
-      if let parent = view.superview {
+      if CACurrentMediaTime() < cameraJumpDeadline, let parent = view.superview {
         let expected = map.convert(point, to: parent)
         if hypot(view.center.x - expected.x, view.center.y - expected.y) > 2 {
           view.center = expected

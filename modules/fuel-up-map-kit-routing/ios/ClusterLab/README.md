@@ -13,7 +13,8 @@ views and their local positions. Immediate camera jumps move the anchor first
 to avoid MapKit culling its old coordinate, then repair stale placement before
 commit. The clock observes the next 100 ms of native placement work even if the
 camera has already stopped; this adds no motion or easing. MapKit retains
-ordinary subpixel placement.
+ordinary subpixel placement. The placement/visibility repair is restricted to
+explicit camera jumps; applying it during gestures reintroduces tracking slips.
 This uses one annotation, not one per station, and
 does not rasterize or snapshot the glass. The carrier does not clip its children.
 
