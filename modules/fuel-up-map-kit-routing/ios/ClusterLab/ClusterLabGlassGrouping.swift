@@ -34,8 +34,17 @@ enum ClusterLabGlassGrouping {
             let other = items[j].frame
             let gap = ClusterLabGeometry.capsuleGap(item.frame, other)
             guard gap <= reach else { continue }
-            let separation = CGPoint(x: item.frame.midX - other.midX, y: item.frame.midY - other.midY)
-            if !ClusterLabGeometry.isVertical(separation) {
+            // Classify the nearest capsule edges, not their centers. A count
+            // beside a price has a diagonal center-to-center line to the next
+            // row; treating that line as horizontal reconnects both rows through
+            // the count and lets native glass pull vertically across the gap.
+            let segments = max(0, (item.frame.width - item.frame.height) / 2) +
+              max(0, (other.width - other.height) / 2)
+            let separation = CGPoint(x: max(0, abs(item.frame.midX - other.midX) - segments),
+                                     y: item.frame.midY - other.midY)
+            let stacked = abs(separation.y) >= (item.frame.height + other.height) / 2 ||
+              ClusterLabGeometry.isVertical(separation)
+            if !stacked {
               guard gap <= ClusterLabGeometry.glassSpacing else { continue }
               let a = root(i), b = root(j)
               parents[max(a, b)] = min(a, b)

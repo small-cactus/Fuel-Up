@@ -33,6 +33,19 @@ assert(groups["a"] != groups["d"])
 assert(Set(groups.values).count == 2)
 assert(grouped(Array(rows.reversed())) == groups)
 assert(grouped(rows, groups) == groups)
+// Real clusters include a narrower count capsule. A diagonal price-to-count
+// pair must not reconnect two otherwise isolated stacked rows transitively.
+for y in stride(from: CGFloat(35), through: 68, by: 1) {
+  for x in stride(from: CGFloat(-15), through: 15, by: 1) {
+    let clusters = [item("a", 0, 0), item("b", x, y),
+      LabGlassItem(id: "badge:a", frame: CGRect(x: 34, y: -16, width: 44, height: 32)),
+      LabGlassItem(id: "badge:b", frame: CGRect(x: x + 34, y: y - 16, width: 44, height: 32))]
+    let result = grouped(clusters)
+    assert(result["a"] == result["badge:a"])
+    assert(result["b"] == result["badge:b"])
+    assert(result["a"] != result["b"], "diagonal count joined stacked rows")
+  }
+}
 let distant = (0..<1000).map { item(String($0), CGFloat($0) * 400, 0) }
 assert(Set(grouped(distant).values).count == 1)
 let stack = (0..<30).map { item(String(format: "%02d", $0), 0, CGFloat($0) * 50) }

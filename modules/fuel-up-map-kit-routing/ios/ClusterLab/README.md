@@ -242,3 +242,9 @@ The `location-` live probe places a price/count at the actual simulator GPS fix
 and verifies the native annotation, z-priority, shared bounded displacement,
 actual rendered clearance, and unchanged distant station positions. Frame
 telemetry includes the presentation translation in the measured pill coordinates.
+
+Glass grouping classifies separation at the nearest capsule edges rather than
+their centers. This prevents a narrow count in one row from diagonally joining
+the price in another row and pulling both rows into one native effect. The
+`rows-` live probe exercises two stacked price/count groups through zoom changes;
+each horizontal pair stays together while vertical gaps above 2 pt remain isolated.

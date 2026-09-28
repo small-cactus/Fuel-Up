@@ -324,3 +324,40 @@ test('native user location stays visible with a nearby price and count gently di
     }
     t.diagnostic(`${report.samples.length} frames with a native blue dot and bounded shared price/count clearance`);
 });
+
+test('stacked price/count rows do not reconnect diagonally through their badges', { timeout: 90000 }, async t => {
+    const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+    const token = `rows-${Date.now()}`;
+    const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+    const file = path.join(container, 'Documents/cluster-lab-probe.json');
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    let report;
+    const deadline = Date.now() + 75000;
+    while (Date.now() < deadline) {
+        try {
+            const value = JSON.parse(readFileSync(file, 'utf8'));
+            if (value.token === token) { report = value; break; }
+        } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    assert.ok(report, 'stacked rows probe did not export');
+    assert.equal(report.status, 'completed');
+    let isolatedFrames = 0;
+    for (const frame of report.samples) {
+        const prices = frame.views.filter(view => view.role === 'price' && view.primary);
+        const badges = frame.views.filter(view => view.role === 'badge');
+        if (prices.length !== 2 || badges.length !== 2) continue;
+        const [a, b] = prices;
+        const gap = Math.abs(a.y - b.y) - 32;
+        if (Math.abs(a.x - b.x) >= 1 || gap <= 2 || gap > 36) continue;
+        assert.notEqual(a.glassGroup, b.glassGroup, 'price/count rows formed an early vertical native bridge');
+        for (const price of prices) {
+            const badge = badges.find(view => view.id === `badge:${price.id}`);
+            assert.ok(badge, 'missing horizontal count');
+            assert.equal(price.glassGroup, badge.glassGroup, 'horizontal price/count glass separated');
+        }
+        isolatedFrames++;
+    }
+    assert.ok(isolatedFrames > 20, 'missing close stacked price/count row coverage');
+    t.diagnostic(`${isolatedFrames} close stacked row frames with horizontal glass intact and vertical effects isolated`);
+});
