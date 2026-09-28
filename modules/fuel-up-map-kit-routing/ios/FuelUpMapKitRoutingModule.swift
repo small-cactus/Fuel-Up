@@ -33,6 +33,14 @@ public final class FuelUpMapKitRoutingModule: Module {
   public func definition() -> ModuleDefinition {
     Name("FuelUpMapKitRouting")
 
+    View(ClusterLabMapView.self) {
+      Prop("stations") { (view, stations: [[String: Any]]) in view.setStations(stations) }
+      Prop("origin") { (view, origin: [String: Double]) in view.setOrigin(origin) }
+      Prop("isDark") { (view, isDark: Bool) in view.setDark(isDark) }
+      Prop("active") { (view, active: Bool) in view.setActive(active) }
+      Prop("probeToken") { (view, token: String?) in view.requestProbe(token) }
+    }
+
     AsyncFunction("openDrivingDirectionsInMapsAsync") { (destination: [String: Any], promise: Promise) in
       DispatchQueue.main.async {
         do {

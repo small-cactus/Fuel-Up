@@ -19,6 +19,7 @@ Pod::Spec.new do |s|
   s.source           = { :path => '.' }
 
   s.dependency 'ExpoModulesCore'
+  s.dependency 'LiquidGlass'
 
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',

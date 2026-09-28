@@ -24,6 +24,11 @@ export default function TabLayout() {
                 <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
             </NativeTabs.Trigger>
 
+            <NativeTabs.Trigger name="cluster-lab" disableAutomaticContentInsets>
+                <NativeTabs.Trigger.Icon sf="circle.hexagongrid" md="bubble-chart" />
+                <NativeTabs.Trigger.Label>Glass Lab</NativeTabs.Trigger.Label>
+            </NativeTabs.Trigger>
+
             <NativeTabs.Trigger name="trends">
                 <NativeTabs.Trigger.Icon sf="chart.line.uptrend.xyaxis" md="trending-up" />
                 <NativeTabs.Trigger.Label>Trends</NativeTabs.Trigger.Label>
