@@ -195,3 +195,26 @@ merges/splits with the connected count held at its normal 56 pt offset throughou
 plus an exact split handoff and separate actual native effect parents for close
 stacked prices. The horizontal pair probe continues to require its
 full visible outward travel. Native glass spacing and recoil remain unchanged.
+
+## Tab-entry framing
+
+`ClusterLabCameraFit` solves the initial north-up camera in projected map coordinates,
+including the full price capsule and the extra width of every predicted count.
+It searches exact contact-scale intervals and solves their monotonic bounds,
+including the existing smoothstep stretch on a transitive group's count;
+the largest feasible uniform scale also minimizes fresh clustering. All station
+locations remain in frame, including members represented by a count. The native
+MapKit camera receives the resulting rect once, before pill creation. Its native
+layout margins are accounted for so safe areas are not padded twice. Longitudes
+are unwrapped across the date line. A single station has a 250 m minimum map width.
+
+The fit reserves 15 pt of blank space on both sides, plus a 2 pt rendering
+allowance, and respects the native safe areas at the top and bottom. It runs on
+tab entry, station-data changes, and size/safe-area changes; normal camera gestures
+do not trigger it. Initial groups are seeded directly in their settled poses,
+without leftover hysteresis or flights from the old camera. Home is unchanged.
+
+`tests/clusterLabCameraFit.test.cjs` checks bounds, group widths, deterministic
+ordering, and optimal zoom against tighter alternatives across compact, large,
+and landscape phone sizes. The live `fit-` probe checks every represented station,
+actual native pill bounds, and absence of transition flights from the first frame.

@@ -242,3 +242,43 @@ test('stacked stations split without an intermediate connected count stretch', {
     for (const split of splits) assert.ok(split.delta <= 0.12, 'vertical split changed the count position at handoff');
     t.diagnostic(`${connected.length} connected vertical frames without count stretch; ${splits.length} splits`);
 });
+
+test('initial camera fit shows every station and count within safe margins on its first rendered frame', { timeout: 30000 }, async t => {
+    const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+    const token = `fit-${Date.now()}`;
+    const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+    const file = path.join(container, 'Documents/cluster-lab-probe.json');
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    let report;
+    const deadline = Date.now() + 20000;
+    while (Date.now() < deadline) {
+        try {
+            const value = JSON.parse(readFileSync(file, 'utf8'));
+            if (value.token === token) { report = value; break; }
+        } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+        await new Promise(resolve => setTimeout(resolve, 250));
+    }
+    assert.ok(report, 'camera fit probe did not export');
+    assert.equal(report.status, 'completed');
+    assert.ok(report.samples.length >= 30);
+    const bounds = report.fitBounds;
+    let tightestMargin = Infinity;
+    for (const frame of report.samples) {
+        assert.equal(frame.stationCount, 6, 'fit dropped a station');
+        assert.equal(frame.animating, false, 'first layout animated in from the old camera');
+        const represented = frame.views.reduce((count, view) => count + (view.role === 'badge' ? view.count : 1), 0);
+        assert.equal(represented, 6, 'fit hid a station without a count');
+        for (const view of frame.views) {
+            const x = view.x - 360, y = view.y - 360;
+            const left = x - view.width / 2 - bounds.x;
+            const right = bounds.x + bounds.width - x - view.width / 2;
+            const top = y - 16 - bounds.y;
+            const bottom = bounds.y + bounds.height - y - 16;
+            assert.ok(Math.min(left, right, top, bottom) >= -1, `fit clipped ${view.id}: ${[left, right, top, bottom]}`);
+            tightestMargin = Math.min(tightestMargin, left, right);
+        }
+    }
+    assert.equal(report.events.length, 0, 'initial fit triggered split/merge flights');
+    assert.ok(tightestMargin <= 1, 'native camera zoomed out beyond the solved fit');
+    t.diagnostic(`${report.samples.length} fitted frames; minimum side clearance beyond 17pt inset: ${tightestMargin.toFixed(2)}pt`);
+});

@@ -89,6 +89,16 @@ final class ClusterLabRenderer {
   private var previousProjection: [String: CGPoint] = [:]
   private var projectionTime: Double = 0
   private var cameraSpeed: CGFloat = 0
+  private var needsInitialLayout = false
+
+  func prepareForCameraFit() {
+    for motion in motions.values { motion.pill?.view.removeFromSuperview() }
+    for badge in badges.values { badge.view.removeFromSuperview() }
+    motions.removeAll(); badges.removeAll(); owners.removeAll()
+    badgeOffsetTargets.removeAll(); badgeOffsetCarries.removeAll(); renderedBadgeOffsets.removeAll()
+    previousProjection.removeAll(); projectionTime = 0; cameraSpeed = 0; cameraStarted = nil
+    needsInitialLayout = true
+  }
 
   func cameraBegan() { cameraStarted = CACurrentMediaTime(); cameraSpeed = 0 }
 
@@ -197,6 +207,23 @@ final class ClusterLabRenderer {
     }
     badgeOffsetTargets = nextBadgeOffsets
     badgeOffsetCarries = badgeOffsetCarries.filter { nextBadgeOffsets[$0.key] != nil && now - $0.value.startedAt < 0.08 }
+    if needsInitialLayout {
+      needsInitialLayout = false
+      let byId = Dictionary(uniqueKeysWithValues: stations.map { ($0.id, $0) })
+      for station in stations {
+        guard let ownerId = nextOwners[station.id], let owner = byId[ownerId] else { continue }
+        let motion = LabStationMotion(station)
+        motion.owner = ownerId; motion.point = owner.mapPoint; motion.settled = true
+        motions[station.id] = motion
+        if ownerId == station.id { _ = makePill(motion) }
+        else if badges[ownerId] == nil {
+          let badge = ClusterLabPill(price: owner.price, name: owner.name)
+          glassGroups.insert(badge.view); badges[ownerId] = badge
+        }
+      }
+      owners = nextOwners
+      return
+    }
     var releases: [(child: String, parent: String, direction: LabVector, speed: CGFloat)] = []
     let previousCounts = Dictionary(grouping: motions.values.filter { $0.settled && $0.owner != $0.station.id }, by: \.owner)
       .mapValues(\.count)

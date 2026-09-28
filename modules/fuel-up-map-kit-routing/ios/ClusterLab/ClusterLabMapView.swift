@@ -17,6 +17,10 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   private var pendingProbe: String?
   private var lastProbe: String?
   private var latestStations: [ClusterLabStation] = []
+  private var needsCameraFit = true
+  private var fittedSize = CGSize.zero
+  private var fittedInsets = UIEdgeInsets.zero
+  private var isFittingCamera = false
   var probe: ClusterLabProbe?
 
   required init(appContext: AppContext? = nil) {
@@ -53,6 +57,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     // Parent covers every visible pill and its offscreen approach. Extra space
     // includes the whole 84-point shell, refraction, and the +n displacement.
     map.frame = bounds
+    if bounds.size != fittedSize || safeAreaInsets != fittedInsets { needsCameraFit = true }
     mapAnchor.layout(map: map)
     refresh()
   }
@@ -62,15 +67,23 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     if window == nil { probe?.cancel(); stopFrames() } else { refresh() }
   }
 
+  override func safeAreaInsetsDidChange() {
+    super.safeAreaInsetsDidChange()
+    needsCameraFit = true
+    refresh()
+  }
+
   func setStations(_ values: [[String: Any]]) {
     var seen = Set<String>()
-    latestStations = values.compactMap(ClusterLabStation.init).filter { seen.insert($0.id).inserted }
+    let next = values.compactMap(ClusterLabStation.init).filter { seen.insert($0.id).inserted }
+    if next != latestStations { needsCameraFit = true }
+    latestStations = next
     guard probe == nil else { return }
     renderer.setStations(latestStations)
     refresh()
   }
 
-  func restoreStationsAfterProbe() { renderer.setStations(latestStations) }
+  func restoreStationsAfterProbe() { renderer.setStations(latestStations); needsCameraFit = true }
 
   func restoreOriginAfterProbe() {
     if let latestOriginValue { setOrigin(latestOriginValue) }
@@ -83,7 +96,10 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     guard probe == nil else { return }
     if let origin, abs(origin.latitude - latitude) < 0.00001 && abs(origin.longitude - longitude) < 0.00001 { return }
     origin = .init(latitude: latitude, longitude: longitude)
-    setRegion(.init(center: origin!, span: .init(latitudeDelta: 0.06, longitudeDelta: 0.06)), animated: false)
+    needsCameraFit = true
+    if latestStations.isEmpty {
+      setRegion(.init(center: origin!, span: .init(latitudeDelta: 0.06, longitudeDelta: 0.06)), animated: false)
+    }
     refresh()
   }
 
@@ -99,6 +115,8 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   }
 
   func setActive(_ value: Bool) {
+    if value && !active { needsCameraFit = true }
+    if !value || needsCameraFit { renderer.container.isHidden = true }
     active = value
     if active { refresh() } else {
       probe?.cancel()
@@ -128,17 +146,73 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
       renderer.container.bounds.size == bounds.insetBy(dx: -ClusterLabGeometry.containerPadding, dy: -ClusterLabGeometry.containerPadding).size
   }
 
+  var fitBounds: CGRect {
+    // Points are the native iOS layout unit. The 2pt allowance also protects the
+    // requested 15pt empty margin from projection rounding and glass refraction.
+    bounds.inset(by: UIEdgeInsets(top: safeAreaInsets.top + 17, left: safeAreaInsets.left + 17,
+                                 bottom: safeAreaInsets.bottom + 17, right: safeAreaInsets.right + 17))
+  }
+
+  @discardableResult
+  func fitCamera(to stations: [ClusterLabStation]) -> Bool {
+    guard !isFittingCamera, let first = stations.first else { return false }
+    let world = MKMapRect.world.width
+    let xs = stations.map { $0.mapPoint.x }.sorted()
+    // Unwrap the shortest longitude interval, including searches at ±180°.
+    let gapIndex = xs.indices.max { a, b in
+      let gapA = (a + 1 < xs.count ? xs[a + 1] : xs[0] + world) - xs[a]
+      let gapB = (b + 1 < xs.count ? xs[b + 1] : xs[0] + world) - xs[b]
+      return gapA < gapB
+    }!
+    let start = xs[(gapIndex + 1) % xs.count]
+    let points = stations.map { station -> LabProjectedStation in
+      let p = station.mapPoint
+      return LabProjectedStation(id: station.id, price: station.price,
+        point: CGPoint(x: p.x < start ? p.x + world : p.x, y: p.y))
+    }
+    let maximumScale = bounds.width / (250 * MKMapPointsPerMeterAtLatitude(first.latitude))
+    guard let fit = ClusterLabCameraFit.rect(for: points, viewport: bounds.size,
+                                             usable: fitBounds, maximumScale: maximumScale) else { return false }
+    // MapKit fits into its layout margins. Convert that inner viewport from the
+    // solved full-screen projection, so native safe areas aren't counted twice.
+    let nativeViewport = map.bounds.inset(by: map.layoutMargins)
+    let unitsPerPoint = fit.width / bounds.width
+    let rect = MKMapRect(x: fit.minX + nativeViewport.minX * unitsPerPoint,
+                         y: fit.minY + nativeViewport.minY * unitsPerPoint,
+                         width: nativeViewport.width * unitsPerPoint,
+                         height: nativeViewport.height * unitsPerPoint)
+    isFittingCamera = true
+    defer { isFittingCamera = false }
+    let camera = map.camera
+    if camera.heading != 0 || camera.pitch != 0 {
+      camera.heading = 0; camera.pitch = 0
+      map.setCamera(camera, animated: false)
+    }
+    mapAnchor.prepareForCameraJump(to: MKMapPoint(x: rect.midX, y: rect.midY).coordinate)
+    map.setVisibleMapRect(rect, animated: false)
+    renderer.prepareForCameraFit()
+    fittedSize = bounds.size; fittedInsets = safeAreaInsets
+    needsCameraFit = false; needsReconcile = true; animationMoving = false
+    return true
+  }
+
+  private func fitIfNeeded() {
+    if needsCameraFit && probe == nil && pendingProbe == nil { fitCamera(to: latestStations) }
+  }
+
   func refresh() {
-    guard active, window != nil, hasValidLayout, UIApplication.shared.applicationState != .background else { return }
+    guard !isFittingCamera, active, window != nil, hasValidLayout, UIApplication.shared.applicationState != .background else { return }
     needsReconcile = true
     startFrames()
     // Older UIKit has no late-commit observer. Keep its immediate delegate
     // update as a fallback; modern iOS coalesces all updates into one frame.
     if frameClock?.synchronizesWithCommit == false {
+      fitIfNeeded()
       mapAnchor.layout(map: map)
       renderer.reconcile(map: map)
       needsReconcile = false
       animationMoving = renderer.render(map: map, deltaTime: 0)
+      renderer.container.isHidden = false
     }
     startPendingProbe()
   }
@@ -157,6 +231,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
 
   private func tick(_ time: CFTimeInterval) {
     guard active, window != nil, hasValidLayout, UIApplication.shared.applicationState != .background else { return }
+    fitIfNeeded()
     guard needsReconcile || cameraMoving || animationMoving || mapAnchor.needsPlacementUpdate || probe != nil else {
       frameClock?.requestContinuous(false)
       lastTimestamp = 0
@@ -171,6 +246,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
       renderer.reconcile(map: map)
     }
     animationMoving = renderer.render(map: map, deltaTime: elapsed)
+    renderer.container.isHidden = false
     probe?.recordAnchor(mapAnchor.sample(map: map))
     let continuous = needsReconcile || cameraMoving || animationMoving || mapAnchor.needsPlacementUpdate || probe != nil
     frameClock?.requestContinuous(continuous)

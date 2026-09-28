@@ -31,7 +31,8 @@ final class ClusterLabProbe {
                          "longitude": center.longitude + offset.1, "price": 3.10 + Double(index) * 0.10,
                          "name": "Probe station \(index)"])
     })
-    view.setRegion(.init(center: center, span: .init(latitudeDelta: spans[0], longitudeDelta: spans[0])), animated: false)
+    if token.hasPrefix("fit-") { view.fitCamera(to: view.renderer.stations) }
+    else { view.setRegion(.init(center: center, span: .init(latitudeDelta: spans[0], longitudeDelta: spans[0])), animated: false) }
     view.renderer.resetRecording()
     view.renderer.recording = true
     view.refresh()
@@ -40,6 +41,12 @@ final class ClusterLabProbe {
   func tick(time: Double) {
     guard let view, !finished else { return }
     if startTime == 0 { startTime = time }
+    if token.hasPrefix("fit-") {
+      stage = 0
+      if baseline.isEmpty { baseline = view.renderer.frameSamples.last?["views"] as? [[String: Any]] ?? [] }
+      if time - startTime >= 2 { finish(status: "completed") }
+      return
+    }
     let nextStage = Int((time - startTime) / 2.5)
     guard nextStage != stage else { return }
     if nextStage >= spans.count { finish(status: "completed"); return }
@@ -73,6 +80,8 @@ final class ClusterLabProbe {
       "samples": view.renderer.frameSamples, "events": view.renderer.events,
       "anchorSamples": anchorSamples,
       "usesNativeGlass": NSClassFromString("UIGlassContainerEffect") != nil,
+      "fitBounds": ["x": view.fitBounds.minX, "y": view.fitBounds.minY,
+                    "width": view.fitBounds.width, "height": view.fitBounds.height],
     ]
     view.renderer.recording = false
     do {
