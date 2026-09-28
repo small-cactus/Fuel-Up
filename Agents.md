@@ -132,3 +132,15 @@ The split/merge behavior must follow this exact model:
    - Parent container stays pinned/scaled to the map.
    - Instantly duplicate `+n` exactly where it is (same text/container/position), then move duplicates inside parent bounds toward their outside-parent target positions using quick eased motion.
    - When aligned, transition to exact text/styles of the outside-parent price containers, then instantly remove the parent-contained duplicates so there is zero pixel delta at handoff.
+
+---
+
+# Commit and Push Changes
+
+The user frequently deletes local project folders. Work that has not been pushed may be permanently lost.
+
+- Commit and push completed project changes to GitHub as part of finishing each task, unless the user explicitly says otherwise. No additional confirmation is needed for routine commits and pushes.
+- For longer tasks, commit and push coherent progress checkpoints when needed to preserve work; clearly identify unfinished work.
+- Run the checks appropriate to the changes before committing, and report any checks that could not be completed.
+- Keep commits scoped to the task. Do not include secrets or unrelated local changes, discard existing work, or force-push without explicit authorization.
+- Verify that the push succeeded and report the branch and commit. If pushing is blocked, clearly state that the work remains local and is not yet backed up on GitHub.
