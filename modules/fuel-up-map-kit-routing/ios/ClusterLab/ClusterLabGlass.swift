@@ -23,7 +23,7 @@ enum ClusterLabGlass {
   static func pill() -> UIView {
     if #available(iOS 26.0, *), NSClassFromString("UIGlassEffect") != nil {
       let view = LiquidGlassViewImpl()
-      view.style = .clear
+      view.style = .regular
       view.interactive = false
       view.cornerConfiguration = .capsule()
       return view
