@@ -490,7 +490,7 @@ test('buildHomeQuerySignature changes when the selected fuel grade or radius cha
     assert.notEqual(premiumSignature, shortRadiusSignature);
 });
 
-test('buildHomeFilterSignature changes for every map-affecting filter', () => {
+test('buildHomeFilterSignature changes for rating and normalizes legacy providers', () => {
     const baseSignature = buildHomeFilterSignature({
         radiusMiles: 10,
         fuelGrade: 'regular',
@@ -511,7 +511,7 @@ test('buildHomeFilterSignature changes for every map-affecting filter', () => {
     });
 
     assert.notEqual(baseSignature, ratingSignature);
-    assert.notEqual(baseSignature, providerSignature);
+    assert.equal(baseSignature, providerSignature);
 });
 
 test('hasHomeFilterSignatureChanged only flags a real off-screen filter change once a baseline exists', () => {

@@ -23,7 +23,7 @@ test('normalizeFuelSearchPreferences preserves diesel and normalizes defaults', 
     assert.deepEqual(normalized, {
         preferredOctane: 'diesel',
         searchRadiusMiles: 15,
-        preferredProvider: 'all',
+        preferredProvider: 'gasbuddy',
         minimumRating: 4.5,
         navigationApp: 'apple-maps',
     });
@@ -77,7 +77,7 @@ test('fuel search request keys change for location and every request-affecting p
         preferredProvider: 'gasbuddy',
         minimumRating: 0,
     }));
-    assert.notEqual(baseKey, buildFuelSearchRequestKey({
+    assert.equal(baseKey, buildFuelSearchRequestKey({
         origin,
         fuelGrade: 'regular',
         radiusMiles: 10,

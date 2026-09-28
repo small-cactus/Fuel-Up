@@ -48,9 +48,8 @@ export function normalizeMinimumRating(value) {
     return Math.max(0, toFiniteNumber(value) ?? DEFAULT_MINIMUM_RATING);
 }
 
-export function normalizePreferredProvider(value) {
-    const normalizedValue = String(value || DEFAULT_PREFERRED_PROVIDER).trim().toLowerCase();
-    return normalizedValue === 'all' ? 'all' : DEFAULT_PREFERRED_PROVIDER;
+export function normalizePreferredProvider() {
+    return DEFAULT_PREFERRED_PROVIDER;
 }
 
 export function normalizeNavigationApp(value) {

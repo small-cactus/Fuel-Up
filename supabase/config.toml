@@ -1,0 +1,7 @@
+project_id = "fuel-up"
+
+[functions.gas-prices]
+verify_jwt = true
+
+[functions.fuel-repair]
+verify_jwt = false

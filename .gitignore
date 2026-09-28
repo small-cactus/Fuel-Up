@@ -39,3 +39,9 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Supabase local state and private repair configuration
+supabase/.temp/
+supabase/.branches/
+supabase/functions/gas-prices-candidate/
+.env

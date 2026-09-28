@@ -29,6 +29,44 @@ function createAsyncStorageMock() {
 }
 
 function primeModule(modulePath, exports) {
+    // In-process transport boundary: app -> function -> provider/cache.
+    // Production uses Supabase HTTP; these tests retain the real backend logic.
+    if (modulePath.endsWith('/src/lib/supabase.js')) {
+        const stationDb = exports.supabase;
+        const emptyQuery = () => ({
+            select() { return this; }, eq() { return this; }, gte() { return this; },
+            order() { return this; }, limit() { return this; },
+            then(resolve) { return Promise.resolve({ data: [], error: null }).then(resolve); },
+            insert() { return Promise.resolve({ error: null }); },
+        });
+        const db = {
+            from(table) {
+                if (table === 'fuel_query_cache') return {
+                    select() { return this; }, eq() { return this; },
+                    async maybeSingle() { return { data: null, error: null }; },
+                    async upsert() { return { error: null }; },
+                };
+                return stationDb?.from(table) || emptyQuery();
+            },
+            async rpc(name) { return { data: name === 'claim_fuel_refresh' ? 'test-lease' : null, error: null }; },
+        };
+        exports = { ...exports, hasSupabaseConfig: true, supabase: {
+            functions: { async invoke(name, options) {
+                assert.equal(name, 'gas-prices');
+                const { getGasPrices } = await import('../supabase/functions/_shared/gasPrices.mjs');
+                try {
+                    const data = await getGasPrices({ input: options.body, db,
+                        fetchImpl: async (...args) => {
+                            const result = await global.fetch(...args);
+                            if (!result.json) result.json = async () => JSON.parse(await result.text());
+                            return result;
+                        },
+                    });
+                    return { data, error: null };
+                } catch (error) { return { data: null, error }; }
+            } },
+        } };
+    }
     require.cache[modulePath] = {
         id: modulePath,
         filename: modulePath,
@@ -132,6 +170,7 @@ test('clearFuelPriceCache prevents in-flight requests from repopulating cached f
 
         const request = refreshFuelPriceSnapshot(query);
 
+        while (!resolveFetch) await new Promise(resolve => setImmediate(resolve));
         await clearFuelPriceCache();
 
         resolveFetch({
@@ -198,7 +237,7 @@ test('clearFuelPriceCache prevents in-flight requests from repopulating cached f
     }
 });
 
-test('refreshFuelPriceSnapshot falls through to live GasBuddy when the Supabase cache is empty', async () => {
+test('refreshFuelPriceSnapshot invokes the cloud service which fetches GasBuddy on a cache miss', async () => {
     const asyncStorageMock = createAsyncStorageMock();
     const asyncStoragePath = require.resolve('@react-native-async-storage/async-storage');
     const devCounterPath = require.resolve('../src/lib/devCounter.js');
@@ -233,7 +272,9 @@ test('refreshFuelPriceSnapshot falls through to live GasBuddy when the Supabase 
                     eq() {
                         return this;
                     },
-                    gte() {
+                    gte() { return this; },
+                    order() { return this; },
+                    limit() {
                         return Promise.resolve({
                             data: [],
                             error: null,

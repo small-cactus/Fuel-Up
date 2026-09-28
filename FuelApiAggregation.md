@@ -1,254 +1,75 @@
-# Fuel API Aggregation
+# Gas price service
 
-This document explains how the app collects, normalizes, ranks, caches, and debugs gas price data.
+The app requests prices through the `gas-prices` Supabase Edge Function. GasBuddy is the only live gas provider. Existing GasBuddy rows in `station_prices` can fill the cache; there is no client-side provider fallback.
 
-## Goal
+Project: `vjindchxfebaltbslqwc`, database region `us-east-2`. The project remains on Free. The public URL/key already in `app.json` authenticate app calls. The database service key stays inside Supabase, and the Mac repair secret is never shipped in the app or committed.
 
-The app tries to return the cheapest valid station-level gas price for the active location.
+## Request path
 
-The active location can come from:
+1. The app keeps its existing local, spatial and trajectory caches (10 minutes). Legacy `all` provider preferences normalize to `gasbuddy`.
+2. `src/services/fuel/remote.js` invokes `gas-prices`, specifying `us-east-2` and a 15-second client deadline.
+3. The function returns a fresh `fuel_query_cache` hit with one database read. Keys include coordinates, radius and grade.
+4. On a miss, an atomic 25-second refresh lease prevents duplicate GasBuddy requests for the same query. A competing refresh gets HTTP 503 with `Retry-After: 2`.
+5. Recent GasBuddy cache-fill history can satisfy the query. Otherwise the function calls GasBuddy with a 6-second deadline, validates the response, applies the existing historical price and grade checks, and fills omitted stations from history.
+6. Validated live rows are saved in `station_prices`. Server-generated rows use the reserved UUID `00000000-0000-4000-8000-000000000001`; it is not a user identity. Query results expire after 10 minutes; empty coverage expires after 60 seconds.
 
-- Device GPS on the Home screen
-- A manual latitude/longitude override set in Settings
+The function filters the final results to the requested radius. GasBuddy determines its own station search coverage, so a radius does not guarantee exhaustive coverage. Source timestamps remain attached to prices, including cache-fill and predicted prices.
 
-The app does not use regional averages as the main result. If no station-level provider returns a usable price, Home fails with an explicit error instead of showing an estimate.
+The cloud and app share `core.js`, `priceValidation.js`, and `stationData.js`. Run `npm run fuel:build` after changing these; it produces the committed Deno modules. Existing pure legacy normalizers remain for compatibility, but no active request path calls another provider.
 
-## Provider Types
+## Contract
 
-The app currently supports two provider classes:
+`POST /functions/v1/gas-prices`, using the app's existing Supabase authorization:
 
-- Station-level providers: these can win the main result.
-- Area-level providers: these are supplemental only and appear in debug output, but they do not replace a missing station price.
+```json
+{"latitude":27.9506,"longitude":-82.4572,"radiusMiles":10,"fuelType":"regular","forceRefresh":false}
+```
 
-### Station-level providers
+Response: `{ "version": 1, "source": "cache|cache-fill|live", "quotes": [...], "summary": {...} }`.
+Supported grades: `regular`, `midgrade`, `premium`, `diesel`. `forceRefresh` is for explicit live diagnostics. Validation failures return 400; provider failures return 502; cache/refresh unavailability returns 503. HTTP errors, invalid JSON, GraphQL errors and schema changes count as provider failures. Legitimate empty coverage, invalid app input and cache outages do not.
 
-- TomTom Search + Fuel Prices
-- Barchart `getFuelPrices`
-- Google Places Nearby Search with `fuelOptions`
+## Mac repair
 
-### Area-level providers
+The database queues one job after at least five upstream failures in five minutes, when at least half of the requests in that window failed. It limits new incidents to one per hour and one active job. Job claims and updates require expiring lease tokens. All queue/cache tables and RPCs are restricted to `service_role`.
 
-- Cardog
-- BLS
-- EIA
-- FRED
+A private `fuel-repair` function serves claim/update requests using a separate random secret. `npm run fuel:repair:install` installs a launch agent at `~/Library/LaunchAgents/com.fuelup.repair.plist` and copies the worker to `~/Library/Application Support/FuelUpRepair`. Deleting the Desktop project does not delete this installed worker. The installer preserves its secret on reruns and uploads it through the Supabase CLI.
 
-## Aggregation Flow
+The launch agent checks the queue every five minutes while the Mac is logged in, awake and online. Idle checks do not start Codex. Jobs remain queued while the Mac is unavailable; this does not wake a sleeping or powered-off Mac. At continuous uptime the poller uses about 8,640 function invocations per 30 days, plus job heartbeats. This is a durable cloud queue consumed by the Mac, rather than an inbound connection to the Mac.
 
-The core fetch pipeline lives in [src/services/fuel/index.js](/Users/anthonyh/Desktop/Fuel Up/src/services/fuel/index.js).
+For a claimed job the worker:
 
-The main flow is:
+1. Clones the latest GitHub `master` into its private jobs directory and probes production. If all grades have recovered, it completes the job without Codex.
+2. Otherwise runs the authenticated local `codex exec` with live web research, workspace write access and a 25-minute deadline. Only provider and validation code plus new regression tests may change. Existing tests, worker code, dependencies and infrastructure are protected by the supervising gate.
+3. Runs the fixed backend contract/validation tests and new regression tests, regenerates shared modules, commits and pushes a repair branch.
+4. Deploys `gas-prices-candidate`. Its probes read history but do not write production cache/history or incident counters. All four grades must return valid GasBuddy prices.
+5. Fast-forwards `master` only if it has not changed, deploys production, and checks live prices, persistence and cache hits for all grades. On failure it redeploys the prior code and attempts a normal Git revert/push.
 
-1. Resolve the active location.
-2. Build a cache key from `fuelType`, rounded coordinates, and search radius.
-3. Load any cached snapshot first when the refresh allows cached reads.
-4. Request all enabled providers in parallel.
-5. Normalize all provider responses into one shared quote shape.
-6. Select the cheapest valid station-level quote.
-7. Save the winning snapshot to cache.
-8. Publish provider debug data for Settings.
+Jobs get up to three attempts, spaced by queue polls; a failed job remains visible with details in local logs. The worker cannot automatically solve missing account access, provider access restrictions, exhausted Codex limits or infrastructure changes outside its repair scope. If its lease expires it stops active child processes. It inherits the Mac's existing Codex model configuration and login.
 
-If no station-level quote is returned, the request fails and Home shows an error message.
+Worker status and logs:
 
-## Normalized Quote Shape
+```sh
+launchctl print gui/$(id -u)/com.fuelup.repair
+tail -50 "$HOME/Library/Application Support/FuelUpRepair/worker.log"
+```
 
-Every provider is normalized into the same internal shape before ranking:
+Per-incident clones and Codex logs are in the installed worker's `jobs` directory. Stop with `launchctl bootout gui/$(id -u)/com.fuelup.repair`. Reinstall after changing worker scripts. Credentials live only in mode-600 files inside a mode-700 application-support directory; CLI authentication uses its normal credential store.
 
-- `providerId`
-- `providerTier`
-- `stationId`
-- `stationName`
-- `address`
-- `latitude`
-- `longitude`
-- `fuelType`
-- `price`
-- `currency`
-- `priceUnit`
-- `distanceMiles`
-- `fetchedAt`
-- `updatedAt`
-- `isEstimated`
-- `sourceLabel`
+## Deploy and verify
 
-This normalization logic lives in [src/services/fuel/core.js](/Users/anthonyh/Desktop/Fuel Up/src/services/fuel/core.js).
+The existing database already has `station_prices`. Apply only the new migration to this existing project; do not blindly replay unrelated old migrations:
 
-## Provider Details
+```sh
+npx --yes supabase@2.118.0 db query --linked --project-ref vjindchxfebaltbslqwc --file supabase/migrations/20260928160000_gas_price_service.sql
+npm run fuel:deploy
+```
 
-### TomTom
+`npm run test:fuel-cloud` checks app/cloud integration, provider contracts, price validation, cache behavior and repair policy. `npm run fuel:probe` exercises actual GasBuddy requests and database persistence/cache reads for all four grades in Tampa. `tests/fuelRepairQueue.sql` checks the real database threshold, exclusive claims, retry/completion and privilege restrictions inside a rolled-back transaction:
 
-TomTom uses a 3-step flow:
+```sh
+npx --yes supabase@2.118.0 db query --linked --project-ref vjindchxfebaltbslqwc --file tests/fuelRepairQueue.sql
+```
 
-1. Category search for nearby petrol stations
-2. Place lookup by `entityId`
-3. Fuel price lookup by `fuelPrice.id`
+Free plan limits still apply. Cloud cache hits are function invocations; local app cache hits avoid the function. This is an initial deployment, not a load test for tens of thousands of users. Keep the plan free until there is an explicit decision to upgrade.
 
-Important implementation detail:
-
-- The app uses TomTom category `7311` and the `petrol station` query to avoid irrelevant POIs.
-
-Known limitation:
-
-- If the TomTom key can search but does not have Fuel Prices entitlement, the search step still returns stations, but no price can be returned.
-
-### Barchart
-
-Barchart uses one request and returns station candidates with prices when a valid key is present.
-
-The app filters the result set to the active fuel type and picks the cheapest valid station from the payload.
-
-### Google Places
-
-Google uses `places:searchNearby` with:
-
-- `includedTypes: ["gas_station"]`
-- `rankPreference: "DISTANCE"`
-- `places.fuelOptions` in the field mask
-
-If `fuelOptions.fuelPrices` is present, the app normalizes it into a station quote and can use it as the main result.
-
-### Cardog
-
-Cardog is currently treated as an area-level source.
-
-It is fetched and shown in debug data, but it does not replace a missing station price on Home.
-
-### BLS, EIA, FRED
-
-These are public area-level sources.
-
-They are normalized for supplemental diagnostics and future comparison, but they do not drive the main price card.
-
-## Ranking Rules
-
-Ranking happens after normalization.
-
-The selection rule is intentionally strict:
-
-- Only non-estimated station-level quotes can win.
-- If multiple station-level quotes exist, the cheapest price wins.
-- If prices tie, the closer station wins.
-- If no station-level quote exists, the result is `null`.
-
-This behavior is implemented in `selectPreferredQuote()` in [src/services/fuel/core.js](/Users/anthonyh/Desktop/Fuel Up/src/services/fuel/core.js).
-
-## Cache Behavior
-
-The app uses two cache layers:
-
-- In-memory cache for fast reuse during the current session
-- AsyncStorage persistence across app launches
-
-Cache keys are built from:
-
-- Fuel type
-- Radius in miles
-- Rounded latitude
-- Rounded longitude
-
-This prevents minor coordinate jitter from constantly creating new cache entries.
-
-Current TTLs:
-
-- Station cache: 10 minutes
-- Area cache: 60 minutes
-
-The cache implementation lives in [src/services/fuel/cacheStore.js](/Users/anthonyh/Desktop/Fuel Up/src/services/fuel/cacheStore.js).
-
-## Home Screen Refresh Rules
-
-The Home screen logic lives in [app/(tabs)/index.js](/Users/anthonyh/Desktop/Fuel Up/app/(tabs)/index.js).
-
-Prices refresh in these cases:
-
-- On initial Home load
-- Whenever the Home tab becomes active again
-- When the top-left Reload button is tapped
-
-Refresh behavior:
-
-- Focus-based refreshes read cached data first, then fetch live
-- Manual Reload skips the cache-first display and forces a live refresh path
-
-If the fetch fails:
-
-- The visible quote is cleared
-- The user sees a specific failure message
-- Debug state is still captured
-
-## Failure Messaging
-
-The app distinguishes these failure categories:
-
-- Invalid manual coordinates
-- No station providers configured
-- Location returned no nearby stations
-- Providers found stations but returned no usable price
-
-The message selection logic lives in `getFuelFailureMessage()` in [src/services/fuel/core.js](/Users/anthonyh/Desktop/Fuel Up/src/services/fuel/core.js).
-
-## Debug Output
-
-Settings includes a Fuel Debug block that shows:
-
-- The active coordinates used for requests
-- Whether the location source is device or manual
-- The latest request input payload
-- Per-provider request URLs
-- Response payloads
-- HTTP errors
-- Provider-level failure categories
-
-Secrets are redacted from URLs before they are stored in debug state.
-
-Shared debug state lives in [src/AppStateContext.js](/Users/anthonyh/Desktop/Fuel Up/src/AppStateContext.js).
-
-## Manual Location Override
-
-Settings includes a manual latitude/longitude override.
-
-When set:
-
-- Home uses those exact coordinates instead of device GPS
-- The map animates to the manual location
-- Debug output marks the source as `manual`
-
-When cleared:
-
-- Home returns to device GPS
-
-## Environment Variables
-
-The app reads provider credentials from Expo public env vars:
-
-- `EXPO_PUBLIC_TOMTOM_API_KEY`
-- `EXPO_PUBLIC_BARCHART_API_KEY`
-- `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`
-- `EXPO_PUBLIC_CARDOG_API_KEY`
-- `EXPO_PUBLIC_EIA_API_KEY`
-- `EXPO_PUBLIC_FRED_API_KEY`
-
-These are read in [src/services/fuel/config.js](/Users/anthonyh/Desktop/Fuel Up/src/services/fuel/config.js).
-
-If env vars change while the app is running, restart the Expo dev server so the new values are loaded.
-
-## Test Coverage
-
-Contract tests for the aggregation layer live in [tests/fuelDataContracts.test.cjs](/Users/anthonyh/Desktop/Fuel Up/tests/fuelDataContracts.test.cjs).
-
-They currently verify:
-
-- TomTom request shape
-- Barchart request shape
-- Google request shape
-- Provider normalization
-- Station-only selection rules
-- Failure message classification
-- Cache key bucketing and TTL logic
-
-## Practical Notes
-
-- A provider returning station search results does not guarantee it can return a station price.
-- TomTom commonly fails at the Fuel Prices step if the key lacks entitlement, even when search works.
-- Google currently provides the strongest live station-price result when `fuelOptions` is available for a nearby station.
-- Area-level providers are useful for diagnostics, validation, and future feature work, but they are intentionally not used as the main fallback result.
+References: [Supabase regional invocation](https://supabase.com/docs/guides/functions/regional-invocation), [Codex non-interactive execution](https://learn.chatgpt.com/docs/non-interactive-mode).

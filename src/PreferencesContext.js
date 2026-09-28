@@ -10,7 +10,7 @@ const STORAGE_KEY = '@fuelup/preferences';
 const DEFAULT_PREFERENCES = {
     searchRadiusMiles: 10,
     preferredOctane: 'regular', // 'regular' | 'midgrade' | 'premium' | 'diesel'
-    preferredProvider: 'gasbuddy', // 'gasbuddy' | 'all'
+    preferredProvider: 'gasbuddy', // GasBuddy is the sole live provider
     minimumRating: 0, // 0 = no filter
     navigationApp: 'apple-maps', // 'apple-maps' | 'google-maps'
     debugClusterAnimations: false,
