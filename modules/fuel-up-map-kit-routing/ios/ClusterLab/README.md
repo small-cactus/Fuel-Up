@@ -41,8 +41,9 @@ use plain rounded system-background pills.
 ## Shared cluster motion
 
 A station contributes one mass unit. On contact, the incoming pill and receiving
-cluster share a mass-weighted velocity; bounded viscous loss prevents runaway
-energy. Both the main price and count move together. On an actual partition,
+cluster share a mass-weighted velocity; contact retains 85% of incoming velocity
+for a softer connection, and bounded viscous loss prevents runaway energy.
+Both the main price and count move together. On an actual partition,
 equal-and-opposite impulses go to the departing mass and remaining mass. A whole
 cluster merging into another cluster does not falsely trigger release impulses.
 

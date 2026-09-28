@@ -264,7 +264,8 @@ final class ClusterLabRenderer {
             (1 / CGFloat(deltaTime)) + motion.reaction.velocity).limited(to: 1200)
           let mass = CGFloat(connectedMasses[motion.owner] ?? 1)
           connectedMasses[motion.owner] = Int(mass) + 1
-          let shared = ClusterLabDynamics.mergedVelocity(target: owner.reaction.velocity, incoming: incoming, targetMass: mass)
+          let shared = ClusterLabDynamics.mergedVelocity(target: owner.reaction.velocity,
+            incoming: incoming * ClusterLabDynamics.connectionVelocityRetention, targetMass: mass)
           // Both connected surfaces inherit the same impact velocity. Native
           // glass continues to merge them inside the single shared container.
           let common = motion.reaction.limitedVelocity(owner.reaction.limitedVelocity(shared))

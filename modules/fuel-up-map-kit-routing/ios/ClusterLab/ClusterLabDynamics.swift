@@ -53,6 +53,9 @@ struct LabSpringBody {
 }
 
 enum ClusterLabDynamics {
+  // Soften incoming contact energy without slowing the magnetic return.
+  static let connectionVelocityRetention: CGFloat = 0.85
+
   static func mergedVelocity(target: LabVector, incoming: LabVector, targetMass: CGFloat, incomingMass: CGFloat = 1) -> LabVector {
     (target * targetMass + incoming * incomingMass) * (1 / max(1, targetMass + incomingMass))
   }
