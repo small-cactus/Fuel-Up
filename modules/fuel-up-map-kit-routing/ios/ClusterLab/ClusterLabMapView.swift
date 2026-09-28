@@ -16,6 +16,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   private var lastTimestamp: CFTimeInterval = 0
   private var active = false
   private var origin: CLLocationCoordinate2D?
+  private var latestOriginValue: [String: Double]?
   private var observers: [NSObjectProtocol] = []
   private var pendingProbe: String?
   private var lastProbe: String?
@@ -55,10 +56,10 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
 
   override func layoutSubviews() {
     super.layoutSubviews()
-    map.frame = bounds
     // Parent covers every visible pill and its offscreen approach. Extra space
     // includes the whole 84-point shell, refraction, and the +n displacement.
     renderer.container.frame = bounds.insetBy(dx: -256, dy: -256)
+    map.frame = bounds
     refresh()
   }
 
@@ -77,9 +78,15 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
 
   func restoreStationsAfterProbe() { renderer.setStations(latestStations) }
 
+  func restoreOriginAfterProbe() {
+    if let latestOriginValue { setOrigin(latestOriginValue) }
+  }
+
   func setOrigin(_ value: [String: Double]) {
-    guard probe == nil, let latitude = value["latitude"], let longitude = value["longitude"],
+    guard let latitude = value["latitude"], let longitude = value["longitude"],
           CLLocationCoordinate2DIsValid(.init(latitude: latitude, longitude: longitude)) else { return }
+    latestOriginValue = value
+    guard probe == nil else { return }
     if let origin, abs(origin.latitude - latitude) < 0.00001 && abs(origin.longitude - longitude) < 0.00001 { return }
     origin = .init(latitude: latitude, longitude: longitude)
     map.setRegion(.init(center: origin!, span: .init(latitudeDelta: 0.06, longitudeDelta: 0.06)), animated: false)
@@ -100,11 +107,18 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     }
   }
 
+  func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) { renderer.cameraBegan() }
+
   func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) { refresh() }
-  func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) { refresh() }
+  func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) { renderer.cameraEnded(); refresh() }
+
+  private var hasValidLayout: Bool {
+    bounds.width > 0 && bounds.height > 0 && map.bounds.size == bounds.size &&
+      renderer.container.frame == bounds.insetBy(dx: -256, dy: -256)
+  }
 
   func refresh() {
-    guard active, window != nil, bounds.width > 0, UIApplication.shared.applicationState != .background else { return }
+    guard active, window != nil, hasValidLayout, UIApplication.shared.applicationState != .background else { return }
     renderer.reconcile(map: map)
     let moving = renderer.render(map: map, deltaTime: 0)
     if moving || probe != nil { startFrames() }
@@ -141,7 +155,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   }
 
   private func startPendingProbe() {
-    guard active, window != nil, bounds.width > 0, let token = pendingProbe, probe == nil else { return }
+    guard active, window != nil, hasValidLayout, let token = pendingProbe, probe == nil else { return }
     pendingProbe = nil; lastProbe = token
     probe = ClusterLabProbe(view: self, token: token)
     probe?.start()

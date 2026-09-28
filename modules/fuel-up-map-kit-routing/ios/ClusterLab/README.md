@@ -19,7 +19,11 @@ the count duplicate at exactly the count's location, then reuses that view as it
 final price pill. Position, dimensions, and content share the same progression.
 Glass and glass ancestors always keep alpha 1; only label content crossfades.
 
-Motion is retargeted from its current map coordinate and screen offset. MapKit's
+Motion is retargeted from its current map coordinate and screen offset. Its
+80–220 ms duration follows measured camera velocity and elapsed movement time.
+Camera completion shortens remaining travel to 80 ms without changing the current
+pose. An elapsed-time ease-out curve adds a distance-scaled rebound capped at three
+points. There is no fixed points-per-frame speed limit or trailing exponential tail. MapKit's
 projection is read natively during camera changes, including rotation; there is no
 JS camera-event loop. The display link sleeps when settled, unfocused, detached,
 or backgrounded. Reduced Motion resolves transitions immediately. Older systems
@@ -46,8 +50,9 @@ exports actual native view frames, transition events, and reset geometry to
 `Documents/cluster-lab-probe.json`, then restores real stations and the camera.
 Leaving the tab cancels the probe and reports cancellation as a failure.
 
-The native gate checks the two-point animation contribution per rendered frame,
-handoff alignment, container bounds, view count, and reset geometry. Camera
-movement is projected separately; the two-point limit is not a camera speed cap.
+The native gate checks completion within 300 ms (including scheduling allowance),
+exact handoff alignment, container bounds, view count, and reset geometry. It
+reports actual frame travel rather than restricting gesture speed. Pure Swift
+checks exercise timing and rebound across travel distances and frame rates.
 This is additional coverage. It does not replace or weaken the existing Home
 `tests/clusterProbe.integration.test.cjs` gate or its JSON export.

@@ -44,11 +44,19 @@ enum ClusterLabGeometry {
     return Dictionary(uniqueKeysWithValues: sorted.indices.map { (sorted[$0].id, sorted[root($0)].id) })
   }
 
-  // Bound animation's contribution to movement to two points per displayed
-  // frame. Map movement is projected separately and never smoothed or delayed.
-  static func fraction(distance: CGFloat, deltaTime: Double, reducedMotion: Bool) -> CGFloat {
-    if reducedMotion || distance < 0.08 { return 1 }
-    let eased = 1 - exp(-max(0, min(deltaTime, 1.0 / 30)) * 18)
-    return min(CGFloat(eased), min(2, CGFloat(deltaTime * 120)) / max(distance, 0.001))
+  // Follow the observed camera movement, with a bounded settling time instead
+  // of a speed cap that makes distant destinations trail behind the gesture.
+  static func duration(distance: CGFloat, speed: CGFloat, movementDuration: Double) -> Double {
+    min(0.22, max(0.08, min(movementDuration, Double(distance / max(speed, 1)))))
+  }
+
+  // Ease-out back with distance-scaled rebound (at most three screen points).
+  // Both endpoints are exact; elapsed time, not frame count, drives progress.
+  static func progress(elapsed: Double, duration: Double, distance: CGFloat) -> CGFloat {
+    let t = CGFloat(min(1, max(0, elapsed / max(duration, 0.001))))
+    if t == 0 || t == 1 { return t }
+    let rebound = min(0.7, pow(3 / max(distance, 1) * 27 / 4, 1.0 / 3))
+    let u = t - 1
+    return 1 + (rebound + 1) * u * u * u + rebound * u * u
   }
 }

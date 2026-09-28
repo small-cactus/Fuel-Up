@@ -4,7 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { readFileSync } = require('node:fs');
 const path = require('node:path');
 
-test('Swift Glass Lab renders bounded transitions and preserves native container geometry', { timeout: 90000 }, async t => {
+test('Swift Glass Lab renders timely transitions and preserves native container geometry', { timeout: 90000 }, async t => {
     const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
     const token = `native-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
@@ -32,12 +32,21 @@ test('Swift Glass Lab renders bounded transitions and preserves native container
         assert.ok(frame.viewCount <= frame.stationCount + 1, 'unbounded temporary glass views');
         for (const view of frame.views) {
             assert.ok(view.contained, `clipped container edge: ${view.id}`);
-            assert.ok((view.step || 0) <= 2.00001, `animation step exceeded 2pt: ${view.step}`);
+            assert.ok(Number.isFinite(view.x) && Number.isFinite(view.y), 'invalid rendered position');
         }
     }
     for (const event of report.events.filter(event => event.type.endsWith('handoff'))) {
         assert.ok(event.delta <= 0.12, `handoff moved ${event.delta}pt`);
     }
+    const arrivals = report.events.filter(event => event.type === 'merge-arrive' || event.type === 'split-handoff');
+    for (const event of arrivals) {
+        assert.ok(event.duration <= 0.30, `transition trailed the gesture: ${event.duration}s`);
+    }
+    const maxDuration = Math.max(...arrivals.map(event => event.duration));
+    const maxStep = Math.max(...report.samples.flatMap(frame => frame.views.map(view => view.step || 0)));
+    t.diagnostic(`Longest transition ${Math.round(maxDuration * 1000)}ms; maximum measured travel ${maxStep.toFixed(2)}pt/frame`);
+    assert.equal(report.baseline.length, 6, 'initial fixture did not fully separate');
+    assert.equal(report.final.length, 6, 'reset fixture did not fully separate');
     const final = new Map(report.final.map(view => [view.id, view]));
     for (const before of report.baseline) {
         const after = final.get(before.id);

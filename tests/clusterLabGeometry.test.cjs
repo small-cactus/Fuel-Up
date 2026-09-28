@@ -5,7 +5,7 @@ const { mkdtempSync, writeFileSync, rmSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const path = require('node:path');
 
-test('native clustering preserves identities, boundary hysteresis, and bounded motion', () => {
+test('native clustering preserves identities, boundary hysteresis, and gesture-timed motion', () => {
     const directory = mkdtempSync(path.join(tmpdir(), 'fuelup-glass-geometry-'));
     try {
         const main = path.join(directory, 'main.swift');
@@ -26,13 +26,26 @@ assert(ClusterLabGeometry.owners(separate, previous: merged)["b"] == "b")
 assert(ClusterLabGeometry.owners([station("b", 3, 0), station("a", 3, 0)], previous: [:])["b"] == "a")
 assert(ClusterLabGeometry.owners([station("a", 3, -104), station("b", 4, -21)], previous: [:])["b"] == "a")
 for distance in stride(from: 0.1, through: 1000, by: 0.5) {
-  for dt in [1.0/120, 1.0/60, 0.1] {
-    let fraction = ClusterLabGeometry.fraction(distance: distance, deltaTime: dt, reducedMotion: false)
-    assert(fraction > 0 && fraction <= 1)
-    assert(distance * fraction <= 2.000001)
+  for speed in [CGFloat(0), 200, 1000, 5000] {
+    let duration = ClusterLabGeometry.duration(distance: distance, speed: speed, movementDuration: 0.18)
+    assert(duration >= 0.08 && duration <= 0.18)
+    assert(ClusterLabGeometry.progress(elapsed: 0, duration: duration, distance: distance) == 0)
+    assert(ClusterLabGeometry.progress(elapsed: duration, duration: duration, distance: distance) == 1)
+    for t in stride(from: 0.0, through: duration, by: duration / 100) {
+      let p = ClusterLabGeometry.progress(elapsed: t, duration: duration, distance: distance)
+      assert(p >= 0 && (p - 1) * distance <= 3.000001)
+    }
+    // At 60 and 120 Hz the exact destination is reached within one frame of
+    // the same deadline, even after a delayed frame. No distance-based tail.
+    for dt in [1.0/120, 1.0/60, 0.1] {
+      let finish = ceil(duration / dt) * dt
+      assert(ClusterLabGeometry.progress(elapsed: finish, duration: duration, distance: distance) == 1)
+    }
   }
 }
-assert(ClusterLabGeometry.fraction(distance: 100, deltaTime: 1.0/60, reducedMotion: true) == 1)
+assert(ClusterLabGeometry.duration(distance: 200, speed: 5000, movementDuration: 0.5) <
+       ClusterLabGeometry.duration(distance: 200, speed: 200, movementDuration: 0.5))
+assert(ClusterLabGeometry.duration(distance: 1000, speed: 0, movementDuration: 10) == 0.22)
 print("native geometry passed")
 `);
         const binary = path.join(directory, 'geometry-test');

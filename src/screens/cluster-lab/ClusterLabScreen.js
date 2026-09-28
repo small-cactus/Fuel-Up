@@ -1,12 +1,12 @@
 import React from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
-import { requireNativeView } from 'expo-modules-core';
+import { requireNativeViewManager } from 'expo-modules-core';
 import { useLocalSearchParams } from 'expo-router';
 import { useIsFocused } from '@react-navigation/native';
 import { useTheme } from '../../ThemeContext';
 import useClusterLabStations from './useClusterLabStations';
 
-const NativeMap = Platform.OS === 'ios' ? requireNativeView('FuelUpMapKitRouting') : null;
+const NativeMap = Platform.OS === 'ios' ? requireNativeViewManager('FuelUpMapKitRouting') : null;
 const EMPTY_ORIGIN = {};
 
 export default function ClusterLabScreen() {

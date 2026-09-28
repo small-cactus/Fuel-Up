@@ -67,6 +67,7 @@ final class ClusterLabProbe {
     view.probe = nil
     view.restoreStationsAfterProbe()
     view.map.setRegion(savedRegion, animated: false)
+    view.restoreOriginAfterProbe()
     view.refresh()
   }
 }
