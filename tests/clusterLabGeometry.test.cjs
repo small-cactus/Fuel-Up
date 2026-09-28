@@ -10,10 +10,18 @@ test('native clustering preserves identities, boundary hysteresis, and gesture-t
     try {
         const main = path.join(directory, 'main.swift');
         writeFileSync(main, `import Foundation
+import CoreGraphics
 func station(_ id: String, _ price: Double, _ x: Double, _ y: Double = 0) -> LabProjectedStation {
   LabProjectedStation(id: id, price: price, point: CGPoint(x: x, y: y))
 }
 let separate = [station("a", 3, 0), station("b", 4, 144)]
+let priceFrame = CGRect(x: -42, y: -16, width: 84, height: 32)
+assert(ClusterLabGeometry.capsuleGap(priceFrame, CGRect(x: 34, y: -16, width: 44, height: 32)) == 0)
+assert(ClusterLabGeometry.capsuleGap(priceFrame, priceFrame.offsetBy(dx: 120, dy: 0)) == 36)
+assert(ClusterLabGeometry.capsuleGap(priceFrame, priceFrame.offsetBy(dx: 0, dy: 56)) == 24)
+let diagonalGap = ClusterLabGeometry.capsuleGap(priceFrame, priceFrame.offsetBy(dx: 84, dy: 32))
+assert(abs(diagonalGap - (hypot(32, 32) - 32)) < 0.000001)
+assert(ClusterLabGeometry.capsuleGap(priceFrame.offsetBy(dx: 84, dy: 32), priceFrame) == diagonalGap)
 assert(ClusterLabGeometry.owners(separate, previous: [:]) == ["a": "a", "b": "b"])
 let contact = [station("a", 3, 0), station("b", 4, 83), station("c", 5, 162)]
 let merged = ClusterLabGeometry.owners(contact, previous: [:])

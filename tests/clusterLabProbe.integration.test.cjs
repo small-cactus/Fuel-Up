@@ -25,7 +25,7 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     assert.equal(report.stagesCompleted, 11);
     assert.ok(report.samples.length >= 250, 'insufficient live frame coverage');
     const types = new Set(report.events.map(event => event.type));
-    for (const type of ['merge-start', 'merge-arrive', 'merge-handoff', 'split-spawn', 'split-handoff', 'merge-impulse', 'split-impulse', 'contact-catch']) {
+    for (const type of ['merge-start', 'merge-arrive', 'merge-handoff', 'split-spawn', 'split-handoff', 'merge-impulse', 'split-impulse', 'split-stretch', 'contact-catch']) {
         assert.ok(types.has(type), `missing ${type}`);
     }
     for (const frame of report.samples) {
@@ -58,7 +58,14 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     assert.ok(primaryTravel > 4, `main price stayed pinned: ${primaryTravel}pt`);
     for (const event of report.events.filter(event => event.type === 'split-impulse')) {
         assert.ok(event.delta < 0.00001, 'split impulse did not balance across masses');
+        assert.ok(event.stretchDuration >= 0.025, 'recoil fired before visible separation');
+        assert.ok(event.gap >= 27 || event.arrived, 'recoil fired before the native neck stretched');
     }
+    const stretching = report.samples.flatMap(frame => frame.views).filter(view => view.stretchGap > 0 && view.stretchGap < 27);
+    assert.ok(stretching.length >= 2, 'no live separated frames before release recoil');
+    const releaseGaps = report.events.filter(event => event.type === 'split-impulse').map(event => event.gap);
+    assert.ok(releaseGaps.some(gap => gap >= 27), 'all releases bypassed visible stretch');
+    t.diagnostic(`Native stretch: ${stretching.length} separated samples before recoil; release gaps ${releaseGaps.map(gap => gap.toFixed(1)).join(', ')}pt`);
     for (const kind of ['merge-impulse', 'split-impulse']) {
         const visibleResponse = report.events.filter(event => event.type === kind).some(event =>
             report.samples.some(frame => frame.time > event.time && frame.time < event.time + 0.3 &&

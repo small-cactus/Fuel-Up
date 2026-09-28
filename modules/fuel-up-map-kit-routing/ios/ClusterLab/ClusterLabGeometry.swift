@@ -1,4 +1,5 @@
 import Foundation
+import CoreGraphics
 
 // Pure screen-space broad phase. Stable price/ID order chooses the cheapest
 // representative. Hysteresis prevents membership chatter at a contact boundary.
@@ -13,10 +14,21 @@ enum ClusterLabGeometry {
   static let badgeWidth: CGFloat = 44
   static let badgeOffset: CGFloat = 56
   static let overscan: CGFloat = 160
-  static let containerPadding: CGFloat = 336
+  static let containerPadding: CGFloat = 360
   static let maximumRebound: CGFloat = 18
   static let disconnectRange = CGSize(width: 120, height: 56)
-  static let glassSpacing: CGFloat = 18
+  static let glassSpacing: CGFloat = 36
+  // Keep the already-tuned connection impulse inside the longer native neck.
+  static let impactSpacing: CGFloat = 18
+
+  // Exact edge distance for the horizontal capsules, including their rounded
+  // ends. A diagonal separation must not release on a rectangular corner gap.
+  static func capsuleGap(_ a: CGRect, _ b: CGRect) -> CGFloat {
+    let radiusSum = (a.height + b.height) / 2
+    let segmentSum = max(0, (a.width - a.height) / 2) + max(0, (b.width - b.height) / 2)
+    let dx = max(0, abs(a.midX - b.midX) - segmentSum)
+    return max(0, hypot(dx, a.midY - b.midY) - radiusSum)
+  }
 
   static func owners(_ stations: [LabProjectedStation], previous: [String: String]) -> [String: String] {
     let sorted = stations.sorted { $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price }

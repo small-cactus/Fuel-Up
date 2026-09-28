@@ -12,11 +12,12 @@ station identity, projection, reversible motion, and atomic handoffs.
 `ClusterLabGlass` uses the installed Callstack library's public Swift glass views.
 The shared native container uses Apple's `UIGlassContainerEffect`; it does not
 draw an imitation or place glass in MapKit annotation snapshots. Native glass
-spacing is 18 pt, letting the connecting neck stretch farther before detaching.
-Contact detection uses that same spacing; the catch and rebound curves are unchanged.
+spacing is 36 pt, letting the connecting neck stretch farther before detaching.
+Connection impulses keep the previously tuned 18-point contact band inside this
+longer native neck; the catch and rebound curves are unchanged.
 
 Only visible stations and a 160-point approach margin participate. One container
-extends 336 points beyond all map edges, including refraction and badge travel.
+extends 360 points beyond all map edges, including refraction and badge travel.
 Settled groups retain a price and count view, not hidden views for each member.
 The first arriving mover becomes the count view in place. Further movers are
 removed in the same transaction that increments the count. Splitting materializes
@@ -46,7 +47,12 @@ A station contributes one mass unit. On contact, the incoming pill and receiving
 cluster share a mass-weighted velocity; contact retains 85% of incoming velocity
 for a softer connection, and bounded viscous loss prevents runaway energy.
 Both the main price and count move together. On an actual partition,
-equal-and-opposite impulses go to the departing mass and remaining mass. A whole
+equal-and-opposite impulses go to the departing mass and remaining mass. The
+recoil waits for the actual rendered capsule edges to separate by 27 pt (or for
+the pill to arrive), rather than firing while the split copies still overlap.
+This gives the native glass a visible stretching phase. The release retains the
+same impulse strength and flight deadline. Reversals discard the pending release,
+camera-end retiming preserves it, and Reduced Motion clears it. A whole
 cluster merging into another cluster does not falsely trigger release impulses.
 
 At contact, the incoming pill briefly resists while the receiving cluster takes
@@ -55,8 +61,8 @@ its momentum. A smooth local clock adjustment slows then catches up over at most
 a smooth spatial limit keeps the visible lag below 6 pt even on fast arrivals.
 The clock never stops or reverses, and position/velocity/acceleration remain continuous
 at both ends. The native glass neck gets a moment to stretch without adding a
-second bounce, extra views, or a later completion. Splits and the rebound curve
-are unchanged. Retargeting clears the catch and starts from the current pose;
+second bounce, extra views, or a later completion. The contact catch leaves the
+rebound curve untouched. Retargeting clears the catch and starts from the current pose;
 Reduced Motion skips it.
 
 The screen-space spring offset is added to the live MapKit projection. Its exact

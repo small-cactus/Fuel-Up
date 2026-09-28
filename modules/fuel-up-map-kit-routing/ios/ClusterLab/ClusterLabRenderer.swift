@@ -20,6 +20,14 @@ struct ClusterLabStation: Equatable {
   }
 }
 
+private struct LabPendingRelease {
+  let parent: String
+  let direction: LabVector
+  let speed: CGFloat
+  let mass: CGFloat
+  let startedAt: Double
+}
+
 private final class LabStationMotion {
   let station: ClusterLabStation
   var owner: String
@@ -45,6 +53,7 @@ private final class LabStationMotion {
   var displayedReactionVelocity = LabVector.zero
   var impactApplied = false
   var contactCatch: LabContactCatch?
+  var pendingRelease: LabPendingRelease?
 
   func begin(duration: Double, travel: CGFloat, speed: CGFloat, restarting: Bool = false) {
     startPoint = point; startOffset = offset; startWidth = width; startMix = priceMix
@@ -53,7 +62,7 @@ private final class LabStationMotion {
     // A new trajectory starts from the current visible pose. Never carry a
     // delayed clock into a reversal or a camera-end retiming.
     contactCatch = nil
-    if !restarting { startedAt = curveStartedAt; impactApplied = false }
+    if !restarting { startedAt = curveStartedAt; impactApplied = false; pendingRelease = nil }
   }
 
   init(_ station: ClusterLabStation) {
@@ -195,14 +204,11 @@ final class ClusterLabRenderer {
       if !motion.settled && motion.pill == nil { _ = makePill(motion) }
     }
     for release in releases {
-      guard let parent = motions[release.parent], let child = motions[release.child] else { continue }
+      guard motions[release.parent] != nil, let child = motions[release.child] else { continue }
       let mass = CGFloat(nextMasses[release.parent] ?? 1)
-      let before = parent.reaction.velocity * mass + child.reaction.velocity
-      _ = ClusterLabDynamics.release(parent: &parent.reaction, child: &child.reaction,
-        direction: release.direction, speed: release.speed, remainingMass: mass)
-      let after = parent.reaction.velocity * mass + child.reaction.velocity
-      event("split-impulse", id: release.child, delta: (after - before).length,
-            details: ["owner": release.parent, "remainingMass": mass])
+      child.pendingRelease = LabPendingRelease(parent: release.parent, direction: release.direction,
+        speed: release.speed, mass: mass, startedAt: now)
+      event("split-stretch", id: release.child, details: ["owner": release.parent])
     }
     owners = nextOwners
   }
@@ -213,6 +219,7 @@ final class ClusterLabRenderer {
     var samples: [[String: Any]] = []
     let reducedMotion = UIAccessibility.isReduceMotionEnabled
     for motion in motions.values {
+      if reducedMotion { motion.pendingRelease = nil }
       if motion.owner == motion.station.id || !motion.settled {
         motion.reaction.advance(deltaTime, reducedMotion: reducedMotion)
       } else { motion.reaction = LabSpringBody() }
@@ -269,8 +276,8 @@ final class ClusterLabRenderer {
         // The impact happens on contact, not after the travelling pill vanishes.
         let contactX = abs(point.x + motion.reaction.offset.x - target.x - owner.reaction.offset.x)
         let contactY = abs(point.y + motion.reaction.offset.y - target.y - owner.reaction.offset.y)
-        if contactX <= (motion.width + ClusterLabGeometry.badgeWidth) / 2 + ClusterLabGeometry.glassSpacing &&
-           contactY <= ClusterLabGeometry.pillSize.height + ClusterLabGeometry.glassSpacing {
+        if contactX <= (motion.width + ClusterLabGeometry.badgeWidth) / 2 + ClusterLabGeometry.impactSpacing &&
+           contactY <= ClusterLabGeometry.pillSize.height + ClusterLabGeometry.impactSpacing {
           motion.contactCatch = LabContactCatch(elapsed: motion.elapsed, outwardDuration: motion.duration * 0.68)
           if let contact = motion.contactCatch, contact.duration > 0 {
             event("contact-catch", id: id, duration: contact.duration,
@@ -368,8 +375,42 @@ final class ClusterLabRenderer {
                         "contained": container.bounds.contains(badge.view.frame)])
       }
     }
+    // First let the existing native glass surfaces pull apart. Apply the same
+    // balanced recoil only after visible edge separation, not at membership
+    // change while the two copies still occupy the exact same position.
+    if deltaTime > 0 {
+      for id in motions.keys.sorted() {
+        guard let child = motions[id], let release = child.pendingRelease else { continue }
+        guard !reducedMotion, let parent = motions[release.parent],
+              let childView = child.pill?.view, let parentView = parent.pill?.view else {
+          child.pendingRelease = nil
+          continue
+        }
+        var gap = ClusterLabGeometry.capsuleGap(childView.frame, parentView.frame)
+        if let badge = badges[release.parent] {
+          gap = min(gap, ClusterLabGeometry.capsuleGap(childView.frame, badge.view.frame))
+        }
+        let age = CACurrentMediaTime() - release.startedAt
+        if recording, let index = samples.firstIndex(where: { $0["id"] as? String == id }) {
+          samples[index]["stretchGap"] = gap
+          samples[index]["stretchAge"] = age
+        }
+        guard (gap >= ClusterLabGeometry.glassSpacing * 0.75 && age >= 0.025) || child.settled else { continue }
+        let before = parent.reaction.velocity * release.mass + child.reaction.velocity
+        let oldParentVelocity = parent.reaction.velocity, oldChildVelocity = child.reaction.velocity
+        _ = ClusterLabDynamics.release(parent: &parent.reaction, child: &child.reaction,
+          direction: release.direction, speed: release.speed, remainingMass: release.mass)
+        parent.displayedReactionVelocity = parent.displayedReactionVelocity + parent.reaction.velocity - oldParentVelocity
+        child.displayedReactionVelocity = child.displayedReactionVelocity + child.reaction.velocity - oldChildVelocity
+        let after = parent.reaction.velocity * release.mass + child.reaction.velocity
+        event("split-impulse", id: id, delta: (after - before).length,
+          details: ["owner": release.parent, "remainingMass": release.mass,
+                    "gap": gap, "stretchDuration": age, "arrived": child.settled])
+        child.pendingRelease = nil
+      }
+    }
     animating = animating || motions.values.contains {
-      ($0.owner == $0.station.id || !$0.settled) && $0.reaction.isMoving
+      $0.pendingRelease != nil || (($0.owner == $0.station.id || !$0.settled) && $0.reaction.isMoving)
     }
     CATransaction.commit()
     if recording {
