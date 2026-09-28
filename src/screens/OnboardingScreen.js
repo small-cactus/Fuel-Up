@@ -307,25 +307,24 @@ export default function OnboardingScreen() {
                 </View>
 
                 <View style={styles.continueActions}>
-                    <Pressable testID="onboarding-continue" accessibilityRole="button" accessibilityState={{ busy: isRequestingPermission, disabled: isRequestingPermission }} disabled={isRequestingPermission} onPress={handleContinue} style={styles.continueButton}>
+                    <Pressable testID="onboarding-continue" accessibilityRole="button" accessibilityValue={{ text: `${currentStep + 1} of ${totalSteps}` }} accessibilityState={{ busy: isRequestingPermission, disabled: isRequestingPermission }} disabled={isRequestingPermission} onPress={handleContinue} style={styles.continueButton}>
                         <GlassView
                             effect="regular"
                             tintColor="#007AFF"
-                            interactive
-                            style={styles.continueGlass}
-                        >
-                            <ContinueButtonContent
-                                text={isLastStep ? 'Get Started' : (
-                                    currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? getLocationActionLabel(locationPermissionState) :
-                                        currentStep === 3 && notifPermissionStatus !== 'granted' ? 'Enable Notifications' : 'Continue'
-                                )}
-                                icon={isLastStep ? 'checkmark' : (
-                                    currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? 'location.fill' :
-                                        currentStep === 3 && notifPermissionStatus !== 'granted' ? 'bell.fill' : 'arrow.right'
-                                )}
-                                isDark={isDark}
-                            />
-                        </GlassView>
+                            pointerEvents="none"
+                            style={[StyleSheet.absoluteFillObject, styles.continueGlass]}
+                        />
+                        <ContinueButtonContent
+                            text={isLastStep ? 'Get Started' : (
+                                currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? getLocationActionLabel(locationPermissionState) :
+                                    currentStep === 3 && notifPermissionStatus !== 'granted' ? 'Enable Notifications' : 'Continue'
+                            )}
+                            icon={isLastStep ? 'checkmark' : (
+                                currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? 'location.fill' :
+                                    currentStep === 3 && notifPermissionStatus !== 'granted' ? 'bell.fill' : 'arrow.right'
+                            )}
+                            isDark={isDark}
+                        />
                     </Pressable>
                     {canSkipPermission && (
                         <Pressable testID="onboarding-permission-skip" accessibilityRole="button"
@@ -409,10 +408,12 @@ const styles = StyleSheet.create({
     fontWeight: '500'
   },
   continueButton: {
+    minHeight: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
     width: '100%'
   },
   continueGlass: {
-    paddingVertical: 18,
     borderRadius: 20,
     overflow: 'hidden'
   },

@@ -1,0 +1,92 @@
+{
+  "flow": "home-card-swap",
+  "device": "E5661CAA-BB65-4806-879A-D00C553836E7",
+  "executionPrerequisite": "Home is loaded with at least two stations, cheapest card selected, GPS and map settled. Swipe the station carousel, return to the first card. Price cards occupy the lower map area; horizontal gestures target their center.",
+  "ok": true,
+  "passed": 4,
+  "failed": 0,
+  "skipped": 0,
+  "errored": 0,
+  "steps": [
+    {
+      "index": 0,
+      "kind": "tool",
+      "flow": "home-card-swap",
+      "status": "pass",
+      "tool": "gesture-swipe",
+      "result": {
+        "swiped": true,
+        "timestampMs": 1790619438464
+      },
+      "args": {
+        "fromX": 0.81,
+        "fromY": 0.78,
+        "toX": 0.2,
+        "toY": 0.78,
+        "durationMs": 450,
+        "udid": "E5661CAA-BB65-4806-879A-D00C553836E7"
+      },
+      "durationMs": 586
+    },
+    {
+      "index": 1,
+      "kind": "tool",
+      "flow": "home-card-swap",
+      "status": "pass",
+      "tool": "await-ui-element",
+      "result": {
+        "success": true,
+        "elapsed": 729
+      },
+      "args": {
+        "condition": "visible",
+        "selector": {
+          "text": "Reset to Cheapest"
+        },
+        "udid": "E5661CAA-BB65-4806-879A-D00C553836E7"
+      },
+      "durationMs": 730
+    },
+    {
+      "index": 2,
+      "kind": "tool",
+      "flow": "home-card-swap",
+      "status": "pass",
+      "tool": "gesture-swipe",
+      "result": {
+        "swiped": true,
+        "timestampMs": 1790619439779
+      },
+      "args": {
+        "fromX": 0.2,
+        "fromY": 0.78,
+        "toX": 0.81,
+        "toY": 0.78,
+        "durationMs": 450,
+        "udid": "E5661CAA-BB65-4806-879A-D00C553836E7"
+      },
+      "durationMs": 529
+    },
+    {
+      "index": 3,
+      "kind": "tool",
+      "flow": "home-card-swap",
+      "status": "pass",
+      "tool": "await-ui-element",
+      "result": {
+        "success": true,
+        "elapsed": 1592
+      },
+      "args": {
+        "condition": "hidden",
+        "selector": {
+          "text": "Reset to Cheapest"
+        },
+        "udid": "E5661CAA-BB65-4806-879A-D00C553836E7"
+      },
+      "durationMs": 1592
+    }
+  ],
+  "startedAt": 1790619438333,
+  "durationMs": 3693
+}

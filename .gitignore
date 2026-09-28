@@ -45,3 +45,6 @@ supabase/.temp/
 supabase/.branches/
 supabase/functions/gas-prices-candidate/
 .env
+
+# Raw device recordings; reviewed clips live under docs/qa/evidence
+/.argent/recordings/

@@ -1,0 +1,295 @@
+TAP version 13
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: brand requests use real coordinates and discard results after radius/grade changes or unmount
+ok 1 - brand requests use real coordinates and discard results after radius/grade changes or unmount
+  ---
+  duration_ms: 183.358708
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: brand requests expose unavailable location, empty results, and retryable failure
+ok 2 - brand requests expose unavailable location, empty results, and retryable failure
+  ---
+  duration_ms: 45.099709
+  ...
+# Subtest: native brand toggles preserve rapid selections, and local search does not replace selection
+ok 3 - native brand toggles preserve rapid selections, and local search does not replace selection
+  ---
+  duration_ms: 76.197459
+  ...
+# Subtest: spatial and persisted caches never reuse unrestricted coverage for E85 or vice versa
+ok 4 - spatial and persisted caches never reuse unrestricted coverage for E85 or vice versa
+  ---
+  duration_ms: 281.339792
+  ...
+# (node:45466) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/.codex/worktrees/brand-preferences-qa/Fuel%20Up/src/lib/onboardingFlow.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/.codex/worktrees/brand-preferences-qa/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: onboarding flow places optional brand preferences after fuel grade
+ok 5 - onboarding flow places optional brand preferences after fuel grade
+  ---
+  duration_ms: 0.627042
+  ...
+# Subtest: onboarding only commits radius and octane on their respective steps
+ok 6 - onboarding only commits radius and octane on their respective steps
+  ---
+  duration_ms: 0.558958
+  ...
+# Subtest: onboarding translucency stays limited to the intended steps
+ok 7 - onboarding translucency stays limited to the intended steps
+  ---
+  duration_ms: 0.272708
+  ...
+# (node:45467) ExperimentalWarning: CommonJS module /Users/anthonyh/.codex/worktrees/brand-preferences-qa/Fuel Up/tests/onboardingInteraction.test.cjs is loading ES Module /Users/anthonyh/.codex/worktrees/brand-preferences-qa/Fuel Up/src/lib/preferencesStore.js using require().
+# Support for loading ES Module in require() is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:45467) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/.codex/worktrees/brand-preferences-qa/Fuel%20Up/src/lib/fuelSearchState.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/.codex/worktrees/brand-preferences-qa/Fuel Up/package.json.
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: onboarding swipes then Get Started save the actual Regular selection
+ok 8 - onboarding swipes then Get Started save the actual Regular selection
+  ---
+  duration_ms: 393.607
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: onboarding swipes then Get Started save the actual Midgrade selection
+ok 9 - onboarding swipes then Get Started save the actual Midgrade selection
+  ---
+  duration_ms: 88.293667
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: onboarding swipes then Get Started save the actual Premium selection
+ok 10 - onboarding swipes then Get Started save the actual Premium selection
+  ---
+  duration_ms: 163.010458
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: onboarding swipes then Get Started save the actual Diesel selection
+ok 11 - onboarding swipes then Get Started save the actual Diesel selection
+  ---
+  duration_ms: 63.29325
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: onboarding swipes then Get Started save the actual E85 selection
+ok 12 - onboarding swipes then Get Started save the actual E85 selection
+  ---
+  duration_ms: 123.339792
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: permission refresh on return from Settings and duplicate taps do not create parallel requests
+ok 13 - permission refresh on return from Settings and duplicate taps do not create parallel requests
+  ---
+  duration_ms: 326.027792
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: onboarding radius uses the same range as the saved preferences
+ok 14 - onboarding radius uses the same range as the saved preferences
+  ---
+  duration_ms: 126.517916
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: a location permission request finishing after leaving onboarding cannot schedule navigation
+ok 15 - a location permission request finishing after leaving onboarding cannot schedule navigation
+  ---
+  duration_ms: 110.043417
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: a location permission request failing after leaving onboarding cannot show a stale alert
+ok 16 - a location permission request failing after leaving onboarding cannot show a stale alert
+  ---
+  duration_ms: 114.889834
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: Get Started saves E85 availability and preferred brands atomically with fuel and radius
+ok 17 - Get Started saves E85 availability and preferred brands atomically with fuel and radius
+  ---
+  duration_ms: 146.979917
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: Not Now advances permission page 2 without requesting access
+ok 18 - Not Now advances permission page 2 without requesting access
+  ---
+  duration_ms: 109.100625
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: Not Now advances permission page 3 without requesting access
+ok 19 - Not Now advances permission page 3 without requesting access
+  ---
+  duration_ms: 140.844709
+  ...
+# (node:45467) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# Subtest: Not Now remains disabled during the native permission request and preserves successful delayed advance
+ok 20 - Not Now remains disabled during the native permission request and preserves successful delayed advance
+  ---
+  duration_ms: 166.64775
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: radius location uses native coordinates only after permission and removes its watch
+ok 21 - radius location uses native coordinates only after permission and removes its watch
+  ---
+  duration_ms: 190.105417
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: a delayed cached location cannot replace a fresh fix or restart the radius camera
+ok 22 - a delayed cached location cannot replace a fresh fix or restart the radius camera
+  ---
+  duration_ms: 185.822708
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# (node:45469) ExperimentalWarning: CommonJS module /Users/anthonyh/.codex/worktrees/brand-preferences-qa/Fuel Up/src/screens/onboarding/RadiusStep.js is loading ES Module /Users/anthonyh/.codex/worktrees/brand-preferences-qa/Fuel Up/src/lib/fuelSearchState.js using require().
+# Support for loading ES Module in require() is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:45469) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/.codex/worktrees/brand-preferences-qa/Fuel%20Up/src/lib/fuelGrade.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/.codex/worktrees/brand-preferences-qa/Fuel Up/package.json.
+# Subtest: designer accepts an unfinished decimal without replacing typed text
+ok 23 - designer accepts an unfinished decimal without replacing typed text
+  ---
+  duration_ms: 139.79075
+  ...
+# Subtest: the radius preview does not animate while its onboarding page is offscreen
+ok 24 - the radius preview does not animate while its onboarding page is offscreen
+  ---
+  duration_ms: 27.795
+  ...
+# (node:45470) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/.codex/worktrees/brand-preferences-qa/Fuel%20Up/src/lib/preferencesStore.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/.codex/worktrees/brand-preferences-qa/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: clean setup persists regular and 2 miles together across relaunch
+ok 25 - clean setup persists regular and 2 miles together across relaunch
+  ---
+  duration_ms: 2.442875
+  ...
+# Subtest: clean setup persists regular and 7 miles together across relaunch
+ok 26 - clean setup persists regular and 7 miles together across relaunch
+  ---
+  duration_ms: 0.158209
+  ...
+# Subtest: clean setup persists regular and 15 miles together across relaunch
+ok 27 - clean setup persists regular and 15 miles together across relaunch
+  ---
+  duration_ms: 0.167125
+  ...
+# Subtest: clean setup persists midgrade and 2 miles together across relaunch
+ok 28 - clean setup persists midgrade and 2 miles together across relaunch
+  ---
+  duration_ms: 0.079291
+  ...
+# Subtest: clean setup persists midgrade and 7 miles together across relaunch
+ok 29 - clean setup persists midgrade and 7 miles together across relaunch
+  ---
+  duration_ms: 0.204541
+  ...
+# Subtest: clean setup persists midgrade and 15 miles together across relaunch
+ok 30 - clean setup persists midgrade and 15 miles together across relaunch
+  ---
+  duration_ms: 0.067791
+  ...
+# Subtest: clean setup persists premium and 2 miles together across relaunch
+ok 31 - clean setup persists premium and 2 miles together across relaunch
+  ---
+  duration_ms: 0.100625
+  ...
+# Subtest: clean setup persists premium and 7 miles together across relaunch
+ok 32 - clean setup persists premium and 7 miles together across relaunch
+  ---
+  duration_ms: 0.912667
+  ...
+# Subtest: clean setup persists premium and 15 miles together across relaunch
+ok 33 - clean setup persists premium and 15 miles together across relaunch
+  ---
+  duration_ms: 0.368666
+  ...
+# Subtest: clean setup persists diesel and 2 miles together across relaunch
+ok 34 - clean setup persists diesel and 2 miles together across relaunch
+  ---
+  duration_ms: 0.413375
+  ...
+# Subtest: clean setup persists diesel and 7 miles together across relaunch
+ok 35 - clean setup persists diesel and 7 miles together across relaunch
+  ---
+  duration_ms: 0.151875
+  ...
+# Subtest: clean setup persists diesel and 15 miles together across relaunch
+ok 36 - clean setup persists diesel and 15 miles together across relaunch
+  ---
+  duration_ms: 0.0525
+  ...
+# Subtest: rapid changes serialize writes so old requests cannot overwrite the latest preference
+ok 37 - rapid changes serialize writes so old requests cannot overwrite the latest preference
+  ---
+  duration_ms: 19.954958
+  ...
+# Subtest: edits during hydration retain stored settings and apply once loading finishes
+ok 38 - edits during hydration retain stored settings and apply once loading finishes
+  ---
+  duration_ms: 0.368125
+  ...
+# Subtest: a failed write does not poison future writes; replay preserves choices
+ok 39 - a failed write does not poison future writes; replay preserves choices
+  ---
+  duration_ms: 0.316417
+  ...
+# Subtest: corrupt preferences recover to clean onboarding: not json
+ok 40 - corrupt preferences recover to clean onboarding: not json
+  ---
+  duration_ms: 0.173041
+  ...
+# Subtest: corrupt preferences recover to clean onboarding: null
+ok 41 - corrupt preferences recover to clean onboarding: null
+  ---
+  duration_ms: 0.095416
+  ...
+# Subtest: corrupt preferences recover to clean onboarding: []
+ok 42 - corrupt preferences recover to clean onboarding: []
+  ---
+  duration_ms: 0.067833
+  ...
+# Subtest: corrupt preferences recover to clean onboarding: {"hasCompletedOnboarding":"false"}
+ok 43 - corrupt preferences recover to clean onboarding: {"hasCompletedOnboarding":"false"}
+  ---
+  duration_ms: 0.07675
+  ...
+# (node:45471) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/.codex/worktrees/brand-preferences-qa/Fuel%20Up/src/lib/stationPreferences.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/.codex/worktrees/brand-preferences-qa/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: preferred brands rank strongly ahead of cheaper other brands without hiding them or changing prices
+ok 44 - preferred brands rank strongly ahead of cheaper other brands without hiding them or changing prices
+  ---
+  duration_ms: 1.966583
+  ...
+# Subtest: E85 requires explicit availability and remains independent of selected fuel and brands
+ok 45 - E85 requires explicit availability and remains independent of selected fuel and brands
+  ---
+  duration_ms: 0.348542
+  ...
+# Subtest: brand discovery counts unique selected-grade stations inside actual current radius
+ok 46 - brand discovery counts unique selected-grade stations inside actual current radius
+  ---
+  duration_ms: 1.056083
+  ...
+# Subtest: keys separate E85 and brands and canonicalize order
+ok 47 - keys separate E85 and brands and canonicalize order
+  ---
+  duration_ms: 0.370958
+  ...
+# Subtest: clean setup and relaunch retain grade, radius, brands and E85 together
+ok 48 - clean setup and relaunch retain grade, radius, brands and E85 together
+  ---
+  duration_ms: 0.427
+  ...
+1..48
+# tests 48
+# suites 0
+# pass 48
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2302.603709
