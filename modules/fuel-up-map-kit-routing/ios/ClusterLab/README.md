@@ -9,15 +9,16 @@ screen-space spatial hashing and contact hysteresis (84 × 32 pt to connect,
 hash cells span this retained range so stretched neighbors remain discoverable. `ClusterLabRenderer` owns
 station identity, projection, reversible motion, and atomic handoffs.
 `ClusterLabDynamics` handles mass-weighted impacts and magnetic home springs.
-`ClusterLabMarket` compares each price with the median of up to 12 other loaded
-stations within five miles. The input snapshot already contains only the selected
-fuel grade. At least three peers are required; sparse markets stay neutral.
-Differences within the larger of two cents or 0.5% stay neutral. Tint becomes
-more saturated green below the median and red above it, reaching full
-strength at the larger of 15 cents or 8%. The benchmark excludes the station
-itself and is recomputed only on a data change, so panning and zooming do not
-reclassify a price. Each hue keeps constant brightness and opacity; only its
-saturation increases with the difference from the market.
+`ClusterLabMarket` gives only the cheapest confirmed station in the loaded search
+snapshot a saturated green tint. The input already excludes estimated prices and
+contains only the selected fuel grade. Stable station-ID order breaks price ties,
+matching cluster ownership. Every alternative is red, including tied prices.
+Red saturation rises with the premium above that cheapest price. Full saturation
+means a difference of at least 15 cents or 8% of the local median, whichever is
+larger. The median uses up to 12 peers within five miles; with fewer than three,
+the cheapest price supplies the scale. Each hue keeps constant brightness and
+opacity. This is recomputed only when data changes, so panning and zooming never
+reassign the cheapest highlight.
 
 `ClusterLabGlass` uses the installed Callstack library's public Swift glass views.
 Pills use regular glass with native `UIGlassEffect.tintColor`, high-contrast text,

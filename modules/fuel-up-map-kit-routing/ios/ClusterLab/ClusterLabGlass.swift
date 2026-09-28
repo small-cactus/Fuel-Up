@@ -51,9 +51,9 @@ final class ClusterLabPill {
   private let countLabel = UILabel()
   private let icon = UIImageView(image: UIImage(systemName: "fuelpump.fill"))
   private var lastCount = 0
-  private var marketDescription = "Not enough nearby prices for comparison"
-  private var lastMedian: Double?
-  private var lastPeerCount = 0
+  private var marketDescription = "Price comparison unavailable"
+  private var lastCheapestPrice: Double?
+  private var wasCheapest = false
   private let price: Double
   private(set) var tintScore: Double = 0
   private(set) var tintUpdateCount = 0
@@ -77,14 +77,15 @@ final class ClusterLabPill {
   }
 
   private func applyMarket(_ market: LabMarketAssessment) {
-    if lastMedian != market.median || lastPeerCount != market.peerCount {
-      lastMedian = market.median
-      lastPeerCount = market.peerCount
-      if let median = market.median {
-        let cents = Int((abs(price - median) * 100).rounded())
-        marketDescription = cents <= 2 ? "Near the nearby market price" :
-          "\(cents) cents \(price < median ? "below" : "above") the median of \(market.peerCount) nearby stations"
-      } else { marketDescription = "Not enough nearby prices for comparison" }
+    if lastCheapestPrice != market.cheapestPrice || wasCheapest != (market.score > 0) {
+      lastCheapestPrice = market.cheapestPrice
+      wasCheapest = market.score > 0
+      if let cheapest = market.cheapestPrice {
+        let cents = Int((max(0, price - cheapest) * 100).rounded())
+        marketDescription = wasCheapest ? "Cheapest confirmed station in this search" :
+          (cents == 0 ? "Same price as the cheapest confirmed station" :
+            "\(cents) cents above the cheapest confirmed station in this search")
+      } else { marketDescription = "Price comparison unavailable" }
     }
     let nextScore = (market.score * 20).rounded() / 20
     guard !hasTint || nextScore != tintScore else { return }

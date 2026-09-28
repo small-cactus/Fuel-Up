@@ -10,9 +10,10 @@ struct LabMarketQuote {
 struct LabMarketAssessment {
   let median: Double?
   let peerCount: Int
-  // Positive is a saving, negative is a premium; magnitude controls saturation.
+  let cheapestPrice: Double?
+  // Only the cheapest confirmed station is positive. Others are red premiums.
   let score: Double
-  static let unknown = LabMarketAssessment(median: nil, peerCount: 0, score: 0)
+  static let unknown = LabMarketAssessment(median: nil, peerCount: 0, cheapestPrice: nil, score: 0)
 }
 
 enum ClusterLabMarket {
@@ -28,6 +29,11 @@ enum ClusterLabMarket {
       abs($0.latitude) <= 90 && abs($0.longitude) <= 180
     }
     let unique = Dictionary(valid.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+    // Inputs exclude estimates. Resolve equal prices by the same stable ID
+    // ordering as cluster ownership, keeping exactly one green representative.
+    guard let cheapest = unique.values.min(by: {
+      $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price
+    }) else { return [:] }
     return unique.mapValues { quote in
       let peers = unique.values.compactMap { other -> (LabMarketQuote, Double)? in
         guard other.id != quote.id else { return nil }
@@ -35,17 +41,16 @@ enum ClusterLabMarket {
         return distance <= radiusMeters ? (other, distance) : nil
       }.sorted { $0.1 == $1.1 ? $0.0.id < $1.0.id : $0.1 < $1.1 }
         .prefix(maximumPeers).map { $0.0.price }.sorted()
-      guard peers.count >= minimumPeers else { return .unknown }
       let middle = peers.count / 2
-      let median = peers.count.isMultiple(of: 2) ? (peers[middle - 1] + peers[middle]) / 2 : peers[middle]
-      let saving = median - quote.price
-      // Keep pennies of noise neutral. Full color means a meaningful local
-      // difference (8%, at least 15 cents), not merely being first or last.
-      let deadband = max(0.02, median * 0.005)
-      let fullScale = max(0.15, median * 0.08)
-      let magnitude = min(1, max(0, (abs(saving) - deadband) / (fullScale - deadband)))
+      let median: Double? = peers.count >= minimumPeers ?
+        (peers.count.isMultiple(of: 2) ? (peers[middle - 1] + peers[middle]) / 2 : peers[middle]) : nil
+      // Every alternative is red, even a tied price. Saturation rises with the
+      // premium; the surrounding median scales a meaningful price difference.
+      let fullScale = max(0.15, (median ?? cheapest.price) * 0.08)
+      let magnitude = min(1, max(0.05, (quote.price - cheapest.price) / fullScale))
       return LabMarketAssessment(median: median, peerCount: peers.count,
-                                 score: magnitude * (saving >= 0 ? 1 : -1))
+                                 cheapestPrice: cheapest.price,
+                                 score: quote.id == cheapest.id ? 1 : -magnitude)
     }
   }
 

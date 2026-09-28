@@ -24,8 +24,8 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     assert.equal(report.usesNativeGlass, true);
     assert.equal(report.stagesCompleted, 11);
     assert.ok(report.samples.length >= 250, 'insufficient live frame coverage');
-    assert.ok(report.baseline.some(view => view.tintScore > 0), 'below-market stations were not green');
-    assert.ok(report.baseline.some(view => view.tintScore < 0), 'above-market stations were not red');
+    assert.equal(report.baseline.filter(view => view.tintScore > 0).length, 1, 'expected exactly one cheapest green price');
+    assert.equal(report.baseline.filter(view => view.tintScore < 0).length, 5, 'every alternative should be red');
     const types = new Set(report.events.map(event => event.type));
     for (const type of ['merge-start', 'merge-arrive', 'merge-handoff', 'split-spawn', 'split-handoff', 'merge-impulse', 'split-impulse', 'split-stretch', 'contact-catch']) {
         assert.ok(types.has(type), `missing ${type}`);
@@ -132,8 +132,9 @@ test('connected +1 moves outward before its split is triggered', { timeout: 9000
     assert.equal(report.status, 'completed');
     assert.equal(report.baseline.length, 2);
     assert.equal(report.final.length, 2);
-    assert.ok(report.samples.every(frame => frame.views.every(view => view.tintScore === 0)),
-        'a two-station sample was incorrectly presented as a local market');
+    assert.equal(report.baseline.find(view => view.id === 'lab-0').tintScore, 1);
+    assert.ok(report.baseline.find(view => view.id === 'lab-1').tintScore < 0,
+        'the more expensive alternative should be red even with only two stations');
     const connected = report.samples.flatMap(frame => frame.views.filter(view => view.role === 'badge'));
     const intermediate = connected.filter(view => view.attachmentOffset > 58 && view.attachmentOffset < 73);
     assert.ok(intermediate.length >= 4, '+1 skipped the visible connected travel phase');
