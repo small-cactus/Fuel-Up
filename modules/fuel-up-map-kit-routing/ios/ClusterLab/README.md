@@ -4,14 +4,16 @@ The second native tab is a full-bleed Apple map with station price pills. It sha
 the fuel service cache, but its rendering and animation are independent of Home.
 
 `ClusterLabMapView` owns MapKit and the display link. `ClusterLabGeometry` performs
-screen-space spatial hashing and contact hysteresis. `ClusterLabRenderer` owns
+screen-space spatial hashing and contact hysteresis (84 × 32 pt to connect,
+108 × 48 pt to disconnect, allowing a small extra stretch before splitting). `ClusterLabRenderer` owns
 station identity, projection, reversible motion, and atomic handoffs.
 `ClusterLabGlass` uses the installed Callstack library's public Swift glass views.
 The shared native container uses Apple's `UIGlassContainerEffect`; it does not
-draw an imitation or place glass in MapKit annotation snapshots.
+draw an imitation or place glass in MapKit annotation snapshots. Native glass
+spacing is 12 pt, giving the connecting neck a little extra stretch.
 
 Only visible stations and a 160-point approach margin participate. One container
-extends 256 points beyond all map edges, including refraction and badge travel.
+extends 288 points beyond all map edges, including refraction and badge travel.
 Settled groups retain a price and count view, not hidden views for each member.
 The first arriving mover becomes the count view in place. Further movers are
 removed in the same transaction that increments the count. Splitting materializes
@@ -22,8 +24,10 @@ Glass and glass ancestors always keep alpha 1; only label content crossfades.
 Motion is retargeted from its current map coordinate and screen offset. Its
 80–220 ms duration follows measured camera velocity and elapsed movement time.
 Camera completion shortens remaining travel to 80 ms without changing the current
-pose. An elapsed-time ease-out curve adds a distance-scaled rebound capped at three
-points. There is no fixed points-per-frame speed limit or trailing exponential tail. MapKit's
+pose. An elapsed-time viscous curve eases into motion, surges past the destination,
+then returns once. Rebound scales with both travel and measured gesture speed,
+up to 18 screen points. The curve has zero velocity and acceleration at its
+endpoints and turnaround; the stronger response adds no settling delay. There is no fixed points-per-frame speed limit or trailing exponential tail. MapKit's
 projection is read natively during camera changes, including rotation; there is no
 JS camera-event loop. The display link sleeps when settled, unfocused, detached,
 or backgrounded. Reduced Motion resolves transitions immediately. Older systems

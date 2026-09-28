@@ -58,7 +58,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     super.layoutSubviews()
     // Parent covers every visible pill and its offscreen approach. Extra space
     // includes the whole 84-point shell, refraction, and the +n displacement.
-    renderer.container.frame = bounds.insetBy(dx: -256, dy: -256)
+    renderer.container.frame = bounds.insetBy(dx: -ClusterLabGeometry.containerPadding, dy: -ClusterLabGeometry.containerPadding)
     map.frame = bounds
     refresh()
   }
@@ -114,7 +114,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
 
   private var hasValidLayout: Bool {
     bounds.width > 0 && bounds.height > 0 && map.bounds.size == bounds.size &&
-      renderer.container.frame == bounds.insetBy(dx: -256, dy: -256)
+      renderer.container.frame == bounds.insetBy(dx: -ClusterLabGeometry.containerPadding, dy: -ClusterLabGeometry.containerPadding)
   }
 
   func refresh() {

@@ -7,7 +7,8 @@ enum ClusterLabGlass {
   static func container() -> UIView {
     if #available(iOS 26.0, *), NSClassFromString("UIGlassContainerEffect") != nil {
       let view = LiquidGlassConatinerViewImpl() // Spelling is the library's public API.
-      view.spacing = 8
+      // A little more native neck/stretch before two moving pills detach.
+      view.spacing = 12
       view.clipsToBounds = false
       view.contentView.clipsToBounds = false
       return view

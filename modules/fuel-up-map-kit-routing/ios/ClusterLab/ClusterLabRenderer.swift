@@ -37,12 +37,13 @@ private final class LabStationMotion {
   var elapsed: Double = 0
   var duration: Double = 0.16
   var travel: CGFloat = 0
+  var launchSpeed: CGFloat = 0
   var startedAt: Double = 0
   var curveStartedAt: Double = 0
 
-  func begin(duration: Double, travel: CGFloat, restarting: Bool = false) {
+  func begin(duration: Double, travel: CGFloat, speed: CGFloat, restarting: Bool = false) {
     startPoint = point; startOffset = offset; startWidth = width; startMix = priceMix
-    elapsed = 0; self.duration = duration; self.travel = travel
+    elapsed = 0; self.duration = duration; self.travel = travel; launchSpeed = speed
     curveStartedAt = CACurrentMediaTime()
     if !restarting { startedAt = curveStartedAt }
   }
@@ -74,7 +75,7 @@ final class ClusterLabRenderer {
     // Finish alongside the camera's final settling frames. Snapshot the current
     // pose when shortening a flight, so interruptions never jump to a new curve.
     for motion in motions.values where !motion.settled && motion.duration - motion.elapsed > 0.08 {
-      motion.begin(duration: 0.08, travel: motion.travel, restarting: true)
+      motion.begin(duration: 0.08, travel: motion.travel, speed: motion.launchSpeed, restarting: true)
     }
   }
 
@@ -157,7 +158,7 @@ final class ClusterLabRenderer {
         let travel = hypot(end.x + (nextOwner == station.id ? 0 : ClusterLabGeometry.badgeOffset) - start.x - motion.offset, end.y - start.y)
         let duration = ClusterLabGeometry.duration(distance: travel, speed: cameraSpeed,
           movementDuration: cameraStarted.map { now - $0 } ?? 0.16)
-        motion.begin(duration: duration, travel: travel)
+        motion.begin(duration: duration, travel: travel, speed: cameraSpeed)
         motion.owner = nextOwner
         motion.settled = false
         if nextOwner != station.id { event("merge-start", id: station.id) }
@@ -194,7 +195,11 @@ final class ClusterLabRenderer {
       let distance = hypot(point.x - target.x, point.y - target.y)
       let error = max(distance, max(abs(targetWidth - motion.width), abs(targetMix - motion.priceMix) * 32))
       if deltaTime > 0 { motion.elapsed = max(0, CACurrentMediaTime() - motion.curveStartedAt) }
-      let progress = ClusterLabGeometry.progress(elapsed: motion.elapsed, duration: motion.duration, distance: motion.travel)
+      var start = motion.settled ? target : project(motion.startPoint, map: map)
+      if !motion.settled { start.x += motion.startOffset }
+      let projectedTravel = hypot(target.x - start.x, target.y - start.y)
+      let progress = motion.settled ? 1 : ClusterLabGeometry.progress(
+        elapsed: motion.elapsed, duration: motion.duration, distance: projectedTravel, speed: motion.launchSpeed)
       motion.point = MKMapPoint(x: motion.startPoint.x + (targetPoint.x - motion.startPoint.x) * progress,
                                y: motion.startPoint.y + (targetPoint.y - motion.startPoint.y) * progress)
       motion.offset = motion.startOffset + (targetOffset - motion.startOffset) * progress
@@ -213,6 +218,8 @@ final class ClusterLabRenderer {
         if recording {
           samples.append(["id": id, "x": pill.view.center.x, "y": pill.view.center.y,
                           "width": pill.view.bounds.width, "priceMix": motion.priceMix,
+                          "rebound": max(0, ((pill.view.center.x - target.x) * (target.x - start.x) +
+                            (pill.view.center.y - target.y) * (target.y - start.y)) / max(projectedTravel, 0.001)),
                           "role": merged ? "merge" : (motion.settled ? "price" : "split"),
                           "step": hypot(pill.view.center.x - previousRenderedPoint.x, pill.view.center.y - previousRenderedPoint.y),
                           "contained": container.bounds.contains(pill.view.frame)])

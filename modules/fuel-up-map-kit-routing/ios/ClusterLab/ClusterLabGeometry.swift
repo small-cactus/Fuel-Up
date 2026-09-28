@@ -13,6 +13,8 @@ enum ClusterLabGeometry {
   static let badgeWidth: CGFloat = 44
   static let badgeOffset: CGFloat = 56
   static let overscan: CGFloat = 160
+  static let containerPadding: CGFloat = 288
+  static let maximumRebound: CGFloat = 18
 
   static func owners(_ stations: [LabProjectedStation], previous: [String: String]) -> [String: String] {
     let sorted = stations.sorted { $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price }
@@ -25,14 +27,14 @@ enum ClusterLabGeometry {
     struct Cell: Hashable { let x: Int; let y: Int }
     var grid: [Cell: [Int]] = [:]
     for (index, station) in sorted.enumerated() {
-      let cell = Cell(x: Int(floor(station.point.x / 104)), y: Int(floor(station.point.y / 48)))
+      let cell = Cell(x: Int(floor(station.point.x / 112)), y: Int(floor(station.point.y / 56)))
       for x in (cell.x - 1)...(cell.x + 1) {
         for y in (cell.y - 1)...(cell.y + 1) {
           for other in grid[Cell(x: x, y: y)] ?? [] {
             let retained = previous[station.id] != nil && previous[station.id] == previous[sorted[other].id]
             let dx = abs(station.point.x - sorted[other].point.x)
             let dy = abs(station.point.y - sorted[other].point.y)
-            if dx <= (retained ? 100 : 84) && dy <= (retained ? 44 : 32) {
+            if dx <= (retained ? 108 : 84) && dy <= (retained ? 48 : 32) {
               let a = root(index), b = root(other)
               parent[max(a, b)] = min(a, b)
             }
@@ -50,13 +52,24 @@ enum ClusterLabGeometry {
     min(0.22, max(0.08, min(movementDuration, Double(distance / max(speed, 1)))))
   }
 
-  // Ease-out back with distance-scaled rebound (at most three screen points).
-  // Both endpoints are exact; elapsed time, not frame count, drives progress.
-  static func progress(elapsed: Double, duration: Double, distance: CGFloat) -> CGFloat {
+  // One viscous surge and return, with zero velocity/acceleration at both ends
+  // and the turnaround. Small drags remain quiet; long or fast moves carry more
+  // momentum. This reshapes the existing flight without extending its deadline.
+  static func rebound(distance: CGFloat, speed: CGFloat) -> CGFloat {
+    let travelEnergy = min(1, max(0, distance) / 180)
+    let gestureEnergy = min(1, max(0, speed) / 1200)
+    return min(maximumRebound, max(0, distance) * (0.025 + 0.07 * travelEnergy + 0.08 * gestureEnergy))
+  }
+
+  static func progress(elapsed: Double, duration: Double, distance: CGFloat, speed: CGFloat = 0) -> CGFloat {
     let t = CGFloat(min(1, max(0, elapsed / max(duration, 0.001))))
     if t == 0 || t == 1 { return t }
-    let rebound = min(0.7, pow(3 / max(distance, 1) * 27 / 4, 1.0 / 3))
-    let u = t - 1
-    return 1 + (rebound + 1) * u * u * u + rebound * u * u
+    let overshoot = rebound(distance: distance, speed: speed) / max(distance, 0.001)
+    func smooth(_ value: CGFloat) -> CGFloat {
+      value * value * value * (value * (value * 6 - 15) + 10)
+    }
+    let turnaround: CGFloat = 0.68
+    if t < turnaround { return (1 + overshoot) * smooth(t / turnaround) }
+    return 1 + overshoot * (1 - smooth((t - turnaround) / (1 - turnaround)))
   }
 }

@@ -31,6 +31,7 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     for (const frame of report.samples) {
         assert.ok(frame.viewCount <= frame.stationCount + 1, 'unbounded temporary glass views');
         for (const view of frame.views) {
+            assert.ok((view.rebound || 0) <= 18.01, `unbounded rebound: ${view.rebound}pt`);
             assert.ok(view.contained, `clipped container edge: ${view.id}`);
             assert.ok(Number.isFinite(view.x) && Number.isFinite(view.y), 'invalid rendered position');
         }
@@ -42,6 +43,9 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     for (const event of arrivals) {
         assert.ok(event.duration <= 0.30, `transition trailed the gesture: ${event.duration}s`);
     }
+    const maxRebound = Math.max(...report.samples.flatMap(frame => frame.views.map(view => view.rebound || 0)));
+    assert.ok(maxRebound > 3, 'large/quick moves did not show stronger rendered rebound');
+    t.diagnostic(`Maximum rendered rebound ${maxRebound.toFixed(2)}pt`);
     const maxDuration = Math.max(...arrivals.map(event => event.duration));
     const maxStep = Math.max(...report.samples.flatMap(frame => frame.views.map(view => view.step || 0)));
     t.diagnostic(`Longest transition ${Math.round(maxDuration * 1000)}ms; maximum measured travel ${maxStep.toFixed(2)}pt/frame`);
