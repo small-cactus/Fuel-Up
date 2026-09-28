@@ -44,11 +44,15 @@ private final class LabStationMotion {
   var displayedReaction = LabVector.zero
   var displayedReactionVelocity = LabVector.zero
   var impactApplied = false
+  var contactCatch: LabContactCatch?
 
   func begin(duration: Double, travel: CGFloat, speed: CGFloat, restarting: Bool = false) {
     startPoint = point; startOffset = offset; startWidth = width; startMix = priceMix
     elapsed = 0; self.duration = duration; self.travel = travel; launchSpeed = speed
     curveStartedAt = CACurrentMediaTime()
+    // A new trajectory starts from the current visible pose. Never carry a
+    // delayed clock into a reversal or a camera-end retiming.
+    contactCatch = nil
     if !restarting { startedAt = curveStartedAt; impactApplied = false }
   }
 
@@ -241,8 +245,14 @@ final class ClusterLabRenderer {
       var start = motion.settled ? target : project(motion.startPoint, map: map)
       if !motion.settled { start.x += motion.startOffset }
       let projectedTravel = hypot(target.x - start.x, target.y - start.y)
-      let progress = motion.settled ? 1 : ClusterLabGeometry.progress(
+      let contactDelay = !motion.settled && merged && !reducedMotion ?
+        (motion.contactCatch?.delay(at: motion.elapsed) ?? 0) : 0
+      let unresistedProgress = motion.settled ? 1 : ClusterLabGeometry.progress(
         elapsed: motion.elapsed, duration: motion.duration, distance: projectedTravel, speed: motion.launchSpeed)
+      let delayedProgress = motion.settled ? 1 : ClusterLabGeometry.progress(
+        elapsed: motion.elapsed - contactDelay, duration: motion.duration, distance: projectedTravel, speed: motion.launchSpeed)
+      let progress = LabContactCatch.resistedProgress(unresisted: unresistedProgress,
+        delayed: delayedProgress, distance: projectedTravel)
       motion.point = MKMapPoint(x: motion.startPoint.x + (targetPoint.x - motion.startPoint.x) * progress,
                                y: motion.startPoint.y + (targetPoint.y - motion.startPoint.y) * progress)
       motion.offset = motion.startOffset + (targetOffset - motion.startOffset) * progress
@@ -260,6 +270,11 @@ final class ClusterLabRenderer {
         let contactX = abs(point.x + motion.reaction.offset.x - target.x - owner.reaction.offset.x)
         let contactY = abs(point.y + motion.reaction.offset.y - target.y - owner.reaction.offset.y)
         if contactX <= (motion.width + ClusterLabGeometry.badgeWidth) / 2 + 12 && contactY <= 44 {
+          motion.contactCatch = LabContactCatch(elapsed: motion.elapsed, outwardDuration: motion.duration * 0.68)
+          if let contact = motion.contactCatch, contact.duration > 0 {
+            event("contact-catch", id: id, duration: contact.duration,
+                  details: ["owner": motion.owner])
+          }
           let incoming = (LabVector(x: point.x - previousRenderedPoint.x, y: point.y - previousRenderedPoint.y) *
             (1 / CGFloat(deltaTime)) + motion.reaction.velocity).limited(to: 1200)
           let mass = CGFloat(connectedMasses[motion.owner] ?? 1)
@@ -289,11 +304,20 @@ final class ClusterLabRenderer {
         pill.render(center: point, width: motion.width, priceMix: motion.priceMix, count: motion.count,
                     best: id == stations.first?.id, dark: dark)
         if recording {
+          // Compare the actual view with the original trajectory in the same
+          // map projection, so the probe proves visible resistance at contact.
+          let unresistedMapPoint = MKMapPoint(
+            x: motion.startPoint.x + (targetPoint.x - motion.startPoint.x) * unresistedProgress,
+            y: motion.startPoint.y + (targetPoint.y - motion.startPoint.y) * unresistedProgress)
+          var unresisted = project(unresistedMapPoint, map: map)
+          unresisted.x += motion.startOffset + (targetOffset - motion.startOffset) * unresistedProgress
           samples.append(["id": id, "x": pill.view.center.x, "y": pill.view.center.y,
                           "width": pill.view.bounds.width, "priceMix": motion.priceMix,
                           "rebound": max(0, ((basePoint.x - target.x) * (target.x - start.x) +
                             (basePoint.y - target.y) * (target.y - start.y)) / max(projectedTravel, 0.001)),
                           "reactionX": reaction.x, "reactionY": reaction.y,
+                          "contactDelay": contactDelay,
+                          "unresistedX": unresisted.x, "unresistedY": unresisted.y,
                           "homeX": target.x, "homeY": target.y, "baseX": basePoint.x, "baseY": basePoint.y,
                           "primary": !merged,
                           "role": merged ? "merge" : (motion.settled ? "price" : "split"),

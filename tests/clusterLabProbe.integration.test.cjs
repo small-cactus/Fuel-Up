@@ -25,13 +25,15 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     assert.equal(report.stagesCompleted, 11);
     assert.ok(report.samples.length >= 250, 'insufficient live frame coverage');
     const types = new Set(report.events.map(event => event.type));
-    for (const type of ['merge-start', 'merge-arrive', 'merge-handoff', 'split-spawn', 'split-handoff', 'merge-impulse', 'split-impulse']) {
+    for (const type of ['merge-start', 'merge-arrive', 'merge-handoff', 'split-spawn', 'split-handoff', 'merge-impulse', 'split-impulse', 'contact-catch']) {
         assert.ok(types.has(type), `missing ${type}`);
     }
     for (const frame of report.samples) {
         assert.ok(frame.viewCount <= frame.stationCount + 1, 'unbounded temporary glass views');
         for (const view of frame.views) {
             assert.ok((view.rebound || 0) <= 18.01, `unbounded rebound: ${view.rebound}pt`);
+            assert.ok((view.contactDelay || 0) <= 0.014301, 'contact catch held the flight too long');
+            if (view.role !== 'merge') assert.equal(view.contactDelay || 0, 0, 'contact catch affected a split or resting pill');
             assert.ok(Math.hypot(view.reactionX || 0, view.reactionY || 0) <= 36.01, 'unbounded magnetic displacement');
             if (view.baseX != null) {
                 assert.ok(Math.hypot(view.x - view.baseX - view.reactionX, view.y - view.baseY - view.reactionY) < 0.001,
@@ -41,6 +43,16 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
             assert.ok(Number.isFinite(view.x) && Number.isFinite(view.y), 'invalid rendered position');
         }
     }
+    const catches = report.samples.flatMap(frame => frame.views).filter(view => view.contactDelay > 0.001);
+    assert.ok(catches.length > 0, 'contact resistance was not sampled on the live map');
+    const visibleCatch = Math.max(...catches.map(view => Math.hypot(
+        view.x - view.reactionX - view.unresistedX, view.y - view.reactionY - view.unresistedY)));
+    assert.ok(visibleCatch > 0.25, 'contact resistance did not affect actual pill movement');
+    assert.ok(visibleCatch <= 6.01, 'contact resistance stretched beyond its subtle six-point limit');
+    for (const event of report.events.filter(event => event.type === 'contact-catch')) {
+        assert.ok(event.duration > 0 && event.duration <= 0.065, 'unbounded contact resistance');
+    }
+    t.diagnostic(`Visible contact resistance ${visibleCatch.toFixed(2)}pt over ${catches.length} samples`);
     const primaryTravel = Math.max(...report.samples.flatMap(frame => frame.views
         .filter(view => view.primary).map(view => Math.hypot(view.reactionX, view.reactionY))));
     assert.ok(primaryTravel > 4, `main price stayed pinned: ${primaryTravel}pt`);

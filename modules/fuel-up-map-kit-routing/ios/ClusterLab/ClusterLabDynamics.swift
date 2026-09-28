@@ -1,5 +1,36 @@
 import Foundation
 
+// Brief surface resistance, expressed as a smooth local change of pace.
+// The clock never stops or reverses, and catches up before the outward peak,
+// preserving the existing rebound amplitude, return timing, and deadline.
+struct LabContactCatch {
+  static let maximumLag: CGFloat = 6
+  let startedAt: Double
+  let duration: Double
+
+  init(elapsed: Double, outwardDuration: Double) {
+    startedAt = elapsed
+    duration = min(0.065, max(0, outwardDuration - elapsed))
+  }
+
+  func delay(at elapsed: Double) -> Double {
+    guard duration > 0, elapsed > startedAt, elapsed < startedAt + duration else { return 0 }
+    let u = (elapsed - startedAt) / duration
+    // C2-continuous at entry/exit. Peak lag is at most 14.3 ms; the
+    // lowest clock speed is still positive, about 24% of the usual pace.
+    let bell = 64 * pow(u * (1 - u), 3)
+    return duration * 0.22 * bell
+  }
+
+  static func resistedProgress(unresisted: CGFloat, delayed: CGFloat, distance: CGFloat) -> CGFloat {
+    guard distance > 0 else { return unresisted }
+    let lag = max(0, (unresisted - delayed) * distance)
+    // Smoothly saturate rather than hard-clamp: even a very fast arrival only
+    // stretches a few points, without a corner in its velocity curve.
+    return unresisted - lag / (1 + lag / maximumLag) / distance
+  }
+}
+
 struct LabVector: Equatable {
   var x: CGFloat = 0
   var y: CGFloat = 0

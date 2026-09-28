@@ -47,6 +47,16 @@ Both the main price and count move together. On an actual partition,
 equal-and-opposite impulses go to the departing mass and remaining mass. A whole
 cluster merging into another cluster does not falsely trigger release impulses.
 
+At contact, the incoming pill briefly resists while the receiving cluster takes
+its momentum. A smooth local clock adjustment slows then catches up over at most
+65 ms, entirely before the existing outward peak. Maximum clock lag is 14.3 ms;
+a smooth spatial limit keeps the visible lag below 6 pt even on fast arrivals.
+The clock never stops or reverses, and position/velocity/acceleration remain continuous
+at both ends. The native glass neck gets a moment to stretch without adding a
+second bounce, extra views, or a later completion. Splits and the rebound curve
+are unchanged. Retargeting clears the catch and starts from the current pose;
+Reduced Motion skips it.
+
 The screen-space spring offset is added to the live MapKit projection. Its exact
 damped-oscillator solution is independent of frame rate, retains state through
 interruptions, and dissipates energy back to zero. One shared energy budget caps
