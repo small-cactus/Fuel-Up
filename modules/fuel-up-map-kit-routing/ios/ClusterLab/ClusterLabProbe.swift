@@ -10,6 +10,7 @@ final class ClusterLabProbe {
   private var stage = -1
   private var finished = false
   private var baseline: [[String: Any]] = []
+  private var anchorSamples: [[String: Any]] = []
   private let center = CLLocationCoordinate2D(latitude: 27.9506, longitude: -82.4572)
   private let spans: [Double] = [0.003, 0.006, 0.010, 0.018, 0.030, 0.018, 0.010, 0.006, 0.003, 0.030, 0.003]
 
@@ -29,7 +30,7 @@ final class ClusterLabProbe {
                          "longitude": center.longitude + offset.1, "price": 3.10 + Double(index) * 0.10,
                          "name": "Probe station \(index)"])
     })
-    view.map.setRegion(.init(center: center, span: .init(latitudeDelta: spans[0], longitudeDelta: spans[0])), animated: false)
+    view.setRegion(.init(center: center, span: .init(latitudeDelta: spans[0], longitudeDelta: spans[0])), animated: false)
     view.renderer.resetRecording()
     view.renderer.recording = true
     view.refresh()
@@ -43,9 +44,21 @@ final class ClusterLabProbe {
     if nextStage >= spans.count { finish(status: "completed"); return }
     if nextStage == 1 { baseline = view.renderer.frameSamples.last?["views"] as? [[String: Any]] ?? [] }
     stage = nextStage
-    view.map.setRegion(.init(center: center, span: .init(latitudeDelta: spans[stage], longitudeDelta: spans[stage])), animated: stage > 0)
+    var target = center
+    var span = spans[stage]
+    if token.hasPrefix("anchor-") {
+      // Repeated pans across both viewport edges, followed by an immediate
+      // camera jump and return. Exercise MapKit annotation rebasing/culling.
+      let offsets: [Double] = [0, 0.002, 0.004, -0.004, -0.002, 0, 0.003, -0.003, 0, 0.02, 0]
+      target.longitude += offsets[stage]
+      span = 0.003
+    }
+    view.setRegion(.init(center: target, span: .init(latitudeDelta: span, longitudeDelta: span)),
+                       animated: stage > 0 && !(token.hasPrefix("anchor-") && stage >= 9))
     view.refresh()
   }
+
+  func recordAnchor(_ sample: [String: Any]) { anchorSamples.append(sample) }
 
   func cancel() { finish(status: "cancelled") }
 
@@ -57,6 +70,7 @@ final class ClusterLabProbe {
       "modes": ["stepped", "one-shot"], "baseline": baseline,
       "final": view.renderer.frameSamples.last?["views"] ?? [],
       "samples": view.renderer.frameSamples, "events": view.renderer.events,
+      "anchorSamples": anchorSamples,
       "usesNativeGlass": NSClassFromString("UIGlassContainerEffect") != nil,
     ]
     view.renderer.recording = false
@@ -68,7 +82,7 @@ final class ClusterLabProbe {
     view.renderer.resetRecording()
     view.probe = nil
     view.restoreStationsAfterProbe()
-    view.map.setRegion(savedRegion, animated: false)
+    view.setRegion(savedRegion, animated: false)
     view.restoreOriginAfterProbe()
     view.refresh()
   }

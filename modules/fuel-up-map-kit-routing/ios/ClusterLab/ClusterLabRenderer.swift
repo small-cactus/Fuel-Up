@@ -118,7 +118,9 @@ final class ClusterLabRenderer {
   }
 
   private func project(_ point: MKMapPoint, map: MKMapView) -> CGPoint {
-    map.convert(point.coordinate, toPointTo: container)
+    let point = map.convert(point.coordinate, toPointTo: map)
+    return CGPoint(x: point.x + ClusterLabGeometry.containerPadding,
+                   y: point.y + ClusterLabGeometry.containerPadding)
   }
 
   private func badgeOffset(for owner: String, at time: Double) -> CGFloat {
@@ -222,7 +224,9 @@ final class ClusterLabRenderer {
             // Remove the shared recoil before converting its base to MapKit.
             let center = CGPoint(x: badge.view.center.x - oldOwner.reaction.offset.x,
                                  y: badge.view.center.y - oldOwner.reaction.offset.y)
-            motion.point = MKMapPoint(map.convert(center, toCoordinateFrom: container))
+            let viewportPoint = CGPoint(x: center.x - ClusterLabGeometry.containerPadding,
+                                        y: center.y - ClusterLabGeometry.containerPadding)
+            motion.point = MKMapPoint(map.convert(viewportPoint, toCoordinateFrom: map))
             motion.offset = 0
           }
           motion.width = ClusterLabGeometry.badgeWidth

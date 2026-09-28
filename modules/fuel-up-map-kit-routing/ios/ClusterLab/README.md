@@ -3,7 +3,21 @@
 The second native tab is a full-bleed Apple map with station price pills. It shares
 the fuel service cache, but its rendering and animation are independent of Home.
 
-`ClusterLabMapView` owns MapKit. `ClusterLabFrameClock` uses UIKit's
+`ClusterLabMapView` owns MapKit. `ClusterLabMapAnchor` places the one shared glass
+surface inside one live `MKAnnotationView`. MapKit moves that carrier with its
+map content, so panning does not depend on the overlay catching up to a camera
+callback. The renderer projects pill positions into padded viewport coordinates;
+the carrier compensates its geographic anchor inside the same transaction. It
+recenters as the anchor approaches the viewport edge, retaining the same glass
+views and their local positions. Immediate camera jumps move the anchor first
+to avoid MapKit culling its old coordinate, then repair stale placement before
+commit. The clock observes the next 100 ms of native placement work even if the
+camera has already stopped; this adds no motion or easing. MapKit retains
+ordinary subpixel placement.
+This uses one annotation, not one per station, and
+does not rasterize or snapshot the glass. The carrier does not clip its children.
+
+`ClusterLabFrameClock` uses UIKit's
 `UIUpdateLink.beforeCATransactionCommit` phase on iOS 18 and later: camera
 callbacks mark the projection dirty, then clustering and pill positioning run
 once after gesture and display-link work, before the frame is committed. This
@@ -37,8 +51,8 @@ own station tint; incoming pills transition to the receiving cluster tint. A
 cached target starts at most one 80 ms native material animation per change;
 ordinary camera frames never rebuild the effect. Reduced Motion applies it
 immediately. Tinting does not alter the movement or rebound curves.
-The shared native container uses Apple's `UIGlassContainerEffect`; it does not
-draw an imitation or place glass in MapKit annotation snapshots. Native glass
+The shared native container uses Apple's `UIGlassContainerEffect` as live UIKit
+subviews inside the MapKit carrier. Native glass
 spacing is 36 pt, letting the connecting neck stretch farther before detaching.
 Connection impulses keep the previously tuned 18-point contact band inside this
 longer native neck; the catch and rebound curves are unchanged.
@@ -152,3 +166,10 @@ stations to isolate +1. Its gate requires at least 12 points of actual connected
 count travel, multiple intermediate frames with unchanged count/width/content,
 and a split duplicate within 0.12 points of the stretched badge. The normal
 six-station gate remains in place.
+
+The `anchor-` probe adds long pans in both directions and immediate camera jumps.
+It checks the carrier remains attached and visible, exercises repeated rebasing,
+and measures the actual shared surface origin in map coordinates (at most 2 pt
+of offset), then verifies all six station views return. This hierarchy check
+complements recorded drag comparisons against visible map features; local pill
+coordinates alone cannot establish that the glass tracks the rendered map.

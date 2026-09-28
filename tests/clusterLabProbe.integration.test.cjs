@@ -156,3 +156,36 @@ test('connected +1 moves outward before its split is triggered', { timeout: 9000
     }
     t.diagnostic(`Connected +1 travelled ${excursion.toFixed(2)}pt; ${intermediate.length} intact intermediate frames before split`);
 });
+
+test('native map carrier stays attached across long pans and camera jumps', { timeout: 90000 }, async t => {
+    const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+    const token = `anchor-${Date.now()}`;
+    const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+    const file = path.join(container, 'Documents/cluster-lab-probe.json');
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    let report;
+    const deadline = Date.now() + 75000;
+    while (Date.now() < deadline) {
+        try {
+            const value = JSON.parse(readFileSync(file, 'utf8'));
+            if (value.token === token) { report = value; break; }
+        } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    assert.ok(report, 'map carrier probe did not export');
+    assert.equal(report.status, 'completed');
+    assert.equal(report.stagesCompleted, 11);
+    assert.ok(report.anchorSamples.length >= 250, 'insufficient live carrier coverage');
+    for (const sample of report.anchorSamples) {
+        assert.equal(sample.attached, true, 'MapKit detached the shared glass carrier');
+        assert.equal(sample.visible, true, 'MapKit hid or faded the shared glass carrier');
+        assert.ok(Number.isFinite(sample.originError) && sample.originError <= 2,
+            `carrier rebase displaced the shared glass surface by ${sample.originError}pt`);
+    }
+    const rebases = report.anchorSamples.at(-1).rebaseCount - report.anchorSamples[0].rebaseCount;
+    assert.ok(rebases >= 4, `only ${rebases} carrier rebases were exercised`);
+    assert.equal(report.final.length, report.baseline.length, 'camera return lost station views');
+    assert.equal(report.final.length, 6);
+    const maxError = Math.max(...report.anchorSamples.map(sample => sample.originError));
+    t.diagnostic(`${rebases} native carrier rebases; maximum surface offset ${maxError.toFixed(3)}pt`);
+});
