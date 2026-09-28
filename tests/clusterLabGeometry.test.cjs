@@ -37,7 +37,18 @@ assert(ClusterLabGeometry.owners([station("a", 3, -104), station("b", 4, -21)], 
 assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 84, y: 32)) == 0)
 assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 102, y: 0)) == 9)
 assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 120, y: 0)) == 18)
-assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 0, y: 44)) == 9)
+assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 0, y: 44)) == 0)
+// Stacked stations have only a 2pt anti-chatter band beyond contact and no
+// pre-split count excursion. Horizontal and sideways diagonal travel is intact.
+for dy in stride(from: 0.0, through: 120, by: 1) {
+  assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 0, y: dy)) == 0)
+}
+assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, 0, 32)], previous: [:])["b"] == "a")
+assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, 0, 33)], previous: [:])["b"] == "b")
+assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, 0, 34)], previous: merged)["b"] == "a")
+assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, 0, 35)], previous: merged)["b"] == "b")
+assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, 10, 35)], previous: merged)["b"] == "b")
+assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 60, y: 44)) == 9)
 assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: -120, y: -56)) == 18)
 for x in stride(from: 84.0, through: 120, by: 0.1) {
   assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, x)], previous: merged)["b"] == "a")

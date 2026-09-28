@@ -37,11 +37,12 @@ enum ClusterLabGlass {
   static func marketTint(score: Double) -> UIColor? {
     guard abs(score) > 0.001 else { return nil }
     let strength = CGFloat(min(1, abs(score)))
-    // Increase saturation, keeping each hue's brightness and opacity fixed.
-    // Native glass owns the material; these values keep white text legible.
-    return UIColor(hue: score > 0 ? 0.385 : 0.99,
-                   saturation: 0.25 + 0.70 * strength,
-                   brightness: score > 0 ? 0.43 : 0.56, alpha: 0.95)
+    // Match WelcomeStep.OnboardingChip and PredictiveFuelingStep: #00FF2F
+    // green / #FF1900 red, at 30% tint opacity. Desaturate toward pastel at
+    // typical prices without darkening the native material or changing alpha.
+    let hue: CGFloat = score > 0 ? (2 + 47.0 / 255) / 6 : (25.0 / 255) / 6
+    return UIColor(hue: hue, saturation: 0.18 + 0.82 * strength,
+                   brightness: 1, alpha: 0.3)
   }
 }
 
@@ -114,7 +115,8 @@ final class ClusterLabPill {
       countLabel.text = "+\(max(1, count))"
       lastCount = count
     }
-    let color: UIColor = abs(tintScore) > 0.001 ? .white : .label
+    // Onboarding's adaptive foreground stays readable over these lighter tints.
+    let color: UIColor = .label
     priceLabel.textColor = color
     icon.tintColor = color
     countLabel.textColor = color

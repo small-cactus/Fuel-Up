@@ -21,10 +21,16 @@ enum ClusterLabGeometry {
   // Keep the already-tuned connection impulse inside the longer native neck.
   static let impactSpacing: CGFloat = 18
   static let maximumBadgeStretch: CGFloat = 18
+  static let verticalDisconnectDistance: CGFloat = 34
+
+  static func isVertical(_ separation: CGPoint) -> Bool {
+    abs(separation.y) > abs(separation.x)
+  }
 
   // Pull the count away while membership is still retained. It remains +n
   // throughout this map-driven range, before a split flight can start.
   static func badgeStretch(separation: CGPoint) -> CGFloat {
+    guard !isVertical(separation) else { return 0 }
     let x = (abs(separation.x) - pillSize.width) / (disconnectRange.width - pillSize.width)
     let y = (abs(separation.y) - pillSize.height) / (disconnectRange.height - pillSize.height)
     let t = min(1, max(0, max(x, y)))
@@ -61,8 +67,10 @@ enum ClusterLabGeometry {
             let retained = previous[station.id] != nil && previous[station.id] == previous[sorted[other].id]
             let dx = abs(station.point.x - sorted[other].point.x)
             let dy = abs(station.point.y - sorted[other].point.y)
+            let vertical = isVertical(CGPoint(x: dx, y: dy))
+            let retainedHeight = vertical ? verticalDisconnectDistance : disconnectRange.height
             if dx <= (retained ? disconnectRange.width : pillSize.width) &&
-               dy <= (retained ? disconnectRange.height : pillSize.height) {
+               dy <= (retained ? retainedHeight : pillSize.height) {
               let a = root(index), b = root(other)
               parent[max(a, b)] = min(a, b)
             }

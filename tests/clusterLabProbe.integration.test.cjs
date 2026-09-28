@@ -32,6 +32,7 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     }
     for (const frame of report.samples) {
         assert.ok(frame.viewCount <= frame.stationCount + 1, 'unbounded temporary glass views');
+        assert.ok(frame.glassGroupCount > 0 && frame.glassGroupCount <= frame.viewCount, 'unbounded native effect groups');
         for (const view of frame.views) {
             assert.ok((view.rebound || 0) <= 18.01, `unbounded rebound: ${view.rebound}pt`);
             assert.ok((view.contactDelay || 0) <= 0.014301, 'contact catch held the flight too long');
@@ -79,7 +80,10 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     for (const frame of report.samples) {
         for (const badge of frame.views.filter(view => view.role === 'badge')) {
             const primary = frame.views.find(view => view.id === badge.id.slice(6) && view.primary);
-            if (primary) assert.equal(badge.tintScore, primary.tintScore, 'count tint did not match its displayed cluster price');
+            if (primary) {
+                assert.equal(badge.tintScore, primary.tintScore, 'count tint did not match its displayed cluster price');
+                assert.equal(badge.glassGroup, primary.glassGroup, 'horizontal count lost its shared native effect');
+            }
             assert.ok(badge.attachmentOffset >= 56 && badge.attachmentOffset <= 74, 'unbounded connected count stretch');
             if (primary) assert.ok(Math.hypot(badge.x - primary.x - badge.attachmentOffset, badge.y - primary.y) < 0.001,
                 'connected price and count did not recoil together');
@@ -132,7 +136,8 @@ test('connected +1 moves outward before its split is triggered', { timeout: 9000
     assert.equal(report.status, 'completed');
     assert.equal(report.baseline.length, 2);
     assert.equal(report.final.length, 2);
-    assert.equal(report.baseline.find(view => view.id === 'lab-0').tintScore, 1);
+    assert.ok(report.baseline.find(view => view.id === 'lab-0').tintScore > 0,
+        'the cheapest confirmed price should remain green');
     assert.ok(report.baseline.find(view => view.id === 'lab-1').tintScore < 0,
         'the more expensive alternative should be red even with only two stations');
     const connected = report.samples.flatMap(frame => frame.views.filter(view => view.role === 'badge'));
@@ -188,4 +193,52 @@ test('native map carrier stays attached across long pans and camera jumps', { ti
     assert.equal(report.final.length, 6);
     const maxError = Math.max(...report.anchorSamples.map(sample => sample.originError));
     t.diagnostic(`${rebases} native carrier rebases; maximum surface offset ${maxError.toFixed(3)}pt`);
+});
+
+test('stacked stations split without an intermediate connected count stretch', { timeout: 90000 }, async t => {
+    const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+    const token = `vertical-${Date.now()}`;
+    const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+    const file = path.join(container, 'Documents/cluster-lab-probe.json');
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    let report;
+    const deadline = Date.now() + 75000;
+    while (Date.now() < deadline) {
+        try {
+            const value = JSON.parse(readFileSync(file, 'utf8'));
+            if (value.token === token) { report = value; break; }
+        } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    assert.ok(report, 'vertical probe did not export');
+    assert.equal(report.status, 'completed');
+    assert.equal(report.baseline.length, 2);
+    assert.equal(report.final.length, 2);
+    assert.ok(Math.abs(report.baseline[0].x - report.baseline[1].x) < 0.1, 'fixture must be vertically stacked');
+    const connected = report.samples.flatMap(frame => frame.views.filter(view => view.role === 'badge'));
+    assert.ok(connected.length > 20, 'missing live vertical merge coverage');
+    for (const badge of connected) {
+        assert.equal(badge.attachmentOffset, 56, 'vertical separation stretched the connected count');
+        assert.equal(badge.count, 1);
+        assert.equal(badge.priceMix, 0);
+    }
+    let isolatedFrames = 0;
+    for (const frame of report.samples) {
+        const prices = frame.views.filter(view => view.role === 'price');
+        if (prices.length !== 2) continue;
+        const [a, b] = prices;
+        const verticalGap = Math.abs(a.y - b.y) - 32;
+        if (Math.abs(a.x - b.x) < 1 && verticalGap > 2 && verticalGap <= 36) {
+            assert.ok(Number.isInteger(a.glassGroup) && Number.isInteger(b.glassGroup));
+            assert.notEqual(a.glassGroup, b.glassGroup, 'stacked prices formed an early native glass bridge');
+            assert.equal(frame.glassGroupCount, 2);
+            isolatedFrames++;
+        }
+    }
+    assert.ok(isolatedFrames > 20, 'missing live close vertical price coverage');
+    t.diagnostic(`${isolatedFrames} close vertical frames in separate native effects`);
+    const splits = report.events.filter(event => event.type === 'split-spawn');
+    assert.ok(splits.length >= 2, 'missing repeated vertical splits');
+    for (const split of splits) assert.ok(split.delta <= 0.12, 'vertical split changed the count position at handoff');
+    t.diagnostic(`${connected.length} connected vertical frames without count stretch; ${splits.length} splits`);
 });

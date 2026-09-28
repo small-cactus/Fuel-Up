@@ -71,7 +71,8 @@ private final class LabStationMotion {
 }
 
 final class ClusterLabRenderer {
-  let container = ClusterLabGlass.container()
+  private let glassGroups = ClusterLabGlassGroups()
+  var container: UIView { glassGroups.root }
   private var motions: [String: LabStationMotion] = [:]
   private var badges: [String: ClusterLabPill] = [:]
   private var owners: [String: String] = [:]
@@ -138,7 +139,7 @@ final class ClusterLabRenderer {
 
   private func makePill(_ motion: LabStationMotion) -> ClusterLabPill {
     let pill = ClusterLabPill(price: motion.station.price, name: motion.station.name)
-    ClusterLabGlass.content(of: container).addSubview(pill.view)
+    glassGroups.insert(pill.view)
     motion.pill = pill
     return pill
   }
@@ -355,7 +356,7 @@ final class ClusterLabRenderer {
           let shared = ClusterLabDynamics.mergedVelocity(target: owner.reaction.velocity,
             incoming: incoming * ClusterLabDynamics.connectionVelocityRetention, targetMass: mass)
           // Both connected surfaces inherit the same impact velocity. Native
-          // glass continues to merge them inside the single shared container.
+          // glass continues to merge them inside their shared native container.
           let common = motion.reaction.limitedVelocity(owner.reaction.limitedVelocity(shared))
           owner.reaction.velocity = common
           motion.reaction.velocity = common
@@ -485,10 +486,21 @@ final class ClusterLabRenderer {
     animating = animating || motions.values.contains {
       $0.pendingRelease != nil || (($0.owner == $0.station.id || !$0.settled) && $0.reaction.isMoving)
     }
+    var renderedViews: [String: UIView] = [:]
+    for (id, motion) in motions { if let pill = motion.pill { renderedViews[id] = pill.view } }
+    for (id, badge) in badges { renderedViews["badge:\(id)"] = badge.view }
+    glassGroups.update(renderedViews)
+    if recording {
+      for index in samples.indices {
+        if let id = samples[index]["id"] as? String, let view = renderedViews[id] {
+          samples[index]["glassGroup"] = glassGroups.group(of: view)
+        }
+      }
+    }
     CATransaction.commit()
     if recording {
       frameSamples.append(["time": CACurrentMediaTime(), "views": samples,
-                           "viewCount": ClusterLabGlass.content(of: container).subviews.count,
+                           "viewCount": glassGroups.pillCount, "glassGroupCount": glassGroups.groupCount,
                            "stationCount": motions.count, "animating": animating])
     }
     return animating

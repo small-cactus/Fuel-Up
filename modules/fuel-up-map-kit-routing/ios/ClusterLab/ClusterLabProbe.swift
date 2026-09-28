@@ -24,7 +24,8 @@ final class ClusterLabProbe {
     let fixture: [(Double, Double)] = [(0, 0), (0.00055, 0.00075), (-0.0005, -0.0008),
                                      (0.0011, -0.0006), (-0.001, 0.0007), (0.0001, 0.0015)]
     // The pair run isolates +1 travel; the normal six-station gate is unchanged.
-    let offsets = token.hasPrefix("pair-") ? Array(fixture.prefix(2)) : fixture
+    let offsets = token.hasPrefix("vertical-") ? [(0.0, 0.0), (0.00055, 0.0)] :
+      (token.hasPrefix("pair-") ? Array(fixture.prefix(2)) : fixture)
     view.renderer.setStations(offsets.enumerated().compactMap { index, offset in
       ClusterLabStation(["id": "lab-\(index)", "latitude": center.latitude + offset.0,
                          "longitude": center.longitude + offset.1, "price": 3.10 + Double(index) * 0.10,

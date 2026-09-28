@@ -11,7 +11,7 @@ struct LabMarketAssessment {
   let median: Double?
   let peerCount: Int
   let cheapestPrice: Double?
-  // Only the cheapest confirmed station is positive. Others are red premiums.
+  // Sign selects the cheapest green station; magnitude is distance from market.
   let score: Double
   static let unknown = LabMarketAssessment(median: nil, peerCount: 0, cheapestPrice: nil, score: 0)
 }
@@ -34,6 +34,10 @@ enum ClusterLabMarket {
     guard let cheapest = unique.values.min(by: {
       $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price
     }) else { return [:] }
+    let snapshotPrices = unique.values.map(\.price).sorted()
+    let snapshotMiddle = snapshotPrices.count / 2
+    let snapshotMedian = snapshotPrices.count.isMultiple(of: 2) ?
+      (snapshotPrices[snapshotMiddle - 1] + snapshotPrices[snapshotMiddle]) / 2 : snapshotPrices[snapshotMiddle]
     return unique.mapValues { quote in
       let peers = unique.values.compactMap { other -> (LabMarketQuote, Double)? in
         guard other.id != quote.id else { return nil }
@@ -44,13 +48,17 @@ enum ClusterLabMarket {
       let middle = peers.count / 2
       let median: Double? = peers.count >= minimumPeers ?
         (peers.count.isMultiple(of: 2) ? (peers[middle - 1] + peers[middle]) / 2 : peers[middle]) : nil
-      // Every alternative is red, even a tied price. Saturation rises with the
-      // premium; the surrounding median scales a meaningful price difference.
-      let fullScale = max(0.15, (median ?? cheapest.price) * 0.08)
-      let magnitude = min(1, max(0.05, (quote.price - cheapest.price) / fullScale))
+      // Typical prices are pastel. Only premiums above the surrounding market
+      // saturate the red; below-market alternatives retain the softest red.
+      // The winner's green strengthens with its savings below that same market.
+      let reference = median ?? snapshotMedian
+      let isCheapest = quote.id == cheapest.id
+      let difference = isCheapest ? reference - quote.price : quote.price - reference
+      let fullScale = max(0.15, reference * 0.08)
+      let magnitude = min(1, max(0.05, difference / fullScale))
       return LabMarketAssessment(median: median, peerCount: peers.count,
                                  cheapestPrice: cheapest.price,
-                                 score: quote.id == cheapest.id ? 1 : -magnitude)
+                                 score: isCheapest ? magnitude : -magnitude)
     }
   }
 

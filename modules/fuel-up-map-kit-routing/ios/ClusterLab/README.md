@@ -3,8 +3,8 @@
 The second native tab is a full-bleed Apple map with station price pills. It shares
 the fuel service cache, but its rendering and animation are independent of Home.
 
-`ClusterLabMapView` owns MapKit. `ClusterLabMapAnchor` places the one shared glass
-surface inside one live `MKAnnotationView`. MapKit moves that carrier with its
+`ClusterLabMapView` owns MapKit. `ClusterLabMapAnchor` places the shared glass
+root inside one live `MKAnnotationView`. MapKit moves that carrier with its
 map content, so panning does not depend on the overlay catching up to a camera
 callback. The renderer projects pill positions into padded viewport coordinates;
 the carrier compensates its geographic anchor inside the same transaction. It
@@ -29,20 +29,28 @@ Older iOS uses a display-link fallback. No camera smoothing or prediction adds
 lag, and the approved cluster springs remain separate from map anchoring.
 `ClusterLabGeometry` performs
 screen-space spatial hashing and contact hysteresis (84 × 32 pt to connect,
-120 × 56 pt to disconnect, allowing more separation before splitting). Spatial
+120 × 56 pt to disconnect for side-by-side stations). Vertically dominant
+pairs connect at 32 pt and disconnect at 34 pt: a two-point anti-chatter band
+without the extended retention or pre-split count stretch. Spatial
 hash cells span this retained range so stretched neighbors remain discoverable. `ClusterLabRenderer` owns
 station identity, projection, reversible motion, and atomic handoffs.
 `ClusterLabDynamics` handles mass-weighted impacts and magnetic home springs.
 `ClusterLabMarket` gives only the cheapest confirmed station in the loaded search
-snapshot a saturated green tint. The input already excludes estimated prices and
+snapshot a green tint. The input already excludes estimated prices and
 contains only the selected fuel grade. Stable station-ID order breaks price ties,
 matching cluster ownership. Every alternative is red, including tied prices.
-Red saturation rises with the premium above that cheapest price. Full saturation
-means a difference of at least 15 cents or 8% of the local median, whichever is
-larger. The median uses up to 12 peers within five miles; with fewer than three,
-the cheapest price supplies the scale. Each hue keeps constant brightness and
-opacity. This is recomputed only when data changes, so panning and zooming never
-reassign the cheapest highlight.
+Saturation is lowest near the typical local price. Red grows more saturated
+above the local median; below-market alternatives remain pastel red. The green
+winner grows more saturated with its savings below the local median. Full
+saturation means a difference of at least 15 cents or 8% of that reference,
+whichever is larger. The median uses up to 12 peers within five miles; with
+fewer than three, the loaded search median supplies the reference. This is
+recomputed only when data changes, so panning and zooming never reassign colors.
+
+The tint matches onboarding's #00FF2F green and #FF1900 red at 30% opacity.
+Saturation ranges from pastel to the original onboarding hue, with constant
+brightness and opacity. Adaptive system-label foregrounds match onboarding's
+light/dark text treatment and stay legible over the lighter regular glass.
 
 `ClusterLabGlass` uses the installed Callstack library's public Swift glass views.
 Pills use regular glass with native `UIGlassEffect.tintColor`, high-contrast text,
@@ -52,16 +60,23 @@ own station tint; incoming pills transition to the receiving cluster tint. A
 cached target starts at most one 80 ms native material animation per change;
 ordinary camera frames never rebuild the effect. Reduced Motion applies it
 immediately. Tinting does not alter the movement or rebound curves.
-The shared native container uses Apple's `UIGlassContainerEffect` as live UIKit
-subviews inside the MapKit carrier. Native glass
-spacing is 36 pt, letting the connecting neck stretch farther before detaching.
+`ClusterLabGlassGroups` pools Apple's native `UIGlassContainerEffect` views under
+the same MapKit carrier. Each effect spans the full padded root. Horizontal
+neighbors share an effect with the unchanged 36 pt spacing. Vertically dominant
+neighbors use separate effects until their actual capsule edges are within 2 pt;
+there is no stretched vertical bridge between separate rows. Spatial hashing
+and stable group assignments minimize work and reparenting. Far-apart runs reuse
+effects, and pills retain their identity and coordinates when changing groups.
+Horizontal chains remain a single effect, including turns: native effects have
+transitive membership, so a vertical pair indirectly joined through a horizontal
+chain cannot be isolated without breaking that horizontal connection.
 Connection impulses keep the previously tuned 18-point contact band inside this
 longer native neck; the catch and rebound curves are unchanged.
 
-Only visible stations and a 160-point approach margin participate. One container
-extends 360 points beyond all map edges, including refraction and badge travel.
+Only visible stations and a 160-point approach margin participate. The root and every native effect
+extend 360 points beyond all map edges, including refraction and badge travel.
 Settled groups retain a price and count view, not hidden views for each member.
-Before a retained group splits, its count moves outward with the map through
+Before a horizontally retained group splits, its count moves outward with the map through
 up to 18 points of additional horizontal travel. This uses the existing
 84 × 32 to 120 × 56 hysteresis band: the count remains +n and 44 points wide
 while it pulls away. It no longer stays fixed until the split starts. The native
@@ -142,7 +157,7 @@ Run with a development build and Metro on the selected simulator:
 
 ```
 node --test tests/clusterLabGeometry.test.cjs tests/clusterLabDynamics.test.cjs
-node --test tests/clusterLabMarket.test.cjs
+node --test tests/clusterLabMarket.test.cjs tests/clusterLabGlassGrouping.test.cjs
 FUELUP_SIMULATOR_UDID=<udid> node --test tests/clusterLabProbe.integration.test.cjs
 ```
 
@@ -174,3 +189,9 @@ and measures the actual shared surface origin in map coordinates (at most 2 pt
 of offset), then verifies all six station views return. This hierarchy check
 complements recorded drag comparisons against visible map features; local pill
 coordinates alone cannot establish that the glass tracks the rendered map.
+
+The `vertical-` probe isolates a north/south pair. Its live gate requires repeated
+merges/splits with the connected count held at its normal 56 pt offset throughout,
+plus an exact split handoff and separate actual native effect parents for close
+stacked prices. The horizontal pair probe continues to require its
+full visible outward travel. Native glass spacing and recoil remain unchanged.
