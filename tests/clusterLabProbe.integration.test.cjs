@@ -39,10 +39,11 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
             if (view.role !== 'merge') assert.equal(view.contactDelay || 0, 0, 'contact catch affected a split or resting pill');
             assert.ok(Math.hypot(view.reactionX || 0, view.reactionY || 0) <= 36.01, 'unbounded magnetic displacement');
             if (view.baseX != null) {
-                assert.ok(Math.hypot(view.x - view.baseX - view.reactionX, view.y - view.baseY - view.reactionY) < 0.001,
+                assert.ok(Math.hypot(view.x - view.baseX - view.reactionX, view.y - view.baseY - view.reactionY - (view.clearanceY || 0)) < 0.001,
                     'visible pill did not follow its physical displacement');
             }
             assert.ok(view.contained, `clipped container edge: ${view.id}`);
+            assert.ok(Math.abs(view.clearanceY || 0) <= 32, 'location avoidance moved a station too far');
             assert.ok(Math.abs(view.tintScore || 0) <= 1, 'unbounded market tint');
             assert.ok(view.tintUpdates <= 20, 'native tint was being recreated every frame');
             assert.ok(Number.isFinite(view.x) && Number.isFinite(view.y), 'invalid rendered position');
@@ -51,7 +52,7 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     const catches = report.samples.flatMap(frame => frame.views).filter(view => view.contactDelay > 0.001);
     assert.ok(catches.length > 0, 'contact resistance was not sampled on the live map');
     const visibleCatch = Math.max(...catches.map(view => Math.hypot(
-        view.x - view.reactionX - view.unresistedX, view.y - view.reactionY - view.unresistedY)));
+        view.x - view.reactionX - view.unresistedX, view.y - view.reactionY - (view.clearanceY || 0) - view.unresistedY)));
     assert.ok(visibleCatch > 0.25, 'contact resistance did not affect actual pill movement');
     assert.ok(visibleCatch <= 6.01, 'contact resistance stretched beyond its subtle six-point limit');
     for (const event of report.events.filter(event => event.type === 'contact-catch')) {
@@ -92,9 +93,11 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     t.diagnostic(`Main price recoil ${primaryTravel.toFixed(2)}pt`);
     for (const event of report.events.filter(event => event.type.endsWith('handoff'))) {
         assert.ok(event.delta <= 0.12, `handoff moved ${event.delta}pt`);
+        if (event.type === 'merge-handoff') assert.ok(event.renderedDelta <= 0.12, 'location clearance broke the rendered merge handoff');
     }
     for (const event of report.events.filter(event => event.type === 'split-spawn')) {
         assert.ok(event.delta <= 0.12, `split duplicate jumped away from its stretched count by ${event.delta}pt`);
+        assert.ok(event.renderedDelta <= 0.12, 'location clearance broke the rendered split duplicate');
     }
     const arrivals = report.events.filter(event => event.type === 'merge-arrive' || event.type === 'split-handoff');
     for (const event of arrivals) {
@@ -281,4 +284,43 @@ test('initial camera fit shows every station and count within safe margins on it
     assert.equal(report.events.length, 0, 'initial fit triggered split/merge flights');
     assert.ok(tightestMargin <= 1, 'native camera zoomed out beyond the solved fit');
     t.diagnostic(`${report.samples.length} fitted frames; minimum side clearance beyond 17pt inset: ${tightestMargin.toFixed(2)}pt`);
+});
+
+test('native user location stays visible with a nearby price and count gently displaced', { timeout: 30000 }, async t => {
+    const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+    const token = `location-${Date.now()}`;
+    const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+    const file = path.join(container, 'Documents/cluster-lab-probe.json');
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    let report;
+    const deadline = Date.now() + 20000;
+    while (Date.now() < deadline) {
+        try {
+            const value = JSON.parse(readFileSync(file, 'utf8'));
+            if (value.token === token) { report = value; break; }
+        } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+        await new Promise(resolve => setTimeout(resolve, 250));
+    }
+    assert.ok(report, 'location clearance probe did not export');
+    assert.equal(report.status, 'completed');
+    assert.equal(report.nativeUserLocationVisible, true, 'MapKit did not present the real user-location annotation');
+    assert.equal(report.userLocationZPriority, 1000, 'location dot must stay above the glass carrier');
+    assert.ok(report.samples.length >= 30);
+    for (const frame of report.samples) {
+        assert.ok(Number.isFinite(frame.userLocation.x) && Number.isFinite(frame.userLocation.y), 'missing live location fix');
+        const price = frame.views.find(view => view.id === 'lab-0');
+        const badge = frame.views.find(view => view.id === 'badge:lab-0');
+        assert.ok(price && badge, 'missing price/count pair at the user location');
+        assert.ok(Math.abs(price.clearanceY) >= 30 && Math.abs(price.clearanceY) <= 32);
+        assert.equal(price.clearanceY, badge.clearanceY, 'connected glass was pulled apart by location avoidance');
+        for (const view of [price, badge]) {
+            const dx = Math.max(0, Math.abs(view.x - frame.userLocation.x) - (view.width - 32) / 2);
+            const gap = Math.hypot(dx, view.y - frame.userLocation.y) - 16;
+            assert.ok(gap >= 14.9, `pill covers the native location dot: ${gap}`);
+        }
+        for (const view of frame.views.filter(view => view.id === 'lab-2' || view.id === 'lab-3')) {
+            assert.equal(view.clearanceY, 0, 'unrelated station was moved');
+        }
+    }
+    t.diagnostic(`${report.samples.length} frames with a native blue dot and bounded shared price/count clearance`);
 });

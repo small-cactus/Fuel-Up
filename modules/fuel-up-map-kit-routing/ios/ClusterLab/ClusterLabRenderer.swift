@@ -54,8 +54,12 @@ private final class LabStationMotion {
   var impactApplied = false
   var contactCatch: LabContactCatch?
   var pendingRelease: LabPendingRelease?
+  var clearance: CGFloat = 0
+  var startClearance: CGFloat = 0
+  var clearanceProgress: CGFloat = 1
 
   func begin(duration: Double, travel: CGFloat, speed: CGFloat, restarting: Bool = false) {
+    startClearance = clearance
     startPoint = point; startOffset = offset; startWidth = width; startMix = priceMix
     elapsed = 0; self.duration = duration; self.travel = travel; launchSpeed = speed
     curveStartedAt = CACurrentMediaTime()
@@ -90,6 +94,7 @@ final class ClusterLabRenderer {
   private var projectionTime: Double = 0
   private var cameraSpeed: CGFloat = 0
   private var needsInitialLayout = false
+  private let locationClearance = ClusterLabLocationClearance()
 
   func prepareForCameraFit() {
     for motion in motions.values { motion.pill?.view.removeFromSuperview() }
@@ -98,6 +103,7 @@ final class ClusterLabRenderer {
     badgeOffsetTargets.removeAll(); badgeOffsetCarries.removeAll(); renderedBadgeOffsets.removeAll()
     previousProjection.removeAll(); projectionTime = 0; cameraSpeed = 0; cameraStarted = nil
     needsInitialLayout = true
+    locationClearance.reset()
   }
 
   func cameraBegan() { cameraStarted = CACurrentMediaTime(); cameraSpeed = 0 }
@@ -261,13 +267,17 @@ final class ClusterLabRenderer {
           motion.priceMix = 0
           motion.count = max(1, previousCounts[motion.owner] ?? 1)
           let pill = makePill(motion)
+          motion.clearance = oldOwner.clearance
+          pill.view.transform = CGAffineTransform(translationX: 0, y: motion.clearance)
           var center = project(motion.point, map: map)
           center.x += motion.offset + motion.reaction.offset.x
           center.y += motion.reaction.offset.y
           pill.render(center: center, width: motion.width, priceMix: 0,
                       count: motion.count, market: markets[motion.owner] ?? .unknown, dark: dark)
           let source = badges[motion.owner]?.view.center ?? center
-          event("split-spawn", id: station.id, delta: hypot(pill.view.center.x - source.x, pill.view.center.y - source.y))
+          let sourceFrame = badges[motion.owner]?.view.frame ?? pill.view.frame
+          event("split-spawn", id: station.id, delta: hypot(pill.view.center.x - source.x, pill.view.center.y - source.y),
+                details: ["renderedDelta": hypot(pill.view.frame.midX - sourceFrame.midX, pill.view.frame.midY - sourceFrame.midY)])
         }
         let destination = stations.first { $0.id == nextOwner }!.mapPoint
         let start = project(motion.point, map: map)
@@ -303,6 +313,12 @@ final class ClusterLabRenderer {
   func render(map: MKMapView, deltaTime: Double) -> Bool {
     var animating = false
     var samples: [[String: Any]] = []
+    var previousRenderedCenters: [ObjectIdentifier: CGPoint] = [:]
+    if recording {
+      for pill in motions.values.compactMap(\.pill) + Array(badges.values) {
+        previousRenderedCenters[ObjectIdentifier(pill.view)] = CGPoint(x: pill.view.frame.midX, y: pill.view.frame.midY)
+      }
+    }
     let reducedMotion = UIAccessibility.isReduceMotionEnabled
     let now = CACurrentMediaTime()
     if reducedMotion { badgeOffsetCarries.removeAll() }
@@ -353,6 +369,7 @@ final class ClusterLabRenderer {
         elapsed: motion.elapsed - contactDelay, duration: motion.duration, distance: projectedTravel, speed: motion.launchSpeed)
       let progress = LabContactCatch.resistedProgress(unresisted: unresistedProgress,
         delayed: delayedProgress, distance: projectedTravel)
+      motion.clearanceProgress = min(1, max(0, progress))
       motion.point = MKMapPoint(x: motion.startPoint.x + (targetPoint.x - motion.startPoint.x) * progress,
                                y: motion.startPoint.y + (targetPoint.y - motion.startPoint.y) * progress)
       motion.offset = motion.startOffset + (targetOffset - motion.startOffset) * progress
@@ -408,6 +425,7 @@ final class ClusterLabRenderer {
           nil : (markets[merged ? motion.owner : id] ?? .unknown)
         pill.render(center: point, width: motion.width, priceMix: motion.priceMix, count: motion.count,
                     market: market, dark: dark)
+        if arrived && merged { pill.view.transform = CGAffineTransform(translationX: 0, y: owner.clearance) }
         if recording {
           // Compare the actual view with the original trajectory in the same
           // map projection, so the probe proves visible resistance at contact.
@@ -464,8 +482,11 @@ final class ClusterLabRenderer {
         // Match the accumulator's content as well as its geometry in this same
         // transaction before releasing the temporary native effect view.
         member.pill?.render(center: moverCenter, width: 44, priceMix: 0, count: members.count, market: markets[ownerId] ?? .unknown, dark: dark)
+        member.pill?.view.transform = badge.view.transform
+        let renderedDelta = hypot(member.pill!.view.frame.midX - badge.view.frame.midX,
+                                  member.pill!.view.frame.midY - badge.view.frame.midY)
         member.pill?.view.removeFromSuperview(); member.pill = nil
-        event("merge-handoff", id: member.station.id, delta: handoffDelta)
+        event("merge-handoff", id: member.station.id, delta: handoffDelta, details: ["renderedDelta": renderedDelta])
       }
       if recording {
         samples.append(["id": "badge:\(ownerId)", "x": badge.view.center.x, "y": badge.view.center.y,
@@ -516,11 +537,46 @@ final class ClusterLabRenderer {
     var renderedViews: [String: UIView] = [:]
     for (id, motion) in motions { if let pill = motion.pill { renderedViews[id] = pill.view } }
     for (id, badge) in badges { renderedViews["badge:\(id)"] = badge.view }
+    let dot: CGPoint? = map.showsUserLocation && map.userLocation.location != nil && map.isUserLocationVisible ?
+      project(MKMapPoint(map.userLocation.coordinate), map: map) : nil
+    var groupFrames: [String: CGRect] = [:]
+    for (id, motion) in motions where motion.owner == id {
+      guard let pill = motion.pill else { continue }
+      // Untransformed frames keep avoidance separate from map projection and
+      // the approved springs. Never feed the previous nudge back into its solve.
+      var frame = CGRect(x: pill.view.center.x - pill.view.bounds.width / 2,
+                         y: pill.view.center.y - 16, width: pill.view.bounds.width, height: 32)
+      if let badge = badges[id] {
+        frame = frame.union(CGRect(x: badge.view.center.x - 22, y: badge.view.center.y - 16, width: 44, height: 32))
+      }
+      groupFrames[id] = frame
+    }
+    let safeBounds = map.bounds.inset(by: map.safeAreaInsets).insetBy(dx: 15, dy: 15)
+      .offsetBy(dx: ClusterLabGeometry.containerPadding, dy: ClusterLabGeometry.containerPadding)
+    let clearance = locationClearance.update(frames: groupFrames, dot: dot, bounds: safeBounds,
+                                             deltaTime: deltaTime, reducedMotion: reducedMotion)
+    animating = animating || clearance.moving
+    for motion in motions.values {
+      let target = clearance.offsets[motion.owner] ?? 0
+      motion.clearance = motion.settled || reducedMotion ? target :
+        motion.startClearance + (target - motion.startClearance) * motion.clearanceProgress
+      motion.pill?.view.transform = CGAffineTransform(translationX: 0, y: motion.clearance)
+    }
+    for (id, badge) in badges {
+      badge.view.transform = CGAffineTransform(translationX: 0, y: clearance.offsets[id] ?? 0)
+    }
     glassGroups.update(renderedViews)
     if recording {
       for index in samples.indices {
         if let id = samples[index]["id"] as? String, let view = renderedViews[id] {
           samples[index]["glassGroup"] = glassGroups.group(of: view)
+          samples[index]["clearanceY"] = view.transform.ty
+          samples[index]["x"] = view.frame.midX
+          samples[index]["y"] = view.frame.midY
+          if let previous = previousRenderedCenters[ObjectIdentifier(view)] {
+            samples[index]["step"] = hypot(view.frame.midX - previous.x, view.frame.midY - previous.y)
+          }
+          samples[index]["contained"] = container.bounds.contains(view.frame)
         }
       }
     }
@@ -528,7 +584,8 @@ final class ClusterLabRenderer {
     if recording {
       frameSamples.append(["time": CACurrentMediaTime(), "views": samples,
                            "viewCount": glassGroups.pillCount, "glassGroupCount": glassGroups.groupCount,
-                           "stationCount": motions.count, "animating": animating])
+                           "stationCount": motions.count, "animating": animating,
+                           "userLocation": dot.map { ["x": $0.x, "y": $0.y] } ?? [:]])
     }
     return animating
   }

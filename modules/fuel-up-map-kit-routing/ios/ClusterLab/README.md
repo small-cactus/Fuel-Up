@@ -218,3 +218,27 @@ without leftover hysteresis or flights from the old camera. Home is unchanged.
 ordering, and optimal zoom against tighter alternatives across compact, large,
 and landscape phone sizes. The live `fit-` probe checks every represented station,
 actual native pill bounds, and absence of transition flights from the first frame.
+
+## User location
+
+Glass Lab uses MapKit's standard blue user-location annotation while the tab is
+active, with native annotation z-priority keeping it above the glass. Location
+updates refresh projection without enabling camera following or refitting it.
+No custom location marker, duplicate location manager, or accuracy-circle
+avoidance is introduced.
+
+`ClusterLabLocationClearance` protects the dot and its white rim with a small
+15 pt radius. Overlapping prices/counts receive a shared vertical translation,
+limited to 32 pt. It picks the shorter clear direction, prefers the side without
+neighboring pills when possible, and respects the visible safe-area edges.
+Longitude and all station coordinates stay unchanged. Adjustments ease over
+80 ms without rebound, resolve immediately for Reduced Motion, and are seeded
+before the first fitted frame. A split inherits the source count's displacement;
+its existing flight interpolates toward its own clearance, preserving handoffs.
+The native dot stays above the pills even when a crowded edge leaves insufficient
+space for full separation within the displacement cap.
+
+The `location-` live probe places a price/count at the actual simulator GPS fix
+and verifies the native annotation, z-priority, shared bounded displacement,
+actual rendered clearance, and unchanged distant station positions. Frame
+telemetry includes the presentation translation in the measured pill coordinates.

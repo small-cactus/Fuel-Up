@@ -11,12 +11,16 @@ final class ClusterLabProbe {
   private var finished = false
   private var baseline: [[String: Any]] = []
   private var anchorSamples: [[String: Any]] = []
-  private let center = CLLocationCoordinate2D(latitude: 27.9506, longitude: -82.4572)
+  private let center: CLLocationCoordinate2D
+  private var isFit: Bool { token.hasPrefix("fit-") || token.hasPrefix("location-") }
   private let spans: [Double] = [0.003, 0.006, 0.010, 0.018, 0.030, 0.018, 0.010, 0.006, 0.003, 0.030, 0.003]
 
   init(view: ClusterLabMapView, token: String) {
     self.view = view; self.token = token
     savedRegion = view.map.region
+    center = token.hasPrefix("location-") ?
+      (view.map.userLocation.location?.coordinate ?? .init(latitude: 27.9506, longitude: -82.4572)) :
+      .init(latitude: 27.9506, longitude: -82.4572)
   }
 
   func start() {
@@ -24,14 +28,15 @@ final class ClusterLabProbe {
     let fixture: [(Double, Double)] = [(0, 0), (0.00055, 0.00075), (-0.0005, -0.0008),
                                      (0.0011, -0.0006), (-0.001, 0.0007), (0.0001, 0.0015)]
     // The pair run isolates +1 travel; the normal six-station gate is unchanged.
-    let offsets = token.hasPrefix("vertical-") ? [(0.0, 0.0), (0.00055, 0.0)] :
+    let offsets = token.hasPrefix("location-") ? [(0.0, 0.0), (0.0, 0.00001), (0.0011, 0.0015), (-0.001, -0.0015)] :
+      token.hasPrefix("vertical-") ? [(0.0, 0.0), (0.00055, 0.0)] :
       (token.hasPrefix("pair-") ? Array(fixture.prefix(2)) : fixture)
     view.renderer.setStations(offsets.enumerated().compactMap { index, offset in
       ClusterLabStation(["id": "lab-\(index)", "latitude": center.latitude + offset.0,
                          "longitude": center.longitude + offset.1, "price": 3.10 + Double(index) * 0.10,
                          "name": "Probe station \(index)"])
     })
-    if token.hasPrefix("fit-") { view.fitCamera(to: view.renderer.stations) }
+    if isFit { view.fitCamera(to: view.renderer.stations) }
     else { view.setRegion(.init(center: center, span: .init(latitudeDelta: spans[0], longitudeDelta: spans[0])), animated: false) }
     view.renderer.resetRecording()
     view.renderer.recording = true
@@ -41,7 +46,7 @@ final class ClusterLabProbe {
   func tick(time: Double) {
     guard let view, !finished else { return }
     if startTime == 0 { startTime = time }
-    if token.hasPrefix("fit-") {
+    if isFit {
       stage = 0
       if baseline.isEmpty { baseline = view.renderer.frameSamples.last?["views"] as? [[String: Any]] ?? [] }
       if time - startTime >= 2 { finish(status: "completed") }
@@ -80,6 +85,9 @@ final class ClusterLabProbe {
       "samples": view.renderer.frameSamples, "events": view.renderer.events,
       "anchorSamples": anchorSamples,
       "usesNativeGlass": NSClassFromString("UIGlassContainerEffect") != nil,
+      "nativeUserLocationVisible": view.map.showsUserLocation && view.map.isUserLocationVisible &&
+        view.map.view(for: view.map.userLocation) != nil,
+      "userLocationZPriority": view.map.view(for: view.map.userLocation)?.zPriority.rawValue ?? -1,
       "fitBounds": ["x": view.fitBounds.minX, "y": view.fitBounds.minY,
                     "width": view.fitBounds.width, "height": view.fitBounds.height],
     ]

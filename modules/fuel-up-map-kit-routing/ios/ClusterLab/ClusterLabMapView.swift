@@ -118,6 +118,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     if value && !active { needsCameraFit = true }
     if !value || needsCameraFit { renderer.container.isHidden = true }
     active = value
+    map.showsUserLocation = value
     if active { refresh() } else {
       probe?.cancel()
       stopFrames()
@@ -135,6 +136,16 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
     annotation === mapAnchor.annotation ? mapAnchor.view : nil
   }
+
+  func mapView(_ mapView: MKMapView, didAdd views: [MKAnnotationView]) {
+    for view in views where view.annotation is MKUserLocation {
+      view.zPriority = .max
+      view.selectedZPriority = .max
+    }
+    refresh()
+  }
+
+  func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) { refresh() }
   func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
     cameraMoving = false
     renderer.cameraEnded()
