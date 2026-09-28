@@ -7,13 +7,14 @@ the fuel service cache, but its rendering and animation are independent of Home.
 screen-space spatial hashing and contact hysteresis (84 × 32 pt to connect,
 108 × 48 pt to disconnect, allowing a small extra stretch before splitting). `ClusterLabRenderer` owns
 station identity, projection, reversible motion, and atomic handoffs.
+`ClusterLabDynamics` handles mass-weighted impacts and magnetic home springs.
 `ClusterLabGlass` uses the installed Callstack library's public Swift glass views.
 The shared native container uses Apple's `UIGlassContainerEffect`; it does not
 draw an imitation or place glass in MapKit annotation snapshots. Native glass
 spacing is 12 pt, giving the connecting neck a little extra stretch.
 
 Only visible stations and a 160-point approach margin participate. One container
-extends 288 points beyond all map edges, including refraction and badge travel.
+extends 336 points beyond all map edges, including refraction and badge travel.
 Settled groups retain a price and count view, not hidden views for each member.
 The first arriving mover becomes the count view in place. Further movers are
 removed in the same transaction that increments the count. Splitting materializes
@@ -37,6 +38,26 @@ JS camera-event loop. The display link sleeps when settled, unfocused, detached,
 or backgrounded. Reduced Motion resolves transitions immediately. Older systems
 use plain rounded system-background pills.
 
+## Shared cluster motion
+
+A station contributes one mass unit. On contact, the incoming pill and receiving
+cluster share a mass-weighted velocity; bounded viscous loss prevents runaway
+energy. Both the main price and count move together. On an actual partition,
+equal-and-opposite impulses go to the departing mass and remaining mass. A whole
+cluster merging into another cluster does not falsely trigger release impulses.
+
+The screen-space spring offset is added to the live MapKit projection. Its exact
+damped-oscillator solution is independent of frame rate, retains state through
+interruptions, and dissipates energy back to zero. One shared energy budget caps
+excursions at 36 pt without hard-clamping positions. Reduced Motion clears it.
+No extra effect views or animation clocks are created.
+
+UIKit Dynamics and UIKit spring animators were considered. They take ownership
+of view positions; this renderer instead needs map projection, glass geometry,
+impacts and view handoffs committed together in the existing display-link
+transaction. The small Swift solver keeps that ownership in one place. Glass
+rendering and merging still use the native Apple effect via Callstack.
+
 ## Verification
 
 Build after installing pods because the map is native Swift:
@@ -48,7 +69,7 @@ cd ios && pod install
 Run with a development build and Metro on the selected simulator:
 
 ```
-node --test tests/clusterLabGeometry.test.cjs
+node --test tests/clusterLabGeometry.test.cjs tests/clusterLabDynamics.test.cjs
 FUELUP_SIMULATOR_UDID=<udid> node --test tests/clusterLabProbe.integration.test.cjs
 ```
 
@@ -62,5 +83,8 @@ The native gate checks completion within 300 ms (including scheduling allowance)
 exact handoff alignment, container bounds, view count, and reset geometry. It
 reports actual frame travel rather than restricting gesture speed. Pure Swift
 checks exercise timing and rebound across travel distances and frame rates.
+The live gate also requires visible main-price reactions to both contact and
+release, equal displacement of the connected price/count, bounded physical
+travel, and balanced split impulses. These are actual UIKit frame samples.
 This is additional coverage. It does not replace or weaken the existing Home
 `tests/clusterProbe.integration.test.cjs` gate or its JSON export.

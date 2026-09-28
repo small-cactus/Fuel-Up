@@ -40,12 +40,16 @@ private final class LabStationMotion {
   var launchSpeed: CGFloat = 0
   var startedAt: Double = 0
   var curveStartedAt: Double = 0
+  var reaction = LabSpringBody()
+  var displayedReaction = LabVector.zero
+  var displayedReactionVelocity = LabVector.zero
+  var impactApplied = false
 
   func begin(duration: Double, travel: CGFloat, speed: CGFloat, restarting: Bool = false) {
     startPoint = point; startOffset = offset; startWidth = width; startMix = priceMix
     elapsed = 0; self.duration = duration; self.travel = travel; launchSpeed = speed
     curveStartedAt = CACurrentMediaTime()
-    if !restarting { startedAt = curveStartedAt }
+    if !restarting { startedAt = curveStartedAt; impactApplied = false }
   }
 
   init(_ station: ClusterLabStation) {
@@ -104,8 +108,12 @@ final class ClusterLabRenderer {
     return pill
   }
 
-  private func event(_ type: String, id: String, delta: CGFloat = 0, duration: Double = 0) {
-    if recording { events.append(["type": type, "id": id, "delta": delta, "duration": duration, "time": CACurrentMediaTime()]) }
+  private func event(_ type: String, id: String, delta: CGFloat = 0, duration: Double = 0, details: [String: Any] = [:]) {
+    if recording {
+      var entry: [String: Any] = ["type": type, "id": id, "delta": delta, "duration": duration, "time": CACurrentMediaTime()]
+      entry.merge(details) { _, value in value }
+      events.append(entry)
+    }
   }
 
   func resetRecording() { events.removeAll(keepingCapacity: true); frameSamples.removeAll(keepingCapacity: true) }
@@ -133,6 +141,8 @@ final class ClusterLabRenderer {
       projectionTime = now
     }
     let nextOwners = ClusterLabGeometry.owners(candidates, previous: owners)
+    let nextMasses = Dictionary(grouping: nextOwners.keys, by: { nextOwners[$0]! }).mapValues(\.count)
+    var releases: [(child: String, parent: String, direction: LabVector, speed: CGFloat)] = []
     let previousCounts = Dictionary(grouping: motions.values.filter { $0.settled && $0.owner != $0.station.id }, by: \.owner)
       .mapValues(\.count)
     for id in Array(motions.keys) where nextOwners[id] == nil {
@@ -143,8 +153,16 @@ final class ClusterLabRenderer {
       motions[station.id] = motion
       let nextOwner = nextOwners[station.id]!
       if motion.owner != nextOwner {
+        let oldOwnerId = motion.owner
+        let wasConnected = oldOwnerId != station.id && (motion.settled || motion.impactApplied)
+        if motion.pill != nil {
+          // A reversal inherits the pose/velocity actually displayed, including
+          // its former cluster's recoil. It never jumps back to a bare map pin.
+          motion.reaction = LabSpringBody(offset: motion.displayedReaction, velocity: motion.displayedReactionVelocity)
+        }
         if motion.settled, motion.pill == nil, let oldOwner = motions[motion.owner] {
           // Split: create a 1:1 duplicate at the existing +n before changing it.
+          motion.reaction = oldOwner.reaction
           motion.point = oldOwner.station.mapPoint
           motion.offset = ClusterLabGeometry.badgeOffset
           motion.width = ClusterLabGeometry.badgeWidth
@@ -159,12 +177,28 @@ final class ClusterLabRenderer {
         let travel = hypot(end.x + (nextOwner == station.id ? 0 : ClusterLabGeometry.badgeOffset) - start.x - motion.offset, end.y - start.y)
         let duration = ClusterLabGeometry.duration(distance: travel, speed: cameraSpeed,
           movementDuration: cameraStarted.map { now - $0 } ?? 0.16)
+        if wasConnected && nextOwners[oldOwnerId] != nextOwner {
+          let direction = LabVector(x: end.x + (nextOwner == station.id ? 0 : ClusterLabGeometry.badgeOffset) - start.x - motion.offset,
+                                    y: end.y - start.y)
+          releases.append((station.id, oldOwnerId, direction * (1 / max(1, direction.length)),
+                           min(900, 360 + cameraSpeed * 0.35 + travel * 1.5)))
+        }
         motion.begin(duration: duration, travel: travel, speed: cameraSpeed)
         motion.owner = nextOwner
         motion.settled = false
         if nextOwner != station.id { event("merge-start", id: station.id) }
       }
       if !motion.settled && motion.pill == nil { _ = makePill(motion) }
+    }
+    for release in releases {
+      guard let parent = motions[release.parent], let child = motions[release.child] else { continue }
+      let mass = CGFloat(nextMasses[release.parent] ?? 1)
+      let before = parent.reaction.velocity * mass + child.reaction.velocity
+      _ = ClusterLabDynamics.release(parent: &parent.reaction, child: &child.reaction,
+        direction: release.direction, speed: release.speed, remainingMass: mass)
+      let after = parent.reaction.velocity * mass + child.reaction.velocity
+      event("split-impulse", id: release.child, delta: (after - before).length,
+            details: ["owner": release.parent, "remainingMass": mass])
     }
     owners = nextOwners
   }
@@ -174,6 +208,14 @@ final class ClusterLabRenderer {
     var animating = false
     var samples: [[String: Any]] = []
     let reducedMotion = UIAccessibility.isReduceMotionEnabled
+    for motion in motions.values {
+      if motion.owner == motion.station.id || !motion.settled {
+        motion.reaction.advance(deltaTime, reducedMotion: reducedMotion)
+      } else { motion.reaction = LabSpringBody() }
+    }
+    var connectedMasses = Dictionary(grouping: motions.values.filter {
+      $0.owner != $0.station.id && ($0.settled || $0.impactApplied)
+    }, by: \.owner).mapValues { $0.count + 1 }
     // One main-thread transaction updates positions, glass sizes, text, and
     // handoffs together. No asynchronous animation completions can race a pinch.
     CATransaction.begin()
@@ -213,22 +255,54 @@ final class ClusterLabRenderer {
       } else { animating = true }
       point = project(motion.point, map: map)
       point.x += motion.offset
+      if merged && !motion.settled && !motion.impactApplied && deltaTime > 0 && progress >= 0.25 && !reducedMotion {
+        // The impact happens on contact, not after the travelling pill vanishes.
+        let contactX = abs(point.x + motion.reaction.offset.x - target.x - owner.reaction.offset.x)
+        let contactY = abs(point.y + motion.reaction.offset.y - target.y - owner.reaction.offset.y)
+        if contactX <= (motion.width + ClusterLabGeometry.badgeWidth) / 2 + 12 && contactY <= 44 {
+          let incoming = (LabVector(x: point.x - previousRenderedPoint.x, y: point.y - previousRenderedPoint.y) *
+            (1 / CGFloat(deltaTime)) + motion.reaction.velocity).limited(to: 1200)
+          let mass = CGFloat(connectedMasses[motion.owner] ?? 1)
+          connectedMasses[motion.owner] = Int(mass) + 1
+          let shared = ClusterLabDynamics.mergedVelocity(target: owner.reaction.velocity, incoming: incoming, targetMass: mass)
+          // Both connected surfaces inherit the same impact velocity. Native
+          // glass continues to merge them inside the single shared container.
+          let common = motion.reaction.limitedVelocity(owner.reaction.limitedVelocity(shared))
+          owner.reaction.velocity = common
+          motion.reaction.velocity = common
+          motion.impactApplied = true
+          event("merge-impulse", id: id, delta: common.length,
+                details: ["owner": motion.owner, "targetMass": mass,
+                          "incomingX": incoming.x, "incomingY": incoming.y,
+                          "sharedX": common.x, "sharedY": common.y])
+        }
+      }
+      let carry = merged ? min(1, max(0, progress)) : 0
+      let reaction = motion.reaction.offset * (1 - carry) + owner.reaction.offset * carry
+      motion.displayedReaction = reaction
+      motion.displayedReactionVelocity = motion.reaction.velocity * (1 - carry) + owner.reaction.velocity * carry
+      let basePoint = point
+      point.x += reaction.x; point.y += reaction.y
       if let pill = motion.pill {
+        let previousCenter = pill.view.bounds.isEmpty ? point : pill.view.center
         pill.render(center: point, width: motion.width, priceMix: motion.priceMix, count: motion.count,
                     best: id == stations.first?.id, dark: dark)
         if recording {
           samples.append(["id": id, "x": pill.view.center.x, "y": pill.view.center.y,
                           "width": pill.view.bounds.width, "priceMix": motion.priceMix,
-                          "rebound": max(0, ((pill.view.center.x - target.x) * (target.x - start.x) +
-                            (pill.view.center.y - target.y) * (target.y - start.y)) / max(projectedTravel, 0.001)),
+                          "rebound": max(0, ((basePoint.x - target.x) * (target.x - start.x) +
+                            (basePoint.y - target.y) * (target.y - start.y)) / max(projectedTravel, 0.001)),
+                          "reactionX": reaction.x, "reactionY": reaction.y,
+                          "homeX": target.x, "homeY": target.y, "baseX": basePoint.x, "baseY": basePoint.y,
+                          "primary": !merged,
                           "role": merged ? "merge" : (motion.settled ? "price" : "split"),
-                          "step": hypot(pill.view.center.x - previousRenderedPoint.x, pill.view.center.y - previousRenderedPoint.y),
+                          "step": hypot(pill.view.center.x - previousCenter.x, pill.view.center.y - previousCenter.y),
                           "contained": container.bounds.contains(pill.view.frame)])
         }
       }
       if arrived && !motion.settled {
         motion.settled = true
-        let handoffDelta = hypot(point.x - target.x, point.y - target.y)
+        let handoffDelta = hypot(point.x - target.x - reaction.x, point.y - target.y - reaction.y)
         let duration = motion.startedAt == 0 ? 0 : CACurrentMediaTime() - motion.startedAt
         if merged { event("merge-arrive", id: id, delta: handoffDelta, duration: duration) }
         else { event("split-handoff", id: id, delta: handoffDelta, duration: duration) }
@@ -249,7 +323,8 @@ final class ClusterLabRenderer {
         badge = pill; first.pill = nil; badges[ownerId] = badge
       } else { continue }
       var center = project(owner.station.mapPoint, map: map)
-      center.x += ClusterLabGeometry.badgeOffset
+      center.x += ClusterLabGeometry.badgeOffset + owner.reaction.offset.x
+      center.y += owner.reaction.offset.y
       badge.render(center: center, width: 44, priceMix: 0, count: members.count, best: false, dark: dark)
       for member in members where member.pill != nil {
         let moverCenter = member.pill!.view.center
@@ -263,8 +338,12 @@ final class ClusterLabRenderer {
       if recording {
         samples.append(["id": "badge:\(ownerId)", "x": badge.view.center.x, "y": badge.view.center.y,
                         "width": badge.view.bounds.width, "count": members.count, "role": "badge",
+                        "reactionX": owner.reaction.offset.x, "reactionY": owner.reaction.offset.y,
                         "contained": container.bounds.contains(badge.view.frame)])
       }
+    }
+    animating = animating || motions.values.contains {
+      ($0.owner == $0.station.id || !$0.settled) && $0.reaction.isMoving
     }
     CATransaction.commit()
     if recording {

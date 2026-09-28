@@ -13,7 +13,7 @@ enum ClusterLabGeometry {
   static let badgeWidth: CGFloat = 44
   static let badgeOffset: CGFloat = 56
   static let overscan: CGFloat = 160
-  static let containerPadding: CGFloat = 288
+  static let containerPadding: CGFloat = 336
   static let maximumRebound: CGFloat = 18
 
   static func owners(_ stations: [LabProjectedStation], previous: [String: String]) -> [String: String] {
