@@ -3,7 +3,16 @@
 The second native tab is a full-bleed Apple map with station price pills. It shares
 the fuel service cache, but its rendering and animation are independent of Home.
 
-`ClusterLabMapView` owns MapKit and the display link. `ClusterLabGeometry` performs
+`ClusterLabMapView` owns MapKit. `ClusterLabFrameClock` uses UIKit's
+`UIUpdateLink.beforeCATransactionCommit` phase on iOS 18 and later: camera
+callbacks mark the projection dirty, then clustering and pill positioning run
+once after gesture and display-link work, before the frame is committed. This
+avoids competing early camera callbacks and display-link updates. Tracking stays
+active through camera deceleration; the clock observes passively when settled
+and requests continuous frames only for camera motion, transitions, or a probe.
+Older iOS uses a display-link fallback. No camera smoothing or prediction adds
+lag, and the approved cluster springs remain separate from map anchoring.
+`ClusterLabGeometry` performs
 screen-space spatial hashing and contact hysteresis (84 × 32 pt to connect,
 120 × 56 pt to disconnect, allowing more separation before splitting). Spatial
 hash cells span this retained range so stretched neighbors remain discoverable. `ClusterLabRenderer` owns
@@ -66,8 +75,8 @@ endpoints and turnaround. Total duration is 1.32 times the base duration,
 with the added time confined to the return. There is no fixed points-per-frame
 speed limit or trailing exponential tail. MapKit's
 projection is read natively during camera changes, including rotation; there is no
-JS camera-event loop. The display link sleeps when settled, unfocused, detached,
-or backgrounded. Reduced Motion resolves transitions immediately. Older systems
+JS camera-event loop. Continuous frame requests stop when settled; the clock is
+released when unfocused, detached, or backgrounded. Reduced Motion resolves transitions immediately. Older systems
 use plain rounded system-background pills.
 
 ## Shared cluster motion

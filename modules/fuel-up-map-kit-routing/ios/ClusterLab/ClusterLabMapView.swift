@@ -1,19 +1,14 @@
 import ExpoModulesCore
 import MapKit
 
-// CADisplayLink retains its target. The weak proxy allows tab/view teardown to
-// release the map even when an animation was interrupted mid-frame.
-private final class LabDisplayLinkTarget: NSObject {
-  weak var owner: ClusterLabMapView?
-  @objc func tick(_ link: CADisplayLink) { owner?.tick(link) }
-}
-
 final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   let map = MKMapView()
   let renderer = ClusterLabRenderer()
-  private let linkTarget = LabDisplayLinkTarget()
-  private var displayLink: CADisplayLink?
+  private var frameClock: ClusterLabFrameClock?
   private var lastTimestamp: CFTimeInterval = 0
+  private var needsReconcile = true
+  private var cameraMoving = false
+  private var animationMoving = false
   private var active = false
   private var origin: CLLocationCoordinate2D?
   private var latestOriginValue: [String: Double]?
@@ -36,7 +31,6 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
                                     span: .init(latitudeDelta: 0.06, longitudeDelta: 0.06)), animated: false)
     addSubview(map)
     addSubview(renderer.container)
-    linkTarget.owner = self
     observers.append(NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification,
                                                             object: nil, queue: .main) { [weak self] _ in
       self?.probe?.cancel()
@@ -50,7 +44,6 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   }
 
   deinit {
-    displayLink?.invalidate()
     observers.forEach(NotificationCenter.default.removeObserver)
   }
 
@@ -107,10 +100,18 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     }
   }
 
-  func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) { renderer.cameraBegan() }
+  func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
+    cameraMoving = true
+    renderer.cameraBegan()
+    refresh()
+  }
 
   func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) { refresh() }
-  func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) { renderer.cameraEnded(); refresh() }
+  func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+    cameraMoving = false
+    renderer.cameraEnded()
+    refresh()
+  }
 
   private var hasValidLayout: Bool {
     bounds.width > 0 && bounds.height > 0 && map.bounds.size == bounds.size &&
@@ -119,31 +120,48 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
 
   func refresh() {
     guard active, window != nil, hasValidLayout, UIApplication.shared.applicationState != .background else { return }
-    renderer.reconcile(map: map)
-    let moving = renderer.render(map: map, deltaTime: 0)
-    if moving || probe != nil { startFrames() }
+    needsReconcile = true
+    startFrames()
+    // Older UIKit has no late-commit observer. Keep its immediate delegate
+    // update as a fallback; modern iOS coalesces all updates into one frame.
+    if frameClock?.synchronizesWithCommit == false {
+      renderer.reconcile(map: map)
+      needsReconcile = false
+      animationMoving = renderer.render(map: map, deltaTime: 0)
+    }
     startPendingProbe()
   }
 
   private func startFrames() {
-    guard displayLink == nil else { return }
-    lastTimestamp = 0
-    let link = CADisplayLink(target: linkTarget, selector: #selector(LabDisplayLinkTarget.tick(_:)))
-    link.preferredFrameRateRange = CAFrameRateRange(minimum: 60, maximum: 120, preferred: 120)
-    link.add(to: .main, forMode: .common)
-    displayLink = link
+    if frameClock == nil {
+      lastTimestamp = 0
+      frameClock = ClusterLabFrameClock(view: map) { [weak self] time in self?.tick(time) }
+    }
+    frameClock?.requestContinuous(true)
   }
 
   private func stopFrames() {
-    displayLink?.invalidate(); displayLink = nil; lastTimestamp = 0
+    frameClock = nil; lastTimestamp = 0; cameraMoving = false
   }
 
-  fileprivate func tick(_ link: CADisplayLink) {
-    let elapsed = lastTimestamp == 0 ? link.duration : link.timestamp - lastTimestamp
-    lastTimestamp = link.timestamp
-    probe?.tick(time: link.timestamp)
-    let moving = renderer.render(map: map, deltaTime: elapsed)
-    if !moving && probe == nil { stopFrames() }
+  private func tick(_ time: CFTimeInterval) {
+    guard active, window != nil, hasValidLayout, UIApplication.shared.applicationState != .background else { return }
+    guard needsReconcile || cameraMoving || animationMoving || probe != nil else {
+      frameClock?.requestContinuous(false)
+      lastTimestamp = 0
+      return
+    }
+    let elapsed = lastTimestamp == 0 ? 1.0 / Double(window?.screen.maximumFramesPerSecond ?? 60) : max(0, time - lastTimestamp)
+    lastTimestamp = time
+    probe?.tick(time: time)
+    if needsReconcile || cameraMoving {
+      needsReconcile = false
+      renderer.reconcile(map: map)
+    }
+    animationMoving = renderer.render(map: map, deltaTime: elapsed)
+    let continuous = needsReconcile || cameraMoving || animationMoving || probe != nil
+    frameClock?.requestContinuous(continuous)
+    if !continuous { lastTimestamp = 0 }
   }
 
   func requestProbe(_ token: String?) {
