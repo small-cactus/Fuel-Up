@@ -71,6 +71,7 @@ async function setCachedEntry(key, value, spatialMetadata = null) {
                 centerLng: toFiniteNumber(spatialMetadata.centerLng),
                 radiusMiles: toFiniteNumber(spatialMetadata.radiusMiles),
                 fuelType: spatialMetadata.fuelType || null,
+                requiresE85: spatialMetadata.requiresE85 === true,
                 preferredProvider: spatialMetadata.preferredProvider || null,
                 fetchedAt: toFiniteNumber(spatialMetadata.fetchedAt) ?? Date.now(),
             },
@@ -143,6 +144,7 @@ function registerSpatialCacheEntry(cacheKey, metadata) {
         centerLng,
         radiusMiles: radiusMiles !== null && radiusMiles > 0 ? radiusMiles : 10,
         fuelType: String(metadata.fuelType || '').trim().toLowerCase(),
+        requiresE85: metadata.requiresE85 === true,
         preferredProvider: String(metadata.preferredProvider || '').trim().toLowerCase(),
         fetchedAt: toFiniteNumber(metadata.fetchedAt) ?? Date.now(),
     });

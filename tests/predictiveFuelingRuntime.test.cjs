@@ -48,6 +48,9 @@ function createRuntimeHarness({
   pendingRecommendation = null,
   triggeredEvents = [],
   station = createStation(),
+  preferences = {},
+  initialState = {},
+  beforePrefetch = null,
 }) {
   let nowMs = 1_700_000_000_000;
   let currentPendingRecommendation = pendingRecommendation;
@@ -72,8 +75,9 @@ function createRuntimeHarness({
       preferredOctane: 'regular',
       preferredProvider: 'gasbuddy',
       navigationApp: 'apple-maps',
+      ...preferences,
     },
-    loadStateAsync: async () => ({}),
+    loadStateAsync: async () => initialState,
     saveStateAsync: async (state) => {
       savedStates.push(state);
       return state;
@@ -89,7 +93,7 @@ function createRuntimeHarness({
       return profile;
     },
     createPrefetchController: () => ({
-      handleLocationPayload: async () => ({
+      handleLocationPayload: async () => (await beforePrefetch?.(), {
         result: {
           snapshot: {
             topStations: [station],
@@ -449,4 +453,75 @@ test('runtime serializes concurrent background location batches', async () => {
 
   assert.equal(maxInflightCount, 1);
   assert.equal(prefetchCallCount, 2);
+});
+
+
+const preferencePayload = { locations: [{ coords: { latitude: 39.94, longitude: -75.02, speed: 14, heading: 90, timestamp: 1700000000000 } }] };
+
+test('requiring E85 rejects stale recommendations and all nonmatching prefetched stations', async () => {
+  const h = createRuntimeHarness({ pendingRecommendation: createRecommendation(), preferences: { requiresE85: true } });
+  await h.runtime.processLocationPayload(preferencePayload);
+  assert.deepEqual(h.runtime.getState().runtimeState.knownStations, []);
+  assert.equal(h.runtime.getState().runtimeState.pendingRecommendation, null);
+  assert.equal(h.liveActivityCalls.filter(call => call.type === 'start').length, 0);
+  assert.equal(h.notificationCalls.length, 0);
+});
+
+test('changing E85 requirement clears cached recommendations, live activity and geofences', async () => {
+  const h = createRuntimeHarness({ pendingRecommendation: createRecommendation() });
+  await h.runtime.processLocationPayload(preferencePayload);
+  assert.equal(h.runtime.getState().runtimeState.liveActivity.active, true);
+  await h.runtime.updateConfig({ preferences: { requiresE85: true } });
+  const state = h.runtime.getState().runtimeState;
+  assert.deepEqual(state.knownStations, []);
+  assert.equal(state.pendingRecommendation, null);
+  assert.equal(state.activeRecommendation, null);
+  assert.equal(state.liveActivity.active, false);
+  assert.deepEqual(h.geofenceCalls.at(-1), []);
+  assert.equal(h.savedStates.at(-1).liveActivity.active, false);
+});
+
+test('E85 and brand metadata survive persistence and process relaunch', async () => {
+  const matching = createStation({ brandNames: ['Wawa'], availableFuelGrades: ['regular', 'e85'], allPrices: { regular: 3.19, e85: 2.5 } });
+  const h = createRuntimeHarness({ station: matching, pendingRecommendation: createRecommendation(), preferences: { requiresE85: true, preferredBrands: [' WAWA '] } });
+  await h.runtime.processLocationPayload(preferencePayload);
+  const saved = h.savedStates.at(-1);
+  assert.equal(saved.knownStations[0].allPrices.e85, 2.5);
+  const restored = createRuntimeHarness({ initialState: saved, preferences: { requiresE85: true, preferredBrands: ['wawa'] } });
+  await restored.runtime.bootstrap();
+  assert.equal(restored.runtime.getState().runtimeState.knownStations[0].stationId, matching.stationId);
+  assert.deepEqual(restored.runtime.getState().config.preferences.preferredBrands, ['wawa']);
+});
+
+test('relaunch with changed E85 requirements removes incompatible persisted activity', async () => {
+  const h = createRuntimeHarness({ preferences: { requiresE85: true }, initialState: {
+    knownStations: [createStation()], pendingRecommendation: createRecommendation(),
+    liveActivity: { active: true, stationId: 'station-1' },
+  } });
+  await h.runtime.bootstrap();
+  assert.equal(h.runtime.getState().runtimeState.pendingRecommendation, null);
+  assert.equal(h.runtime.getState().runtimeState.liveActivity.active, false);
+  assert.ok(h.liveActivityCalls.some(call => call.type === 'end'));
+});
+
+
+test('E85 change during an in-flight prefetch cannot publish an old incompatible result', async () => {
+  let release, started;
+  const gate = new Promise(resolve => { release = resolve; });
+  const entered = new Promise(resolve => { started = resolve; });
+  const h = createRuntimeHarness({
+    triggeredEvents: [createRecommendation()],
+    beforePrefetch: async () => { started(); await gate; },
+  });
+  const pendingBatch = h.runtime.processLocationPayload(preferencePayload);
+  await entered;
+  const settingsChange = h.runtime.updateConfig({ preferences: { requiresE85: true } });
+  release();
+  await Promise.all([pendingBatch, settingsChange]);
+  const state = h.runtime.getState().runtimeState;
+  assert.deepEqual(state.knownStations, []);
+  assert.equal(state.activeRecommendation, null);
+  assert.equal(state.liveActivity.active, false);
+  assert.equal(h.notificationCalls.length, 0);
+  assert.equal(h.liveActivityCalls.filter(call => call.type === 'start').length, 0);
 });

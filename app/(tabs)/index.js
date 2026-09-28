@@ -84,6 +84,7 @@ import {
 } from '../../src/lib/locationRefresh';
 import { flushLocationProbeReportAsync, recordLocationProbeEvent } from '../../src/lib/locationProbe';
 import { openStationNavigation } from '../../src/lib/openNavigation';
+import { rankStationQuotes } from '../../src/lib/stationPreferences';
 import { normalizeFuelGrade, rankQuotesForFuelGrade } from '../../src/lib/fuelGrade';
 import { buildFuelSearchRequestKey, buildResolvedFuelSearchContext } from '../../src/lib/fuelSearchState';
 import {
@@ -237,13 +238,18 @@ export default function HomeScreen() {
     const preferredProvider = normalizedFuelSearchPreferences.preferredProvider;
     const minimumRating = normalizedFuelSearchPreferences.minimumRating;
     const navigationApp = normalizedFuelSearchPreferences.navigationApp;
+    const { preferredBrands, requiresE85 } = normalizedFuelSearchPreferences;
     const buildResolvedHomeQuerySignature = useCallback((nextRegion) => buildHomeQuerySignature({
         origin: nextRegion,
         radiusMiles: searchRadiusMiles,
         fuelGrade: selectedFuelGrade,
         preferredProvider,
+        preferredBrands,
+        requiresE85,
     }), [
         preferredProvider,
+        preferredBrands,
+        requiresE85,
         searchRadiusMiles,
         selectedFuelGrade,
     ]);
@@ -251,6 +257,8 @@ export default function HomeScreen() {
         radiusMiles: searchRadiusMiles,
         fuelGrade: selectedFuelGrade,
         preferredProvider,
+        preferredBrands,
+        requiresE85,
         minimumRating,
     });
     const currentVisibleHomeRequestKey = useMemo(() => buildFuelSearchRequestKey({
@@ -258,9 +266,15 @@ export default function HomeScreen() {
         fuelGrade: selectedFuelGrade,
         radiusMiles: searchRadiusMiles,
         preferredProvider,
+        minimumRating,
+        preferredBrands,
+        requiresE85,
     }), [
         location,
         preferredProvider,
+        minimumRating,
+        preferredBrands,
+        requiresE85,
         searchRadiusMiles,
         selectedFuelGrade,
     ]);
@@ -358,6 +372,8 @@ export default function HomeScreen() {
             fuelGrade: selectedFuelGrade,
             radiusMiles: searchRadiusMiles,
             preferredProvider,
+            preferredBrands,
+            requiresE85,
             minimumRating,
         });
 
@@ -369,6 +385,8 @@ export default function HomeScreen() {
     }, [
         minimumRating,
         preferredProvider,
+        preferredBrands,
+        requiresE85,
         searchRadiusMiles,
         selectedFuelGrade,
         setResolvedFuelSearchContext,
@@ -1143,15 +1161,15 @@ export default function HomeScreen() {
             // the previously cached window. The in-memory spatial index is
             // the source of truth here — as long as the window covers the
             // user (edge buffer and TTL respected), we can reuse its data.
-            const movementFuelGrade = preferredProvider === 'gasbuddy'
-                ? 'regular'
-                : selectedFuelGrade;
+            const movementFuelGrade = selectedFuelGrade;
             const hasUsableWindowForMovement = hasUsableCachedFuelWindow({
                 latitude: freshRegion.latitude,
                 longitude: freshRegion.longitude,
                 radiusMiles: searchRadiusMiles,
                 fuelType: movementFuelGrade,
                 preferredProvider,
+                preferredBrands,
+                requiresE85,
             });
 
             if (!hasUsableWindowForMovement) {
@@ -1212,6 +1230,9 @@ export default function HomeScreen() {
             fuelGrade: selectedFuelGrade,
             radiusMiles: searchRadiusMiles,
             preferredProvider,
+            minimumRating,
+            preferredBrands,
+            requiresE85,
         });
         const snapshotFuelGrade = selectedFuelGrade;
         const query = {
@@ -1220,6 +1241,8 @@ export default function HomeScreen() {
             radiusMiles: searchRadiusMiles,
             fuelType: snapshotFuelGrade,
             preferredProvider,
+            preferredBrands,
+            requiresE85,
         };
         const pendingHomeRefitRequest = pendingHomeRefitRequestRef.current;
         const homeFuelSnapshotStrategy = resolveHomeFuelSnapshotStrategy({
@@ -1251,6 +1274,8 @@ export default function HomeScreen() {
                         radiusMiles: searchRadiusMiles,
                         fuelType: snapshotFuelGrade,
                         preferredProvider,
+                        preferredBrands,
+                        requiresE85,
                     },
                     locationSource,
                     preferCached: Boolean(preferCached),
@@ -1297,6 +1322,8 @@ export default function HomeScreen() {
                                     radiusMiles: searchRadiusMiles,
                                     fuelType: snapshotFuelGrade,
                                     preferredProvider,
+                                    preferredBrands,
+                                    requiresE85,
                                 },
                             },
                         });
@@ -1414,6 +1441,8 @@ export default function HomeScreen() {
                         radiusMiles: searchRadiusMiles,
                         fuelType: snapshotFuelGrade,
                         preferredProvider,
+                        preferredBrands,
+                        requiresE85,
                     },
                     status: 'completed',
                     stationCount: Array.isArray(freshSnapshot?.topStations)
@@ -1432,9 +1461,11 @@ export default function HomeScreen() {
                 fuelType: selectedFuelGrade,
                 radiusMiles: searchRadiusMiles,
                 preferredProvider,
+                preferredBrands,
+                requiresE85,
                 minimumRating,
                 requestKey: requestDisplayKey,
-            });
+            }).catch(error => console.warn('Unable to prefetch trends', error));
         } catch (error) {
             if (isFuelCacheResetError(error)) {
                 return;
@@ -1473,6 +1504,8 @@ export default function HomeScreen() {
                         radiusMiles: searchRadiusMiles,
                         fuelType: snapshotFuelGrade,
                         preferredProvider,
+                        preferredBrands,
+                        requiresE85,
                     },
                     status: 'failed',
                     error: error?.message || String(error || 'unknown-error'),
@@ -1480,7 +1513,7 @@ export default function HomeScreen() {
                 },
             });
         } finally {
-            if (isMountedRef.current) {
+            if (isMountedRef.current && activeHomeQuerySignatureRef.current === requestQuerySignature) {
                 setIsRefreshingPrices(false);
             }
 
@@ -1695,6 +1728,8 @@ export default function HomeScreen() {
             radiusMiles: searchRadiusMiles,
             fuelType: snapshotFuelGrade,
             preferredProvider,
+            preferredBrands,
+            requiresE85,
         });
         if (windowStillCovers) {
             return;
@@ -2092,6 +2127,8 @@ export default function HomeScreen() {
         manualLocationOverride,
         minimumRating,
         preferredProvider,
+        preferredBrands,
+        requiresE85,
         searchRadiusMiles,
         selectedFuelGrade,
     ]);
@@ -2107,6 +2144,8 @@ export default function HomeScreen() {
                 fuelGrade: selectedFuelGrade,
                 radiusMiles: searchRadiusMiles,
                 preferredProvider,
+                preferredBrands,
+                requiresE85,
                 minimumRating,
             })
             : null;
@@ -2130,8 +2169,13 @@ export default function HomeScreen() {
             fuelType: selectedFuelGrade,
             radiusMiles: searchRadiusMiles,
             preferredProvider,
+            preferredBrands,
+            requiresE85,
             minimumRating,
             requestKey: trendPrefetchRequestKey,
+        }).catch(error => {
+            prefetchedTrendRequestKeysRef.current.delete(trendPrefetchRequestKey);
+            console.warn('Unable to prefetch trends', error);
         });
     }, [
         bestQuote,
@@ -2139,6 +2183,8 @@ export default function HomeScreen() {
         location,
         minimumRating,
         preferredProvider,
+        preferredBrands,
+        requiresE85,
         regionalQuotes.length,
         router,
         searchRadiusMiles,
@@ -2164,16 +2210,9 @@ export default function HomeScreen() {
             .filter(quote => quote?.providerTier === 'station' && !quote?.isEstimated)
     ), [bestQuote, topStations]);
     const filteredStationQuotes = useMemo(() => (
-        // Do NOT pass radiusMiles here. If we filtered the already-cached
-        // set by distance-from-current-user, stations on the "behind" side
-        // would drop out of the list as the user moves through the window,
-        // leaving the feed with a single station or nothing just before the
-        // cache edge is crossed and a refetch happens. Instead we show
-        // everything the last fetch returned and trust the cache-window
-        // refetch path in the tracker to roll the window forward before
-        // stations get unreasonably far away.
         filterStationQuotesForHome({
             quotes: rawStationQuotes,
+            radiusMiles: searchRadiusMiles,
             origin: location,
             minimumRating: minRating,
         })
@@ -2181,10 +2220,11 @@ export default function HomeScreen() {
         location,
         minRating,
         rawStationQuotes,
+        searchRadiusMiles,
     ]);
     const rankedStationQuotes = useMemo(() => {
-        return rankQuotesForFuelGrade(filteredStationQuotes, selectedFuelGrade);
-    }, [filteredStationQuotes, selectedFuelGrade]);
+        return rankStationQuotes(rankQuotesForFuelGrade(filteredStationQuotes, selectedFuelGrade), { preferredBrands, requiresE85 });
+    }, [filteredStationQuotes, selectedFuelGrade, preferredBrands, requiresE85]);
     const displayBestQuote = rankedStationQuotes[0] || null;
     const stationQuotes = useMemo(() => (
         rankedStationQuotes
@@ -2204,10 +2244,10 @@ export default function HomeScreen() {
             return errorMsg;
         }
 
-        return rawStationQuotes.length > 0 && filteredStationQuotes.length === 0
+        return rawStationQuotes.length > 0 && rankedStationQuotes.length === 0
             ? 'No nearby stations match your current filters.'
             : null;
-    }, [errorMsg, filteredStationQuotes.length, rawStationQuotes.length]);
+    }, [errorMsg, rankedStationQuotes.length, rawStationQuotes.length]);
 
     const stationQuotesRef = useRef([]);
     const effectiveSuppressedStationIdsRef = useRef(new Set());
@@ -3342,6 +3382,7 @@ export default function HomeScreen() {
                     </View>
                 ) : stationQuotes.length > 0 ? (
                     <Animated.FlatList
+                        testID="home-station-cards"
                         ref={flatListRef}
                         data={stationQuotes}
                         horizontal
@@ -3418,6 +3459,7 @@ export default function HomeScreen() {
                     <ResetToCheapestButton
                         glassTintColor={homeGlassTintColor}
                         isDark={isDark}
+                        label={preferredBrands.length ? "Reset to Top Pick" : "Reset to Cheapest"}
                         onPress={handleResetToCheapest}
                         themeColors={themeColors}
                     />

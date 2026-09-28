@@ -9,6 +9,8 @@ export const DEFAULT_PREFERENCES = {
     navigationApp: 'apple-maps',
     debugClusterAnimations: false,
     excludedBrands: [],
+    preferredBrands: [],
+    requiresE85: false,
     hasCompletedOnboarding: false,
 };
 

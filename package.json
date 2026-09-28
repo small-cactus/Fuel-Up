@@ -83,6 +83,11 @@
   "devDependencies": {
     "@swmansion/argent": "0.26.0",
     "@types/react": "~19.2.10",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-native": "^5.0.0",
+    "eslint-plugin-react-perf": "^3.3.3",
     "react-test-renderer": "^19.2.0",
     "typescript": "~5.9.2"
   }

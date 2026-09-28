@@ -1,189 +1,80 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import React from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import MapView, { Marker, PROVIDER_APPLE } from 'react-native-maps';
+import { LiquidGlassView } from '@callstack/liquid-glass';
+import { SymbolView } from 'expo-symbols';
+import { SCREEN_WIDTH, LIGHT_SCREEN_BACKGROUND } from '../presentation';
 
-import TopCanopy from '../../../components/TopCanopy';
-import BottomCanopy from '../../../components/BottomCanopy';
-import FuelUpHeaderLogo from '../../../components/FuelUpHeaderLogo';
-import { getDrivingRouteAsync } from '../../../lib/FuelUpMapKitRouting';
-import PredictiveMapScene from './PredictiveMapScene';
-import {
-    getPredictiveFuelingFallbackRoutes,
-    PREDICTIVE_FUELING_SCENE,
-} from './constants';
+const EXAMPLE_REGION = {
+    latitude: 37.7755, longitude: -122.4194,
+    latitudeDelta: 0.018, longitudeDelta: 0.025,
+};
+const EXAMPLE_STOPS = [
+    { id: 'usual', coordinate: { latitude: 37.7775, longitude: -122.426 }, price: '$4.29', label: 'Usual stop', cheaper: false },
+    { id: 'better', coordinate: { latitude: 37.7725, longitude: -122.413 }, price: '$3.99', label: 'Better price', cheaper: true },
+];
 
-const {
-    buildPredictiveRouteMetrics,
-    buildRouteMetrics,
-} = require('./simulationMath.cjs');
-const { getPredictiveRouteDiagnostics } = require('./routeDiagnostics.cjs');
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const LIGHT_SCREEN_BACKGROUND = '#f2f1f6';
-const LIGHT_SCREEN_BACKGROUND_85 = 'rgba(242,241,246,0.85)';
-const LIGHT_SCREEN_BACKGROUND_0 = 'rgba(242,241,246,0)';
-
-export default function PredictiveFuelingStep({ insets, isActive, isDark }) {
-    const [route, setRoute] = useState(() => getPredictiveFuelingFallbackRoutes());
-
-    useEffect(() => {
-        let isCancelled = false;
-
-        void (async () => {
-            try {
-                const [initialRoute, rerouteRoute] = await Promise.all([
-                    getDrivingRouteAsync({
-                        origin: PREDICTIVE_FUELING_SCENE.origin,
-                        destination: PREDICTIVE_FUELING_SCENE.expensiveStation.coordinate,
-                    }),
-                    getDrivingRouteAsync({
-                        origin: PREDICTIVE_FUELING_SCENE.rerouteOrigin,
-                        destination: PREDICTIVE_FUELING_SCENE.destinationStation.coordinate,
-                    }),
-                ]);
-
-                if (
-                    !isCancelled &&
-                    initialRoute?.coordinates?.length &&
-                    rerouteRoute?.coordinates?.length
-                ) {
-                    const nextRouteSet = {
-                        initialRoute,
-                        rerouteRoute,
-                        isFallback: false,
-                    };
-
-                    if (__DEV__) {
-                        console.info(
-                            'Predictive fueling route diagnostics:',
-                            getPredictiveRouteDiagnostics(
-                                nextRouteSet,
-                                PREDICTIVE_FUELING_SCENE
-                            )
-                        );
-                    }
-
-                    setRoute(nextRouteSet);
-                }
-            } catch (error) {
-                const fallbackRouteSet = getPredictiveFuelingFallbackRoutes();
-
-                if (__DEV__) {
-                    console.warn(
-                        'Predictive fueling route fallback in use:',
-                        error?.code || error?.message || error,
-                        getPredictiveRouteDiagnostics(fallbackRouteSet, PREDICTIVE_FUELING_SCENE)
-                    );
-                }
-
-                if (!isCancelled) {
-                    setRoute(fallbackRouteSet);
-                }
-            }
-        })();
-
-        return () => {
-            isCancelled = true;
-        };
-    }, []);
-
-    const routeMetrics = useMemo(() => {
-        if (route?.initialRoute?.coordinates?.length && route?.rerouteRoute?.coordinates?.length) {
-            return buildPredictiveRouteMetrics(route, PREDICTIVE_FUELING_SCENE);
-        }
-
-        if (!route?.coordinates?.length) {
-            return null;
-        }
-
-        return buildRouteMetrics(route, PREDICTIVE_FUELING_SCENE);
-    }, [route]);
-
+// An intentionally static illustration. Live driving detection belongs to the
+// predictive service; onboarding must not run a simulated trip or camera loop.
+export default function PredictiveFuelingStep({ insets, isDark }) {
+    const textColor = isDark ? '#FFFFFF' : '#111111';
     return (
-        <View style={styles.stepContainer}>
-            <PredictiveMapScene
-                insets={insets}
-                isActive={isActive}
-                isDark={isDark}
-                routeMetrics={routeMetrics}
-                sceneConfig={PREDICTIVE_FUELING_SCENE}
-            />
-
-            <TopCanopy
-                edgeColor={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(242,241,246,0.42)'}
-                height={insets.top + 300}
-                isDark={isDark}
-                topInset={insets.top}
-            />
-            <BottomCanopy height={270} isDark={isDark} />
-
-            <LinearGradient
-                colors={[
-                    isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND,
-                    isDark ? 'rgba(0,0,0,0.85)' : LIGHT_SCREEN_BACKGROUND_85,
-                    isDark ? 'rgba(0,0,0,0)' : LIGHT_SCREEN_BACKGROUND_0,
-                ]}
-                locations={[0, 0.5, 1]}
-                style={[styles.topGradient, { height: insets.top + 220 }]}
-                pointerEvents="none"
-            />
-
-            <LinearGradient
-                colors={[
-                    isDark ? 'rgba(0,0,0,0)' : LIGHT_SCREEN_BACKGROUND_0,
-                    isDark ? 'rgba(0,0,0,0.85)' : LIGHT_SCREEN_BACKGROUND_85,
-                    isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND,
-                ]}
-                locations={[0, 0.8, 1.2]}
-                style={[styles.footerGradient, { height: 280 }]}
-                pointerEvents="none"
-            />
-
-            <View
-                pointerEvents="none"
-                style={[styles.headerOverlay, { paddingTop: insets.top + 20 }]}
-            >
-                <FuelUpHeaderLogo isDark={isDark} />
-                <Text style={[styles.headerTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>
-                    Predictive Fueling
-                </Text>
+        <ScrollView testID="onboarding-predictive" style={{ width: SCREEN_WIDTH, backgroundColor: isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND }}
+            contentContainerStyle={[styles.content, { paddingTop: insets.top + 32, paddingBottom: insets.bottom + 150 }]}
+            showsVerticalScrollIndicator={false}>
+            <View style={styles.header}>
+                <SymbolView name="sparkles" size={36} tintColor="#007AFF" />
+                <Text style={[styles.title, { color: textColor }]}>Predictive Fueling</Text>
+                <Text style={[styles.subtitle, { color: textColor }]}>A better stop, along your drive.</Text>
             </View>
-        </View>
+            <View style={styles.mapCard} accessible accessibilityLabel="Example: your usual stop costs $4.29 per gallon. A nearby stop costs $3.99, saving 30 cents per gallon.">
+                <MapView testID="onboarding-predictive-map" style={StyleSheet.absoluteFillObject}
+                    provider={PROVIDER_APPLE} initialRegion={EXAMPLE_REGION}
+                    userInterfaceStyle={isDark ? 'dark' : 'light'} scrollEnabled={false} zoomEnabled={false}
+                    rotateEnabled={false} pitchEnabled={false} showsCompass={false} showsPointsOfInterest={false}
+                    accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                    {EXAMPLE_STOPS.map(stop => (
+                        <Marker key={stop.id} coordinate={stop.coordinate} anchor={{ x: 0.5, y: 0.5 }}>
+                            <LiquidGlassView effect="regular" colorScheme={isDark ? 'dark' : 'light'}
+                                tintColor={stop.cheaper ? 'rgba(0, 255, 47, 0.3)' : 'rgba(255, 25, 0, 0.3)'} style={styles.priceChip}>
+                                <Text style={[styles.price, { color: textColor }]}>{stop.price}</Text>
+                                <Text style={[styles.stopLabel, { color: textColor }]}>{stop.label}</Text>
+                            </LiquidGlassView>
+                        </Marker>
+                    ))}
+                </MapView>
+            </View>
+            <Text style={[styles.caption, { color: textColor }]}>Example prices · Save 30¢ per gallon</Text>
+            <View style={styles.detail}>
+                <SymbolView name="bell.badge.fill" size={24} tintColor="#007AFF" />
+                <View style={styles.detailText}>
+                    <Text style={[styles.detailTitle, { color: textColor }]}>Know before you stop</Text>
+                    <Text style={[styles.detailBody, { color: textColor }]}>Get an alert when a better fuel stop is nearby. You choose where to go.</Text>
+                </View>
+            </View>
+            <View style={styles.detail}>
+                <SymbolView name="location.fill" size={24} tintColor="#007AFF" />
+                <View style={styles.detailText}>
+                    <Text style={[styles.detailTitle, { color: textColor }]}>Ready when you drive</Text>
+                    <Text style={[styles.detailBody, { color: textColor }]}>Always-on location and Motion & Fitness help recognize your drives.</Text>
+                </View>
+            </View>
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    stepContainer: {
-        width: SCREEN_WIDTH,
-        height: SCREEN_HEIGHT,
-        backgroundColor: 'transparent',
-    },
-    topGradient: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-    },
-    footerGradient: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-    },
-    headerOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        alignItems: 'center',
-        gap: 12,
-        paddingHorizontal: 24,
-    },
-    headerTitle: {
-        fontSize: 28,
-        fontWeight: '800',
-        textAlign: 'center',
-        letterSpacing: -0.3,
-        fontFamily: 'ui-rounded',
-    },
+    content: { paddingHorizontal: 24, gap: 20 },
+    header: { alignItems: 'center', gap: 12 },
+    title: { fontSize: 28, fontWeight: '800', fontFamily: 'ui-rounded', textAlign: 'center' },
+    subtitle: { fontSize: 17, lineHeight: 23, textAlign: 'center', opacity: 0.7 },
+    mapCard: { height: 230, borderRadius: 24, overflow: 'hidden' },
+    priceChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 18, alignItems: 'center' },
+    price: { fontSize: 19, fontWeight: '800', fontVariant: ['tabular-nums'] },
+    stopLabel: { fontSize: 12, fontWeight: '600' },
+    caption: { fontSize: 13, textAlign: 'center', opacity: 0.65, marginTop: -10 },
+    detail: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
+    detailText: { flex: 1, gap: 5 },
+    detailTitle: { fontSize: 17, fontWeight: '700' },
+    detailBody: { fontSize: 15, lineHeight: 21, opacity: 0.7 },
 });

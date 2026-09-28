@@ -171,7 +171,7 @@ export function createPredictiveFuelingDriveGate(options = {}) {
     async function startBackendIfNeeded() {
         syncBackendRunningState('start-backend-if-needed');
         if (backendRunning) {
-            backendApi.updateConfig(preferences);
+            await backendApi.updateConfig(preferences);
             updateDriveGateDebugState({
                 backendRunning: true,
                 lastDecision: {
@@ -460,7 +460,7 @@ export function createPredictiveFuelingDriveGate(options = {}) {
                 }
             });
         } else {
-            backendApi.updateConfig(preferences);
+            await backendApi.updateConfig(preferences);
         }
 
         syncBackendRunningState('start');
@@ -487,7 +487,9 @@ export function createPredictiveFuelingDriveGate(options = {}) {
         preferences = { ...nextPreferences };
         syncBackendRunningState('update-preferences');
         if (backendRunning) {
-            backendApi.updateConfig(preferences);
+            return Promise.resolve(backendApi.updateConfig(preferences)).catch(error => {
+                console.warn('Predictive preference update failed:', error?.message || error);
+            });
         }
     }
 

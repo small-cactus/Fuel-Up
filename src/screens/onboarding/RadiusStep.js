@@ -10,12 +10,12 @@ function radiusRegion(coordinate, radius) {
     return { ...coordinate, latitudeDelta, longitudeDelta: latitudeDelta / Math.max(0.2, Math.cos(coordinate.latitude * Math.PI / 180)) };
 }
 
-export default function RadiusStep({ isDark, themeColors, insets, value, onChange, coordinate, width }) {
+export default function RadiusStep({ isDark, themeColors, insets, value, onChange, coordinate, width, isActive = true }) {
     const map = useRef(null);
     const [fittedRadius, setFittedRadius] = useState(value);
     useEffect(() => {
-        if (coordinate) map.current?.animateToRegion(radiusRegion(coordinate, fittedRadius));
-    }, [coordinate, fittedRadius]);
+        if (isActive && coordinate) map.current?.animateToRegion(radiusRegion(coordinate, fittedRadius));
+    }, [coordinate, fittedRadius, isActive]);
     return (
         <View style={{ width, flex: 1, paddingBottom: insets.bottom + 100, backgroundColor: themeColors.background }}>
             <View style={[styles.header, { paddingTop: insets.top + 32 }]}>

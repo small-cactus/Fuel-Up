@@ -5,26 +5,27 @@ export class ServiceError extends Error {
     constructor(code, status = 502) { super(code); this.code = code; this.status = status; }
 }
 export function validateInput(input) {
-    const { latitude, longitude, fuelType = 'regular', radiusMiles = 10, forceRefresh = false } = input || {};
+    const { latitude, longitude, fuelType = 'regular', radiusMiles = 10, forceRefresh = false, requiresE85 = false } = input || {};
     if (typeof latitude !== 'number' || !Number.isFinite(latitude) || Math.abs(latitude) > 90 ||
         typeof longitude !== 'number' || !Number.isFinite(longitude) || Math.abs(longitude) > 180 ||
         !['regular', 'midgrade', 'premium', 'diesel', 'e85'].includes(fuelType) ||
         typeof radiusMiles !== 'number' || !Number.isFinite(radiusMiles) || radiusMiles < 1 || radiusMiles > 100 ||
-        typeof forceRefresh !== 'boolean') throw new ServiceError('INVALID_INPUT', 400);
-    return { latitude, longitude, fuelType, radiusMiles, forceRefresh };
+        typeof forceRefresh !== 'boolean' || typeof requiresE85 !== 'boolean') throw new ServiceError('INVALID_INPUT', 400);
+    return { latitude, longitude, fuelType, radiusMiles, forceRefresh, requiresE85 };
 }
 export function queryKey(input) {
     // Fine coordinates avoid presenting a neighbouring query as complete coverage.
-    return `${input.latitude.toFixed(4)}:${input.longitude.toFixed(4)}:${input.fuelType}:${input.radiusMiles}`;
+    return `${input.latitude.toFixed(4)}:${input.longitude.toFixed(4)}:${input.fuelType}:${input.radiusMiles}${input.requiresE85 ? ':with-e85' : ''}`;
 }
 function output(quotes, input, source, summary = {}) {
     return { version: 1, source, quotes: sanitizeStationQuotesForFuelType(quotes, input.fuelType)
         .filter(q => q.providerId === 'gasbuddy' && Number.isFinite(q.latitude) && Number.isFinite(q.longitude))
         .map(q => ({ ...q, distanceMiles: calculateDistanceMiles(input, q) }))
-        .filter(q => q.distanceMiles <= input.radiusMiles), summary };
+        .filter(q => q.distanceMiles <= input.radiusMiles)
+        .filter(q => !input.requiresE85 || Number(q.allPrices?.e85 ?? q.allPrices?.e_85) > 0), summary };
 }
 export async function fetchProvider(input, fetchImpl = fetch, csrf = '1.Y2RjCddx4SvvGneh') {
-    const request = buildGasBuddyGraphQLRequest(input);
+    const request = buildGasBuddyGraphQLRequest({ ...input, fuelType: input.requiresE85 ? 'e85' : input.fuelType });
     const response = await fetchImpl(request.url, { method: 'POST',
         headers: { ...request.headers, gbcsrf: csrf }, body: JSON.stringify(request.body),
         signal: AbortSignal.timeout(6000) });
@@ -42,6 +43,7 @@ export async function fetchProvider(input, fetchImpl = fetch, csrf = '1.Y2RjCddx
 export function toHistoryRows(quotes, input) {
     return quotes.map(q => ({ station_id: q.stationId, provider_id: 'gasbuddy', fuel_type: q.fuelType,
         all_prices: q.allPrices || {}, price: q.price, currency: q.currency,
+        brand_names: q.brandNames || [],
         station_name: String(q.stationName).slice(0, 255), address: String(q.address).slice(0, 500),
         latitude: q.latitude, longitude: q.longitude,
         // Service-generated rows have no end-user identity.

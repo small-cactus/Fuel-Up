@@ -26,6 +26,8 @@ test('normalizeFuelSearchPreferences preserves diesel and normalizes defaults', 
         preferredProvider: 'gasbuddy',
         minimumRating: 4.5,
         navigationApp: 'apple-maps',
+        preferredBrands: [],
+        requiresE85: false,
     });
 });
 

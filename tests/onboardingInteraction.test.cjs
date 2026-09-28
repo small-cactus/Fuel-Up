@@ -6,7 +6,7 @@ const load = require('./helpers/loadComponent.cjs');
 const { createPreferencesStore } = require('../src/lib/preferencesStore.js');
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
-async function setup() {
+async function setup({ requestLocation } = {}) {
     let saved;
     const store = createPreferencesStore({ getItem: async () => saved, setItem: async (_, value) => { saved = value; } });
     await store.load();
@@ -26,7 +26,7 @@ async function setup() {
         default: { View: 'AnimatedView', createAnimatedComponent: c => c },
         useSharedValue: initial => React.useRef({ value: initial }).current,
         useAnimatedStyle: () => ({}), useAnimatedProps: () => ({}),
-        withTiming: v => v, withDelay: (_, v) => v, runOnJS: fn => fn,
+        withTiming: v => v, withDelay: (_, v) => v, cancelAnimation: () => {}, runOnJS: fn => fn,
         Easing: { out: v => v, exp: v => v, back: () => v => v },
     };
     const mocks = {
@@ -62,11 +62,11 @@ async function setup() {
         },
         '../lib/predictiveTrackingAccess': {
             getPredictiveTrackingPermissionStateAsync: async () => tracking,
-            enablePredictiveTrackingAsync: async () => { calls.location++; return tracking; },
+            enablePredictiveTrackingAsync: async () => { calls.location++; return requestLocation ? requestLocation() : tracking; },
             openPredictiveTrackingSettingsAsync: async () => {},
         },
     };
-    mocks['@expo/ui/swift-ui'] = { Host: 'Host', Form: 'Form', Picker: 'NativePicker', Section: 'Section', Text: 'NativeText' };
+    mocks['@expo/ui/swift-ui'] = { Host: 'Host', Form: 'Form', Picker: 'NativePicker', Section: 'Section', Text: 'NativeText', Toggle: 'NativeToggle' };
     mocks['@expo/ui/swift-ui/modifiers'] = { pickerStyle: x => x, tag: x => x };
     mocks['./presentation.js'] = load('src/screens/onboarding/presentation.js', mocks);
     mocks['./locationCopy.js'] = load('src/screens/onboarding/locationCopy.js', mocks);
@@ -78,12 +78,13 @@ async function setup() {
     }
     mocks['./onboarding/FuelGradeStep'] = load('src/screens/onboarding/FuelGradeStep.js', mocks);
     mocks['./onboarding/RadiusStep'] = load('src/screens/onboarding/RadiusStep.js', mocks);
+    mocks['./onboarding/BrandStep'] = { __esModule: true, default: props => React.createElement('BrandStep', props) };
     mocks['./onboarding/useOnboardingLocation'] = { __esModule: true, default: () => null };
     const Component = load('src/screens/OnboardingScreen.js', mocks).default;
     let renderer;
     await act(async () => { renderer = create(React.createElement(Component)); });
     return {
-        renderer, store, saved: () => JSON.parse(saved), calls, permissions, tracking, subscriptions,
+        renderer, store, scrolls, saved: () => JSON.parse(saved), calls, permissions, tracking, subscriptions,
         swipe: async step => act(async () => renderer.root.findByProps({ testID: 'onboarding-pages' }).props.onMomentumScrollEnd({ nativeEvent: { contentOffset: { x: step * 440 } } })),
         continue: async () => act(async () => renderer.root.findAllByType('Pressable').find(n => n.props.accessibilityRole === 'button').props.onPress()),
         dispose: async () => act(async () => renderer.unmount()),
@@ -97,7 +98,7 @@ for (const grade of ['Regular', 'Midgrade', 'Premium', 'Diesel', 'E85']) {
             app.renderer.root.findByType('Slider').props.onValueChange(7);
             app.renderer.root.findByType('NativePicker').props.onSelectionChange(grade.toLowerCase());
         });
-        await app.swipe(5);
+        await app.swipe(6);
         await app.continue();
         assert.equal(app.saved().preferredOctane, grade.toLowerCase());
         assert.equal(app.saved().searchRadiusMiles, 7);
@@ -129,5 +130,84 @@ test('onboarding radius uses the same range as the saved preferences', async () 
     const slider = app.renderer.root.findByType('Slider');
     assert.equal(slider.props.minimumValue, 2);
     assert.equal(slider.props.maximumValue, 15);
+    await app.dispose();
+});
+
+
+test('a location permission request finishing after leaving onboarding cannot schedule navigation', async t => {
+    let finish;
+    const app = await setup({ requestLocation: () => new Promise(resolve => { finish = resolve; }) });
+    await app.swipe(2);
+    await app.continue();
+    await app.dispose();
+    const timer = t.mock.method(global, 'setTimeout');
+    await act(async () => finish({ isReady: true }));
+    assert.equal(timer.mock.callCount(), 0);
+    assert.equal(app.calls.alerts.length, 0);
+});
+
+test('a location permission request failing after leaving onboarding cannot show a stale alert', async () => {
+    let fail;
+    const app = await setup({ requestLocation: () => new Promise((_, reject) => { fail = reject; }) });
+    await app.swipe(2);
+    await app.continue();
+    await app.dispose();
+    await act(async () => fail(new Error('permission service unavailable')));
+    assert.equal(app.calls.alerts.length, 0);
+});
+
+
+test('Get Started saves E85 availability and preferred brands atomically with fuel and radius', async () => {
+    const app = await setup();
+    await act(async () => {
+        app.renderer.root.findByType('Slider').props.onValueChange(12);
+        app.renderer.root.findByType('NativePicker').props.onSelectionChange('premium');
+        app.renderer.root.findByType('NativeToggle').props.onIsOnChange(true);
+        app.renderer.root.findByType('BrandStep').props.onChange(['wawa', 'shell']);
+    });
+    await app.swipe(6);
+    await app.continue();
+    assert.equal(app.saved().preferredOctane, 'premium');
+    assert.equal(app.saved().searchRadiusMiles, 12);
+    assert.equal(app.saved().requiresE85, true);
+    assert.deepEqual(app.saved().preferredBrands, ['shell', 'wawa']);
+    assert.equal(app.saved().hasCompletedOnboarding, true);
+    await app.dispose();
+});
+
+
+for (const step of [2, 3]) {
+    test(`Not Now advances permission page ${step} without requesting access`, async () => {
+        const app = await setup();
+        await app.swipe(step);
+        const skip = app.renderer.root.findByProps({ testID: 'onboarding-permission-skip' });
+        assert.equal(skip.props.accessibilityRole, 'button');
+        assert.equal(skip.props.disabled, false);
+        assert.equal(skip.props.style.minHeight, 44);
+        await act(async () => skip.props.onPress());
+        assert.deepEqual(app.scrolls.at(-1), { x: (step + 1) * 440, animated: true });
+        assert.equal(app.calls.location, 0);
+        assert.equal(app.calls.notifications, 0);
+        assert.equal(app.store.getSnapshot().preferences.hasCompletedOnboarding, false);
+        await app.dispose();
+    });
+}
+
+test('Not Now remains disabled during the native permission request and preserves successful delayed advance', async t => {
+    let finish;
+    const app = await setup({ requestLocation: () => new Promise(resolve => { finish = resolve; }) });
+    await app.swipe(2);
+    await app.continue();
+    const skip = app.renderer.root.findByProps({ testID: 'onboarding-permission-skip' });
+    assert.equal(skip.props.disabled, true);
+    await act(async () => skip.props.onPress());
+    assert.equal(app.scrolls.length, 0);
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    await act(async () => finish({ isReady: true }));
+    assert.equal(app.renderer.root.findAllByProps({ testID: 'onboarding-permission-skip' }).length, 0);
+    await act(async () => t.mock.timers.tick(599));
+    assert.equal(app.scrolls.length, 0);
+    await act(async () => t.mock.timers.tick(1));
+    assert.deepEqual(app.scrolls, [{ x: 3 * 440, animated: true }]);
     await app.dispose();
 });

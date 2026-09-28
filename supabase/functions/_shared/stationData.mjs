@@ -704,6 +704,7 @@ function mapStationPriceRowToQuote({ row, origin, fallbackSourceLabel }) {
         providerTier: 'station',
         stationId: row.station_id ? String(row.station_id) : '',
         stationName: row.station_name,
+        brandNames: Array.isArray(row.brand_names) ? row.brand_names : [],
         address: row.address,
         latitude: stationCoords.latitude,
         longitude: stationCoords.longitude,

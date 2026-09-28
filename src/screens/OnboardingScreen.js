@@ -5,6 +5,7 @@ import { hasPredictiveLocationAccess, getLocationActionLabel } from './onboardin
 import { SCREEN_WIDTH, DEMO_REGION, LIGHT_SCREEN_BACKGROUND, LIGHT_SCREEN_BACKGROUND_85, LIGHT_SCREEN_BACKGROUND_0 } from './onboarding/presentation.js';
 import RadiusStep from './onboarding/RadiusStep';
 import FuelGradeStep from './onboarding/FuelGradeStep';
+import BrandStep from './onboarding/BrandStep';
 import useOnboardingLocation from './onboarding/useOnboardingLocation';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppState, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -16,7 +17,7 @@ import * as Notifications from 'expo-notifications';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
-import Animated, { useSharedValue, useAnimatedStyle, useAnimatedProps, withTiming, withDelay, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, useAnimatedProps, withTiming, withDelay, cancelAnimation, Easing } from 'react-native-reanimated';
 import { usePreferences } from '../PreferencesContext';
 import { useTheme } from '../ThemeContext';
 
@@ -65,18 +66,27 @@ export default function OnboardingScreen() {
             duration: 1000,
             easing: Easing.out(Easing.exp)
         }));
-    }, []);
+        return () => cancelAnimation(blurIntensity);
+    }, [blurIntensity]);
 
     const scrollViewRef = useRef(null);
     const activeStepRef = useRef(currentStep);
     activeStepRef.current = currentStep;
     const permissionRequestRef = useRef(false);
     const advanceTimerRef = useRef(null);
+    const isMountedRef = useRef(false);
     const [isRequestingPermission, setIsRequestingPermission] = useState(false);
 
-    useEffect(() => () => clearTimeout(advanceTimerRef.current), []);
+    useEffect(() => {
+        isMountedRef.current = true;
+        return () => {
+            isMountedRef.current = false;
+            clearTimeout(advanceTimerRef.current);
+        };
+    }, []);
 
     const advanceAfterPermission = step => {
+        if (!isMountedRef.current) return;
         clearTimeout(advanceTimerRef.current);
         advanceTimerRef.current = setTimeout(() => {
             if (activeStepRef.current === step) {
@@ -89,6 +99,7 @@ export default function OnboardingScreen() {
         const offset = event.nativeEvent.contentOffset.x;
         const index = Math.round(offset / SCREEN_WIDTH);
         if (index !== currentStep && index >= 0 && index < totalSteps) {
+            clearTimeout(advanceTimerRef.current);
             setCurrentStep(index);
         }
     };
@@ -96,6 +107,8 @@ export default function OnboardingScreen() {
 
     const [radius, setRadius] = useState(preferences.searchRadiusMiles);
     const [octane, setOctane] = useState(preferences.preferredOctane);
+    const [requiresE85, setRequiresE85] = useState(Boolean(preferences.requiresE85));
+    const [preferredBrands, setPreferredBrands] = useState(preferences.preferredBrands || []);
     const [locationPermissionState, setLocationPermissionState] = useState(null);
     const [notifPermissionStatus, setNotifPermissionStatus] = useState(null);
     const onboardingCoordinate = useOnboardingLocation(locationPermissionState);
@@ -125,6 +138,7 @@ export default function OnboardingScreen() {
         const requestedStep = currentStep;
         try {
             const nextPermissionState = await enablePredictiveTrackingAsync();
+            if (!isMountedRef.current) return;
             setLocationPermissionState(nextPermissionState);
 
             if (nextPermissionState.isReady) {
@@ -150,13 +164,14 @@ export default function OnboardingScreen() {
                 );
             }
         } catch (error) {
+            if (!isMountedRef.current) return;
             Alert.alert(
                 'Unable To Enable Predictive Tracking',
                 'Unable to check tracking permissions. Please try again or review access in iPhone Settings.'
             );
         } finally {
             permissionRequestRef.current = false;
-            setIsRequestingPermission(false);
+            if (isMountedRef.current) setIsRequestingPermission(false);
         }
     };
 
@@ -170,14 +185,16 @@ export default function OnboardingScreen() {
             // Permission and remote token registration are separate: being offline
             // must not turn a granted permission into a displayed denial.
             const permission = await Notifications.getPermissionsAsync();
+            if (!isMountedRef.current) return;
             setNotifPermissionStatus(permission.status);
             if (token) void savePushTokenToSupabase(token);
             advanceAfterPermission(requestedStep);
         } catch (error) {
+            if (!isMountedRef.current) return;
             Alert.alert('Notification Setup Unavailable', 'Please try again. You can also enable notifications later in iPhone Settings.');
         } finally {
             permissionRequestRef.current = false;
-            setIsRequestingPermission(false);
+            if (isMountedRef.current) setIsRequestingPermission(false);
         }
     };
 
@@ -200,6 +217,7 @@ export default function OnboardingScreen() {
                 currentStep,
                 radius,
                 octane,
+                requiresE85,
             }).forEach(([preferenceKey, preferenceValue]) => {
                 updatePreference(preferenceKey, preferenceValue);
             });
@@ -207,11 +225,19 @@ export default function OnboardingScreen() {
             scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * SCREEN_WIDTH, animated: true });
         } else {
             // Final step
-            completeOnboarding({ searchRadiusMiles: radius, preferredOctane: octane });
+            completeOnboarding({ searchRadiusMiles: radius, preferredOctane: octane, requiresE85, preferredBrands });
         }
     };
 
     const isLastStep = currentStep === totalSteps - 1;
+    const canSkipPermission = (
+        currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState)
+    ) || (currentStep === 3 && notifPermissionStatus !== 'granted');
+    const handleSkipPermission = () => {
+        if (permissionRequestRef.current || !canSkipPermission) return;
+        clearTimeout(advanceTimerRef.current);
+        scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * SCREEN_WIDTH, animated: true });
+    };
 
     // Use full map for specific steps
     const isTranslucentStep = isTranslucentOnboardingStep(currentStep);
@@ -248,8 +274,11 @@ export default function OnboardingScreen() {
 
                     <MemoLocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionState={locationPermissionState} />
                     <MemoNotificationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={notifPermissionStatus} />
-                    <RadiusStep width={SCREEN_WIDTH} isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} coordinate={onboardingCoordinate} />
-                    <FuelGradeStep width={SCREEN_WIDTH} isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} />
+                    <RadiusStep isActive={currentStep === 4} width={SCREEN_WIDTH} isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} coordinate={onboardingCoordinate} />
+                    <FuelGradeStep width={SCREEN_WIDTH} isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} requiresE85={requiresE85} onRequiresE85Change={setRequiresE85} />
+                    <BrandStep width={SCREEN_WIDTH} insets={insets} themeColors={themeColors} isDark={isDark}
+                        isActive={currentStep === 6} coordinate={onboardingCoordinate} radiusMiles={radius} fuelGrade={octane}
+                        requiresE85={requiresE85} selectedBrands={preferredBrands} onChange={setPreferredBrands} />
                 </ScrollView>
             </View>
 
@@ -277,26 +306,36 @@ export default function OnboardingScreen() {
                     ))}
                 </View>
 
-                <Pressable testID="onboarding-continue" accessibilityRole="button" accessibilityState={{ busy: isRequestingPermission, disabled: isRequestingPermission }} disabled={isRequestingPermission} onPress={handleContinue} style={styles.continueButton}>
-                    <GlassView
-                        effect="regular"
-                        tintColor="#007AFF"
-                        interactive
-                        style={styles.continueGlass}
-                    >
-                        <ContinueButtonContent
-                            text={isLastStep ? 'Get Started' : (
-                                currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? getLocationActionLabel(locationPermissionState) :
-                                    currentStep === 3 && notifPermissionStatus !== 'granted' ? 'Enable Notifications' : 'Continue'
-                            )}
-                            icon={isLastStep ? 'checkmark' : (
-                                currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? 'location.fill' :
-                                    currentStep === 3 && notifPermissionStatus !== 'granted' ? 'bell.fill' : 'arrow.right'
-                            )}
-                            isDark={isDark}
-                        />
-                    </GlassView>
-                </Pressable>
+                <View style={styles.continueActions}>
+                    <Pressable testID="onboarding-continue" accessibilityRole="button" accessibilityState={{ busy: isRequestingPermission, disabled: isRequestingPermission }} disabled={isRequestingPermission} onPress={handleContinue} style={styles.continueButton}>
+                        <GlassView
+                            effect="regular"
+                            tintColor="#007AFF"
+                            interactive
+                            style={styles.continueGlass}
+                        >
+                            <ContinueButtonContent
+                                text={isLastStep ? 'Get Started' : (
+                                    currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? getLocationActionLabel(locationPermissionState) :
+                                        currentStep === 3 && notifPermissionStatus !== 'granted' ? 'Enable Notifications' : 'Continue'
+                                )}
+                                icon={isLastStep ? 'checkmark' : (
+                                    currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? 'location.fill' :
+                                        currentStep === 3 && notifPermissionStatus !== 'granted' ? 'bell.fill' : 'arrow.right'
+                                )}
+                                isDark={isDark}
+                            />
+                        </GlassView>
+                    </Pressable>
+                    {canSkipPermission && (
+                        <Pressable testID="onboarding-permission-skip" accessibilityRole="button"
+                            accessibilityLabel={currentStep === 2 ? 'Not now, set up location later' : 'Not now, set up notifications later'}
+                            accessibilityState={{ disabled: isRequestingPermission }} disabled={isRequestingPermission}
+                            onPress={handleSkipPermission} style={styles.skipPermission}>
+                            <Text style={[styles.skipPermissionText, { color: themeColors.text }]}>Not Now</Text>
+                        </Pressable>
+                    )}
+                </View>
             </View>
 
             {/* Full-screen transition blur overlay (Dynamic Intensity) */}
@@ -355,6 +394,19 @@ const styles = StyleSheet.create({
   dotActive: {
     width: 24,
     borderRadius: 4
+  },
+  continueActions: {
+    width: '100%',
+    gap: 4
+  },
+  skipPermission: {
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  skipPermissionText: {
+    fontSize: 16,
+    fontWeight: '500'
   },
   continueButton: {
     width: '100%'

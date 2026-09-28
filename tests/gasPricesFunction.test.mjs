@@ -85,3 +85,28 @@ test('candidate probes cannot modify cache, history or incident counters', async
     assert.equal(result.source, 'live'); assert.ok(result.quotes.length);
     assert.deepEqual(db.writes, []); assert.deepEqual(db.calls, []);
 });
+test('E85 requirement searches E85 coverage but returns and stores requested-grade prices and brands', async () => {
+    const both = { ...station, name: 'Corner shop', brands: [{name:'Shell'}], prices:[
+        {fuelProduct:'premium_gas',credit:{price:4.5}}, {fuelProduct:'e85',credit:{price:2.5}},
+    ] };
+    let variables;
+    const db=database();
+    const result=await getGasPrices({input:{...input,fuelType:'premium',requiresE85:true},db,
+        fetchImpl:async(_,request)=>{variables=JSON.parse(request.body).variables;return Response.json({data:{locationBySearchTerm:{stations:{results:[both]}}}});}});
+    assert.equal(variables.fuel,5);
+    assert.equal(result.quotes[0].fuelType,'premium');
+    assert.equal(result.quotes[0].price,4.5);
+    assert.deepEqual(result.quotes[0].brandNames,['Shell']);
+    const stored=db.writes.find(w=>w.table==='station_prices').rows[0];
+    assert.equal(stored.fuel_type,'premium');
+    assert.equal(stored.all_prices.e85,2.5);
+    assert.deepEqual(stored.brand_names,['Shell']);
+    assert.notEqual(queryKey(input),queryKey({...input,requiresE85:true}));
+    assert.throws(()=>validateInput({...input,requiresE85:'yes'}),{code:'INVALID_INPUT'});
+});
+test('E85 filter also applies to cached prices and cache-fill rows', async()=>{
+    const q={providerId:'gasbuddy',providerTier:'station',stationId:'1',fuelType:'regular',price:3.5,allPrices:{regular:3.5},latitude:input.latitude,longitude:input.longitude};
+    const db=database({cached:{quotes:[q,{...q,stationId:'2',allPrices:{regular:3.5,e85:2.5}}],expires_at:new Date(Date.now()+60000).toISOString()}});
+    const result=await getGasPrices({input:{...input,requiresE85:true},db,fetchImpl:()=>assert.fail('cached')});
+    assert.deepEqual(result.quotes.map(q=>q.stationId),['2']);
+});

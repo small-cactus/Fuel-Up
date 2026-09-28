@@ -104,7 +104,7 @@ export function WelcomeStep({ isDark, themeColors, insets, mapRegion }) {
     );
 }
 
-export const OnboardingChip = ({ price, isCheapest, isDark, top, left, isActive }) => {
+export const OnboardingChip = ({ price, isCheapest, isDark, top, left }) => {
 
     const chipTint = isCheapest ? 'rgba(0, 255, 47, 0.3)' : 'rgba(255, 25, 0, 0.3)';
 
@@ -121,7 +121,6 @@ export const OnboardingChip = ({ price, isCheapest, isDark, top, left, isActive 
                 colorScheme={isDark ? 'dark' : 'light'}
                 interactive={false}
                 style={styles.demoChip}
-                key={isActive ? 'chip-active' : 'chip-inactive'}
             >
 
                 <SymbolView

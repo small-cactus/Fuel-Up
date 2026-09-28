@@ -7,7 +7,7 @@ import {
     ONBOARDING_STEPS,
 } from '../src/lib/onboardingFlow.js';
 
-test('onboarding flow removes the rating step and keeps six steps', () => {
+test('onboarding flow places optional brand preferences after fuel grade', () => {
     assert.deepEqual(ONBOARDING_STEPS, [
         'welcome',
         'predictive',
@@ -15,6 +15,7 @@ test('onboarding flow removes the rating step and keeps six steps', () => {
         'notifications',
         'radius',
         'octane',
+        'brands',
     ]);
 });
 
@@ -34,7 +35,7 @@ test('onboarding only commits radius and octane on their respective steps', () =
             radius: 20,
             octane: 'diesel',
         }),
-        [['preferredOctane', 'diesel']]
+        [['preferredOctane', 'diesel'], ['requiresE85', false]]
     );
 });
 

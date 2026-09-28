@@ -1,0 +1,145 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import * as Location from 'expo-location';
+import {
+    buildTrendRequestKey,
+    captureTrendCacheGeneration,
+    clearTrendDataCache,
+    getCachedTrendData,
+    getLastResolvedTrendData,
+    getLastTrendsScreenViewedAt,
+    isTrendCacheGenerationCurrent,
+    prefetchTrendData,
+} from '../../services/fuel/trends';
+
+const REFRESH_INTERVAL_MS = 60 * 60 * 1000;
+
+// Each result belongs to one location, grade, radius and cache generation. An older
+// request may finish, but it cannot replace a newer selection or resurrect a reset.
+export default function useTrendData({
+    currentRequestKey,
+    origin,
+    fuelGrade,
+    radiusMiles,
+    preferredProvider,
+    minimumRating,
+    preferredBrands,
+    requiresE85,
+    resetToken,
+    commitOrigin,
+}) {
+    const scope = JSON.stringify([currentRequestKey, fuelGrade, radiusMiles, preferredProvider, minimumRating, preferredBrands, requiresE85, resetToken]);
+    const scopeRef = useRef(scope);
+    scopeRef.current = scope;
+    const mounted = useRef(false);
+    const activeRequest = useRef(null);
+    const previousReset = useRef(resetToken);
+    const [result, setResult] = useState(null);
+    const [refreshingScope, setRefreshingScope] = useState(null);
+
+    useEffect(() => {
+        mounted.current = true;
+        return () => {
+            mounted.current = false;
+            activeRequest.current = null;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (previousReset.current === resetToken) return;
+        previousReset.current = resetToken;
+        clearTrendDataCache();
+        activeRequest.current = null;
+        setResult(null);
+        setRefreshingScope(null);
+    }, [resetToken]);
+
+    const load = useCallback(({ refreshing = false } = {}) => {
+        if (activeRequest.current?.scope === scope) return activeRequest.current.promise;
+        const request = { scope, promise: null };
+        const generation = captureTrendCacheGeneration();
+        activeRequest.current = request;
+        if (refreshing) setRefreshingScope(scope);
+        const isCurrent = () => mounted.current && scopeRef.current === scope &&
+            activeRequest.current === request && isTrendCacheGenerationCurrent(generation);
+
+        request.promise = (async () => {
+            let resolvedOrigin = origin;
+            try {
+                if (!resolvedOrigin) {
+                    const permission = await Location.getForegroundPermissionsAsync();
+                    if (!isCurrent()) return;
+                    if (permission.status !== 'granted') {
+                        throw new Error('Allow location in Settings to see fuel trends near you.');
+                    }
+                    const fix = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+                    if (!isCurrent()) return;
+                    if (!Number.isFinite(fix?.coords?.latitude) || !Number.isFinite(fix?.coords?.longitude)) {
+                        throw new Error('Your location is unavailable. Pull to refresh to try again.');
+                    }
+                    resolvedOrigin = { ...fix.coords, locationSource: 'device' };
+                }
+                if (!isCurrent()) return;
+                const requestKey = buildTrendRequestKey({
+                    latitude: resolvedOrigin.latitude,
+                    longitude: resolvedOrigin.longitude,
+                    fuelType: fuelGrade,
+                    radiusMiles,
+                    preferredProvider,
+                    minimumRating,
+                    preferredBrands,
+                    requiresE85,
+                });
+                const data = await prefetchTrendData({
+                    latitude: resolvedOrigin.latitude,
+                    longitude: resolvedOrigin.longitude,
+                    fuelType: fuelGrade,
+                    radiusMiles,
+                    preferredProvider,
+                    minimumRating,
+                    preferredBrands,
+                    requiresE85,
+                    requestKey,
+                });
+                if (!isCurrent()) return;
+                setResult({ scope, requestKey, data, generation, resetToken, error: null });
+                // Publish only a current fix. A late GPS result must never undo a
+                // manual location or fuel-grade change made while it was resolving.
+                if (!origin) commitOrigin(resolvedOrigin, resolvedOrigin.locationSource);
+                return data;
+            } catch (error) {
+                if (isCurrent()) {
+                    setResult({ scope, requestKey: currentRequestKey, data: null, generation, resetToken,
+                        error: origin ? 'Unable to refresh local trends. Pull to refresh to try again.' :
+                            (error?.message || 'Your location is unavailable. Pull to refresh to try again.') });
+                }
+            } finally {
+                if (mounted.current && scopeRef.current === scope && activeRequest.current === request) {
+                    setRefreshingScope(null);
+                }
+                if (activeRequest.current === request) activeRequest.current = null;
+            }
+        })();
+        return request.promise;
+    }, [scope, origin, fuelGrade, radiusMiles, preferredProvider, minimumRating, preferredBrands, requiresE85, currentRequestKey, commitOrigin, resetToken]);
+
+    useFocusEffect(useCallback(() => {
+        const cached = currentRequestKey ? getCachedTrendData(currentRequestKey) : null;
+        const resolvedAt = currentRequestKey ? getLastTrendsScreenViewedAt(currentRequestKey) : 0;
+        if (!cached || Date.now() - resolvedAt > REFRESH_INTERVAL_MS) void load();
+        // Data arrival does not re-enter this effect. Freshness is measured from
+        // the successful fetch, rather than extended on every visit to the tab.
+    }, [currentRequestKey, load]));
+
+    const onPullToRefresh = useCallback(() => load({ refreshing: true }), [load]);
+    const currentResult = result && isTrendCacheGenerationCurrent(result.generation) && result.resetToken === resetToken &&
+        (result.scope === scope || (currentRequestKey && result.requestKey === currentRequestKey)) ? result : null;
+    const cached = currentRequestKey ? getCachedTrendData(currentRequestKey) || getLastResolvedTrendData(currentRequestKey) : null;
+    return {
+        data: cached || currentResult?.data || null,
+        loading: !cached && !currentResult,
+        refreshing: refreshingScope === scope,
+        error: currentResult?.error || null,
+        onPullToRefresh,
+    };
+}

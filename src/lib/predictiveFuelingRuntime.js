@@ -1,3 +1,4 @@
+const { normalizePreferredBrands, rankStationQuotes, stationOffersE85 } = require('./stationPreferences.js');
 const {
   createPredictiveLocationPrefetchController,
 } = require('./predictiveLocationPrefetchController.js');
@@ -240,6 +241,8 @@ function buildLiveActivityProps({
 function normalizePreferences(preferences = {}) {
   return {
     preferredOctane: String(preferences?.preferredOctane || 'regular'),
+    preferredBrands: normalizePreferredBrands(preferences.preferredBrands),
+    requiresE85: Boolean(preferences.requiresE85),
     preferredProvider: String(preferences?.preferredProvider || 'gasbuddy'),
     searchRadiusMiles: Math.max(2, Math.min(15, Math.round(Number(preferences?.searchRadiusMiles) || 10))),
     navigationApp: String(preferences?.navigationApp || 'apple-maps'),
@@ -402,13 +405,21 @@ function createPredictiveFuelingRuntime(options = {}) {
     return buildStationLookup(runtimeState.knownStations).get(String(stationId)) || null;
   }
 
+  function isStationEligible(station) {
+    return Boolean(station) && (!config.preferences.requiresE85 || stationOffersE85(station));
+  }
+
+  function filterKnownStations() {
+    runtimeState.knownStations = rankStationQuotes(runtimeState.knownStations, config.preferences);
+  }
+
   function rememberStations(stations) {
     const normalizedStations = (Array.isArray(stations) ? stations : [])
       .filter(station => station?.stationId);
-    runtimeState.knownStations = uniqueBy([
+    runtimeState.knownStations = rankStationQuotes(uniqueBy([
       ...normalizedStations,
       ...runtimeState.knownStations,
-    ], station => station?.stationId).slice(0, 16);
+    ], station => station?.stationId), config.preferences).slice(0, 16);
   }
 
   function appendRecentSamples(samples) {
@@ -448,6 +459,7 @@ function createPredictiveFuelingRuntime(options = {}) {
     recommender = createRecommender({
       cooldownMs: notificationCooldownMs,
       enforcePresentationTiming: true,
+      explicitPreferredBrands: config.preferences.preferredBrands,
     });
     recommender.setProfile(buildRecommenderProfile(profile, config.preferences));
     recommender.setStations(runtimeState.knownStations);
@@ -506,6 +518,15 @@ function createPredictiveFuelingRuntime(options = {}) {
         prefetchSnapshot: options.prefetchSnapshot,
       });
       latestGeofenceSignature = geofenceSignature(runtimeState.geofences);
+      filterKnownStations();
+      const invalidRecommendation = [runtimeState.activeRecommendation, runtimeState.pendingRecommendation]
+        .some(value => value && !isStationEligible(getStationById(value.stationId)));
+      if (invalidRecommendation || (runtimeState.liveActivity?.active && !isStationEligible(getStationById(runtimeState.liveActivity.stationId)))) {
+        runtimeState.activeRecommendation = null;
+        runtimeState.pendingRecommendation = null;
+        await clearLiveActivity();
+      }
+      await syncGeofencesForKnownStations(null);
       rebuildRecommender();
       lastPersistAt = 0;
       debugState.lifecycle.bootstrappedAt = now();
@@ -624,6 +645,7 @@ function createPredictiveFuelingRuntime(options = {}) {
   }
 
   async function ensureLiveActivity({ recommendation, station, source = 'pending', phase = 'approaching' }) {
+    if (!isStationEligible(station)) { await clearLiveActivity(); return; }
     if (typeof notifications.startPredictiveLiveActivity !== 'function') {
       return;
     }
@@ -698,6 +720,8 @@ function createPredictiveFuelingRuntime(options = {}) {
       return;
     }
 
+    if (!isStationEligible(getStationById(recommendation.stationId))) { await clearLiveActivity(); return; }
+
     runtimeState.liveActivity = {
       active: true,
       stationId: recommendation.stationId,
@@ -726,6 +750,7 @@ function createPredictiveFuelingRuntime(options = {}) {
   }
 
   async function scheduleNotificationForRecommendation(recommendation, station) {
+    if (!isStationEligible(getStationById(recommendation?.stationId))) return;
     if (typeof notifications.schedulePredictiveRecommendationNotification !== 'function') {
       debugState.lastNotificationDecision = {
         at: now(),
@@ -815,7 +840,7 @@ function createPredictiveFuelingRuntime(options = {}) {
   }
 
   async function applyPendingRecommendation(pendingRecommendation) {
-    if (!pendingRecommendation || isStationSuppressed(pendingRecommendation.stationId)) {
+    if (!pendingRecommendation || !isStationEligible(getStationById(pendingRecommendation.stationId)) || isStationSuppressed(pendingRecommendation.stationId)) {
       runtimeState.pendingRecommendation = null;
       debugState.lastRecommendationDecision = {
         at: now(),
@@ -854,7 +879,7 @@ function createPredictiveFuelingRuntime(options = {}) {
   }
 
   async function applyActiveRecommendation(activeRecommendation) {
-    if (!activeRecommendation || isStationSuppressed(activeRecommendation.stationId)) {
+    if (!activeRecommendation || !isStationEligible(getStationById(activeRecommendation.stationId)) || isStationSuppressed(activeRecommendation.stationId)) {
       runtimeState.activeRecommendation = null;
       debugState.lastRecommendationDecision = {
         at: now(),
@@ -949,6 +974,7 @@ function createPredictiveFuelingRuntime(options = {}) {
         cooldownMs: getPrefetchCooldownMs(),
         radiusMiles: config.preferences.searchRadiusMiles,
         fuelType: config.preferences.preferredOctane,
+        requiresE85: config.preferences.requiresE85,
         preferredProvider: config.preferences.preferredProvider,
       });
       debugState.lastPrefetch = {
@@ -1290,13 +1316,19 @@ function createPredictiveFuelingRuntime(options = {}) {
   }
 
   function updateConfig(nextConfig = {}) {
+    const previousCriteria = JSON.stringify(config.preferences);
     config = {
       ...config,
       ...nextConfig,
-      preferences: normalizePreferences(nextConfig.preferences || config.preferences),
+      preferences: normalizePreferences({ ...config.preferences, ...nextConfig.preferences }),
     };
-    if (recommender) {
-      recommender.setProfile(buildRecommenderProfile(profile, config.preferences));
+    const criteriaChanged = previousCriteria !== JSON.stringify(config.preferences);
+    // Apply eligibility immediately, including while a prefetch is in flight.
+    filterKnownStations();
+    if (criteriaChanged) {
+      runtimeState.activeRecommendation = null;
+      runtimeState.pendingRecommendation = null;
+      runtimeState.arrivalSession = null;
     }
     debugState.lifecycle.lastConfigUpdateAt = now();
     setTrackingDebug('config-updated');
@@ -1306,6 +1338,19 @@ function createPredictiveFuelingRuntime(options = {}) {
       searchRadiusMiles: config.preferences.searchRadiusMiles,
     });
     emit();
+    if (!criteriaChanged) return Promise.resolve(getState());
+    return enqueueOperation(async () => {
+      await bootstrap();
+      filterKnownStations();
+      runtimeState.activeRecommendation = null;
+      runtimeState.pendingRecommendation = null;
+      await clearLiveActivity();
+      rebuildRecommender();
+      await syncGeofencesForKnownStations(null);
+      await persist({ force: true });
+      emit();
+      return getState();
+    });
   }
 
   return {

@@ -53,6 +53,7 @@ function buildTrajectorySnapshotCacheKey({
     longitude,
     radiusMiles,
     fuelType,
+    requiresE85 = false,
     preferredProvider,
     courseDegrees,
     speedMps,
@@ -65,6 +66,7 @@ function buildTrajectorySnapshotCacheKey({
             longitude,
             radiusMiles,
             fuelType,
+            requiresE85,
             preferredProvider,
         }),
         Math.round(Number(courseDegrees) || 0),
@@ -213,6 +215,7 @@ function findUsableCachedFuelWindow({
     latitude,
     longitude,
     fuelType,
+    requiresE85 = false,
     preferredProvider,
     radiusMiles,
     edgeBufferFraction = DEFAULT_CACHE_EDGE_BUFFER_FRACTION,
@@ -241,6 +244,7 @@ function findUsableCachedFuelWindow({
     let bestMatch = null;
 
     for (const entry of listSpatialCacheEntries()) {
+        if (Boolean(entry.requiresE85) !== Boolean(requiresE85)) continue;
         if (normFuelType && entry.fuelType && entry.fuelType !== normFuelType) {
             continue;
         }
@@ -303,6 +307,7 @@ async function findUsableCachedFuelSnapshot({
     longitude,
     radiusMiles,
     fuelType,
+    requiresE85 = false,
     preferredProvider = 'gasbuddy',
     edgeBufferFraction = DEFAULT_CACHE_EDGE_BUFFER_FRACTION,
 }) {
@@ -310,6 +315,7 @@ async function findUsableCachedFuelSnapshot({
         latitude,
         longitude,
         fuelType,
+        requiresE85,
         preferredProvider,
         radiusMiles,
         edgeBufferFraction,
@@ -365,7 +371,7 @@ async function findUsableCachedFuelSnapshot({
     }, fuelType);
 }
 
-async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fuelType, preferredProvider = 'gasbuddy' }) {
+async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fuelType, requiresE85 = false, preferredProvider = 'gasbuddy' }) {
     // First try the spatial lookup so we can reuse an already-fetched window
     // when the user is still inside the safe portion of it. Falling back to
     // the exact cache key keeps the existing behavior intact when the spatial
@@ -375,6 +381,7 @@ async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fu
         longitude,
         radiusMiles,
         fuelType,
+        requiresE85,
         preferredProvider,
     });
 
@@ -387,6 +394,7 @@ async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fu
         longitude,
         radiusMiles,
         fuelType,
+        requiresE85,
         preferredProvider,
     });
     const cacheEntry = await getCachedEntry(cacheKey);
@@ -419,6 +427,7 @@ function hasUsableCachedFuelWindow({
     longitude,
     radiusMiles,
     fuelType,
+    requiresE85 = false,
     preferredProvider,
     edgeBufferFraction,
 }) {
@@ -427,6 +436,7 @@ function hasUsableCachedFuelWindow({
         longitude,
         radiusMiles,
         fuelType,
+        requiresE85,
         preferredProvider,
         edgeBufferFraction,
     }));
@@ -438,6 +448,7 @@ async function refreshFuelPriceSnapshot({
     zipCode,
     radiusMiles,
     fuelType,
+    requiresE85 = false,
     preferredProvider,
     forceLiveGasBuddy = false,
     // `allowLiveGasBuddy` is accepted for backwards compatibility with the
@@ -455,7 +466,7 @@ async function refreshFuelPriceSnapshot({
         latitude,
         longitude,
         radiusMiles: normalizedRadius,
-        fuelType: normalizedFuelType,
+        fuelType: normalizedFuelType, requiresE85,
         preferredProvider,
     });
 
@@ -469,7 +480,7 @@ async function refreshFuelPriceSnapshot({
     request = (async () => {
         const debugState = {
             input: {
-                fuelType: normalizedFuelType,
+                fuelType: normalizedFuelType, requiresE85,
                 latitude,
                 longitude,
                 radiusMiles: normalizedRadius,
@@ -481,7 +492,7 @@ async function refreshFuelPriceSnapshot({
 
         const providerResults = [await fetchGasBuddyQuote({
             latitude, longitude, radiusMiles: normalizedRadius,
-            fuelType: normalizedFuelType, config, forceLive: forceLiveGasBuddy,
+            fuelType: normalizedFuelType, requiresE85, config, forceLive: forceLiveGasBuddy,
         })];
 
         debugState.providers = providerResults.map(result => result.debugEntry);
@@ -547,7 +558,7 @@ async function refreshFuelPriceSnapshot({
             centerLat: latitude,
             centerLng: longitude,
             radiusMiles: normalizedRadius,
-            fuelType: normalizedFuelType,
+            fuelType: normalizedFuelType, requiresE85,
             preferredProvider,
             fetchedAt: Date.now(),
         });
@@ -579,6 +590,7 @@ async function refreshFuelPriceSnapshotAlongTrajectory({
     speedMps,
     radiusMiles,
     fuelType,
+    requiresE85 = false,
     preferredProvider,
     routeProvider,
     lookaheadMeters,
@@ -596,7 +608,7 @@ async function refreshFuelPriceSnapshotAlongTrajectory({
             latitude,
             longitude,
             radiusMiles: normalizedRadius,
-            fuelType: normalizedFuelType,
+            fuelType: normalizedFuelType, requiresE85,
             preferredProvider,
         }),
         Math.round(Number(courseDegrees) || 0),
@@ -629,7 +641,7 @@ async function refreshFuelPriceSnapshotAlongTrajectory({
             latitude,
             longitude,
             radiusMiles: normalizedRadius,
-            fuelType: normalizedFuelType,
+            fuelType: normalizedFuelType, requiresE85,
             preferredProvider,
             forceLiveGasBuddy,
             allowLiveGasBuddy,
@@ -647,14 +659,14 @@ async function refreshFuelPriceSnapshotAlongTrajectory({
             latitude,
             longitude,
             radiusMiles: normalizedRadius,
-            fuelType: normalizedFuelType,
+            fuelType: normalizedFuelType, requiresE85,
             preferredProvider,
         });
         const trajectorySnapshotCacheKey = buildTrajectorySnapshotCacheKey({
             latitude,
             longitude,
             radiusMiles: normalizedRadius,
-            fuelType: normalizedFuelType,
+            fuelType: normalizedFuelType, requiresE85,
             preferredProvider,
             courseDegrees,
             speedMps,
@@ -707,7 +719,7 @@ async function refreshFuelPriceSnapshotAlongTrajectory({
             centerLat: latitude,
             centerLng: longitude,
             radiusMiles: normalizedRadius,
-            fuelType: normalizedFuelType,
+            fuelType: normalizedFuelType, requiresE85,
             preferredProvider,
             fetchedAt: Date.now(),
         });

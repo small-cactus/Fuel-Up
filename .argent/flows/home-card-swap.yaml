@@ -1,0 +1,28 @@
+steps:
+  - tool: gesture-swipe
+    args:
+      fromX: 0.81
+      fromY: 0.78
+      toX: 0.2
+      toY: 0.78
+      durationMs: 450
+  - tool: await-ui-element
+    args:
+      condition: visible
+      selector:
+        text: Reset to Cheapest
+  - tool: gesture-swipe
+    args:
+      fromX: 0.2
+      fromY: 0.78
+      toX: 0.81
+      toY: 0.78
+      durationMs: 450
+  - tool: await-ui-element
+    args:
+      condition: hidden
+      selector:
+        text: Reset to Cheapest
+executionPrerequisite: Home is loaded with at least two stations, cheapest card
+  selected, GPS and map settled. Swipe the station carousel, return to the first
+  card. Price cards occupy the lower map area; horizontal gestures target their center.

@@ -9,6 +9,7 @@ function buildCooldownKey({
     courseDegrees,
     radiusMiles,
     fuelType,
+    requiresE85 = false,
     preferredProvider,
 }) {
     return [
@@ -17,6 +18,7 @@ function buildCooldownKey({
         Math.round(Number(courseDegrees) / 15),
         Math.round(Number(radiusMiles) || 10),
         String(fuelType || 'regular'),
+        requiresE85 ? 'with-e85' : 'any-station',
         String(preferredProvider || 'gasbuddy'),
     ].join(':');
 }
@@ -58,6 +60,7 @@ function createPredictiveLocationPrefetchController({
             ...trajectorySeed,
             radiusMiles: settings.radiusMiles,
             fuelType: settings.fuelType,
+            requiresE85: settings.requiresE85,
             preferredProvider: settings.preferredProvider,
         });
         const nowMs = now();

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, Alert, StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import { useTheme } from '../../src/ThemeContext';
 import TopCanopy from '../../src/components/TopCanopy';
 import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
 import NativeSettingsForm from '../../src/components/settings/NativeSettingsForm';
+import BrandPreferencesSheet from '../../src/components/settings/BrandPreferencesSheet';
 import {
     enablePredictiveTrackingAsync,
     getPredictiveTrackingPermissionStateAsync,
@@ -25,22 +26,35 @@ function noThrow(promise) {
 export default function SettingsScreen() {
     const insets = useSafeAreaInsets();
     const { isDark, themeMode, setThemeMode, themeColors } = useTheme();
-    const { requestFuelReset, setFuelDebugState } = useAppState();
+    const { requestFuelReset, setFuelDebugState, manualLocationOverride, resolvedFuelSearchContext } = useAppState();
     const { preferences, updatePreference, resetOnboarding } = usePreferences();
     const [trackingPermissionState, setTrackingPermissionState] = useState(null);
+    const [brandsPresented, setBrandsPresented] = useState(false);
+    const brandCoordinate = useMemo(() => {
+        const origin = manualLocationOverride || resolvedFuelSearchContext;
+        return Number.isFinite(origin?.latitude) && Number.isFinite(origin?.longitude)
+            ? { latitude: origin.latitude, longitude: origin.longitude } : null;
+    }, [manualLocationOverride, resolvedFuelSearchContext]);
+    const mountedRef = useRef(false);
+    const permissionRevisionRef = useRef(0);
+    const reviewingPermissionsRef = useRef(false);
+    const resettingFuelRef = useRef(false);
 
     const canopyEdgeLine = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
     const topCanopyHeight = insets.top + TOP_CANOPY_HEIGHT;
 
     useEffect(() => {
         let isActive = true;
+        mountedRef.current = true;
 
         const refreshPermissions = async () => {
+            if (reviewingPermissionsRef.current) return;
+            const revision = ++permissionRevisionRef.current;
             try {
                 const nextPermissionState = await getPredictiveTrackingPermissionStateAsync();
-                if (isActive) setTrackingPermissionState(nextPermissionState);
+                if (isActive && revision === permissionRevisionRef.current) setTrackingPermissionState(nextPermissionState);
             } catch {
-                if (isActive) setTrackingPermissionState(null);
+                if (isActive && revision === permissionRevisionRef.current) setTrackingPermissionState(null);
             }
         };
         void refreshPermissions();
@@ -49,6 +63,8 @@ export default function SettingsScreen() {
         });
         return () => {
             isActive = false;
+            mountedRef.current = false;
+            permissionRevisionRef.current += 1;
             subscription.remove();
         };
     }, []);
@@ -78,14 +94,18 @@ export default function SettingsScreen() {
     };
 
     const handleFuelReset = async () => {
+        if (resettingFuelRef.current) return;
+        resettingFuelRef.current = true;
         try {
             await clearFuelPriceCache();
             clearTrendDataCache();
             setFuelDebugState(null);
             requestFuelReset();
-            Alert.alert('Fuel Cache Cleared', 'Your next map refresh will pull fresh prices.');
+            if (mountedRef.current) Alert.alert('Fuel Cache Cleared', 'Your next map refresh will pull fresh prices.');
         } catch (error) {
-            Alert.alert('Reset Failed', 'Unable to clear the fuel cache right now. Please try again.');
+            if (mountedRef.current) Alert.alert('Reset Failed', 'Unable to clear the fuel cache right now. Please try again.');
+        } finally {
+            resettingFuelRef.current = false;
         }
     };
 
@@ -128,10 +148,14 @@ export default function SettingsScreen() {
     };
 
     const handleReviewTrackingPermissions = async () => {
+        if (reviewingPermissionsRef.current) return;
+        reviewingPermissionsRef.current = true;
+        const revision = ++permissionRevisionRef.current;
         fireTapHaptic();
 
         try {
             const nextPermissionState = await enablePredictiveTrackingAsync();
+            if (!mountedRef.current || revision !== permissionRevisionRef.current) return;
             setTrackingPermissionState(nextPermissionState);
 
             if (nextPermissionState.isReady) {
@@ -152,16 +176,19 @@ export default function SettingsScreen() {
                     {
                         text: 'Open Settings',
                         onPress: () => {
-                            void openPredictiveTrackingSettingsAsync();
+                            noThrow(openPredictiveTrackingSettingsAsync());
                         },
                     },
                 ]
             );
         } catch (error) {
+            if (!mountedRef.current || revision !== permissionRevisionRef.current) return;
             Alert.alert(
                 'Unable To Review Permissions',
                 'Background tracking permissions can only be configured from a development or production build.'
             );
+        } finally {
+            reviewingPermissionsRef.current = false;
         }
     };
 
@@ -177,6 +204,11 @@ export default function SettingsScreen() {
 
     return (
         <View style={styles.container}>
+            <BrandPreferencesSheet visible={brandsPresented} onClose={() => setBrandsPresented(false)}
+                isDark={isDark} themeColors={themeColors} coordinate={brandCoordinate}
+                radiusMiles={preferences.searchRadiusMiles} fuelGrade={preferences.preferredOctane}
+                requiresE85={preferences.requiresE85} selectedBrands={preferences.preferredBrands || []}
+                onChange={brands => updatePreference('preferredBrands', brands)} />
             <View style={[styles.baseBackground, { backgroundColor: themeColors.background }]} />
             <View style={styles.foregroundLayer}>
                 <View
@@ -194,6 +226,10 @@ export default function SettingsScreen() {
                         preferredOctane={preferences.preferredOctane}
                         onRadiusChange={handleRadiusChange}
                         onOctaneChange={handleOctaneChange}
+                        requiresE85={preferences.requiresE85}
+                        onRequiresE85Change={value => updatePreference('requiresE85', value)}
+                        preferredBrands={preferences.preferredBrands}
+                        onEditPreferredBrands={() => setBrandsPresented(true)}
                         navigationApp={preferences.navigationApp}
                         onNavigationAppChange={handleNavigationAppChange}
                         themeMode={themeMode}

@@ -1,3 +1,4 @@
+const { normalizePreferredBrands } = require('./stationPreferences.js');
 const AsyncStorageModule = require('@react-native-async-storage/async-storage');
 
 const AsyncStorage = AsyncStorageModule?.default || AsyncStorageModule;
@@ -9,11 +10,15 @@ const DEFAULT_PREDICTIVE_PREFERENCES = Object.freeze({
   navigationApp: 'apple-maps',
   preferredOctane: 'regular',
   preferredProvider: 'gasbuddy',
+  preferredBrands: [],
+  requiresE85: false,
   searchRadiusMiles: 10,
 });
 
 function normalizePredictiveFuelingPreferences(preferences = {}) {
   return {
+    preferredBrands: normalizePreferredBrands(preferences.preferredBrands),
+    requiresE85: Boolean(preferences.requiresE85),
     hasCompletedOnboarding: Boolean(preferences?.hasCompletedOnboarding),
     navigationApp: String(preferences?.navigationApp || DEFAULT_PREDICTIVE_PREFERENCES.navigationApp),
     preferredOctane: String(preferences?.preferredOctane || DEFAULT_PREDICTIVE_PREFERENCES.preferredOctane),

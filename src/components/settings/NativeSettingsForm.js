@@ -19,7 +19,6 @@ import {
     Button,
     Form,
     Host,
-    Image,
     Label,
     LabeledContent,
     Picker,
@@ -66,6 +65,10 @@ export default function NativeSettingsForm({
     preferredOctane,
     onRadiusChange,
     onOctaneChange,
+    requiresE85,
+    onRequiresE85Change,
+    preferredBrands = [],
+    onEditPreferredBrands,
     // Navigation
     navigationApp,
     onNavigationAppChange,
@@ -99,7 +102,7 @@ export default function NativeSettingsForm({
                                 foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
                             ]}
                         >
-                            Regular 85–88 · Midgrade 89–90 · Premium 91–94+ · Diesel · E85. Radius limits the list to stations within your selected distance.
+                            Regular 85–88 · Midgrade 89–90 · Premium 91–94+ · Diesel · E85. Require E85 limits results to stations with an E85 price. Preferred brands appear first, with other stations still available.
                         </Text>
                     }
                 >
@@ -167,6 +170,15 @@ export default function NativeSettingsForm({
                             </Text>
                         ))}
                     </Picker>
+                    <Toggle label="Require E85" systemImage="leaf.fill" isOn={Boolean(requiresE85)}
+                        onIsOnChange={onRequiresE85Change} testID="settings-requires-e85" />
+                    <Button onPress={onEditPreferredBrands} testID="settings-preferred-brands">
+                        <LabeledContent label={<Label title="Preferred Brands" systemImage="heart" />}>
+                            <Text modifiers={[foregroundStyle({ type: 'hierarchical', style: 'secondary' })]}>
+                                {preferredBrands.length ? `${preferredBrands.length} selected` : 'Any brand'}
+                            </Text>
+                        </LabeledContent>
+                    </Button>
                 </Section>
 
                 <Section

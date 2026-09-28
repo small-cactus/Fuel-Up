@@ -49,7 +49,7 @@ function normalizeCoordinate(value) {
     return Number(value).toFixed(2);
 }
 
-function buildCacheKey({ latitude, longitude, radiusMiles, fuelType, preferredProvider = 'gasbuddy' }) {
+function buildCacheKey({ latitude, longitude, radiusMiles, fuelType, requiresE85 = false, preferredProvider = 'gasbuddy' }) {
     return [
         'fuel',
         normalizeFuelTypeName(fuelType),
@@ -57,6 +57,7 @@ function buildCacheKey({ latitude, longitude, radiusMiles, fuelType, preferredPr
         Math.max(1, Math.round(toFiniteNumber(radiusMiles) || 10)),
         normalizeCoordinate(latitude),
         normalizeCoordinate(longitude),
+        ...(requiresE85 ? ['with-e85'] : []),
     ].join(':');
 }
 
@@ -299,6 +300,7 @@ function createQuote({
     providerTier,
     stationId = null,
     stationName,
+    brandNames = [],
     address,
     latitude,
     longitude,
@@ -318,6 +320,7 @@ function createQuote({
         providerTier,
         stationId,
         stationName,
+        brandNames,
         address,
         latitude: toFiniteNumber(latitude),
         longitude: toFiniteNumber(longitude),
@@ -710,6 +713,7 @@ function normalizeGasBuddyResponse({ origin, fuelType, payload }) {
                 providerTier: 'station',
                 stationId: String(station.id || ''),
                 stationName: station.name || (station.brands?.[0]?.name) || 'Gas station',
+                brandNames: [...new Set((station.brands || []).map(brand => brand.name).filter(name => typeof name === 'string' && name.trim()))],
                 address: addressLine || 'Nearby fuel station',
                 latitude: toFiniteNumber(station.latitude) ?? origin.latitude,
                 longitude: toFiniteNumber(station.longitude) ?? origin.longitude,

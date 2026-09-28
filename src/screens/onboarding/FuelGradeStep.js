@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SymbolView } from 'expo-symbols';
-import { Form, Host, Picker, Section, Text as NativeText } from '@expo/ui/swift-ui';
+import { Form, Host, Picker, Section, Toggle, Text as NativeText } from '@expo/ui/swift-ui';
 import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers';
 import { FUEL_GRADE_ORDER, getFuelGradeMeta } from '../../lib/fuelGrade';
 
-export default function FuelGradeStep({ isDark, themeColors, insets, value, onChange, width }) {
+export default function FuelGradeStep({ isDark, themeColors, insets, value, onChange, width, requiresE85, onRequiresE85Change }) {
     return (
         <View style={{ width, flex: 1, backgroundColor: themeColors.background }}>
             <View style={[styles.header, { paddingTop: insets.top + 32 }]}>
@@ -21,6 +21,10 @@ export default function FuelGradeStep({ isDark, themeColors, insets, value, onCh
                                 <NativeText key={grade} testID={`onboarding-grade-${grade}`} modifiers={[tag(grade)]}>{getFuelGradeMeta(grade).label}</NativeText>
                             ))}
                         </Picker>
+                    </Section>
+                    <Section footer={<NativeText>Your selected fuel stays the same. Stations must also have E85.</NativeText>}>
+                        <Toggle testID="onboarding-requires-e85" label="Only show stations that also have E85"
+                            isOn={Boolean(requiresE85)} onIsOnChange={onRequiresE85Change} />
                     </Section>
                 </Form>
             </Host>

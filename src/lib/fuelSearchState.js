@@ -1,4 +1,5 @@
 import { normalizeFuelGrade } from './fuelGrade.js';
+import { normalizePreferredBrands } from './stationPreferences.js';
 
 // The supported search radius range was determined by testing the live
 // GasBuddy return set across ~20 US cities (dense urban → extreme rural).
@@ -67,6 +68,8 @@ export function normalizeFuelSearchPreferences(preferences = {}) {
         preferredProvider: normalizePreferredProvider(preferences.preferredProvider),
         minimumRating: normalizeMinimumRating(preferences.minimumRating),
         navigationApp: normalizeNavigationApp(preferences.navigationApp),
+        preferredBrands: normalizePreferredBrands(preferences.preferredBrands),
+        requiresE85: preferences.requiresE85 === true,
     };
 }
 
@@ -77,12 +80,15 @@ export function buildFuelSearchCriteriaSignature({
     radiusMiles,
     preferredProvider,
     minimumRating = DEFAULT_MINIMUM_RATING,
+    preferredBrands = [],
+    requiresE85 = false,
 }) {
     return [
         normalizeFuelGrade(preferredOctane || fuelGrade),
         normalizeSearchRadiusMiles(searchRadiusMiles ?? radiusMiles),
         normalizePreferredProvider(preferredProvider),
         normalizeMinimumRating(minimumRating).toFixed(1),
+        ...(requiresE85 || normalizePreferredBrands(preferredBrands).length ? [JSON.stringify([requiresE85 === true, normalizePreferredBrands(preferredBrands)])] : []),
     ].join('|');
 }
 
@@ -105,6 +111,8 @@ export function buildFuelSearchRequestKey({
     radiusMiles,
     preferredProvider,
     minimumRating = DEFAULT_MINIMUM_RATING,
+    preferredBrands = [],
+    requiresE85 = false,
 }) {
     return [
         buildFuelSearchLocationKey(origin),
@@ -115,6 +123,8 @@ export function buildFuelSearchRequestKey({
             radiusMiles,
             preferredProvider,
             minimumRating,
+            preferredBrands,
+            requiresE85,
         }),
     ].join('|');
 }
@@ -128,6 +138,8 @@ export function buildResolvedFuelSearchContext({
     radiusMiles,
     preferredProvider,
     minimumRating = DEFAULT_MINIMUM_RATING,
+    preferredBrands = [],
+    requiresE85 = false,
 }) {
     if (!origin || buildFuelSearchLocationKey(origin) === 'unresolved') {
         return null;
@@ -146,6 +158,8 @@ export function buildResolvedFuelSearchContext({
             radiusMiles,
             preferredProvider,
             minimumRating,
+            preferredBrands,
+            requiresE85,
         }),
         requestKey: buildFuelSearchRequestKey({
             origin,
@@ -155,6 +169,8 @@ export function buildResolvedFuelSearchContext({
             radiusMiles,
             preferredProvider,
             minimumRating,
+            preferredBrands,
+            requiresE85,
         }),
         updatedAt: new Date().toISOString(),
     };

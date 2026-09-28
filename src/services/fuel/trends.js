@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabase.js';
 import { filterStationQuotesForHome } from '../../lib/homeState.js';
 import { rankQuotesForFuelGrade } from '../../lib/fuelGrade.js';
+import { rankStationQuotes } from '../../lib/stationPreferences.js';
 import { buildFuelSearchRequestKey } from '../../lib/fuelSearchState.js';
 const { buildLatestFuelStationQuotesFromRows } = require('./index');
 const { buildValidationState } = require('./priceValidation');
@@ -154,6 +155,8 @@ export function buildTrendRequestKey({
     radiusMiles = 10,
     preferredProvider = 'gasbuddy',
     minimumRating = 0,
+    preferredBrands = [],
+    requiresE85 = false,
     requestKey = '',
 }) {
     if (requestKey) {
@@ -169,6 +172,8 @@ export function buildTrendRequestKey({
         radiusMiles,
         preferredProvider,
         minimumRating,
+        preferredBrands,
+        requiresE85,
     });
 }
 
@@ -178,6 +183,8 @@ export async function fetchTrendData({
     fuelType = 'regular',
     radiusMiles = 10,
     minimumRating = 0,
+    preferredBrands = [],
+    requiresE85 = false,
 }) {
     const searchLat = Math.round(latitude * 10) / 10;
     const searchLng = Math.round(longitude * 10) / 10;
@@ -207,7 +214,7 @@ export async function fetchTrendData({
             },
         })
         : [];
-    const rankedLatestQuotes = rankQuotesForFuelGrade(
+    const rankedLatestQuotes = rankStationQuotes(rankQuotesForFuelGrade(
         filterStationQuotesForHome({
             quotes: projectedLatestQuotes,
             origin: {
@@ -216,9 +223,11 @@ export async function fetchTrendData({
             },
             radiusMiles,
             minimumRating,
+            preferredBrands,
+            requiresE85,
         }),
         fuelType
-    );
+    ), { preferredBrands, requiresE85 });
     const visibleStationIds = new Set(
         rankedLatestQuotes
             .map(quote => String(quote?.stationId || '').trim())
@@ -245,17 +254,16 @@ export async function fetchTrendData({
     let leaderboardLastChangedAt = null;
     const latestPriceByStation = new Map();
     let previousLeaderboardSnapshotKey = null;
+    const latestQuoteById = new Map(rankedLatestQuotes.map(quote => [String(quote.stationId), quote]));
 
     displayedRows.forEach(row => {
         latestPriceByStation.set(row.station_id, row.price);
 
-        const rankingSnapshot = [...latestPriceByStation.entries()]
-            .sort((a, b) => {
-                if (a[1] === b[1]) return String(a[0]).localeCompare(String(b[0]));
-                return a[1] - b[1];
-            })
+        const rankingSnapshot = rankStationQuotes([...latestPriceByStation.entries()].map(([stationId, price]) => ({
+            ...latestQuoteById.get(String(stationId)), stationId, price,
+        })), { preferredBrands, requiresE85 })
             .slice(0, 5)
-            .map(([stationId, price], index) => `${index + 1}:${stationId}:${Number(price).toFixed(3)}`)
+            .map((quote, index) => `${index + 1}:${quote.stationId}:${Number(quote.price).toFixed(3)}`)
             .join('|');
 
         if (rankingSnapshot !== previousLeaderboardSnapshotKey) {
@@ -381,6 +389,9 @@ export async function fetchTrendData({
 
     const leaderboard = buildTrendLeaderboard({
         rankedLatestQuotes,
+        earliestRankedQuotes: rankStationQuotes(rankedLatestQuotes.map(quote => ({
+            ...quote, price: stationHistoryById.get(String(quote.stationId))?.earliestPrice ?? quote.price,
+        })), { preferredBrands, requiresE85 }),
         stationHistoryById,
         limit: 5,
     });
@@ -482,6 +493,8 @@ export async function prefetchTrendData({
     radiusMiles = 10,
     preferredProvider = 'gasbuddy',
     minimumRating = 0,
+    preferredBrands = [],
+    requiresE85 = false,
     requestKey = '',
 }) {
     const resolvedRequestKey = buildTrendRequestKey({
@@ -491,6 +504,8 @@ export async function prefetchTrendData({
         radiusMiles,
         preferredProvider,
         minimumRating,
+        preferredBrands,
+        requiresE85,
         requestKey,
     });
 
@@ -509,6 +524,8 @@ export async function prefetchTrendData({
                 fuelType,
                 radiusMiles,
                 minimumRating,
+                preferredBrands,
+                requiresE85,
             });
             if (!isTrendCacheGenerationCurrent(requestGeneration)) {
                 return null;

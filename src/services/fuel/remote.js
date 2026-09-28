@@ -1,6 +1,6 @@
 const { sanitizeStationQuotesForFuelType } = require('./stationData');
 
-async function fetchGasBuddyQuote({ latitude, longitude, radiusMiles, fuelType, config, forceLive }) {
+async function fetchGasBuddyQuote({ latitude, longitude, radiusMiles, fuelType, requiresE85 = false, config, forceLive }) {
     const debugEntry = {
         providerId: 'gasbuddy', providerTier: 'station', enabled: true,
         quoteReturned: false, failureCategory: null, requests: [], summary: {}, error: null,
@@ -13,7 +13,7 @@ async function fetchGasBuddyQuote({ latitude, longitude, radiusMiles, fuelType, 
         let result;
         try {
             result = await supabase.functions.invoke('gas-prices', {
-                body: { latitude, longitude, radiusMiles, fuelType, forceRefresh: Boolean(forceLive) },
+                body: { latitude, longitude, radiusMiles, fuelType, requiresE85, forceRefresh: Boolean(forceLive) },
                 signal: controller.signal,
                 region: 'us-east-2',
             });

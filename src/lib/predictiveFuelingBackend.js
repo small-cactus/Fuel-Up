@@ -217,7 +217,7 @@ async function ensurePredictiveFuelingBackendStarted(preferences = {}) {
       },
     });
   } else {
-    runtime.updateConfig({ preferences });
+    await runtime.updateConfig({ preferences });
     updateBackendDebugState({
       lastLifecycle: {
         at: Date.now(),
@@ -329,7 +329,7 @@ function updatePredictiveFuelingBackendConfig(preferences = {}) {
     return;
   }
 
-  runtime.updateConfig({ preferences });
+  return runtime.updateConfig({ preferences });
 }
 
 function subscribeToPredictiveFuelingBackend(listener) {

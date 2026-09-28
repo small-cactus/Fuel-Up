@@ -158,12 +158,16 @@ export function buildHomeQuerySignature({
     radiusMiles,
     fuelGrade,
     preferredProvider,
+    preferredBrands,
+    requiresE85,
 }) {
     return buildFuelSearchRequestKey({
         origin,
         fuelGrade,
         radiusMiles,
         preferredProvider,
+        preferredBrands,
+        requiresE85,
         minimumRating: 0,
     });
 }
@@ -172,12 +176,16 @@ export function buildHomeFilterSignature({
     radiusMiles,
     fuelGrade,
     preferredProvider,
+    preferredBrands,
+    requiresE85,
     minimumRating = 0,
 }) {
     return buildFuelSearchCriteriaSignature({
         fuelGrade,
         radiusMiles,
         preferredProvider,
+        preferredBrands,
+        requiresE85,
         minimumRating,
     });
 }

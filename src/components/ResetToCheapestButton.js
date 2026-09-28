@@ -5,6 +5,7 @@ import { GlassView } from 'expo-glass-effect';
 
 function ResetToCheapestButton({
     disabled = false,
+    label = 'Reset to Cheapest',
     glassTintColor,
     isDark,
     onPress,
@@ -13,7 +14,7 @@ function ResetToCheapestButton({
     return (
         <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Reset to cheapest"
+            accessibilityLabel={label}
             disabled={disabled}
             onPress={onPress}
             style={({ pressed }) => [
@@ -30,7 +31,7 @@ function ResetToCheapestButton({
                 glassEffectStyle="clear"
             >
                 <Ionicons color={themeColors.text} name="arrow-undo" size={14} />
-                <Text style={[styles.label, { color: themeColors.text }]}>Reset to Cheapest</Text>
+                <Text style={[styles.label, { color: themeColors.text }]}>{label}</Text>
             </GlassView>
         </Pressable>
     );

@@ -1,4 +1,4 @@
-function buildTrendLeaderboard({ rankedLatestQuotes, stationHistoryById, limit = 5 }) {
+function buildTrendLeaderboard({ rankedLatestQuotes, earliestRankedQuotes, stationHistoryById, limit = 5 }) {
     const rankedQuotes = Array.isArray(rankedLatestQuotes)
         ? rankedLatestQuotes.filter(Boolean)
         : [];
@@ -9,12 +9,12 @@ function buildTrendLeaderboard({ rankedLatestQuotes, stationHistoryById, limit =
         .map(quote => historyMap.get(String(quote?.stationId || '').trim()))
         .filter(Boolean);
     const earliestRankByStationId = new Map(
-        eligibleHistory
+        (Array.isArray(earliestRankedQuotes) ? earliestRankedQuotes : eligibleHistory
             .slice()
             .sort((left, right) => (
                 Number(left.earliestPrice) - Number(right.earliestPrice) ||
                 String(left.stationId || '').localeCompare(String(right.stationId || ''))
-            ))
+            )))
             .map((station, index) => [String(station.stationId || '').trim(), index])
     );
 

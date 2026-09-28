@@ -21,7 +21,7 @@
  *   (registered in app/_layout.js)
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     Pressable,
     ScrollView,
@@ -129,15 +129,16 @@ function PhaseSegments({ value, onChange, isDark }) {
  * buttons for the `progress` float.
  */
 function ProgressRow({ value, onChange, isDark }) {
-    const displayValue = typeof value === 'number'
-        ? value.toFixed(2)
-        : String(value || '0');
-
+    const [draft, setDraft] = useState(() => Number(value || 0).toFixed(2));
+    const isEditing = useRef(false);
+    useEffect(() => {
+        if (!isEditing.current) setDraft(Number(value || 0).toFixed(2));
+    }, [value]);
     const adjust = useCallback((delta) => {
-        const parsed = Number(displayValue) || 0;
-        const next = Math.max(0, Math.min(1, parsed + delta));
+        const next = Math.max(0, Math.min(1, (Number(draft) || 0) + delta));
+        setDraft(next.toFixed(2));
         onChange(Number(next.toFixed(2)));
-    }, [displayValue, onChange]);
+    }, [draft, onChange]);
 
     return (
         <View style={styles.controlRow}>
@@ -147,13 +148,23 @@ function ProgressRow({ value, onChange, isDark }) {
             <View style={styles.progressInputRow}>
                 <TextInput
                     style={[styles.controlInput, styles.progressInputField, isDark && styles.controlInputDark]}
-                    value={displayValue}
+                    value={draft}
+                    accessibilityLabel="Progress, from zero to one"
+                    onFocus={() => { isEditing.current = true; }}
+                    onBlur={() => {
+                        isEditing.current = false;
+                        const next = Math.max(0, Math.min(1, Number(draft) || 0));
+                        setDraft(next.toFixed(2));
+                        onChange(next);
+                    }}
                     onChangeText={(next) => {
+                        // Preserve intermediate decimal input such as "0.".
+                        // Normalize only on blur, so editing does not move the caret.
+                        isEditing.current = true;
+                        setDraft(next);
                         const parsed = Number(next);
-                        if (Number.isFinite(parsed)) {
+                        if (next !== '' && Number.isFinite(parsed)) {
                             onChange(Math.max(0, Math.min(1, parsed)));
-                        } else if (next === '' || next === '.') {
-                            onChange(0);
                         }
                     }}
                     keyboardType="decimal-pad"

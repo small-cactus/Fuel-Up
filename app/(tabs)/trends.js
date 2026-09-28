@@ -3,27 +3,13 @@ import { Animated, StyleSheet, Text, View, ScrollView, Dimensions, RefreshContro
 import { GlassView } from 'expo-glass-effect';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/ThemeContext';
-import * as Location from 'expo-location';
 import { LinearGradient as ExpoLinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import * as d3Shape from 'd3-shape';
 import * as d3Scale from 'd3-scale';
 import TrendLeaderboard from '../../src/screens/trends/TrendLeaderboard';
-import { useFocusEffect } from 'expo-router';
-import {
-    buildTrendRequestKey,
-    captureTrendCacheGeneration,
-    clearTrendDataCache,
-    fetchTrendData,
-    getCachedTrendData,
-    getInFlightTrendDataRequest,
-    getLastResolvedTrendData,
-    getLastTrendsScreenViewedAt,
-    isTrendCacheGenerationCurrent,
-    setCachedTrendData,
-    setLastResolvedTrendData,
-    setLastTrendsScreenViewedAt,
-} from '../../src/services/fuel/trends';
+import { buildTrendRequestKey } from '../../src/services/fuel/trends';
+import useTrendData from '../../src/screens/trends/useTrendData';
 import { useAppState } from '../../src/AppStateContext';
 import { usePreferences } from '../../src/PreferencesContext';
 import TopCanopy from '../../src/components/TopCanopy';
@@ -34,7 +20,6 @@ import { buildResolvedFuelSearchContext } from '../../src/lib/fuelSearchState';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CHART_HEIGHT = 220;
 const TOP_CANOPY_HEIGHT = 44;
-const VIEW_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const TREND_BACKGROUND_GRADIENT_STRENGTH = 10; // 0 = off, 1 = default, >1 = stronger
 const TREND_BACKGROUND_GRADIENT_SPREAD = 0.35; // 0 = tighter/closer, 1 = wider/spread out
 
@@ -125,10 +110,6 @@ function formatTrendAxisLabel(dateValue, rangeStartValue, rangeEndValue) {
         month: 'short',
         day: 'numeric',
     });
-}
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function getTrendDirectionFromData(data) {
@@ -245,6 +226,8 @@ export default function TrendsScreen() {
     const searchRadiusMiles = normalizedFuelSearchPreferences.searchRadiusMiles;
     const preferredProvider = normalizedFuelSearchPreferences.preferredProvider;
     const minimumRating = normalizedFuelSearchPreferences.minimumRating;
+    const preferredBrands = normalizedFuelSearchPreferences.preferredBrands;
+    const requiresE85 = normalizedFuelSearchPreferences.requiresE85;
     const selectedFuelGradeMeta = getFuelGradeMeta(selectedFuelGrade);
     const resolvedManualOrigin = useMemo(() => {
         const latitude = Number(manualLocationOverride?.latitude);
@@ -291,103 +274,19 @@ export default function TrendsScreen() {
                 radiusMiles: searchRadiusMiles,
                 preferredProvider,
                 minimumRating,
+                preferredBrands,
+                requiresE85,
             })
             : ''
     ), [
         minimumRating,
+        preferredBrands,
+        requiresE85,
         preferredProvider,
         searchRadiusMiles,
         selectedFuelGrade,
         sharedSearchOrigin,
     ]);
-    const liveCachedTrendData = currentTrendRequestKey
-        ? getCachedTrendData(currentTrendRequestKey)
-        : null;
-    const [loading, setLoading] = useState(!liveCachedTrendData);
-    const [refreshing, setRefreshing] = useState(false);
-    const [trendData, setTrendData] = useState(liveCachedTrendData);
-    const [activeGradientColors, setActiveGradientColors] = useState(() => {
-        const initialGradientData = liveCachedTrendData || getLastResolvedTrendData(currentTrendRequestKey) || null;
-        return buildTrendBackgroundGradientColors({
-            direction: getTrendDirectionFromData(initialGradientData),
-            isDark,
-        });
-    });
-    const [incomingGradientColors, setIncomingGradientColors] = useState(null);
-    const isMountedRef = useRef(true);
-    const isFocusedRef = useRef(false);
-    const activeTrendRequestKeyRef = useRef(currentTrendRequestKey);
-    const gradientFadeOpacity = useRef(new Animated.Value(1)).current;
-    const activeFetchRef = useRef({
-        requestKey: null,
-        promise: null,
-    });
-
-    useEffect(() => {
-        return () => {
-            isMountedRef.current = false;
-        };
-    }, []);
-
-    useEffect(() => {
-        activeTrendRequestKeyRef.current = currentTrendRequestKey;
-    }, [currentTrendRequestKey]);
-
-    useEffect(() => {
-        if (!fuelResetToken) {
-            return;
-        }
-
-        clearTrendDataCache();
-        activeFetchRef.current = {
-            requestKey: null,
-            promise: null,
-        };
-        setTrendData(null);
-        setLoading(false);
-        setRefreshing(false);
-        setIncomingGradientColors(null);
-        gradientFadeOpacity.setValue(1);
-        setActiveGradientColors(buildTrendBackgroundGradientColors({
-            direction: null,
-            isDark,
-        }));
-    }, [fuelResetToken, gradientFadeOpacity, isDark]);
-
-    useEffect(() => {
-        if (!currentTrendRequestKey) {
-            setTrendData(null);
-            setLoading(true);
-            setIncomingGradientColors(null);
-            gradientFadeOpacity.setValue(1);
-            setActiveGradientColors(buildTrendBackgroundGradientColors({
-                direction: null,
-                isDark,
-            }));
-            return;
-        }
-
-        const nextCachedData = getCachedTrendData(currentTrendRequestKey);
-        const nextGradientData = nextCachedData || getLastResolvedTrendData(currentTrendRequestKey) || null;
-        setTrendData(nextCachedData || getLastResolvedTrendData(currentTrendRequestKey) || null);
-        setLoading(!nextCachedData);
-        setIncomingGradientColors(null);
-        gradientFadeOpacity.setValue(1);
-        setActiveGradientColors(buildTrendBackgroundGradientColors({
-            direction: getTrendDirectionFromData(nextGradientData),
-            isDark,
-        }));
-    }, [currentTrendRequestKey, gradientFadeOpacity, isDark]);
-
-    useEffect(() => {
-        if (!liveCachedTrendData || trendData === liveCachedTrendData) {
-            return;
-        }
-
-        setTrendData(liveCachedTrendData);
-        setLoading(false);
-    }, [liveCachedTrendData, trendData]);
-
     const commitResolvedSearchOrigin = useCallback((origin, locationSource) => {
         const nextContext = buildResolvedFuelSearchContext({
             origin,
@@ -396,6 +295,8 @@ export default function TrendsScreen() {
             radiusMiles: searchRadiusMiles,
             preferredProvider,
             minimumRating,
+            preferredBrands,
+            requiresE85,
         });
 
         if (nextContext) {
@@ -403,266 +304,31 @@ export default function TrendsScreen() {
         }
     }, [
         minimumRating,
+        preferredBrands,
+        requiresE85,
         preferredProvider,
         searchRadiusMiles,
         selectedFuelGrade,
         setResolvedFuelSearchContext,
     ]);
 
-    const resolveTrendRequestContext = useCallback(async () => {
-        if (resolvedManualOrigin) {
-            commitResolvedSearchOrigin(resolvedManualOrigin, 'manual');
-            return {
-                latitude: resolvedManualOrigin.latitude,
-                longitude: resolvedManualOrigin.longitude,
-                locationSource: 'manual',
-                requestKey: buildTrendRequestKey({
-                    latitude: resolvedManualOrigin.latitude,
-                    longitude: resolvedManualOrigin.longitude,
-                    fuelType: selectedFuelGrade,
-                    radiusMiles: searchRadiusMiles,
-                    preferredProvider,
-                    minimumRating,
-                }),
-            };
-        }
-
-        if (sharedSearchOrigin) {
-            return {
-                latitude: sharedSearchOrigin.latitude,
-                longitude: sharedSearchOrigin.longitude,
-                locationSource: sharedSearchOrigin.locationSource || 'device',
-                requestKey: buildTrendRequestKey({
-                    latitude: sharedSearchOrigin.latitude,
-                    longitude: sharedSearchOrigin.longitude,
-                    fuelType: selectedFuelGrade,
-                    radiusMiles: searchRadiusMiles,
-                    preferredProvider,
-                    minimumRating,
-                }),
-            };
-        }
-
-        let permission = await Location.getForegroundPermissionsAsync();
-        if (permission.status !== 'granted') {
-            permission = await Location.requestForegroundPermissionsAsync();
-        }
-
-        let nextOrigin = null;
-        let locationSource = 'fallback';
-
-        if (permission.status === 'granted') {
-            const location = await Location.getCurrentPositionAsync({});
-            nextOrigin = {
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude,
-                latitudeDelta: 0.05,
-                longitudeDelta: 0.05,
-            };
-            locationSource = 'device';
-        }
-
-        if (!nextOrigin) {
-            nextOrigin = {
-                latitude: 37.3346,
-                longitude: -122.009,
-                latitudeDelta: 0.05,
-                longitudeDelta: 0.05,
-            };
-        }
-
-        commitResolvedSearchOrigin(nextOrigin, locationSource);
-
-        return {
-            latitude: nextOrigin.latitude,
-            longitude: nextOrigin.longitude,
-            locationSource,
-            requestKey: buildTrendRequestKey({
-                latitude: nextOrigin.latitude,
-                longitude: nextOrigin.longitude,
-                fuelType: selectedFuelGrade,
-                radiusMiles: searchRadiusMiles,
-                preferredProvider,
-                minimumRating,
-            }),
-        };
-    }, [
-        commitResolvedSearchOrigin,
-        minimumRating,
+    const { data: displayTrendData, loading, refreshing, error: trendError, onPullToRefresh } = useTrendData({
+        currentRequestKey: currentTrendRequestKey,
+        origin: sharedSearchOrigin,
+        fuelGrade: selectedFuelGrade,
+        radiusMiles: searchRadiusMiles,
         preferredProvider,
-        resolvedManualOrigin,
-        searchRadiusMiles,
-        selectedFuelGrade,
-        sharedSearchOrigin,
-    ]);
-
-    const loadTrendData = useCallback(({
-        showLoading = false,
-    } = {}) => {
-        if (
-            currentTrendRequestKey &&
-            activeFetchRef.current.promise &&
-            activeFetchRef.current.requestKey === currentTrendRequestKey
-        ) {
-            return activeFetchRef.current.promise;
-        }
-
-        if (showLoading && isMountedRef.current) {
-            setTrendData(null);
-            setLoading(true);
-        }
-
-        const request = (async () => {
-            let requestContext = null;
-            try {
-                const requestGeneration = captureTrendCacheGeneration();
-                requestContext = await resolveTrendRequestContext();
-                const {
-                    latitude,
-                    longitude,
-                    requestKey,
-                } = requestContext;
-
-                activeTrendRequestKeyRef.current = requestKey;
-                activeFetchRef.current = {
-                    requestKey,
-                    promise: request,
-                };
-
-                const sharedPrefetchRequest = getInFlightTrendDataRequest(requestKey);
-                if (sharedPrefetchRequest) {
-                    const prefetchedData = await sharedPrefetchRequest;
-
-                    if (
-                        isMountedRef.current &&
-                        activeTrendRequestKeyRef.current === requestKey
-                    ) {
-                        setTrendData(prefetchedData || null);
-                        setLoading(false);
-                    }
-
-                    return prefetchedData || null;
-                }
-
-                const data = await fetchTrendData({
-                    latitude,
-                    longitude,
-                    fuelType: selectedFuelGrade,
-                    radiusMiles: searchRadiusMiles,
-                    minimumRating,
-                });
-
-                if (!isTrendCacheGenerationCurrent(requestGeneration)) {
-                    return;
-                }
-
-                setCachedTrendData(requestKey, data);
-                setLastResolvedTrendData(requestKey, data);
-
-                if (isMountedRef.current) {
-                    if (activeTrendRequestKeyRef.current === requestKey) {
-                        setTrendData(data);
-                    }
-                }
-            } catch (err) {
-                console.warn('Error loading trends data', err);
-            } finally {
-                if (isMountedRef.current) {
-                    if (
-                        !requestContext ||
-                        activeTrendRequestKeyRef.current === requestContext.requestKey
-                    ) {
-                        setLoading(false);
-                    }
-                }
-                if (activeFetchRef.current.promise === request) {
-                    activeFetchRef.current = {
-                        requestKey: null,
-                        promise: null,
-                    };
-                }
-            }
-        })();
-
-        activeFetchRef.current = {
-            requestKey: currentTrendRequestKey || null,
-            promise: request,
-        };
-        return request;
-    }, [
-        currentTrendRequestKey,
         minimumRating,
-        resolveTrendRequestContext,
-        searchRadiusMiles,
-        selectedFuelGrade,
-    ]);
-
-    useFocusEffect(
-        useCallback(() => {
-            isFocusedRef.current = true;
-            const now = Date.now();
-            const cachedDataForRequest = currentTrendRequestKey
-                ? getCachedTrendData(currentTrendRequestKey)
-                : null;
-            const lastViewedAtForRequest = currentTrendRequestKey
-                ? getLastTrendsScreenViewedAt(currentTrendRequestKey)
-                : 0;
-            const hasExpired = currentTrendRequestKey
-                ? (now - lastViewedAtForRequest) > VIEW_REFRESH_INTERVAL_MS
-                : true;
-            const shouldFetch = !cachedDataForRequest || hasExpired || !currentTrendRequestKey;
-
-            if (currentTrendRequestKey) {
-                setLastTrendsScreenViewedAt(currentTrendRequestKey, now);
-            }
-
-            if (cachedDataForRequest && trendData !== cachedDataForRequest) {
-                setTrendData(cachedDataForRequest);
-                setLoading(false);
-            } else if (!cachedDataForRequest) {
-                setTrendData(null);
-            }
-
-            if (shouldFetch) {
-                const shouldAnimateFetchedEntry = !cachedDataForRequest;
-                void loadTrendData({
-                    showLoading: shouldAnimateFetchedEntry,
-                });
-            }
-            return () => {
-                isFocusedRef.current = false;
-            };
-        }, [currentTrendRequestKey, loadTrendData, trendData])
-    );
-
-    const onPullToRefresh = useCallback(() => {
-        setRefreshing(true);
-        if (currentTrendRequestKey) {
-            setLastTrendsScreenViewedAt(currentTrendRequestKey, Date.now());
-        }
-
-        const refreshStartedAt = Date.now();
-        void (async () => {
-            try {
-                await loadTrendData({ showLoading: false });
-            } finally {
-                const elapsed = Date.now() - refreshStartedAt;
-                if (elapsed < 550) {
-                    await sleep(550 - elapsed);
-                }
-                if (isMountedRef.current) {
-                    setRefreshing(false);
-                }
-            }
-        })();
-    }, [currentTrendRequestKey, loadTrendData]);
-
-    const resolvedTrendData = trendData || liveCachedTrendData || null;
-    const fallbackResolvedTrendData = currentTrendRequestKey
-        ? getLastResolvedTrendData(currentTrendRequestKey)
-        : null;
-    const realDisplayTrendData = resolvedTrendData || fallbackResolvedTrendData || null;
-    const displayTrendData = realDisplayTrendData;
+        preferredBrands,
+        requiresE85,
+        resetToken: fuelResetToken,
+        commitOrigin: commitResolvedSearchOrigin,
+    });
+    const [activeGradientColors, setActiveGradientColors] = useState(() => buildTrendBackgroundGradientColors({
+        direction: getTrendDirectionFromData(displayTrendData), isDark,
+    }));
+    const [incomingGradientColors, setIncomingGradientColors] = useState(null);
+    const gradientFadeOpacity = useRef(new Animated.Value(1)).current;
     const heroTrendData = displayTrendData;
     const hasHeroTrendData = Boolean(heroTrendData?.averagePricesByDay?.length > 1);
     const gradientSourceData = displayTrendData || null;
@@ -690,9 +356,7 @@ export default function TrendsScreen() {
 
     useEffect(() => {
         if (areGradientColorSetsEqual(activeGradientColors, targetGradientColors)) {
-            if (incomingGradientColors) {
-                setIncomingGradientColors(null);
-            }
+            setIncomingGradientColors(null);
             gradientFadeOpacity.setValue(1);
             return;
         }
@@ -700,11 +364,12 @@ export default function TrendsScreen() {
         setIncomingGradientColors(targetGradientColors);
         gradientFadeOpacity.setValue(0);
 
-        Animated.timing(gradientFadeOpacity, {
+        const animation = Animated.timing(gradientFadeOpacity, {
             toValue: 1,
             duration: 650,
             useNativeDriver: true,
-        }).start(({ finished }) => {
+        });
+        animation.start(({ finished }) => {
             if (!finished) {
                 return;
             }
@@ -713,10 +378,10 @@ export default function TrendsScreen() {
             setIncomingGradientColors(null);
             gradientFadeOpacity.setValue(1);
         });
+        return () => animation.stop();
     }, [
         activeGradientColors,
         gradientFadeOpacity,
-        incomingGradientColors,
         targetGradientColors,
     ]);
 
@@ -918,7 +583,7 @@ export default function TrendsScreen() {
                                 {/* Empty/No Data Fallback */}
                                 {!loading && !displayTrendData?.averagePricesByDay?.length && !displayTrendData?.leaderboard?.length && (
                                     <View style={styles.emptyState}>
-                                        <Text style={[styles.emptyText, darkModeWeightStyle.emptyText, { color: themeColors.textOpacity }]}>Not enough historical data collected yet to render trends. Check back soon.</Text>
+                                        <Text style={[styles.emptyText, darkModeWeightStyle.emptyText, { color: themeColors.textOpacity }]}>{trendError || 'Not enough historical data collected yet to render trends. Check back soon.'}</Text>
                                     </View>
                                 )}
                             </View>

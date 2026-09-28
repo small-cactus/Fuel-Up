@@ -5,12 +5,14 @@ export const ONBOARDING_STEPS = [
     'notifications',
     'radius',
     'octane',
+    'brands',
 ];
 
 export function buildOnboardingPreferenceUpdates({
     currentStep,
     radius,
     octane,
+    requiresE85 = false,
 }) {
     const updates = [];
 
@@ -20,6 +22,7 @@ export function buildOnboardingPreferenceUpdates({
 
     if (ONBOARDING_STEPS[currentStep] === 'octane') {
         updates.push(['preferredOctane', octane]);
+        updates.push(['requiresE85', Boolean(requiresE85)]);
     }
 
     return updates;

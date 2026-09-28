@@ -1,3 +1,4 @@
+const { normalizePreferredBrands, normalizeStationBrand, stationBrandNames } = require('./stationPreferences.js');
 /**
  * Predictive fueling recommender.
  *
@@ -1618,6 +1619,20 @@ function scoreDestinationLikelihood(station, profile, nowMs, context = {}) {
  */
 function recommend(window, profile, stations, options = {}) {
   const opts = { ...DEFAULT_OPTIONS, ...options };
+  const preferredBrands = new Set(normalizePreferredBrands(opts.explicitPreferredBrands));
+  if (preferredBrands.size && !opts.evaluatingPreferredBrands) {
+    const preferredStations = (stations || []).filter(station =>
+      stationBrandNames(station).some(name => preferredBrands.has(normalizeStationBrand(name))));
+    if (preferredStations.length && preferredStations.length < (stations || []).length) {
+      // Explicit choices take precedence only when the normal recommendation
+      // gates accept a preferred station. Preserve actual prices and fall back
+      // to all stations if preferred brands are off-route or otherwise unsafe.
+      const preferredRecommendation = recommend(window, profile, preferredStations, {
+        ...opts, evaluatingPreferredBrands: true, onRecommendationSkipped: undefined,
+      });
+      if (preferredRecommendation) return preferredRecommendation;
+    }
+  }
   const emitSkip = (reason, extra = {}) => {
     if (typeof opts.onRecommendationSkipped === 'function') {
       opts.onRecommendationSkipped({

@@ -110,6 +110,8 @@ function ClusterMarkerOverlay({
   const previousClusterRef = useRef(null);
   const transitionRef = useRef({ fromClusterKey: '', toClusterKey: '', transitionKey: '' });
   const queueIndexRef = useRef(0);
+  const transitionGenerationRef = useRef(0);
+  const transitionTimersRef = useRef(new Set());
   const mergeQueueRef = useRef([]);
   const splitQueueRef = useRef([]);
   const outsideHiddenIdsRef = useRef(new Set());
@@ -249,17 +251,43 @@ function ClusterMarkerOverlay({
     setAccumulatorCount(nextCount);
   };
 
-  const finishMergeSequence = () => {
+  const invalidateTransitionWork = () => {
+    transitionGenerationRef.current += 1;
+    transitionTimersRef.current.forEach(clearTimeout);
+    transitionTimersRef.current.clear();
+    cancelAnimation(mergeProgress);
+    cancelAnimation(splitProgress);
+    return transitionGenerationRef.current;
+  };
+
+  const scheduleTransitionStep = (generation, callback, delayMs) => {
+    if (generation !== transitionGenerationRef.current) return;
+    const timer = setTimeout(() => {
+      transitionTimersRef.current.delete(timer);
+      if (generation === transitionGenerationRef.current) callback();
+    }, delayMs);
+    transitionTimersRef.current.add(timer);
+  };
+
+  useEffect(() => () => {
+    invalidateTransitionWork();
+    cancelAnimation(suppressionProgress);
+  }, [mergeProgress, splitProgress, suppressionProgress]);
+
+  const finishMergeSequence = (generation) => {
+    if (generation !== transitionGenerationRef.current) return;
     setMergeMover(null);
     applyLiveClusterPresentation();
     mergeQueueRef.current = [];
     queueIndexRef.current = 0;
     setRuntimePhase(CLUSTER_RUNTIME_PHASE.MERGE_COMPLETE);
     emitTransitionEvent({ type: CLUSTER_PROBE_TRANSITION_TYPES.MERGE_SEQUENCE_COMPLETE });
-    setTimeout(() => setRuntimePhase(CLUSTER_RUNTIME_PHASE.LIVE), 34);
+    scheduleTransitionStep(generation, () => setRuntimePhase(CLUSTER_RUNTIME_PHASE.LIVE), 34);
   };
 
-  const handleMergeStepComplete = (moverStationId) => {
+  const handleMergeStepComplete = (moverStationId, generation) => {
+    if (generation !== transitionGenerationRef.current ||
+        mergeQueueRef.current[queueIndexRef.current]?.stationId !== moverStationId) return;
     queueIndexRef.current += 1;
     const nextCount = accumulatorCountRef.current + 1;
     accumulatorCountRef.current = nextCount;
@@ -270,15 +298,16 @@ function ClusterMarkerOverlay({
       moverStationId,
     });
     setMergeMover(null);
-    setTimeout(runMergeQueueStep, 16);
+    scheduleTransitionStep(generation, () => runMergeQueueStep(generation), 16);
   };
 
-  const runMergeQueueStep = () => {
+  const runMergeQueueStep = (generation) => {
+    if (generation !== transitionGenerationRef.current) return;
     const queue = mergeQueueRef.current;
     const index = queueIndexRef.current;
 
     if (!queue[index]) {
-      finishMergeSequence();
+      finishMergeSequence(generation);
       return;
     }
 
@@ -303,71 +332,32 @@ function ClusterMarkerOverlay({
         return;
       }
 
-      runOnJS(handleMergeStepComplete)(item.stationId);
+      runOnJS(handleMergeStepComplete)(item.stationId, generation);
     });
   };
 
-  const finishSplitSequence = () => {
+  const finishSplitSequence = (generation) => {
+    if (generation !== transitionGenerationRef.current) return;
     setSplitMover(null);
     splitQueueRef.current = [];
     queueIndexRef.current = 0;
     setRuntimePhase(CLUSTER_RUNTIME_PHASE.SPLIT_HANDOFF);
     emitTransitionEvent({ type: CLUSTER_PROBE_TRANSITION_TYPES.SPLIT_HANDOFF_COMPLETE });
-    setTimeout(() => {
+    scheduleTransitionStep(generation, () => {
       applyLiveClusterPresentation();
       setRuntimePhase(CLUSTER_RUNTIME_PHASE.LIVE);
     }, 48);
   };
 
-  const settleMergeForIdleMap = () => {
-    if (runtimePhase !== CLUSTER_RUNTIME_PHASE.MERGE_PREP && runtimePhase !== CLUSTER_RUNTIME_PHASE.MERGE_ACTIVE) {
-      return;
-    }
-
-    const hiddenIds = new Set((outsideTargets || []).map(target => String(target.stationId)));
-    outsideHiddenIdsRef.current = hiddenIds;
-    setOutsideHiddenIds(Array.from(hiddenIds));
-    mergeQueueRef.current = [];
-    queueIndexRef.current = 0;
-    cancelAnimation(mergeProgress);
-    mergeProgress.value = 1;
-    setMergeMover(null);
-    const nextCount = Math.max(0, quotes.length - 1);
-    accumulatorCountRef.current = nextCount;
-    setAccumulatorCount(nextCount);
-    setRuntimePhase(CLUSTER_RUNTIME_PHASE.MERGE_COMPLETE);
-    emitTransitionEvent({ type: CLUSTER_PROBE_TRANSITION_TYPES.MERGE_SEQUENCE_COMPLETE });
-    setTimeout(() => {
-      applyLiveClusterPresentation();
-      setRuntimePhase(CLUSTER_RUNTIME_PHASE.LIVE);
-    }, 16);
-  };
-
-  const settleSplitForIdleMap = () => {
-    if (runtimePhase !== CLUSTER_RUNTIME_PHASE.SPLIT_PREP && runtimePhase !== CLUSTER_RUNTIME_PHASE.SPLIT_ACTIVE) {
-      return;
-    }
-
-    splitQueueRef.current = [];
-    queueIndexRef.current = 0;
-    cancelAnimation(splitProgress);
-    splitProgress.value = 1;
-    setSplitMover(null);
-    setRuntimePhase(CLUSTER_RUNTIME_PHASE.SPLIT_HANDOFF);
-    emitTransitionEvent({ type: CLUSTER_PROBE_TRANSITION_TYPES.SPLIT_HANDOFF_COMPLETE });
-    setTimeout(() => {
-      applyLiveClusterPresentation();
-      setRuntimePhase(CLUSTER_RUNTIME_PHASE.LIVE);
-    }, 16);
-  };
-
-  const handleSplitStepComplete = (moverStationId) => {
+  const handleSplitStepComplete = (moverStationId, generation) => {
+    if (generation !== transitionGenerationRef.current ||
+        splitQueueRef.current[queueIndexRef.current]?.stationId !== moverStationId) return;
     const queue = splitQueueRef.current;
     const index = queueIndexRef.current;
     const item = queue[index];
 
     if (!item) {
-      finishSplitSequence();
+      finishSplitSequence(generation);
       return;
     }
 
@@ -388,15 +378,16 @@ function ClusterMarkerOverlay({
     accumulatorCountRef.current = nextCount;
     setAccumulatorCount(nextCount);
 
-    setTimeout(runSplitQueueStep, 16);
+    scheduleTransitionStep(generation, () => runSplitQueueStep(generation), 16);
   };
 
-  const runSplitQueueStep = () => {
+  const runSplitQueueStep = (generation) => {
+    if (generation !== transitionGenerationRef.current) return;
     const queue = splitQueueRef.current;
     const index = queueIndexRef.current;
 
     if (!queue[index]) {
-      finishSplitSequence();
+      finishSplitSequence(generation);
       return;
     }
 
@@ -428,18 +419,9 @@ function ClusterMarkerOverlay({
         return;
       }
 
-      runOnJS(handleSplitStepComplete)(item.stationId);
+      runOnJS(handleSplitStepComplete)(item.stationId, generation);
     });
   };
-
-  useEffect(() => {
-    if (isMapMoving) {
-      return;
-    }
-
-    settleMergeForIdleMap();
-    settleSplitForIdleMap();
-  }, [isMapMoving, runtimePhase, outsideTargets, quotes.length]);
 
   useEffect(() => {
     const previousCluster = previousClusterRef.current;
@@ -455,6 +437,17 @@ function ClusterMarkerOverlay({
     if (previousKey === nextKey) {
       return;
     }
+
+    // Membership replacement owns a new generation. A finished UI-thread
+    // callback may already be queued on JS when its animation is cancelled.
+    const generation = invalidateTransitionWork();
+    mergeQueueRef.current = [];
+    splitQueueRef.current = [];
+    queueIndexRef.current = 0;
+    setMergeMover(null);
+    setSplitMover(null);
+    splitRevealByIdRef.current = new Map();
+    setSplitRevealTargets([]);
 
     const plan = buildTransitionPlan({
       previousCluster,
@@ -483,7 +476,7 @@ function ClusterMarkerOverlay({
       outsideHiddenIdsRef.current = hiddenIds;
       setOutsideHiddenIds(Array.from(hiddenIds));
       setRuntimePhase(CLUSTER_RUNTIME_PHASE.MERGE_PREP);
-      runMergeQueueStep();
+      runMergeQueueStep(generation);
     } else if (plan.type === 'split' && plan.queue.length > 0) {
       splitQueueRef.current = plan.queue;
       queueIndexRef.current = 0;
@@ -492,7 +485,7 @@ function ClusterMarkerOverlay({
       splitRevealByIdRef.current = new Map();
       setSplitRevealTargets([]);
       setRuntimePhase(CLUSTER_RUNTIME_PHASE.SPLIT_PREP);
-      runSplitQueueStep();
+      runSplitQueueStep(generation);
     } else {
       setRuntimePhase(CLUSTER_RUNTIME_PHASE.LIVE);
       setMergeMover(null);
