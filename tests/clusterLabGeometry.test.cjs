@@ -13,7 +13,7 @@ test('native clustering preserves identities, boundary hysteresis, and gesture-t
 func station(_ id: String, _ price: Double, _ x: Double, _ y: Double = 0) -> LabProjectedStation {
   LabProjectedStation(id: id, price: price, point: CGPoint(x: x, y: y))
 }
-let separate = [station("a", 3, 0), station("b", 4, 120)]
+let separate = [station("a", 3, 0), station("b", 4, 144)]
 assert(ClusterLabGeometry.owners(separate, previous: [:]) == ["a": "a", "b": "b"])
 let contact = [station("a", 3, 0), station("b", 4, 83), station("c", 5, 162)]
 let merged = ClusterLabGeometry.owners(contact, previous: [:])
@@ -46,13 +46,13 @@ for distance in stride(from: 0.1, through: 1000, by: 0.5) {
 assert(ClusterLabGeometry.duration(distance: 200, speed: 5000, movementDuration: 0.5) <
        ClusterLabGeometry.duration(distance: 200, speed: 200, movementDuration: 0.5))
 assert(ClusterLabGeometry.duration(distance: 1000, speed: 0, movementDuration: 10) == 0.22)
-// Retained connections get only a little extra stretch, on both axes and
+// Retained connections get more separation, on both axes and
 // across spatial-hash boundaries; fresh pills still merge at original contact.
-let stretched = [station("a", 3, 111), station("b", 4, 219, 48)]
+let stretched = [station("a", 3, 111), station("b", 4, 231, 56)]
 assert(ClusterLabGeometry.owners(stretched, previous: merged)["b"] == "a")
 assert(ClusterLabGeometry.owners(stretched, previous: [:])["b"] == "b")
-assert(ClusterLabGeometry.owners([station("a", 3, 111), station("b", 4, 220, 48)], previous: merged)["b"] == "b")
-assert(ClusterLabGeometry.owners([station("a", 3, 111), station("b", 4, 219, 49)], previous: merged)["b"] == "b")
+assert(ClusterLabGeometry.owners([station("a", 3, 111), station("b", 4, 232, 56)], previous: merged)["b"] == "b")
+assert(ClusterLabGeometry.owners([station("a", 3, 111), station("b", 4, 231, 57)], previous: merged)["b"] == "b")
 let gentle = ClusterLabGeometry.rebound(distance: 20, speed: 50)
 let fast = ClusterLabGeometry.rebound(distance: 20, speed: 1200)
 let long = ClusterLabGeometry.rebound(distance: 180, speed: 50)

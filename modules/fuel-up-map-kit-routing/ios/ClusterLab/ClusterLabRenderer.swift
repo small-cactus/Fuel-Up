@@ -269,7 +269,8 @@ final class ClusterLabRenderer {
         // The impact happens on contact, not after the travelling pill vanishes.
         let contactX = abs(point.x + motion.reaction.offset.x - target.x - owner.reaction.offset.x)
         let contactY = abs(point.y + motion.reaction.offset.y - target.y - owner.reaction.offset.y)
-        if contactX <= (motion.width + ClusterLabGeometry.badgeWidth) / 2 + 12 && contactY <= 44 {
+        if contactX <= (motion.width + ClusterLabGeometry.badgeWidth) / 2 + ClusterLabGeometry.glassSpacing &&
+           contactY <= ClusterLabGeometry.pillSize.height + ClusterLabGeometry.glassSpacing {
           motion.contactCatch = LabContactCatch(elapsed: motion.elapsed, outwardDuration: motion.duration * 0.68)
           if let contact = motion.contactCatch, contact.duration > 0 {
             event("contact-catch", id: id, duration: contact.duration,

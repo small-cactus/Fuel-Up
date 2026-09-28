@@ -15,6 +15,8 @@ enum ClusterLabGeometry {
   static let overscan: CGFloat = 160
   static let containerPadding: CGFloat = 336
   static let maximumRebound: CGFloat = 18
+  static let disconnectRange = CGSize(width: 120, height: 56)
+  static let glassSpacing: CGFloat = 18
 
   static func owners(_ stations: [LabProjectedStation], previous: [String: String]) -> [String: String] {
     let sorted = stations.sorted { $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price }
@@ -27,14 +29,18 @@ enum ClusterLabGeometry {
     struct Cell: Hashable { let x: Int; let y: Int }
     var grid: [Cell: [Int]] = [:]
     for (index, station) in sorted.enumerated() {
-      let cell = Cell(x: Int(floor(station.point.x / 112)), y: Int(floor(station.point.y / 56)))
+      // A cell spans the largest retained connection, so the adjacent-cell
+      // search cannot miss a stretched pair across a bucket boundary.
+      let cell = Cell(x: Int(floor(station.point.x / disconnectRange.width)),
+                      y: Int(floor(station.point.y / disconnectRange.height)))
       for x in (cell.x - 1)...(cell.x + 1) {
         for y in (cell.y - 1)...(cell.y + 1) {
           for other in grid[Cell(x: x, y: y)] ?? [] {
             let retained = previous[station.id] != nil && previous[station.id] == previous[sorted[other].id]
             let dx = abs(station.point.x - sorted[other].point.x)
             let dy = abs(station.point.y - sorted[other].point.y)
-            if dx <= (retained ? 108 : 84) && dy <= (retained ? 48 : 32) {
+            if dx <= (retained ? disconnectRange.width : pillSize.width) &&
+               dy <= (retained ? disconnectRange.height : pillSize.height) {
               let a = root(index), b = root(other)
               parent[max(a, b)] = min(a, b)
             }

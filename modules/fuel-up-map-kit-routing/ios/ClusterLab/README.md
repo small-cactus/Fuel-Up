@@ -5,13 +5,15 @@ the fuel service cache, but its rendering and animation are independent of Home.
 
 `ClusterLabMapView` owns MapKit and the display link. `ClusterLabGeometry` performs
 screen-space spatial hashing and contact hysteresis (84 × 32 pt to connect,
-108 × 48 pt to disconnect, allowing a small extra stretch before splitting). `ClusterLabRenderer` owns
+120 × 56 pt to disconnect, allowing more separation before splitting). Spatial
+hash cells span this retained range so stretched neighbors remain discoverable. `ClusterLabRenderer` owns
 station identity, projection, reversible motion, and atomic handoffs.
 `ClusterLabDynamics` handles mass-weighted impacts and magnetic home springs.
 `ClusterLabGlass` uses the installed Callstack library's public Swift glass views.
 The shared native container uses Apple's `UIGlassContainerEffect`; it does not
 draw an imitation or place glass in MapKit annotation snapshots. Native glass
-spacing is 12 pt, giving the connecting neck a little extra stretch.
+spacing is 18 pt, letting the connecting neck stretch farther before detaching.
+Contact detection uses that same spacing; the catch and rebound curves are unchanged.
 
 Only visible stations and a 160-point approach margin participate. One container
 extends 336 points beyond all map edges, including refraction and badge travel.
