@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { incidentCode, validateRepairPaths, deployWithRollback } from '../scripts/fuel-repair/policy.mjs';
+import { incidentCode, validateRepairPaths, deployWithRollback, candidateSource } from '../scripts/fuel-repair/policy.mjs';
 test('repair scope protects tests, migrations, worker and credentials', () => {
   for (const file of ['tests/gasPricesFunction.test.mjs', 'package.json', '.env', 'scripts/fuel-repair/worker.mjs', 'supabase/migrations/new.sql']) {
     assert.throws(() => validateRepairPaths([file]));
@@ -23,4 +23,12 @@ test('successful production verification never rolls back', async () => {
 });
 test('failed rollback remains a reported deployment failure', async () => {
   await assert.rejects(deployWithRollback({deploy:async()=>{throw Error('Deploy failed');},verify:async()=>{},rollback:async()=>{throw Error('Unavailable');}}), /rollback also failed/);
+});
+
+test('candidate wrapper enforces a private secret and read-only service mode', () => {
+  const source = candidateSource('Deno.serve(async (request: Request) => { getGasPrices({ input, db, csrf }); });');
+  assert.match(source, /probeOnly: true/);
+  assert.match(source, /x-fuel-repair-secret/);
+  assert.match(source, /status: 401/);
+  assert.throws(() => candidateSource('Deno.serve(() => {});'));
 });

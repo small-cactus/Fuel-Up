@@ -38,13 +38,13 @@ The launch agent checks the queue every five minutes while the Mac is logged in,
 
 For a claimed job the worker:
 
-1. Clones the latest GitHub `master` into its private jobs directory and probes production. If all grades have recovered, it completes the job without Codex.
+1. Clones the backend files from the latest GitHub `master` into its private jobs directory and probes production. If all grades have recovered, it completes the job without Codex.
 2. Otherwise runs the authenticated local `codex exec` with live web research, workspace write access and a 25-minute deadline. Only provider and validation code plus new regression tests may change. Existing tests, worker code, dependencies and infrastructure are protected by the supervising gate.
 3. Runs the fixed backend contract/validation tests and new regression tests, regenerates shared modules, commits and pushes a repair branch.
-4. Deploys `gas-prices-candidate`. Its probes read history but do not write production cache/history or incident counters. All four grades must return valid GasBuddy prices.
+4. Deploys `gas-prices-candidate`. It requires the private repair secret. Its probes read history but do not write production cache/history or incident counters. All four grades must return valid GasBuddy prices.
 5. Fast-forwards `master` only if it has not changed, deploys production, and checks live prices, persistence and cache hits for all grades. On failure it redeploys the prior code and attempts a normal Git revert/push.
 
-Jobs get up to three attempts, spaced by queue polls; a failed job remains visible with details in local logs. The worker cannot automatically solve missing account access, provider access restrictions, exhausted Codex limits or infrastructure changes outside its repair scope. If its lease expires it stops active child processes. It inherits the Mac's existing Codex model configuration and login.
+Jobs get up to three attempts, spaced by queue polls; a failed job remains visible with details in local logs. The worker cannot automatically solve missing account access, provider access restrictions, exhausted Codex limits or infrastructure changes outside its repair scope. If its lease expires it stops active child processes. It inherits the Mac's existing Codex model configuration and login. The installer requires CLI 0.158 or newer and can use the CLI bundled with ChatGPT when the shell CLI is older.
 
 Worker status and logs:
 
@@ -73,3 +73,7 @@ npx --yes supabase@2.118.0 db query --linked --project-ref vjindchxfebaltbslqwc 
 Free plan limits still apply. Cloud cache hits are function invocations; local app cache hits avoid the function. This is an initial deployment, not a load test for tens of thousands of users. Keep the plan free until there is an explicit decision to upgrade.
 
 References: [Supabase regional invocation](https://supabase.com/docs/guides/functions/regional-invocation), [Codex non-interactive execution](https://learn.chatgpt.com/docs/non-interactive-mode).
+
+## Deployment verification (2026-09-28)
+
+All four grades returned live GasBuddy prices and persisted successfully; follow-up requests returned cloud cache hits. Observed latency varied across runs (roughly 0.3 to 3.5 seconds), so this deployment does not establish an extremely low latency guarantee. The focused suite passes. Broader suites reproduce three failures on the unchanged prior commit: predictive camera heading continuity, rich-history cohort accuracy, and no-corridor miss classification. Native simulator/device verification and a real incident requiring a Codex-authored repair have not been performed.

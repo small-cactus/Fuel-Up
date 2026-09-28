@@ -18,6 +18,14 @@ const config = { ...existing, secret: existing?.secret || randomBytes(32).toStri
   repository: 'https://github.com/small-cactus/Fuel-Up.git', node: process.execPath,
   npx: join(binaryRoot, 'npx'), codex: join(binaryRoot, 'codex'),
 };
+const candidates = [config.codex, '/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex'];
+config.codex = candidates.find(binary => {
+  try {
+    const match = execFileSync(binary, ['--version'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).match(/(\d+)\.(\d+)\./);
+    return match && (Number(match[1]) > 0 || Number(match[2]) >= 158);
+  } catch { return false; }
+});
+if (!config.codex) throw new Error('Update Codex CLI to at least 0.158 before installing the repair worker.');
 await access(config.codex);
 await writeFile(configPath, JSON.stringify(config, null, 2), { mode: 0o600 });
 await chmod(configPath, 0o600);

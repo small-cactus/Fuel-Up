@@ -1,8 +1,8 @@
 import { spawn } from 'node:child_process';
-import { readFile, writeFile, mkdir, open, readdir, lstat } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, open, readdir, lstat, cp } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { repairFiles, validateRepairPaths, incidentCode, deployWithRollback } from './policy.mjs';
+import { repairFiles, validateRepairPaths, incidentCode, deployWithRollback, candidateSource } from './policy.mjs';
 const root = dirname(fileURLToPath(import.meta.url));
 const config = JSON.parse(await readFile(join(root, 'config.json'), 'utf8'));
 const log = message => console.log(`${new Date().toISOString()} ${message}`);
@@ -36,7 +36,7 @@ function run(command, args, { cwd = root, timeout = 120000, env = {}, input, out
 const git = (cwd, ...args) => run('/usr/bin/git', args, { cwd });
 const cli = (cwd, ...args) => run(config.npx, ['--yes', 'supabase@2.118.0', ...args], { cwd, timeout: 180000 });
 const probe = (cwd, candidate = false) => run(config.node, ['scripts/probeFuelFunction.mjs', '--all-grades'], {
-  cwd, timeout: 120000, env: { FUEL_FUNCTION_NAME: candidate ? 'gas-prices-candidate' : 'gas-prices' },
+  cwd, timeout: 120000, env: { FUEL_FUNCTION_NAME: candidate ? 'gas-prices-candidate' : 'gas-prices', ...(candidate ? { FUEL_REPAIR_SECRET: config.secret } : {}) },
 });
 async function gate(cwd) {
   const paths = (await git(cwd, 'diff', '--name-only', 'HEAD')).split('\n').filter(Boolean);
@@ -56,12 +56,17 @@ async function repair(job) {
   const directory = join(root, 'jobs', `${job.id}-${job.attempts}`);
   await mkdir(directory, { recursive: true });
   const cwd = join(directory, 'repo');
-  await run('/usr/bin/git', ['clone', '--depth', '1', '--branch', 'master', config.repository, cwd], { timeout: 300000 });
+  await run('/usr/bin/git', ['clone', '--filter=blob:none', '--sparse', '--depth', '1', '--branch', 'master', config.repository, cwd], { timeout: 300000 });
+  await git(cwd, 'sparse-checkout', 'set', '--no-cone', '/src/services/fuel/', '/supabase/', '/tests/', '/scripts/buildFuelFunctionShared.cjs', '/scripts/probeFuelFunction.mjs', '/app.json', '/Agents.md', '/package.json', '/.gitignore');
   const base = await git(cwd, 'rev-parse', 'HEAD');
   try {
     await probe(cwd);
     return { message: 'Provider recovered; live and cached prices pass for every grade', commit: base };
   } catch { /* A real failure still exists; diagnose it. */ }
+  const rollback = join(directory, 'rollback');
+  await mkdir(join(rollback, 'supabase'), { recursive: true });
+  await cp(join(cwd, 'supabase/functions'), join(rollback, 'supabase/functions'), { recursive: true });
+  await cp(join(cwd, 'supabase/config.toml'), join(rollback, 'supabase/config.toml'));
   const branch = `repair/gasbuddy-${job.id}-${job.attempts}`;
   await git(cwd, 'switch', '-c', branch);
   const outputFile = await open(join(directory, 'codex.log'), 'a', 0o600);
@@ -95,9 +100,7 @@ Use the existing CLI model and credentials. Never print credentials. Finish with
   const candidate = join(cwd, 'supabase/functions/gas-prices-candidate');
   await mkdir(candidate, { recursive: true });
   const entry = await readFile(join(cwd, 'supabase/functions/gas-prices/index.ts'), 'utf8');
-  const marker = 'getGasPrices({ input, db,';
-  if (entry.split(marker).length !== 2) throw new Error('Candidate wrapper could not enable read-only probes');
-  await writeFile(join(candidate, 'index.ts'), entry.replace(marker, `${marker} probeOnly: true,`));
+  await writeFile(join(candidate, 'index.ts'), candidateSource(entry));
   await cli(cwd, 'functions', 'deploy', 'gas-prices-candidate', '--project-ref', config.projectRef, '--use-api');
   await probe(cwd, true);
   const latest = await git(cwd, 'ls-remote', 'origin', 'refs/heads/master');
@@ -108,9 +111,6 @@ Use the existing CLI model and credentials. Never print credentials. Finish with
     deploy: () => cli(cwd, 'functions', 'deploy', 'gas-prices', '--project-ref', config.projectRef, '--use-api'),
     verify: () => probe(cwd),
     rollback: async () => {
-      const rollback = join(directory, 'rollback');
-      await run('/usr/bin/git', ['clone', '--no-hardlinks', cwd, rollback]);
-      await git(rollback, 'checkout', base);
       await cli(rollback, 'functions', 'deploy', 'gas-prices', '--project-ref', config.projectRef, '--use-api');
       // Revert by a new commit; never rewrite remote history.
       await git(cwd, 'revert', '--no-edit', commit);

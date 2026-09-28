@@ -23,3 +23,13 @@ export async function deployWithRollback({ deploy, verify, rollback }) {
     throw new Error(`Deployment failed; previous code redeployed: ${error.message}`);
   }
 }
+export function candidateSource(entry) {
+  const marker = 'getGasPrices({ input, db,';
+  const serve = 'Deno.serve(async (request: Request) => {';
+  if (entry.split(marker).length !== 2 || entry.split(serve).length !== 2) {
+    throw new Error('Candidate wrapper could not enforce read-only authenticated probes');
+  }
+  return entry.replace(marker, `${marker} probeOnly: true,`).replace(serve, `${serve}
+  const secret = Deno.env.get('FUEL_REPAIR_SECRET');
+  if (!secret || request.headers.get('x-fuel-repair-secret') !== secret) return new Response('Unauthorized', {status: 401});`);
+}

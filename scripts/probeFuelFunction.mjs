@@ -10,7 +10,7 @@ for (const fuelType of grades) {
   for (let attempt = 0; attempt < 2; attempt++) {
     const start = performance.now();
     const response = await fetch(`${config.url}/functions/v1/${endpoint}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-region': 'us-east-2', apikey: key, Authorization: `Bearer ${key}` },
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-region': 'us-east-2', ...(endpoint !== 'gas-prices' ? { 'x-fuel-repair-secret': process.env.FUEL_REPAIR_SECRET } : {}), apikey: key, Authorization: `Bearer ${key}` },
       body: JSON.stringify(body), signal: AbortSignal.timeout(20000),
     });
     const result = await response.json();

@@ -31,7 +31,7 @@ export async function fetchProvider(input, fetchImpl = fetch, csrf = '1.Y2RjCddx
     if (!response.ok) throw new ServiceError(`UPSTREAM_HTTP_${response.status}`);
     let payload;
     try { payload = await response.json(); } catch { throw new ServiceError('UPSTREAM_INVALID_JSON'); }
-    if (payload.errors?.length) throw new ServiceError('UPSTREAM_GRAPHQL_ERROR');
+    if (payload?.errors?.length) throw new ServiceError('UPSTREAM_GRAPHQL_ERROR');
     const stations = payload?.data?.locationBySearchTerm?.stations?.results;
     if (!Array.isArray(stations)) throw new ServiceError('UPSTREAM_SCHEMA_CHANGED');
     if (stations.some(s => !s || !Array.isArray(s.prices) || !Number.isFinite(s.latitude) || !Number.isFinite(s.longitude))) {
