@@ -75,13 +75,17 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     for (const frame of report.samples) {
         for (const badge of frame.views.filter(view => view.role === 'badge')) {
             const primary = frame.views.find(view => view.id === badge.id.slice(6) && view.primary);
-            if (primary) assert.ok(Math.hypot(badge.x - primary.x - 56, badge.y - primary.y) < 0.001,
+            assert.ok(badge.attachmentOffset >= 56 && badge.attachmentOffset <= 74, 'unbounded connected count stretch');
+            if (primary) assert.ok(Math.hypot(badge.x - primary.x - badge.attachmentOffset, badge.y - primary.y) < 0.001,
                 'connected price and count did not recoil together');
         }
     }
     t.diagnostic(`Main price recoil ${primaryTravel.toFixed(2)}pt`);
     for (const event of report.events.filter(event => event.type.endsWith('handoff'))) {
         assert.ok(event.delta <= 0.12, `handoff moved ${event.delta}pt`);
+    }
+    for (const event of report.events.filter(event => event.type === 'split-spawn')) {
+        assert.ok(event.delta <= 0.12, `split duplicate jumped away from its stretched count by ${event.delta}pt`);
     }
     const arrivals = report.events.filter(event => event.type === 'merge-arrive' || event.type === 'split-handoff');
     for (const event of arrivals) {
@@ -102,4 +106,45 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
         assert.ok(Math.hypot(before.x - after.x, before.y - after.y) <= 1.5, `reset moved ${before.id}`);
     }
     t.diagnostic(`${report.samples.length} native frames; ${report.events.length} transitions; ${file}`);
+});
+
+test('connected +1 moves outward before its split is triggered', { timeout: 90000 }, async t => {
+    const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+    const token = `pair-${Date.now()}`;
+    const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+    const file = path.join(container, 'Documents/cluster-lab-probe.json');
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    let report;
+    const deadline = Date.now() + 75000;
+    while (Date.now() < deadline) {
+        try {
+            const value = JSON.parse(readFileSync(file, 'utf8'));
+            if (value.token === token) { report = value; break; }
+        } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    assert.ok(report, 'pair probe did not export');
+    assert.equal(report.status, 'completed');
+    assert.equal(report.baseline.length, 2);
+    assert.equal(report.final.length, 2);
+    const connected = report.samples.flatMap(frame => frame.views.filter(view => view.role === 'badge'));
+    const intermediate = connected.filter(view => view.attachmentOffset > 58 && view.attachmentOffset < 73);
+    assert.ok(intermediate.length >= 4, '+1 skipped the visible connected travel phase');
+    for (const view of intermediate) {
+        assert.equal(view.count, 1);
+        assert.equal(view.width, 44);
+        assert.equal(view.priceMix, 0);
+        assert.ok(view.contained);
+    }
+    const excursion = Math.max(...connected.map(view => view.attachmentOffset)) - Math.min(...connected.map(view => view.attachmentOffset));
+    assert.ok(excursion >= 12, `connected +1 only travelled ${excursion}pt`);
+    const splits = report.events.filter(event => event.type === 'split-spawn');
+    assert.ok(splits.length >= 2, 'missing repeated pair splits');
+    for (const split of splits) {
+        const preceding = report.samples.filter(frame => frame.time < split.time)
+            .flatMap(frame => frame.views.filter(view => view.role === 'badge')).at(-1);
+        assert.ok(preceding && preceding.attachmentOffset >= 68, '+1 detached before visibly pulling away');
+        assert.ok(split.delta <= 0.12, 'split did not begin at the stretched +1 location');
+    }
+    t.diagnostic(`Connected +1 travelled ${excursion.toFixed(2)}pt; ${intermediate.length} intact intermediate frames before split`);
 });

@@ -19,6 +19,17 @@ longer native neck; the catch and rebound curves are unchanged.
 Only visible stations and a 160-point approach margin participate. One container
 extends 360 points beyond all map edges, including refraction and badge travel.
 Settled groups retain a price and count view, not hidden views for each member.
+Before a retained group splits, its count moves outward with the map through
+up to 18 points of additional horizontal travel. This uses the existing
+84 × 32 to 120 × 56 hysteresis band: the count remains +n and 44 points wide
+while it pulls away. It no longer stays fixed until the split starts. The native
+glass spacing, spring tuning, and flight durations are unchanged.
+
+The count's offset is shared by arriving movers and its rendered badge. A
+membership change carries the current count offset into an 80 ms correction,
+so a remaining +n does not snap back when one member leaves. Split duplicates
+start at the actual stretched badge position, including its current recoil.
+
 The first arriving mover becomes the count view in place. Further movers are
 removed in the same transaction that increments the count. Splitting materializes
 the count duplicate at exactly the count's location, then reuses that view as its
@@ -50,7 +61,7 @@ Both the main price and count move together. On an actual partition,
 equal-and-opposite impulses go to the departing mass and remaining mass. The
 recoil waits for the actual rendered capsule edges to separate by 27 pt (or for
 the pill to arrive), rather than firing while the split copies still overlap.
-This gives the native glass a visible stretching phase. The release retains the
+This retained release policy is separate from the new map-driven count travel. The release retains the
 same impulse strength and flight deadline. Reversals discard the pending release,
 camera-end retiming preserves it, and Reduced Motion clears it. A whole
 cluster merging into another cluster does not falsely trigger release impulses.
@@ -107,3 +118,9 @@ release, equal displacement of the connected price/count, bounded physical
 travel, and balanced split impulses. These are actual UIKit frame samples.
 This is additional coverage. It does not replace or weaken the existing Home
 `tests/clusterProbe.integration.test.cjs` gate or its JSON export.
+
+The additional `pair-` probe token runs the same map zoom sequence with two
+stations to isolate +1. Its gate requires at least 12 points of actual connected
+count travel, multiple intermediate frames with unchanged count/width/content,
+and a split duplicate within 0.12 points of the stretched badge. The normal
+six-station gate remains in place.

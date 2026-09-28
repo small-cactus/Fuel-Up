@@ -33,6 +33,16 @@ assert(ClusterLabGeometry.owners(boundary, previous: [:])["b"] == "b")
 assert(ClusterLabGeometry.owners(separate, previous: merged)["b"] == "b")
 assert(ClusterLabGeometry.owners([station("b", 3, 0), station("a", 3, 0)], previous: [:])["b"] == "a")
 assert(ClusterLabGeometry.owners([station("a", 3, -104), station("b", 4, -21)], previous: [:])["b"] == "a")
+// A still-connected badge pulls away through the existing hysteresis band.
+assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 84, y: 32)) == 0)
+assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 102, y: 0)) == 9)
+assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 120, y: 0)) == 18)
+assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 0, y: 44)) == 9)
+assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: -120, y: -56)) == 18)
+for x in stride(from: 84.0, through: 120, by: 0.1) {
+  assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, x)], previous: merged)["b"] == "a")
+  assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: x, y: 0)) <= 18)
+}
 for distance in stride(from: 0.1, through: 1000, by: 0.5) {
   for speed in [CGFloat(0), 200, 1000, 5000] {
     let duration = ClusterLabGeometry.duration(distance: distance, speed: speed, movementDuration: 0.18)

@@ -75,6 +75,9 @@ final class ClusterLabRenderer {
   private var motions: [String: LabStationMotion] = [:]
   private var badges: [String: ClusterLabPill] = [:]
   private var owners: [String: String] = [:]
+  private var badgeOffsetTargets: [String: CGFloat] = [:]
+  private var badgeOffsetCarries: [String: (delta: CGFloat, startedAt: Double)] = [:]
+  private var renderedBadgeOffsets: [String: CGFloat] = [:]
   private(set) var stations: [ClusterLabStation] = []
   private(set) var events: [[String: Any]] = []
   private(set) var frameSamples: [[String: Any]] = []
@@ -112,6 +115,19 @@ final class ClusterLabRenderer {
 
   private func project(_ point: MKMapPoint, map: MKMapView) -> CGPoint {
     map.convert(point.coordinate, toPointTo: container)
+  }
+
+  private func badgeOffset(for owner: String, at time: Double) -> CGFloat {
+    var offset = badgeOffsetTargets[owner] ?? ClusterLabGeometry.badgeOffset
+    if let carry = badgeOffsetCarries[owner] {
+      // Preserve count position at membership changes; ordinary zooming tracks
+      // the map directly. This short correction has no additional rebound.
+      let t = min(1, max(0, (time - carry.startedAt) / 0.08))
+      let smooth = t * t * t * (t * (t * 6 - 15) + 10)
+      offset += carry.delta * (1 - smooth)
+    }
+    return min(ClusterLabGeometry.badgeOffset + ClusterLabGeometry.maximumBadgeStretch,
+               max(ClusterLabGeometry.badgeOffset, offset))
   }
 
   private func makePill(_ motion: LabStationMotion) -> ClusterLabPill {
@@ -155,6 +171,25 @@ final class ClusterLabRenderer {
     }
     let nextOwners = ClusterLabGeometry.owners(candidates, previous: owners)
     let nextMasses = Dictionary(grouping: nextOwners.keys, by: { nextOwners[$0]! }).mapValues(\.count)
+    let positions = Dictionary(uniqueKeysWithValues: candidates.map { ($0.id, $0.point) })
+    var nextBadgeOffsets: [String: CGFloat] = [:]
+    for candidate in candidates {
+      guard let owner = nextOwners[candidate.id], owner != candidate.id,
+            let center = positions[owner] else { continue }
+      let stretch = ClusterLabGeometry.badgeStretch(separation:
+        CGPoint(x: candidate.point.x - center.x, y: candidate.point.y - center.y))
+      nextBadgeOffsets[owner] = max(nextBadgeOffsets[owner] ?? ClusterLabGeometry.badgeOffset,
+                                   ClusterLabGeometry.badgeOffset + stretch)
+    }
+    let changedGroups = Set(Set(nextOwners.keys).union(owners.keys).filter { nextOwners[$0] != owners[$0] }
+      .flatMap { [nextOwners[$0], owners[$0]].compactMap { $0 } })
+    for owner in changedGroups {
+      if let previous = renderedBadgeOffsets[owner], let target = nextBadgeOffsets[owner] {
+        badgeOffsetCarries[owner] = (previous - target, now)
+      }
+    }
+    badgeOffsetTargets = nextBadgeOffsets
+    badgeOffsetCarries = badgeOffsetCarries.filter { nextBadgeOffsets[$0.key] != nil && now - $0.value.startedAt < 0.08 }
     var releases: [(child: String, parent: String, direction: LabVector, speed: CGFloat)] = []
     let previousCounts = Dictionary(grouping: motions.values.filter { $0.settled && $0.owner != $0.station.id }, by: \.owner)
       .mapValues(\.count)
@@ -177,21 +212,36 @@ final class ClusterLabRenderer {
           // Split: create a 1:1 duplicate at the existing +n before changing it.
           motion.reaction = oldOwner.reaction
           motion.point = oldOwner.station.mapPoint
-          motion.offset = ClusterLabGeometry.badgeOffset
+          motion.offset = renderedBadgeOffsets[motion.owner] ?? ClusterLabGeometry.badgeOffset
+          if let badge = badges[motion.owner] {
+            // Duplicate the stretched count exactly where it is rendered.
+            // Remove the shared recoil before converting its base to MapKit.
+            let center = CGPoint(x: badge.view.center.x - oldOwner.reaction.offset.x,
+                                 y: badge.view.center.y - oldOwner.reaction.offset.y)
+            motion.point = MKMapPoint(map.convert(center, toCoordinateFrom: container))
+            motion.offset = 0
+          }
           motion.width = ClusterLabGeometry.badgeWidth
           motion.priceMix = 0
           motion.count = max(1, previousCounts[motion.owner] ?? 1)
-          _ = makePill(motion)
-          event("split-spawn", id: station.id)
+          let pill = makePill(motion)
+          var center = project(motion.point, map: map)
+          center.x += motion.offset + motion.reaction.offset.x
+          center.y += motion.reaction.offset.y
+          pill.render(center: center, width: motion.width, priceMix: 0,
+                      count: motion.count, best: false, dark: dark)
+          let source = badges[motion.owner]?.view.center ?? center
+          event("split-spawn", id: station.id, delta: hypot(pill.view.center.x - source.x, pill.view.center.y - source.y))
         }
         let destination = stations.first { $0.id == nextOwner }!.mapPoint
         let start = project(motion.point, map: map)
         let end = project(destination, map: map)
-        let travel = hypot(end.x + (nextOwner == station.id ? 0 : ClusterLabGeometry.badgeOffset) - start.x - motion.offset, end.y - start.y)
+        let nextOffset = nextOwner == station.id ? 0 : badgeOffset(for: nextOwner, at: now)
+        let travel = hypot(end.x + nextOffset - start.x - motion.offset, end.y - start.y)
         let duration = ClusterLabGeometry.duration(distance: travel, speed: cameraSpeed,
           movementDuration: cameraStarted.map { now - $0 } ?? 0.16)
         if wasConnected && nextOwners[oldOwnerId] != nextOwner {
-          let direction = LabVector(x: end.x + (nextOwner == station.id ? 0 : ClusterLabGeometry.badgeOffset) - start.x - motion.offset,
+          let direction = LabVector(x: end.x + nextOffset - start.x - motion.offset,
                                     y: end.y - start.y)
           releases.append((station.id, oldOwnerId, direction * (1 / max(1, direction.length)),
                            min(900, 360 + cameraSpeed * 0.35 + travel * 1.5)))
@@ -218,6 +268,13 @@ final class ClusterLabRenderer {
     var animating = false
     var samples: [[String: Any]] = []
     let reducedMotion = UIAccessibility.isReduceMotionEnabled
+    let now = CACurrentMediaTime()
+    if reducedMotion { badgeOffsetCarries.removeAll() }
+    badgeOffsetCarries = badgeOffsetCarries.filter { now - $0.value.startedAt < 0.08 }
+    renderedBadgeOffsets = Dictionary(uniqueKeysWithValues: badgeOffsetTargets.keys.map {
+      ($0, badgeOffset(for: $0, at: now))
+    })
+    animating = !badgeOffsetCarries.isEmpty
     for motion in motions.values {
       if reducedMotion { motion.pendingRelease = nil }
       if motion.owner == motion.station.id || !motion.settled {
@@ -235,7 +292,7 @@ final class ClusterLabRenderer {
       guard let motion = motions[id], let owner = motions[motion.owner] else { continue }
       let merged = motion.owner != id
       let targetPoint = merged ? owner.station.mapPoint : motion.station.mapPoint
-      let targetOffset = merged ? ClusterLabGeometry.badgeOffset : 0
+      let targetOffset = merged ? (renderedBadgeOffsets[motion.owner] ?? ClusterLabGeometry.badgeOffset) : 0
       let targetWidth = merged ? ClusterLabGeometry.badgeWidth : 84
       let targetMix: CGFloat = merged ? 0 : 1
       if motion.settled {
@@ -356,7 +413,8 @@ final class ClusterLabRenderer {
         badge = pill; first.pill = nil; badges[ownerId] = badge
       } else { continue }
       var center = project(owner.station.mapPoint, map: map)
-      center.x += ClusterLabGeometry.badgeOffset + owner.reaction.offset.x
+      let attachmentOffset = renderedBadgeOffsets[ownerId] ?? ClusterLabGeometry.badgeOffset
+      center.x += attachmentOffset + owner.reaction.offset.x
       center.y += owner.reaction.offset.y
       badge.render(center: center, width: 44, priceMix: 0, count: members.count, best: false, dark: dark)
       for member in members where member.pill != nil {
@@ -371,6 +429,7 @@ final class ClusterLabRenderer {
       if recording {
         samples.append(["id": "badge:\(ownerId)", "x": badge.view.center.x, "y": badge.view.center.y,
                         "width": badge.view.bounds.width, "count": members.count, "role": "badge",
+                        "attachmentOffset": attachmentOffset, "priceMix": 0,
                         "reactionX": owner.reaction.offset.x, "reactionY": owner.reaction.offset.y,
                         "contained": container.bounds.contains(badge.view.frame)])
       }

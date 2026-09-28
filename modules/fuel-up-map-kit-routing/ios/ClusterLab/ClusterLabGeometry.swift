@@ -20,6 +20,16 @@ enum ClusterLabGeometry {
   static let glassSpacing: CGFloat = 36
   // Keep the already-tuned connection impulse inside the longer native neck.
   static let impactSpacing: CGFloat = 18
+  static let maximumBadgeStretch: CGFloat = 18
+
+  // Pull the count away while membership is still retained. It remains +n
+  // throughout this map-driven range, before a split flight can start.
+  static func badgeStretch(separation: CGPoint) -> CGFloat {
+    let x = (abs(separation.x) - pillSize.width) / (disconnectRange.width - pillSize.width)
+    let y = (abs(separation.y) - pillSize.height) / (disconnectRange.height - pillSize.height)
+    let t = min(1, max(0, max(x, y)))
+    return maximumBadgeStretch * t * t * (3 - 2 * t)
+  }
 
   // Exact edge distance for the horizontal capsules, including their rounded
   // ends. A diagonal separation must not release on a rectangular corner gap.
