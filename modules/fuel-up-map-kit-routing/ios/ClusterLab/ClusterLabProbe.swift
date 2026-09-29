@@ -11,6 +11,7 @@ final class ClusterLabProbe {
   private var finished = false
   private var baseline: [[String: Any]] = []
   private var anchorSamples: [[String: Any]] = []
+  private var focusDetails: [String: Any] = [:]
   private let center: CLLocationCoordinate2D
   private var isFit: Bool { token.hasPrefix("fit-") || token.hasPrefix("location-") }
   private let spans: [Double] = [0.003, 0.006, 0.010, 0.018, 0.030, 0.018, 0.010, 0.006, 0.003, 0.030, 0.003]
@@ -38,7 +39,14 @@ final class ClusterLabProbe {
                          "name": "Probe station \(index)"])
     })
     if isFit { view.fitCamera(to: view.renderer.stations) }
-    else { view.setRegion(.init(center: center, span: .init(latitudeDelta: spans[0], longitudeDelta: spans[0])), animated: false) }
+    else {
+      let span = token.hasPrefix("focus-") ? 0.03 : spans[0]
+      view.setRegion(.init(center: center, span: .init(latitudeDelta: span, longitudeDelta: span)), animated: false)
+      if token.hasPrefix("focus-rotated-") {
+        let camera = view.map.camera; camera.heading = 35
+        view.map.setCamera(camera, animated: false)
+      }
+    }
     view.renderer.resetRecording()
     view.renderer.recording = true
     view.refresh()
@@ -47,6 +55,24 @@ final class ClusterLabProbe {
   func tick(time: Double) {
     guard let view, !finished else { return }
     if startTime == 0 { startTime = time }
+    if token.hasPrefix("focus-") {
+      if stage == -1 && time - startTime >= 1 {
+        stage = 0
+        baseline = view.renderer.frameSamples.last?["views"] as? [[String: Any]] ?? []
+        focusDetails = ["beforeDistance": view.map.camera.centerCoordinateDistance,
+                        "beforeHeading": view.map.camera.heading,
+                        "requested": view.focusStation("lab-0")]
+      }
+      if time - startTime >= 4 {
+        focusDetails["afterDistance"] = view.map.camera.centerCoordinateDistance
+        focusDetails["afterHeading"] = view.map.camera.heading
+        let point = view.map.convert(center, toPointTo: view.map)
+        let cameraCenter = view.map.convert(view.map.centerCoordinate, toPointTo: view.map)
+        focusDetails["centerError"] = hypot(point.x - cameraCenter.x, point.y - cameraCenter.y)
+        finish(status: "completed")
+      }
+      return
+    }
     if isFit {
       stage = 0
       if baseline.isEmpty { baseline = view.renderer.frameSamples.last?["views"] as? [[String: Any]] ?? [] }
@@ -85,6 +111,7 @@ final class ClusterLabProbe {
       "final": view.renderer.frameSamples.last?["views"] ?? [],
       "samples": view.renderer.frameSamples, "events": view.renderer.events,
       "anchorSamples": anchorSamples,
+      "focus": focusDetails,
       "usesNativeGlass": NSClassFromString("UIGlassContainerEffect") != nil,
       "nativeUserLocationVisible": view.map.showsUserLocation && view.map.isUserLocationVisible &&
         view.map.view(for: view.map.userLocation) != nil,

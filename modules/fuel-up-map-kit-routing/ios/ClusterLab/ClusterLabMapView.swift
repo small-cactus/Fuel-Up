@@ -5,6 +5,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   let map = MKMapView()
   let renderer = ClusterLabRenderer()
   private lazy var mapAnchor = ClusterLabMapAnchor(container: renderer.container)
+  private var focusInteraction: ClusterLabFocusInteraction?
   private var frameClock: ClusterLabFrameClock?
   private var lastTimestamp: CFTimeInterval = 0
   private var needsReconcile = true
@@ -36,6 +37,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
                                     span: .init(latitudeDelta: 0.06, longitudeDelta: 0.06)), animated: false)
     addSubview(map)
     mapAnchor.attach(to: map)
+    focusInteraction = ClusterLabFocusInteraction(view: self)
     observers.append(NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification,
                                                             object: nil, queue: .main) { [weak self] _ in
       self?.probe?.cancel()

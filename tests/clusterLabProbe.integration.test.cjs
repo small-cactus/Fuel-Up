@@ -361,3 +361,43 @@ test('stacked price/count rows do not reconnect diagonally through their badges'
     assert.ok(isolatedFrames > 20, 'missing close stacked price/count row coverage');
     t.diagnostic(`${isolatedFrames} close stacked row frames with horizontal glass intact and vertical effects isolated`);
 });
+
+for (const orientation of ['north', 'rotated']) {
+    test(`native focus isolates a chip with ${orientation} camera heading`, { timeout: 30000 }, async t => {
+        const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+        const token = `focus-${orientation}-${Date.now()}`;
+        const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+        const file = path.join(container, 'Documents/cluster-lab-probe.json');
+        execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+        let report;
+        const deadline = Date.now() + 20000;
+        while (Date.now() < deadline) {
+            try {
+                const value = JSON.parse(readFileSync(file, 'utf8'));
+                if (value.token === token) { report = value; break; }
+            } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+            await new Promise(resolve => setTimeout(resolve, 250));
+        }
+        assert.ok(report, 'focus probe did not export');
+        assert.equal(report.status, 'completed');
+        assert.equal(report.focus.requested, true);
+        assert.ok(report.baseline.some(v => v.role === 'badge'), 'focus must start connected');
+        assert.ok(report.focus.afterDistance < report.focus.beforeDistance * 0.8, 'native camera did not zoom in');
+        assert.ok(Math.abs(report.focus.afterHeading - report.focus.beforeHeading) < 0.1, 'focus rotated the map');
+        assert.ok(report.focus.centerError < 1, 'native camera did not center the selected station');
+        const settled = report.samples.slice(-30);
+        assert.ok(settled.length === 30);
+        for (const frame of settled) {
+            const target = frame.views.find(v => v.id === 'lab-0');
+            assert.ok(target && target.primary && target.role === 'price', 'target stayed inside another cluster');
+            assert.ok(!frame.views.some(v => v.id === 'badge:lab-0'), 'target retained a connected count');
+            for (const other of frame.views.filter(v => v.id !== 'lab-0' && v.glassGroup === target.glassGroup)) {
+                const dx = Math.max(0, Math.abs(target.x - other.x) - (target.width + other.width - 64) / 2);
+                assert.ok(Math.hypot(dx, target.y - other.y) - 32 > 36, 'target retained a native glass bridge');
+            }
+            assert.ok(target.contained, 'focus clipped the selected chip');
+        }
+        assert.ok(report.events.some(e => e.type === 'split-spawn'), 'focus bypassed the existing split animation');
+        t.diagnostic(`Native zoom ${(report.focus.beforeDistance / report.focus.afterDistance).toFixed(2)}x; center error ${report.focus.centerError.toFixed(3)}pt`);
+    });
+}

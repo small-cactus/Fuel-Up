@@ -89,6 +89,26 @@ final class ClusterLabRenderer {
   private(set) var frameSamples: [[String: Any]] = []
   var recording = false
   var dark = false
+  var onFocus: ((String) -> Bool)?
+  var clusterOwners: [String: String] { owners }
+
+  func station(at point: CGPoint, in source: UIView) -> String? {
+    guard !container.isHidden else { return nil }
+    let point = source.convert(point, to: container)
+    let candidates = motions.compactMap { id, motion in motion.pill.map { (id, $0.view.frame) } } +
+      badges.map { ($0.key, $0.value.view.frame) }
+    return candidates.filter { $0.1.insetBy(dx: -2, dy: -6).contains(point) }.min {
+      let a = ($0.1.contains(point) ? 0.0 : 1000.0) + hypot(point.x - $0.1.midX, point.y - $0.1.midY)
+      let b = ($1.1.contains(point) ? 0.0 : 1000.0) + hypot(point.x - $1.1.midX, point.y - $1.1.midY)
+      return a == b ? $0.0 < $1.0 : a < b
+    }?.0
+  }
+
+  private func addFocusAction(_ pill: ClusterLabPill, id: String) {
+    pill.view.accessibilityCustomActions = [UIAccessibilityCustomAction(name: "Focus station") { [weak self] _ in
+      self?.onFocus?(id) ?? false
+    }]
+  }
   private var cameraStarted: Double?
   private var previousProjection: [String: CGPoint] = [:]
   private var projectionTime: Double = 0
@@ -155,6 +175,7 @@ final class ClusterLabRenderer {
 
   private func makePill(_ motion: LabStationMotion) -> ClusterLabPill {
     let pill = ClusterLabPill(price: motion.station.price, name: motion.station.name)
+    addFocusAction(pill, id: motion.station.id)
     glassGroups.insert(pill.view)
     motion.pill = pill
     return pill
@@ -224,6 +245,7 @@ final class ClusterLabRenderer {
         if ownerId == station.id { _ = makePill(motion) }
         else if badges[ownerId] == nil {
           let badge = ClusterLabPill(price: owner.price, name: owner.name)
+          addFocusAction(badge, id: ownerId)
           glassGroups.insert(badge.view); badges[ownerId] = badge
         }
       }
@@ -470,6 +492,7 @@ final class ClusterLabRenderer {
         // The first arriving mover becomes the accumulator in place. The effect
         // view never remounts and no duplicate glass surface flashes underneath.
         badge = pill; first.pill = nil; badges[ownerId] = badge
+        addFocusAction(badge, id: ownerId)
       } else { continue }
       var center = project(owner.station.mapPoint, map: map)
       let attachmentOffset = renderedBadgeOffsets[ownerId] ?? ClusterLabGeometry.badgeOffset

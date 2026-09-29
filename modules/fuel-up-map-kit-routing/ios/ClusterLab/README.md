@@ -248,3 +248,25 @@ their centers. This prevents a narrow count in one row from diagonally joining
 the price in another row and pulling both rows into one native effect. The
 `rows-` live probe exercises two stacked price/count groups through zoom changes;
 each horizontal pair stays together while vertical gaps above 2 pt remain isolated.
+
+## Tap to focus
+
+`ClusterLabMapView.focusStation(_:)` centers a station and uses MapKit's native
+animated camera to zoom until the station has neither cluster members nor a
+nearby native glass connection. `ClusterLabFocus` evaluates the settled price,
+count, grouping hysteresis, and location-clearance geometry before moving the
+camera. It brackets and refines a separating scale, with a small projection
+allowance; no trial views or intermediate camera movements are used.
+
+One map-level tap recognizer hit-tests actual rendered pill positions, including
+location offsets and moving split pills. The 32 pt pills have a 44 pt high touch
+area. Counts focus their displayed representative. Native double-tap, pan,
+pinch, and rotation remain available. VoiceOver has a Focus station action.
+The camera preserves heading; Reduce Motion disables its animated movement.
+Already isolated prices only center. Identical coordinates cannot be separated
+by geographic zoom; these center without an excessive zoom attempt. Other
+unresolvable cases stop at the native zoom range or the 20 m distance limit.
+
+The `focus-north-` and `focus-rotated-` live probes start with connected stations,
+invoke the same focus function, then check the actual camera, rendered isolated
+price, absence of count/glass bridges, and existing split-animation coverage.
