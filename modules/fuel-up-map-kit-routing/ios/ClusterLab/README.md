@@ -20,9 +20,11 @@ or new collision/release impulses. Normal pinch and station-focus physics remain
 unchanged; an interrupted overview resumes the appropriate interaction mode.
 A UIKit `UIPageControl` sits between the
 card and native tab bar, with native scrubbing and accessibility behavior.
-Pagination keeps UIKit's native page control and default indicators inside one
-native regular Liquid Glass capsule. The control uses its minimal backing so
-UIKit does not add a second material. The capsule hides for a single page.
+Pagination keeps UIKit's native page control over one regular Liquid Glass
+capsule. The 28pt capsule is sized for at most seven visible indicator slots;
+UIKit condenses longer lists within that width. The control retains a 44pt touch
+height and uses label colors (45% opacity for inactive dots) for theme contrast.
+Its minimal backing avoids a second material. The capsule hides for one page.
 Changing pages focuses the station through a native view command. Tapping a map
 pill emits one selection event and scrolls the card without echoing the camera
 command. Map gestures and cluster animation never send per-frame work to React.

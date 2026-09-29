@@ -13,16 +13,23 @@ final class ClusterLabPageControl: ExpoView {
     super.init(appContext: appContext)
     control.hidesForSinglePage = true
     control.backgroundStyle = .minimal
+    control.currentPageIndicatorTintColor = .label
+    control.pageIndicatorTintColor = UIColor.label.withAlphaComponent(0.45)
     control.addTarget(self, action: #selector(changed), for: .valueChanged)
+    glass.isUserInteractionEnabled = false
     addSubview(glass)
-    ClusterLabGlass.content(of: glass).addSubview(control)
+    addSubview(control)
   }
 
   override func layoutSubviews() {
     super.layoutSubviews()
-    let width = min(bounds.width, control.size(forNumberOfPages: control.numberOfPages).width + 16)
-    glass.frame = CGRect(x: (bounds.width - width) / 2, y: 0, width: width, height: bounds.height)
-    control.frame = glass.bounds
+    // UIKit condenses long page lists itself. Size for the visible row rather
+    // than reserving a dot for every station, and keep its full touch height.
+    let width = min(bounds.width, control.size(forNumberOfPages: min(control.numberOfPages, 7)).width)
+    let height = min(bounds.height, 28)
+    glass.frame = CGRect(x: (bounds.width - width) / 2, y: (bounds.height - height) / 2,
+                         width: width, height: height)
+    control.frame = CGRect(x: glass.frame.minX, y: 0, width: width, height: bounds.height)
   }
 
   func setDark(_ dark: Bool) {
