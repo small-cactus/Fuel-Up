@@ -8,8 +8,16 @@ the fuel service cache, but its rendering and animation are independent of Home.
 `ClusterLabScreen` keeps one selected station ID shared by the React carousel and
 native map. `StationPriceCard` renders the quote with Expo's regular native glass;
 `StationCardCarousel` virtualizes horizontal pages and measures their content.
-Reset to cheapest sits above the card. A UIKit `UIPageControl` sits between the
+Show all appears above the card only outside overview, including after a manual
+map movement. It returns the carousel to the cheapest station,
+clears native focus emphasis, and animates the native camera to the same solved
+overview used on entry. All pills are normal-sized in overview; the cheapest
+card is a suggestion. Selecting any station, including the first card, focuses
+that station consistently. Returning to the tab starts in overview again.
+A UIKit `UIPageControl` sits between the
 card and native tab bar, with native scrubbing and accessibility behavior.
+Pagination uses the unwrapped UIKit page control with its automatic background
+and default indicator styling; there is no custom pagination capsule.
 Changing pages focuses the station through a native view command. Tapping a map
 pill emits one selection event and scrolls the card without echoing the camera
 command. Map gestures and cluster animation never send per-frame work to React.
@@ -318,6 +326,10 @@ overshoot as well as the final footprint when solving its native camera zoom.
 The `emphasis-` live probe exercises rapid selection reversals without camera
 movement, checking size continuity, settled dimensions, fixed map anchors, and
 view count. Existing focus probes also verify the larger rendered capsule.
+The `overview-north-` and `overview-rotated-` probes focus a connected pair,
+return to overview, then interrupt another focus flight with Show all. They
+verify native intermediate camera frames, the original fitted scale, safe pill
+edges, complete station representation, and cleared selection emphasis.
 
 
 Home publishes its applied station quotes and search identity through AppState.

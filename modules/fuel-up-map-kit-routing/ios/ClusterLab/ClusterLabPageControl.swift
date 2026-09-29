@@ -11,7 +11,7 @@ final class ClusterLabPageControl: ExpoView {
   required init(appContext: AppContext? = nil) {
     super.init(appContext: appContext)
     control.hidesForSinglePage = true
-    control.backgroundStyle = .prominent
+    control.backgroundStyle = .automatic
     control.addTarget(self, action: #selector(changed), for: .valueChanged)
     addSubview(control)
   }
@@ -23,8 +23,6 @@ final class ClusterLabPageControl: ExpoView {
 
   func setDark(_ dark: Bool) {
     overrideUserInterfaceStyle = dark ? .dark : .light
-    control.currentPageIndicatorTintColor = .label
-    control.pageIndicatorTintColor = .tertiaryLabel
   }
 
   func applyPages() {

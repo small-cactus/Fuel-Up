@@ -30,7 +30,8 @@ final class ClusterLabProbe {
     let fixture: [(Double, Double)] = [(0, 0), (0.00055, 0.00075), (-0.0005, -0.0008),
                                      (0.0011, -0.0006), (-0.001, 0.0007), (0.0001, 0.0015)]
     // The pair run isolates +1 travel; the normal six-station gate is unchanged.
-    let offsets = token.hasPrefix("location-") ? [(0.0, 0.0), (0.0, 0.00001), (0.0011, 0.0015), (-0.001, -0.0015)] :
+    let offsets = token.hasPrefix("overview-") ? [(0.0, 0.0), (0.0, 0.0001)] + Array(fixture.dropFirst(2)) :
+      token.hasPrefix("location-") ? [(0.0, 0.0), (0.0, 0.00001), (0.0011, 0.0015), (-0.001, -0.0015)] :
       token.hasPrefix("rows-") ? [(0.0, 0.0015), (0.0, 0.00151), (0.00055, 0.0015), (0.00055, 0.00151)] :
       token.hasPrefix("vertical-") ? [(0.0, 0.0), (0.00055, 0.0)] :
       (token.hasPrefix("pair-") ? Array(fixture.prefix(2)) : fixture)
@@ -39,7 +40,7 @@ final class ClusterLabProbe {
                          "longitude": center.longitude + offset.1, "price": 3.10 + Double(index) * 0.10,
                          "name": "Probe station \(index)"])
     })
-    if isFit { view.fitCamera(to: view.renderer.stations) }
+    if isFit || token.hasPrefix("overview-") { view.fitCamera(to: view.renderer.stations) }
     else {
       let span = token.hasPrefix("focus-") ? 0.03 : spans[0]
       view.setRegion(.init(center: center, span: .init(latitudeDelta: span, longitudeDelta: span)), animated: false)
@@ -56,6 +57,38 @@ final class ClusterLabProbe {
   func tick(time: Double) {
     guard let view, !finished else { return }
     if startTime == 0 { startTime = time }
+    if token.hasPrefix("overview-") {
+      let elapsed = time - startTime
+      focusCameraSamples.append(["time": elapsed, "distance": view.map.camera.centerCoordinateDistance])
+      if stage == -1 && elapsed >= 1 {
+        stage = 0
+        focusDetails["overviewDistance"] = view.map.camera.centerCoordinateDistance
+        if token.hasPrefix("overview-rotated-") {
+          let camera = view.map.camera.copy() as! MKMapCamera
+          camera.heading = 35; view.map.setCamera(camera, animated: false)
+        }
+        focusDetails["focusRequested"] = view.focusStation("lab-0")
+      }
+      if stage == 0 && elapsed >= 2.5 {
+        stage = 1
+        focusDetails["focusedDistance"] = view.map.camera.centerCoordinateDistance
+        focusDetails["overviewRequested"] = view.showAll()
+      }
+      if stage == 1 && elapsed >= 4 {
+        stage = 2
+        focusDetails["returnedDistance"] = view.map.camera.centerCoordinateDistance
+        focusDetails["returnedHeading"] = view.map.camera.heading
+        focusDetails["returnedViews"] = view.renderer.frameSamples.last?["views"]
+        // Interrupt a focus flight with overview; stale focus must never win.
+        view.focusStation("lab-1")
+      }
+      if stage == 2 && elapsed >= 4.1 { stage = 3; view.showAll() }
+      if elapsed >= 5.8 {
+        focusDetails["finalDistance"] = view.map.camera.centerCoordinateDistance
+        finish(status: "completed")
+      }
+      return
+    }
     if token.hasPrefix("emphasis-") {
       let elapsed = time - startTime
       let times: [Double] = [1, 1.05, 1.10, 1.8, 2.2]

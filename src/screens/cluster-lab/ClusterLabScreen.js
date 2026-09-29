@@ -23,10 +23,18 @@ export default function ClusterLabScreen() {
     const map = useRef(null);
     const carousel = useRef(null);
     const [selectedId, setSelectedId] = useState(null);
+    const [overview, setOverview] = useState(true);
     const [overlayHeight, setOverlayHeight] = useState(0);
-    const selection = stations.some(station => station.id === selectedId) ? selectedId : stations[0]?.id;
+    const selection = !overview && stations.some(station => station.id === selectedId) ? selectedId : stations[0]?.id;
     const selectionRef = useRef(selection);
     selectionRef.current = selection;
+    useEffect(() => {
+        if (active) {
+            setOverview(true);
+            setSelectedId(null);
+            carousel.current?.scrollTo(0, false);
+        }
+    }, [active]);
     useEffect(() => {
         if (selectedId !== selection) {
             setSelectedId(selection || null);
@@ -38,13 +46,22 @@ export default function ClusterLabScreen() {
         if (index >= 0) carousel.current?.scrollTo(index, false);
     }, [stations]);
     const select = useCallback(id => {
+        setOverview(false);
         setSelectedId(id);
         void map.current?.focusStation(id);
     }, []);
+    const showAll = useCallback(() => {
+        setOverview(true);
+        setSelectedId(stations[0]?.id || null);
+        carousel.current?.scrollTo(0);
+        void map.current?.showAll();
+    }, [stations]);
+    const overviewChanged = useCallback(event => setOverview(event.nativeEvent.overview), []);
     const mapSelected = useCallback(event => {
         const id = event.nativeEvent.id;
         const index = stations.findIndex(station => station.id === id);
         if (index < 0) return;
+        setOverview(false);
         setSelectedId(id);
         carousel.current?.scrollTo(index);
     }, [stations]);
@@ -63,12 +80,13 @@ export default function ClusterLabScreen() {
             active={active}
             overlayBottomInset={stations.length ? overlayHeight + 8 : 0}
             onStationSelect={mapSelected}
+            onOverviewChange={overviewChanged}
             probeToken={__DEV__ && typeof clusterLabProbe === 'string' ? clusterLabProbe : null}
         />
         {stations.length > 0 && <StationCardCarousel ref={carousel} stations={stations} selectedId={selection}
             active={active} bottom={insets.bottom + 12} fuelGrade={preferences.preferredOctane}
             isDark={isDark} themeColors={themeColors} onSelect={select} onNavigate={navigate}
-            onHeight={setOverlayHeight} />}
+            onHeight={setOverlayHeight} onShowAll={showAll} overview={overview} />}
         </View>
     );
 }

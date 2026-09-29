@@ -9,7 +9,7 @@ import { pageFromOffset } from './stationCardModel';
 const NativePages = requireNativeViewManager('FuelUpMapKitRouting', 'ClusterLabPageControl');
 
 const StationCardCarousel = forwardRef(function StationCardCarousel({ stations, selectedId, active, bottom,
-    fuelGrade, isDark, themeColors, onSelect, onNavigate, onHeight }, ref) {
+    fuelGrade, isDark, themeColors, onSelect, onNavigate, onHeight, onShowAll, overview }, ref) {
     const { width, height, fontScale } = useWindowDimensions();
     const compact = height < 500;
     const list = useRef(null);
@@ -60,11 +60,13 @@ const StationCardCarousel = forwardRef(function StationCardCarousel({ stations, 
         <View pointerEvents="box-none" style={[styles.overlay, { bottom }]}
             onLayout={event => onHeight(event.nativeEvent.layout.height + bottom)}>
             <View pointerEvents="box-none" style={styles.resetRow}>
-                {index > 0 && <Pressable accessibilityRole="button" accessibilityLabel="Reset to cheapest"
-                    onPress={() => choose(0)}>
+                {!overview && <Pressable accessibilityRole="button" accessibilityLabel="Show all stations"
+                    accessibilityHint="Fits all stations on the map and shows the cheapest card"
+                    style={({ pressed }) => pressed && styles.pressed}
+                    onPress={onShowAll}>
                     <GlassView glassEffectStyle="regular" style={styles.reset}>
-                        <SymbolView name="arrow.uturn.backward" size={14} tintColor={themeColors.text} />
-                        <Text style={[styles.resetText, { color: themeColors.text }]}>Reset to cheapest</Text>
+                        <SymbolView name="arrow.up.left.and.arrow.down.right" size={14} tintColor={themeColors.text} />
+                        <Text style={[styles.resetText, { color: themeColors.text }]}>Show all</Text>
                     </GlassView>
                 </Pressable>}
             </View>
@@ -103,6 +105,7 @@ const styles = StyleSheet.create({
     resetRow: { minHeight: 52, paddingBottom: 8, alignItems: 'center' },
     reset: { minHeight: 44, borderRadius: 22, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 7 },
     resetText: { fontSize: 14, fontWeight: '600' },
+    pressed: { opacity: 0.7 },
     items: { alignItems: 'flex-start' },
     pages: { height: 44, marginHorizontal: 24 },
 });

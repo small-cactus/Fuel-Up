@@ -118,6 +118,7 @@ final class ClusterLabRenderer {
   private let locationClearance = ClusterLabLocationClearance()
 
   func prepareForCameraFit() {
+    emphasis.reset()
     for motion in motions.values { motion.pill?.view.removeFromSuperview() }
     for badge in badges.values { badge.view.removeFromSuperview() }
     motions.removeAll(); badges.removeAll(); owners.removeAll()

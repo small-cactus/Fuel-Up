@@ -474,3 +474,47 @@ test('focused pill size retargets continuously without moving its map anchor or 
     assert.equal(final.animating, false, 'selection failed to settle');
     t.diagnostic(`${intermediate} intermediate sizes; maximum width step ${maximumStep.toFixed(2)}pt`);
 });
+
+for (const heading of ['north', 'rotated']) {
+    test(`Show all restores the fitted overview after ${heading} focus and interruption`, { timeout: 30000 }, async t => {
+        const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+        const token = `overview-${heading}-${Date.now()}`;
+        const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+        const file = path.join(container, 'Documents/cluster-lab-probe.json');
+        execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+        let report;
+        const deadline = Date.now() + 20000;
+        while (Date.now() < deadline) {
+            try {
+                const value = JSON.parse(readFileSync(file, 'utf8'));
+                if (value.token === token) { report = value; break; }
+            } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+            await new Promise(resolve => setTimeout(resolve, 250));
+        }
+        assert.ok(report, 'overview probe did not export');
+        assert.equal(report.status, 'completed');
+        const detail = report.focus;
+        assert.equal(detail.focusRequested, true);
+        assert.equal(detail.overviewRequested, true);
+        assert.ok(detail.focusedDistance < detail.overviewDistance * 0.95, 'focus never zoomed in');
+        for (const key of ['returnedDistance', 'finalDistance']) {
+            assert.ok(Math.abs(detail[key] / detail.overviewDistance - 1) < 0.005, `${key} did not match initial fit`);
+        }
+        assert.ok(Math.abs(detail.returnedHeading) < 0.01, 'overview did not restore north');
+        const travel = report.focusCameraSamples.filter(frame => frame.time > 2.5 && frame.time < 4 &&
+            frame.distance > detail.focusedDistance * 1.01 && frame.distance < detail.overviewDistance * 0.99);
+        assert.ok(travel.length >= 8, 'overview camera jumped instead of animating');
+        const bounds = report.fitBounds;
+        for (const views of [detail.returnedViews, report.final]) {
+            assert.equal(views.reduce((count, view) => count + (view.role === 'badge' ? view.count : 1), 0), 6);
+            for (const view of views) {
+                if (view.role !== 'badge') assert.ok(Math.abs(view.width - 84) < 0.01, 'focused emphasis remained in overview');
+                const x = view.x - 360, y = view.y - 360;
+                assert.ok(x - view.width / 2 >= bounds.x - 1 && x + view.width / 2 <= bounds.x + bounds.width + 1 &&
+                    y - 16 >= bounds.y - 1 && y + 16 <= bounds.y + bounds.height + 1, 'overview clipped a pill');
+            }
+        }
+        assert.equal(report.samples.at(-1).selectedId, '');
+        t.diagnostic(`${travel.length} intermediate overview camera frames; all six stations visible and normal-sized`);
+    });
+}
