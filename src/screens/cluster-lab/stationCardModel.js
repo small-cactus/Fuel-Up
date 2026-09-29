@@ -1,7 +1,14 @@
+import { filterStationQuotesForHome } from '../../lib/homeState.js';
+import { rankQuotesForFuelGrade } from '../../lib/fuelGrade.js';
+import { stationOffersE85 } from '../../lib/stationPreferences.js';
+
 // Keep station identity and all quote metadata outside the rendered carousel.
-export function buildLabStations(snapshot) {
-    const quotes = [...(snapshot?.topStations || [])];
-    if (snapshot?.quote) quotes.push(snapshot.quote);
+export function buildLabStations(snapshot, { origin, radiusMiles, minimumRating = 0, fuelGrade, requiresE85 = false } = {}) {
+    let quotes = [...(snapshot?.topStations || [])];
+    if (snapshot?.quote) quotes.unshift(snapshot.quote);
+    quotes = filterStationQuotesForHome({ quotes, origin, radiusMiles, minimumRating });
+    if (fuelGrade) quotes = rankQuotesForFuelGrade(quotes, fuelGrade);
+    if (requiresE85) quotes = quotes.filter(stationOffersE85);
     const byId = new Map();
     for (const quote of quotes) {
         if (quote.providerTier !== 'station' || quote.isEstimated || quote.stationId == null ||
@@ -34,4 +41,15 @@ export function stationDistance(miles) {
 export function pageFromOffset(offset, width, count) {
     if (!Number.isFinite(offset) || width <= 0 || count < 1) return null;
     return Math.min(count - 1, Math.max(0, Math.round(offset / width)));
+}
+
+
+// A different fuel/filter/reset/origin must never reuse the prior Home result.
+export function matchingHomeStationSnapshot(snapshot, { criteriaSignature, fuelResetToken, latitude, longitude }) {
+    if (!snapshot || snapshot.criteriaSignature !== criteriaSignature || snapshot.fuelResetToken !== fuelResetToken) return null;
+    // Match Home's region equality tolerance (sub-meter GPS rounding).
+    if (Number.isFinite(latitude) && (!Number.isFinite(snapshot.origin?.latitude) ||
+        !Number.isFinite(snapshot.origin?.longitude) || Math.abs(snapshot.origin.latitude - latitude) > 0.000001 ||
+        Math.abs(snapshot.origin.longitude - longitude) > 0.000001)) return null;
+    return snapshot;
 }

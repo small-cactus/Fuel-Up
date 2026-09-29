@@ -4,28 +4,36 @@ import { useAppState } from '../../AppStateContext';
 import { usePreferences } from '../../PreferencesContext';
 import { getLastDeviceLocationRegion } from '../../lib/deviceLocationCache';
 import { getCachedFuelPriceSnapshot, refreshFuelPriceSnapshot } from '../../services/fuel';
-import { buildLabStations } from './stationCardModel';
+import { buildLabStations, matchingHomeStationSnapshot } from './stationCardModel';
 
 // Data crosses the bridge once per search. The Swift view owns all camera and
 // animation work; no JS region events, timers, markers, or frame updates.
 export default function useClusterLabStations(active) {
-    const { resolvedFuelSearchContext, manualLocationOverride, fuelResetToken } = useAppState();
-    const { preferences } = usePreferences();
+    const { resolvedFuelSearchContext, manualLocationOverride, fuelResetToken, homeStationSnapshot } = useAppState();
+    const { preferences, fuelSearchCriteriaSignature } = usePreferences();
     const [result, setResult] = useState(null);
     const latitude = manualLocationOverride?.latitude ?? resolvedFuelSearchContext?.latitude;
     const longitude = manualLocationOverride?.longitude ?? resolvedFuelSearchContext?.longitude;
     const fuelType = preferences.preferredOctane;
     const radiusMiles = preferences.searchRadiusMiles;
     const preferredProvider = preferences.preferredProvider;
+    const minimumRating = preferences.minimumRating;
     const requiresE85 = Boolean(preferences.requiresE85);
-    const scope = JSON.stringify([latitude, longitude, fuelType, radiusMiles, preferredProvider, requiresE85, fuelResetToken]);
+    const scope = JSON.stringify([latitude, longitude, fuelType, radiusMiles, preferredProvider, requiresE85, minimumRating, fuelSearchCriteriaSignature, fuelResetToken]);
+
+    const shared = useMemo(() => {
+        const snapshot = matchingHomeStationSnapshot(homeStationSnapshot, {
+            criteriaSignature: fuelSearchCriteriaSignature, fuelResetToken, latitude, longitude,
+        });
+        return snapshot ? { origin: snapshot.origin, stations: buildLabStations({ topStations: snapshot.quotes }) } : null;
+    }, [homeStationSnapshot, fuelSearchCriteriaSignature, fuelResetToken, latitude, longitude]);
 
     useEffect(() => {
-        if (!active) return;
+        if (!active || shared) return;
         let cancelled = false;
         const publish = (origin, snapshot) => {
             if (cancelled) return;
-            setResult({ scope, origin: { latitude: origin.latitude, longitude: origin.longitude }, stations: buildLabStations(snapshot) });
+            setResult({ scope, origin: { latitude: origin.latitude, longitude: origin.longitude }, stations: buildLabStations(snapshot, { origin, radiusMiles, minimumRating, fuelGrade: fuelType, requiresE85 }) });
         };
         (async () => {
             let origin = Number.isFinite(latitude) && Number.isFinite(longitude) ? { latitude, longitude } :
@@ -51,7 +59,7 @@ export default function useClusterLabStations(active) {
             if (!cancelled) console.warn('[Glass Lab] Station load failed:', error.message);
         });
         return () => { cancelled = true; };
-    }, [active, scope, latitude, longitude, fuelType, radiusMiles, preferredProvider, requiresE85]);
+    }, [active, shared, scope, latitude, longitude, fuelType, radiusMiles, minimumRating, preferredProvider, requiresE85]);
 
-    return useMemo(() => result?.scope === scope ? result : { origin: null, stations: [] }, [result, scope]);
+    return useMemo(() => shared || (result?.scope === scope ? result : { origin: null, stations: [] }), [shared, result, scope]);
 }

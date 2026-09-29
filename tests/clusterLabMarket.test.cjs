@@ -37,7 +37,7 @@ assert(noise.values.filter { $0.score < 0 }.count == 3)
 let tied = [quote("a", 3.2), quote("b", 3.2), quote("c", 3.2)]
 for input in [tied, Array(tied.reversed())] {
   let colors = ClusterLabMarket.assess(input)
-  assert(colors["a"]!.score == 0.05 && colors["b"]!.score == -0.05 && colors["c"]!.score == -0.05)
+  assert(colors["a"]!.score == 0.05 && colors["b"]!.score == -0.55 && colors["c"]!.score == -0.55)
 }
 assert(ClusterLabMarket.assess([quote("only", 3.2)])["only"]!.score == 0.05)
 assert(ClusterLabMarket.assess([]).isEmpty)
@@ -54,8 +54,8 @@ let nearby = (0..<12).map { quote("n-\($0)", 3.2, 27.95 + Double($0) * 0.0001) }
 let distant = (0..<20).map { quote("d-\($0)", 2.0, 27.98 + Double($0) * 0.0001) }
 let bounded = ClusterLabMarket.assess([quote("target", 3.2)] + nearby + distant)
 assert(bounded["target"]!.peerCount == 12 && bounded["target"]!.median == 3.2)
-assert(bounded["target"]!.score == -0.05, "A distant bargain must not saturate an average local price")
-assert(abs(result["median"]!.score) <= 0.05, "Typical prices should be pastel")
+assert(bounded["target"]!.score == -0.55, "Median redness must stay local and independent of distant bargains")
+assert(abs(result["median"]!.score + 0.55) < 0.000001, "Typical alternatives should be clearly red")
 assert(abs(result["high"]!.score) > abs(result["median"]!.score))
 assert(abs(result["worst"]!.score) > abs(result["high"]!.score))
 var previous: Double = 2

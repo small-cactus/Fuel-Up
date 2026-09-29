@@ -155,6 +155,7 @@ export default function HomeScreen() {
         manualLocationOverride,
         resolvedFuelSearchContext,
         setFuelDebugState,
+        setHomeStationSnapshot,
         setResolvedFuelSearchContext,
         clusterProbeRequest,
         isClusterProbeSessionActive,
@@ -2230,6 +2231,15 @@ export default function HomeScreen() {
         rankedStationQuotes
             .map((q, idx) => ({ ...q, originalIndex: idx }))
     ), [rankedStationQuotes]);
+    // Publish the actual Home result set, not another independently chosen
+    // spatial cache window. Glass Lab follows these same applied prices.
+    useEffect(() => {
+        setHomeStationSnapshot(bestQuote ? {
+            quotes: stationQuotes, origin: location,
+            criteriaSignature: currentHomeFilterSignature, fuelResetToken,
+        } : null);
+    }, [bestQuote, stationQuotes, location, currentHomeFilterSignature, fuelResetToken, setHomeStationSnapshot]);
+
     const stationQuotesSignature = useMemo(() => (
         stationQuotes
             .map(quote => [

@@ -10,6 +10,7 @@ struct LabProjectedStation {
 }
 
 enum ClusterLabGeometry {
+  static let focusedScale: CGFloat = 1.18
   static let pillSize = CGSize(width: 84, height: 32)
   static let badgeWidth: CGFloat = 44
   static let badgeOffset: CGFloat = 56
@@ -46,7 +47,7 @@ enum ClusterLabGeometry {
     return max(0, hypot(dx, a.midY - b.midY) - radiusSum)
   }
 
-  static func owners(_ stations: [LabProjectedStation], previous: [String: String]) -> [String: String] {
+  static func owners(_ stations: [LabProjectedStation], previous: [String: String], selectedId: String? = nil) -> [String: String] {
     let sorted = stations.sorted { $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price }
     var parent = Array(sorted.indices)
     func root(_ index: Int) -> Int {
@@ -56,11 +57,15 @@ enum ClusterLabGeometry {
     }
     struct Cell: Hashable { let x: Int; let y: Int }
     var grid: [Cell: [Int]] = [:]
+    let extraWidth = pillSize.width * (focusedScale - 1) / 2
+    let extraHeight = pillSize.height * (focusedScale - 1) / 2
+    let cellWidth = disconnectRange.width + extraWidth
+    let cellHeight = disconnectRange.height + extraHeight
     for (index, station) in sorted.enumerated() {
       // A cell spans the largest retained connection, so the adjacent-cell
       // search cannot miss a stretched pair across a bucket boundary.
-      let cell = Cell(x: Int(floor(station.point.x / disconnectRange.width)),
-                      y: Int(floor(station.point.y / disconnectRange.height)))
+      let cell = Cell(x: Int(floor(station.point.x / cellWidth)),
+                      y: Int(floor(station.point.y / cellHeight)))
       for x in (cell.x - 1)...(cell.x + 1) {
         for y in (cell.y - 1)...(cell.y + 1) {
           for other in grid[Cell(x: x, y: y)] ?? [] {
@@ -69,8 +74,9 @@ enum ClusterLabGeometry {
             let dy = abs(station.point.y - sorted[other].point.y)
             let vertical = isVertical(CGPoint(x: dx, y: dy))
             let retainedHeight = vertical ? verticalDisconnectDistance : disconnectRange.height
-            if dx <= (retained ? disconnectRange.width : pillSize.width) &&
-               dy <= (retained ? retainedHeight : pillSize.height) {
+            let selected = station.id == selectedId || sorted[other].id == selectedId
+            if dx <= (retained ? disconnectRange.width : pillSize.width) + (selected ? extraWidth : 0) &&
+               dy <= (retained ? retainedHeight : pillSize.height) + (selected ? extraHeight : 0) {
               let a = root(index), b = root(other)
               parent[max(a, b)] = min(a, b)
             }

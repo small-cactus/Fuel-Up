@@ -120,7 +120,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   }
 
   func setActive(_ value: Bool) {
-    if value && !active { needsCameraFit = true; focusedStationId = nil }
+    if value && !active { needsCameraFit = true; focusedStationId = nil; renderer.emphasis.reset() }
     if !value || needsCameraFit { renderer.container.isHidden = true }
     active = value
     map.showsUserLocation = value
@@ -177,7 +177,10 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     refresh()
   }
 
-  func didFocusStation(_ id: String) { focusedStationId = id; needsCameraFit = false }
+  func didFocusStation(_ id: String) {
+    focusedStationId = id; needsCameraFit = false
+    renderer.emphasis.select(id)
+  }
 
   func selectStation(_ id: String) -> Bool {
     guard focusStation(id) else { return false }

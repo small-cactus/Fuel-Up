@@ -59,8 +59,9 @@ station identity, projection, reversible motion, and atomic handoffs.
 snapshot a green tint. The input already excludes estimated prices and
 contains only the selected fuel grade. Stable station-ID order breaks price ties,
 matching cluster ownership. Every alternative is red, including tied prices.
-Saturation is lowest near the typical local price. Red grows more saturated
-above the local median; below-market alternatives remain pastel red. The green
+Median alternatives now have a red score of 0.55 (about 63% tint saturation).
+Red increases above the local median; below-market alternatives soften toward
+a floor of 0.18. This makes the one green bargain more distinct. The green
 winner grows more saturated with its savings below the local median. Full
 saturation means a difference of at least 15 cents or 8% of that reference,
 whichever is larger. The median uses up to 12 peers within five miles; with
@@ -302,3 +303,29 @@ Offscreen view culling and cluster membership never change that ranking.
 A merging price retains its station color while the price is the dominant
 content; only its count representation adopts the cluster owner's color.
 Live zoom, merge, pan, and re-entry probes compare prices against the global table.
+
+
+Focused prices grow to 118% in both dimensions, including text and icon. Overview
+pills and count badges keep their normal size. The selection spring uses the
+existing native frame clock and transaction, preserves center coordinates, and
+retargets size and velocity when selection changes. No extra glass views are
+created. Reduce Motion applies the size immediately. Returning to the tab's
+initial overview clears emphasis. Only pairs involving the focused station get
+larger membership bounds; glass grouping, hit testing, release gaps, and location
+clearance read actual rendered dimensions. Counts move outward by the added
+price half-width to preserve their attachment. Focus reserves the small spring
+overshoot as well as the final footprint when solving its native camera zoom.
+The `emphasis-` live probe exercises rapid selection reversals without camera
+movement, checking size continuity, settled dimensions, fixed map anchors, and
+view count. Existing focus probes also verify the larger rendered capsule.
+
+
+Home publishes its applied station quotes and search identity through AppState.
+Glass Lab consumes that exact snapshot while origin, criteria, and reset token
+match, instead of independently selecting a different spatial cache window on
+every tab entry. An empty filtered Home result is valid and does not trigger a
+fallback fetch. When Home has no matching result yet, Glass Lab still reads the
+existing shared fuel cache first and fetches only if it has no station snapshot;
+that fallback now applies Home's radius, rating, fuel-grade and E85 eligibility.
+Home hides overlapping pills while Glass Lab merges them, so visual pill counts
+can still differ even when the underlying station IDs are identical.

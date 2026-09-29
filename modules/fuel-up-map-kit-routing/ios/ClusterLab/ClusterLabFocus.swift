@@ -18,7 +18,7 @@ enum ClusterLabFocus {
     }
     func clear(_ scale: CGFloat) -> Bool {
       let points = stations.map { LabProjectedStation(id: $0.id, price: $0.price, point: project($0.point, scale)) }
-      let owners = ClusterLabGeometry.owners(points, previous: previous)
+      let owners = ClusterLabGeometry.owners(points, previous: previous, selectedId: id)
       guard owners[id] == id, !owners.contains(where: { $0.key != id && $0.value == id }) else { return false }
       let positions = Dictionary(uniqueKeysWithValues: points.map { ($0.id, $0.point) })
       var frames: [String: CGRect] = [:], groupFrames: [String: CGRect] = [:]
@@ -29,10 +29,13 @@ enum ClusterLabFocus {
           CGPoint(x: point.point.x - origin.x, y: point.point.y - origin.y)))
       }
       for point in points where owners[point.id] == point.id {
-        let frame = CGRect(x: point.point.x - 42, y: point.point.y - 16, width: 84, height: 32)
+        // Include the small spring overshoot when solving native separation.
+        let scale: CGFloat = point.id == id ? 1.20 : 1
+        let frame = CGRect(x: point.point.x - 42 * scale, y: point.point.y - 16 * scale,
+                           width: 84 * scale, height: 32 * scale)
         frames[point.id] = frame; groupFrames[point.id] = frame
         if let offset = offsets[point.id] {
-          let badge = CGRect(x: point.point.x + offset - 22, y: point.point.y - 16, width: 44, height: 32)
+          let badge = CGRect(x: point.point.x + offset + 42 * (scale - 1) - 22, y: point.point.y - 16, width: 44, height: 32)
           frames["badge:\(point.id)"] = badge
           groupFrames[point.id] = frame.union(badge)
         }

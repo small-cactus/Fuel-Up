@@ -75,6 +75,7 @@ private final class LabStationMotion {
 }
 
 final class ClusterLabRenderer {
+  let emphasis = ClusterLabEmphasis()
   private let glassGroups = ClusterLabGlassGroups()
   var container: UIView { glassGroups.root }
   private var motions: [String: LabStationMotion] = [:]
@@ -154,6 +155,7 @@ final class ClusterLabRenderer {
     for id in Array(motions.keys) where changed.contains(id) || !next.contains(where: { $0.id == id }) {
       motions.removeValue(forKey: id)?.pill?.view.removeFromSuperview()
     }
+    if let id = emphasis.selectedId, !snapshot.contains(where: { $0.id == id }) { emphasis.select(nil) }
     stations = snapshot
   }
 
@@ -172,8 +174,9 @@ final class ClusterLabRenderer {
       let smooth = t * t * t * (t * (t * 6 - 15) + 10)
       offset += carry.delta * (1 - smooth)
     }
+    let extra = 42 * (emphasis.scale(for: owner, priceMix: 1) - 1)
     return min(ClusterLabGeometry.badgeOffset + ClusterLabGeometry.maximumBadgeStretch,
-               max(ClusterLabGeometry.badgeOffset, offset))
+               max(ClusterLabGeometry.badgeOffset, offset)) + extra
   }
 
   private func makePill(_ motion: LabStationMotion) -> ClusterLabPill {
@@ -216,7 +219,7 @@ final class ClusterLabRenderer {
       previousProjection = Dictionary(uniqueKeysWithValues: candidates.map { ($0.id, $0.point) })
       projectionTime = now
     }
-    let nextOwners = ClusterLabGeometry.owners(candidates, previous: owners)
+    let nextOwners = ClusterLabGeometry.owners(candidates, previous: owners, selectedId: emphasis.selectedId)
     let nextMasses = Dictionary(grouping: nextOwners.keys, by: { nextOwners[$0]! }).mapValues(\.count)
     let positions = Dictionary(uniqueKeysWithValues: candidates.map { ($0.id, $0.point) })
     var nextBadgeOffsets: [String: CGFloat] = [:]
@@ -232,7 +235,8 @@ final class ClusterLabRenderer {
       .flatMap { [nextOwners[$0], owners[$0]].compactMap { $0 } })
     for owner in changedGroups {
       if let previous = renderedBadgeOffsets[owner], let target = nextBadgeOffsets[owner] {
-        badgeOffsetCarries[owner] = (previous - target, now)
+        let extra = 42 * (emphasis.scale(for: owner, priceMix: 1) - 1)
+        badgeOffsetCarries[owner] = (previous - target - extra, now)
       }
     }
     badgeOffsetTargets = nextBadgeOffsets
@@ -348,10 +352,11 @@ final class ClusterLabRenderer {
     let now = CACurrentMediaTime()
     if reducedMotion { badgeOffsetCarries.removeAll() }
     badgeOffsetCarries = badgeOffsetCarries.filter { now - $0.value.startedAt < 0.08 }
+    let emphasisMoving = emphasis.advance(deltaTime, reducedMotion: reducedMotion)
     renderedBadgeOffsets = Dictionary(uniqueKeysWithValues: badgeOffsetTargets.keys.map {
       ($0, badgeOffset(for: $0, at: now))
     })
-    animating = !badgeOffsetCarries.isEmpty
+    animating = emphasisMoving || !badgeOffsetCarries.isEmpty
     for motion in motions.values {
       if reducedMotion { motion.pendingRelease = nil }
       if motion.owner == motion.station.id || !motion.settled {
@@ -451,8 +456,9 @@ final class ClusterLabRenderer {
         let marketId = merged && motion.priceMix <= 0.5 ? motion.owner : id
         let market: LabMarketAssessment? = !merged && motion.elapsed == 0 && motion.startedAt > 0 && !reducedMotion ?
           nil : (markets[marketId] ?? .unknown)
+        pill.view.accessibilityTraits = emphasis.selectedId == id && motion.priceMix > 0.5 ? [.selected] : []
         pill.render(center: point, width: motion.width, priceMix: motion.priceMix, count: motion.count,
-                    market: market, dark: dark)
+                    market: market, dark: dark, scale: emphasis.scale(for: id, priceMix: motion.priceMix))
         if arrived && merged { pill.view.transform = CGAffineTransform(translationX: 0, y: owner.clearance) }
         if recording {
           // Compare the actual view with the original trajectory in the same
@@ -463,7 +469,7 @@ final class ClusterLabRenderer {
           var unresisted = project(unresistedMapPoint, map: map)
           unresisted.x += motion.startOffset + (targetOffset - motion.startOffset) * unresistedProgress
           samples.append(["id": id, "x": pill.view.center.x, "y": pill.view.center.y,
-                          "width": pill.view.bounds.width, "priceMix": motion.priceMix,
+                          "width": pill.view.bounds.width, "height": pill.view.bounds.height, "priceMix": motion.priceMix,
                           "tintScore": pill.tintScore, "tintUpdates": pill.tintUpdateCount,
                           "rebound": max(0, ((basePoint.x - target.x) * (target.x - start.x) +
                             (basePoint.y - target.y) * (target.y - start.y)) / max(projectedTravel, 0.001)),
@@ -574,7 +580,8 @@ final class ClusterLabRenderer {
       // Untransformed frames keep avoidance separate from map projection and
       // the approved springs. Never feed the previous nudge back into its solve.
       var frame = CGRect(x: pill.view.center.x - pill.view.bounds.width / 2,
-                         y: pill.view.center.y - 16, width: pill.view.bounds.width, height: 32)
+                         y: pill.view.center.y - pill.view.bounds.height / 2,
+                         width: pill.view.bounds.width, height: pill.view.bounds.height)
       if let badge = badges[id] {
         frame = frame.union(CGRect(x: badge.view.center.x - 22, y: badge.view.center.y - 16, width: 44, height: 32))
       }
@@ -614,6 +621,7 @@ final class ClusterLabRenderer {
       frameSamples.append(["time": CACurrentMediaTime(), "views": samples,
                            "viewCount": glassGroups.pillCount, "glassGroupCount": glassGroups.groupCount,
                            "stationCount": motions.count, "animating": animating,
+                           "selectedId": emphasis.selectedId ?? "",
                            "userLocation": dot.map { ["x": $0.x, "y": $0.y] } ?? [:]])
     }
     return animating

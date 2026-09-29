@@ -56,6 +56,18 @@ final class ClusterLabProbe {
   func tick(time: Double) {
     guard let view, !finished else { return }
     if startTime == 0 { startTime = time }
+    if token.hasPrefix("emphasis-") {
+      let elapsed = time - startTime
+      let times: [Double] = [1, 1.05, 1.10, 1.8, 2.2]
+      let ids: [String?] = ["lab-0", "lab-1", "lab-0", nil, "lab-1"]
+      if stage + 1 < times.count && elapsed >= times[stage + 1] {
+        stage += 1
+        view.renderer.emphasis.select(ids[stage])
+        view.refresh()
+      }
+      if elapsed >= 3 { finish(status: "completed") }
+      return
+    }
     if token.hasPrefix("focus-") {
       let reference = CLLocationCoordinate2D(latitude: center.latitude, longitude: center.longitude + 0.001)
       let a = view.map.convert(center, toPointTo: view.map)

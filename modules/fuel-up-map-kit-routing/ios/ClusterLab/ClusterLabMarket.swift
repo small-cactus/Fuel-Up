@@ -48,14 +48,15 @@ enum ClusterLabMarket {
       let middle = peers.count / 2
       let median: Double? = peers.count >= minimumPeers ?
         (peers.count.isMultiple(of: 2) ? (peers[middle - 1] + peers[middle]) / 2 : peers[middle]) : nil
-      // Typical prices are pastel. Only premiums above the surrounding market
-      // saturate the red; below-market alternatives retain the softest red.
+      // Median alternatives are clearly red. Below-market alternatives remain
+      // softer, while premiums reach full red at the same market-relative spread.
       // The winner's green strengthens with its savings below that same market.
       let reference = median ?? snapshotMedian
       let isCheapest = quote.id == cheapest.id
       let difference = isCheapest ? reference - quote.price : quote.price - reference
       let fullScale = max(0.15, reference * 0.08)
-      let magnitude = min(1, max(0.05, difference / fullScale))
+      let magnitude = isCheapest ? min(1, max(0.05, difference / fullScale)) :
+        min(1, max(0.18, 0.55 + 0.45 * difference / fullScale))
       return LabMarketAssessment(median: median, peerCount: peers.count,
                                  cheapestPrice: cheapest.price,
                                  score: isCheapest ? magnitude : -magnitude)

@@ -415,6 +415,8 @@ for (const orientation of ['north', 'rotated']) {
         for (const frame of settled) {
             const target = frame.views.find(v => v.id === 'lab-0');
             assert.ok(target && target.primary && target.role === 'price', 'target stayed inside another cluster');
+            assert.ok(Math.abs(target.width - 84 * 1.18) < 0.01, 'focused glass did not enlarge');
+            assert.ok(Math.abs(target.height - 32 * 1.18) < 0.01, 'focused glass lost its aspect ratio');
             assert.ok(!frame.views.some(v => v.id === 'badge:lab-0'), 'target retained a connected count');
             for (const other of frame.views.filter(v => v.id !== 'lab-0' && v.glassGroup === target.glassGroup)) {
                 const dx = Math.max(0, Math.abs(target.x - other.x) - (target.width + other.width - 64) / 2);
@@ -426,3 +428,49 @@ for (const orientation of ['north', 'rotated']) {
         t.diagnostic(`Native zoom ${(report.focus.beforeDistance / report.focus.afterDistance).toFixed(2)}x; center error ${report.focus.centerError.toFixed(3)}pt`);
     });
 }
+
+
+test('focused pill size retargets continuously without moving its map anchor or adding views', { timeout: 30000 }, async t => {
+    const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+    const token = `emphasis-${Date.now()}`;
+    const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+    const file = path.join(container, 'Documents/cluster-lab-probe.json');
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    let report;
+    const deadline = Date.now() + 20000;
+    while (Date.now() < deadline) {
+        try {
+            const value = JSON.parse(readFileSync(file, 'utf8'));
+            if (value.token === token) { report = value; break; }
+        } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+        await new Promise(resolve => setTimeout(resolve, 250));
+    }
+    assert.ok(report, 'emphasis probe did not export');
+    assert.equal(report.status, 'completed');
+    assert.ok(report.samples.length > 100);
+    const start = report.samples[0].time;
+    const frames = report.samples.filter(frame => frame.time - start > 0.8);
+    const widths = new Map();
+    let maximumStep = 0, intermediate = 0;
+    for (const frame of frames) {
+        assert.ok(frame.viewCount <= 6, 'selection allocated duplicate pills');
+        for (const view of frame.views.filter(view => view.primary)) {
+            assert.ok(view.contained, 'selection clipped native glass');
+            assert.ok(Math.hypot(view.x - view.homeX, view.y - view.homeY - view.clearanceY) < 0.1, 'size change moved the map anchor');
+            assert.ok(Math.abs(view.width / view.height - 84 / 32) < 0.001, 'glass did not scale uniformly');
+            if (view.id !== 'lab-0' && view.id !== 'lab-1') assert.equal(view.width, 84, 'unselected pill changed size');
+            if (widths.has(view.id)) maximumStep = Math.max(maximumStep, Math.abs(view.width - widths.get(view.id)));
+            widths.set(view.id, view.width);
+            if (view.width > 85 && view.width < 98) intermediate++;
+        }
+    }
+    assert.ok(intermediate >= 12, 'size jumped rather than animating through interrupted selections');
+    assert.ok(maximumStep < 4, `size discontinuity: ${maximumStep}pt`);
+    const final = report.samples.at(-1);
+    assert.equal(final.selectedId, 'lab-1');
+    for (const view of final.views.filter(view => view.primary)) {
+        assert.ok(Math.abs(view.width - (view.id === 'lab-1' ? 84 * 1.18 : 84)) < 0.01);
+    }
+    assert.equal(final.animating, false, 'selection failed to settle');
+    t.diagnostic(`${intermediate} intermediate sizes; maximum width step ${maximumStep.toFixed(2)}pt`);
+});

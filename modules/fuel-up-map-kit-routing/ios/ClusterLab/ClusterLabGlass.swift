@@ -51,6 +51,7 @@ final class ClusterLabPill {
   private let priceLabel = UILabel()
   private let countLabel = UILabel()
   private let icon = UIImageView(image: UIImage(systemName: "fuelpump.fill"))
+  private var lastScale: CGFloat = 1
   private var lastCount = 0
   private var marketDescription = "Price comparison unavailable"
   private var lastCheapestPrice: Double?
@@ -107,9 +108,9 @@ final class ClusterLabPill {
     } else { view.backgroundColor = color ?? .secondarySystemBackground }
   }
 
-  func render(center: CGPoint, width: CGFloat, priceMix: CGFloat, count: Int, market: LabMarketAssessment?, dark: Bool) {
+  func render(center: CGPoint, width: CGFloat, priceMix: CGFloat, count: Int, market: LabMarketAssessment?, dark: Bool, scale: CGFloat = 1) {
     if let market { applyMarket(market) }
-    view.bounds = CGRect(x: 0, y: 0, width: width, height: 32)
+    view.bounds = CGRect(x: 0, y: 0, width: width * scale, height: 32 * scale)
     view.center = center
     if lastCount != count {
       countLabel.text = "+\(max(1, count))"
@@ -124,8 +125,14 @@ final class ClusterLabPill {
     priceLabel.alpha = priceMix
     icon.alpha = priceMix
     countLabel.alpha = 1 - priceMix
-    icon.frame = CGRect(x: (width - 66) / 2, y: 9, width: 14, height: 14)
-    priceLabel.frame = CGRect(x: (width - 66) / 2 + 16, y: 0, width: 50, height: 32)
+    if scale != lastScale {
+      lastScale = scale
+      priceLabel.font = .systemFont(ofSize: 15 * scale, weight: .bold)
+      countLabel.font = .systemFont(ofSize: 15 * scale, weight: .bold)
+      if !(view is UIVisualEffectView) { view.layer.cornerRadius = 16 * scale }
+    }
+    icon.frame = CGRect(x: (width - 66) / 2 * scale, y: 9 * scale, width: 14 * scale, height: 14 * scale)
+    priceLabel.frame = CGRect(x: ((width - 66) / 2 + 16) * scale, y: 0, width: 50 * scale, height: 32 * scale)
     countLabel.frame = view.bounds
     view.accessibilityValue = priceMix > 0.5 ? "\(priceLabel.text ?? ""), \(marketDescription)" : countLabel.text
   }

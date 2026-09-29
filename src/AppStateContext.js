@@ -12,6 +12,8 @@ let rootRevealSessionState = { ...ROOT_REVEAL_SESSION_DEFAULT };
 const AppStateContext = createContext({
     fuelResetToken: 0,
     fuelDebugState: null,
+    homeStationSnapshot: null,
+    setHomeStationSnapshot: () => { },
     manualLocationOverride: null,
     resolvedFuelSearchContext: null,
     resolvedFuelSearchVersion: 0,
@@ -37,6 +39,7 @@ const AppStateContext = createContext({
 export function AppStateProvider({ children }) {
     const [fuelResetToken, setFuelResetToken] = useState(0);
     const [fuelDebugState, setFuelDebugState] = useState(null);
+    const [homeStationSnapshot, setHomeStationSnapshot] = useState(null);
     const [manualLocationOverride, setManualLocationOverrideState] = useState(null);
     const [resolvedFuelSearchContext, setResolvedFuelSearchContextState] = useState(null);
     const resolvedFuelSearchContextRef = useRef(null);
@@ -53,6 +56,7 @@ export function AppStateProvider({ children }) {
 
     const requestFuelReset = useCallback(() => {
         resolvedFuelSearchContextRef.current = null;
+        setHomeStationSnapshot(null);
         setResolvedFuelSearchContextState(null);
         setResolvedFuelSearchVersion(currentValue => currentValue + 1);
         setFuelResetToken(currentValue => currentValue + 1);
@@ -62,7 +66,8 @@ export function AppStateProvider({ children }) {
         if (!nextLocation) {
             setManualLocationOverrideState(null);
             resolvedFuelSearchContextRef.current = null;
-        setResolvedFuelSearchContextState(null);
+            setHomeStationSnapshot(null);
+            setResolvedFuelSearchContextState(null);
             setResolvedFuelSearchVersion(currentValue => currentValue + 1);
             return;
         }
@@ -74,6 +79,7 @@ export function AppStateProvider({ children }) {
             updatedAt: new Date().toISOString(),
         });
         resolvedFuelSearchContextRef.current = null;
+        setHomeStationSnapshot(null);
         setResolvedFuelSearchContextState(null);
         setResolvedFuelSearchVersion(currentValue => currentValue + 1);
     }, []);
@@ -81,6 +87,7 @@ export function AppStateProvider({ children }) {
     const clearManualLocationOverride = useCallback(() => {
         setManualLocationOverrideState(null);
         resolvedFuelSearchContextRef.current = null;
+        setHomeStationSnapshot(null);
         setResolvedFuelSearchContextState(null);
         setResolvedFuelSearchVersion(currentValue => currentValue + 1);
     }, []);
@@ -99,6 +106,7 @@ export function AppStateProvider({ children }) {
     const clearResolvedFuelSearchContext = useCallback(() => {
         if (!resolvedFuelSearchContextRef.current) return;
         resolvedFuelSearchContextRef.current = null;
+        setHomeStationSnapshot(null);
         setResolvedFuelSearchContextState(null);
         setResolvedFuelSearchVersion(value => value + 1);
     }, []);
@@ -173,6 +181,8 @@ export function AppStateProvider({ children }) {
 
     const value = useMemo(() => ({
         fuelDebugState,
+        homeStationSnapshot,
+        setHomeStationSnapshot,
         fuelResetToken,
         manualLocationOverride,
         resolvedFuelSearchContext,
@@ -194,7 +204,7 @@ export function AppStateProvider({ children }) {
         holdRootReveal,
         startRootReveal,
         hideRootReveal
-    }), [fuelDebugState, fuelResetToken, manualLocationOverride, resolvedFuelSearchContext, resolvedFuelSearchVersion, clusterProbeRequest, isClusterProbeSessionActive, rootRevealPhase, rootRevealVersion, hasCompletedRootReveal, setFuelDebugState, setManualLocationOverride, clearManualLocationOverride, setResolvedFuelSearchContext, clearResolvedFuelSearchContext, requestClusterProbe, clearClusterProbeRequest, finishClusterProbeSession, requestFuelReset, holdRootReveal, startRootReveal, hideRootReveal]);
+    }), [fuelDebugState, homeStationSnapshot, fuelResetToken, manualLocationOverride, resolvedFuelSearchContext, resolvedFuelSearchVersion, clusterProbeRequest, isClusterProbeSessionActive, rootRevealPhase, rootRevealVersion, hasCompletedRootReveal, setFuelDebugState, setManualLocationOverride, clearManualLocationOverride, setResolvedFuelSearchContext, clearResolvedFuelSearchContext, requestClusterProbe, clearClusterProbeRequest, finishClusterProbeSession, requestFuelReset, holdRootReveal, startRootReveal, hideRootReveal]);
 
     return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
 }

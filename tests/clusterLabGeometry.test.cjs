@@ -110,6 +110,13 @@ for t in stride(from: duration * 0.68, through: ClusterLabGeometry.completionDur
 let tiny = duration * 0.0001
 assert(ClusterLabGeometry.progress(elapsed: tiny, duration: duration, distance: 180, speed: 1200) < 0.000001)
 assert(abs(ClusterLabGeometry.progress(elapsed: ClusterLabGeometry.completionDuration(for: duration) - tiny, duration: duration, distance: 180, speed: 1200) - 1) < 0.000001)
+// The larger focused footprint extends only contacts involving that station.
+let focusPair = [station("a", 3, 0), station("b", 4, 90)]
+assert(ClusterLabGeometry.owners(focusPair, previous: [:])["b"] == "b")
+assert(ClusterLabGeometry.owners(focusPair, previous: [:], selectedId: "a")["b"] == "a")
+assert(ClusterLabGeometry.owners(focusPair, previous: [:], selectedId: "missing")["b"] == "b")
+let focusRetained = [station("a", 3, 0), station("b", 4, 127)]
+assert(ClusterLabGeometry.owners(focusRetained, previous: merged, selectedId: "a")["b"] == "a")
 print("native geometry passed")
 `);
         const binary = path.join(directory, 'geometry-test');
