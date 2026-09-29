@@ -4,6 +4,9 @@ import MapKit
 final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   let map = MKMapView()
   let renderer = ClusterLabRenderer()
+  let onStationSelect = EventDispatcher()
+  private var overlayBottomInset: CGFloat = 0
+  private var focusedStationId: String?
   private lazy var mapAnchor = ClusterLabMapAnchor(container: renderer.container)
   private var focusInteraction: ClusterLabFocusInteraction?
   private var frameClock: ClusterLabFrameClock?
@@ -117,7 +120,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   }
 
   func setActive(_ value: Bool) {
-    if value && !active { needsCameraFit = true }
+    if value && !active { needsCameraFit = true; focusedStationId = nil }
     if !value || needsCameraFit { renderer.container.isHidden = true }
     active = value
     map.showsUserLocation = value
@@ -163,7 +166,23 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     // Points are the native iOS layout unit. The 2pt allowance also protects the
     // requested 15pt empty margin from projection rounding and glass refraction.
     bounds.inset(by: UIEdgeInsets(top: safeAreaInsets.top + 17, left: safeAreaInsets.left + 17,
-                                 bottom: safeAreaInsets.bottom + 17, right: safeAreaInsets.right + 17))
+                                 bottom: max(safeAreaInsets.bottom + 17, min(overlayBottomInset, bounds.height - safeAreaInsets.top - 64)),
+                                 right: safeAreaInsets.right + 17))
+  }
+
+  func setOverlayBottomInset(_ value: CGFloat) {
+    guard value.isFinite, abs(value - overlayBottomInset) > 1 else { return }
+    overlayBottomInset = max(0, value)
+    needsCameraFit = true
+    refresh()
+  }
+
+  func didFocusStation(_ id: String) { focusedStationId = id; needsCameraFit = false }
+
+  func selectStation(_ id: String) -> Bool {
+    guard focusStation(id) else { return false }
+    onStationSelect(["id": id])
+    return true
   }
 
   @discardableResult
@@ -196,11 +215,10 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
                          height: nativeViewport.height * unitsPerPoint)
     isFittingCamera = true
     defer { isFittingCamera = false }
-    let camera = map.camera
-    if camera.heading != 0 || camera.pitch != 0 {
-      camera.heading = 0; camera.pitch = 0
-      map.setCamera(camera, animated: false)
-    }
+    // Finish any prior focus flight before applying this initial/layout fit.
+    let camera = map.camera.copy() as! MKMapCamera
+    camera.heading = 0; camera.pitch = 0
+    map.setCamera(camera, animated: false)
     mapAnchor.prepareForCameraJump(to: MKMapPoint(x: rect.midX, y: rect.midY).coordinate)
     map.setVisibleMapRect(rect, animated: false)
     renderer.prepareForCameraFit()
@@ -210,7 +228,10 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   }
 
   private func fitIfNeeded() {
-    if needsCameraFit && probe == nil && pendingProbe == nil { fitCamera(to: latestStations) }
+    if needsCameraFit && probe == nil && pendingProbe == nil {
+      if let id = focusedStationId, latestStations.contains(where: { $0.id == id }) { focusStation(id) }
+      else { fitCamera(to: latestStations) }
+    }
   }
 
   func refresh() {

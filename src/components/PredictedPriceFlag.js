@@ -10,7 +10,7 @@ function formatPrice(price) {
     return `$${price.toFixed(2)}`;
 }
 
-export default function PredictedPriceFlag({ validation, isDark, themeColors, compact = false }) {
+export default function PredictedPriceFlag({ validation, isDark, themeColors, compact = false, hitSlop }) {
     if (!validation?.usedPrediction) {
         return null;
     }
@@ -45,7 +45,7 @@ export default function PredictedPriceFlag({ validation, isDark, themeColors, co
                 accessibilityRole="button"
                 accessibilityLabel="Estimated price, tap for details"
                 onPress={handlePress}
-                hitSlop={6}
+                hitSlop={hitSlop ?? 6}
                 style={styles.compactBadge}
             >
                 <SymbolView name="info.circle" size={12} tintColor={iconTint} />
@@ -58,7 +58,7 @@ export default function PredictedPriceFlag({ validation, isDark, themeColors, co
             accessibilityRole="button"
             accessibilityLabel="Estimated price, tap for details"
             onPress={handlePress}
-            hitSlop={4}
+            hitSlop={hitSlop ?? 4}
             style={styles.subtleBadge}
         >
             <SymbolView name="info.circle" size={11} tintColor={iconTint} />

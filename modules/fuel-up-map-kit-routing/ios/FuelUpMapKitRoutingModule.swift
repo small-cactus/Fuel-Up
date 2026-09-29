@@ -39,6 +39,18 @@ public final class FuelUpMapKitRoutingModule: Module {
       Prop("isDark") { (view, isDark: Bool) in view.setDark(isDark) }
       Prop("active") { (view, active: Bool) in view.setActive(active) }
       Prop("probeToken") { (view, token: String?) in view.requestProbe(token) }
+      Prop("overlayBottomInset") { (view, inset: Double) in view.setOverlayBottomInset(CGFloat(inset)) }
+      Events("onStationSelect")
+      AsyncFunction("focusStation") { (view: ClusterLabMapView, id: String) in view.focusStation(id) }
+    }
+
+    View(ClusterLabPageControl.self) {
+      ViewName("ClusterLabPageControl")
+      Prop("pageCount") { (view, count: Int) in view.pageCount = count }
+      Prop("currentPage") { (view, page: Int) in view.currentPage = page }
+      Prop("isDark") { (view, dark: Bool) in view.setDark(dark) }
+      Events("onPageChange")
+      OnViewDidUpdateProps { (view: ClusterLabPageControl) in view.applyPages() }
     }
 
     AsyncFunction("openDrivingDirectionsInMapsAsync") { (destination: [String: Any], promise: Promise) in

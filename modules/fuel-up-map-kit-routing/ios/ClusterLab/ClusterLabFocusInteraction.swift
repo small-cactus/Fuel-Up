@@ -14,7 +14,7 @@ final class ClusterLabFocusInteraction: NSObject, UIGestureRecognizerDelegate {
     // Focus on finger-up; waiting for a possible second tap adds the system's
     // double-tap timeout before any calculation or camera movement can begin.
     view.map.addGestureRecognizer(tap)
-    view.renderer.onFocus = { [weak view] id in view?.focusStation(id) ?? false }
+    view.renderer.onFocus = { [weak view] id in view?.selectStation(id) ?? false }
   }
 
   func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
@@ -28,7 +28,7 @@ final class ClusterLabFocusInteraction: NSObject, UIGestureRecognizerDelegate {
   @objc private func tapped(_ tap: UITapGestureRecognizer) {
     guard tap.state == .ended, let view,
           let id = view.renderer.station(at: tap.location(in: view.map), in: view.map) else { return }
-    view.focusStation(id)
+    view.selectStation(id)
   }
 }
 
@@ -50,11 +50,18 @@ extension ClusterLabMapView {
     let minimumDistance = max(20, map.cameraZoomRange?.minCenterCoordinateDistance ?? 0)
     let dot = map.userLocation.location.map { map.convert($0.coordinate, toPointTo: map) }
     guard let plan = ClusterLabFocus.plan(id: id, stations: points, previous: renderer.clusterOwners,
-      dot: dot, bounds: map.bounds, maximumScale: max(1, distance / minimumDistance)) else { return false }
-    camera.centerCoordinate = station.coordinate
+      dot: dot, bounds: fitBounds, maximumScale: max(1, distance / minimumDistance)) else { return false }
+    // Center the station in the unobscured map, above the React card. Project
+    // that offset back through the existing heading before the native zoom.
+    let point = map.convert(station.coordinate, toPointTo: map)
+    let cameraCenter = map.convert(camera.centerCoordinate, toPointTo: map)
+    camera.centerCoordinate = map.convert(CGPoint(
+      x: point.x + (cameraCenter.x - fitBounds.midX) / plan.scale,
+      y: point.y + (cameraCenter.y - fitBounds.midY) / plan.scale), toCoordinateFrom: map)
     camera.centerCoordinateDistance = min(camera.centerCoordinateDistance, distance / plan.scale)
     // Existing physical split/merge animation follows MapKit's actual movement.
     // No custom camera tween, intermediate camera probes, or gesture blocking.
+    didFocusStation(id)
     map.setCamera(camera, animated: !UIAccessibility.isReduceMotionEnabled)
     refresh()
     return true

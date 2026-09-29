@@ -4,6 +4,7 @@ import { useAppState } from '../../AppStateContext';
 import { usePreferences } from '../../PreferencesContext';
 import { getLastDeviceLocationRegion } from '../../lib/deviceLocationCache';
 import { getCachedFuelPriceSnapshot, refreshFuelPriceSnapshot } from '../../services/fuel';
+import { buildLabStations } from './stationCardModel';
 
 // Data crosses the bridge once per search. The Swift view owns all camera and
 // animation work; no JS region events, timers, markers, or frame updates.
@@ -24,19 +25,7 @@ export default function useClusterLabStations(active) {
         let cancelled = false;
         const publish = (origin, snapshot) => {
             if (cancelled) return;
-            const quotes = [...(snapshot?.topStations || [])];
-            if (snapshot?.quote) quotes.push(snapshot.quote);
-            const byId = new Map();
-            for (const quote of quotes) {
-                if (quote.providerTier !== 'station' || quote.isEstimated ||
-                    quote.stationId == null || !Number.isFinite(quote.latitude) ||
-                    !Number.isFinite(quote.longitude) || !Number.isFinite(quote.price) || quote.price <= 0) continue;
-                byId.set(String(quote.stationId), {
-                    id: String(quote.stationId), latitude: quote.latitude, longitude: quote.longitude,
-                    price: quote.price, name: quote.stationName || quote.name || 'Gas station',
-                });
-            }
-            setResult({ scope, origin: { latitude: origin.latitude, longitude: origin.longitude }, stations: [...byId.values()] });
+            setResult({ scope, origin: { latitude: origin.latitude, longitude: origin.longitude }, stations: buildLabStations(snapshot) });
         };
         (async () => {
             let origin = Number.isFinite(latitude) && Number.isFinite(longitude) ? { latitude, longitude } :

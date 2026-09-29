@@ -3,6 +3,26 @@
 The second native tab is a full-bleed Apple map with station price pills. It shares
 the fuel service cache, but its rendering and animation are independent of Home.
 
+## Station cards
+
+`ClusterLabScreen` keeps one selected station ID shared by the React carousel and
+native map. `StationPriceCard` renders the quote with Expo's regular native glass;
+`StationCardCarousel` virtualizes horizontal pages and measures their content.
+Reset to cheapest sits above the card. A UIKit `UIPageControl` sits between the
+card and native tab bar, with native scrubbing and accessibility behavior.
+Changing pages focuses the station through a native view command. Tapping a map
+pill emits one selection event and scrolls the card without echoing the camera
+command. Map gestures and cluster animation never send per-frame work to React.
+
+`stationCardModel` preserves quote metadata, deduplicates station IDs, and uses
+the same price/ID ordering as native market ranking. It retains the existing
+station eligibility rules and shared fuel-grade/estimate/navigation logic.
+The age label updates once a minute while the tab is active. Content measurements
+adapt to Dynamic Type; dimension or font changes rebuild only the visible pages.
+The overlay reports its occupied height so initial fit and focus use the remaining
+map area. Focus offsets the copied native camera using its actual projected
+center, including MapKit safe-area margins and the current heading.
+
 `ClusterLabMapView` owns MapKit. `ClusterLabMapAnchor` places the shared glass
 root inside one live `MKAnnotationView`. MapKit moves that carrier with its
 map content, so panning does not depend on the overlay catching up to a camera

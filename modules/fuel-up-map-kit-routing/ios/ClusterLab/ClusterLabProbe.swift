@@ -76,7 +76,7 @@ final class ClusterLabProbe {
         focusDetails["afterDistance"] = view.map.camera.centerCoordinateDistance
         focusDetails["afterHeading"] = view.map.camera.heading
         let point = view.map.convert(center, toPointTo: view.map)
-        let cameraCenter = view.map.convert(view.map.centerCoordinate, toPointTo: view.map)
+        let cameraCenter = CGPoint(x: view.fitBounds.midX, y: view.fitBounds.midY)
         focusDetails["centerError"] = hypot(point.x - cameraCenter.x, point.y - cameraCenter.y)
         finish(status: "completed")
       }
