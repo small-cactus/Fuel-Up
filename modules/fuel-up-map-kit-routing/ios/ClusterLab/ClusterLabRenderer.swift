@@ -188,6 +188,19 @@ final class ClusterLabRenderer {
     return pill
   }
 
+  private func tintOwner(for id: String) -> String {
+    var current = id
+    var visited = Set<String>()
+    // Include outward-moving duplicates while the native glass neck remains.
+    // Following the parent also handles a cluster merging into another cluster.
+    while visited.insert(current).inserted, let motion = motions[current] {
+      let parent = motion.owner != current ? motion.owner : motion.pendingRelease?.parent
+      guard let parent, motions[parent] != nil else { break }
+      current = parent
+    }
+    return current
+  }
+
   private func event(_ type: String, id: String, delta: CGFloat = 0, duration: Double = 0, details: [String: Any] = [:]) {
     if recording {
       var entry: [String: Any] = ["type": type, "id": id, "delta": delta, "duration": duration, "time": CACurrentMediaTime()]
@@ -450,13 +463,8 @@ final class ClusterLabRenderer {
       point.x += reaction.x; point.y += reaction.y
       if let pill = motion.pill {
         let previousCenter = pill.view.bounds.isEmpty ? point : pill.view.center
-        // A split duplicate first presents exactly the source badge's tint.
-        // Begin its native color transition on the first movement frame.
-        // A visible price always keeps its own global station color. Only the
-        // count representation takes the owner color, matching its +n badge.
-        let marketId = merged && motion.priceMix <= 0.5 ? motion.owner : id
-        let market: LabMarketAssessment? = !merged && motion.elapsed == 0 && motion.startedAt > 0 && !reducedMotion ?
-          nil : (markets[marketId] ?? .unknown)
+        let marketId = tintOwner(for: id)
+        let market = markets[marketId] ?? .unknown
         pill.view.accessibilityTraits = emphasis.selectedId == id && motion.priceMix > 0.5 ? [.selected] : []
         pill.render(center: point, width: motion.width, priceMix: motion.priceMix, count: motion.count,
                     market: market, dark: dark, scale: emphasis.scale(for: id, priceMix: motion.priceMix))
@@ -472,6 +480,9 @@ final class ClusterLabRenderer {
           samples.append(["id": id, "x": pill.view.center.x, "y": pill.view.center.y,
                           "width": pill.view.bounds.width, "height": pill.view.bounds.height, "priceMix": motion.priceMix,
                           "tintScore": pill.tintScore, "tintUpdates": pill.tintUpdateCount,
+                          "materialTint": pill.materialTint,
+                          "tintOwner": marketId, "clusterOwner": motion.owner,
+                          "releaseParent": motion.pendingRelease?.parent ?? "",
                           "rebound": max(0, ((basePoint.x - target.x) * (target.x - start.x) +
                             (basePoint.y - target.y) * (target.y - start.y)) / max(projectedTravel, 0.001)),
                           "reactionX": reaction.x, "reactionY": reaction.y,
@@ -511,13 +522,14 @@ final class ClusterLabRenderer {
       let attachmentOffset = renderedBadgeOffsets[ownerId] ?? ClusterLabGeometry.badgeOffset
       center.x += attachmentOffset + owner.reaction.offset.x
       center.y += owner.reaction.offset.y
-      badge.render(center: center, width: 44, priceMix: 0, count: members.count, market: markets[ownerId] ?? .unknown, dark: dark)
+      let badgeMarket = markets[tintOwner(for: ownerId)] ?? .unknown
+      badge.render(center: center, width: 44, priceMix: 0, count: members.count, market: badgeMarket, dark: dark)
       for member in members where member.pill != nil {
         let moverCenter = member.pill!.view.center
         let handoffDelta = hypot(moverCenter.x - badge.view.center.x, moverCenter.y - badge.view.center.y)
         // Match the accumulator's content as well as its geometry in this same
         // transaction before releasing the temporary native effect view.
-        member.pill?.render(center: moverCenter, width: 44, priceMix: 0, count: members.count, market: markets[ownerId] ?? .unknown, dark: dark)
+        member.pill?.render(center: moverCenter, width: 44, priceMix: 0, count: members.count, market: badgeMarket, dark: dark)
         member.pill?.view.transform = badge.view.transform
         let renderedDelta = hypot(member.pill!.view.frame.midX - badge.view.frame.midX,
                                   member.pill!.view.frame.midY - badge.view.frame.midY)
@@ -529,6 +541,8 @@ final class ClusterLabRenderer {
                         "width": badge.view.bounds.width, "count": members.count, "role": "badge",
                         "attachmentOffset": attachmentOffset, "priceMix": 0,
                         "tintScore": badge.tintScore, "tintUpdates": badge.tintUpdateCount,
+                        "materialTint": badge.materialTint,
+                        "tintOwner": tintOwner(for: ownerId), "clusterOwner": ownerId, "releaseParent": "",
                         "reactionX": owner.reaction.offset.x, "reactionY": owner.reaction.offset.y,
                         "contained": container.bounds.contains(badge.view.frame)])
       }

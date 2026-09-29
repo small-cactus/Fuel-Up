@@ -16,8 +16,9 @@ card is a suggestion. Selecting any station, including the first card, focuses
 that station consistently. Returning to the tab starts in overview again.
 A UIKit `UIPageControl` sits between the
 card and native tab bar, with native scrubbing and accessibility behavior.
-Pagination uses the unwrapped UIKit page control with its automatic background
-and default indicator styling; there is no custom pagination capsule.
+Pagination keeps UIKit's native page control and default indicators inside one
+native regular Liquid Glass capsule. The control uses its minimal backing so
+UIKit does not add a second material. The capsule hides for a single page.
 Changing pages focuses the station through a native view command. Tapping a map
 pill emits one selection event and scrolls the card without echoing the camera
 command. Map gestures and cluster animation never send per-frame work to React.
@@ -84,11 +85,12 @@ light/dark text treatment and stay legible over the lighter regular glass.
 `ClusterLabGlass` uses the installed Callstack library's public Swift glass views.
 Pills use regular glass with native `UIGlassEffect.tintColor`, high-contrast text,
 and a spoken local-price comparison. The count shares its representative price's
-tint. Departing duplicates start with the count's tint, then transition to their
-own station tint; incoming pills transition to the receiving cluster tint. A
-cached target starts at most one 80 ms native material animation per change;
-ordinary camera frames never rebuild the effect. Reduced Motion applies it
-immediately. Tinting does not alter the movement or rebound curves.
+tint. Incoming prices immediately inherit the receiving parent; departing
+duplicates retain that tint until the glass neck releases. Parent ownership is
+followed through cluster changes. Tint updates commit together without separate
+per-pill color tweens; unchanged tints never rebuild the effect. Movement and
+rebound curves are unchanged. Live probes compare the native material RGBA
+values as well as market scores between connected parents and children.
 `ClusterLabGlassGroups` pools Apple's native `UIGlassContainerEffect` views under
 the same MapKit carrier. Each effect spans the full padded root. Horizontal
 neighbors share an effect with the unchanged 36 pt spacing. Vertically dominant
@@ -308,8 +310,8 @@ the map's live camera would apply the destination before animation begins.
 
 Station market colors are cached by ID from the complete search snapshot.
 Offscreen view culling and cluster membership never change that ranking.
-A merging price retains its station color while the price is the dominant
-content; only its count representation adopts the cluster owner's color.
+A connected price or count inherits its parent's tint regardless of its text.
+Once released, a standalone price returns to its own cached market color.
 Live zoom, merge, pan, and re-entry probes compare prices against the global table.
 
 

@@ -4,6 +4,22 @@ const { execFileSync } = require('node:child_process');
 const { readFileSync } = require('node:fs');
 const path = require('node:path');
 
+// Check actual rendered materials against the connected parent, while standalone
+// stations retain their global market tint. Includes price-to-count crossfades.
+function assertParentTints(report, frame) {
+    const byId = new Map(frame.views.map(view => [view.id, view]));
+    for (const view of frame.views) {
+        const parentId = view.role === 'badge' || view.role === 'merge' ? view.clusterOwner : view.releaseParent;
+        const parent = parentId && byId.get(parentId);
+        const expectedId = parent?.tintOwner || parentId || view.id;
+        assert.equal(view.tintOwner, expectedId, `wrong tint owner for ${view.id}`);
+        assert.equal(view.tintScore, report.marketScores[expectedId], `wrong rendered tint for ${view.id}`);
+        assert.equal(view.materialTint.length, 4, 'missing native glass material tint');
+        if (parent) assert.deepEqual(view.materialTint, parent.materialTint,
+            `native glass color differs from parent for ${view.id}`);
+    }
+}
+
 test('Swift Glass Lab renders timely transitions and preserves native container geometry', { timeout: 90000 }, async t => {
     const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
     const token = `native-${Date.now()}`;
@@ -31,6 +47,7 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
         assert.ok(types.has(type), `missing ${type}`);
     }
     for (const frame of report.samples) {
+        assertParentTints(report, frame);
         assert.ok(frame.viewCount <= frame.stationCount + 1, 'unbounded temporary glass views');
         assert.ok(frame.glassGroupCount > 0 && frame.glassGroupCount <= frame.viewCount, 'unbounded native effect groups');
         for (const view of frame.views) {
@@ -43,14 +60,16 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
                     'visible pill did not follow its physical displacement');
             }
             assert.ok(view.contained, `clipped container edge: ${view.id}`);
-            if (view.priceMix > 0.5) assert.equal(view.tintScore, report.marketScores[view.id],
-                `visible price ${view.id} changed its global tint during zoom/merge`);
             assert.ok(Math.abs(view.clearanceY || 0) <= 32, 'location avoidance moved a station too far');
             assert.ok(Math.abs(view.tintScore || 0) <= 1, 'unbounded market tint');
             assert.ok(view.tintUpdates <= 20, 'native tint was being recreated every frame');
             assert.ok(Number.isFinite(view.x) && Number.isFinite(view.y), 'invalid rendered position');
         }
     }
+    assert.ok(report.samples.flatMap(frame => frame.views).filter(view => view.role === 'merge' && view.priceMix > 0.5).length >= 10,
+        'missing parent-color coverage while incoming prices are still visible');
+    assert.ok(report.samples.flatMap(frame => frame.views).filter(view => view.role === 'split' && view.releaseParent).length >= 2,
+        'missing parent-color coverage during outward neck stretch');
     const catches = report.samples.flatMap(frame => frame.views).filter(view => view.contactDelay > 0.001);
     assert.ok(catches.length > 0, 'contact resistance was not sampled on the live map');
     const visibleCatch = Math.max(...catches.map(view => Math.hypot(
@@ -196,9 +215,7 @@ test('native map carrier stays attached across long pans and camera jumps', { ti
     assert.ok(rebases >= 4, `only ${rebases} carrier rebases were exercised`);
     assert.equal(report.final.length, report.baseline.length, 'camera return lost station views');
     for (const frame of report.samples) {
-        for (const view of frame.views.filter(view => view.priceMix > 0.5)) {
-            assert.equal(view.tintScore, report.marketScores[view.id], 'culling/re-entry changed a station tint');
-        }
+        assertParentTints(report, frame);
     }
     assert.equal(report.final.length, 6);
     const maxError = Math.max(...report.anchorSamples.map(sample => sample.originError));
@@ -389,9 +406,7 @@ for (const orientation of ['north', 'rotated']) {
         assert.equal(report.status, 'completed');
         assert.equal(report.focus.requested, true);
         for (const frame of report.samples) {
-            for (const view of frame.views.filter(view => view.priceMix > 0.5)) {
-                assert.equal(view.tintScore, report.marketScores[view.id], 'zoom/culling changed a visible price tint');
-            }
+            assertParentTints(report, frame);
         }
         assert.ok(report.focus.requestMilliseconds < 50, 'focus calculation and camera request blocked the main thread');
         t.diagnostic(`Focus calculation and camera request: ${report.focus.requestMilliseconds.toFixed(2)}ms`);

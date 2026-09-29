@@ -60,6 +60,15 @@ final class ClusterLabPill {
   private(set) var tintScore: Double = 0
   private(set) var tintUpdateCount = 0
   private var hasTint = false
+  var materialTint: [CGFloat] {
+    var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+    if #available(iOS 26.0, *), let glass = view as? UIVisualEffectView,
+       let effect = glass.effect as? UIGlassEffect,
+       effect.tintColor?.getRed(&red, green: &green, blue: &blue, alpha: &alpha) == true {
+      return [red, green, blue, alpha]
+    }
+    return []
+  }
 
   init(price: Double, name: String) {
     self.price = price
@@ -91,7 +100,6 @@ final class ClusterLabPill {
     }
     let nextScore = (market.score * 20).rounded() / 20
     guard !hasTint || nextScore != tintScore else { return }
-    let animate = hasTint && !UIAccessibility.isReduceMotionEnabled
     hasTint = true; tintScore = nextScore; tintUpdateCount += 1
     let color = ClusterLabGlass.marketTint(score: nextScore)
     if #available(iOS 26.0, *), let glass = view as? LiquidGlassViewImpl {
@@ -99,12 +107,9 @@ final class ClusterLabPill {
       let effect = UIGlassEffect(style: .regular)
       effect.isInteractive = false
       effect.tintColor = color
-      if animate {
-        // One native material animation per target change, not one effect per
-        // frame. Its 80 ms finish precedes the shortest split/merge handoff.
-        UIView.animate(withDuration: 0.08, delay: 0,
-                       options: [.beginFromCurrentState, .allowUserInteraction]) { glass.effect = effect }
-      } else { UIView.performWithoutAnimation { glass.effect = effect } }
+      // Commit connected surfaces' identical tint together. Independent color
+      // tweens briefly mixed a child's old color into its parent's glass.
+      UIView.performWithoutAnimation { glass.effect = effect }
     } else { view.backgroundColor = color ?? .secondarySystemBackground }
   }
 
