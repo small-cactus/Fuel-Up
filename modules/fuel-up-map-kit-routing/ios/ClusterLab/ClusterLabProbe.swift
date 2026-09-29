@@ -32,6 +32,8 @@ final class ClusterLabProbe {
     // The pair run isolates +1 travel; the normal six-station gate is unchanged.
     let offsets = token.hasPrefix("overview-") ? [(0.0, 0.0), (0.0, 0.0001)] + Array(fixture.dropFirst(2)) :
       token.hasPrefix("location-") ? [(0.0, 0.0), (0.0, 0.00001), (0.0011, 0.0015), (-0.001, -0.0015)] :
+      token.hasPrefix("islands-") ? [(0.0, 0.0), (0.0, 0.00001), (0.0003, 0.0010), (0.0003, 0.00101),
+                                      (-0.0004, 0.0007), (-0.0004, 0.00071)] :
       token.hasPrefix("rows-") ? [(0.0, 0.0015), (0.0, 0.00151), (0.00055, 0.0015), (0.00055, 0.00151)] :
       token.hasPrefix("vertical-") ? [(0.0, 0.0), (0.00055, 0.0)] :
       (token.hasPrefix("pair-") ? Array(fixture.prefix(2)) : fixture)

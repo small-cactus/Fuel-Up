@@ -4,6 +4,7 @@ import CoreGraphics
 struct LabGlassItem {
   let id: String
   let frame: CGRect
+  var family: String? = nil
 }
 
 // Native glass has one isotropic spacing. Share effects along horizontal runs,
@@ -42,6 +43,12 @@ enum ClusterLabGlassGrouping {
             let other = items[j].frame
             let gap = ClusterLabGeometry.capsuleGap(item.frame, other)
             guard gap <= reach else { continue }
+            // Proximity must not join independent cluster islands, including
+            // diagonal price-to-count chains. Distant islands still pool effects.
+            if item.family != items[j].family {
+              conflicts.append((i, j))
+              continue
+            }
             // Classify the nearest capsule edges, not their centers. A count
             // beside a price has a diagonal center-to-center line to the next
             // row; treating that line as horizontal reconnects both rows through

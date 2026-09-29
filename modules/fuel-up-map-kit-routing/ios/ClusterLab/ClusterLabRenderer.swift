@@ -53,6 +53,7 @@ private final class LabStationMotion {
   var displayedReactionVelocity = LabVector.zero
   var impactApplied = false
   var contactCatch: LabContactCatch?
+  var glassParent: String?
   var pendingRelease: LabPendingRelease?
   var quiet = false
   var clearance: CGFloat = 0
@@ -67,7 +68,7 @@ private final class LabStationMotion {
     // A new trajectory starts from the current visible pose. Never carry a
     // delayed clock into a reversal or a camera-end retiming.
     contactCatch = nil
-    if !restarting { startedAt = curveStartedAt; impactApplied = false; pendingRelease = nil }
+    if !restarting { startedAt = curveStartedAt; impactApplied = false; pendingRelease = nil; glassParent = nil }
   }
 
   init(_ station: ClusterLabStation) {
@@ -209,7 +210,7 @@ final class ClusterLabRenderer {
     // Include outward-moving duplicates while the native glass neck remains.
     // Following the parent also handles a cluster merging into another cluster.
     while visited.insert(current).inserted, let motion = motions[current] {
-      let parent = motion.owner != current ? motion.owner : motion.pendingRelease?.parent
+      let parent = motion.owner != current ? motion.owner : motion.glassParent ?? motion.pendingRelease?.parent
       guard let parent, motions[parent] != nil else { break }
       current = parent
     }
@@ -361,6 +362,7 @@ final class ClusterLabRenderer {
     for release in releases {
       guard motions[release.parent] != nil, let child = motions[release.child] else { continue }
       let mass = CGFloat(nextMasses[release.parent] ?? 1)
+      child.glassParent = release.parent
       child.pendingRelease = LabPendingRelease(parent: release.parent, direction: release.direction,
         speed: release.speed, mass: mass, startedAt: now)
       event("split-stretch", id: release.child, details: ["owner": release.parent])
@@ -636,23 +638,23 @@ final class ClusterLabRenderer {
     for (id, badge) in badges {
       badge.view.transform = CGAffineTransform(translationX: 0, y: clearance.offsets[id] ?? 0)
     }
-    let connections = glassGroups.update(renderedViews)
-    // Native necks can appear before logical membership changes. Color the
-    // actual connected surface as one piece, without recoloring distant runs
-    // that merely reuse the same effect container.
-    var colorOwners: [String: String] = [:]
+    // A departing duplicate stays in its original glass family through the
+    // native neck's remaining reach, independently of the recoil trigger.
+    for motion in motions.values where motion.glassParent != nil {
+      guard let parentId = motion.glassParent, let child = motion.pill?.view,
+            let parent = motions[parentId]?.pill?.view else {
+        motion.glassParent = nil; continue
+      }
+      let gap = min(ClusterLabGeometry.capsuleGap(child.frame, parent.frame),
+                    badges[parentId].map { ClusterLabGeometry.capsuleGap(child.frame, $0.view.frame) } ?? .infinity)
+      if gap > ClusterLabGeometry.glassSpacing && motion.pendingRelease == nil { motion.glassParent = nil }
+    }
     let logicalTints = Dictionary(uniqueKeysWithValues: renderedPills.keys.map { key in
       (key, tintOwner(for: key.hasPrefix("badge:") ? String(key.dropFirst(6)) : key))
     })
-    for (id, candidate) in logicalTints {
-      guard let connection = connections[id], let station = motions[candidate]?.station else { continue }
-      if let current = colorOwners[connection], let chosen = motions[current]?.station,
-         chosen.price < station.price || (chosen.price == station.price && chosen.id < station.id) { continue }
-      colorOwners[connection] = candidate
-    }
+    let connections = glassGroups.update(renderedViews, families: logicalTints)
     for (id, pill) in renderedPills {
-      guard let connection = connections[id], let owner = colorOwners[connection] else { continue }
-      pill.applyMarket(markets[owner] ?? .unknown)
+      pill.applyMarket(markets[logicalTints[id] ?? id] ?? .unknown)
     }
     if recording {
       // Handoffs are recorded as events; frame samples describe surviving views.
@@ -662,7 +664,7 @@ final class ClusterLabRenderer {
           if let pill = renderedPills[id], let connection = connections[id] {
             samples[index]["logicalTintOwner"] = logicalTints[id]
             samples[index]["glassConnection"] = connection
-            samples[index]["tintOwner"] = colorOwners[connection]
+            samples[index]["tintOwner"] = logicalTints[id]
             samples[index]["tintScore"] = pill.tintScore
             samples[index]["tintUpdates"] = pill.tintUpdateCount
             samples[index]["materialTint"] = pill.materialTint

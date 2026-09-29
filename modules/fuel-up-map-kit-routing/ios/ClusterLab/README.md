@@ -21,7 +21,7 @@ unchanged; an interrupted overview resumes the appropriate interaction mode.
 A UIKit `UIPageControl` sits between the
 card and native tab bar, with native scrubbing and accessibility behavior.
 Pagination keeps UIKit's native page control over one regular Liquid Glass
-capsule. The 28pt capsule is sized for at most seven visible indicator slots;
+capsule. The 28pt capsule has 8pt side padding around at most seven visible indicator slots;
 UIKit condenses longer lists within that width. The control retains a 44pt touch
 height and uses label colors (45% opacity for inactive dots) for theme contrast.
 Its minimal backing avoids a second material. The capsule hides for one page.
@@ -94,11 +94,12 @@ and a spoken local-price comparison. The count shares its representative price's
 tint. Incoming prices immediately inherit the receiving parent; departing
 duplicates retain that tint until the glass neck releases. Parent ownership is
 followed through cluster changes. Tint updates commit together without separate
-per-pill color tweens; unchanged tints never rebuild the effect. Physical native
-bridges can precede logical membership, so the grouping pass also exposes actual
-connected components. Each connected surface uses its cheapest logical parent's
-cached global market tint (stable station-ID tie break). Distant components can
-reuse one effect container without sharing colors. Movement and
+per-pill color tweens; unchanged tints never rebuild the effect. The grouping pass follows intended cluster families, so neighboring
+price/count islands cannot form diagonal chains through each other's capsules.
+Nearby independent families use separate native effects; distant families pool
+those effects. Departing duplicates retain the original family through the
+remaining native neck reach, independently of the recoil trigger. Every surface
+uses its family's cached global market tint. Movement and
 rebound curves are unchanged. Live probes compare the native material RGBA
 values as well as market scores between connected parents and children.
 `ClusterLabGlassGroups` pools Apple's native `UIGlassContainerEffect` views under

@@ -25,11 +25,14 @@ final class ClusterLabPageControl: ExpoView {
     super.layoutSubviews()
     // UIKit condenses long page lists itself. Size for the visible row rather
     // than reserving a dot for every station, and keep its full touch height.
-    let width = min(bounds.width, control.size(forNumberOfPages: min(control.numberOfPages, 7)).width)
+    let controlWidth = max(0, min(bounds.width - 16,
+      control.size(forNumberOfPages: min(control.numberOfPages, 7)).width))
+    let width = min(bounds.width, controlWidth + 16)
     let height = min(bounds.height, 28)
     glass.frame = CGRect(x: (bounds.width - width) / 2, y: (bounds.height - height) / 2,
                          width: width, height: height)
-    control.frame = CGRect(x: glass.frame.minX, y: 0, width: width, height: bounds.height)
+    control.frame = CGRect(x: (bounds.width - controlWidth) / 2, y: 0,
+                           width: controlWidth, height: bounds.height)
   }
 
   func setDark(_ dark: Bool) {

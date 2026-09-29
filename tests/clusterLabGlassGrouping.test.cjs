@@ -46,6 +46,20 @@ for y in stride(from: CGFloat(35), through: 68, by: 1) {
     assert(result["a"] != result["b"], "diagonal count joined stacked rows")
   }
 }
+// The screenshot's staggered cluster islands can form a diagonal chain through
+// price and count edges. Each intended pair must blend without joining neighbors.
+func cluster(_ id: String, _ x: CGFloat, _ y: CGFloat) -> [LabGlassItem] {
+  [LabGlassItem(id: id, frame: CGRect(x: x - 42, y: y - 16, width: 84, height: 32), family: id),
+   LabGlassItem(id: "badge:" + id, frame: CGRect(x: x + 34, y: y - 16, width: 44, height: 32), family: id)]
+}
+for y in stride(from: CGFloat(-45), through: 45, by: 1) {
+  let islands = cluster("a", 0, 0) + cluster("b", 95, y) + cluster("c", -65, y - 35)
+  let result = grouped(islands)
+  for id in ["a", "b", "c"] { assert(result[id] == result["badge:" + id]) }
+  assert(result["a"] != result["b"] && result["a"] != result["c"] && result["b"] != result["c"])
+}
+let pooled = (0..<1000).flatMap { cluster(String($0), CGFloat($0) * 400, 0) }
+assert(Set(grouped(pooled).values).count == 1)
 let distant = (0..<1000).map { item(String($0), CGFloat($0) * 400, 0) }
 assert(Set(grouped(distant).values).count == 1)
 let separated = ClusterLabGlassGrouping.layout(distant, previous: [:])
