@@ -8,6 +8,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   let onOverviewChange = EventDispatcher()
   private var overview = true
   private var overviewDestination: MKMapCamera?
+  private var fittedOverview: (stations: [ClusterLabStation], bounds: CGRect, camera: MKMapCamera)?
   private var overlayBottomInset: CGFloat = 0
   private var focusedStationId: String?
   private lazy var mapAnchor = ClusterLabMapAnchor(container: renderer.container)
@@ -134,7 +135,10 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   }
 
   func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
-    if !isFittingCamera && !needsCameraFit && overviewDestination == nil { setOverview(false) }
+    if !isFittingCamera && !needsCameraFit && overviewDestination == nil {
+      renderer.endOverview()
+      setOverview(false)
+    }
     cameraMoving = true
     renderer.cameraBegan()
     refresh()
@@ -165,7 +169,10 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
       // counts as overview; otherwise keep the return action available.
       if actual.distance(from: target) > 1 ||
           abs(camera.centerCoordinateDistance / destination.centerCoordinateDistance - 1) > 0.005 ||
-          abs(camera.heading - destination.heading) > 0.1 { setOverview(false) }
+          abs(camera.heading - destination.heading) > 0.1 {
+        renderer.endOverview()
+        setOverview(false)
+      }
     }
     cameraMoving = false
     renderer.cameraEnded()
@@ -253,6 +260,15 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
                          height: nativeViewport.height * unitsPerPoint)
     isFittingCamera = true
     defer { isFittingCamera = false }
+    if animated, let saved = fittedOverview, saved.stations == stations, saved.bounds == fitBounds,
+       let camera = saved.camera.copy() as? MKMapCamera {
+      overviewDestination = camera.copy() as? MKMapCamera
+      setOverview(true)
+      map.setCamera(camera, animated: true)
+      fittedSize = bounds.size; fittedInsets = safeAreaInsets
+      needsCameraFit = false; needsReconcile = true
+      return true
+    }
     if animated, let camera = map.camera.copy() as? MKMapCamera {
       // Measure MapKit's current scale, independent of heading. Solve the same
       // overview as initial layout, then let one native camera flight do the work.
@@ -269,6 +285,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
       camera.centerCoordinateDistance *= unitsPerPoint / currentUnitsPerPoint * latitudeScale
       camera.centerCoordinate = target; camera.heading = 0; camera.pitch = 0
       overviewDestination = camera.copy() as? MKMapCamera
+      fittedOverview = (stations, fitBounds, camera.copy() as! MKMapCamera)
       setOverview(true)
       map.setCamera(camera, animated: true)
       fittedSize = bounds.size; fittedInsets = safeAreaInsets
@@ -281,6 +298,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     map.setCamera(camera, animated: false)
     mapAnchor.prepareForCameraJump(to: MKMapPoint(x: rect.midX, y: rect.midY).coordinate)
     map.setVisibleMapRect(rect, animated: false)
+    fittedOverview = (stations, fitBounds, map.camera.copy() as! MKMapCamera)
     renderer.prepareForCameraFit()
     overviewDestination = nil
     setOverview(true)

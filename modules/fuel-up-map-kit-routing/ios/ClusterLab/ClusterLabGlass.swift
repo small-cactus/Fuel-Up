@@ -1,7 +1,6 @@
 import UIKit
-import LiquidGlass
 
-// Use native Apple effects and the installed library's pill implementation.
+// Use Apple's effect views directly so UIKit owns their material and layout.
 // No masks, custom blur, borders, or replicated glass.
 enum ClusterLabGlass {
   static func container() -> UIView {
@@ -25,9 +24,10 @@ enum ClusterLabGlass {
 
   static func pill() -> UIView {
     if #available(iOS 26.0, *), NSClassFromString("UIGlassEffect") != nil {
-      let view = LiquidGlassViewImpl()
-      view.style = .regular
-      view.interactive = false
+      // The library subclass returns from layoutSubviews without calling
+      // super once an effect exists. That skips UIKit's native material layout
+      // during resizing/reparenting even when effect.tintColor is unchanged.
+      let view = UIVisualEffectView(effect: nil)
       view.cornerConfiguration = .capsule()
       return view
     }
@@ -105,8 +105,7 @@ final class ClusterLabPill {
     guard !hasTint || nextScore != tintScore else { return }
     hasTint = true; tintScore = nextScore; tintUpdateCount += 1
     let color = ClusterLabGlass.marketTint(score: nextScore)
-    if #available(iOS 26.0, *), let glass = view as? LiquidGlassViewImpl {
-      glass.effectTintColor = color
+    if #available(iOS 26.0, *), let glass = view as? UIVisualEffectView {
       let effect = UIGlassEffect(style: .regular)
       effect.isInteractive = false
       effect.tintColor = color

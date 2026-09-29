@@ -91,17 +91,34 @@ Saturation ranges from pastel to the original onboarding hue, with constant
 brightness and opacity. Adaptive system-label foregrounds match onboarding's
 light/dark text treatment and stay legible over the lighter regular glass.
 
-`ClusterLabGlass` uses Apple's public container effect and the installed
-Callstack library's public Swift pill views. Native container effects are
+`ClusterLabGlass` uses Apple's public container and pill effects. Native container effects are
 assigned once; layouts and membership changes never recreate their materials.
-Pills use regular glass with native `UIGlassEffect.tintColor`, high-contrast text,
+Pooling and native paint order are solved canonically from the current scene.
+Effect-object reuse is handled separately. Both the container order and the
+order of pills inside each container are restored deterministically after
+reparenting. Otherwise an identical camera can put a neighboring glass shadow
+above a pill after one zoom path and below it after another, changing its rendered
+color without changing its tint. Distant islands still share effects.
+Pills use UIKit `UIVisualEffectView` directly, preserving its native layout during
+resizing and reparenting. The library pill subclass skips `super.layoutSubviews()`
+once an effect exists; its tint property can therefore remain correct while the
+rendered material is stale. Pills use regular glass with native
+`UIGlassEffect.tintColor`, high-contrast text,
 and a spoken local-price comparison. The count shares its representative price's
 tint. Every visible price keeps its station's cached market tint, including
-incoming and departing price surfaces. Only +N content inherits its parent.
+incoming and departing price surfaces. A split duplicate stays +N with its
+original parent's tint until its first home arrival, then reveals the station
+price over 40ms. This prevents red material from being introduced while the
+duplicate still overlays a green parent. Incoming counts consolidate at their
+first arrival; the shared parent spring carries the remaining rebound.
 Connectivity never selects a color or a cheapest representative for other
 visible prices. Tint updates commit without per-pill color tweens; unchanged
 tints never rebuild the effect. The grouping pass derives native pre-merge
-families from projected parent price anchors. Thus approaching chips share glass
+families from projected parent price anchors. A 12pt preparation margin reparents
+horizontal arrivals before native contact without increasing glass spacing.
+Settled price anchors take priority over incoming count views when choosing a
+pooled container. New surfaces attach directly to their final container with
+their tint configured. Thus approaching chips share glass
 before logical membership changes, while neighboring price/count islands cannot
 form diagonal chains through a count capsule, recoil, or location avoidance.
 Nearby independent families use separate native effects; distant families pool
@@ -361,3 +378,19 @@ existing shared fuel cache first and fetches only if it has no station snapshot;
 that fallback now applies Home's radius, rating, fuel-grade and E85 eligibility.
 Home hides overlapping pills while Glass Lab merges them, so visual pill counts
 can still differ even when the underlying station IDs are identical.
+
+Show all reuses the fitted native camera for an unchanged station snapshot and
+viewport. Its membership is solved without gesture hysteresis throughout the
+return flight and settled overview. Manual camera gestures restore the approved
+hysteresis and +N stretch. Temporary split-family carries end at first arrival,
+so the same overview cannot retain a native connection from a previous flight.
+The roundtrip probe returns six times after focus, zoom-out, and rotation,
+checking exact owner/visible-connection identities and subpixel geometry.
+
+Pixel validation uses full-resolution simulator screenshots at repeated overview
+and focused checkpoints, with varied pinch centers, zoom directions, and speeds
+between them. `scripts/measureClusterLabColors.py` reads their AX frames, excludes
+card-covered pills, and compares six fixed 3x3 pixel patches plus text-free tint
+bands per pill. It reports geometry mismatches separately and includes repeated
+idle captures as a noise control. This complements the live native probe; tint
+property equality alone does not establish visible color consistency.

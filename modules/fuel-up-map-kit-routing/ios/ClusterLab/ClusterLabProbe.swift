@@ -13,6 +13,7 @@ final class ClusterLabProbe {
   private var anchorSamples: [[String: Any]] = []
   private var focusDetails: [String: Any] = [:]
   private var focusCameraSamples: [[String: Any]] = []
+  private var overviewReturns: [[String: Any]] = []
   private let center: CLLocationCoordinate2D
   private var isFit: Bool { token.hasPrefix("fit-") || token.hasPrefix("location-") }
   private let spans: [Double] = [0.003, 0.006, 0.010, 0.018, 0.030, 0.018, 0.010, 0.006, 0.003, 0.030, 0.003]
@@ -30,7 +31,9 @@ final class ClusterLabProbe {
     let fixture: [(Double, Double)] = [(0, 0), (0.00055, 0.00075), (-0.0005, -0.0008),
                                      (0.0011, -0.0006), (-0.001, 0.0007), (0.0001, 0.0015)]
     // The pair run isolates +1 travel; the normal six-station gate is unchanged.
-    let offsets = token.hasPrefix("overview-") ? [(0.0, 0.0), (0.0, 0.0001)] + Array(fixture.dropFirst(2)) :
+    let offsets = token.hasPrefix("roundtrip-") ? [(0.0, 0.0), (0.0, 0.0015), (0.0015, 0.0),
+      (0.0015, 0.0015), (-0.0015, 0.004), (0.0015, 0.004), (0.0, 0.00001), (0.0015, 0.00151)] :
+      token.hasPrefix("overview-") ? [(0.0, 0.0), (0.0, 0.0001)] + Array(fixture.dropFirst(2)) :
       token.hasPrefix("location-") ? [(0.0, 0.0), (0.0, 0.00001), (0.0011, 0.0015), (-0.001, -0.0015)] :
       token.hasPrefix("islands-") ? [(0.0, 0.0), (0.0, 0.00001), (0.0003, 0.0010), (0.0003, 0.00101),
                                       (-0.0004, 0.0007), (-0.0004, 0.00071)] :
@@ -42,7 +45,7 @@ final class ClusterLabProbe {
                          "longitude": center.longitude + offset.1, "price": 3.10 + Double(index) * 0.10,
                          "name": "Probe station \(index)"])
     })
-    if isFit || token.hasPrefix("overview-") { view.fitCamera(to: view.renderer.stations) }
+    if isFit || token.hasPrefix("overview-") || token.hasPrefix("roundtrip-") { view.fitCamera(to: view.renderer.stations) }
     else {
       let span = token.hasPrefix("focus-") ? 0.03 : spans[0]
       view.setRegion(.init(center: center, span: .init(latitudeDelta: span, longitudeDelta: span)), animated: false)
@@ -59,6 +62,29 @@ final class ClusterLabProbe {
   func tick(time: Double) {
     guard let view, !finished else { return }
     if startTime == 0 { startTime = time }
+    if token.hasPrefix("roundtrip-") {
+      let elapsed = time - startTime
+      let next = Int(max(0, elapsed - 1) / 1.25)
+      guard elapsed >= 1, next != stage else { return }
+      stage = next
+      if next.isMultiple(of: 2) {
+        if let sample = view.renderer.frameSamples.last { overviewReturns.append(sample) }
+        if next >= 12 { finish(status: "completed"); return }
+        switch next / 2 % 3 {
+        case 0: view.focusStation("lab-1")
+        case 1:
+          let camera = view.map.camera.copy() as! MKMapCamera
+          camera.centerCoordinateDistance *= 2.5
+          view.map.setCamera(camera, animated: true)
+        default:
+          let camera = view.map.camera.copy() as! MKMapCamera
+          camera.heading = 35; camera.centerCoordinateDistance *= 0.7
+          view.map.setCamera(camera, animated: true)
+        }
+      } else { view.showAll() }
+      view.refresh()
+      return
+    }
     if token.hasPrefix("overview-") {
       let elapsed = time - startTime
       focusCameraSamples.append(["time": elapsed, "distance": view.map.camera.centerCoordinateDistance])
@@ -169,7 +195,7 @@ final class ClusterLabProbe {
       "anchorSamples": anchorSamples,
       "focus": focusDetails, "startTime": startTime,
       "stationPrices": Dictionary(uniqueKeysWithValues: view.renderer.stations.map { ($0.id, $0.price) }),
-      "focusCameraSamples": focusCameraSamples,
+      "focusCameraSamples": focusCameraSamples, "overviewReturns": overviewReturns,
       "marketScores": ClusterLabMarket.assess(view.renderer.stations.map {
         LabMarketQuote(id: $0.id, latitude: $0.latitude, longitude: $0.longitude, price: $0.price)
       }).mapValues { ($0.score * 20).rounded() / 20 },

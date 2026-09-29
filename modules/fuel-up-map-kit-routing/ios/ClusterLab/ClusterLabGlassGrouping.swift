@@ -5,6 +5,7 @@ struct LabGlassItem {
   let id: String
   let frame: CGRect
   var family: String? = nil
+  var anchorPriority: Int = 0
 }
 
 // Native glass has one isotropic spacing. Share effects along horizontal runs,
@@ -14,6 +15,7 @@ enum ClusterLabGlassGrouping {
   struct Layout {
     let groups: [String: Int]
     let connections: [String: String]
+    let layers: [Int: Int]
   }
   private struct Cell: Hashable { let x: Int; let y: Int }
 
@@ -21,10 +23,11 @@ enum ClusterLabGlassGrouping {
     layout(input, previous: previous).groups
   }
 
-  static func layout(_ input: [LabGlassItem], previous: [String: Int]) -> Layout {
+  static func layout(_ input: [LabGlassItem], previous: [String: Int], preparation: Bool = false) -> Layout {
     let items = input.sorted { $0.id < $1.id }
-    guard !items.isEmpty else { return Layout(groups: [:], connections: [:]) }
+    guard !items.isEmpty else { return Layout(groups: [:], connections: [:], layers: [:]) }
     let reach = ClusterLabGeometry.glassSpacing * 2
+    let horizontalReach = ClusterLabGeometry.glassSpacing + (preparation ? 12 : 0)
     let cellWidth = (items.map { $0.frame.width }.max() ?? 84) + reach
     let cellHeight = (items.map { $0.frame.height }.max() ?? 32) + reach
     var parents = Array(items.indices)
@@ -60,7 +63,7 @@ enum ClusterLabGlassGrouping {
             let stacked = abs(separation.y) >= (item.frame.height + other.height) / 2 ||
               ClusterLabGeometry.isVertical(separation)
             if !stacked {
-              guard gap <= ClusterLabGeometry.glassSpacing else { continue }
+              guard gap <= horizontalReach else { continue }
               let a = root(i), b = root(j)
               parents[max(a, b)] = min(a, b)
             } else if gap <= 2 {
@@ -81,22 +84,43 @@ enum ClusterLabGlassGrouping {
       neighbors[a, default: []].insert(b)
       neighbors[b, default: []].insert(a)
     }
+    let priority = components.mapValues { $0.map { items[$0].anchorPriority }.max() ?? 0 }
+    let ordered = components.keys.sorted {
+      priority[$0] == priority[$1] ? $0 < $1 : priority[$0]! > priority[$1]!
+    }
+    // Canonical paint layers depend only on the current scene, never on which
+    // effect happened to be allocated first. History-dependent pooling changes
+    // native shadow/backdrop composition even when every tint is unchanged.
     var colors: [Int: Int] = [:]
-    var result: [String: Int] = [:]
-    var connections: [String: String] = [:]
-    for component in components.keys.sorted() {
-      let indices = components[component]!
+    for component in ordered {
       let occupied = Set((neighbors[component] ?? []).compactMap { colors[$0] })
-      let votes = Dictionary(grouping: indices.compactMap { previous[items[$0].id] }, by: { $0 }).mapValues(\.count)
-      let preferred = votes.keys.sorted { votes[$0] == votes[$1] ? $0 < $1 : votes[$0]! > votes[$1]! }
-      var color = preferred.first { !occupied.contains($0) } ?? 0
+      var color = 0
       while occupied.contains(color) { color += 1 }
       colors[component] = color
-      for index in indices {
-        result[items[index].id] = color
-        connections[items[index].id] = items[component].id
+    }
+    let buckets = Dictionary(grouping: ordered, by: { colors[$0]! })
+    var result: [String: Int] = [:]
+    var connections: [String: String] = [:]
+    var layers: [Int: Int] = [:]
+    // Reuse actual effect objects separately from their canonical paint order.
+    // Preserve the strongest stationary anchor when a bucket acquires movers.
+    for color in buckets.keys.sorted() {
+      let indices = buckets[color]!.flatMap { components[$0]! }
+      let votes = Dictionary(grouping: indices.compactMap { previous[items[$0].id] }, by: { $0 }).mapValues(\.count)
+      let anchored = indices.filter { items[$0].anchorPriority > 0 }.sorted {
+        items[$0].anchorPriority == items[$1].anchorPriority ? $0 < $1 : items[$0].anchorPriority > items[$1].anchorPriority
+      }.compactMap { previous[items[$0].id] }
+      let preferred = anchored + votes.keys.sorted { votes[$0] == votes[$1] ? $0 < $1 : votes[$0]! > votes[$1]! }
+      var group = preferred.first { layers[$0] == nil } ?? 0
+      while layers[group] != nil { group += 1 }
+      layers[group] = color
+      for component in buckets[color]! {
+        for index in components[component]! {
+          result[items[index].id] = group
+          connections[items[index].id] = items[component].id
+        }
       }
     }
-    return Layout(groups: result, connections: connections)
+    return Layout(groups: result, connections: connections, layers: layers)
   }
 }

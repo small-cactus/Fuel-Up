@@ -15,7 +15,7 @@ function canBlendAnchors(a, b) {
     const dx = Math.max(0, Math.abs(a.x - b.x) - segments), dy = Math.abs(a.y - b.y);
     const stacked = dy >= (a.height + b.height) / 2 || dy > dx;
     const gap = Math.max(0, Math.hypot(dx, dy) - (a.height + b.height) / 2);
-    return gap <= (stacked ? 2 : 36);
+    return gap <= (stacked ? 2 : 48);
 }
 function assertParentTints(report, frame) {
     assert.equal(frame.glassMaterialResets, 0, 'native container material recreated during chip layout');
@@ -44,7 +44,8 @@ function assertParentTints(report, frame) {
     assert.ok(!connections.has(undefined), 'missing physical glass connection');
     for (const view of frame.views) {
         const expectedId = view.role === 'badge' ? view.id.slice(6) :
-            (view.priceMix > 0 ? view.id : view.logicalTintOwner);
+            (view.countCopy && !view.revealingPrice ? view.copyParent :
+                (view.priceMix > 0 || view.revealingPrice ? view.id : view.logicalTintOwner));
         assert.ok(Number.isFinite(report.stationPrices[expectedId]), 'missing station quote');
         assert.equal(view.tintOwner, expectedId, `station tint followed glass connectivity for ${view.id}`);
         assert.equal(view.tintScore, report.marketScores[expectedId], `price tint changed during motion for ${view.id}`);
@@ -159,7 +160,20 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
                 'connected price and count did not recoil together');
         }
     }
-    t.diagnostic(`Main price recoil ${primaryTravel.toFixed(2)}pt`);
+    const departingCounts = report.samples.flatMap(frame => frame.views).filter(view =>
+        view.role === 'split' && view.countCopy && view.progress < 1);
+    assert.ok(departingCounts.length >= 4, 'missing outward count-copy coverage');
+    for (const view of departingCounts) {
+        assert.equal(view.priceMix, 0, 'price/tint was revealed while the duplicate still overlapped its parent');
+        assert.notEqual(view.tintOwner, view.id, 'count copy acquired a station tint before reaching home');
+    }
+    for (const view of report.samples.flatMap(frame => frame.views).filter(view => view.role === 'merge')) {
+        assert.ok(view.progress < 1, 'duplicate count waited through rebound after reaching its accumulator');
+    }
+    for (const view of report.final) {
+        assert.ok(view.nativeLayoutError <= 0.01, `UIKit material layout stayed stale for ${view.id}: ${view.nativeLayoutError}pt`);
+    }
+    t.diagnostic(`Main price recoil ${primaryTravel.toFixed(2)}pt; ${departingCounts.length} parent-colored outward copies`);
     for (const event of report.events.filter(event => event.type.endsWith('handoff'))) {
         assert.ok(event.delta <= 0.12, `handoff moved ${event.delta}pt`);
         if (event.type === 'merge-handoff') assert.ok(event.renderedDelta <= 0.12, 'location clearance broke the rendered merge handoff');
@@ -632,3 +646,39 @@ for (const heading of ['north', 'rotated']) {
         t.diagnostic(`${travel.length} intermediate overview camera frames; all six stations visible and normal-sized`);
     });
 }
+
+
+test('Show all restores identical cluster membership and glass after repeated focus, zoom-out and rotation', { timeout: 45000 }, async t => {
+    const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+    const token = `roundtrip-${Date.now()}`;
+    const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+    const file = path.join(container, 'Documents/cluster-lab-probe.json');
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    let report;
+    const deadline = Date.now() + 35000;
+    while (Date.now() < deadline) {
+        try {
+            const value = JSON.parse(readFileSync(file, 'utf8'));
+            if (value.token === token) { report = value; break; }
+        } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    assert.ok(report, 'roundtrip probe did not export');
+    assert.equal(report.status, 'completed');
+    assert.equal(report.overviewReturns.length, 7, 'missing repeated overview returns');
+    const baseline = report.overviewReturns[0];
+    assert.ok(baseline.views.some(v => v.role === 'badge'), 'fixture has no connected clusters');
+    assert.ok(baseline.views.filter(v => v.role === 'price').length >= 4, 'fixture has too few independent clusters');
+    const signature = frame => frame.views.map(v => `${v.id}:${v.role}:${v.glassConnection}:${v.glassLayer}:${v.tintScore}`).sort();
+    for (const frame of report.overviewReturns) {
+        assertParentTints(report, frame);
+        assert.deepEqual(frame.owners, baseline.owners, 'same overview retained different logical clusters');
+        assert.deepEqual(signature(frame), signature(baseline), 'same overview changed visible glass connections');
+        for (const before of baseline.views) {
+            const after = frame.views.find(v => v.id === before.id);
+            assert.ok(Math.hypot(before.x - after.x, before.y - after.y) <= 0.5, `overview geometry drifted for ${before.id}`);
+            assert.equal(after.width, before.width, 'overview pill size changed');
+        }
+    }
+    t.diagnostic('Six overview returns preserved membership, native glass connections, tint and geometry');
+});

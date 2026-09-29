@@ -48,3 +48,6 @@ supabase/functions/gas-prices-candidate/
 
 # Raw device recordings; reviewed clips live under docs/qa/evidence
 /.argent/recordings/
+
+# Raw repeated color-checkpoint screenshots
+/.argent/color-checkpoints/

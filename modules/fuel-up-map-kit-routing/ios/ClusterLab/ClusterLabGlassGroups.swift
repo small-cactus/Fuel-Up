@@ -6,6 +6,7 @@ final class ClusterLabGlassGroups {
   let root = UIView()
   private var containers: [Int: UIView] = [:]
   private var assignments: [String: Int] = [:]
+  private var viewReparents: [ObjectIdentifier: Int] = [:]
 
   init() {
     root.isUserInteractionEnabled = false
@@ -22,33 +23,58 @@ final class ClusterLabGlassGroups {
     return ClusterLabGlass.content(of: container)
   }
 
-  func insert(_ view: UIView) { content(for: 0).addSubview(view) }
-
-  func update(_ views: [String: UIView], families: [String: String]) -> [String: String] {
-    let layout = ClusterLabGlassGrouping.layout(views.map { LabGlassItem(id: $0.key, frame: $0.value.frame, family: families[$0.key]) }, previous: assignments)
+  func update(_ views: [String: UIView], families: [String: String], anchors: [String: Int]) -> [String: String] {
+    let items = views.map { LabGlassItem(id: $0.key, frame: $0.value.frame, family: families[$0.key], anchorPriority: anchors[$0.key] ?? 0) }
+    // Prepare the shared effect before native glass reaches visible contact.
+    // The effect's 36pt spacing and strict vertical contact remain unchanged.
+    let layout = ClusterLabGlassGrouping.layout(items, previous: assignments, preparation: true)
     let next = layout.groups
+    let connections = ClusterLabGlassGrouping.layout(items, previous: next).connections
+    let live = Set(views.values.map(ObjectIdentifier.init))
+    viewReparents = viewReparents.filter { live.contains($0.key) }
     for container in containers.values where container.frame != root.bounds { container.frame = root.bounds }
     for id in views.keys.sorted() {
       guard let view = views[id], let group = next[id] else { continue }
       let parent = content(for: group)
-      if view.superview !== parent { parent.addSubview(view) }
+      if view.superview !== parent {
+        if view.superview != nil { viewReparents[ObjectIdentifier(view), default: 0] += 1 }
+        parent.addSubview(view)
+      }
     }
     let used = Set(next.values)
     for group in Array(containers.keys) where !used.contains(group) {
       containers.removeValue(forKey: group)?.removeFromSuperview()
     }
+    // Adding a reparented pill/container appends it in UIKit. Restore one paint
+    // order so native shadows and backdrop sampling cannot depend on zoom history.
+    for group in used {
+      let parent = content(for: group)
+      let ordered = views.keys.sorted().filter { next[$0] == group }.compactMap { views[$0] }
+      if !parent.subviews.elementsEqual(ordered, by: { $0 === $1 }) {
+        for view in ordered { parent.bringSubviewToFront(view) }
+      }
+    }
+    let orderedContainers = used.sorted { layout.layers[$0]! < layout.layers[$1]! }.compactMap { containers[$0] }
+    if !root.subviews.elementsEqual(orderedContainers, by: { $0 === $1 }) {
+      for container in orderedContainers { root.bringSubviewToFront(container) }
+    }
     assignments = next
-    return layout.connections
+    return connections
   }
 
   // Read the actual UIKit hierarchy for the live probe, not planned assignments.
   func group(of view: UIView) -> Int? {
     containers.first { ClusterLabGlass.content(of: $0.value) === view.superview }?.key
   }
+  func paintLayer(of view: UIView) -> Int? {
+    guard let group = group(of: view), let container = containers[group] else { return nil }
+    return root.subviews.firstIndex { $0 === container }
+  }
   // Inspect real material writes on UIKit views, not copied getter identities.
   var materialResetCount: Int {
     containers.values.reduce(0) { $0 + (($1 as? ClusterLabGlassContainer)?.materialResetCount ?? 0) }
   }
+  func reparents(of view: UIView) -> Int { viewReparents[ObjectIdentifier(view)] ?? 0 }
   var pillCount: Int { containers.values.reduce(0) { $0 + ClusterLabGlass.content(of: $1).subviews.count } }
   var groupCount: Int { containers.count }
 }

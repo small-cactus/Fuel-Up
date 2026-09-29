@@ -65,6 +65,22 @@ assert(previewAnchors["a"] != previewAnchors["c"])
 let previewPills = cluster("a", 0, 0) + cluster("b", 110, 0)
 let preview = grouped(previewPills.map { LabGlassItem(id: $0.id, frame: $0.frame, family: previewAnchors[$0.family!]) })
 assert(Set(preview.values).count == 1, "intended incoming glass lost its pre-merge morph")
+// Share the native container before visible horizontal contact, while keeping
+// physical connection reporting and vertical behavior at their original reach.
+let approaching = [LabGlassItem(id: "parent", frame: item("parent", 0, 0).frame, anchorPriority: 10),
+                   item("incoming", 126, 0)]
+let oldEffects = ["parent": 3, "incoming": 0]
+let prepared = ClusterLabGlassGrouping.layout(approaching, previous: oldEffects, preparation: true)
+assert(prepared.groups["parent"] == 3 && prepared.groups["incoming"] == 3)
+let physical = ClusterLabGlassGrouping.layout(approaching, previous: prepared.groups)
+assert(physical.connections["parent"] != physical.connections["incoming"])
+// Multiple count movers must never outvote a settled price's native material.
+let crowd = [LabGlassItem(id: "parent", frame: item("parent", 0, 0).frame, anchorPriority: 10)] +
+  (0..<4).map { item("child-" + String($0), 50 + CGFloat($0), 0) }
+let prior = Dictionary(uniqueKeysWithValues: crowd.map { ($0.id, $0.id == "parent" ? 3 : 0) })
+assert(Set(ClusterLabGlassGrouping.layout(crowd, previous: prior, preparation: true).groups.values) == [3])
+let preparedVertical = ClusterLabGlassGrouping.layout([item("a", 0, 0), item("b", 0, 36)], previous: [:], preparation: true)
+assert(preparedVertical.groups["a"] != preparedVertical.groups["b"])
 let pooled = (0..<1000).flatMap { cluster(String($0), CGFloat($0) * 400, 0) }
 assert(Set(grouped(pooled).values).count == 1)
 let distant = (0..<1000).map { item(String($0), CGFloat($0) * 400, 0) }
@@ -74,6 +90,17 @@ assert(Set(separated.connections.values).count == 1000)
 let touching = ClusterLabGlassGrouping.layout([item("a", 0, 0), item("b", 110, 0), item("c", 600, 0)], previous: [:])
 assert(touching.connections["a"] == touching.connections["b"])
 assert(touching.connections["a"] != touching.connections["c"])
+// Same scene must have the same native paint order after arbitrary prior pools.
+let paintItems = cluster("a", 0, 0) + cluster("b", 0, 42) + cluster("c", 160, 85)
+func paintOrder(_ prior: [String: Int]) -> [String: Int] {
+  let layout = ClusterLabGlassGrouping.layout(paintItems, previous: prior, preparation: true)
+  return layout.groups.mapValues { layout.layers[$0]! }
+}
+let baselinePaint = paintOrder([:])
+for seed in 0..<30 {
+  let prior = Dictionary(uniqueKeysWithValues: paintItems.enumerated().map { ($1.id, ($0 * 7 + seed) % 5) })
+  assert(paintOrder(prior) == baselinePaint, "zoom history changed native shadow order")
+}
 let stack = (0..<30).map { item(String(format: "%02d", $0), 0, CGFloat($0) * 50) }
 assert(Set(grouped(stack).values).count <= 3)
 // Merge back to the same horizontal effect regardless of earlier row assignments.

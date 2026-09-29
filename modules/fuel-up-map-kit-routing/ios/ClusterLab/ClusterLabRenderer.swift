@@ -55,6 +55,9 @@ private final class LabStationMotion {
   var contactCatch: LabContactCatch?
   var glassParent: String?
   var pendingRelease: LabPendingRelease?
+  var countCopy = false
+  var copyTintOwner: String?
+  var revealStartedAt: Double?
   var quiet = false
   var clearance: CGFloat = 0
   var startClearance: CGFloat = 0
@@ -78,9 +81,11 @@ private final class LabStationMotion {
 
 final class ClusterLabRenderer {
   private var overviewTransition = false
+  private var canonicalOverview = false
 
   func beginOverview() {
     overviewTransition = true
+    canonicalOverview = true
     for motion in motions.values where !motion.settled {
       motion.quiet = true
       motion.begin(duration: min(0.12, motion.duration), travel: motion.travel,
@@ -88,7 +93,7 @@ final class ClusterLabRenderer {
     }
   }
 
-  func endOverview() { overviewTransition = false }
+  func endOverview() { overviewTransition = false; canonicalOverview = false }
   let emphasis = ClusterLabEmphasis()
   private let glassGroups = ClusterLabGlassGroups()
   var container: UIView { glassGroups.root }
@@ -133,6 +138,7 @@ final class ClusterLabRenderer {
 
   func prepareForCameraFit() {
     overviewTransition = false
+    canonicalOverview = true
     emphasis.reset()
     for motion in motions.values { motion.pill?.view.removeFromSuperview() }
     for badge in badges.values { badge.view.removeFromSuperview() }
@@ -199,7 +205,6 @@ final class ClusterLabRenderer {
   private func makePill(_ motion: LabStationMotion) -> ClusterLabPill {
     let pill = ClusterLabPill(price: motion.station.price, name: motion.station.name)
     addFocusAction(pill, id: motion.station.id)
-    glassGroups.insert(pill.view)
     motion.pill = pill
     return pill
   }
@@ -210,7 +215,7 @@ final class ClusterLabRenderer {
     // Include outward-moving duplicates while the native glass neck remains.
     // Following the parent also handles a cluster merging into another cluster.
     while visited.insert(current).inserted, let motion = motions[current] {
-      let parent = motion.owner != current ? motion.owner : motion.glassParent ?? motion.pendingRelease?.parent
+      let parent = motion.owner != current ? motion.owner : motion.glassParent
       guard let parent, motions[parent] != nil else { break }
       current = parent
     }
@@ -249,7 +254,7 @@ final class ClusterLabRenderer {
       previousProjection = Dictionary(uniqueKeysWithValues: candidates.map { ($0.id, $0.point) })
       projectionTime = now
     }
-    let nextOwners = ClusterLabGeometry.owners(candidates, previous: owners, selectedId: emphasis.selectedId)
+    let nextOwners = ClusterLabGeometry.owners(candidates, previous: canonicalOverview ? [:] : owners, selectedId: emphasis.selectedId)
     let nextMasses = Dictionary(grouping: nextOwners.keys, by: { nextOwners[$0]! }).mapValues(\.count)
     let positions = Dictionary(uniqueKeysWithValues: candidates.map { ($0.id, $0.point) })
     var nextBadgeOffsets: [String: CGFloat] = [:]
@@ -283,7 +288,7 @@ final class ClusterLabRenderer {
         else if badges[ownerId] == nil {
           let badge = ClusterLabPill(price: owner.price, name: owner.name)
           addFocusAction(badge, id: ownerId)
-          glassGroups.insert(badge.view); badges[ownerId] = badge
+          badges[ownerId] = badge
         }
       }
       owners = nextOwners
@@ -324,6 +329,7 @@ final class ClusterLabRenderer {
           }
           motion.width = ClusterLabGeometry.badgeWidth
           motion.priceMix = 0
+          motion.countCopy = true; motion.copyTintOwner = motion.owner; motion.revealStartedAt = nil
           motion.count = max(1, previousCounts[motion.owner] ?? 1)
           let pill = makePill(motion)
           motion.clearance = oldOwner.clearance
@@ -354,6 +360,7 @@ final class ClusterLabRenderer {
         motion.begin(duration: duration, travel: travel, speed: cameraSpeed)
         motion.quiet = overviewTransition
         motion.owner = nextOwner
+        if nextOwner != station.id { motion.countCopy = false; motion.copyTintOwner = nil; motion.revealStartedAt = nil }
         motion.settled = false
         if nextOwner != station.id { event("merge-start", id: station.id) }
       }
@@ -440,11 +447,29 @@ final class ClusterLabRenderer {
       motion.width = motion.startWidth + (targetWidth - motion.startWidth) * progress
       motion.priceMix = min(1, max(0, motion.startMix + (targetMix - motion.startMix) * progress))
       let completion = motion.quiet ? motion.duration : ClusterLabGeometry.completionDuration(for: motion.duration)
-      let arrived = motion.settled || motion.elapsed >= completion || (motion.startedAt == 0 && error < 0.001) || reducedMotion
+      // Consolidate the count at the first arrival. Its parent's shared spring
+      // already carries the impact; overlapping count surfaces need not wait
+      // for a second, independent rebound before their exact handoff.
+      let reached = progress >= 1
+      let arrived = motion.settled || (merged && reached) || motion.elapsed >= completion || (motion.startedAt == 0 && error < 0.001) || reducedMotion
       if arrived {
         motion.point = targetPoint; motion.offset = targetOffset
         motion.width = targetWidth; motion.priceMix = targetMix
       } else { animating = true }
+      if !merged && motion.countCopy {
+        // A departing +N must not turn red while still sitting on the green
+        // accumulator. Reveal its own price/tint at the first home crossing,
+        // after ending the temporary glass-family carry. Rebound continues.
+        if motion.revealStartedAt == nil && (reached || arrived) {
+          motion.glassParent = nil
+          motion.revealStartedAt = now
+        }
+        let reveal = CGFloat(min(1, max(0, (now - (motion.revealStartedAt ?? now)) / 0.04)))
+        motion.priceMix = reveal * reveal * (3 - 2 * reveal)
+        if reveal >= 1 { motion.countCopy = false; motion.copyTintOwner = nil; motion.revealStartedAt = nil }
+        else { animating = true }
+      }
+      if !merged && reached { motion.glassParent = nil }
       point = project(motion.point, map: map)
       point.x += motion.offset
       if merged && !motion.settled && !motion.impactApplied && deltaTime > 0 && progress >= 0.25 && !reducedMotion && !motion.quiet {
@@ -503,7 +528,8 @@ final class ClusterLabRenderer {
                           "materialTint": pill.materialTint,
                           "tintOwner": marketId, "clusterOwner": motion.owner,
                           "releaseParent": motion.pendingRelease?.parent ?? "",
-                          "quiet": motion.quiet, "progress": progress,
+                          "quiet": motion.quiet, "progress": progress, "countCopy": motion.countCopy,
+                          "copyParent": motion.copyTintOwner ?? "", "revealingPrice": motion.revealStartedAt != nil,
                           "rebound": max(0, ((basePoint.x - target.x) * (target.x - start.x) +
                             (basePoint.y - target.y) * (target.y - start.y)) / max(projectedTravel, 0.001)),
                           "reactionX": reaction.x, "reactionY": reaction.y,
@@ -533,7 +559,9 @@ final class ClusterLabRenderer {
       guard let owner = motions[ownerId] else { continue }
       let badge: ClusterLabPill
       if let existing = badges[ownerId] { badge = existing }
-      else if let first = members.first(where: { $0.pill != nil }), let pill = first.pill {
+      else if let first = members.filter({ $0.pill != nil }).min(by: {
+        $0.station.price == $1.station.price ? $0.station.id < $1.station.id : $0.station.price < $1.station.price
+      }), let pill = first.pill {
         // The first arriving mover becomes the accumulator in place. The effect
         // view never remounts and no duplicate glass surface flashes underneath.
         badge = pill; first.pill = nil; badges[ownerId] = badge
@@ -587,7 +615,8 @@ final class ClusterLabRenderer {
           samples[index]["stretchGap"] = gap
           samples[index]["stretchAge"] = age
         }
-        guard (gap >= ClusterLabGeometry.glassSpacing * 0.75 && age >= 0.025) || child.settled else { continue }
+        let reachedHome = child.settled || child.revealStartedAt != nil
+        guard (gap >= ClusterLabGeometry.glassSpacing * 0.75 && age >= 0.025) || reachedHome else { continue }
         if child.quiet { child.pendingRelease = nil; continue }
         let before = parent.reaction.velocity * release.mass + child.reaction.velocity
         let oldParentVelocity = parent.reaction.velocity, oldChildVelocity = child.reaction.velocity
@@ -598,7 +627,7 @@ final class ClusterLabRenderer {
         let after = parent.reaction.velocity * release.mass + child.reaction.velocity
         event("split-impulse", id: id, delta: (after - before).length,
           details: ["owner": release.parent, "remainingMass": release.mass,
-                    "gap": gap, "stretchDuration": age, "arrived": child.settled])
+                    "gap": gap, "stretchDuration": age, "arrived": reachedHome])
         child.pendingRelease = nil
       }
     }
@@ -609,7 +638,10 @@ final class ClusterLabRenderer {
     for (id, motion) in motions { if let pill = motion.pill { renderedPills[id] = pill } }
     for (id, badge) in badges { renderedPills["badge:\(id)"] = badge }
     let renderedViews = renderedPills.mapValues(\.view)
-    let dot: CGPoint? = map.showsUserLocation && map.userLocation.location != nil && map.isUserLocationVisible ?
+    // MapKit's annotation-visibility flag can lag a camera jump by a frame.
+    // Use the known geographic fix immediately; distant projected dots cannot
+    // overlap a visible pill. This keeps first-frame clearance deterministic.
+    let dot: CGPoint? = map.showsUserLocation && map.userLocation.location != nil ?
       project(MKMapPoint(map.userLocation.coordinate), map: map) : nil
     var groupFrames: [String: CGRect] = [:]
     for (id, motion) in motions where motion.owner == id {
@@ -664,17 +696,23 @@ final class ClusterLabRenderer {
     })
     let previews = ClusterLabGlassGrouping.layout(familyFrames.map {
       LabGlassItem(id: $0.key, frame: $0.value)
-    }, previous: [:]).connections
-    let connections = glassGroups.update(renderedViews, families: logicalTints.mapValues { previews[$0] ?? $0 })
+    }, previous: [:], preparation: true).connections
     // Glass connectivity controls only morphing, never a station's market color.
     // A surface showing a price keeps that station's global tint. Only +N
     // content inherits the representative parent's tint, including split copies.
     let visibleTints = Dictionary(uniqueKeysWithValues: renderedPills.keys.map { id in
+      let motion = motions[id]
       let owner = id.hasPrefix("badge:") ? String(id.dropFirst(6)) :
-        ((motions[id]?.priceMix ?? 0) > 0 ? id : logicalTints[id] ?? id)
+        (motion?.countCopy == true && motion?.revealStartedAt == nil ? motion?.copyTintOwner ?? id :
+          ((motion?.priceMix ?? 0) > 0 || motion?.revealStartedAt != nil ? id : logicalTints[id] ?? id))
       return (id, owner)
     })
     for (id, pill) in renderedPills { pill.applyMarket(markets[visibleTints[id] ?? id] ?? .unknown) }
+    let anchors = Dictionary(uniqueKeysWithValues: stations.enumerated().compactMap { rank, station -> (String, Int)? in
+      guard let motion = motions[station.id], motion.owner == station.id, motion.settled else { return nil }
+      return (station.id, stations.count - rank)
+    })
+    let connections = glassGroups.update(renderedViews, families: logicalTints.mapValues { previews[$0] ?? $0 }, anchors: anchors)
     if recording {
       // Handoffs are recorded as events; frame samples describe surviving views.
       samples.removeAll { renderedViews[$0["id"] as? String ?? ""] == nil }
@@ -694,6 +732,11 @@ final class ClusterLabRenderer {
             samples[index]["materialTint"] = pill.materialTint
           }
           samples[index]["glassGroup"] = glassGroups.group(of: view)
+          samples[index]["glassLayer"] = glassGroups.paintLayer(of: view)
+          samples[index]["glassReparents"] = glassGroups.reparents(of: view)
+          samples[index]["nativeLayoutError"] = max(
+            abs(ClusterLabGlass.content(of: view).bounds.width - view.bounds.width),
+            abs(ClusterLabGlass.content(of: view).bounds.height - view.bounds.height))
           samples[index]["clearanceY"] = view.transform.ty
           samples[index]["x"] = view.frame.midX
           samples[index]["y"] = view.frame.midY
@@ -709,7 +752,7 @@ final class ClusterLabRenderer {
       frameSamples.append(["time": CACurrentMediaTime(), "views": samples,
                            "viewCount": glassGroups.pillCount, "glassGroupCount": glassGroups.groupCount,
                            "glassMaterialResets": glassGroups.materialResetCount,
-                           "stationCount": motions.count, "animating": animating,
+                           "stationCount": motions.count, "animating": animating, "owners": owners,
                            "selectedId": emphasis.selectedId ?? "",
                            "userLocation": dot.map { ["x": $0.x, "y": $0.y] } ?? [:]])
     }
