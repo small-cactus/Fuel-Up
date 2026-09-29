@@ -16,7 +16,8 @@ restored the previous container order and exact baseline sampled colors.
   the twelve overview returns and twelve focus captures.
 - Three initial idle screenshots are the noise control. Later cycles include a
   second capture after another 1.1 seconds to distinguish settling from persistence.
-- Before: 35 screenshots plus one restart control. After: 35 screenshots.
+- Before: 35 screenshots plus one restart control. After: 35 screenshots plus
+  one final-build control; 72 screenshots total.
 - Full-resolution 1080 × 2340 PNGs captured by Argent, not UIView snapshots.
 - Six fixed 3 × 3 pixel patches per pill at x = 30%, 50%, 70% and y = 17%, 83%
   of its baseline bounds. Compare their mean RGB values against the same absolute
@@ -71,7 +72,12 @@ this final stacking build could be installed or measured there.
 
 - 138 unit tests and native grouping model: passed.
 - Simulator and signed device builds: passed.
-- Full native Glass Lab regression suite: running after the final stacking change.
+- Full native Glass Lab regression suite: all 14 passed on the final build,
+  including six overview returns with identical membership, glass connections,
+  paint order, tint, and geometry.
+- An earlier run had intermittent first-frame fit/location failures. The renderer
+  now uses the available user coordinate without waiting for MapKit's delayed
+  visibility flag; both first-frame gates passed in the final full run.
 - Required older Home probe: failed by timeout waiting for its exported report.
   Home's `ENABLE_CLUSTER_MERGE_TRANSITIONS` remains disabled; its gate was not
   weakened or removed.
