@@ -54,6 +54,7 @@ private final class LabStationMotion {
   var impactApplied = false
   var contactCatch: LabContactCatch?
   var pendingRelease: LabPendingRelease?
+  var quiet = false
   var clearance: CGFloat = 0
   var startClearance: CGFloat = 0
   var clearanceProgress: CGFloat = 1
@@ -75,6 +76,18 @@ private final class LabStationMotion {
 }
 
 final class ClusterLabRenderer {
+  private var overviewTransition = false
+
+  func beginOverview() {
+    overviewTransition = true
+    for motion in motions.values where !motion.settled {
+      motion.quiet = true
+      motion.begin(duration: min(0.12, motion.duration), travel: motion.travel,
+                   speed: motion.launchSpeed, restarting: true)
+    }
+  }
+
+  func endOverview() { overviewTransition = false }
   let emphasis = ClusterLabEmphasis()
   private let glassGroups = ClusterLabGlassGroups()
   var container: UIView { glassGroups.root }
@@ -118,6 +131,7 @@ final class ClusterLabRenderer {
   private let locationClearance = ClusterLabLocationClearance()
 
   func prepareForCameraFit() {
+    overviewTransition = false
     emphasis.reset()
     for motion in motions.values { motion.pill?.view.removeFromSuperview() }
     for badge in badges.values { badge.view.removeFromSuperview() }
@@ -131,6 +145,7 @@ final class ClusterLabRenderer {
   func cameraBegan() { cameraStarted = CACurrentMediaTime(); cameraSpeed = 0 }
 
   func cameraEnded() {
+    overviewTransition = false
     cameraStarted = nil
     // Finish alongside the camera's final settling frames. Snapshot the current
     // pose when shortening a flight, so interruptions never jump to a new curve.
@@ -336,6 +351,7 @@ final class ClusterLabRenderer {
                            min(900, 360 + cameraSpeed * 0.35 + travel * 1.5)))
         }
         motion.begin(duration: duration, travel: travel, speed: cameraSpeed)
+        motion.quiet = overviewTransition
         motion.owner = nextOwner
         motion.settled = false
         if nextOwner != station.id { event("merge-start", id: station.id) }
@@ -405,11 +421,13 @@ final class ClusterLabRenderer {
       var start = motion.settled ? target : project(motion.startPoint, map: map)
       if !motion.settled { start.x += motion.startOffset }
       let projectedTravel = hypot(target.x - start.x, target.y - start.y)
-      let contactDelay = !motion.settled && merged && !reducedMotion ?
+      let contactDelay = !motion.settled && merged && !reducedMotion && !motion.quiet ?
         (motion.contactCatch?.delay(at: motion.elapsed) ?? 0) : 0
-      let unresistedProgress = motion.settled ? 1 : ClusterLabGeometry.progress(
+      let quietTime = CGFloat(min(1, max(0, motion.elapsed / max(motion.duration, 0.001))))
+      let quietProgress = quietTime * quietTime * quietTime * (quietTime * (quietTime * 6 - 15) + 10)
+      let unresistedProgress = motion.settled ? 1 : motion.quiet ? quietProgress : ClusterLabGeometry.progress(
         elapsed: motion.elapsed, duration: motion.duration, distance: projectedTravel, speed: motion.launchSpeed)
-      let delayedProgress = motion.settled ? 1 : ClusterLabGeometry.progress(
+      let delayedProgress = motion.settled ? 1 : motion.quiet ? quietProgress : ClusterLabGeometry.progress(
         elapsed: motion.elapsed - contactDelay, duration: motion.duration, distance: projectedTravel, speed: motion.launchSpeed)
       let progress = LabContactCatch.resistedProgress(unresisted: unresistedProgress,
         delayed: delayedProgress, distance: projectedTravel)
@@ -419,14 +437,15 @@ final class ClusterLabRenderer {
       motion.offset = motion.startOffset + (targetOffset - motion.startOffset) * progress
       motion.width = motion.startWidth + (targetWidth - motion.startWidth) * progress
       motion.priceMix = min(1, max(0, motion.startMix + (targetMix - motion.startMix) * progress))
-      let arrived = motion.settled || motion.elapsed >= ClusterLabGeometry.completionDuration(for: motion.duration) || (motion.startedAt == 0 && error < 0.001) || reducedMotion
+      let completion = motion.quiet ? motion.duration : ClusterLabGeometry.completionDuration(for: motion.duration)
+      let arrived = motion.settled || motion.elapsed >= completion || (motion.startedAt == 0 && error < 0.001) || reducedMotion
       if arrived {
         motion.point = targetPoint; motion.offset = targetOffset
         motion.width = targetWidth; motion.priceMix = targetMix
       } else { animating = true }
       point = project(motion.point, map: map)
       point.x += motion.offset
-      if merged && !motion.settled && !motion.impactApplied && deltaTime > 0 && progress >= 0.25 && !reducedMotion {
+      if merged && !motion.settled && !motion.impactApplied && deltaTime > 0 && progress >= 0.25 && !reducedMotion && !motion.quiet {
         // The impact happens on contact, not after the travelling pill vanishes.
         let contactX = abs(point.x + motion.reaction.offset.x - target.x - owner.reaction.offset.x)
         let contactY = abs(point.y + motion.reaction.offset.y - target.y - owner.reaction.offset.y)
@@ -464,10 +483,9 @@ final class ClusterLabRenderer {
       if let pill = motion.pill {
         let previousCenter = pill.view.bounds.isEmpty ? point : pill.view.center
         let marketId = tintOwner(for: id)
-        let market = markets[marketId] ?? .unknown
         pill.view.accessibilityTraits = emphasis.selectedId == id && motion.priceMix > 0.5 ? [.selected] : []
         pill.render(center: point, width: motion.width, priceMix: motion.priceMix, count: motion.count,
-                    market: market, dark: dark, scale: emphasis.scale(for: id, priceMix: motion.priceMix))
+                    market: nil, dark: dark, scale: emphasis.scale(for: id, priceMix: motion.priceMix))
         if arrived && merged { pill.view.transform = CGAffineTransform(translationX: 0, y: owner.clearance) }
         if recording {
           // Compare the actual view with the original trajectory in the same
@@ -483,6 +501,7 @@ final class ClusterLabRenderer {
                           "materialTint": pill.materialTint,
                           "tintOwner": marketId, "clusterOwner": motion.owner,
                           "releaseParent": motion.pendingRelease?.parent ?? "",
+                          "quiet": motion.quiet, "progress": progress,
                           "rebound": max(0, ((basePoint.x - target.x) * (target.x - start.x) +
                             (basePoint.y - target.y) * (target.y - start.y)) / max(projectedTravel, 0.001)),
                           "reactionX": reaction.x, "reactionY": reaction.y,
@@ -522,14 +541,13 @@ final class ClusterLabRenderer {
       let attachmentOffset = renderedBadgeOffsets[ownerId] ?? ClusterLabGeometry.badgeOffset
       center.x += attachmentOffset + owner.reaction.offset.x
       center.y += owner.reaction.offset.y
-      let badgeMarket = markets[tintOwner(for: ownerId)] ?? .unknown
-      badge.render(center: center, width: 44, priceMix: 0, count: members.count, market: badgeMarket, dark: dark)
+      badge.render(center: center, width: 44, priceMix: 0, count: members.count, market: nil, dark: dark)
       for member in members where member.pill != nil {
         let moverCenter = member.pill!.view.center
         let handoffDelta = hypot(moverCenter.x - badge.view.center.x, moverCenter.y - badge.view.center.y)
         // Match the accumulator's content as well as its geometry in this same
         // transaction before releasing the temporary native effect view.
-        member.pill?.render(center: moverCenter, width: 44, priceMix: 0, count: members.count, market: badgeMarket, dark: dark)
+        member.pill?.render(center: moverCenter, width: 44, priceMix: 0, count: members.count, market: nil, dark: dark)
         member.pill?.view.transform = badge.view.transform
         let renderedDelta = hypot(member.pill!.view.frame.midX - badge.view.frame.midX,
                                   member.pill!.view.frame.midY - badge.view.frame.midY)
@@ -568,6 +586,7 @@ final class ClusterLabRenderer {
           samples[index]["stretchAge"] = age
         }
         guard (gap >= ClusterLabGeometry.glassSpacing * 0.75 && age >= 0.025) || child.settled else { continue }
+        if child.quiet { child.pendingRelease = nil; continue }
         let before = parent.reaction.velocity * release.mass + child.reaction.velocity
         let oldParentVelocity = parent.reaction.velocity, oldChildVelocity = child.reaction.velocity
         _ = ClusterLabDynamics.release(parent: &parent.reaction, child: &child.reaction,
@@ -584,9 +603,10 @@ final class ClusterLabRenderer {
     animating = animating || motions.values.contains {
       $0.pendingRelease != nil || (($0.owner == $0.station.id || !$0.settled) && $0.reaction.isMoving)
     }
-    var renderedViews: [String: UIView] = [:]
-    for (id, motion) in motions { if let pill = motion.pill { renderedViews[id] = pill.view } }
-    for (id, badge) in badges { renderedViews["badge:\(id)"] = badge.view }
+    var renderedPills: [String: ClusterLabPill] = [:]
+    for (id, motion) in motions { if let pill = motion.pill { renderedPills[id] = pill } }
+    for (id, badge) in badges { renderedPills["badge:\(id)"] = badge }
+    let renderedViews = renderedPills.mapValues(\.view)
     let dot: CGPoint? = map.showsUserLocation && map.userLocation.location != nil && map.isUserLocationVisible ?
       project(MKMapPoint(map.userLocation.coordinate), map: map) : nil
     var groupFrames: [String: CGRect] = [:]
@@ -616,10 +636,37 @@ final class ClusterLabRenderer {
     for (id, badge) in badges {
       badge.view.transform = CGAffineTransform(translationX: 0, y: clearance.offsets[id] ?? 0)
     }
-    glassGroups.update(renderedViews)
+    let connections = glassGroups.update(renderedViews)
+    // Native necks can appear before logical membership changes. Color the
+    // actual connected surface as one piece, without recoloring distant runs
+    // that merely reuse the same effect container.
+    var colorOwners: [String: String] = [:]
+    let logicalTints = Dictionary(uniqueKeysWithValues: renderedPills.keys.map { key in
+      (key, tintOwner(for: key.hasPrefix("badge:") ? String(key.dropFirst(6)) : key))
+    })
+    for (id, candidate) in logicalTints {
+      guard let connection = connections[id], let station = motions[candidate]?.station else { continue }
+      if let current = colorOwners[connection], let chosen = motions[current]?.station,
+         chosen.price < station.price || (chosen.price == station.price && chosen.id < station.id) { continue }
+      colorOwners[connection] = candidate
+    }
+    for (id, pill) in renderedPills {
+      guard let connection = connections[id], let owner = colorOwners[connection] else { continue }
+      pill.applyMarket(markets[owner] ?? .unknown)
+    }
     if recording {
+      // Handoffs are recorded as events; frame samples describe surviving views.
+      samples.removeAll { renderedViews[$0["id"] as? String ?? ""] == nil }
       for index in samples.indices {
         if let id = samples[index]["id"] as? String, let view = renderedViews[id] {
+          if let pill = renderedPills[id], let connection = connections[id] {
+            samples[index]["logicalTintOwner"] = logicalTints[id]
+            samples[index]["glassConnection"] = connection
+            samples[index]["tintOwner"] = colorOwners[connection]
+            samples[index]["tintScore"] = pill.tintScore
+            samples[index]["tintUpdates"] = pill.tintUpdateCount
+            samples[index]["materialTint"] = pill.materialTint
+          }
           samples[index]["glassGroup"] = glassGroups.group(of: view)
           samples[index]["clearanceY"] = view.transform.ty
           samples[index]["x"] = view.frame.midX

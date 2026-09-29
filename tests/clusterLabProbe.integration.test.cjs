@@ -4,19 +4,22 @@ const { execFileSync } = require('node:child_process');
 const { readFileSync } = require('node:fs');
 const path = require('node:path');
 
-// Check actual rendered materials against the connected parent, while standalone
-// stations retain their global market tint. Includes price-to-count crossfades.
+// Independently choose the cheapest logical parent within each physical glass
+// connection. Distant surfaces may share an effect container, never a tint.
 function assertParentTints(report, frame) {
-    const byId = new Map(frame.views.map(view => [view.id, view]));
-    for (const view of frame.views) {
-        const parentId = view.role === 'badge' || view.role === 'merge' ? view.clusterOwner : view.releaseParent;
-        const parent = parentId && byId.get(parentId);
-        const expectedId = parent?.tintOwner || parentId || view.id;
-        assert.equal(view.tintOwner, expectedId, `wrong tint owner for ${view.id}`);
-        assert.equal(view.tintScore, report.marketScores[expectedId], `wrong rendered tint for ${view.id}`);
-        assert.equal(view.materialTint.length, 4, 'missing native glass material tint');
-        if (parent) assert.deepEqual(view.materialTint, parent.materialTint,
-            `native glass color differs from parent for ${view.id}`);
+    const connections = Map.groupBy(frame.views, view => view.glassConnection);
+    assert.ok(!connections.has(undefined), 'missing physical glass connection');
+    for (const views of connections.values()) {
+        const parents = [...new Set(views.map(view => view.logicalTintOwner))];
+        parents.sort((a, b) => report.stationPrices[a] - report.stationPrices[b] || a.localeCompare(b));
+        const expectedId = parents[0];
+        assert.ok(Number.isFinite(report.stationPrices[expectedId]), 'missing parent quote');
+        for (const view of views) {
+            assert.equal(view.tintOwner, expectedId, `wrong connected tint owner for ${view.id}`);
+            assert.equal(view.tintScore, report.marketScores[expectedId], `wrong rendered tint for ${view.id}`);
+            assert.equal(view.materialTint.length, 4, 'missing native glass material tint');
+            assert.deepEqual(view.materialTint, views[0].materialTint, 'connected materials differ');
+        }
     }
 }
 
@@ -70,6 +73,9 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
         'missing parent-color coverage while incoming prices are still visible');
     assert.ok(report.samples.flatMap(frame => frame.views).filter(view => view.role === 'split' && view.releaseParent).length >= 2,
         'missing parent-color coverage during outward neck stretch');
+    assert.ok(report.samples.some(frame => [...Map.groupBy(frame.views, view => view.glassConnection).values()]
+        .some(views => new Set(views.map(view => view.logicalTintOwner)).size > 1)),
+        'missing native bridge coverage between different logical parents');
     const catches = report.samples.flatMap(frame => frame.views).filter(view => view.contactDelay > 0.001);
     assert.ok(catches.length > 0, 'contact resistance was not sampled on the live map');
     const visibleCatch = Math.max(...catches.map(view => Math.hypot(
@@ -519,6 +525,21 @@ for (const heading of ['north', 'rotated']) {
         const travel = report.focusCameraSamples.filter(frame => frame.time > 2.5 && frame.time < 4 &&
             frame.distance > detail.focusedDistance * 1.01 && frame.distance < detail.overviewDistance * 0.99);
         assert.ok(travel.length >= 8, 'overview camera jumped instead of animating');
+        const overviewFrames = report.samples.filter(frame => {
+            const elapsed = frame.time - report.startTime;
+            return elapsed > 2.5 && elapsed < 4;
+        });
+        const moving = overviewFrames.flatMap(frame => frame.views).filter(view => view.quiet && view.progress < 1);
+        assert.ok(moving.length >= 2, 'missing calm overview motion coverage');
+        for (const view of moving) {
+            assert.ok(view.progress >= 0 && view.progress <= 1, 'overview overshot');
+            assert.equal(view.contactDelay, 0, 'overview introduced contact resistance');
+            assert.ok(view.rebound < 0.001, 'overview introduced rebound');
+        }
+        assert.ok(!report.events.some(event => event.time - report.startTime > 2.5 &&
+            event.time - report.startTime < 4 && ['merge-impulse', 'split-impulse'].includes(event.type)),
+            'overview injected collision energy');
+        for (const frame of overviewFrames) assertParentTints(report, frame);
         const bounds = report.fitBounds;
         for (const views of [detail.returnedViews, report.final]) {
             assert.equal(views.reduce((count, view) => count + (view.role === 'badge' ? view.count : 1), 0), 6);

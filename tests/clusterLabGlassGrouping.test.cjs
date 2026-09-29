@@ -48,6 +48,11 @@ for y in stride(from: CGFloat(35), through: 68, by: 1) {
 }
 let distant = (0..<1000).map { item(String($0), CGFloat($0) * 400, 0) }
 assert(Set(grouped(distant).values).count == 1)
+let separated = ClusterLabGlassGrouping.layout(distant, previous: [:])
+assert(Set(separated.connections.values).count == 1000)
+let touching = ClusterLabGlassGrouping.layout([item("a", 0, 0), item("b", 110, 0), item("c", 600, 0)], previous: [:])
+assert(touching.connections["a"] == touching.connections["b"])
+assert(touching.connections["a"] != touching.connections["c"])
 let stack = (0..<30).map { item(String(format: "%02d", $0), 0, CGFloat($0) * 50) }
 assert(Set(grouped(stack).values).count <= 3)
 // Merge back to the same horizontal effect regardless of earlier row assignments.

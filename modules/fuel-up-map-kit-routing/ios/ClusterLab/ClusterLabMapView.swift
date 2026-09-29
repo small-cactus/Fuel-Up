@@ -193,6 +193,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   }
 
   func didFocusStation(_ id: String) {
+    renderer.endOverview()
     overviewDestination = nil
     setOverview(false)
     focusedStationId = id; needsCameraFit = false
@@ -207,6 +208,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
 
   @discardableResult
   func showAll() -> Bool {
+    renderer.beginOverview()
     focusedStationId = nil
     renderer.emphasis.select(nil)
     let fitted = fitCamera(to: renderer.stations, animated: !UIAccessibility.isReduceMotionEnabled)

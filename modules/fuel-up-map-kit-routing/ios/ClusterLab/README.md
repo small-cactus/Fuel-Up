@@ -14,6 +14,10 @@ clears native focus emphasis, and animates the native camera to the same solved
 overview used on entry. All pills are normal-sized in overview; the cheapest
 card is a suggestion. Selecting any station, including the first card, focuses
 that station consistently. Returning to the tab starts in overview again.
+Show all resets the card directly rather than scrolling past every intermediate
+station. Its camera flight uses monotonic pill travel without contact resistance
+or new collision/release impulses. Normal pinch and station-focus physics remain
+unchanged; an interrupted overview resumes the appropriate interaction mode.
 A UIKit `UIPageControl` sits between the
 card and native tab bar, with native scrubbing and accessibility behavior.
 Pagination keeps UIKit's native page control and default indicators inside one
@@ -88,7 +92,11 @@ and a spoken local-price comparison. The count shares its representative price's
 tint. Incoming prices immediately inherit the receiving parent; departing
 duplicates retain that tint until the glass neck releases. Parent ownership is
 followed through cluster changes. Tint updates commit together without separate
-per-pill color tweens; unchanged tints never rebuild the effect. Movement and
+per-pill color tweens; unchanged tints never rebuild the effect. Physical native
+bridges can precede logical membership, so the grouping pass also exposes actual
+connected components. Each connected surface uses its cheapest logical parent's
+cached global market tint (stable station-ID tie break). Distant components can
+reuse one effect container without sharing colors. Movement and
 rebound curves are unchanged. Live probes compare the native material RGBA
 values as well as market scores between connected parents and children.
 `ClusterLabGlassGroups` pools Apple's native `UIGlassContainerEffect` views under

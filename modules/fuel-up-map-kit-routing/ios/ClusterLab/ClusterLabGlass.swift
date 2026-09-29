@@ -87,7 +87,7 @@ final class ClusterLabPill {
     view.accessibilityLabel = name
   }
 
-  private func applyMarket(_ market: LabMarketAssessment) {
+  func applyMarket(_ market: LabMarketAssessment) {
     if lastCheapestPrice != market.cheapestPrice || wasCheapest != (market.score > 0) {
       lastCheapestPrice = market.cheapestPrice
       wasCheapest = market.score > 0

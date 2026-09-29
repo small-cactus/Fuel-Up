@@ -165,7 +165,8 @@ final class ClusterLabProbe {
       "final": view.renderer.frameSamples.last?["views"] ?? [],
       "samples": view.renderer.frameSamples, "events": view.renderer.events,
       "anchorSamples": anchorSamples,
-      "focus": focusDetails,
+      "focus": focusDetails, "startTime": startTime,
+      "stationPrices": Dictionary(uniqueKeysWithValues: view.renderer.stations.map { ($0.id, $0.price) }),
       "focusCameraSamples": focusCameraSamples,
       "marketScores": ClusterLabMarket.assess(view.renderer.stations.map {
         LabMarketQuote(id: $0.id, latitude: $0.latitude, longitude: $0.longitude, price: $0.price)

@@ -24,8 +24,9 @@ final class ClusterLabGlassGroups {
 
   func insert(_ view: UIView) { content(for: 0).addSubview(view) }
 
-  func update(_ views: [String: UIView]) {
-    let next = ClusterLabGlassGrouping.groups(views.map { LabGlassItem(id: $0.key, frame: $0.value.frame) }, previous: assignments)
+  func update(_ views: [String: UIView]) -> [String: String] {
+    let layout = ClusterLabGlassGrouping.layout(views.map { LabGlassItem(id: $0.key, frame: $0.value.frame) }, previous: assignments)
+    let next = layout.groups
     for container in containers.values where container.frame != root.bounds { container.frame = root.bounds }
     for id in views.keys.sorted() {
       guard let view = views[id], let group = next[id] else { continue }
@@ -37,6 +38,7 @@ final class ClusterLabGlassGroups {
       containers.removeValue(forKey: group)?.removeFromSuperview()
     }
     assignments = next
+    return layout.connections
   }
 
   // Read the actual UIKit hierarchy for the live probe, not planned assignments.

@@ -10,11 +10,19 @@ struct LabGlassItem {
 // but keep stacked runs in separate native effects until their capsules touch.
 // Distant runs reuse the same effect; there is no container per station.
 enum ClusterLabGlassGrouping {
+  struct Layout {
+    let groups: [String: Int]
+    let connections: [String: String]
+  }
   private struct Cell: Hashable { let x: Int; let y: Int }
 
   static func groups(_ input: [LabGlassItem], previous: [String: Int]) -> [String: Int] {
+    layout(input, previous: previous).groups
+  }
+
+  static func layout(_ input: [LabGlassItem], previous: [String: Int]) -> Layout {
     let items = input.sorted { $0.id < $1.id }
-    guard !items.isEmpty else { return [:] }
+    guard !items.isEmpty else { return Layout(groups: [:], connections: [:]) }
     let reach = ClusterLabGeometry.glassSpacing * 2
     let cellWidth = (items.map { $0.frame.width }.max() ?? 84) + reach
     let cellHeight = (items.map { $0.frame.height }.max() ?? 32) + reach
@@ -68,6 +76,7 @@ enum ClusterLabGlassGrouping {
     }
     var colors: [Int: Int] = [:]
     var result: [String: Int] = [:]
+    var connections: [String: String] = [:]
     for component in components.keys.sorted() {
       let indices = components[component]!
       let occupied = Set((neighbors[component] ?? []).compactMap { colors[$0] })
@@ -76,8 +85,11 @@ enum ClusterLabGlassGrouping {
       var color = preferred.first { !occupied.contains($0) } ?? 0
       while occupied.contains(color) { color += 1 }
       colors[component] = color
-      for index in indices { result[items[index].id] = color }
+      for index in indices {
+        result[items[index].id] = color
+        connections[items[index].id] = items[component].id
+      }
     }
-    return result
+    return Layout(groups: result, connections: connections)
   }
 }

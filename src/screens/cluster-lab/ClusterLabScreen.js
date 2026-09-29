@@ -53,7 +53,7 @@ export default function ClusterLabScreen() {
     const showAll = useCallback(() => {
         setOverview(true);
         setSelectedId(stations[0]?.id || null);
-        carousel.current?.scrollTo(0);
+        carousel.current?.scrollTo(0, false);
         void map.current?.showAll();
     }, [stations]);
     const overviewChanged = useCallback(event => setOverview(event.nativeEvent.overview), []);
