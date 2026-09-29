@@ -12,6 +12,7 @@ final class ClusterLabProbe {
   private var baseline: [[String: Any]] = []
   private var anchorSamples: [[String: Any]] = []
   private var focusDetails: [String: Any] = [:]
+  private var focusCameraSamples: [[String: Any]] = []
   private let center: CLLocationCoordinate2D
   private var isFit: Bool { token.hasPrefix("fit-") || token.hasPrefix("location-") }
   private let spans: [Double] = [0.003, 0.006, 0.010, 0.018, 0.030, 0.018, 0.010, 0.006, 0.003, 0.030, 0.003]
@@ -56,12 +57,20 @@ final class ClusterLabProbe {
     guard let view, !finished else { return }
     if startTime == 0 { startTime = time }
     if token.hasPrefix("focus-") {
+      let reference = CLLocationCoordinate2D(latitude: center.latitude, longitude: center.longitude + 0.001)
+      let a = view.map.convert(center, toPointTo: view.map)
+      let b = view.map.convert(reference, toPointTo: view.map)
+      focusCameraSamples.append(["time": time - startTime,
+                                 "distance": view.map.camera.centerCoordinateDistance,
+                                 "projectedDistance": hypot(a.x - b.x, a.y - b.y)])
       if stage == -1 && time - startTime >= 1 {
         stage = 0
         baseline = view.renderer.frameSamples.last?["views"] as? [[String: Any]] ?? []
         focusDetails = ["beforeDistance": view.map.camera.centerCoordinateDistance,
-                        "beforeHeading": view.map.camera.heading,
-                        "requested": view.focusStation("lab-0")]
+                        "beforeHeading": view.map.camera.heading]
+        let requestStart = CACurrentMediaTime()
+        focusDetails["requested"] = view.focusStation("lab-0")
+        focusDetails["requestMilliseconds"] = (CACurrentMediaTime() - requestStart) * 1000
       }
       if time - startTime >= 4 {
         focusDetails["afterDistance"] = view.map.camera.centerCoordinateDistance
@@ -112,6 +121,10 @@ final class ClusterLabProbe {
       "samples": view.renderer.frameSamples, "events": view.renderer.events,
       "anchorSamples": anchorSamples,
       "focus": focusDetails,
+      "focusCameraSamples": focusCameraSamples,
+      "marketScores": ClusterLabMarket.assess(view.renderer.stations.map {
+        LabMarketQuote(id: $0.id, latitude: $0.latitude, longitude: $0.longitude, price: $0.price)
+      }).mapValues { ($0.score * 20).rounded() / 20 },
       "usesNativeGlass": NSClassFromString("UIGlassContainerEffect") != nil,
       "nativeUserLocationVisible": view.map.showsUserLocation && view.map.isUserLocationVisible &&
         view.map.view(for: view.map.userLocation) != nil,

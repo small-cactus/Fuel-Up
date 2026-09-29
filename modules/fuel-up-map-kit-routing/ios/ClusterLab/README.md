@@ -260,7 +260,9 @@ allowance; no trial views or intermediate camera movements are used.
 
 One map-level tap recognizer hit-tests actual rendered pill positions, including
 location offsets and moving split pills. The 32 pt pills have a 44 pt high touch
-area. Counts focus their displayed representative. Native double-tap, pan,
+area. Counts focus their displayed representative. Focus starts on finger-up
+without waiting for a possible second tap; the first tap of a double-tap on a
+chip therefore also focuses it. Native double-tap on the map background, pan,
 pinch, and rotation remain available. VoiceOver has a Focus station action.
 The camera preserves heading; Reduce Motion disables its animated movement.
 Already isolated prices only center. Identical coordinates cannot be separated
@@ -270,3 +272,13 @@ unresolvable cases stop at the native zoom range or the 20 m distance limit.
 The `focus-north-` and `focus-rotated-` live probes start with connected stations,
 invoke the same focus function, then check the actual camera, rendered isolated
 price, absence of count/glass bridges, and existing split-animation coverage.
+They also sample the map projection throughout the zoom, requiring intermediate
+frames and bounded progress per frame so an instantaneous camera jump cannot pass.
+Focus configures a copy of the current camera before calling `setCamera`; mutating
+the map's live camera would apply the destination before animation begins.
+
+Station market colors are cached by ID from the complete search snapshot.
+Offscreen view culling and cluster membership never change that ranking.
+A merging price retains its station color while the price is the dominant
+content; only its count representation adopts the cluster owner's color.
+Live zoom, merge, pan, and re-entry probes compare prices against the global table.

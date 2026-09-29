@@ -141,8 +141,11 @@ final class ClusterLabRenderer {
   init() { container.isUserInteractionEnabled = false }
 
   func setStations(_ next: [ClusterLabStation]) {
-    guard next != stations else { return }
-    markets = ClusterLabMarket.assess(next.map {
+    let snapshot = next.sorted { $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price }
+    guard snapshot != stations else { return }
+    // Keep the full search's identity-to-color table, independent of the culled
+    // views and current cluster owners. Only new station data can replace it.
+    markets = ClusterLabMarket.assess(snapshot.map {
       LabMarketQuote(id: $0.id, latitude: $0.latitude, longitude: $0.longitude, price: $0.price)
     })
     // A data refresh may change price/order; no stale price is retained in a
@@ -151,7 +154,7 @@ final class ClusterLabRenderer {
     for id in Array(motions.keys) where changed.contains(id) || !next.contains(where: { $0.id == id }) {
       motions.removeValue(forKey: id)?.pill?.view.removeFromSuperview()
     }
-    stations = next.sorted { $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price }
+    stations = snapshot
   }
 
   private func project(_ point: MKMapPoint, map: MKMapView) -> CGPoint {
@@ -443,8 +446,11 @@ final class ClusterLabRenderer {
         let previousCenter = pill.view.bounds.isEmpty ? point : pill.view.center
         // A split duplicate first presents exactly the source badge's tint.
         // Begin its native color transition on the first movement frame.
+        // A visible price always keeps its own global station color. Only the
+        // count representation takes the owner color, matching its +n badge.
+        let marketId = merged && motion.priceMix <= 0.5 ? motion.owner : id
         let market: LabMarketAssessment? = !merged && motion.elapsed == 0 && motion.startedAt > 0 && !reducedMotion ?
-          nil : (markets[merged ? motion.owner : id] ?? .unknown)
+          nil : (markets[marketId] ?? .unknown)
         pill.render(center: point, width: motion.width, priceMix: motion.priceMix, count: motion.count,
                     market: market, dark: dark)
         if arrived && merged { pill.view.transform = CGAffineTransform(translationX: 0, y: owner.clearance) }

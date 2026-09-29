@@ -43,6 +43,8 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
                     'visible pill did not follow its physical displacement');
             }
             assert.ok(view.contained, `clipped container edge: ${view.id}`);
+            if (view.priceMix > 0.5) assert.equal(view.tintScore, report.marketScores[view.id],
+                `visible price ${view.id} changed its global tint during zoom/merge`);
             assert.ok(Math.abs(view.clearanceY || 0) <= 32, 'location avoidance moved a station too far');
             assert.ok(Math.abs(view.tintScore || 0) <= 1, 'unbounded market tint');
             assert.ok(view.tintUpdates <= 20, 'native tint was being recreated every frame');
@@ -193,6 +195,11 @@ test('native map carrier stays attached across long pans and camera jumps', { ti
     const rebases = report.anchorSamples.at(-1).rebaseCount - report.anchorSamples[0].rebaseCount;
     assert.ok(rebases >= 4, `only ${rebases} carrier rebases were exercised`);
     assert.equal(report.final.length, report.baseline.length, 'camera return lost station views');
+    for (const frame of report.samples) {
+        for (const view of frame.views.filter(view => view.priceMix > 0.5)) {
+            assert.equal(view.tintScore, report.marketScores[view.id], 'culling/re-entry changed a station tint');
+        }
+    }
     assert.equal(report.final.length, 6);
     const maxError = Math.max(...report.anchorSamples.map(sample => sample.originError));
     t.diagnostic(`${rebases} native carrier rebases; maximum surface offset ${maxError.toFixed(3)}pt`);
@@ -381,10 +388,28 @@ for (const orientation of ['north', 'rotated']) {
         assert.ok(report, 'focus probe did not export');
         assert.equal(report.status, 'completed');
         assert.equal(report.focus.requested, true);
+        for (const frame of report.samples) {
+            for (const view of frame.views.filter(view => view.priceMix > 0.5)) {
+                assert.equal(view.tintScore, report.marketScores[view.id], 'zoom/culling changed a visible price tint');
+            }
+        }
+        assert.ok(report.focus.requestMilliseconds < 50, 'focus calculation and camera request blocked the main thread');
+        t.diagnostic(`Focus calculation and camera request: ${report.focus.requestMilliseconds.toFixed(2)}ms`);
         assert.ok(report.baseline.some(v => v.role === 'badge'), 'focus must start connected');
         assert.ok(report.focus.afterDistance < report.focus.beforeDistance * 0.8, 'native camera did not zoom in');
         assert.ok(Math.abs(report.focus.afterHeading - report.focus.beforeHeading) < 0.1, 'focus rotated the map');
         assert.ok(report.focus.centerError < 1, 'native camera did not center the selected station');
+        const camera = report.focusCameraSamples;
+        assert.ok(camera?.length > 30, 'missing live camera animation samples');
+        const start = camera.findLast(frame => frame.time <= 1).projectedDistance;
+        const end = camera.at(-1).projectedDistance;
+        const progress = camera.map(frame => ({ time: frame.time,
+            zoom: Math.log(frame.projectedDistance / start) / Math.log(end / start) }));
+        const intermediate = progress.filter(frame => frame.zoom > 0.02 && frame.zoom < 0.98);
+        assert.ok(intermediate.length >= 8, `camera jumped instead of animating: ${intermediate.length} intermediate frames`);
+        const maxStep = Math.max(...progress.slice(1).map((frame, index) => Math.abs(frame.zoom - progress[index].zoom)));
+        assert.ok(maxStep < 0.35, `camera skipped ${(maxStep * 100).toFixed(1)}% of its zoom in one frame`);
+        t.diagnostic(`${intermediate.length} intermediate map frames; largest zoom step ${(maxStep * 100).toFixed(1)}%`);
         const settled = report.samples.slice(-30);
         assert.ok(settled.length === 30);
         for (const frame of settled) {

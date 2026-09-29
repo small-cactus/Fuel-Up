@@ -9,14 +9,11 @@ final class ClusterLabFocusInteraction: NSObject, UIGestureRecognizerDelegate {
     self.view = view
     super.init()
     let tap = UITapGestureRecognizer(target: self, action: #selector(tapped(_:)))
-    let doubleTap = UITapGestureRecognizer(target: nil, action: nil)
-    doubleTap.numberOfTapsRequired = 2
-    for gesture in [tap, doubleTap] {
-      gesture.delegate = self
-      gesture.cancelsTouchesInView = false
-      view.map.addGestureRecognizer(gesture)
-    }
-    tap.require(toFail: doubleTap)
+    tap.delegate = self
+    tap.cancelsTouchesInView = false
+    // Focus on finger-up; waiting for a possible second tap adds the system's
+    // double-tap timeout before any calculation or camera movement can begin.
+    view.map.addGestureRecognizer(tap)
     view.renderer.onFocus = { [weak view] id in view?.focusStation(id) ?? false }
   }
 
@@ -42,7 +39,10 @@ extension ClusterLabMapView {
           let station = renderer.stations.first(where: { $0.id == id }) else { return false }
     let points = renderer.stations.map { LabProjectedStation(id: $0.id, price: $0.price,
       point: map.convert($0.coordinate, toPointTo: map)) }
-    let camera = map.camera
+    // MapKit observes its current camera: mutating it applies the destination
+    // immediately. Configure an independent copy so setCamera can animate
+    // from the existing viewport to the calculated destination.
+    guard let camera = map.camera.copy() as? MKMapCamera else { return false }
     let latitudeScale = MKMetersPerMapPointAtLatitude(station.latitude) /
       MKMetersPerMapPointAtLatitude(camera.centerCoordinate.latitude)
     let distance = camera.centerCoordinateDistance * latitudeScale
