@@ -45,6 +45,10 @@ final class ClusterLabGlassGroups {
   func group(of view: UIView) -> Int? {
     containers.first { ClusterLabGlass.content(of: $0.value) === view.superview }?.key
   }
+  // Inspect real material writes on UIKit views, not copied getter identities.
+  var materialResetCount: Int {
+    containers.values.reduce(0) { $0 + (($1 as? ClusterLabGlassContainer)?.materialResetCount ?? 0) }
+  }
   var pillCount: Int { containers.values.reduce(0) { $0 + ClusterLabGlass.content(of: $1).subviews.count } }
   var groupCount: Int { containers.count }
 }

@@ -58,6 +58,13 @@ for y in stride(from: CGFloat(-45), through: 45, by: 1) {
   for id in ["a", "b", "c"] { assert(result[id] == result["badge:" + id]) }
   assert(result["a"] != result["b"] && result["a"] != result["c"] && result["b"] != result["c"])
 }
+// Native glass preview must precede the logical 84pt clustering boundary.
+let previewAnchors = ClusterLabGlassGrouping.layout([item("a", 0, 0), item("b", 110, 0), item("c", 240, 45)], previous: [:]).connections
+assert(previewAnchors["a"] == previewAnchors["b"])
+assert(previewAnchors["a"] != previewAnchors["c"])
+let previewPills = cluster("a", 0, 0) + cluster("b", 110, 0)
+let preview = grouped(previewPills.map { LabGlassItem(id: $0.id, frame: $0.frame, family: previewAnchors[$0.family!]) })
+assert(Set(preview.values).count == 1, "intended incoming glass lost its pre-merge morph")
 let pooled = (0..<1000).flatMap { cluster(String($0), CGFloat($0) * 400, 0) }
 assert(Set(grouped(pooled).values).count == 1)
 let distant = (0..<1000).map { item(String($0), CGFloat($0) * 400, 0) }

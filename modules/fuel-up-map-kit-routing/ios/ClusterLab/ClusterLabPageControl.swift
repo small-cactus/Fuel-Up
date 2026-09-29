@@ -5,6 +5,7 @@ import UIKit
 final class ClusterLabPageControl: ExpoView {
   let control = UIPageControl()
   private let glass = ClusterLabGlass.pill()
+  private var needsMaterialRefresh = true
   let onPageChange = EventDispatcher()
   var pageCount = 0
   var currentPage = 0
@@ -33,10 +34,30 @@ final class ClusterLabPageControl: ExpoView {
                          width: width, height: height)
     control.frame = CGRect(x: (bounds.width - controlWidth) / 2, y: 0,
                            width: controlWidth, height: bounds.height)
+    if needsMaterialRefresh, window != nil, width > 0, height > 0,
+       #available(iOS 26.0, *), let material = glass as? UIVisualEffectView {
+      // Match expo-glass-effect's mount lifecycle: tear down the stale effect
+      // during layout before rebuilding regular glass on the attached view.
+      UIView.performWithoutAnimation {
+        material.effect = UIVisualEffect()
+        material.effect = UIGlassEffect(style: .regular)
+      }
+      needsMaterialRefresh = false
+    }
+  }
+
+  override func didMoveToWindow() {
+    super.didMoveToWindow()
+    needsMaterialRefresh = true
+    if window != nil { setNeedsLayout() }
   }
 
   func setDark(_ dark: Bool) {
-    overrideUserInterfaceStyle = dark ? .dark : .light
+    let style: UIUserInterfaceStyle = dark ? .dark : .light
+    guard overrideUserInterfaceStyle != style else { return }
+    overrideUserInterfaceStyle = style
+    needsMaterialRefresh = true
+    setNeedsLayout()
   }
 
   func applyPages() {

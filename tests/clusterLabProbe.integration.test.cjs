@@ -4,35 +4,61 @@ const { execFileSync } = require('node:child_process');
 const { readFileSync } = require('node:fs');
 const path = require('node:path');
 
-// Verify actual native glass connections belong to one intended cluster family.
-// Nearby independent families must not reuse an effect; distant ones may pool.
+// Native previews follow primary map anchors, not displaced price/count edges.
+// Check the preview graph independently before inspecting actual glass/tints.
 function capsuleGap(a, b) {
     const segment = Math.max(0, (a.width - 32) / 2) + Math.max(0, (b.width - 32) / 2);
     return Math.max(0, Math.hypot(Math.max(0, Math.abs(a.x - b.x) - segment), a.y - b.y) - 32);
 }
+function canBlendAnchors(a, b) {
+    const segments = Math.max(0, (a.width - a.height) / 2) + Math.max(0, (b.width - b.height) / 2);
+    const dx = Math.max(0, Math.abs(a.x - b.x) - segments), dy = Math.abs(a.y - b.y);
+    const stacked = dy >= (a.height + b.height) / 2 || dy > dx;
+    const gap = Math.max(0, Math.hypot(dx, dy) - (a.height + b.height) / 2);
+    return gap <= (stacked ? 2 : 36);
+}
 function assertParentTints(report, frame) {
+    assert.equal(frame.glassMaterialResets, 0, 'native container material recreated during chip layout');
+    const anchors = new Map(frame.views.map(view => [view.logicalTintOwner, view.familyAnchor]));
+    const ids = [...anchors.keys()].sort();
+    const parents = new Map(ids.map(id => [id, id]));
+    const root = id => parents.get(id) === id ? id : root(parents.get(id));
+    for (let i = 0; i < ids.length; i++) for (const b of ids.slice(i + 1)) {
+        const a = ids[i];
+        assert.ok(anchors.get(a) && anchors.get(b), 'missing primary map anchors');
+        if (canBlendAnchors(anchors.get(a), anchors.get(b))) {
+            const ra = root(a), rb = root(b);
+            parents.set(ra < rb ? rb : ra, ra < rb ? ra : rb);
+        }
+    }
+    for (const view of frame.views) assert.equal(view.glassFamily, root(view.logicalTintOwner), 'wrong native preview family');
     for (let i = 0; i < frame.views.length; i++) {
         for (const b of frame.views.slice(i + 1)) {
             const a = frame.views[i];
-            if (a.logicalTintOwner !== b.logicalTintOwner && capsuleGap(a, b) <= 72) {
+            if (a.glassFamily !== b.glassFamily && capsuleGap(a, b) <= 72) {
                 assert.notEqual(a.glassGroup, b.glassGroup, 'nearby independent clusters share a native effect');
             }
         }
     }
     const connections = Map.groupBy(frame.views, view => view.glassConnection);
     assert.ok(!connections.has(undefined), 'missing physical glass connection');
-    for (const views of connections.values()) {
-        const parents = [...new Set(views.map(view => view.logicalTintOwner))];
-        parents.sort((a, b) => report.stationPrices[a] - report.stationPrices[b] || a.localeCompare(b));
-        assert.equal(parents.length, 1, 'independent cluster families joined into one glass surface');
-        const expectedId = parents[0];
-        assert.ok(Number.isFinite(report.stationPrices[expectedId]), 'missing parent quote');
-        for (const view of views) {
-            assert.equal(view.tintOwner, expectedId, `wrong connected tint owner for ${view.id}`);
-            assert.equal(view.tintScore, report.marketScores[expectedId], `wrong rendered tint for ${view.id}`);
-            assert.equal(view.materialTint.length, 4, 'missing native glass material tint');
-            assert.deepEqual(view.materialTint, views[0].materialTint, 'connected materials differ');
-        }
+    for (const view of frame.views) {
+        const expectedId = view.role === 'badge' ? view.id.slice(6) :
+            (view.priceMix > 0 ? view.id : view.logicalTintOwner);
+        assert.ok(Number.isFinite(report.stationPrices[expectedId]), 'missing station quote');
+        assert.equal(view.tintOwner, expectedId, `station tint followed glass connectivity for ${view.id}`);
+        assert.equal(view.tintScore, report.marketScores[expectedId], `price tint changed during motion for ${view.id}`);
+        assert.equal(view.materialTint.length, 4, 'missing native glass material tint');
+        const score = report.marketScores[expectedId];
+        const saturation = 0.18 + 0.82 * Math.min(1, Math.abs(score));
+        const fraction = score > 0 ? 47 / 255 : 25 / 255;
+        const expectedTint = score > 0 ? [1 - saturation, 1, 1 - saturation * (1 - fraction), 0.3] :
+            [1, 1 - saturation * (1 - fraction), 1 - saturation, 0.3];
+        view.materialTint.forEach((channel, i) => assert.ok(Math.abs(channel - expectedTint[i]) < 0.00001,
+            `native material color changed for ${view.id}`));
+        const sameOwner = frame.views.filter(other => other.tintOwner === expectedId);
+        for (const other of sameOwner) assert.deepEqual(view.materialTint, other.materialTint,
+            'price and its count use different native tints');
     }
 }
 
@@ -83,11 +109,15 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
         }
     }
     assert.ok(report.samples.flatMap(frame => frame.views).filter(view => view.role === 'merge' && view.priceMix > 0.5).length >= 10,
-        'missing parent-color coverage while incoming prices are still visible');
+        'missing stable station-color coverage while incoming prices are still visible');
     assert.ok(report.samples.flatMap(frame => frame.views).filter(view => view.role === 'split' && view.releaseParent).length >= 2,
         'missing parent-color coverage during outward neck stretch');
     assert.ok(report.samples.some(frame => frame.views.some(view => view.role === 'badge')),
         'missing connected price/count coverage');
+    const previewFrames = report.samples.filter(frame => [...Map.groupBy(frame.views, view => view.glassConnection).values()]
+        .some(views => new Set(views.map(view => view.logicalTintOwner)).size > 1));
+    assert.ok(previewFrames.length >= 4, 'missing native pre-merge glass connection between distinct logical parents');
+    t.diagnostic(`${previewFrames.length} native pre-merge frames before logical membership changes`);
     const catches = report.samples.flatMap(frame => frame.views).filter(view => view.contactDelay > 0.001);
     assert.ok(catches.length > 0, 'contact resistance was not sampled on the live map');
     const visibleCatch = Math.max(...catches.map(view => Math.hypot(
@@ -432,7 +462,7 @@ test('staggered neighboring clusters stay independent while their own price and 
             assert.ok(badge, 'missing intended count');
             assert.equal(price.glassGroup, badge.glassGroup, 'isolating neighbors broke price/count blending');
         }
-        if (prices.some(a => badges.some(b => a.logicalTintOwner !== b.logicalTintOwner &&
+        if (prices.some(a => badges.some(b => a.glassFamily !== b.glassFamily &&
             Math.abs(a.y - b.y) > 2 && Math.abs(a.x - b.x) > 1 && capsuleGap(a, b) <= 36))) closeDiagonalFrames++;
         assert.ok(frame.glassGroupCount <= 3, 'neighbor isolation allocated unnecessary native effects');
     }

@@ -652,10 +652,29 @@ final class ClusterLabRenderer {
     let logicalTints = Dictionary(uniqueKeysWithValues: renderedPills.keys.map { key in
       (key, tintOwner(for: key.hasPrefix("badge:") ? String(key.dropFirst(6)) : key))
     })
-    let connections = glassGroups.update(renderedViews, families: logicalTints)
-    for (id, pill) in renderedPills {
-      pill.applyMarket(markets[logicalTints[id] ?? id] ?? .unknown)
-    }
+    // Native glass starts connecting before logical membership changes. Derive
+    // those preview families from the parent PRICE anchors on the map, never
+    // from a nearby count capsule, recoil, or location-avoidance displacement.
+    let familyFrames = Dictionary(uniqueKeysWithValues: Set(logicalTints.values).compactMap { id -> (String, CGRect)? in
+      guard let motion = motions[id] else { return nil }
+      let center = project(motion.station.mapPoint, map: map)
+      let size = motion.pill?.view.bounds.size ?? ClusterLabGeometry.pillSize
+      return (id, CGRect(x: center.x - size.width / 2, y: center.y - size.height / 2,
+                         width: size.width, height: size.height))
+    })
+    let previews = ClusterLabGlassGrouping.layout(familyFrames.map {
+      LabGlassItem(id: $0.key, frame: $0.value)
+    }, previous: [:]).connections
+    let connections = glassGroups.update(renderedViews, families: logicalTints.mapValues { previews[$0] ?? $0 })
+    // Glass connectivity controls only morphing, never a station's market color.
+    // A surface showing a price keeps that station's global tint. Only +N
+    // content inherits the representative parent's tint, including split copies.
+    let visibleTints = Dictionary(uniqueKeysWithValues: renderedPills.keys.map { id in
+      let owner = id.hasPrefix("badge:") ? String(id.dropFirst(6)) :
+        ((motions[id]?.priceMix ?? 0) > 0 ? id : logicalTints[id] ?? id)
+      return (id, owner)
+    })
+    for (id, pill) in renderedPills { pill.applyMarket(markets[visibleTints[id] ?? id] ?? .unknown) }
     if recording {
       // Handoffs are recorded as events; frame samples describe surviving views.
       samples.removeAll { renderedViews[$0["id"] as? String ?? ""] == nil }
@@ -664,7 +683,12 @@ final class ClusterLabRenderer {
           if let pill = renderedPills[id], let connection = connections[id] {
             samples[index]["logicalTintOwner"] = logicalTints[id]
             samples[index]["glassConnection"] = connection
-            samples[index]["tintOwner"] = logicalTints[id]
+            samples[index]["tintOwner"] = visibleTints[id]
+            if let family = logicalTints[id], let anchor = familyFrames[family] {
+              samples[index]["glassFamily"] = previews[family] ?? family
+              samples[index]["familyAnchor"] = ["x": anchor.midX, "y": anchor.midY,
+                "width": anchor.width, "height": anchor.height]
+            }
             samples[index]["tintScore"] = pill.tintScore
             samples[index]["tintUpdates"] = pill.tintUpdateCount
             samples[index]["materialTint"] = pill.materialTint
@@ -684,6 +708,7 @@ final class ClusterLabRenderer {
     if recording {
       frameSamples.append(["time": CACurrentMediaTime(), "views": samples,
                            "viewCount": glassGroups.pillCount, "glassGroupCount": glassGroups.groupCount,
+                           "glassMaterialResets": glassGroups.materialResetCount,
                            "stationCount": motions.count, "animating": animating,
                            "selectedId": emphasis.selectedId ?? "",
                            "userLocation": dot.map { ["x": $0.x, "y": $0.y] } ?? [:]])

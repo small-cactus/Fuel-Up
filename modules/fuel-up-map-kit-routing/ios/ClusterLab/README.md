@@ -25,6 +25,9 @@ capsule. The 28pt capsule has 8pt side padding around at most seven visible indi
 UIKit condenses longer lists within that width. The control retains a 44pt touch
 height and uses label colors (45% opacity for inactive dots) for theme contrast.
 Its minimal backing avoids a second material. The capsule hides for one page.
+On attachment, tab re-entry, and theme changes, the pagination material is reset
+and reapplied during layout as native regular glass, matching expo-glass-effect's
+mount lifecycle so a stale effect cannot survive a detached view.
 Changing pages focuses the station through a native view command. Tapping a map
 pill emits one selection event and scrolls the card without echoing the camera
 command. Map gestures and cluster animation never send per-frame work to React.
@@ -88,20 +91,24 @@ Saturation ranges from pastel to the original onboarding hue, with constant
 brightness and opacity. Adaptive system-label foregrounds match onboarding's
 light/dark text treatment and stay legible over the lighter regular glass.
 
-`ClusterLabGlass` uses the installed Callstack library's public Swift glass views.
+`ClusterLabGlass` uses Apple's public container effect and the installed
+Callstack library's public Swift pill views. Native container effects are
+assigned once; layouts and membership changes never recreate their materials.
 Pills use regular glass with native `UIGlassEffect.tintColor`, high-contrast text,
 and a spoken local-price comparison. The count shares its representative price's
-tint. Incoming prices immediately inherit the receiving parent; departing
-duplicates retain that tint until the glass neck releases. Parent ownership is
-followed through cluster changes. Tint updates commit together without separate
-per-pill color tweens; unchanged tints never rebuild the effect. The grouping pass follows intended cluster families, so neighboring
-price/count islands cannot form diagonal chains through each other's capsules.
+tint. Every visible price keeps its station's cached market tint, including
+incoming and departing price surfaces. Only +N content inherits its parent.
+Connectivity never selects a color or a cheapest representative for other
+visible prices. Tint updates commit without per-pill color tweens; unchanged
+tints never rebuild the effect. The grouping pass derives native pre-merge
+families from projected parent price anchors. Thus approaching chips share glass
+before logical membership changes, while neighboring price/count islands cannot
+form diagonal chains through a count capsule, recoil, or location avoidance.
 Nearby independent families use separate native effects; distant families pool
-those effects. Departing duplicates retain the original family through the
-remaining native neck reach, independently of the recoil trigger. Every surface
-uses its family's cached global market tint. Movement and
-rebound curves are unchanged. Live probes compare the native material RGBA
-values as well as market scores between connected parents and children.
+those effects. Departing duplicates retain the original glass family through the
+remaining native neck reach, independently of the recoil trigger. Movement and
+rebound curves are unchanged. Live probes compare actual native material RGBA
+and market scores against station identity throughout each transition.
 `ClusterLabGlassGroups` pools Apple's native `UIGlassContainerEffect` views under
 the same MapKit carrier. Each effect spans the full padded root. Horizontal
 neighbors share an effect with the unchanged 36 pt spacing. Vertically dominant
@@ -321,8 +328,8 @@ the map's live camera would apply the destination before animation begins.
 
 Station market colors are cached by ID from the complete search snapshot.
 Offscreen view culling and cluster membership never change that ranking.
-A connected price or count inherits its parent's tint regardless of its text.
-Once released, a standalone price returns to its own cached market color.
+Every surface displaying a price keeps its station's cached market tint.
+Count content uses its parent's tint; morph connectivity never recolors prices.
 Live zoom, merge, pan, and re-entry probes compare prices against the global table.
 
 

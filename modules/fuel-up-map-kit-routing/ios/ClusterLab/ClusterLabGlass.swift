@@ -1,14 +1,17 @@
 import UIKit
 import LiquidGlass
 
-// Use the installed library's native implementations, including its runtime
-// availability checks. No masks, custom blur, borders, or replicated glass.
+// Use native Apple effects and the installed library's pill implementation.
+// No masks, custom blur, borders, or replicated glass.
 enum ClusterLabGlass {
   static func container() -> UIView {
     if #available(iOS 26.0, *), NSClassFromString("UIGlassContainerEffect") != nil {
-      let view = LiquidGlassConatinerViewImpl() // Spelling is the library's public API.
-      // Let Apple's native neck stretch farther before moving pills detach.
-      view.spacing = ClusterLabGeometry.glassSpacing
+      // The library's container rebuilds its effect on every layout, causing
+      // material/tint settling flashes when membership changes. UIKit's native
+      // view preserves one effect through layouts and chip reparenting.
+      let effect = UIGlassContainerEffect()
+      effect.spacing = ClusterLabGeometry.glassSpacing
+      let view = ClusterLabGlassContainer(effect: effect)
       view.clipsToBounds = false
       view.contentView.clipsToBounds = false
       return view
@@ -107,8 +110,8 @@ final class ClusterLabPill {
       let effect = UIGlassEffect(style: .regular)
       effect.isInteractive = false
       effect.tintColor = color
-      // Commit connected surfaces' identical tint together. Independent color
-      // tweens briefly mixed a child's old color into its parent's glass.
+      // Commit a content-role tint change once without a separate color tween.
+      // Unchanged station prices never recreate their native material.
       UIView.performWithoutAnimation { glass.effect = effect }
     } else { view.backgroundColor = color ?? .secondarySystemBackground }
   }
@@ -140,5 +143,14 @@ final class ClusterLabPill {
     priceLabel.frame = CGRect(x: ((width - 66) / 2 + 16) * scale, y: 0, width: 50 * scale, height: 32 * scale)
     countLabel.frame = view.bounds
     view.accessibilityValue = priceMix > 0.5 ? "\(priceLabel.text ?? ""), \(marketDescription)" : countLabel.text
+  }
+}
+
+// Track public material assignments, rather than UIKit's copied effect getter.
+// Native UIKit continues to own all layout, merging, and material rendering.
+final class ClusterLabGlassContainer: UIVisualEffectView {
+  private(set) var materialResetCount = 0
+  override var effect: UIVisualEffect? {
+    didSet { materialResetCount += 1 }
   }
 }
