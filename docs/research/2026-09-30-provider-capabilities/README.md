@@ -1,5 +1,10 @@
 # GasBuddy price history, geographic scope, and pagination probes
 
+**Latest result:** the complete Florida inventory and all available price
+responses were retrieved and independently reconciled in **22.303 seconds using
+five requests**. See [Verified complete retrieval](#verified-complete-retrieval)
+below; it supersedes the earlier 70-second estimate.
+
 Observed September 30, 2026. This is a research checkpoint; no app, production
 collector, schedule, or price-correction behavior was changed.
 
@@ -188,3 +193,98 @@ samples, queries, and arithmetic. The investigation added 14 requests: one faile
 full-price request, one full inventory, one initial page sample, two batch-shape
 validation requests, eight timed pages, and one fixed-ID sample. Raw bulk price
 responses were saved only in temporary local files, not committed to the repo.
+
+## Verified complete retrieval
+
+The most efficient complete method verified in this investigation is:
+
+1. Fetch the whole state inventory **without the `prices` field**, including IDs,
+   names, coordinates and addresses. Validate the reported count and unique IDs.
+2. Fetch prices directly for those known IDs, in groups of **2,000**. Use ordinary
+   `station(id:)` fields with aliases and one shared GraphQL fragment. This keeps
+   query bodies under a conservative 90 KB budget and avoids the unreliable
+   state-price pagination entirely.
+3. Require each alias to return its exact requested ID and price array. Retain
+   records with no positive price as unpriced; they still count toward coverage.
+4. Reconcile the output against the full inventory before saving a successful
+   snapshot. Keep per-batch observation times and each payment/grade report time.
+
+### Florida end-to-end measurement
+
+Observed 2026-09-30 19:18:27–19:18:50 UTC on the development Mac/network:
+
+| Measure | Result |
+| --- | ---: |
+| Inventory IDs | 7,931 |
+| Final unique station IDs | 7,931 |
+| Missing / unexpected / duplicate IDs | 0 / 0 / 0 |
+| Requests | 5: one inventory plus four price batches |
+| Complete fetch, parsing, validation and merge | **22.303 seconds** |
+| Deliberate pacing included | Four two-second pauses |
+| Summed request/download times | 14.234 seconds |
+| Local save and sync after fetch | 0.038 seconds |
+| Decoded response bytes | 4,736,814 |
+| At least one positive reported price | 5,749 stations |
+| No positive reported prices | 2,182 stations |
+
+The final ID set also exactly matched the independently fetched earlier 7,931-ID
+inventory, not merely the count. This is a measured complete run against the
+provider's inventory, not a theoretical extrapolation, physical station census,
+atomic database snapshot, freshness guarantee, or verified pump truth. One run
+does not establish latency percentiles or an approved request rate.
+
+Batch selection probes returned 500/500 IDs in 1.038 seconds and 2,000/2,000 IDs
+in 3.689 seconds. The latter needs fewer requests and pacing gaps. This is the
+best verified strategy here; larger batches and concurrency were not exhaustively
+optimized or saturation-tested. The full run used no concurrent requests.
+
+[Complete benchmark](complete-florida-benchmark.json) and the compressed
+[complete raw research snapshot](complete-florida-snapshot.json.gz) preserve the
+evidence. The snapshot contains public station metadata and quotes, with no
+reporter identities, credentials, cookies or headers.
+
+### Provider metadata and larger-state limitations
+
+The inventory contains mixed-case `Fl` abbreviations, which are normalized only
+for validation. It also contains a Parrish-address station whose region is `GA`.
+The latter is retained with `ADDRESS_SCOPE_MISMATCH`, not silently removed or
+rewritten. A mismatched overall search region still fails the run.
+
+The discovery step has a real limitation above **10,000 records**:
+
+- California reports 9,844 records; only its count was checked, not a full run.
+- Texas reports 15,271. Requesting all IDs at once failed. The first 10,000 IDs
+  succeeded, but requesting the remaining 5,271 using the returned cursor failed
+  with `Unable to complete search request`.
+- A 20,000-limit Florida inventory query also failed. Together these observations
+  support a 10,000-result search-window limitation; this is not published vendor
+  documentation. Changing the tested sort arguments was not supported.
+- The helper therefore **stops on inventories above 10,000**. Complete partitioned
+  discovery or an authorized bulk catalog is required for those states. It does
+  not claim to fetch all states successfully. The fixed-ID price batching can
+  process a larger verified catalog, but statewide enumeration for Texas remains
+  unresolved in this implementation.
+- A root `brands { brandId name }` query returned 665 brand entries. This identifies
+  a possible discovery-partition dimension, but no complete brand-partitioned
+  Texas inventory was demonstrated; unbranded stations and multi-brand duplicates
+  must be accounted for before claiming completeness.
+
+### Reusable research fetcher
+
+```sh
+node scripts/price-model/fetchStateSnapshot.mjs "Florida" FL /absolute/new-snapshot.json
+node --test tests/stateSnapshot.test.mjs tests/researchCollector.test.mjs
+```
+
+The core, HTTP transport and CLI are separate files. Requests are serialized and
+paced; 401/403/429 stop the run. Only explicit payload-size failures can split a
+price batch; errors, missing aliases, bad IDs, truncated inventories, and exhausted
+budgets cannot become successful snapshots. Existing output files are not
+overwritten, and failed runs remove the newly created incomplete output. An
+external process kill may leave an incomplete file; consumers must require valid
+JSON and `complete: true`. No production app or existing collection job was changed.
+
+For repeated refreshes, an independently reconciled catalog can be reused to
+avoid rediscovering station metadata every hour, with scheduled catalog refreshes
+to discover new/removed stations. That is an architectural option, not a deployed
+cache or a promise that yesterday's catalog contains every station today.

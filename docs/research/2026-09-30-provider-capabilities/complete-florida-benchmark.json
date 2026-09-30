@@ -1,0 +1,210 @@
+{
+  "version": 1,
+  "provider": "gasbuddy",
+  "state": "Florida",
+  "region": "FL",
+  "complete": true,
+  "coverageBasis": "Every ID in the provider inventory at collection start; not an atomic price snapshot or independently verified station census.",
+  "startedAt": "2026-09-30T19:18:27.875Z",
+  "finishedAt": "2026-09-30T19:18:50.178Z",
+  "elapsedMs": 22303,
+  "inventoryCount": 7931,
+  "returnedCount": 7931,
+  "pricedStations": 5749,
+  "unpricedStations": 2182,
+  "requestCount": 5,
+  "pauseMs": 2000,
+  "batchSize": 2000,
+  "scopeWarnings": [
+    {
+      "stationId": "215147",
+      "code": "ADDRESS_SCOPE_MISMATCH",
+      "reportedRegion": "GA",
+      "reportedCountry": "US"
+    }
+  ],
+  "requests": [
+    {
+      "kind": "inventory",
+      "startedAt": "2026-09-30T19:18:27.876Z",
+      "observedAt": "2026-09-30T19:18:30.274Z",
+      "status": 200,
+      "queryBytes": 383,
+      "decodedBodyBytes": 1568070,
+      "headersMs": 2206.961042,
+      "receivedMs": 2387.915834,
+      "parseMs": 10.230207999999948
+    },
+    {
+      "kind": "prices",
+      "startedAt": "2026-09-30T19:18:32.279Z",
+      "observedAt": "2026-09-30T19:18:35.365Z",
+      "status": 200,
+      "queryBytes": 67958,
+      "decodedBodyBytes": 878192,
+      "headersMs": 2930.9636250000003,
+      "receivedMs": 3078.8554999999997,
+      "parseMs": 7.2346669999997175
+    },
+    {
+      "kind": "prices",
+      "startedAt": "2026-09-30T19:18:37.375Z",
+      "observedAt": "2026-09-30T19:18:40.744Z",
+      "status": 200,
+      "queryBytes": 67904,
+      "decodedBodyBytes": 876218,
+      "headersMs": 3216.6619169999994,
+      "receivedMs": 3363.624,
+      "parseMs": 5.413249999999607
+    },
+    {
+      "kind": "prices",
+      "startedAt": "2026-09-30T19:18:42.751Z",
+      "observedAt": "2026-09-30T19:18:45.263Z",
+      "status": 200,
+      "queryBytes": 67935,
+      "decodedBodyBytes": 801576,
+      "headersMs": 2345.4315840000017,
+      "receivedMs": 2506.3847090000017,
+      "parseMs": 5.139916000000085
+    },
+    {
+      "kind": "prices",
+      "startedAt": "2026-09-30T19:18:47.269Z",
+      "observedAt": "2026-09-30T19:18:50.171Z",
+      "status": 200,
+      "queryBytes": 65660,
+      "decodedBodyBytes": 612758,
+      "headersMs": 2768.860125000003,
+      "receivedMs": 2897.1262080000015,
+      "parseMs": 4.828000000001339
+    }
+  ],
+  "decodedResponseBytes": 4736814,
+  "summedReceiveMs": 14233.906251000002,
+  "stationIdSetSha256": "4074e1237f048918e09460f77d50a639f4a134e326c8abca51682d425c14df8a",
+  "independentInventoryComparison": {
+    "expected": 7931,
+    "matched": 7931,
+    "missing": 0,
+    "extra": 0
+  },
+  "batchSelectionProbes": {
+    "fixed-id500-fragment": {
+      "name": "fixed-id500-fragment",
+      "startedAt": "2026-09-30T19:11:18.909Z",
+      "status": 200,
+      "variables": {},
+      "headersMs": 932.7189170000001,
+      "receivedMs": 1037.8071250000003,
+      "parseMs": 1.580667000000176,
+      "decodedBodyBytes": 221341,
+      "returned": 500,
+      "unique": 500,
+      "priced": 0
+    },
+    "fixed-id2000-fragment": {
+      "name": "fixed-id2000-fragment",
+      "startedAt": "2026-09-30T19:11:54.228Z",
+      "status": 200,
+      "variables": {},
+      "headersMs": 3529.6426249999995,
+      "receivedMs": 3689.3332499999997,
+      "parseMs": 5.055833000000348,
+      "decodedBodyBytes": 878983,
+      "returned": 2000,
+      "unique": 2000,
+      "priced": 0
+    }
+  },
+  "largerStateProbes": {
+    "state-count-texas": {
+      "name": "state-count-texas",
+      "startedAt": "2026-09-30T19:19:38.970Z",
+      "status": 200,
+      "query": "query($state:String!){locationBySearchTerm(search:$state,priority:\"locality\"){regionCode stations(limit:1,priority:\"locality\",maxAge:0){count results{id}}}}",
+      "variables": {
+        "state": "Texas"
+      },
+      "headersMs": 529.050334,
+      "receivedMs": 530.5611250000002,
+      "parseMs": 0.03616599999986647,
+      "decodedBodyBytes": 109,
+      "reportedCount": 15271,
+      "returned": 1,
+      "unique": 1,
+      "priced": 0
+    },
+    "state-count-california": {
+      "name": "state-count-california",
+      "startedAt": "2026-09-30T19:19:41.504Z",
+      "status": 200,
+      "query": "query($state:String!){locationBySearchTerm(search:$state,priority:\"locality\"){regionCode stations(limit:1,priority:\"locality\",maxAge:0){count results{id}}}}",
+      "variables": {
+        "state": "California"
+      },
+      "headersMs": 200.30316700000003,
+      "receivedMs": 201.010542,
+      "parseMs": 0.038457999999991443,
+      "decodedBodyBytes": 107,
+      "reportedCount": 9844,
+      "returned": 1,
+      "unique": 1,
+      "priced": 0
+    },
+    "texas-full-id-inventory": {
+      "name": "texas-full-id-inventory",
+      "startedAt": "2026-09-30T19:20:51.955Z",
+      "status": 200,
+      "errors": [
+        "Unable to complete search request"
+      ],
+      "query": "{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode stations(limit:15271,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {},
+      "headersMs": 1048.017375,
+      "receivedMs": 1050.5760420000001,
+      "parseMs": 0.041582999999718595,
+      "decodedBodyBytes": 224,
+      "returned": 0,
+      "unique": 0,
+      "priced": 0
+    },
+    "texas-inventory-page1": {
+      "name": "texas-inventory-page1",
+      "startedAt": "2026-09-30T19:22:24.502Z",
+      "status": 200,
+      "query": "query($cursor:String,$limit:Int){locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode stations(limit:$limit,cursor:$cursor,maxAge:0,priority:\"locality\"){count cursor{next} results{id}}}}",
+      "variables": {
+        "limit": 10000
+      },
+      "headersMs": 3152.2011250000005,
+      "receivedMs": 3231.0025000000005,
+      "parseMs": 3.0040420000004815,
+      "decodedBodyBytes": 155845,
+      "reportedCount": 15271,
+      "returned": 10000,
+      "unique": 10000,
+      "priced": 0
+    },
+    "texas-inventory-page2": {
+      "name": "texas-inventory-page2",
+      "startedAt": "2026-09-30T19:22:29.741Z",
+      "status": 200,
+      "errors": [
+        "Unable to complete search request"
+      ],
+      "query": "query($cursor:String,$limit:Int){locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode stations(limit:$limit,cursor:$cursor,maxAge:0,priority:\"locality\"){count cursor{next} results{id}}}}",
+      "variables": {
+        "limit": 5271,
+        "cursor": "[provider-issued cursor omitted]"
+      },
+      "headersMs": 250.43524999999954,
+      "receivedMs": 251.2564999999995,
+      "parseMs": 0.05945900000006077,
+      "decodedBodyBytes": 225,
+      "returned": 0,
+      "unique": 0,
+      "priced": 0
+    }
+  }
+}
