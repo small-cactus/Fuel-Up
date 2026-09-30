@@ -18,7 +18,7 @@ Admin tooling:
 - `tests/nationalDiscovery.integration.sql`: transactional rollback verification of leases, shared cooldowns, permissions, regional ownership, and partial evidence. Requires an empty paused discovery queue.
 - `tests/providerRetry.integration.sql`: transactional rollback verification of explicit and missing Retry-After behavior.
 
-Verification: 56 focused Node tests passed. Transactional database tests covered regional leases and cooldowns. Real HTTP workers initially exposed Supabase safe-update enforcement missing from direct SQL tests; migration `20260930225000` adds explicit singleton predicates to all queue configuration updates. The first real East discovery batch then succeeded at 20:33 UTC. National price collection remains disabled pending complete inventory.
+Verification: 58 focused Node tests passed. Transactional database tests covered regional leases and cooldowns. Real HTTP workers initially exposed Supabase safe-update enforcement missing from direct SQL tests; migration `20260930225000` adds explicit singleton predicates to all queue configuration updates. The first real East discovery batch then succeeded at 20:33 UTC. National price collection remains disabled pending complete inventory.
 
 Subsequent controls:
 
@@ -38,3 +38,11 @@ The offline geographic planner uses the included January 2026 Census DC/Texas bo
 DC has no verified DC-only geocoder result. Its explicit geographic certificate requires two distinct full nearby responses, centers at least 1 km apart, every Census boundary vertex within 23 km, evidence that the returned footprint extends at least 24 km, and identical DC-addressed station IDs. This is conditional geographic coverage, not a provider-reported DC total or verified pump truth. The certificate records the assumption and source rather than inventing a state count.
 
 The collection-window migration separates inventory observation time from the bounded period for refreshing prices for that fixed inventory. An explicit catalog validity window is capped at eight days after publication. It never rewrites inventory timestamps to imply a new enumeration. The national watchdog restores only a missing main schedule while collection is enabled and within its deadline; it does not undo manual pauses or access denials.
+
+
+Deployment operations:
+
+- After full reconciliation, publish the catalog using `publishCatalog.mjs`. Publishing leaves price collection paused.
+- `activate.mjs <end-ISO>` starts a bounded window of at most seven days, preserves provider cooldowns, disables bootstrap discovery, installs the minute dispatcher and five-minute watchdog, and allows 20,000 station lookups of retry headroom per hour. The configured budget is our cap, not a provider-issued quota. If the current hour has insufficient time at the measured scheduling pace, it starts at the next hour instead of creating an intentionally incomplete run.
+- `auditHour.mjs <run-id> [new-report.json]` downloads the immutable Storage objects through the authenticated Supabase CLI and independently checks hashes, exact station IDs, observation windows, missing-price counts, and execution regions. It makes no provider requests and does not print credentials. Temporary downloads are removed after verification.
+- Initial archive capacity is capped at 900 MB. Extrapolating the existing Florida snapshot gives roughly 4.1 MB per nationwide hour / 687 MB per seven days; this is a planning estimate, to be replaced by the first actual nationwide hour. Reaching the cap pauses acquisition without deleting evidence.

@@ -36,6 +36,8 @@ export async function fetchNationalPriceBatch(ids, { fetchImpl = fetch, csrf, ma
   } finally { reader.releaseLock(); }
   const bytes = new Uint8Array(size); let offset = 0;
   for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+  responseEvidence.decodedBodyBytes = size;
+  responseEvidence.fullElapsedMs = Math.round(performance.now() - started);
   let body;
   try { body = JSON.parse(new TextDecoder().decode(bytes)); } catch { throw new NationalPriceError('INVALID_JSON'); }
   if (body.errors?.length) { const error = new NationalPriceError('GRAPHQL_ERROR');
