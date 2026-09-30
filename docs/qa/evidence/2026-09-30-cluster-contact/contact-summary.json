@@ -1,5 +1,5 @@
 {
-  "token": "contact-1790783587720",
+  "token": "contact-1790784296089",
   "status": "completed",
   "nativeUserLocationVisible": true,
   "frames": 416,
@@ -138,8 +138,8 @@
           "tintOwner": "lab-3",
           "tintScore": 0,
           "x": 547.5,
-          "y": 718.5134673852406,
-          "clearanceY": -7.986548817155267
+          "y": 718.4781019446427,
+          "clearanceY": -8.02191425775311
         },
         {
           "id": "lab-5",
@@ -164,6 +164,17 @@
           "clearanceY": 0
         },
         {
+          "id": "badge:lab-5",
+          "role": "badge",
+          "glassConnection": "badge:lab-5",
+          "glassFamily": "lab-5",
+          "tintOwner": "lab-5",
+          "tintScore": 0,
+          "x": 486.00000000051585,
+          "y": 820.0000000015398,
+          "clearanceY": 0
+        },
+        {
           "id": "badge:lab-0",
           "role": "badge",
           "glassConnection": "badge:lab-0",
@@ -182,19 +193,8 @@
           "tintOwner": "lab-3",
           "tintScore": 0,
           "x": 603.5,
-          "y": 718.5134673852406,
-          "clearanceY": -7.986548817155267
-        },
-        {
-          "id": "badge:lab-5",
-          "role": "badge",
-          "glassConnection": "badge:lab-5",
-          "glassFamily": "lab-5",
-          "tintOwner": "lab-5",
-          "tintScore": 0,
-          "x": 486.00000000051585,
-          "y": 820.0000000015398,
-          "clearanceY": 0
+          "y": 718.4781019446427,
+          "clearanceY": -8.02191425775311
         }
       ]
     },
@@ -331,8 +331,8 @@
           "tintOwner": "lab-3",
           "tintScore": 0,
           "x": 547.5,
-          "y": 718.5136287773638,
-          "clearanceY": -7.986387425032035
+          "y": 718.5136289980362,
+          "clearanceY": -7.98638720435963
         },
         {
           "id": "lab-5",
@@ -357,17 +357,6 @@
           "clearanceY": 0
         },
         {
-          "id": "badge:lab-3",
-          "role": "badge",
-          "glassConnection": "badge:lab-3",
-          "glassFamily": "lab-3",
-          "tintOwner": "lab-3",
-          "tintScore": 0,
-          "x": 603.5,
-          "y": 718.5136287773638,
-          "clearanceY": -7.986387425032035
-        },
-        {
           "id": "badge:lab-5",
           "role": "badge",
           "glassConnection": "badge:lab-5",
@@ -377,6 +366,17 @@
           "x": 486.00000000051585,
           "y": 820.0000000015398,
           "clearanceY": 0
+        },
+        {
+          "id": "badge:lab-3",
+          "role": "badge",
+          "glassConnection": "badge:lab-3",
+          "glassFamily": "lab-3",
+          "tintOwner": "lab-3",
+          "tintScore": 0,
+          "x": 603.5,
+          "y": 718.5136289980362,
+          "clearanceY": -7.98638720435963
         },
         {
           "id": "badge:lab-0",

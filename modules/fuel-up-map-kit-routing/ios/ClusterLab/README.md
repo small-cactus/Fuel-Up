@@ -66,11 +66,11 @@ and requests continuous frames only for camera motion, transitions, or a probe.
 Older iOS uses a display-link fallback. No camera smoothing or prediction adds
 lag, and the approved cluster springs remain separate from map anchoring.
 `ClusterLabGeometry` performs
-screen-space spatial hashing and contact hysteresis (84 × 32 pt to connect,
-120 × 56 pt to disconnect for side-by-side stations). Vertically dominant
-pairs connect at 32 pt and disconnect at 34 pt: a two-point anti-chatter band
-without the extended retention or pre-split count stretch. Spatial
-hash cells span this retained range so stretched neighbors remain discoverable.
+screen-space spatial hashing with native capsule-edge contact. Horizontal
+capsules connect within the native 36pt neck reach; stacked capsules require
+edges within 2pt. The existing 120 × 56pt retained range and horizontal count
+stretch remain; vertical pairs have no extended count excursion. Spatial hash
+cells include both retained reach and bounded location-dot nudges.
 Only displayed representatives recruit nearby stations; hidden members cannot
 extend a cluster through a chain of neighbors. Every member must stay within
 its own representative's existing contact/retention range, so a long street
@@ -107,10 +107,10 @@ rendered material is stale. Pills use regular glass with native
 `UIGlassEffect.tintColor`, high-contrast text,
 and a spoken local-price comparison. The count shares its representative price's
 tint. Every visible price keeps its station's cached market tint, including
-incoming and departing price surfaces. A split duplicate stays +N with its
-original parent's tint until its first home arrival, then reveals the station
-price over 40ms. This prevents red material from being introduced while the
-duplicate still overlays a green parent. Incoming counts consolidate at their
+incoming and departing price surfaces. A split duplicate stays +N until its
+first home arrival, then reveals the station price over 40ms. It retains its own
+station ID and tint from creation; only the attached accumulator takes the
+parent's ID. Incoming counts consolidate at their
 first arrival; the shared parent spring carries the remaining rebound.
 Connectivity never selects a color or a cheapest representative for other
 visible prices. Tint updates commit without per-pill color tweens; unchanged
@@ -119,9 +119,9 @@ families from projected parent price anchors. A 12pt preparation margin reparent
 horizontal arrivals before native contact without increasing glass spacing.
 Settled price anchors take priority over incoming count views when choosing a
 pooled container. New surfaces attach directly to their final container with
-their tint configured. Thus approaching chips share glass
-before logical membership changes, while neighboring price/count islands cannot
-form diagonal chains through a count capsule, recoil, or location avoidance.
+their tint configured. Approaching chips can prewarm an effect before visible contact, but membership
+commits as the native neck connects. Actual price/count footprints prevent a
+preview from bridging still-independent logical families.
 Nearby independent families use separate native effects; distant families pool
 those effects. Departing duplicates retain the original glass family through the
 remaining native neck reach, independently of the recoil trigger. Movement and
@@ -145,7 +145,7 @@ extend 360 points beyond all map edges, including refraction and badge travel.
 Settled groups retain a price and count view, not hidden views for each member.
 Before a horizontally retained group splits, its count moves outward with the map through
 up to 18 points of additional horizontal travel. This uses the existing
-84 × 32 to 120 × 56 hysteresis band: the count remains +n and 44 points wide
+84 × 32 to 120 × 56 stretch range: the count remains +n and 44 points wide
 while it pulls away. It no longer stays fixed until the split starts. The native
 glass spacing, spring tuning, and flight durations are unchanged.
 
@@ -268,8 +268,8 @@ full visible outward travel. Native glass spacing and recoil remain unchanged.
 `ClusterLabCameraFit` solves the initial north-up camera in projected map coordinates,
 including the full price capsule and the extra width of every predicted count.
 It searches exact contact-scale intervals and solves their monotonic bounds,
-including the existing smoothstep stretch on a transitive group's count;
-the largest feasible uniform scale also minimizes fresh clustering. All station
+including the existing smoothstep count stretch. The largest feasible uniform
+scale provides the tightest overview without clipping predicted pills. All station
 locations remain in frame, including members represented by a count. The native
 MapKit camera receives the resulting rect once, before pill creation. Its native
 layout margins are accounted for so safe areas are not padded twice. Longitudes
