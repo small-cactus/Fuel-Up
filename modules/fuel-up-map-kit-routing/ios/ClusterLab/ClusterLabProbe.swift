@@ -21,7 +21,7 @@ final class ClusterLabProbe {
   init(view: ClusterLabMapView, token: String) {
     self.view = view; self.token = token
     savedRegion = view.map.region
-    center = token.hasPrefix("location-") ?
+    center = token.hasPrefix("location-") || token.hasPrefix("contact-") ?
       (view.map.userLocation.location?.coordinate ?? .init(latitude: 27.9506, longitude: -82.4572)) :
       .init(latitude: 27.9506, longitude: -82.4572)
   }
@@ -54,6 +54,20 @@ final class ClusterLabProbe {
         view.map.setCamera(camera, animated: false)
       }
     }
+    if token.hasPrefix("contact-") {
+      // Recreate both screenshot arrangements at known MapKit screen distances.
+      let dot = view.map.convert(center, toPointTo: view.map)
+      let points: [CGPoint] = [CGPoint(x: 100, y: 180), CGPoint(x: 101, y: 180), CGPoint(x: 210, y: 180),
+        CGPoint(x: dot.x, y: dot.y - 23), CGPoint(x: dot.x, y: dot.y - 60),
+        CGPoint(x: 70, y: 460), CGPoint(x: 196, y: 460), CGPoint(x: 71, y: 460)]
+      view.renderer.setStations(points.enumerated().map { index, point in
+        let coordinate = view.map.convert(point, toCoordinateFrom: view.map)
+        return ClusterLabStation(["id": "lab-\(index)", "latitude": coordinate.latitude,
+          "longitude": coordinate.longitude, "price": 3.10 + Double(index) * 0.10,
+          "name": "Contact station \(index)"])!
+      })
+      view.setRegion(.init(center: center, span: .init(latitudeDelta: 0.002, longitudeDelta: 0.002)), animated: false)
+    }
     view.renderer.resetRecording()
     view.renderer.recording = true
     view.refresh()
@@ -62,6 +76,19 @@ final class ClusterLabProbe {
   func tick(time: Double) {
     guard let view, !finished else { return }
     if startTime == 0 { startTime = time }
+    if token.hasPrefix("contact-") {
+      let elapsed = time - startTime
+      let next = Int(max(0, elapsed - 1) / 1.5)
+      if elapsed >= 1, next != stage {
+        stage = next
+        if let sample = view.renderer.frameSamples.last { overviewReturns.append(sample) }
+        if next >= 4 { finish(status: "completed"); return }
+        let span = next.isMultiple(of: 2) ? 0.003 : 0.002
+        view.setRegion(.init(center: center, span: .init(latitudeDelta: span, longitudeDelta: span)), animated: true)
+        view.refresh()
+      }
+      return
+    }
     if token.hasPrefix("rapid-") {
       let elapsed = time - startTime
       focusCameraSamples.append(["time": elapsed, "distance": view.map.camera.centerCoordinateDistance])

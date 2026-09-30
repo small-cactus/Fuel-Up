@@ -34,7 +34,7 @@ final class ClusterLabLocationClearance {
       neighbors.reduce(0) { total, other in
         let segment = max(0, (frame.width - frame.height) / 2) + max(0, (other.width - other.height) / 2)
         let x = max(0, abs(frame.midX - other.midX) - segment)
-        let penetration = max(0, (frame.height + other.height) / 2 - hypot(x, frame.midY + shift - other.midY))
+        let penetration = max(0, (frame.height + other.height) / 2 + 3 - hypot(x, frame.midY + shift - other.midY))
         return total + penetration * penetration
       }
     }
@@ -51,18 +51,29 @@ final class ClusterLabLocationClearance {
     return abs(frame.midY + low - dot.y) >= abs(frame.midY + high - dot.y) ? low : high
   }
 
+  // Deterministic targets also feed membership. Animated offsets must never
+  // feed back into grouping, otherwise a nudge can cause frame-to-frame chatter.
+  static func targets(frames: [String: CGRect], dot: CGPoint?, bounds: CGRect) -> [String: CGFloat] {
+    var result: [String: CGFloat] = [:], occupied = frames
+    for id in frames.keys.sorted() {
+      let frame = frames[id]!
+      let initial = offset(frame: frame, dot: dot, bounds: bounds)
+      let target = initial == 0 ? 0 : offset(frame: frame, dot: dot, bounds: bounds,
+                                            neighbors: occupied.filter { $0.key != id }.map(\.value))
+      result[id] = target
+      occupied[id] = frame.offsetBy(dx: 0, dy: target)
+    }
+    return result
+  }
+
   func update(frames: [String: CGRect], dot: CGPoint?, bounds: CGRect,
               deltaTime: Double, reducedMotion: Bool) -> (offsets: [String: CGFloat], moving: Bool) {
     motions = motions.filter { frames[$0.key] != nil }
     var offsets: [String: CGFloat] = [:]
     var moving = false
-    var occupied = frames
+    let targets = Self.targets(frames: frames, dot: dot, bounds: bounds)
     for id in frames.keys.sorted() {
-      let frame = frames[id]!
-      let initial = Self.offset(frame: frame, dot: dot, bounds: bounds)
-      let target = initial == 0 ? 0 : Self.offset(frame: frame, dot: dot, bounds: bounds,
-                                                 neighbors: occupied.filter { $0.key != id }.map(\.value))
-      occupied[id] = frame.offsetBy(dx: 0, dy: target)
+      let target = targets[id]!
       var motion = motions[id] ?? Motion()
       if abs(target - motion.target) > 0.05 {
         motion.start = motion.value; motion.target = target; motion.elapsed = 0

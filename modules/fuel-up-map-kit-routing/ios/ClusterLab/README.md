@@ -347,7 +347,8 @@ the map's live camera would apply the destination before animation begins.
 Station market colors are cached by ID from the complete search snapshot.
 Offscreen view culling and cluster membership never change that ranking.
 Every surface displaying a price keeps its station's cached market tint.
-Count content uses its parent's tint; morph connectivity never recolors prices.
+Attached counts use their parent's identity; traveling copies retain their own.
+Morph connectivity never recolors prices.
 Live zoom, merge, pan, and re-entry probes compare prices against the global table.
 
 
@@ -413,3 +414,30 @@ reproduce persistent extra green price pills on this simulator; one further
 every reported rendered-color artifact on the phone.
 See [measurements](../../../../docs/qa/evidence/2026-09-30-chip-identity/rapid-summary.json)
 and [winner-change image](../../../../docs/qa/evidence/2026-09-30-chip-identity/winner-change.png).
+
+### Logical contact and native glass
+
+Fresh membership uses the same rounded-capsule contact predicate as native glass:
+horizontal neck reach is 36pt, while stacked capsules must be within 2pt. The
+existing retained horizontal +N stretch, recoil, and timing are unchanged. Only
+displayed representatives recruit; hidden members cannot form long chains.
+Camera fit visits the predicate's edge and orientation boundaries before rendering.
+
+Separate families may prewarm a shared effect while still outside visible contact.
+If any of their actual price/count footprints could form a neck, they stay isolated
+until logical membership agrees. This prevents badges bridging unrelated clusters.
+Location clearance also considers the native contact band when choosing which
+side of the location dot to use. Membership and focus use its deterministic
+target offsets, never animated displacement, so a nudge cannot leave touching
+prices uncombined or feed animation history back into cluster ownership. Existing
+geographic contacts still combine and receive one shared nudge. When a splitting
+price becomes a parent, incoming copies and its badge track its current pose
+rather than its eventual map destination.
+
+The `contact-` simulator probe recreates horizontal prices 110pt apart, stacked
+prices 37pt apart brought into contact by the real location-dot nudge, and an
+independent price near a neighboring count. It zooms in
+and back twice, requiring the first two pairs to combine and the last pair to stay
+isolated. The general morph gate requires incoming views to connect to their
+committed parent before arrival, and forbids glass connections between independent
+parents. It no longer requires the incorrect pre-merge state with separate owners.

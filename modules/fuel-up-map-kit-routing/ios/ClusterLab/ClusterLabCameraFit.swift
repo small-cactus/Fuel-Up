@@ -1,9 +1,9 @@
 import Foundation
 import CoreGraphics
 
-// Solve in projected map coordinates before creating any pills. Larger uniform
-// scale can only split fresh clusters, so the largest feasible scale also gives
-// the fewest grouped stations. Count capsules are included in the width budget.
+// Solve in projected map coordinates before creating any pills. Visit every
+// contact interval from largest to smallest to find the tightest feasible camera.
+// Count capsules are included in the width budget.
 enum ClusterLabCameraFit {
   static func rect(for stations: [LabProjectedStation], viewport: CGSize,
                    usable: CGRect, maximumScale: CGFloat) -> CGRect? {
@@ -26,8 +26,9 @@ enum ClusterLabCameraFit {
       for j in points.indices where j < i {
         let x = abs(points[i].point.x - points[j].point.x)
         let y = abs(points[i].point.y - points[j].point.y)
-        let contact = min(x > 0 ? 84 / x : .infinity, y > 0 ? 32 / y : .infinity)
-        if contact > 0 && contact < scale { contacts.insert(contact) }
+        for contact in ClusterLabGeometry.contactScales(separation: CGPoint(x: x, y: y)) {
+          if contact > 0 && contact < scale { contacts.insert(contact) }
+        }
       }
     }
     let boundaries = contacts.sorted(by: >) + [0]
@@ -50,7 +51,7 @@ enum ClusterLabCameraFit {
       }
       var candidate = scale
       if rightEdge(at: candidate) + 42 > usable.width {
-        // Transitive groups can have a stretched count even on first layout.
+        // A directly recruited member can stretch its count on first layout.
         // Solve that existing smoothstep width too, entirely offscreen.
         var low: CGFloat = 0, high = scale
         for _ in 0..<48 {

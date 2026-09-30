@@ -43,6 +43,10 @@ let countGroup = CGRect(x: 145, y: 384, width: 138, height: 32)
 assert(offset(CGPoint(x: 263, y: 400), frame: countGroup) == -31)
 assert(ClusterLabLocationClearance.offset(frame: pill, dot: center, bounds: bounds,
   neighbors: [pill.offsetBy(dx: 0, dy: -40)]) == 31)
+// A nudge that clears the dot must not stop in the neighbor's 2pt glass band.
+// In this arrangement both directions clear the dot, but only below stays separate.
+assert(ClusterLabLocationClearance.offset(frame: pill, dot: center, bounds: bounds,
+  neighbors: [pill.offsetBy(dx: 0, dy: -64)]) == 31)
 let state = ClusterLabLocationClearance()
 var previous: CGFloat = 0
 for _ in 0..<12 {

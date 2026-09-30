@@ -1,0 +1,497 @@
+{
+  "token": "contact-1790783587720",
+  "status": "completed",
+  "nativeUserLocationVisible": true,
+  "frames": 416,
+  "events": 48,
+  "returns": [
+    {
+      "owners": {
+        "lab-0": "lab-0",
+        "lab-1": "lab-0",
+        "lab-2": "lab-2",
+        "lab-3": "lab-3",
+        "lab-4": "lab-4",
+        "lab-5": "lab-5",
+        "lab-6": "lab-6",
+        "lab-7": "lab-5"
+      },
+      "views": [
+        {
+          "id": "lab-0",
+          "role": "price",
+          "glassConnection": "badge:lab-0",
+          "glassFamily": "lab-0",
+          "tintOwner": "lab-0",
+          "tintScore": 1,
+          "x": 416.25000000282336,
+          "y": 435.2499919098383,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-2",
+          "role": "price",
+          "glassConnection": "lab-2",
+          "glassFamily": "lab-2",
+          "tintOwner": "lab-2",
+          "tintScore": 0,
+          "x": 581.249999999592,
+          "y": 435.2499919098383,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-3",
+          "role": "price",
+          "glassConnection": "lab-3",
+          "glassFamily": "lab-3",
+          "tintOwner": "lab-3",
+          "tintScore": 0,
+          "x": 547.5,
+          "y": 715.0000162058924,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-4",
+          "role": "price",
+          "glassConnection": "lab-4",
+          "glassFamily": "lab-4",
+          "tintOwner": "lab-4",
+          "tintScore": 0,
+          "x": 547.5,
+          "y": 659.5000162021518,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-5",
+          "role": "price",
+          "glassConnection": "badge:lab-5",
+          "glassFamily": "lab-5",
+          "tintOwner": "lab-5",
+          "tintScore": 0,
+          "x": 371.25000000336746,
+          "y": 855.2499919025445,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-6",
+          "role": "price",
+          "glassConnection": "lab-6",
+          "glassFamily": "lab-6",
+          "tintOwner": "lab-6",
+          "tintScore": 0,
+          "x": 560.2499999936636,
+          "y": 855.2499919025445,
+          "clearanceY": 0
+        },
+        {
+          "id": "badge:lab-0",
+          "role": "badge",
+          "glassConnection": "badge:lab-0",
+          "glassFamily": "lab-0",
+          "tintOwner": "lab-0",
+          "tintScore": 1,
+          "x": 472.25000000282336,
+          "y": 435.2499919098383,
+          "clearanceY": 0
+        },
+        {
+          "id": "badge:lab-5",
+          "role": "badge",
+          "glassConnection": "badge:lab-5",
+          "glassFamily": "lab-5",
+          "tintOwner": "lab-5",
+          "tintScore": 0,
+          "x": 427.25000000336746,
+          "y": 855.2499919025445,
+          "clearanceY": 0
+        }
+      ]
+    },
+    {
+      "owners": {
+        "lab-0": "lab-0",
+        "lab-1": "lab-0",
+        "lab-2": "lab-0",
+        "lab-3": "lab-3",
+        "lab-4": "lab-3",
+        "lab-5": "lab-5",
+        "lab-6": "lab-6",
+        "lab-7": "lab-5"
+      },
+      "views": [
+        {
+          "id": "lab-0",
+          "role": "price",
+          "glassConnection": "badge:lab-0",
+          "glassFamily": "lab-0",
+          "tintOwner": "lab-0",
+          "tintScore": 1,
+          "x": 460.00000000059464,
+          "y": 540.0000000022819,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-3",
+          "role": "price",
+          "glassConnection": "badge:lab-3",
+          "glassFamily": "lab-3",
+          "tintOwner": "lab-3",
+          "tintScore": 0,
+          "x": 547.5,
+          "y": 718.5134673852406,
+          "clearanceY": -7.986548817155267
+        },
+        {
+          "id": "lab-5",
+          "role": "price",
+          "glassConnection": "badge:lab-5",
+          "glassFamily": "lab-5",
+          "tintOwner": "lab-5",
+          "tintScore": 0,
+          "x": 430.00000000051585,
+          "y": 820.0000000015398,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-6",
+          "role": "price",
+          "glassConnection": "lab-6",
+          "glassFamily": "lab-6",
+          "tintOwner": "lab-6",
+          "tintScore": 0,
+          "x": 555.9999999959008,
+          "y": 820.0000000015398,
+          "clearanceY": 0
+        },
+        {
+          "id": "badge:lab-0",
+          "role": "badge",
+          "glassConnection": "badge:lab-0",
+          "glassFamily": "lab-0",
+          "tintOwner": "lab-0",
+          "tintScore": 1,
+          "x": 530.6049382748539,
+          "y": 540.0000000022819,
+          "clearanceY": 0
+        },
+        {
+          "id": "badge:lab-3",
+          "role": "badge",
+          "glassConnection": "badge:lab-3",
+          "glassFamily": "lab-3",
+          "tintOwner": "lab-3",
+          "tintScore": 0,
+          "x": 603.5,
+          "y": 718.5134673852406,
+          "clearanceY": -7.986548817155267
+        },
+        {
+          "id": "badge:lab-5",
+          "role": "badge",
+          "glassConnection": "badge:lab-5",
+          "glassFamily": "lab-5",
+          "tintOwner": "lab-5",
+          "tintScore": 0,
+          "x": 486.00000000051585,
+          "y": 820.0000000015398,
+          "clearanceY": 0
+        }
+      ]
+    },
+    {
+      "owners": {
+        "lab-0": "lab-0",
+        "lab-1": "lab-0",
+        "lab-2": "lab-2",
+        "lab-3": "lab-3",
+        "lab-4": "lab-4",
+        "lab-5": "lab-5",
+        "lab-6": "lab-6",
+        "lab-7": "lab-5"
+      },
+      "views": [
+        {
+          "id": "lab-0",
+          "role": "price",
+          "glassConnection": "badge:lab-0",
+          "glassFamily": "lab-0",
+          "tintOwner": "lab-0",
+          "tintScore": 1,
+          "x": 416.25000000282336,
+          "y": 435.2499919098383,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-2",
+          "role": "price",
+          "glassConnection": "lab-2",
+          "glassFamily": "lab-2",
+          "tintOwner": "lab-2",
+          "tintScore": 0,
+          "x": 581.249999999592,
+          "y": 435.2499919098383,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-3",
+          "role": "price",
+          "glassConnection": "lab-3",
+          "glassFamily": "lab-3",
+          "tintOwner": "lab-3",
+          "tintScore": 0,
+          "x": 547.5,
+          "y": 715.0000162058924,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-4",
+          "role": "price",
+          "glassConnection": "lab-4",
+          "glassFamily": "lab-4",
+          "tintOwner": "lab-4",
+          "tintScore": 0,
+          "x": 547.5,
+          "y": 659.5000162021518,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-5",
+          "role": "price",
+          "glassConnection": "badge:lab-5",
+          "glassFamily": "lab-5",
+          "tintOwner": "lab-5",
+          "tintScore": 0,
+          "x": 371.25000000336746,
+          "y": 855.2499919025445,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-6",
+          "role": "price",
+          "glassConnection": "lab-6",
+          "glassFamily": "lab-6",
+          "tintOwner": "lab-6",
+          "tintScore": 0,
+          "x": 560.2499999936636,
+          "y": 855.2499919025445,
+          "clearanceY": 0
+        },
+        {
+          "id": "badge:lab-5",
+          "role": "badge",
+          "glassConnection": "badge:lab-5",
+          "glassFamily": "lab-5",
+          "tintOwner": "lab-5",
+          "tintScore": 0,
+          "x": 427.25000000336746,
+          "y": 855.2499919025445,
+          "clearanceY": 0
+        },
+        {
+          "id": "badge:lab-0",
+          "role": "badge",
+          "glassConnection": "badge:lab-0",
+          "glassFamily": "lab-0",
+          "tintOwner": "lab-0",
+          "tintScore": 1,
+          "x": 472.25000000282336,
+          "y": 435.2499919098383,
+          "clearanceY": 0
+        }
+      ]
+    },
+    {
+      "owners": {
+        "lab-0": "lab-0",
+        "lab-1": "lab-0",
+        "lab-2": "lab-0",
+        "lab-3": "lab-3",
+        "lab-4": "lab-3",
+        "lab-5": "lab-5",
+        "lab-6": "lab-6",
+        "lab-7": "lab-5"
+      },
+      "views": [
+        {
+          "id": "lab-0",
+          "role": "price",
+          "glassConnection": "badge:lab-0",
+          "glassFamily": "lab-0",
+          "tintOwner": "lab-0",
+          "tintScore": 1,
+          "x": 460.00000000059464,
+          "y": 540.0000000022819,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-3",
+          "role": "price",
+          "glassConnection": "badge:lab-3",
+          "glassFamily": "lab-3",
+          "tintOwner": "lab-3",
+          "tintScore": 0,
+          "x": 547.5,
+          "y": 718.5136287773638,
+          "clearanceY": -7.986387425032035
+        },
+        {
+          "id": "lab-5",
+          "role": "price",
+          "glassConnection": "badge:lab-5",
+          "glassFamily": "lab-5",
+          "tintOwner": "lab-5",
+          "tintScore": 0,
+          "x": 430.00000000051585,
+          "y": 820.0000000015398,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-6",
+          "role": "price",
+          "glassConnection": "lab-6",
+          "glassFamily": "lab-6",
+          "tintOwner": "lab-6",
+          "tintScore": 0,
+          "x": 555.9999999959008,
+          "y": 820.0000000015398,
+          "clearanceY": 0
+        },
+        {
+          "id": "badge:lab-3",
+          "role": "badge",
+          "glassConnection": "badge:lab-3",
+          "glassFamily": "lab-3",
+          "tintOwner": "lab-3",
+          "tintScore": 0,
+          "x": 603.5,
+          "y": 718.5136287773638,
+          "clearanceY": -7.986387425032035
+        },
+        {
+          "id": "badge:lab-5",
+          "role": "badge",
+          "glassConnection": "badge:lab-5",
+          "glassFamily": "lab-5",
+          "tintOwner": "lab-5",
+          "tintScore": 0,
+          "x": 486.00000000051585,
+          "y": 820.0000000015398,
+          "clearanceY": 0
+        },
+        {
+          "id": "badge:lab-0",
+          "role": "badge",
+          "glassConnection": "badge:lab-0",
+          "glassFamily": "lab-0",
+          "tintOwner": "lab-0",
+          "tintScore": 1,
+          "x": 530.6049382748539,
+          "y": 540.0000000022819,
+          "clearanceY": 0
+        }
+      ]
+    },
+    {
+      "owners": {
+        "lab-0": "lab-0",
+        "lab-1": "lab-0",
+        "lab-2": "lab-2",
+        "lab-3": "lab-3",
+        "lab-4": "lab-4",
+        "lab-5": "lab-5",
+        "lab-6": "lab-6",
+        "lab-7": "lab-5"
+      },
+      "views": [
+        {
+          "id": "lab-0",
+          "role": "price",
+          "glassConnection": "badge:lab-0",
+          "glassFamily": "lab-0",
+          "tintOwner": "lab-0",
+          "tintScore": 1,
+          "x": 416.25000000282336,
+          "y": 435.2499919098383,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-2",
+          "role": "price",
+          "glassConnection": "lab-2",
+          "glassFamily": "lab-2",
+          "tintOwner": "lab-2",
+          "tintScore": 0,
+          "x": 581.249999999592,
+          "y": 435.2499919098383,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-3",
+          "role": "price",
+          "glassConnection": "lab-3",
+          "glassFamily": "lab-3",
+          "tintOwner": "lab-3",
+          "tintScore": 0,
+          "x": 547.5,
+          "y": 715.0000162058924,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-4",
+          "role": "price",
+          "glassConnection": "lab-4",
+          "glassFamily": "lab-4",
+          "tintOwner": "lab-4",
+          "tintScore": 0,
+          "x": 547.5,
+          "y": 659.5000162021518,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-5",
+          "role": "price",
+          "glassConnection": "badge:lab-5",
+          "glassFamily": "lab-5",
+          "tintOwner": "lab-5",
+          "tintScore": 0,
+          "x": 371.25000000336746,
+          "y": 855.2499919025445,
+          "clearanceY": 0
+        },
+        {
+          "id": "lab-6",
+          "role": "price",
+          "glassConnection": "lab-6",
+          "glassFamily": "lab-6",
+          "tintOwner": "lab-6",
+          "tintScore": 0,
+          "x": 560.2499999936636,
+          "y": 855.2499919025445,
+          "clearanceY": 0
+        },
+        {
+          "id": "badge:lab-0",
+          "role": "badge",
+          "glassConnection": "badge:lab-0",
+          "glassFamily": "lab-0",
+          "tintOwner": "lab-0",
+          "tintScore": 1,
+          "x": 472.25000000282336,
+          "y": 435.2499919098383,
+          "clearanceY": 0
+        },
+        {
+          "id": "badge:lab-5",
+          "role": "badge",
+          "glassConnection": "badge:lab-5",
+          "glassFamily": "lab-5",
+          "tintOwner": "lab-5",
+          "tintScore": 0,
+          "x": 427.25000000336746,
+          "y": 855.2499919025445,
+          "clearanceY": 0
+        }
+      ]
+    }
+  ]
+}

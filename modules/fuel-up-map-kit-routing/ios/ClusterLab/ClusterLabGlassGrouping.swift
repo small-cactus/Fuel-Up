@@ -23,11 +23,30 @@ enum ClusterLabGlassGrouping {
     layout(input, previous: previous).groups
   }
 
+  // Prewarm incoming native effects without allowing a count capsule to bridge
+  // two independent parents. Once membership changes, movers share their actual
+  // parent's family and retain the full native connection/disconnection morph.
+  static func previews(anchors: [LabGlassItem], footprints: [String: [CGRect]]) -> [String: String] {
+    var result = layout(anchors, previous: [:], preparation: true).connections
+    let groups = Dictionary(grouping: result.keys, by: { result[$0]! })
+    for ids in groups.values where ids.count > 1 {
+      var touches = false
+      for (index, id) in ids.enumerated() {
+        for other in ids.dropFirst(index + 1) {
+          if (footprints[id] ?? []).contains(where: { a in
+            (footprints[other] ?? []).contains(where: { ClusterLabGeometry.canBlend(a, $0) })
+          }) { touches = true }
+        }
+      }
+      if touches { for id in ids { result[id] = id } }
+    }
+    return result
+  }
+
   static func layout(_ input: [LabGlassItem], previous: [String: Int], preparation: Bool = false) -> Layout {
     let items = input.sorted { $0.id < $1.id }
     guard !items.isEmpty else { return Layout(groups: [:], connections: [:], layers: [:]) }
     let reach = ClusterLabGeometry.glassSpacing * 2
-    let horizontalReach = ClusterLabGeometry.glassSpacing + (preparation ? 12 : 0)
     let cellWidth = (items.map { $0.frame.width }.max() ?? 84) + reach
     let cellHeight = (items.map { $0.frame.height }.max() ?? 32) + reach
     var parents = Array(items.indices)
@@ -52,21 +71,7 @@ enum ClusterLabGlassGrouping {
               conflicts.append((i, j))
               continue
             }
-            // Classify the nearest capsule edges, not their centers. A count
-            // beside a price has a diagonal center-to-center line to the next
-            // row; treating that line as horizontal reconnects both rows through
-            // the count and lets native glass pull vertically across the gap.
-            let segments = max(0, (item.frame.width - item.frame.height) / 2) +
-              max(0, (other.width - other.height) / 2)
-            let separation = CGPoint(x: max(0, abs(item.frame.midX - other.midX) - segments),
-                                     y: item.frame.midY - other.midY)
-            let stacked = abs(separation.y) >= (item.frame.height + other.height) / 2 ||
-              ClusterLabGeometry.isVertical(separation)
-            if !stacked {
-              guard gap <= horizontalReach else { continue }
-              let a = root(i), b = root(j)
-              parents[max(a, b)] = min(a, b)
-            } else if gap <= 2 {
+            if ClusterLabGeometry.canBlend(item.frame, other, preparation: preparation) {
               let a = root(i), b = root(j)
               parents[max(a, b)] = min(a, b)
             } else { conflicts.append((i, j)) }

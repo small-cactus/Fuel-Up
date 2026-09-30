@@ -58,13 +58,23 @@ for y in stride(from: CGFloat(-45), through: 45, by: 1) {
   for id in ["a", "b", "c"] { assert(result[id] == result["badge:" + id]) }
   assert(result["a"] != result["b"] && result["a"] != result["c"] && result["b"] != result["c"])
 }
-// Native glass preview must precede the logical 84pt clustering boundary.
+// Intended logical families retain native glass morphing.
 let previewAnchors = ClusterLabGlassGrouping.layout([item("a", 0, 0), item("b", 110, 0), item("c", 240, 45)], previous: [:]).connections
 assert(previewAnchors["a"] == previewAnchors["b"])
 assert(previewAnchors["a"] != previewAnchors["c"])
 let previewPills = cluster("a", 0, 0) + cluster("b", 110, 0)
 let preview = grouped(previewPills.map { LabGlassItem(id: $0.id, frame: $0.frame, family: previewAnchors[$0.family!]) })
 assert(Set(preview.values).count == 1, "intended incoming glass lost its pre-merge morph")
+// The count edge may be much closer than its price anchor. Do not prewarm
+// separate families into one visible neck before their membership agrees.
+let anchors = [item("a", 0, 0), item("b", 126, 0)]
+let bareFrames = Dictionary(uniqueKeysWithValues: anchors.map { ($0.id, [$0.frame]) })
+let barePreview = ClusterLabGlassGrouping.previews(anchors: anchors, footprints: bareFrames)
+assert(barePreview["a"] == barePreview["b"], "incoming solo price lost native prewarming")
+var withCount = bareFrames
+withCount["a"]!.append(CGRect(x: 52, y: -16, width: 44, height: 32))
+let countPreview = ClusterLabGlassGrouping.previews(anchors: anchors, footprints: withCount)
+assert(countPreview["a"] != countPreview["b"], "count bridged unrelated logical parents")
 // Share the native container before visible horizontal contact, while keeping
 // physical connection reporting and vertical behavior at their original reach.
 let approaching = [LabGlassItem(id: "parent", frame: item("parent", 0, 0).frame, anchorPriority: 10),

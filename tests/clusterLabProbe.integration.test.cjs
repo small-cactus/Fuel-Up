@@ -10,12 +10,12 @@ function capsuleGap(a, b) {
     const segment = Math.max(0, (a.width - 32) / 2) + Math.max(0, (b.width - 32) / 2);
     return Math.max(0, Math.hypot(Math.max(0, Math.abs(a.x - b.x) - segment), a.y - b.y) - 32);
 }
-function canBlendAnchors(a, b) {
+function canBlendAnchors(a, b, preparation = true) {
     const segments = Math.max(0, (a.width - a.height) / 2) + Math.max(0, (b.width - b.height) / 2);
     const dx = Math.max(0, Math.abs(a.x - b.x) - segments), dy = Math.abs(a.y - b.y);
     const stacked = dy >= (a.height + b.height) / 2 || dy > dx;
     const gap = Math.max(0, Math.hypot(dx, dy) - (a.height + b.height) / 2);
-    return gap <= (stacked ? 2 : 48);
+    return gap <= (stacked ? 2 : preparation ? 48 : 36);
 }
 function assertParentTints(report, frame) {
     assert.equal(frame.glassMaterialResets, 0, 'native container material recreated during chip layout');
@@ -31,7 +31,18 @@ function assertParentTints(report, frame) {
             parents.set(ra < rb ? rb : ra, ra < rb ? ra : rb);
         }
     }
-    for (const view of frame.views) assert.equal(view.glassFamily, root(view.logicalTintOwner), 'wrong native preview family');
+    const blocked = new Set();
+    for (let i = 0; i < frame.views.length; i++) for (const b of frame.views.slice(i + 1)) {
+        const a = frame.views[i];
+        if (a.logicalTintOwner !== b.logicalTintOwner && root(a.logicalTintOwner) === root(b.logicalTintOwner) &&
+            canBlendAnchors({...a, height: a.height ?? 32}, {...b, height: b.height ?? 32}, false)) {
+            blocked.add(root(a.logicalTintOwner));
+        }
+    }
+    for (const view of frame.views) {
+        const group = root(view.logicalTintOwner);
+        assert.equal(view.glassFamily, blocked.has(group) ? view.logicalTintOwner : group, 'wrong native preview family');
+    }
     for (let i = 0; i < frame.views.length; i++) {
         for (const b of frame.views.slice(i + 1)) {
             const a = frame.views[i];
@@ -111,10 +122,19 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
         'missing parent-color coverage during outward neck stretch');
     assert.ok(report.samples.some(frame => frame.views.some(view => view.role === 'badge')),
         'missing connected price/count coverage');
-    const previewFrames = report.samples.filter(frame => [...Map.groupBy(frame.views, view => view.glassConnection).values()]
-        .some(views => new Set(views.map(view => view.logicalTintOwner)).size > 1));
-    assert.ok(previewFrames.length >= 4, 'missing native pre-merge glass connection between distinct logical parents');
-    t.diagnostic(`${previewFrames.length} native pre-merge frames before logical membership changes`);
+    // Contact now commits membership immediately. Require the intended live
+    // merge morph, and reject the old state: connected glass with separate owners.
+    const mergeFrames = report.samples.filter(frame => frame.views.some(view =>
+        view.role === 'merge' && frame.views.some(parent => parent.id === view.clusterOwner &&
+            parent.glassConnection === view.glassConnection)));
+    assert.ok(mergeFrames.length >= 4, 'missing native glass morph during incoming merge');
+    for (const frame of report.samples) {
+        for (const connected of Map.groupBy(frame.views, view => view.glassConnection).values()) {
+            assert.equal(new Set(connected.map(view => view.logicalTintOwner)).size, 1,
+                'native glass bridged independent logical parents');
+        }
+    }
+    t.diagnostic(`${mergeFrames.length} native connection frames during committed merges; no false parent bridges`);
     const catches = report.samples.flatMap(frame => frame.views).filter(view => view.contactDelay > 0.001);
     assert.ok(catches.length > 0, 'contact resistance was not sampled on the live map');
     const visibleCatch = Math.max(...catches.map(view => Math.hypot(
@@ -716,4 +736,45 @@ test('one station ID owns green through 50 rapid zoom cycles and a changed cheap
     assert.ok(finalGreen.length > 0);
     assert.ok(finalGreen.every(v => v.tintOwner === 'lab-1'), 'old winner retained green');
     t.diagnostic(`${report.samples.length} native frames; ${splits} splits; ${merges} merges; green remained exclusive to the current cheapest ID`);
+});
+
+
+test('touching price capsules combine while nearby independent counts cannot form false necks', { timeout: 25000 }, async t => {
+    const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+    const token = `contact-${Date.now()}`;
+    const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+    const file = path.join(container, 'Documents/cluster-lab-probe.json');
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    let report;
+    const deadline = Date.now() + 20000;
+    while (Date.now() < deadline) {
+        try {
+            const value = JSON.parse(readFileSync(file, 'utf8'));
+            if (value.token === token) { report = value; break; }
+        } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+        await new Promise(resolve => setTimeout(resolve, 250));
+    }
+    assert.ok(report, 'contact probe did not export');
+    assert.equal(report.status, 'completed');
+    assert.equal(report.overviewReturns.length, 5);
+    assert.equal(report.nativeUserLocationVisible, true, 'contact fixture must exercise the real location dot');
+    for (const frame of report.samples) assertParentTints(report, frame);
+    const [before, combined, apart, combinedAgain] = report.overviewReturns;
+    for (const frame of [before, apart]) {
+        assert.equal(frame.owners['lab-2'], 'lab-2');
+        assert.equal(frame.owners['lab-4'], 'lab-4');
+    }
+    for (const frame of [combined, combinedAgain]) {
+        assert.equal(frame.owners['lab-2'], 'lab-0', 'horizontal native neck did not combine prices');
+        assert.equal(frame.owners['lab-4'], 'lab-3', 'stacked native contact did not combine prices');
+        assert.ok(frame.views.some(v => v.id === 'lab-3' && v.clearanceY < -5), 'contact fixture did not nudge the price off the real dot');
+        assert.equal(frame.owners['lab-6'], 'lab-6', 'independent station recruited through a distant count');
+        const parent = frame.views.find(v => v.id === 'lab-5');
+        const neighbor = frame.views.find(v => v.id === 'lab-6');
+        assert.notEqual(parent.glassGroup, neighbor.glassGroup, 'count created a false native neck');
+        assert.ok(!frame.views.some(v => v.id === 'lab-2' || v.id === 'lab-4'), 'combined prices remained visible');
+    }
+    assert.deepEqual(combined.owners, combinedAgain.owners);
+    assert.ok(report.events.some(e => e.type === 'merge-start') && report.events.some(e => e.type === 'split-spawn'));
+    t.diagnostic('Both contact arrangements combined on each return; independent count neighbor remained isolated');
 });

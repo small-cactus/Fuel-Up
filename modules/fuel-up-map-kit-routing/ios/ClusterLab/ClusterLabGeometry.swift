@@ -47,7 +47,38 @@ enum ClusterLabGeometry {
     return max(0, hypot(dx, a.midY - b.midY) - radiusSum)
   }
 
-  static func owners(_ stations: [LabProjectedStation], previous: [String: String], selectedId: String? = nil) -> [String: String] {
+  static func pillFrame(at point: CGPoint, selected: Bool = false) -> CGRect {
+    let scale = selected ? focusedScale : 1
+    return CGRect(x: point.x - pillSize.width * scale / 2, y: point.y - pillSize.height * scale / 2,
+                  width: pillSize.width * scale, height: pillSize.height * scale)
+  }
+
+  // One contact rule for logical membership and native glass. In particular,
+  // horizontally stretched glass cannot remain connected to a second price.
+  static func canBlend(_ a: CGRect, _ b: CGRect, preparation: Bool = false) -> Bool {
+    let segments = max(0, (a.width - a.height) / 2) + max(0, (b.width - b.height) / 2)
+    let dx = max(0, abs(a.midX - b.midX) - segments), dy = abs(a.midY - b.midY)
+    let stacked = dy >= (a.height + b.height) / 2 || dy > dx
+    return capsuleGap(a, b) <= (stacked ? 2 : glassSpacing + (preparation ? 12 : 0))
+  }
+
+  // All scale boundaries of canBlend for two normal price capsules. Including
+  // orientation boundaries keeps the pre-render camera solve exact at diagonals.
+  static func contactScales(separation: CGPoint) -> [CGFloat] {
+    let x = abs(separation.x), y = abs(separation.y), segment = pillSize.width - pillSize.height
+    guard x + y > 0 else { return [] }
+    func edgeScale(_ reach: CGFloat) -> CGFloat {
+      let radius = pillSize.height + reach
+      if y > 0 && x * radius / y <= segment { return radius / y }
+      let length2 = x * x + y * y
+      return (x * segment + sqrt(max(0, length2 * radius * radius - y * y * segment * segment))) / length2
+    }
+    return [edgeScale(2), edgeScale(glassSpacing), y > 0 ? pillSize.height / y : .infinity,
+            x > y ? segment / (x - y) : .infinity]
+  }
+
+  static func owners(_ stations: [LabProjectedStation], previous: [String: String], selectedId: String? = nil,
+                     displayOffsets: [String: CGFloat] = [:]) -> [String: String] {
     let sorted = stations.sorted { $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price }
     var owners: [String: String] = [:]
     struct Cell: Hashable { let x: Int; let y: Int }
@@ -55,7 +86,7 @@ enum ClusterLabGeometry {
     let extraWidth = pillSize.width * (focusedScale - 1) / 2
     let extraHeight = pillSize.height * (focusedScale - 1) / 2
     let cellWidth = disconnectRange.width + extraWidth
-    let cellHeight = disconnectRange.height + extraHeight
+    let cellHeight = disconnectRange.height + extraHeight + 2 * (displayOffsets.values.map { abs($0) }.max() ?? 0)
     for (index, station) in sorted.enumerated() {
       // A cell spans the largest retained connection, so the adjacent-cell
       // search cannot miss a stretched pair across a bucket boundary.
@@ -71,8 +102,16 @@ enum ClusterLabGeometry {
             let vertical = isVertical(CGPoint(x: dx, y: dy))
             let retainedHeight = vertical ? verticalDisconnectDistance : disconnectRange.height
             let selected = station.id == selectedId || sorted[other].id == selectedId
-            if dx <= (retained ? disconnectRange.width : pillSize.width) + (selected ? extraWidth : 0) &&
-               dy <= (retained ? retainedHeight : pillSize.height) + (selected ? extraHeight : 0) {
+            let ownFrame = pillFrame(at: station.point, selected: station.id == selectedId)
+            let parentFrame = pillFrame(at: sorted[other].point, selected: sorted[other].id == selectedId)
+            // A geographic contact will share one nudge after merging. Separate
+            // hypothetical nudges must not prevent that original connection.
+            let contact = canBlend(ownFrame, parentFrame) || canBlend(
+              ownFrame.offsetBy(dx: 0, dy: displayOffsets[station.id] ?? 0),
+              parentFrame.offsetBy(dx: 0, dy: displayOffsets[sorted[other].id] ?? 0))
+            let held = retained && dx <= disconnectRange.width + (selected ? extraWidth : 0) &&
+              dy <= retainedHeight + (selected ? extraHeight : 0)
+            if contact || held {
               representative = min(representative ?? other, other)
             }
           }

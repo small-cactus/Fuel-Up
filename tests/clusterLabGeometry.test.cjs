@@ -14,7 +14,28 @@ import CoreGraphics
 func station(_ id: String, _ price: Double, _ x: Double, _ y: Double = 0) -> LabProjectedStation {
   LabProjectedStation(id: id, price: price, point: CGPoint(x: x, y: y))
 }
+// The dot pushes the cheaper lower pill up by 8pt, into its upper neighbor.
+// Membership uses that deterministic displayed contact, not the animated frame.
+let nudged = [station("a", 3, 0, 377), station("b", 4, 0, 340)]
+assert(ClusterLabGeometry.owners(nudged, previous: [:])["b"] == "b")
+assert(ClusterLabGeometry.owners(nudged, previous: [:], displayOffsets: ["a": -8])["b"] == "a")
 let separate = [station("a", 3, 0), station("b", 4, 144)]
+// Members which already touch geographically receive one shared nudge; do
+// not split them because hypothetical independent offsets point opposite ways.
+assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, 10)], previous: [:],
+  displayOffsets: ["a": -31, "b": 31])["b"] == "a")
+// Screenshot regression: horizontal glass must not show two prices inside a
+// connected neck; stacked capsules combine at native contact, not earlier.
+assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, 110)], previous: [:])["b"] == "a")
+for x in stride(from: 0.0, through: 140, by: 2) {
+  for y in stride(from: 0.0, through: 70, by: 2) {
+    let a = ClusterLabGeometry.pillFrame(at: .zero)
+    let b = ClusterLabGeometry.pillFrame(at: CGPoint(x: x, y: y))
+    let joined = ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, x, y)], previous: [:])["b"] == "a"
+    assert(joined == ClusterLabGeometry.canBlend(a, b), "native and logical contact disagree")
+  }
+}
+
 let priceFrame = CGRect(x: -42, y: -16, width: 84, height: 32)
 assert(ClusterLabGeometry.capsuleGap(priceFrame, CGRect(x: 34, y: -16, width: 44, height: 32)) == 0)
 assert(ClusterLabGeometry.capsuleGap(priceFrame, priceFrame.offsetBy(dx: 120, dy: 0)) == 36)
@@ -49,7 +70,7 @@ for input in [street, Array(street.reversed())] {
   }
 }
 
-let boundary = [station("a", 3, 0), station("b", 4, 105)]
+let boundary = [station("a", 3, 0), station("b", 4, 105, 48)]
 assert(ClusterLabGeometry.owners(boundary, previous: merged)["b"] == "a")
 assert(ClusterLabGeometry.owners(boundary, previous: [:])["b"] == "b")
 assert(ClusterLabGeometry.owners(separate, previous: merged)["b"] == "b")
@@ -66,7 +87,7 @@ for dy in stride(from: 0.0, through: 120, by: 1) {
   assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 0, y: dy)) == 0)
 }
 assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, 0, 32)], previous: [:])["b"] == "a")
-assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, 0, 33)], previous: [:])["b"] == "b")
+assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, 0, 33)], previous: [:])["b"] == "a")
 assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, 0, 34)], previous: merged)["b"] == "a")
 assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, 0, 35)], previous: merged)["b"] == "b")
 assert(ClusterLabGeometry.owners([station("a", 3, 0), station("b", 4, 10, 35)], previous: merged)["b"] == "b")
@@ -98,7 +119,7 @@ assert(ClusterLabGeometry.duration(distance: 200, speed: 5000, movementDuration:
        ClusterLabGeometry.duration(distance: 200, speed: 200, movementDuration: 0.5))
 assert(ClusterLabGeometry.duration(distance: 1000, speed: 0, movementDuration: 10) == 0.22)
 // Retained connections get more separation, on both axes and
-// across spatial-hash boundaries; fresh pills still merge at original contact.
+// across spatial-hash boundaries; fresh pills merge at native capsule contact.
 let stretched = [station("a", 3, 111), station("b", 4, 231, 56)]
 assert(ClusterLabGeometry.owners(stretched, previous: merged)["b"] == "a")
 assert(ClusterLabGeometry.owners(stretched, previous: [:])["b"] == "b")
@@ -133,7 +154,7 @@ let tiny = duration * 0.0001
 assert(ClusterLabGeometry.progress(elapsed: tiny, duration: duration, distance: 180, speed: 1200) < 0.000001)
 assert(abs(ClusterLabGeometry.progress(elapsed: ClusterLabGeometry.completionDuration(for: duration) - tiny, duration: duration, distance: 180, speed: 1200) - 1) < 0.000001)
 // The larger focused footprint extends only contacts involving that station.
-let focusPair = [station("a", 3, 0), station("b", 4, 90)]
+let focusPair = [station("a", 3, 0), station("b", 4, 126)]
 assert(ClusterLabGeometry.owners(focusPair, previous: [:])["b"] == "b")
 assert(ClusterLabGeometry.owners(focusPair, previous: [:], selectedId: "a")["b"] == "a")
 assert(ClusterLabGeometry.owners(focusPair, previous: [:], selectedId: "missing")["b"] == "b")

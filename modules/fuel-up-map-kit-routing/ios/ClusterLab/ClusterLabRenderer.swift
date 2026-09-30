@@ -256,7 +256,15 @@ final class ClusterLabRenderer {
       previousProjection = Dictionary(uniqueKeysWithValues: candidates.map { ($0.id, $0.point) })
       projectionTime = now
     }
-    let nextOwners = ClusterLabGeometry.owners(candidates, previous: canonicalOverview ? [:] : owners, selectedId: emphasis.selectedId)
+    let contactFrames = Dictionary(uniqueKeysWithValues: candidates.map {
+      ($0.id, ClusterLabGeometry.pillFrame(at: $0.point, selected: $0.id == emphasis.selectedId))
+    })
+    let dot = map.showsUserLocation && map.userLocation.location != nil ?
+      map.convert(map.userLocation.coordinate, toPointTo: map) : nil
+    let contactOffsets = ClusterLabLocationClearance.targets(frames: contactFrames, dot: dot,
+      bounds: map.bounds.inset(by: map.safeAreaInsets).insetBy(dx: 15, dy: 15))
+    let nextOwners = ClusterLabGeometry.owners(candidates, previous: canonicalOverview ? [:] : owners,
+                                              selectedId: emphasis.selectedId, displayOffsets: contactOffsets)
     let nextMasses = Dictionary(grouping: nextOwners.keys, by: { nextOwners[$0]! }).mapValues(\.count)
     let positions = Dictionary(uniqueKeysWithValues: candidates.map { ($0.id, $0.point) })
     var nextBadgeOffsets: [String: CGFloat] = [:]
@@ -411,11 +419,17 @@ final class ClusterLabRenderer {
     // handoffs together. No asynchronous animation completions can race a pinch.
     CATransaction.begin()
     CATransaction.setDisableActions(true)
-    for id in motions.keys.sorted() {
+    // A newly independent price can receive a child while still settling from
+    // its own split. Update parents first so counts target their live pose.
+    let renderOrder = motions.keys.sorted {
+      let a = motions[$0]!.owner == $0, b = motions[$1]!.owner == $1
+      return a == b ? $0 < $1 : a
+    }
+    for id in renderOrder {
       guard let motion = motions[id], let owner = motions[motion.owner] else { continue }
       let merged = motion.owner != id
-      let targetPoint = merged ? owner.station.mapPoint : motion.station.mapPoint
-      let targetOffset = merged ? (renderedBadgeOffsets[motion.owner] ?? ClusterLabGeometry.badgeOffset) : 0
+      let targetPoint = merged ? owner.point : motion.station.mapPoint
+      let targetOffset = merged ? (renderedBadgeOffsets[motion.owner] ?? ClusterLabGeometry.badgeOffset) + owner.offset : 0
       let targetWidth = merged ? ClusterLabGeometry.badgeWidth : 84
       let targetMix: CGFloat = merged ? 0 : 1
       if motion.settled {
@@ -570,10 +584,9 @@ final class ClusterLabRenderer {
         badge.adoptCluster(stationID: ownerId, price: owner.station.price, name: owner.station.name)
         addFocusAction(badge, id: ownerId)
       } else { continue }
-      var center = project(owner.station.mapPoint, map: map)
+      var center = owner.pill?.view.center ?? project(owner.point, map: map)
       let attachmentOffset = renderedBadgeOffsets[ownerId] ?? ClusterLabGeometry.badgeOffset
-      center.x += attachmentOffset + owner.reaction.offset.x
-      center.y += owner.reaction.offset.y
+      center.x += attachmentOffset
       badge.render(center: center, width: 44, priceMix: 0, count: members.count, market: nil, dark: dark)
       for member in members where member.pill != nil {
         let moverCenter = member.pill!.view.center
@@ -671,7 +684,7 @@ final class ClusterLabRenderer {
       motion.pill?.view.transform = CGAffineTransform(translationX: 0, y: motion.clearance)
     }
     for (id, badge) in badges {
-      badge.view.transform = CGAffineTransform(translationX: 0, y: clearance.offsets[id] ?? 0)
+      badge.view.transform = CGAffineTransform(translationX: 0, y: motions[id]?.clearance ?? 0)
     }
     // A departing duplicate stays in its original glass family through the
     // native neck's remaining reach, independently of the recoil trigger.
@@ -687,9 +700,9 @@ final class ClusterLabRenderer {
     let logicalTints = Dictionary(uniqueKeysWithValues: renderedPills.keys.map { key in
       (key, tintOwner(for: key.hasPrefix("badge:") ? String(key.dropFirst(6)) : key))
     })
-    // Native glass starts connecting before logical membership changes. Derive
-    // those preview families from the parent PRICE anchors on the map, never
-    // from a nearby count capsule, recoil, or location-avoidance displacement.
+    // Prewarm effects from primary map anchors, but never let a count edge or
+    // displacement create a visible bridge between independent logical parents.
+    // Actual membership commits at the same capsule contact as native glass.
     let familyFrames = Dictionary(uniqueKeysWithValues: Set(logicalTints.values).compactMap { id -> (String, CGRect)? in
       guard let motion = motions[id] else { return nil }
       let center = project(motion.station.mapPoint, map: map)
@@ -697,9 +710,11 @@ final class ClusterLabRenderer {
       return (id, CGRect(x: center.x - size.width / 2, y: center.y - size.height / 2,
                          width: size.width, height: size.height))
     })
-    let previews = ClusterLabGlassGrouping.layout(familyFrames.map {
+    let footprints = Dictionary(grouping: renderedViews.keys, by: { logicalTints[$0]! })
+      .mapValues { $0.compactMap { renderedViews[$0]?.frame } }
+    let previews = ClusterLabGlassGrouping.previews(anchors: familyFrames.map {
       LabGlassItem(id: $0.key, frame: $0.value)
-    }, previous: [:], preparation: true).connections
+    }, footprints: footprints)
     // Tint is locked to the station identity stored on the native pill. A
     // moving +N copy never borrows the parent's winning ID. Only the attached
     // accumulator represents its parent (bound when created or adopted).
