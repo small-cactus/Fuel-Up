@@ -2,12 +2,12 @@ import { readFile, mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { planNationalRefresh } from './plan.mjs';
+import { planRegionalRefresh } from './regionalPlan.mjs';
 
 const [path] = process.argv.slice(2);
 if (!path || process.argv.length !== 3) throw Error('Usage: node scripts/national-prices/publishCatalog.mjs /absolute/reconciled-catalog.json');
 const manifest = JSON.parse(await readFile(path, 'utf8'));
-const { batches, ...plan } = planNationalRefresh(manifest);
+const { batches, ...plan } = planRegionalRefresh(manifest);
 console.log(JSON.stringify(plan, null, 2));
 const dir = await mkdtemp(join(tmpdir(), 'fuel-national-catalog-'));
 try {

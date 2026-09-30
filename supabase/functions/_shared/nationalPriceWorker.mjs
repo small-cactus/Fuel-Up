@@ -1,4 +1,5 @@
 import { fetchNationalPriceBatch, compressSnapshot, NationalPriceError } from './nationalPriceTransport.mjs';
+import { NATIONAL_REGIONS } from './nationalRegions.mjs';
 
 async function rpc(db, name, args = {}) {
   const { data, error } = await db.rpc(name, args);
@@ -9,13 +10,15 @@ async function rpc(db, name, args = {}) {
 // One provider request is leased at a time across all workers. Small invocations
 // can resume after a crash; cron creates only the present hour, never fake backfill.
 export async function collectNationalPrices({ db, fetchBatch = fetchNationalPriceBatch,
-  sleep = ms => new Promise(resolve => setTimeout(resolve, ms)), now = () => Date.now(), csrf }) {
+  sleep = ms => new Promise(resolve => setTimeout(resolve, ms)), now = () => Date.now(), csrf, executionRegion }) {
+  if (!NATIONAL_REGIONS[executionRegion]) throw new NationalPriceError('EXECUTION_REGION_REQUIRED');
   const started = now(), results = [];
   for (let i = 0; i < 8 && now() - started < 55_000; i++) {
-    const jobs = await rpc(db, 'claim_fuel_national_job');
+    const jobs = await rpc(db, 'claim_fuel_national_region_job', { p_region: executionRegion });
     const job = jobs?.[0]; if (!job) break;
     try {
-      const snapshot = await fetchBatch(job.station_ids, { csrf });
+      if (job.execution_region !== executionRegion) throw new NationalPriceError('REGION_JOB_MISMATCH');
+      const snapshot = { ...await fetchBatch(job.station_ids, { csrf }), executionRegion };
       const compressed = await compressSnapshot(snapshot);
       const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', compressed))].map(b => b.toString(16).padStart(2, '0')).join('');
       // Lease-specific immutable keys: a stale worker cannot overwrite a newer

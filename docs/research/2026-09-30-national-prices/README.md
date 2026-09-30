@@ -1,5 +1,11 @@
 # Nationwide hourly collection: deployed, disabled pending coverage and rate budget
 
+**Regional update:** [REGIONS.md](REGIONS.md) describes the current three-function
+deployment, strict execution-region checks and central US East coordination.
+The single-worker deployment details and 28-test count below describe the
+earlier checkpoint; it is superseded by that update (37 tests plus live routing
+checks). Nationwide collection is still disabled.
+
 September 30, 2026. **No nationwide hourly feed is running.** The resumable
 Supabase queue, authenticated Edge Function, private archive bucket and minute
 dispatcher are installed, with collection explicitly disabled. The dispatcher

@@ -50,35 +50,36 @@ test('national transport captures 429 Retry-After and sends no retry', async () 
 
 function fakeDB({ jobs = [{ id: 1, run_id: 10, lease_token: 'token', station_ids: ['1', '2'] }], save = true, uploadError = false } = {}) {
   const calls = [], uploads = [];
+  jobs.forEach(job => job.execution_region = 'us-east-1');
   return { calls, uploads,
-    rpc: async (name, args) => { calls.push({ name, args }); return { data: name === 'claim_fuel_national_job' ? (jobs.length ? [jobs.shift()] : []) : name === 'finish_fuel_national_job' ? save : true }; },
+    rpc: async (name, args) => { calls.push({ name, args }); return { data: name === 'claim_fuel_national_region_job' ? (jobs.length ? [jobs.shift()] : []) : name === 'finish_fuel_national_job' ? save : true }; },
     storage: { from: bucket => ({ upload: async (path, bytes, options) => { uploads.push({ bucket, path, bytes, options }); return { error: uploadError ? 'failed' : null }; } }) } };
 }
 const snapshot = { startedAt: new Date().toISOString(), observedAt: new Date().toISOString(), stations: [quote('1'), { id: '2', prices: [] }] };
 test('worker archives first, then commits exact IDs, checksum and unpriced coverage; never overwrites artifacts', async () => {
-  const db = fakeDB(); const r = await collectNationalPrices({ db, fetchBatch: async () => snapshot, sleep: async () => {} });
+  const db = fakeDB(); const r = await collectNationalPrices({ executionRegion: 'us-east-1', db, fetchBatch: async () => snapshot, sleep: async () => {} });
   assert.equal(r[0].stations, 2); assert.equal(r[0].priced, 1);
   assert.equal(db.uploads[0].options.upsert, false);
-  assert.deepEqual(JSON.parse(gunzipSync(db.uploads[0].bytes)), snapshot);
+  assert.deepEqual(JSON.parse(gunzipSync(db.uploads[0].bytes)), { ...snapshot, executionRegion: 'us-east-1' });
   const saved = db.calls.find(c => c.name === 'finish_fuel_national_job');
   assert.deepEqual(saved.args.p_ids, ['1', '2']); assert.equal(saved.args.p_priced, 1); assert.equal(saved.args.p_sha256.length, 64);
 });
 test('archive failure or stale lease cannot publish a successful batch', async () => {
   for (const option of [{ uploadError: true }, { save: false }]) {
-    const db = fakeDB(option); const r = await collectNationalPrices({ db, fetchBatch: async () => snapshot });
+    const db = fakeDB(option); const r = await collectNationalPrices({ executionRegion: 'us-east-1', db, fetchBatch: async () => snapshot });
     assert.equal(r[0].status, 'failed'); assert(db.calls.some(c => c.name === 'fail_fuel_national_job'));
     if (option.uploadError) assert(!db.calls.some(c => c.name === 'finish_fuel_national_job'));
   }
 });
 test('rate denial stops the worker loop immediately and persists the cooldown', async () => {
   const db = fakeDB(); let fetches = 0;
-  const r = await collectNationalPrices({ db, fetchBatch: async () => { fetches++; throw new NationalPriceError('UPSTREAM_HTTP_429', 5000); } });
+  const r = await collectNationalPrices({ executionRegion: 'us-east-1', db, fetchBatch: async () => { fetches++; throw new NationalPriceError('UPSTREAM_HTTP_429', 5000); } });
   assert.equal(fetches, 1); assert.equal(db.uploads.length, 0); assert.equal(r[0].status, 'failed');
   assert.equal(db.calls.at(-1).args.p_retry_after_seconds, 5000);
-  assert.equal(db.calls.filter(c => c.name === 'claim_fuel_national_job').length, 1);
+  assert.equal(db.calls.filter(c => c.name === 'claim_fuel_national_region_job').length, 1);
 });
 test('disabled or cooled queue causes zero provider calls and zero storage writes', async () => {
   const db = fakeDB({ jobs: [] }); let fetched = false;
-  assert.deepEqual(await collectNationalPrices({ db, fetchBatch: async () => { fetched = true; } }), []);
+  assert.deepEqual(await collectNationalPrices({ executionRegion: 'us-east-1', db, fetchBatch: async () => { fetched = true; } }), []);
   assert.equal(fetched, false); assert.equal(db.uploads.length, 0);
 });

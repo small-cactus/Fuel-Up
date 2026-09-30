@@ -1,0 +1,42 @@
+{
+  "recordedAt": "2026-09-30T20:05:27.420Z",
+  "databaseRegion": "us-east-2",
+  "providerRequests": 0,
+  "unauthorizedStatus": 401,
+  "retiredStatus": 410,
+  "results": [
+    {
+      "functionName": "fuel-national-east",
+      "region": "us-east-1",
+      "httpStatus": 200,
+      "body": {
+        "results": [],
+        "expectedRegion": "us-east-1",
+        "actualRegion": "us-east-1"
+      },
+      "passed": true
+    },
+    {
+      "functionName": "fuel-national-southwest",
+      "region": "us-west-1",
+      "httpStatus": 200,
+      "body": {
+        "results": [],
+        "expectedRegion": "us-west-1",
+        "actualRegion": "us-west-1"
+      },
+      "passed": true
+    },
+    {
+      "functionName": "fuel-national-northwest",
+      "region": "us-west-2",
+      "httpStatus": 200,
+      "body": {
+        "results": [],
+        "expectedRegion": "us-west-2",
+        "actualRegion": "us-west-2"
+      },
+      "passed": true
+    }
+  ]
+}

@@ -12,3 +12,12 @@ verify_jwt = false
 
 [functions.fuel-national]
 verify_jwt = false
+
+[functions.fuel-national-east]
+verify_jwt = false
+
+[functions.fuel-national-southwest]
+verify_jwt = false
+
+[functions.fuel-national-northwest]
+verify_jwt = false
