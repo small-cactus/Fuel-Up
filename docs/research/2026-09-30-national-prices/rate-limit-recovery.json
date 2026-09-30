@@ -1,0 +1,31 @@
+{
+  "startedAt": "2026-09-30T20:23:42.410Z",
+  "observedAt": "2026-09-30T20:23:42.846Z",
+  "source": "same local execution environment as original denial; no proxy, session change, or header change",
+  "status": 200,
+  "headers": {
+    "age": "0",
+    "cf-ray": "a435f26bbcdccaa0-MIA",
+    "content-type": "application/json; charset=utf-8",
+    "date": "Wed, 30 Sep 2026 20:23:42 GMT",
+    "server": "cloudflare",
+    "via": "1.1 varnish-v4",
+    "x-cache": "MISS"
+  },
+  "bodyBytes": 109,
+  "bodySha256": "9c44d08b993e6879bde68c7cf701c5df2e1b124c9b92e2548a3fc3ab37b17fd5",
+  "result": {
+    "locationBySearchTerm": {
+      "regionCode": "TX",
+      "stations": {
+        "count": 15271,
+        "results": [
+          {
+            "id": "151333"
+          }
+        ]
+      }
+    }
+  },
+  "minutesSinceOriginal429": 47.9141
+}

@@ -1,9 +1,10 @@
 import { authorizedResearchRequest } from './researchCollector.mjs';
 import { collectNationalPrices } from './nationalPriceWorker.mjs';
 import { verifyExecutionRegion } from './nationalRegions.mjs';
+import { collectDiscovery } from './nationalDiscovery.mjs';
 
 export function createNationalRegionHandler({ expectedRegion, actualRegion, secret, db, csrf,
-  collect = collectNationalPrices }) {
+  collect = collectNationalPrices, discover = collectDiscovery }) {
   return async request => {
     const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' };
     const reply = (body, status = 200) => new Response(JSON.stringify(body), { status, headers });
@@ -16,10 +17,10 @@ export function createNationalRegionHandler({ expectedRegion, actualRegion, secr
     let body;
     try { body = await request.json(); } catch { return reply({ error: 'INVALID_JSON' }, 400); }
     if (body?.mode === 'health') return reply({ status: 'region_verified', ...provenance });
-    if (body?.mode && body.mode !== 'collect') return reply({ error: 'INVALID_MODE' }, 400);
+    if (body?.mode && !['collect', 'discover'].includes(body.mode)) return reply({ error: 'INVALID_MODE' }, 400);
     try {
-      const results = await collect({ db, csrf, executionRegion: actualRegion });
+      const results = await (body?.mode === 'discover' ? discover : collect)({ db, csrf, executionRegion: actualRegion });
       return reply({ results, ...provenance });
-    } catch { return reply({ error: 'WORKER_FAILED', ...provenance }, 503); }
+    } catch (error) { return reply({ error: /^[A-Z_]+$/.test(error?.code || '') ? error.code : 'WORKER_FAILED', ...(/^[A-Z0-9]{1,20}$/.test(error?.databaseCode || '') ? { databaseCode: error.databaseCode } : {}), ...provenance }, 503); }
   };
 }
