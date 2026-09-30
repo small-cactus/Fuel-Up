@@ -8,6 +8,7 @@ const { buildValidationRowFromStoredRow } = require('../../src/services/fuel/sta
 const HOUR = 3600000;
 const TRAIN_END = Date.parse('2026-04-15T00:00:00Z');
 const VALIDATION_END = Date.parse('2026-09-01T00:00:00Z');
+const rankingSnapshots = process.argv.includes('--ranking-snapshots');
 const inputBytes = fs.readFileSync(process.argv[2]);
 const input = process.argv[2].endsWith('.gz') ? zlib.gunzipSync(inputBytes) : inputBytes;
 const snapshot = JSON.parse(input);
@@ -53,15 +54,22 @@ const median = values => {
 };
 const samples = [];
 let purged = 0;
-for (const sequence of groups.values()) {
+// Ranking must retain every candidate at each decision time, including quotes
+// with no future label. Filtering those first would manufacture better winners.
+const sequences = rankingSnapshots
+    ? observations.filter(event => event.observed >= VALIDATION_END).map(event => [event])
+    : groups.values();
+for (const sequence of sequences) {
     sequence.sort((a, b) => a.observed - b.observed);
     for (let index = 0; index < sequence.length; index++) {
         const event = sequence[index];
-        const target = sequence.slice(index + 1).find(next => next.observed > event.observed && next.source > event.source + 5 * 60000);
-        if (!target || target.observed - event.observed > 48 * HOUR) continue;
+        const future = rankingSnapshots ? (groups.get(event.key) || []) : sequence.slice(index + 1);
+        let target = future.find(next => next.observed > event.observed && next.source > event.source + 5 * 60000);
+        if (target && target.observed - event.observed > 48 * HOUR) target = null;
+        if (!target && !rankingSnapshots) continue;
         const split = event.observed < TRAIN_END ? 'train' : event.observed < VALIDATION_END ? 'validation' : 'test';
         const splitEnd = split === 'train' ? TRAIN_END : split === 'validation' ? VALIDATION_END : Infinity;
-        if (target.observed >= splitEnd) { purged++; continue; }
+        if (target && target.observed >= splitEnd) { purged++; continue; }
         const current = event.row;
         const history = rows.filter(row => row.observed < event.observed && row.observed >= event.observed - 14 * 24 * HOUR &&
             row.provider_id === 'gasbuddy' && row.fuel_type === event.fuel &&
@@ -104,13 +112,17 @@ for (const sequence of groups.values()) {
         assert.equal(values.length, featureNames.length);
         assert.ok(values.every(Number.isFinite));
         assert.ok(history.every(row => row.observed < event.observed));
-        const correction = target.price - event.price;
-        samples.push({ id: `${event.key}:${event.source}`, station: event.station, fuel: event.fuel,
+        const correction = target ? target.price - event.price : null;
+        samples.push({ id: `${event.key}:${event.source}${rankingSnapshots ? `:${event.observed}` : ''}`, station: event.station, fuel: event.fuel,
+            ...(rankingSnapshots ? { snapshotId: `${current.created_at}|${current.search_latitude_rounded}|${current.search_longitude_rounded}|${event.fuel}`,
+                stationName: current.station_name, payment: event.method } : {}),
             split, observedAt: new Date(event.observed).toISOString(), sourceAt: new Date(event.source).toISOString(),
-            targetObservedAt: new Date(target.observed).toISOString(), targetSourceAt: new Date(target.source).toISOString(),
-            rawPrice: event.price, targetPrice: target.price, correction,
-            materiallyChanged: Math.abs(correction) >= .10 - 1e-8,
-            underpriced: correction >= .10 - 1e-8, nextObservationHours: (target.observed - event.observed) / HOUR,
+            targetObservedAt: target ? new Date(target.observed).toISOString() : null,
+            targetSourceAt: target ? new Date(target.source).toISOString() : null,
+            rawPrice: event.price, targetPrice: target?.price ?? null, correction,
+            materiallyChanged: target ? Math.abs(correction) >= .10 - 1e-8 : null,
+            underpriced: target ? correction >= .10 - 1e-8 : null,
+            nextObservationHours: target ? (target.observed - event.observed) / HOUR : null,
             mathPrice: result.finalDisplayedPrice, mathPrediction: prediction, mathDecision: result.decision,
             mathRisk: result.risk, mathAdjusted: result.usedPrediction, peerMedian,
             historyRows: history.length, featureValues: values });

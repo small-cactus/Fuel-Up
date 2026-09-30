@@ -2,8 +2,12 @@
 
 **No learned replacement passed.** We fitted statistical models and two small
 neural networks, and evaluated local Tev1. On this chronological test, retaining
-the reported price was more accurate than the current adjustment logic or any
-learned replacement. No production policy, animation, or selection code changed.
+the reported price had lower average next-report error than the current adjustment
+logic or any learned replacement. **This does not establish better station
+selection.** A single stale bargain can win the ranking and harm the user while
+barely affecting average error. See the follow-up [recommendation audit](RANKING.md)
+and [one-shot OpenAI comparison](OPENAI.md). No production policy, animation, or
+selection code changed.
 
 The target is the **next observed newer report within 48 hours**, not a verified
 pump price. A later change does not prove the earlier report was already wrong.

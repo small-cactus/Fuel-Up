@@ -13,13 +13,13 @@ function row(id, observed, source, price, station = 'A') {
         latitude: 27.98, longitude: -82.75, search_latitude_rounded: 28,
         search_longitude_rounded: -82.8, created_at: observed, updated_at_source: source };
 }
-function build(rows) {
+function build(rows, ranking = false) {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'fuel-price-model-'));
     try {
         const input = path.join(directory, 'input.json');
         const output = path.join(directory, 'output.json');
         fs.writeFileSync(input, JSON.stringify({ rows }));
-        execFileSync(process.execPath, [builder, input, output]);
+        execFileSync(process.execPath, [builder, input, output, ...(ranking ? ['--ranking-snapshots'] : [])]);
         return JSON.parse(fs.readFileSync(output));
     } finally { fs.rmSync(directory, { recursive: true, force: true }); }
 }
@@ -35,6 +35,18 @@ test('future label and future peer prices cannot affect current features or base
     assert.deepEqual(before.featureValues, after.featureValues);
     assert.equal(before.mathPrice, after.mathPrice);
     assert.notEqual(before.targetPrice, after.targetPrice);
+});
+
+test('ranking snapshots retain unlabelled cheapest stations and repeated decision times', () => {
+    const rows = [row(1, '2026-09-28T10:00Z', '2026-09-28T09:00Z', 4, 'cheap'),
+        row(2, '2026-09-28T10:00Z', '2026-09-28T09:00Z', 5, 'other'),
+        row(3, '2026-09-29T10:00Z', '2026-09-28T09:00Z', 4, 'cheap'),
+        row(4, '2026-09-29T10:00Z', '2026-09-29T09:00Z', 5.2, 'other')];
+    const { samples } = build(rows, true);
+    assert.equal(samples.length, 4);
+    assert.equal(samples.filter(sample => sample.station === 'cheap').length, 2);
+    assert.ok(samples.filter(sample => sample.station === 'cheap').every(sample => sample.targetPrice === null));
+    assert.equal(new Set(samples.map(sample => sample.snapshotId)).size, 2);
 });
 
 test('cache replays do not create labels; unchanged newer reports remain controls', () => {
