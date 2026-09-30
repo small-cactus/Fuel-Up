@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { gzipSync, gunzipSync } from 'node:zlib';
 import { catalogFromDiscovery } from './catalogFromDiscovery.mjs';
 import { NATIONAL_REGIONS } from '../../supabase/functions/_shared/nationalRegions.mjs';
-const query = sql => JSON.parse(execFileSync('npx', ['--no-install','supabase','db','query','--linked','--project-ref','vjindchxfebaltbslqwc',sql,'--output','json'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })).rows;
+const query = sql => JSON.parse(execFileSync('npx', ['--no-install','supabase@2.118.0','db','query','--linked','--project-ref','vjindchxfebaltbslqwc',sql,'--output','json'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })).rows;
 const literal = value => `'${String(value).replaceAll("'", "''")}'`;
 const action = process.argv[2] || 'status';
 if (action === 'seed') {

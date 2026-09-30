@@ -9,11 +9,11 @@ if(!/^\d+$/.test(runId||''))throw Error('Usage: node scripts/national-prices/aud
 const project=['--linked','--project-ref','vjindchxfebaltbslqwc'];
 const sql=`select jsonb_build_object('run',(select to_jsonb(r) from fuel_national_runs r where id=${runId}),
  'jobs',(select jsonb_agg(to_jsonb(j)||jsonb_build_object('station_ids',b.station_ids)) from fuel_national_jobs j join fuel_national_batches b using(catalog_id,ordinal) where j.run_id=${runId})) as audit`;
-const {run,jobs}=JSON.parse(execFileSync('npx',['--no-install','supabase','db','query',...project,sql,'--output','json'],{encoding:'utf8',maxBuffer:8_000_000})).rows[0].audit;
+const {run,jobs}=JSON.parse(execFileSync('npx',['--no-install','supabase@2.118.0','db','query',...project,sql,'--output','json'],{encoding:'utf8',maxBuffer:8_000_000})).rows[0].audit;
 if(run?.status!=='complete'||jobs?.length!==run.expected_batches||jobs.some(j=>j.status!=='succeeded'))throw Error('Hour is not complete');
 const dir=mkdtempSync(join(tmpdir(),'fuel-national-audit-'));
 try {
- execFileSync('npx',['--no-install','supabase','storage','cp','--recursive',`ss:///fuel-national/${runId}`,dir,...project,'--experimental','--jobs','4'],{stdio:['ignore','pipe','pipe'],maxBuffer:1_000_000});
+ execFileSync('npx',['--no-install','supabase@2.118.0','storage','cp','--recursive',`ss:///fuel-national/${runId}`,dir,...project,'--experimental','--jobs','4'],{stdio:['ignore','pipe','pipe'],maxBuffer:1_000_000});
  const files=new Map();
  const walk=path=>{for(const entry of readdirSync(path,{withFileTypes:true})){const full=join(path,entry.name);if(entry.isDirectory())walk(full);else {if(files.has(entry.name))throw Error('Ambiguous archive filename');files.set(entry.name,full);}}};walk(dir);
  const seen=new Set(),regional={};let bytes=0,priced=0;

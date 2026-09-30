@@ -6,7 +6,7 @@ import { pipeline } from 'node:stream/promises';
 
 const output = process.argv[2];
 if (!output) throw new Error('Usage: node scripts/price-model/exportCollection.mjs /absolute/output.json.gz');
-const query = sql => JSON.parse(execFileSync('npx', ['--no-install', 'supabase', 'db', 'query', '--linked', '--project-ref',
+const query = sql => JSON.parse(execFileSync('npx', ['--no-install', 'supabase@2.118.0', 'db', 'query', '--linked', '--project-ref',
     'vjindchxfebaltbslqwc', sql, '--output', 'json'], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 })).rows;
 const campaign = 'hourly-24-cities-20260930-v1';
 const metadata = query(`select now() as cutoff,(select to_jsonb(h) from public.fuel_research_health h where id='${campaign}') as health;`)[0];

@@ -16,5 +16,5 @@ try {
     update public.fuel_national_config set catalog_id=public.install_fuel_national_catalog('${literal}'::jsonb) where id;
     commit; select catalog_id,enabled,halt_reason from public.fuel_national_config;`;
   const file = join(dir, 'catalog.sql'); await writeFile(file, sql, { mode: 0o600 });
-  console.log(execFileSync('npx', ['--no-install','supabase','db','query','--linked','--project-ref','vjindchxfebaltbslqwc','--file',file,'--output','json'], { encoding: 'utf8', maxBuffer: 2_000_000 }));
+  console.log(execFileSync('npx', ['--no-install','supabase@2.118.0','db','query','--linked','--project-ref','vjindchxfebaltbslqwc','--file',file,'--output','json'], { encoding: 'utf8', maxBuffer: 2_000_000 }));
 } finally { await rm(dir, { recursive: true, force: true }); }

@@ -20,7 +20,7 @@ await writeFile(configPath, JSON.stringify(config, null, 2), { mode: 0o600 });
 await chmod(configPath, 0o600);
 const temporary = await mkdtemp(join(tmpdir(), 'fuel-research-install-'));
 await chmod(temporary, 0o700);
-const cli = args => execFileSync('npx', ['--no-install', 'supabase', ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+const cli = args => execFileSync('npx', ['--no-install', 'supabase@2.118.0', ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
 const sqlString = value => `'${String(value).replaceAll("'", "''")}'`;
 try {
     const secretPath = join(temporary, 'secrets.env');

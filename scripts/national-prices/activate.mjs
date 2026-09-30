@@ -26,5 +26,5 @@ select cron.schedule('fuel-national-dispatch','* * * * *','select public.dispatc
 select cron.schedule('fuel-national-watchdog','*/5 * * * *','select public.watchdog_fuel_national();');
 commit;
 select enabled,starts_at,ends_at,catalog_valid_until,approved_lookups_per_hour,max_requests_per_hour,archive_budget_bytes from fuel_national_config;`;
-const result=execFileSync('npx',['--no-install','supabase','db','query','--linked','--project-ref','vjindchxfebaltbslqwc',sql,'--output','json'],{encoding:'utf8'});
+const result=execFileSync('npx',['--no-install','supabase@2.118.0','db','query','--linked','--project-ref','vjindchxfebaltbslqwc',sql,'--output','json'],{encoding:'utf8'});
 console.log(result);
