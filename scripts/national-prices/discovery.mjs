@@ -34,6 +34,27 @@ if (action === 'seed') {
   }
   for(const descriptor of tasks) query(`select enqueue_fuel_discovery(${literal('bootstrap-20260930-scope-'+descriptor.searchStyle+'-'+descriptor.states.join('-'))},${literal(JSON.stringify(descriptor))}::jsonb)`);
   console.log(JSON.stringify({queued:tasks,unresolvedAfterBothVariants:rows.flatMap(r=>r.scopes).filter(s=>!s.scopeMatches && !completed.has(s.state) && ['name','code'].every(style=>rows.some(r=>r.status==='succeeded' && r.descriptor.searchStyle===style && r.descriptor.states.includes(s.state)))).map(s=>s.state)}));
+} else if (action === 'texas-progress') {
+  // Aggregate at the database to avoid repeatedly downloading every inventory.
+  // This is monitoring only; catalog publication still uses the full validator.
+  const seed=JSON.parse(gunzipSync(readFileSync('docs/research/2026-09-30-national-prices/partial-texas-catalog.json.gz')));
+  const seedIds=Date.now()-Date.parse(seed.seedObservedAt)<86400000?seed.ids:[];
+  const rows=query(`with scopes as (
+    select payload->>'observedAt' as observed,descriptor->>'kind' as kind,s from fuel_discovery_jobs
+    cross join lateral jsonb_array_elements(payload->'scopes') s
+    where status='succeeded' and s->>'state'='TX' and (payload->>'observedAt')::timestamptz>now()-interval '24 hours'
+  ), ids as (
+    select x->>'id' as id from scopes cross join lateral jsonb_array_elements(s->'stations') x
+    where ((s->>'scopeMatches')::boolean and kind in ('states','brands','fuels'))
+      or (kind='nearby' and upper(x->'address'->>'region')='TX' and upper(x->'address'->>'country')='US')
+    union select jsonb_array_elements_text(${literal(JSON.stringify(seedIds))}::jsonb)
+  ) select (select (s->>'reportedCount')::integer from scopes where kind='states' and (s->>'scopeMatches')::boolean order by observed desc limit 1) as expected,
+    (select count(*) from ids) as known,
+    (select count(*) from fuel_discovery_jobs where status='queued') as queued,
+    (select count(*) from fuel_discovery_jobs where status='running') as running,
+    (select provider_backoff_until from fuel_national_config) as cooldown,
+    (select max(completed_at) from fuel_discovery_jobs) as last_success;`);
+  console.log(JSON.stringify(rows[0],null,2));
 } else if (action === 'status') {
   const rows = query(`select jsonb_build_object(
     'config',(select to_jsonb(c) from fuel_discovery_config c),

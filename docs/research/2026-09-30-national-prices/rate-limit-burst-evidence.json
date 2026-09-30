@@ -1,0 +1,181 @@
+{
+  "recordedAt": "2026-09-30T21:30:20.067Z",
+  "source": "Preserved local probe response summaries; no new provider requests",
+  "successfulBurst": [
+    {
+      "name": "tx-brand-ids-0",
+      "startedAt": "2026-09-30T19:35:11.321Z",
+      "status": 200,
+      "receivedMs": 702.6069999999997
+    },
+    {
+      "name": "tx-brand-ids-8",
+      "startedAt": "2026-09-30T19:35:14.027Z",
+      "status": 200,
+      "receivedMs": 676.8463750000001
+    },
+    {
+      "name": "tx-brand-ids-16",
+      "startedAt": "2026-09-30T19:35:16.707Z",
+      "status": 200,
+      "receivedMs": 215.01591700000063
+    },
+    {
+      "name": "tx-brand-ids-24",
+      "startedAt": "2026-09-30T19:35:18.925Z",
+      "status": 200,
+      "receivedMs": 557.965291999999
+    },
+    {
+      "name": "tx-brand-ids-32",
+      "startedAt": "2026-09-30T19:35:21.487Z",
+      "status": 200,
+      "receivedMs": 265.18487500000083
+    },
+    {
+      "name": "tx-brand-ids-40",
+      "startedAt": "2026-09-30T19:35:23.755Z",
+      "status": 200,
+      "receivedMs": 627.4146250000013
+    },
+    {
+      "name": "tx-brand-ids-48",
+      "startedAt": "2026-09-30T19:35:26.385Z",
+      "status": 200,
+      "receivedMs": 365.0720829999991
+    },
+    {
+      "name": "tx-brand-ids-56",
+      "startedAt": "2026-09-30T19:35:28.753Z",
+      "status": 200,
+      "receivedMs": 339.70254099999875
+    },
+    {
+      "name": "tx-brand-ids-64",
+      "startedAt": "2026-09-30T19:35:31.095Z",
+      "status": 200,
+      "receivedMs": 433.591290999997
+    },
+    {
+      "name": "tx-brand-ids-72",
+      "startedAt": "2026-09-30T19:35:33.531Z",
+      "status": 200,
+      "receivedMs": 472.98541699999987
+    },
+    {
+      "name": "tx-brand-ids-80",
+      "startedAt": "2026-09-30T19:35:36.008Z",
+      "status": 200,
+      "receivedMs": 483.3763749999998
+    },
+    {
+      "name": "tx-brand-ids-88",
+      "startedAt": "2026-09-30T19:35:38.496Z",
+      "status": 200,
+      "receivedMs": 262.7103339999994
+    },
+    {
+      "name": "tx-brand-ids-96",
+      "startedAt": "2026-09-30T19:35:40.761Z",
+      "status": 200,
+      "receivedMs": 391.6427909999984
+    },
+    {
+      "name": "tx-brand-ids-104",
+      "startedAt": "2026-09-30T19:35:43.155Z",
+      "status": 200,
+      "receivedMs": 722.9937079999945
+    },
+    {
+      "name": "tx-brand-ids-112",
+      "startedAt": "2026-09-30T19:35:45.881Z",
+      "status": 200,
+      "receivedMs": 295.8558339999945
+    }
+  ],
+  "successfulBurstSpanSeconds": 34.56,
+  "nextRequest": {
+    "name": "tx-brand-ids-120",
+    "status": 429,
+    "approximateAt": "2026-09-30T19:35:48Z",
+    "responseHeadersRetained": false
+  },
+  "earlierSuccessfulBurst": [
+    {
+      "name": "tx-brand-counts-0",
+      "startedAt": "2026-09-30T19:33:04.227Z",
+      "status": 200
+    },
+    {
+      "name": "tx-brand-counts-50",
+      "startedAt": "2026-09-30T19:33:06.724Z",
+      "status": 200
+    },
+    {
+      "name": "tx-brand-counts-100",
+      "startedAt": "2026-09-30T19:33:09.010Z",
+      "status": 200
+    },
+    {
+      "name": "tx-brand-counts-150",
+      "startedAt": "2026-09-30T19:33:11.370Z",
+      "status": 200
+    },
+    {
+      "name": "tx-brand-counts-200",
+      "startedAt": "2026-09-30T19:33:13.731Z",
+      "status": 200
+    },
+    {
+      "name": "tx-brand-counts-250",
+      "startedAt": "2026-09-30T19:33:16.069Z",
+      "status": 200
+    },
+    {
+      "name": "tx-brand-counts-300",
+      "startedAt": "2026-09-30T19:33:18.447Z",
+      "status": 200
+    },
+    {
+      "name": "tx-brand-counts-350",
+      "startedAt": "2026-09-30T19:33:20.890Z",
+      "status": 200
+    },
+    {
+      "name": "tx-brand-counts-400",
+      "startedAt": "2026-09-30T19:33:23.181Z",
+      "status": 200
+    },
+    {
+      "name": "tx-brand-counts-450",
+      "startedAt": "2026-09-30T19:33:25.478Z",
+      "status": 200
+    },
+    {
+      "name": "tx-brand-counts-500",
+      "startedAt": "2026-09-30T19:33:27.886Z",
+      "status": 200
+    },
+    {
+      "name": "tx-brand-counts-550",
+      "startedAt": "2026-09-30T19:33:30.325Z",
+      "status": 200
+    },
+    {
+      "name": "tx-brand-counts-600",
+      "startedAt": "2026-09-30T19:33:32.603Z",
+      "status": 200
+    },
+    {
+      "name": "tx-brand-counts-650",
+      "startedAt": "2026-09-30T19:33:34.895Z",
+      "status": 200
+    },
+    {
+      "name": "county-harris-test",
+      "startedAt": "2026-09-30T19:33:50.836Z",
+      "status": 200
+    }
+  ],
+  "interpretation": "Consistent with a burst allowance near 15 HTTP requests, possibly a minute window. Not enough evidence to distinguish fixed window, sliding window, token bucket, query-weighted limits, or a separate anti-bot rule. Exact reset duration and key remain unverified."
+}

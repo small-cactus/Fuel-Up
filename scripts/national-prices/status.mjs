@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 const sql = `select jsonb_build_object(
  'config',(select to_jsonb(c) from public.fuel_national_config c),
+ 'accounted_archive_bytes',public.fuel_national_archive_bytes(),
  'regions',(select jsonb_agg(r) from public.fuel_national_regions r),
  'regional_hours',(select jsonb_agg(h) from (select * from public.fuel_national_regional_health order by slot_at desc limit 72) h),
  'cron',(select jsonb_agg(jsonb_build_object('name',jobname,'active',active,'schedule',schedule)) from cron.job where jobname in ('fuel-national-dispatch','fuel-national-watchdog')),
