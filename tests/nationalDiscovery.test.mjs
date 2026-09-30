@@ -67,3 +67,24 @@ test('scope reconciliation only permits explicit canonical state search variants
  assert.match(discoveryQuery({kind:'states',states:['CT'],searchStyle:'code'},'us-east-1'),/search:"CT"/);
  assert.throws(()=>discoveryQuery({kind:'states',states:['CT'],searchStyle:'arbitrary'},'us-east-1'));
 });
+test('Texas brand partitions use the verified statewide name, not a geocoder suffix',()=>{
+ assert.match(discoveryQuery({kind:'brands',state:'TX',brandIds:[0,142]},'us-east-1'),/search:"Texas"/);
+});
+test('fuel partitions preserve their own counts and enforce region and batch limits',()=>{
+ const descriptor={kind:'fuels',state:'TX',fuelIds:[2,4]};
+ const query=discoveryQuery(descriptor,'us-east-1');
+ assert.match(query,/search:"Texas"/);assert.match(query,/fuel:2/);assert.match(query,/fuel:4/);
+ assert.throws(()=>discoveryQuery(descriptor,'us-west-1'));
+ assert.throws(()=>discoveryQuery({...descriptor,fuelIds:[1,2,3]},'us-east-1'));
+ assert.throws(()=>discoveryQuery({...descriptor,fuelIds:[6]},'us-east-1'));
+ const input={scope:{...data.s0,regionCode:'TX',s0:data.s0.stations,s1:{count:2,results:data.s0.stations.results}}};
+ const normalized=normalizeDiscovery(input,descriptor,'us-east-1');
+ assert.deepEqual(normalized.scopes.map(s=>[s.fuelId,s.reportedCount,s.fullResponse]),[[2,1,true],[4,2,false]]);
+});
+test('geographic batches stay bounded and retain each requested center',()=>{
+ const descriptor={kind:'nearby',state:'DC',points:[{latitude:38.9,longitude:-77.02},{latitude:38.91,longitude:-77.03}]};
+ const query=discoveryQuery(descriptor,'us-east-1');assert.match(query,/n0:/);assert.match(query,/n1:/);
+ assert.throws(()=>discoveryQuery({...descriptor,points:Array(33).fill(descriptor.points[0])},'us-east-1'));
+ const input={n0:data.s0,n1:data.s0};const normalized=normalizeDiscovery(input,descriptor,'us-east-1');
+ assert.deepEqual(normalized.scopes.map(s=>s.requestedCenter),descriptor.points);
+});

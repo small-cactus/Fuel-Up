@@ -21,14 +21,19 @@ export function discoveryQuery(task, region) {
   stateAllowed(task.state);
   if (task.kind === 'brands') {
     if (!Array.isArray(task.brandIds) || !task.brandIds.length || task.brandIds.length > 8 || task.brandIds.some(id => !Number.isInteger(id) || id < 0 || id > 100000)) throw new NationalPriceError('INVALID_DISCOVERY_BRANDS');
-    return `query BrandInventory{scope:locationBySearchTerm(search:${JSON.stringify(STATE_NAMES[task.state] + ', United States')},priority:"locality"){${locationFields} ${task.brandIds.map((id, i) => `s${i}:stations(brandId:${id},limit:10000,maxAge:0,priority:"locality"){${selection}}`).join(' ')}}}`;
+    return `query BrandInventory{scope:locationBySearchTerm(search:${JSON.stringify(STATE_NAMES[task.state])},priority:"locality"){${locationFields} ${task.brandIds.map((id, i) => `s${i}:stations(brandId:${id},limit:10000,maxAge:0,priority:"locality"){${selection}}`).join(' ')}}}`;
+  }
+  if (task.kind === 'fuels') {
+    if (!Array.isArray(task.fuelIds) || !task.fuelIds.length || task.fuelIds.length > 2 || task.fuelIds.some(id => ![1,2,3,4,5].includes(id))) throw new NationalPriceError('INVALID_DISCOVERY_FUELS');
+    return `query FuelInventory{scope:locationBySearchTerm(search:${JSON.stringify(STATE_NAMES[task.state])},priority:"locality"){${locationFields} ${task.fuelIds.map((id,i)=>`s${i}:stations(fuel:${id},limit:10000,maxAge:0,priority:"locality"){${selection}}`).join(' ')}}}`;
   }
   if (task.kind === 'nearby') {
     // Targeted reconciliation only. Bounds prevent a task assigned to East from
     // querying western states; Texas points are generated inside its polygon.
     const bounds = task.state === 'TX' ? [25.8,36.6,-106.7,-93.4] : task.state === 'DC' ? [38.8,39,-77.12,-76.9] : null;
-    if (!bounds || !Number.isFinite(task.latitude) || !Number.isFinite(task.longitude) || task.latitude < bounds[0] || task.latitude > bounds[1] || task.longitude < bounds[2] || task.longitude > bounds[3]) throw new NationalPriceError('INVALID_DISCOVERY_COORDINATE');
-    return `query NearbyInventory{scope:locationBySearchTerm(lat:${task.latitude},lng:${task.longitude},priority:"locality"){${locationFields} stations(lat:${task.latitude},lng:${task.longitude},limit:10000,maxAge:0,priority:"locality"){${selection}}}}`;
+    const points = task.points || [{ latitude: task.latitude, longitude: task.longitude }];
+    if (!bounds || !Array.isArray(points) || !points.length || points.length > 32 || points.some(p => !Number.isFinite(p.latitude) || !Number.isFinite(p.longitude) || p.latitude < bounds[0] || p.latitude > bounds[1] || p.longitude < bounds[2] || p.longitude > bounds[3])) throw new NationalPriceError('INVALID_DISCOVERY_COORDINATE');
+    return `query NearbyInventory{${points.map((p,i) => `n${i}:locationBySearchTerm(lat:${p.latitude},lng:${p.longitude},priority:"locality"){${locationFields} stations(lat:${p.latitude},lng:${p.longitude},limit:10000,maxAge:0,priority:"locality"){${selection}}}`).join(' ')}}`;
   }
   throw new NationalPriceError('INVALID_DISCOVERY_KIND');
 }
@@ -36,15 +41,16 @@ export function discoveryQuery(task, region) {
 export function normalizeDiscovery(data, task, executionRegion) {
   const scopes = task.kind === 'states' ? task.states.map((state, i) => ({ state, location: data?.[`s${i}`], rows: data?.[`s${i}`]?.stations })) :
     task.kind === 'brands' ? task.brandIds.map((brandId, i) => ({ state: task.state, brandId, location: data?.scope, rows: data?.scope?.[`s${i}`] })) :
-      [{ state: task.state, location: data?.scope, rows: data?.scope?.stations }];
-  return { task, executionRegion, observedAt: new Date().toISOString(), scopes: scopes.map(({ state, brandId, location, rows }) => {
+    task.kind === 'fuels' ? task.fuelIds.map((fuelId, i) => ({ state: task.state, fuelId, location: data?.scope, rows: data?.scope?.[`s${i}`] })) :
+      (task.points || [{ latitude: task.latitude, longitude: task.longitude }]).map((requestedCenter,i) => ({ state: task.state, requestedCenter, location: data?.[`n${i}`], rows: data?.[`n${i}`]?.stations }));
+  return { task, executionRegion, observedAt: new Date().toISOString(), scopes: scopes.map(({ state, brandId, fuelId, requestedCenter, location, rows }) => {
     if (!location || !Number.isSafeInteger(rows?.count) || rows.count < 0 || !Array.isArray(rows.results)) throw new NationalPriceError('DISCOVERY_SCHEMA_ERROR');
     const ids = new Set();
     for (const s of rows.results) {
       if (!/^\d{1,12}$/.test(s.id) || ids.has(s.id) || !Number.isFinite(s.latitude) || !Number.isFinite(s.longitude)) throw new NationalPriceError('DISCOVERY_ID_OR_GEOMETRY_ERROR');
       ids.add(s.id);
     }
-    return { state, ...(brandId !== undefined ? { brandId } : {}), reportedCount: rows.count, returnedCount: ids.size,
+    return { state, ...(brandId !== undefined ? { brandId } : {}), ...(fuelId !== undefined ? { fuelId } : {}), ...(requestedCenter ? { requestedCenter } : {}), reportedCount: rows.count, returnedCount: ids.size,
       fullResponse: ids.size === rows.count, scopeMatches: String(location.countryCode).toUpperCase() === 'US' && String(location.regionCode).toUpperCase() === state,
       location: { displayName: location.displayName, countryCode: location.countryCode, regionCode: location.regionCode, latitude: location.latitude, longitude: location.longitude }, stations: rows.results };
   }) };
@@ -67,6 +73,8 @@ export async function fetchDiscovery(task, executionRegion, { csrf, fetchImpl = 
   const bytes = new Uint8Array(size); let offset = 0;
   for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
   const payload = JSON.parse(new TextDecoder().decode(bytes));
+  responseEvidence.decodedBodyBytes = size;
+  responseEvidence.fullElapsedMs = Math.round(performance.now() - started);
   if (payload.errors?.length) { const error = new NationalPriceError('DISCOVERY_GRAPHQL_ERROR');
     error.responseEvidence = { ...responseEvidence, graphqlErrors: payload.errors.map(e => String(e.message).slice(0, 500)).slice(0, 10) }; throw error; }
   return { ...normalizeDiscovery(payload.data, task, executionRegion), responseEvidence };

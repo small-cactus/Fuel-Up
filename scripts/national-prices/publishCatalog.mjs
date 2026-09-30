@@ -12,8 +12,8 @@ console.log(JSON.stringify(plan, null, 2));
 const dir = await mkdtemp(join(tmpdir(), 'fuel-national-catalog-'));
 try {
   const literal = JSON.stringify(manifest).replaceAll("'", "''");
-  const sql = `begin; update public.fuel_national_config set enabled=false,halt_reason='PROVIDER_BUDGET_AND_CAPACITY_REVIEW_REQUIRED';
-    update public.fuel_national_config set catalog_id=public.install_fuel_national_catalog('${literal}'::jsonb);
+  const sql = `begin; update public.fuel_national_config set enabled=false,halt_reason='PROVIDER_BUDGET_AND_CAPACITY_REVIEW_REQUIRED' where id;
+    update public.fuel_national_config set catalog_id=public.install_fuel_national_catalog('${literal}'::jsonb) where id;
     commit; select catalog_id,enabled,halt_reason from public.fuel_national_config;`;
   const file = join(dir, 'catalog.sql'); await writeFile(file, sql, { mode: 0o600 });
   console.log(execFileSync('npx', ['--no-install','supabase','db','query','--linked','--project-ref','vjindchxfebaltbslqwc','--file',file,'--output','json'], { encoding: 'utf8', maxBuffer: 2_000_000 }));

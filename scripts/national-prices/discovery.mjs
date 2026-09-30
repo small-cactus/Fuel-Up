@@ -43,10 +43,24 @@ if (action === 'seed') {
     'recentAttempts',(select jsonb_agg(a) from (select * from fuel_discovery_attempts order by id desc limit 20) a)
     ) as discovery;`);
   console.log(JSON.stringify(rows[0].discovery,null,2));
+} else if (action === 'enqueue-geo') {
+  const path=process.argv[3];if(!path)throw Error('Geographic plan file required');
+  const plan=JSON.parse(readFileSync(path));const start=Number(process.argv[4]||0),count=Number(process.argv[5]||8);
+  const namespace=plan.taskNamespace||'geo';
+  if(!/^[a-z0-9-]{1,40}$/.test(namespace))throw Error('Invalid geographic task namespace');
+  if(!Number.isInteger(start)||start<0||!Number.isInteger(count)||count<1||count>20)throw Error('Invalid batch range');
+  const tasks=plan.batches.slice(start,start+count);
+  for(let i=0;i<tasks.length;i++)query(`select enqueue_fuel_discovery(${literal('bootstrap-20260930-'+namespace+'-'+plan.state+'-'+(start+i))},${literal(JSON.stringify(tasks[i]))}::jsonb)`);
+  console.log(JSON.stringify({state:plan.state,queuedBatches:tasks.length,from:start}));
+} else if (action === 'geo-input') {
+  if(!process.argv[3])throw Error('New output path required');
+  const rows=query("select payload from fuel_discovery_jobs where status='succeeded' order by id");
+  writeFileSync(process.argv[3],JSON.stringify(rows.map(r=>r.payload)),{flag:'wx'});
 } else if (action === 'catalog') {
   const rows=query("select payload from fuel_discovery_jobs where status='succeeded' order by id");
   const seed=JSON.parse(gunzipSync(readFileSync('docs/research/2026-09-30-national-prices/partial-texas-catalog.json.gz')));
-  const catalog=catalogFromDiscovery(rows.map(r=>r.payload),[seed]);
+  const boundary=JSON.parse(gunzipSync(readFileSync('docs/research/2026-09-30-national-prices/census-dc-tx-boundaries.json.gz')));
+  const catalog=catalogFromDiscovery(rows.map(r=>r.payload),[seed],Date.now(),boundary);
   if(process.argv[3]) writeFileSync(process.argv[3],JSON.stringify(catalog),{flag:'wx'});
   console.log(JSON.stringify({complete:catalog.complete,coveredStates:catalog.regions.length,stations:catalog.regions.reduce((n,r)=>n+r.ids.length,0),gaps:catalog.gaps},null,2));
 } else if (action === 'export') {

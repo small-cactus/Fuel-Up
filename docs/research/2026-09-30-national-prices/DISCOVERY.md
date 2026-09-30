@@ -8,7 +8,7 @@ GasBuddy's public configured-rate-limiter package accepts externally supplied in
 
 The new national/discovery retry policy honors positive Retry-After values without imposing a one-hour minimum. If absent, consecutive 429s since the last successful collection use 60, 120, 240, 480, 960, 1920, then 3600 seconds. The database shares this pause among all three regional national workers. This is our conservative scheduling policy, not proof that the provider shares a limit across regions. No provider session cookies are persisted by these workers. The existing 24-city campaign has not been rerouted or rewritten.
 
-Bootstrap schedule `fuel-national-discovery` runs every minute, allows only one active discovery request globally, caps discovery at 30 attempts per rolling hour, and is bounded to eight hours. It cannot run while national price collection is enabled. 401/403 and schema-level GraphQL errors stop discovery for inspection. Regional handlers reject a mismatching SB_REGION before accessing the queue or provider.
+Bootstrap schedule `fuel-national-discovery` runs every minute, allows only one active discovery request globally, caps discovery at 60 attempts per rolling hour, and is bounded to eight hours. It cannot run while national price collection is enabled. 401/403 and schema-level GraphQL errors stop discovery for inspection. Regional handlers reject a mismatching SB_REGION before accessing the queue or provider.
 
 Admin tooling:
 
@@ -18,7 +18,7 @@ Admin tooling:
 - `tests/nationalDiscovery.integration.sql`: transactional rollback verification of leases, shared cooldowns, permissions, regional ownership, and partial evidence. Requires an empty paused discovery queue.
 - `tests/providerRetry.integration.sql`: transactional rollback verification of explicit and missing Retry-After behavior.
 
-Verification: 45 focused Node tests passed. Transactional database tests covered regional leases and cooldowns. Real HTTP workers initially exposed Supabase safe-update enforcement missing from direct SQL tests; migration `20260930225000` adds explicit singleton predicates to all queue configuration updates. The first real East discovery batch then succeeded at 20:33 UTC. National price collection remains disabled pending complete inventory.
+Verification: 56 focused Node tests passed. Transactional database tests covered regional leases and cooldowns. Real HTTP workers initially exposed Supabase safe-update enforcement missing from direct SQL tests; migration `20260930225000` adds explicit singleton predicates to all queue configuration updates. The first real East discovery batch then succeeded at 20:33 UTC. National price collection remains disabled pending complete inventory.
 
 Subsequent controls:
 
@@ -27,3 +27,14 @@ Subsequent controls:
 - `configureDiscovery.sql` starts the bounded discovery schedule and preserves any provider cooldown. Repeating it does not extend the existing bootstrap deadline.
 - National price workers use a database-enforced 15-second minimum request interval and a 45-second work window, allowing approximately three batches per minute while leaving room before the next cron tick. This is operator pacing, not a measured provider limit. National prices remain paused until the catalog is complete.
 - Both discovery and price transports retain allow-listed response metadata for diagnosing quota/reset information, excluding cookies and credentials.
+
+
+### Geographic and fuel reconciliation
+
+Canonical names fixed the qualified-search geocoder errors in several states. Texas still exceeds the 10,000-result window, so its complete catalog requires the union of state, brand, fuel, and address-filtered nearby inventories to equal the actual statewide count. A fuel subset's count never replaces that denominator. Geographic query batches are bounded to 32 centers and an 8 MB decoded response; they retain every center and measured response duration/size. They use the same East worker, request cadence, shared cooldown, and lease as other discovery work.
+
+The offline geographic planner uses the included January 2026 Census DC/Texas boundary artifact. Its Texas circles conservatively cover the polygon assuming the empirically observed approximately 25 km nearby footprint. Stop remaining geographic tasks when the statewide union reconciles. The planner needs Python, Shapely 2.1.2, and NumPy; it never contacts the fuel provider.
+
+DC has no verified DC-only geocoder result. Its explicit geographic certificate requires two distinct full nearby responses, centers at least 1 km apart, every Census boundary vertex within 23 km, evidence that the returned footprint extends at least 24 km, and identical DC-addressed station IDs. This is conditional geographic coverage, not a provider-reported DC total or verified pump truth. The certificate records the assumption and source rather than inventing a state count.
+
+The collection-window migration separates inventory observation time from the bounded period for refreshing prices for that fixed inventory. An explicit catalog validity window is capped at eight days after publication. It never rewrites inventory timestamps to imply a new enumeration. The national watchdog restores only a missing main schedule while collection is enabled and within its deadline; it does not undo manual pauses or access denials.

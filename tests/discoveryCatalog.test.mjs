@@ -18,3 +18,11 @@ test('stale discovery cannot renew a catalog timestamp',()=>{
  const old=observation([scope('FL',['1'])]);old.observedAt=new Date(Date.now()-86400001).toISOString();
  assert.equal(catalogFromDiscovery([old]).regions.length,0);
 });
+test('fuel subsets contribute IDs without replacing the statewide denominator',()=>{
+ const state=observation([scope('TX',['1'],4)]);
+ const fuel=observation([scope('TX',['2','3'],2)],'fuels');
+ const partial=catalogFromDiscovery([state,fuel]);
+ assert.deepEqual(partial.gaps.find(g=>g.code==='TX'),{code:'TX',reason:'Statewide count does not reconcile',expected:4,known:3});
+ const full=catalogFromDiscovery([state,fuel,observation([scope('TX',['4'],1)],'fuels')]);
+ assert.deepEqual(full.regions.find(r=>r.code==='TX').ids,['1','2','3','4']);
+});
