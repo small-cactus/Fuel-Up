@@ -28,5 +28,5 @@ for case in cases:
         result = json.load(response)
     results.append({**case, 'response': result,
                     'correct': result['answers']['answer']['choice'] == case['expected']})
-(ROOT / 'tev1-controls.json').write_text(json.dumps(results, indent=2))
+(ROOT / 'tev1-controls.json').write_text(json.dumps(results, indent=2) + "\n", newline="\n")
 print(json.dumps({'count': len(results), 'correct': sum(result['correct'] for result in results)}))

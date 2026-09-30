@@ -37,7 +37,7 @@ metadata = {'version': api('/api/version'), 'models': api('/api/tags'), 'bins': 
 # Warm up on a real validation input, never on a label.
 api('/v1/systemone', request_for(cases[0]['features']))
 metadata['loaded'] = api('/api/ps')
-(ROOT / 'tev1-metadata.json').write_text(json.dumps(metadata, indent=2))
+(ROOT / 'tev1-metadata.json').write_text(json.dumps(metadata, indent=2) + "\n", newline="\n")
 results = []
 for index, case in enumerate(cases):
     started = time.perf_counter()
@@ -57,7 +57,7 @@ for index, case in enumerate(cases):
     except Exception as error:
         results.append({'sampleIndex': case['sampleIndex'], 'error': str(error),
                         'seconds': time.perf_counter() - started})
-    (ROOT / 'tev1-results.json').write_text(json.dumps(results, indent=2))
+    (ROOT / 'tev1-results.json').write_text(json.dumps(results, indent=2) + "\n", newline="\n")
     if (index + 1) % 50 == 0:
         print(f'Completed {index + 1}/{len(cases)}', flush=True)
 print(json.dumps({'calls': len(results), 'failed': sum('error' in row for row in results),
