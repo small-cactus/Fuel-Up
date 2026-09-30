@@ -1,0 +1,530 @@
+{
+  "recordedAt": "2026-09-30T18:57:33.813Z",
+  "scope": "Bounded read-only capability probes, not a nationwide collection or rate-limit test.",
+  "directGraphqlRequests": 21,
+  "directGraphqlHttp200": 17,
+  "directGraphqlValidation400": 4,
+  "blockedHtmlDownload": {
+    "status": 403,
+    "retried": false
+  },
+  "schemaInspection": {
+    "status": 400,
+    "errors": [
+      "GraphQL introspection is not allowed by Apollo Server, but the query contained __schema or __type. To enable introspection, pass introspection: true to ApolloServer in production",
+      "GraphQL introspection is not allowed by Apollo Server, but the query contained __schema or __type. To enable introspection, pass introspection: true to ApolloServer in production"
+    ]
+  },
+  "singleStation": {
+    "status": 200,
+    "query": "{station(id:\"172657\"){id name prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}",
+    "response": {
+      "data": {
+        "station": {
+          "id": "172657",
+          "name": "Wawa",
+          "prices": [
+            {
+              "fuelProduct": "regular_gas",
+              "cash": null,
+              "credit": {
+                "price": 4.34,
+                "postedTime": "2026-09-28T20:28:14.596Z"
+              }
+            },
+            {
+              "fuelProduct": "midgrade_gas",
+              "cash": null,
+              "credit": {
+                "price": 4.74,
+                "postedTime": "2026-09-28T20:28:14.612Z"
+              }
+            },
+            {
+              "fuelProduct": "premium_gas",
+              "cash": null,
+              "credit": {
+                "price": 4.84,
+                "postedTime": "2026-09-28T20:28:14.628Z"
+              }
+            },
+            {
+              "fuelProduct": "diesel",
+              "cash": null,
+              "credit": {
+                "price": 5.99,
+                "postedTime": "2026-09-28T20:28:14.581Z"
+              }
+            },
+            {
+              "fuelProduct": "e85",
+              "cash": null,
+              "credit": {
+                "price": 0,
+                "postedTime": null
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "unsavedBaseline": {
+    "status": 200,
+    "note": "Initial request used the existing app query; response was displayed but not saved. Excluded from aggregate station measurements."
+  },
+  "probes": [
+    {
+      "name": "radius-argument-check",
+      "observedAt": "2026-09-30T18:52:48.518Z",
+      "status": 400,
+      "query": "{locationBySearchTerm(lat:27.9659,lng:-82.8001,radius:5){stations(lat:27.9659,lng:-82.8001,radius:5,limit:20){count}}}",
+      "variables": {},
+      "errors": [
+        "Unknown argument \"radius\" on field \"Query.locationBySearchTerm\".",
+        "Unknown argument \"radius\" on field \"Location.stations\"."
+      ],
+      "hasNextCursor": false
+    },
+    {
+      "name": "station-history-check",
+      "observedAt": "2026-09-30T18:52:50.973Z",
+      "status": 400,
+      "query": "{station(id:\"172657\"){id priceHistory{price postedTime}}}",
+      "variables": {},
+      "errors": [
+        "Cannot query field \"priceHistory\" on type \"Station\"."
+      ],
+      "hasNextCursor": false
+    },
+    {
+      "name": "clearwater-page1",
+      "observedAt": "2026-09-30T18:53:09.176Z",
+      "status": 200,
+      "query": "query($lat:Float,$lng:Float,$search:String,$cursor:String){locationBySearchTerm(lat:$lat,lng:$lng,search:$search,priority:\"locality\"){displayName latitude longitude regionCode stations(lat:$lat,lng:$lng,cursor:$cursor,priority:\"locality\",maxAge:0){count cursor{next} results{id name latitude longitude distance prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+      "variables": {
+        "lat": 27.9659,
+        "lng": -82.8001
+      },
+      "displayName": null,
+      "totalReported": 321,
+      "returned": 20,
+      "unique": 20,
+      "hasNextCursor": true,
+      "pricedStations": 13,
+      "minimumKm": 0.4787703821526028,
+      "maximumKm": 3.902201872193143,
+      "stationIdsSha256": "7016fcf03916e186c50be54893927f0c00c9eb91ca5ad82d080adf872b13f6f8",
+      "coordinateBounds": {
+        "south": 27.935460190428,
+        "north": 27.986658,
+        "west": -82.826971113682,
+        "east": -82.765671908855
+      }
+    },
+    {
+      "name": "rural-page1",
+      "observedAt": "2026-09-30T18:53:11.450Z",
+      "status": 200,
+      "query": "query($lat:Float,$lng:Float,$search:String,$cursor:String){locationBySearchTerm(lat:$lat,lng:$lng,search:$search,priority:\"locality\"){displayName latitude longitude regionCode stations(lat:$lat,lng:$lng,cursor:$cursor,priority:\"locality\",maxAge:0){count cursor{next} results{id name latitude longitude distance prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+      "variables": {
+        "lat": 38.482,
+        "lng": -100.906
+      },
+      "displayName": null,
+      "totalReported": 10,
+      "returned": 10,
+      "unique": 10,
+      "hasNextCursor": true,
+      "pricedStations": 3,
+      "minimumKm": 0.17617780470980238,
+      "maximumKm": 24.074623298680287,
+      "stationIdsSha256": "6e238dd16c0ae0a5e7cb8821af4bdb91120b7a6491b310552b45f5c08604a26d",
+      "coordinateBounds": {
+        "south": 38.269935870019,
+        "north": 38.65398,
+        "west": -101.073264,
+        "east": -100.896152
+      }
+    },
+    {
+      "name": "alaska-page1",
+      "observedAt": "2026-09-30T18:53:13.599Z",
+      "status": 200,
+      "query": "query($lat:Float,$lng:Float,$search:String,$cursor:String){locationBySearchTerm(lat:$lat,lng:$lng,search:$search,priority:\"locality\"){displayName latitude longitude regionCode stations(lat:$lat,lng:$lng,cursor:$cursor,priority:\"locality\",maxAge:0){count cursor{next} results{id name latitude longitude distance prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+      "variables": {
+        "lat": 64.8378,
+        "lng": -147.7164
+      },
+      "displayName": null,
+      "totalReported": 45,
+      "returned": 20,
+      "unique": 20,
+      "hasNextCursor": true,
+      "pricedStations": 12,
+      "minimumKm": 0.27740866955474913,
+      "maximumKm": 3.439575741543315,
+      "stationIdsSha256": "672c0a0c1f8732c91f97e0fb40367fa4da4e47cf5b75369256842098a9938295",
+      "coordinateBounds": {
+        "south": 64.81269876553,
+        "north": 64.858894073925,
+        "west": -147.7802312,
+        "east": -147.682043
+      }
+    },
+    {
+      "name": "clearwater-limit100",
+      "observedAt": "2026-09-30T18:53:15.805Z",
+      "status": 200,
+      "query": "query($lat:Float,$lng:Float,$search:String,$cursor:String,$limit:Int){locationBySearchTerm(lat:$lat,lng:$lng,search:$search,priority:\"locality\"){displayName latitude longitude regionCode stations(lat:$lat,lng:$lng,cursor:$cursor,limit:$limit,priority:\"locality\",maxAge:0){count cursor{next} results{id name latitude longitude distance prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+      "variables": {
+        "lat": 27.9659,
+        "lng": -82.8001,
+        "limit": 100
+      },
+      "displayName": null,
+      "totalReported": 321,
+      "returned": 100,
+      "unique": 100,
+      "hasNextCursor": true,
+      "pricedStations": 78,
+      "minimumKm": 0.4787703821526028,
+      "maximumKm": 10.06594991728913,
+      "stationIdsSha256": "ca23c8878ad16e15a367cea786d06d3348666f58b1b3b65e9812aba06ee01b1f",
+      "coordinateBounds": {
+        "south": 27.879659,
+        "north": 28.049952148854,
+        "west": -82.84638,
+        "east": -82.707213163376
+      }
+    },
+    {
+      "name": "clearwater-limit500",
+      "observedAt": "2026-09-30T18:53:38.165Z",
+      "status": 200,
+      "query": "query($lat:Float,$lng:Float,$search:String,$cursor:String,$limit:Int){locationBySearchTerm(lat:$lat,lng:$lng,search:$search,priority:\"locality\"){displayName latitude longitude regionCode stations(lat:$lat,lng:$lng,cursor:$cursor,limit:$limit,priority:\"locality\",maxAge:0){count cursor{next} results{id name latitude longitude distance prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+      "variables": {
+        "lat": 27.9659,
+        "lng": -82.8001,
+        "limit": 500
+      },
+      "displayName": null,
+      "totalReported": 321,
+      "returned": 321,
+      "unique": 321,
+      "hasNextCursor": true,
+      "pricedStations": 258,
+      "minimumKm": 0.4787703821526028,
+      "maximumKm": 24.918230205215938,
+      "stationIdsSha256": "af604d448533c776fd68831e253d08ee02c455097097fec79231d33703b32f1d",
+      "coordinateBounds": {
+        "south": 27.755658071388,
+        "north": 28.177883653401,
+        "west": -82.865753173828,
+        "east": -82.550794780254
+      }
+    },
+    {
+      "name": "alaska-limit100",
+      "observedAt": "2026-09-30T18:53:40.789Z",
+      "status": 200,
+      "query": "query($lat:Float,$lng:Float,$search:String,$cursor:String,$limit:Int){locationBySearchTerm(lat:$lat,lng:$lng,search:$search,priority:\"locality\"){displayName latitude longitude regionCode stations(lat:$lat,lng:$lng,cursor:$cursor,limit:$limit,priority:\"locality\",maxAge:0){count cursor{next} results{id name latitude longitude distance prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+      "variables": {
+        "lat": 64.8378,
+        "lng": -147.7164,
+        "limit": 100
+      },
+      "displayName": null,
+      "totalReported": 45,
+      "returned": 45,
+      "unique": 45,
+      "hasNextCursor": true,
+      "pricedStations": 25,
+      "minimumKm": 0.27740866955474913,
+      "maximumKm": 21.97019333407857,
+      "stationIdsSha256": "9b6b43e24dd9df0b3918c3912c25e36768106b12d7916abe80313df39bbdda69",
+      "coordinateBounds": {
+        "south": 64.741260375255,
+        "north": 65.024136058594,
+        "west": -148.008099496365,
+        "east": -147.298926115036
+      }
+    },
+    {
+      "name": "rural-page2",
+      "observedAt": "2026-09-30T18:53:43.069Z",
+      "status": 200,
+      "query": "query($lat:Float,$lng:Float,$search:String,$cursor:String){locationBySearchTerm(lat:$lat,lng:$lng,search:$search,priority:\"locality\"){displayName latitude longitude regionCode stations(lat:$lat,lng:$lng,cursor:$cursor,priority:\"locality\",maxAge:0){count cursor{next} results{id name latitude longitude distance prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+      "variables": {
+        "lat": 38.482,
+        "lng": -100.906,
+        "cursor": "[provider-issued cursor omitted]"
+      },
+      "displayName": null,
+      "totalReported": 10,
+      "returned": 1,
+      "unique": 1,
+      "hasNextCursor": true,
+      "pricedStations": 0,
+      "minimumKm": 24.074623298680287,
+      "maximumKm": 24.074623298680287,
+      "stationIdsSha256": "db45a9a886071a9dbe63e19431065307a0d3f8fba52877c6bb75d9e1ee31de67",
+      "coordinateBounds": {
+        "south": 38.269935870019,
+        "north": 38.269935870019,
+        "west": -100.961667576868,
+        "east": -100.961667576868
+      }
+    },
+    {
+      "name": "regional-trends",
+      "observedAt": "2026-09-30T18:53:45.315Z",
+      "status": 200,
+      "query": "{locationBySearchTerm(lat:27.9659,lng:-82.8001){trends{areaName country today todayLow trend}}}",
+      "variables": {},
+      "hasNextCursor": false,
+      "trends": [
+        {
+          "areaName": "Tampa",
+          "country": "US",
+          "today": 4.18,
+          "todayLow": 3.82,
+          "trend": -1
+        },
+        {
+          "areaName": "Florida",
+          "country": "US",
+          "today": 4.2,
+          "todayLow": 3.59,
+          "trend": -1
+        },
+        {
+          "areaName": "United States",
+          "country": "US",
+          "today": 4.41,
+          "todayLow": 0,
+          "trend": -1
+        }
+      ]
+    },
+    {
+      "name": "florida-scope",
+      "observedAt": "2026-09-30T18:54:28.793Z",
+      "status": 200,
+      "query": "query($lat:Float,$lng:Float,$search:String,$cursor:String,$limit:Int){locationBySearchTerm(lat:$lat,lng:$lng,search:$search,priority:\"locality\"){displayName latitude longitude regionCode stations(lat:$lat,lng:$lng,cursor:$cursor,limit:$limit,priority:\"locality\",maxAge:0){count cursor{next} results{id name latitude longitude distance prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+      "variables": {
+        "search": "Florida",
+        "limit": 1
+      },
+      "displayName": "Florida",
+      "totalReported": 7931,
+      "returned": 1,
+      "unique": 1,
+      "hasNextCursor": true,
+      "pricedStations": 1,
+      "stationIdsSha256": "2250ee04d0d292ae2d556bb0f41f51c97245d92c2ea51fd5944ff15ec19a9a01",
+      "coordinateBounds": {
+        "south": 30.46321226,
+        "north": 30.46321226,
+        "west": -84.3004024,
+        "east": -84.3004024
+      }
+    },
+    {
+      "name": "us-scope",
+      "observedAt": "2026-09-30T18:54:31.309Z",
+      "status": 200,
+      "query": "query($lat:Float,$lng:Float,$search:String,$cursor:String,$limit:Int){locationBySearchTerm(lat:$lat,lng:$lng,search:$search,priority:\"locality\"){displayName latitude longitude regionCode stations(lat:$lat,lng:$lng,cursor:$cursor,limit:$limit,priority:\"locality\",maxAge:0){count cursor{next} results{id name latitude longitude distance prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+      "variables": {
+        "search": "United States",
+        "limit": 1
+      },
+      "displayName": "United States",
+      "totalReported": 3,
+      "returned": 1,
+      "unique": 1,
+      "hasNextCursor": true,
+      "pricedStations": 0,
+      "stationIdsSha256": "512359cf02a3080dbd85a7e6aafb0a837e220851c2e7d1b96e9c02acdf23c1fe",
+      "coordinateBounds": {
+        "south": 39.828302445373,
+        "north": 39.828302445373,
+        "west": -100.533678531647,
+        "east": -100.533678531647
+      }
+    },
+    {
+      "name": "new-york-limit500",
+      "observedAt": "2026-09-30T18:54:33.827Z",
+      "status": 200,
+      "query": "query($lat:Float,$lng:Float,$search:String,$cursor:String,$limit:Int){locationBySearchTerm(lat:$lat,lng:$lng,search:$search,priority:\"locality\"){displayName latitude longitude regionCode stations(lat:$lat,lng:$lng,cursor:$cursor,limit:$limit,priority:\"locality\",maxAge:0){count cursor{next} results{id name latitude longitude distance prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+      "variables": {
+        "lat": 40.7128,
+        "lng": -74.006,
+        "limit": 500
+      },
+      "displayName": null,
+      "totalReported": 1426,
+      "returned": 500,
+      "unique": 500,
+      "hasNextCursor": true,
+      "pricedStations": 258,
+      "minimumKm": 2.780566125581376,
+      "maximumKm": 13.739885134443059,
+      "stationIdsSha256": "c716edd84dc48b0d0ae410ab244a25ee3dc1181692d22a344bb5f4e7f0b934a6",
+      "coordinateBounds": {
+        "south": 40.592696257507,
+        "north": 40.831642382353,
+        "west": -74.16247844696,
+        "east": -73.848281800747
+      }
+    },
+    {
+      "name": "florida-limit500",
+      "observedAt": "2026-09-30T18:55:14.388Z",
+      "status": 200,
+      "query": "query($lat:Float,$lng:Float,$search:String,$cursor:String,$limit:Int){locationBySearchTerm(lat:$lat,lng:$lng,search:$search,priority:\"locality\"){displayName latitude longitude regionCode stations(lat:$lat,lng:$lng,cursor:$cursor,limit:$limit,priority:\"locality\",maxAge:0){count cursor{next} results{id name latitude longitude distance prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+      "variables": {
+        "search": "Florida",
+        "limit": 500
+      },
+      "displayName": "Florida",
+      "totalReported": 7931,
+      "returned": 500,
+      "unique": 500,
+      "hasNextCursor": true,
+      "pricedStations": 500,
+      "stationIdsSha256": "38974c380eae48e8eac8b44b1d0e5f1a38b3c00bf64b3aed2d64384387d0a21b",
+      "coordinateBounds": {
+        "south": 25.580450057983,
+        "north": 30.784746,
+        "west": -87.4229888,
+        "east": -80.05524
+      }
+    },
+    {
+      "name": "florida-page2-limit500",
+      "observedAt": "2026-09-30T18:55:17.257Z",
+      "status": 200,
+      "query": "query($lat:Float,$lng:Float,$search:String,$cursor:String,$limit:Int){locationBySearchTerm(lat:$lat,lng:$lng,search:$search,priority:\"locality\"){displayName latitude longitude regionCode stations(lat:$lat,lng:$lng,cursor:$cursor,limit:$limit,priority:\"locality\",maxAge:0){count cursor{next} results{id name latitude longitude distance prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+      "variables": {
+        "search": "Florida",
+        "limit": 500,
+        "cursor": "[provider-issued cursor omitted]"
+      },
+      "displayName": "Florida",
+      "totalReported": 7931,
+      "returned": 500,
+      "unique": 500,
+      "hasNextCursor": true,
+      "pricedStations": 497,
+      "stationIdsSha256": "fd202948db18a02f8ff3005e27a223a4a7aa36b198997ad915252d6554540f2e",
+      "coordinateBounds": {
+        "south": 25.539871,
+        "north": 30.949092346158,
+        "west": -87.320936,
+        "east": -80.052834749221
+      }
+    },
+    {
+      "name": "new-york-page2-limit500",
+      "observedAt": "2026-09-30T18:55:19.936Z",
+      "status": 200,
+      "query": "query($lat:Float,$lng:Float,$search:String,$cursor:String,$limit:Int){locationBySearchTerm(lat:$lat,lng:$lng,search:$search,priority:\"locality\"){displayName latitude longitude regionCode stations(lat:$lat,lng:$lng,cursor:$cursor,limit:$limit,priority:\"locality\",maxAge:0){count cursor{next} results{id name latitude longitude distance prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+      "variables": {
+        "lat": 40.7128,
+        "lng": -74.006,
+        "limit": 500,
+        "cursor": "[provider-issued cursor omitted]"
+      },
+      "displayName": null,
+      "totalReported": 1426,
+      "returned": 500,
+      "unique": 500,
+      "hasNextCursor": true,
+      "pricedStations": 237,
+      "minimumKm": 13.816880558748379,
+      "maximumKm": 19.58722419235163,
+      "stationIdsSha256": "175ba8edcd8656a2b655135ac1f44c08b936952af054a2d12f3b87f466d81935",
+      "coordinateBounds": {
+        "south": 40.573882217686,
+        "north": 40.886812350769,
+        "west": -74.237030446529,
+        "east": -73.773987293243
+      }
+    },
+    {
+      "name": "new-york-page3-limit500",
+      "observedAt": "2026-09-30T18:55:59.350Z",
+      "status": 200,
+      "query": "query($lat:Float,$lng:Float,$search:String,$cursor:String,$limit:Int){locationBySearchTerm(lat:$lat,lng:$lng,search:$search,priority:\"locality\"){displayName latitude longitude regionCode stations(lat:$lat,lng:$lng,cursor:$cursor,limit:$limit,priority:\"locality\",maxAge:0){count cursor{next} results{id name latitude longitude distance prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+      "variables": {
+        "lat": 40.7128,
+        "lng": -74.006,
+        "limit": 500,
+        "cursor": "[provider-issued cursor omitted]"
+      },
+      "displayName": null,
+      "totalReported": 1426,
+      "returned": 426,
+      "unique": 426,
+      "hasNextCursor": true,
+      "pricedStations": 199,
+      "minimumKm": 19.58792282865387,
+      "maximumKm": 24.976224661212367,
+      "stationIdsSha256": "3137a5ff9238f59aea8e5aa91523f41676e5dcac8aa056c8bae4d1400368d2cc",
+      "coordinateBounds": {
+        "south": 40.536042570465,
+        "north": 40.935124,
+        "west": -74.301438331604,
+        "east": -73.717387318611
+      }
+    },
+    {
+      "name": "distance-argument-check",
+      "observedAt": "2026-09-30T18:56:02.034Z",
+      "status": 400,
+      "query": "{locationBySearchTerm(lat:27.9659,lng:-82.8001){stations(lat:27.9659,lng:-82.8001,maxDistance:50,distance:50,limit:1){count}}}",
+      "variables": {},
+      "errors": [
+        "Unknown argument \"maxDistance\" on field \"Location.stations\".",
+        "Unknown argument \"distance\" on field \"Location.stations\"."
+      ],
+      "hasNextCursor": false
+    }
+  ],
+  "comparisons": {
+    "newYork": {
+      "reported": 1426,
+      "returned": 1426,
+      "unique": 1426,
+      "pages": 3,
+      "maxKm": 24.976224661212367
+    },
+    "florida": {
+      "pages": 2,
+      "returned": 1000,
+      "unique": 943,
+      "overlap": 57
+    }
+  },
+  "coverageArithmetic": {
+    "usLandSquareMiles": 3533038.28,
+    "radiusKmAssumption": 25,
+    "triangularGridRequestsPerHour": 5635.2632604541,
+    "squareGridRequestsPerHour": 7320.421710849562,
+    "statePaging": {
+      "assumedStationRange": [
+        150000,
+        200000
+      ],
+      "pageSize": 500,
+      "regions": 51,
+      "idealRequestRange": [
+        300,
+        450
+      ],
+      "note": "Illustrative counts, not measured US inventory. Sum ceil(stateCount/500); excludes duplicates, omissions, retries and discovery."
+    }
+  }
+}
