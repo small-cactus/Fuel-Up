@@ -1,0 +1,128 @@
+{
+  "selectedDecoderByValidation": "expectedDelta",
+  "calls": 531,
+  "failed": 0,
+  "classification": {
+    "validation": {
+      "brier": 0.16659180541339708,
+      "averagePrecision": 0.20487532914630735,
+      "rocAuc": 0.5207463102199944,
+      "threshold": 0.2,
+      "tp": 84,
+      "fp": 342,
+      "fn": 0,
+      "tn": 0,
+      "precision": 0.19718309859154928,
+      "recall": 1.0,
+      "f1": 0.32941176470588235
+    },
+    "test": {
+      "brier": 0.1392017677949336,
+      "averagePrecision": 0.21941708986728362,
+      "rocAuc": 0.5525902668759811,
+      "threshold": 0.2,
+      "tp": 14,
+      "fp": 91,
+      "fn": 0,
+      "tn": 0,
+      "precision": 0.13333333333333333,
+      "recall": 1.0,
+      "f1": 0.23529411764705882
+    }
+  },
+  "testAtHalf": {
+    "brier": 0.1392017677949336,
+    "averagePrecision": 0.21941708986728362,
+    "rocAuc": 0.5525902668759811,
+    "threshold": 0.5,
+    "tp": 0,
+    "fp": 0,
+    "fn": 14,
+    "tn": 91,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0
+  },
+  "price": {
+    "expectedDelta": {
+      "validation": {
+        "count": 426,
+        "maeCents": 85.18463590397243,
+        "rmseCents": 85.5931639030494,
+        "within5Cents": 0.0,
+        "within10Cents": 0.0,
+        "underByMoreThan10Cents": 426,
+        "overByMoreThan10Cents": 0,
+        "materialChangeMaeCents": 87.85823333102914
+      },
+      "test": {
+        "count": 105,
+        "maeCents": 83.96265504824908,
+        "rmseCents": 84.12935547906496,
+        "within5Cents": 0.0,
+        "within10Cents": 0.0,
+        "underByMoreThan10Cents": 105,
+        "overByMoreThan10Cents": 0,
+        "materialChangeMaeCents": 76.2748293864915
+      },
+      "differenceVsRaw": {
+        "meanCents": 81.24836933396334,
+        "stationBootstrap95Cents": [
+          78.81462510379704,
+          83.382849555387
+        ]
+      },
+      "differenceVsCurrentMath": {
+        "meanCents": 77.68646457205858,
+        "stationBootstrap95Cents": [
+          72.11750020859247,
+          81.82642040389415
+        ]
+      }
+    },
+    "chosenDelta": {
+      "validation": {
+        "count": 426,
+        "maeCents": 99.89201877934272,
+        "rmseCents": 100.22334214073663,
+        "within5Cents": 0.0,
+        "within10Cents": 0.0,
+        "underByMoreThan10Cents": 426,
+        "overByMoreThan10Cents": 0,
+        "materialChangeMaeCents": 102.79761904761908
+      },
+      "test": {
+        "count": 105,
+        "maeCents": 97.74285714285715,
+        "rmseCents": 97.84394766789663,
+        "within5Cents": 0.0,
+        "within10Cents": 0.0,
+        "underByMoreThan10Cents": 105,
+        "overByMoreThan10Cents": 0,
+        "materialChangeMaeCents": 89.92857142857146
+      },
+      "differenceVsRaw": {
+        "meanCents": 95.02857142857142,
+        "stationBootstrap95Cents": [
+          92.89850975753993,
+          96.82584233173664
+        ]
+      },
+      "differenceVsCurrentMath": {
+        "meanCents": 91.46666666666667,
+        "stationBootstrap95Cents": [
+          86.5046508097166,
+          95.0332518115942
+        ]
+      }
+    }
+  },
+  "latencySeconds": {
+    "median": 0.17284660000586882,
+    "p95": 0.19194594997679815
+  },
+  "inputTokens": {
+    "min": 1302,
+    "max": 1406
+  }
+}

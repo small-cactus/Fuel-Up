@@ -1,0 +1,106 @@
+{
+  "version": {
+    "version": "0.35.0"
+  },
+  "models": {
+    "models": [
+      {
+        "name": "tev1:0.8b",
+        "model": "tev1:0.8b",
+        "modified_at": "2026-09-30T01:16:28.3466296-04:00",
+        "size": 811856202,
+        "digest": "d45e875d63fed9465390a4eb9e55f51f470390a446667b55d0a075a15e0336bf",
+        "details": {
+          "parent_model": "Tev1-0.8B-Q8_0.gguf",
+          "format": "gguf",
+          "family": "qwen35",
+          "families": [
+            "qwen35"
+          ],
+          "parameter_size": "752.39M",
+          "quantization_level": "Q8_0",
+          "context_length": 262144,
+          "embedding_length": 1024
+        },
+        "capabilities": [
+          "decision",
+          "tools",
+          "thinking",
+          "completion"
+        ]
+      }
+    ]
+  },
+  "bins": [
+    -1,
+    -0.5,
+    -0.25,
+    -0.15,
+    -0.1,
+    -0.05,
+    0,
+    0.05,
+    0.1,
+    0.15,
+    0.25,
+    0.5,
+    1
+  ],
+  "prompt": {
+    "model": "tev1:0.8b",
+    "keep_alive": "10m",
+    "state": {
+      "task": "Forecast the next independent report for the same gas station, fuel grade and payment method, within 48 hours. Prices are USD per gallon. Only currently known observations follow. The current math is a heuristic, not ground truth. Keep unchanged prices when evidence for a correction is weak.",
+      "features": {}
+    },
+    "questions": {
+      "outdated": {
+        "type": "noul",
+        "instructions": "Will the next reported price differ from the current price by at least $0.10 per gallon? A newer timestamp alone does not prove a price change."
+      },
+      "correction": {
+        "type": "choice",
+        "instructions": "Choose the closest signed correction: next report price minus current price, in USD per gallon. Zero means unchanged. Negative means next price lower; positive means higher. Predict conservatively from the known facts only.",
+        "criteria": {
+          "0": "-1.00 dollars per gallon",
+          "1": "-0.50 dollars per gallon",
+          "2": "-0.25 dollars per gallon",
+          "3": "-0.15 dollars per gallon",
+          "4": "-0.10 dollars per gallon",
+          "5": "-0.05 dollars per gallon",
+          "6": "+0.00 dollars per gallon",
+          "7": "+0.05 dollars per gallon",
+          "8": "+0.10 dollars per gallon",
+          "9": "+0.15 dollars per gallon",
+          "10": "+0.25 dollars per gallon",
+          "11": "+0.50 dollars per gallon",
+          "12": "+1.00 dollars per gallon"
+        }
+      }
+    }
+  },
+  "endpoint": "/v1/systemone",
+  "loaded": {
+    "models": [
+      {
+        "name": "tev1:0.8b",
+        "model": "tev1:0.8b",
+        "size": 893869096,
+        "digest": "d45e875d63fed9465390a4eb9e55f51f470390a446667b55d0a075a15e0336bf",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen35",
+          "families": [
+            "qwen35"
+          ],
+          "parameter_size": "752.39M",
+          "quantization_level": "Q8_0"
+        },
+        "expires_at": "2026-09-30T12:56:22.8184304-04:00",
+        "size_vram": 893869096,
+        "context_length": 2050
+      }
+    ]
+  }
+}

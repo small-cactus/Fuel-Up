@@ -1,0 +1,10 @@
+{
+  "tiny_mlp_price": {
+    "samples": 830,
+    "maxExportRoundTripError": 0.0
+  },
+  "tiny_mlp_stale": {
+    "samples": 830,
+    "maxExportRoundTripError": 0.0
+  }
+}

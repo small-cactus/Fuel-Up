@@ -175,5 +175,7 @@ any production code. Component manifest hashes match the tagged source commit.
 No simulator or phone interaction was required for this backend audit.
 
 Evidence: [aggregate and quote comparisons](summary.json),
-[input capture hashes](inputs.json). Raw captures are local in
-`/tmp/fuelup-price-audit`; they are not a durable committed database backup.
+[input capture hashes](inputs.json). The following modeling experiment also
+preserves the exact [history export](../2026-09-30-price-model/history-snapshot.json.gz)
+without user UUIDs. Direct provider captures remain local in `/tmp/fuelup-price-audit`;
+this is a scoped research snapshot, not a complete database backup.

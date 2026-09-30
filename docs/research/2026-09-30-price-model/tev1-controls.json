@@ -1,0 +1,1442 @@
+[
+  {
+    "expected": "1",
+    "named": false,
+    "order": [
+      -0.5,
+      0,
+      0.5
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "The known correct change is 0.00. Select the zero change option.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "0": "-0.50 dollars per gallon",
+            "1": "+0.00 dollars per gallon",
+            "2": "+0.50 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "1",
+          "probabilities": {
+            "0": 0.18642538119656102,
+            "1": 0.7860967449184099,
+            "2": 0.027477873885029078
+          },
+          "confidence": 0.4528523388267506
+        }
+      },
+      "usage": {
+        "input_tokens": 154,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "1",
+    "named": false,
+    "order": [
+      -0.5,
+      0,
+      0.5
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "Old price is 5.00 and new price is 5.00. Select new price minus old price.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "0": "-0.50 dollars per gallon",
+            "1": "+0.00 dollars per gallon",
+            "2": "+0.50 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "1",
+          "probabilities": {
+            "0": 0.03402199469407324,
+            "1": 0.9563681824605637,
+            "2": 0.00960982284536322
+          },
+          "confidence": 0.8158377397387351
+        }
+      },
+      "usage": {
+        "input_tokens": 162,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "2",
+    "named": false,
+    "order": [
+      0.5,
+      -0.5,
+      0
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "The known correct change is 0.00. Select the zero change option.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "0": "+0.50 dollars per gallon",
+            "1": "-0.50 dollars per gallon",
+            "2": "+0.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "2",
+          "probabilities": {
+            "0": 0.047474689185216405,
+            "1": 0.01345331950368224,
+            "2": 0.9390719913111013
+          },
+          "confidence": 0.7618095754131845
+        }
+      },
+      "usage": {
+        "input_tokens": 154,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "2",
+    "named": false,
+    "order": [
+      0.5,
+      -0.5,
+      0
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "Old price is 5.00 and new price is 5.00. Select new price minus old price.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "0": "+0.50 dollars per gallon",
+            "1": "-0.50 dollars per gallon",
+            "2": "+0.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "2",
+          "probabilities": {
+            "0": 0.10188281565107016,
+            "1": 0.1166471407561484,
+            "2": 0.7814700435927814
+          },
+          "confidence": 0.38466430235264537
+        }
+      },
+      "usage": {
+        "input_tokens": 162,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "0",
+    "named": false,
+    "order": [
+      0,
+      0.5,
+      -0.5
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "The known correct change is 0.00. Select the zero change option.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "0": "+0.00 dollars per gallon",
+            "1": "+0.50 dollars per gallon",
+            "2": "-0.50 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "0",
+          "probabilities": {
+            "0": 0.9563666062450218,
+            "1": 0.017988312830253934,
+            "2": 0.025645080924724336
+          },
+          "confidence": 0.8098572007929191
+        }
+      },
+      "usage": {
+        "input_tokens": 154,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "0",
+    "named": false,
+    "order": [
+      0,
+      0.5,
+      -0.5
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "Old price is 5.00 and new price is 5.00. Select new price minus old price.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "0": "+0.00 dollars per gallon",
+            "1": "+0.50 dollars per gallon",
+            "2": "-0.50 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "0",
+          "probabilities": {
+            "0": 0.9446240031811717,
+            "1": 0.04413450197005808,
+            "2": 0.011241494848770194
+          },
+          "confidence": 0.7797317719485952
+        }
+      },
+      "usage": {
+        "input_tokens": 162,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "6",
+    "named": false,
+    "order": [
+      -1,
+      -0.5,
+      -0.25,
+      -0.15,
+      -0.1,
+      -0.05,
+      0,
+      0.05,
+      0.1,
+      0.15,
+      0.25,
+      0.5,
+      1
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "The known correct change is 0.00. Select the zero change option.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "0": "-1.00 dollars per gallon",
+            "1": "-0.50 dollars per gallon",
+            "2": "-0.25 dollars per gallon",
+            "3": "-0.15 dollars per gallon",
+            "4": "-0.10 dollars per gallon",
+            "5": "-0.05 dollars per gallon",
+            "6": "+0.00 dollars per gallon",
+            "7": "+0.05 dollars per gallon",
+            "8": "+0.10 dollars per gallon",
+            "9": "+0.15 dollars per gallon",
+            "10": "+0.25 dollars per gallon",
+            "11": "+0.50 dollars per gallon",
+            "12": "+1.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "6",
+          "probabilities": {
+            "0": 0.2864219639184428,
+            "1": 0.014213624541578306,
+            "2": 0.0005973023788890861,
+            "3": 0.00026924170765514225,
+            "4": 0.0031134224451738646,
+            "5": 0.016408156439180418,
+            "6": 0.6087331360328084,
+            "7": 0.025621949799845948,
+            "8": 0.0010685012317950522,
+            "9": 0.03555763074556182,
+            "10": 0.0062260759292169085,
+            "11": 0.00144172510140595,
+            "12": 0.0003272697284460969
+          },
+          "confidence": 0.5803806859644616
+        }
+      },
+      "usage": {
+        "input_tokens": 342,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "6",
+    "named": false,
+    "order": [
+      -1,
+      -0.5,
+      -0.25,
+      -0.15,
+      -0.1,
+      -0.05,
+      0,
+      0.05,
+      0.1,
+      0.15,
+      0.25,
+      0.5,
+      1
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "Old price is 5.00 and new price is 5.00. Select new price minus old price.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "0": "-1.00 dollars per gallon",
+            "1": "-0.50 dollars per gallon",
+            "2": "-0.25 dollars per gallon",
+            "3": "-0.15 dollars per gallon",
+            "4": "-0.10 dollars per gallon",
+            "5": "-0.05 dollars per gallon",
+            "6": "+0.00 dollars per gallon",
+            "7": "+0.05 dollars per gallon",
+            "8": "+0.10 dollars per gallon",
+            "9": "+0.15 dollars per gallon",
+            "10": "+0.25 dollars per gallon",
+            "11": "+0.50 dollars per gallon",
+            "12": "+1.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "0",
+          "probabilities": {
+            "0": 0.7187095683791415,
+            "1": 0.12428844245195161,
+            "2": 0.009804342012264445,
+            "3": 0.0042048440892224325,
+            "4": 0.007728996038060279,
+            "5": 0.008810306892086292,
+            "6": 0.06487871241009203,
+            "7": 0.00492297937890053,
+            "8": 0.006584332911493477,
+            "9": 0.0447827285841214,
+            "10": 0.004375048897071904,
+            "11": 0.0006890033660085305,
+            "12": 0.0002206945895854426
+          },
+          "confidence": 0.5904029328731031
+        }
+      },
+      "usage": {
+        "input_tokens": 350,
+        "output_tokens": 1
+      }
+    },
+    "correct": false
+  },
+  {
+    "expected": "6",
+    "named": false,
+    "order": [
+      1,
+      0.5,
+      0.25,
+      0.15,
+      0.1,
+      0.05,
+      0,
+      -0.05,
+      -0.1,
+      -0.15,
+      -0.25,
+      -0.5,
+      -1
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "The known correct change is 0.00. Select the zero change option.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "0": "+1.00 dollars per gallon",
+            "1": "+0.50 dollars per gallon",
+            "2": "+0.25 dollars per gallon",
+            "3": "+0.15 dollars per gallon",
+            "4": "+0.10 dollars per gallon",
+            "5": "+0.05 dollars per gallon",
+            "6": "+0.00 dollars per gallon",
+            "7": "-0.05 dollars per gallon",
+            "8": "-0.10 dollars per gallon",
+            "9": "-0.15 dollars per gallon",
+            "10": "-0.25 dollars per gallon",
+            "11": "-0.50 dollars per gallon",
+            "12": "-1.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "6",
+          "probabilities": {
+            "0": 0.058595695088372084,
+            "1": 0.0034693093411999392,
+            "2": 0.0003875714458177534,
+            "3": 0.0001779256552158356,
+            "4": 0.0018452936013556725,
+            "5": 0.0050277904964103745,
+            "6": 0.8983071609537782,
+            "7": 0.014177592869727305,
+            "8": 0.0007871743076878551,
+            "9": 0.012180518123030669,
+            "10": 0.00364260738103674,
+            "11": 0.0012707687609723297,
+            "12": 0.0001305919753954623
+          },
+          "confidence": 0.814893282097094
+        }
+      },
+      "usage": {
+        "input_tokens": 342,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "6",
+    "named": false,
+    "order": [
+      1,
+      0.5,
+      0.25,
+      0.15,
+      0.1,
+      0.05,
+      0,
+      -0.05,
+      -0.1,
+      -0.15,
+      -0.25,
+      -0.5,
+      -1
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "Old price is 5.00 and new price is 5.00. Select new price minus old price.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "0": "+1.00 dollars per gallon",
+            "1": "+0.50 dollars per gallon",
+            "2": "+0.25 dollars per gallon",
+            "3": "+0.15 dollars per gallon",
+            "4": "+0.10 dollars per gallon",
+            "5": "+0.05 dollars per gallon",
+            "6": "+0.00 dollars per gallon",
+            "7": "-0.05 dollars per gallon",
+            "8": "-0.10 dollars per gallon",
+            "9": "-0.15 dollars per gallon",
+            "10": "-0.25 dollars per gallon",
+            "11": "-0.50 dollars per gallon",
+            "12": "-1.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "6",
+          "probabilities": {
+            "0": 0.2778307953480839,
+            "1": 0.061357679868173996,
+            "2": 0.00367978543401966,
+            "3": 0.0024616857706334693,
+            "4": 0.006242738183768339,
+            "5": 0.005785494485392722,
+            "6": 0.4613272289952104,
+            "7": 0.017656418622289845,
+            "8": 0.018682792497093977,
+            "9": 0.12992096943894632,
+            "10": 0.01225041516955699,
+            "11": 0.0024274624413290393,
+            "12": 0.0003765337455012843
+          },
+          "confidence": 0.4295442357476379
+        }
+      },
+      "usage": {
+        "input_tokens": 350,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "0",
+    "named": false,
+    "order": [
+      0,
+      -1,
+      -0.5,
+      -0.25,
+      -0.15,
+      -0.1,
+      -0.05,
+      0.05,
+      0.1,
+      0.15,
+      0.25,
+      0.5,
+      1
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "The known correct change is 0.00. Select the zero change option.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "0": "+0.00 dollars per gallon",
+            "1": "-1.00 dollars per gallon",
+            "2": "-0.50 dollars per gallon",
+            "3": "-0.25 dollars per gallon",
+            "4": "-0.15 dollars per gallon",
+            "5": "-0.10 dollars per gallon",
+            "6": "-0.05 dollars per gallon",
+            "7": "+0.05 dollars per gallon",
+            "8": "+0.10 dollars per gallon",
+            "9": "+0.15 dollars per gallon",
+            "10": "+0.25 dollars per gallon",
+            "11": "+0.50 dollars per gallon",
+            "12": "+1.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "0",
+          "probabilities": {
+            "0": 0.9728274597476413,
+            "1": 0.023295090772741733,
+            "2": 0.0003697830544259713,
+            "3": 0.00024061312916263397,
+            "4": 0.0007535531570072561,
+            "5": 0.00045120471245530056,
+            "6": 0.0006576824120481005,
+            "7": 0.0001459871252265078,
+            "8": 0.0003563964128230614,
+            "9": 0.0008078160251622391,
+            "10": 2.528316129438958e-05,
+            "11": 3.342250561949392e-05,
+            "12": 3.5707784391621706e-05
+          },
+          "confidence": 0.9439100989131182
+        }
+      },
+      "usage": {
+        "input_tokens": 342,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "0",
+    "named": false,
+    "order": [
+      0,
+      -1,
+      -0.5,
+      -0.25,
+      -0.15,
+      -0.1,
+      -0.05,
+      0.05,
+      0.1,
+      0.15,
+      0.25,
+      0.5,
+      1
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "Old price is 5.00 and new price is 5.00. Select new price minus old price.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "0": "+0.00 dollars per gallon",
+            "1": "-1.00 dollars per gallon",
+            "2": "-0.50 dollars per gallon",
+            "3": "-0.25 dollars per gallon",
+            "4": "-0.15 dollars per gallon",
+            "5": "-0.10 dollars per gallon",
+            "6": "-0.05 dollars per gallon",
+            "7": "+0.05 dollars per gallon",
+            "8": "+0.10 dollars per gallon",
+            "9": "+0.15 dollars per gallon",
+            "10": "+0.25 dollars per gallon",
+            "11": "+0.50 dollars per gallon",
+            "12": "+1.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "0",
+          "probabilities": {
+            "0": 0.8840228428593365,
+            "1": 0.10896290803323831,
+            "2": 0.0009858323608911508,
+            "3": 0.0008014760344807171,
+            "4": 0.0016697951453567728,
+            "5": 0.00047993242721164174,
+            "6": 0.00040007873674339616,
+            "7": 0.0002627307175148357,
+            "8": 0.0009699710522337182,
+            "9": 0.0013116875809358968,
+            "10": 5.887684310121079e-05,
+            "11": 4.61812426161899e-05,
+            "12": 2.768696633924779e-05
+          },
+          "confidence": 0.844262538637021
+        }
+      },
+      "usage": {
+        "input_tokens": 350,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "unchanged",
+    "named": true,
+    "order": [
+      -0.5,
+      0,
+      0.5
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "The known correct change is 0.00. Select the zero change option.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "lower_50": "-0.50 dollars per gallon",
+            "unchanged": "+0.00 dollars per gallon",
+            "higher_50": "+0.50 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "unchanged",
+          "probabilities": {
+            "lower_50": 0.005413684696091023,
+            "unchanged": 0.9643882043442454,
+            "higher_50": 0.03019811095966359
+          },
+          "confidence": 0.8462462427203777
+        }
+      },
+      "usage": {
+        "input_tokens": 161,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "unchanged",
+    "named": true,
+    "order": [
+      -0.5,
+      0,
+      0.5
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "Old price is 5.00 and new price is 5.00. Select new price minus old price.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "lower_50": "-0.50 dollars per gallon",
+            "unchanged": "+0.00 dollars per gallon",
+            "higher_50": "+0.50 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "unchanged",
+          "probabilities": {
+            "lower_50": 0.05013197031752081,
+            "unchanged": 0.9279365620330878,
+            "higher_50": 0.02193146764939122
+          },
+          "confidence": 0.7239913425908975
+        }
+      },
+      "usage": {
+        "input_tokens": 169,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "unchanged",
+    "named": true,
+    "order": [
+      0.5,
+      -0.5,
+      0
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "The known correct change is 0.00. Select the zero change option.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "higher_50": "+0.50 dollars per gallon",
+            "lower_50": "-0.50 dollars per gallon",
+            "unchanged": "+0.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "unchanged",
+          "probabilities": {
+            "higher_50": 0.0012291097723546327,
+            "lower_50": 0.025591374196758394,
+            "unchanged": 0.973179516030887
+          },
+          "confidence": 0.8830346489007596
+        }
+      },
+      "usage": {
+        "input_tokens": 161,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "unchanged",
+    "named": true,
+    "order": [
+      0.5,
+      -0.5,
+      0
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "Old price is 5.00 and new price is 5.00. Select new price minus old price.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "higher_50": "+0.50 dollars per gallon",
+            "lower_50": "-0.50 dollars per gallon",
+            "unchanged": "+0.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "unchanged",
+          "probabilities": {
+            "higher_50": 0.04157957426468128,
+            "lower_50": 0.043698533745491396,
+            "unchanged": 0.9147218919898273
+          },
+          "confidence": 0.6809077035763336
+        }
+      },
+      "usage": {
+        "input_tokens": 169,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "unchanged",
+    "named": true,
+    "order": [
+      0,
+      0.5,
+      -0.5
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "The known correct change is 0.00. Select the zero change option.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "unchanged": "+0.00 dollars per gallon",
+            "higher_50": "+0.50 dollars per gallon",
+            "lower_50": "-0.50 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "unchanged",
+          "probabilities": {
+            "unchanged": 0.97213385427892,
+            "higher_50": 0.005802966944034545,
+            "lower_50": 0.02206317877704543
+          },
+          "confidence": 0.8711997917314509
+        }
+      },
+      "usage": {
+        "input_tokens": 161,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "unchanged",
+    "named": true,
+    "order": [
+      0,
+      0.5,
+      -0.5
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "Old price is 5.00 and new price is 5.00. Select new price minus old price.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "unchanged": "+0.00 dollars per gallon",
+            "higher_50": "+0.50 dollars per gallon",
+            "lower_50": "-0.50 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "unchanged",
+          "probabilities": {
+            "unchanged": 0.9351881004961312,
+            "higher_50": 0.04593399836577068,
+            "lower_50": 0.01887790113809805
+          },
+          "confidence": 0.7459454334161582
+        }
+      },
+      "usage": {
+        "input_tokens": 169,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "unchanged",
+    "named": true,
+    "order": [
+      -1,
+      -0.5,
+      -0.25,
+      -0.15,
+      -0.1,
+      -0.05,
+      0,
+      0.05,
+      0.1,
+      0.15,
+      0.25,
+      0.5,
+      1
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "The known correct change is 0.00. Select the zero change option.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "lower_100": "-1.00 dollars per gallon",
+            "lower_50": "-0.50 dollars per gallon",
+            "lower_25": "-0.25 dollars per gallon",
+            "lower_15": "-0.15 dollars per gallon",
+            "lower_10": "-0.10 dollars per gallon",
+            "lower_5": "-0.05 dollars per gallon",
+            "unchanged": "+0.00 dollars per gallon",
+            "higher_5": "+0.05 dollars per gallon",
+            "higher_10": "+0.10 dollars per gallon",
+            "higher_15": "+0.15 dollars per gallon",
+            "higher_25": "+0.25 dollars per gallon",
+            "higher_50": "+0.50 dollars per gallon",
+            "higher_100": "+1.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "unchanged",
+          "probabilities": {
+            "lower_100": 0.0049862095636029335,
+            "lower_50": 0.002395331699059323,
+            "lower_25": 0.0006182680729054987,
+            "lower_15": 0.0003818524666120804,
+            "lower_10": 0.0024218296413781224,
+            "lower_5": 0.0016160457802138655,
+            "unchanged": 0.9038586074889712,
+            "higher_5": 0.01875641137117744,
+            "higher_10": 0.002044026964404599,
+            "higher_15": 0.033079655179481936,
+            "higher_25": 0.027501940918323583,
+            "higher_50": 0.0011106231496501688,
+            "higher_100": 0.0012291977042191038
+          },
+          "confidence": 0.8130876471755183
+        }
+      },
+      "usage": {
+        "input_tokens": 376,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "unchanged",
+    "named": true,
+    "order": [
+      -1,
+      -0.5,
+      -0.25,
+      -0.15,
+      -0.1,
+      -0.05,
+      0,
+      0.05,
+      0.1,
+      0.15,
+      0.25,
+      0.5,
+      1
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "Old price is 5.00 and new price is 5.00. Select new price minus old price.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "lower_100": "-1.00 dollars per gallon",
+            "lower_50": "-0.50 dollars per gallon",
+            "lower_25": "-0.25 dollars per gallon",
+            "lower_15": "-0.15 dollars per gallon",
+            "lower_10": "-0.10 dollars per gallon",
+            "lower_5": "-0.05 dollars per gallon",
+            "unchanged": "+0.00 dollars per gallon",
+            "higher_5": "+0.05 dollars per gallon",
+            "higher_10": "+0.10 dollars per gallon",
+            "higher_15": "+0.15 dollars per gallon",
+            "higher_25": "+0.25 dollars per gallon",
+            "higher_50": "+0.50 dollars per gallon",
+            "higher_100": "+1.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "lower_100",
+          "probabilities": {
+            "lower_100": 0.3777568691592803,
+            "lower_50": 0.15424182466767927,
+            "lower_25": 0.004109245246196676,
+            "lower_15": 0.0034737157656948418,
+            "lower_10": 0.017473279789917015,
+            "lower_5": 0.011574007303606398,
+            "unchanged": 0.2615867055715897,
+            "higher_5": 0.02348454160344471,
+            "higher_10": 0.036708388683562916,
+            "higher_15": 0.08907578659834212,
+            "higher_25": 0.014669141756196765,
+            "higher_50": 0.003945405795350204,
+            "higher_100": 0.0019010880591388308
+          },
+          "confidence": 0.34036757238457727
+        }
+      },
+      "usage": {
+        "input_tokens": 384,
+        "output_tokens": 1
+      }
+    },
+    "correct": false
+  },
+  {
+    "expected": "unchanged",
+    "named": true,
+    "order": [
+      1,
+      0.5,
+      0.25,
+      0.15,
+      0.1,
+      0.05,
+      0,
+      -0.05,
+      -0.1,
+      -0.15,
+      -0.25,
+      -0.5,
+      -1
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "The known correct change is 0.00. Select the zero change option.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "higher_100": "+1.00 dollars per gallon",
+            "higher_50": "+0.50 dollars per gallon",
+            "higher_25": "+0.25 dollars per gallon",
+            "higher_15": "+0.15 dollars per gallon",
+            "higher_10": "+0.10 dollars per gallon",
+            "higher_5": "+0.05 dollars per gallon",
+            "unchanged": "+0.00 dollars per gallon",
+            "lower_5": "-0.05 dollars per gallon",
+            "lower_10": "-0.10 dollars per gallon",
+            "lower_15": "-0.15 dollars per gallon",
+            "lower_25": "-0.25 dollars per gallon",
+            "lower_50": "-0.50 dollars per gallon",
+            "lower_100": "-1.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "unchanged",
+          "probabilities": {
+            "higher_100": 0.001266434499970877,
+            "higher_50": 0.0007948878190378961,
+            "higher_25": 0.0003718012935590366,
+            "higher_15": 0.00029175448828160934,
+            "higher_10": 0.001302196900750004,
+            "higher_5": 0.0005826006793064087,
+            "unchanged": 0.9585159340162855,
+            "lower_5": 0.013529095070074054,
+            "lower_10": 0.0018185596127830732,
+            "lower_15": 0.013128063945460636,
+            "lower_25": 0.0073234994763094014,
+            "lower_50": 0.00044153843512876917,
+            "lower_100": 0.0006336337630526333
+          },
+          "confidence": 0.9049911858660663
+        }
+      },
+      "usage": {
+        "input_tokens": 376,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "unchanged",
+    "named": true,
+    "order": [
+      1,
+      0.5,
+      0.25,
+      0.15,
+      0.1,
+      0.05,
+      0,
+      -0.05,
+      -0.1,
+      -0.15,
+      -0.25,
+      -0.5,
+      -1
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "Old price is 5.00 and new price is 5.00. Select new price minus old price.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "higher_100": "+1.00 dollars per gallon",
+            "higher_50": "+0.50 dollars per gallon",
+            "higher_25": "+0.25 dollars per gallon",
+            "higher_15": "+0.15 dollars per gallon",
+            "higher_10": "+0.10 dollars per gallon",
+            "higher_5": "+0.05 dollars per gallon",
+            "unchanged": "+0.00 dollars per gallon",
+            "lower_5": "-0.05 dollars per gallon",
+            "lower_10": "-0.10 dollars per gallon",
+            "lower_15": "-0.15 dollars per gallon",
+            "lower_25": "-0.25 dollars per gallon",
+            "lower_50": "-0.50 dollars per gallon",
+            "lower_100": "-1.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "unchanged",
+          "probabilities": {
+            "higher_100": 0.027044304491514713,
+            "higher_50": 0.03068146560372788,
+            "higher_25": 0.0021172229044498806,
+            "higher_15": 0.0014850452527721027,
+            "higher_10": 0.0033297412086687357,
+            "higher_5": 0.0013434907913720076,
+            "unchanged": 0.7707412260717127,
+            "lower_5": 0.017199716082873837,
+            "lower_10": 0.01601576095053185,
+            "lower_15": 0.09366001081781722,
+            "lower_25": 0.03146253903029898,
+            "lower_50": 0.0027268979100144096,
+            "lower_100": 0.002192578884245902
+          },
+          "confidence": 0.6288170081342943
+        }
+      },
+      "usage": {
+        "input_tokens": 384,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "unchanged",
+    "named": true,
+    "order": [
+      0,
+      -1,
+      -0.5,
+      -0.25,
+      -0.15,
+      -0.1,
+      -0.05,
+      0.05,
+      0.1,
+      0.15,
+      0.25,
+      0.5,
+      1
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "The known correct change is 0.00. Select the zero change option.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "unchanged": "+0.00 dollars per gallon",
+            "lower_100": "-1.00 dollars per gallon",
+            "lower_50": "-0.50 dollars per gallon",
+            "lower_25": "-0.25 dollars per gallon",
+            "lower_15": "-0.15 dollars per gallon",
+            "lower_10": "-0.10 dollars per gallon",
+            "lower_5": "-0.05 dollars per gallon",
+            "higher_5": "+0.05 dollars per gallon",
+            "higher_10": "+0.10 dollars per gallon",
+            "higher_15": "+0.15 dollars per gallon",
+            "higher_25": "+0.25 dollars per gallon",
+            "higher_50": "+0.50 dollars per gallon",
+            "higher_100": "+1.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "unchanged",
+          "probabilities": {
+            "unchanged": 0.9906337081911856,
+            "lower_100": 0.00473046106598272,
+            "lower_50": 0.00018243866101412442,
+            "lower_25": 0.00011842110512054389,
+            "lower_15": 0.0003979056450227005,
+            "lower_10": 0.0001591308363139037,
+            "lower_5": 0.0005872549096782102,
+            "higher_5": 0.00032999351708703806,
+            "higher_10": 0.0008007983202790453,
+            "higher_15": 0.0015076151363055512,
+            "higher_25": 9.210550407440808e-05,
+            "higher_50": 8.943669145042864e-05,
+            "higher_100": 0.0003707304164860659
+          },
+          "confidence": 0.973124543753994
+        }
+      },
+      "usage": {
+        "input_tokens": 376,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  },
+  {
+    "expected": "unchanged",
+    "named": true,
+    "order": [
+      0,
+      -1,
+      -0.5,
+      -0.25,
+      -0.15,
+      -0.1,
+      -0.05,
+      0.05,
+      0.1,
+      0.15,
+      0.25,
+      0.5,
+      1
+    ],
+    "request": {
+      "model": "tev1:0.8b",
+      "state": "Old price is 5.00 and new price is 5.00. Select new price minus old price.",
+      "questions": {
+        "answer": {
+          "type": "choice",
+          "instructions": "Select the correct price change from the state.",
+          "criteria": {
+            "unchanged": "+0.00 dollars per gallon",
+            "lower_100": "-1.00 dollars per gallon",
+            "lower_50": "-0.50 dollars per gallon",
+            "lower_25": "-0.25 dollars per gallon",
+            "lower_15": "-0.15 dollars per gallon",
+            "lower_10": "-0.10 dollars per gallon",
+            "lower_5": "-0.05 dollars per gallon",
+            "higher_5": "+0.05 dollars per gallon",
+            "higher_10": "+0.10 dollars per gallon",
+            "higher_15": "+0.15 dollars per gallon",
+            "higher_25": "+0.25 dollars per gallon",
+            "higher_50": "+0.50 dollars per gallon",
+            "higher_100": "+1.00 dollars per gallon"
+          }
+        }
+      },
+      "keep_alive": "5m"
+    },
+    "response": {
+      "model": "tev1:0.8b",
+      "answers": {
+        "answer": {
+          "type": "choice",
+          "choice": "unchanged",
+          "probabilities": {
+            "unchanged": 0.9620270961843357,
+            "lower_100": 0.026635244331466273,
+            "lower_50": 0.0006197743468357895,
+            "lower_25": 0.0005290947825459288,
+            "lower_15": 0.001543312072679641,
+            "lower_10": 0.0008086835682452728,
+            "lower_5": 0.0005839769054124531,
+            "higher_5": 0.0007124421506619139,
+            "higher_10": 0.003061361334459453,
+            "higher_15": 0.002990627503374444,
+            "higher_25": 0.00018974292929993023,
+            "higher_50": 0.00017228641777931327,
+            "higher_100": 0.00012635747290422488
+          },
+          "confidence": 0.9192980702438851
+        }
+      },
+      "usage": {
+        "input_tokens": 384,
+        "output_tokens": 1
+      }
+    },
+    "correct": true
+  }
+]
