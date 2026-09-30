@@ -1,5 +1,8 @@
 # One-shot station selection with OpenAI models
 
+Follow-up: [95th-percentile and worst-slice analysis](TAIL-RISK.md) separates
+absolute price error, one-sided false-bargain risk, and selection regret.
+
 **No demonstrated station-selection improvement.** Tested 100 distinct historical
 candidate sets per model, one request per case, with the same frozen prompt and
 actual station history sequences. No tools, examples, follow-up corrections,

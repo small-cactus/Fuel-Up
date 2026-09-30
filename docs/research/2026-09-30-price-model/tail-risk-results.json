@@ -1,0 +1,1462 @@
+{
+  "scope": "Post-hoc frozen prediction tail audit; future reported prices, not pump truth. No model selection or tuning.",
+  "percentileDefinition": "Linear interpolation at (n-1)*.95; worst5Mean averages the largest ceil(n*.05) values. Fixed baseline slices include all cutoff ties.",
+  "commonCases": 95,
+  "candidateRows": 464,
+  "uniqueStations": 62,
+  "uniqueReportPairs": 105,
+  "allCommonRows": {
+    "raw": {
+      "absolute": {
+        "count": 464,
+        "p95": 11.000000000000032,
+        "worst5Mean": 13.291666666666638,
+        "worst5Count": 24,
+        "max": 20.000000000000018
+      },
+      "tooLow": {
+        "count": 464,
+        "p95": 1.9999999999999574,
+        "worst5Mean": 4.499999999999989,
+        "worst5Count": 24,
+        "max": 10.000000000000053
+      },
+      "tooHigh": {
+        "count": 464,
+        "p95": 11.000000000000032,
+        "worst5Mean": 13.291666666666638,
+        "worst5Count": 24,
+        "max": 20.000000000000018
+      },
+      "underByMoreThan10Cents": 0,
+      "overByMoreThan10Cents": 31
+    },
+    "current_math": {
+      "absolute": {
+        "count": 464,
+        "p95": 20.954999999999984,
+        "worst5Mean": 34.50833333333333,
+        "worst5Count": 24,
+        "max": 56.00000000000005
+      },
+      "tooLow": {
+        "count": 464,
+        "p95": 1.9999999999999574,
+        "worst5Mean": 6.854166666666662,
+        "worst5Count": 24,
+        "max": 30.400000000000027
+      },
+      "tooHigh": {
+        "count": 464,
+        "p95": 20.594999999999967,
+        "worst5Mean": 34.104166666666664,
+        "worst5Count": 24,
+        "max": 56.00000000000005
+      },
+      "underByMoreThan10Cents": 7,
+      "overByMoreThan10Cents": 126
+    },
+    "boosted_trees": {
+      "absolute": {
+        "count": 464,
+        "p95": 24.053710268506435,
+        "worst5Mean": 28.422227224566424,
+        "worst5Count": 24,
+        "max": 42.67547695993264
+      },
+      "tooLow": {
+        "count": 464,
+        "p95": 0,
+        "worst5Mean": 0.4806021063046099,
+        "worst5Count": 24,
+        "max": 4.847097430951841
+      },
+      "tooHigh": {
+        "count": 464,
+        "p95": 24.053710268506435,
+        "worst5Mean": 28.422227224566424,
+        "worst5Count": 24,
+        "max": 42.67547695993264
+      },
+      "underByMoreThan10Cents": 0,
+      "overByMoreThan10Cents": 248
+    },
+    "ridge": {
+      "absolute": {
+        "count": 464,
+        "p95": 21.147802220413478,
+        "worst5Mean": 23.486097544802373,
+        "worst5Count": 24,
+        "max": 33.69116796049951
+      },
+      "tooLow": {
+        "count": 464,
+        "p95": 0,
+        "worst5Mean": 0.40017070438336616,
+        "worst5Count": 24,
+        "max": 2.8287955154849165
+      },
+      "tooHigh": {
+        "count": 464,
+        "p95": 21.147802220413478,
+        "worst5Mean": 23.486097544802373,
+        "worst5Count": 24,
+        "max": 33.69116796049951
+      },
+      "underByMoreThan10Cents": 0,
+      "overByMoreThan10Cents": 257
+    },
+    "huber": {
+      "absolute": {
+        "count": 464,
+        "p95": 25.18193370817576,
+        "worst5Mean": 28.20027657511693,
+        "worst5Count": 24,
+        "max": 33.15278476232484
+      },
+      "tooLow": {
+        "count": 464,
+        "p95": 0,
+        "worst5Mean": 0.9570644383845769,
+        "worst5Count": 24,
+        "max": 4.898912913253994
+      },
+      "tooHigh": {
+        "count": 464,
+        "p95": 25.18193370817576,
+        "worst5Mean": 28.20027657511693,
+        "worst5Count": 24,
+        "max": 33.15278476232484
+      },
+      "underByMoreThan10Cents": 0,
+      "overByMoreThan10Cents": 312
+    },
+    "tiny_mlp_price": {
+      "absolute": {
+        "count": 464,
+        "p95": 43.66444746135948,
+        "worst5Mean": 46.18983704821375,
+        "worst5Count": 24,
+        "max": 47.842089774470594
+      },
+      "tooLow": {
+        "count": 464,
+        "p95": 0.2763310994658542,
+        "worst5Mean": 5.062092082708985,
+        "worst5Count": 24,
+        "max": 12.854703900120468
+      },
+      "tooHigh": {
+        "count": 464,
+        "p95": 43.66444746135948,
+        "worst5Mean": 46.18983704821375,
+        "worst5Count": 24,
+        "max": 47.842089774470594
+      },
+      "underByMoreThan10Cents": 6,
+      "overByMoreThan10Cents": 367
+    },
+    "gpt-6-luna/none": {
+      "absolute": {
+        "count": 464,
+        "p95": 15.000000000000036,
+        "worst5Mean": 21.833333333333343,
+        "worst5Count": 24,
+        "max": 32.00000000000003
+      },
+      "tooLow": {
+        "count": 464,
+        "p95": 0,
+        "worst5Mean": 2.3333333333333206,
+        "worst5Count": 24,
+        "max": 8.999999999999986
+      },
+      "tooHigh": {
+        "count": 464,
+        "p95": 15.000000000000036,
+        "worst5Mean": 21.833333333333343,
+        "worst5Count": 24,
+        "max": 32.00000000000003
+      },
+      "underByMoreThan10Cents": 0,
+      "overByMoreThan10Cents": 67
+    },
+    "gpt-5.6-terra/none": {
+      "absolute": {
+        "count": 464,
+        "p95": 20.000000000000018,
+        "worst5Mean": 33.41666666666666,
+        "worst5Count": 24,
+        "max": 59.999999999999964
+      },
+      "tooLow": {
+        "count": 464,
+        "p95": 1.9999999999999574,
+        "worst5Mean": 13.500000000000005,
+        "worst5Count": 24,
+        "max": 59.999999999999964
+      },
+      "tooHigh": {
+        "count": 464,
+        "p95": 18.99999999999995,
+        "worst5Mean": 30.583333333333325,
+        "worst5Count": 24,
+        "max": 46
+      },
+      "underByMoreThan10Cents": 11,
+      "overByMoreThan10Cents": 71
+    },
+    "gpt-6.1-sol/low": {
+      "absolute": {
+        "count": 464,
+        "p95": 11.999999999999922,
+        "worst5Mean": 13.9,
+        "worst5Count": 24,
+        "max": 22.000000000000064
+      },
+      "tooLow": {
+        "count": 464,
+        "p95": 3.000000000000025,
+        "worst5Mean": 5.941666666666667,
+        "worst5Count": 24,
+        "max": 13.999999999999968
+      },
+      "tooHigh": {
+        "count": 464,
+        "p95": 11.999999999999922,
+        "worst5Mean": 13.816666666666665,
+        "worst5Count": 24,
+        "max": 22.000000000000064
+      },
+      "underByMoreThan10Cents": 2,
+      "overByMoreThan10Cents": 41
+    }
+  },
+  "earliestUniqueReportPairs": {
+    "raw": {
+      "absolute": {
+        "count": 105,
+        "p95": 10.799999999999962,
+        "worst5Mean": 13.499999999999993,
+        "worst5Count": 6,
+        "max": 20.000000000000018
+      },
+      "tooLow": {
+        "count": 105,
+        "p95": 0,
+        "worst5Mean": 4.0000000000000036,
+        "worst5Count": 6,
+        "max": 10.000000000000053
+      },
+      "tooHigh": {
+        "count": 105,
+        "p95": 10.799999999999962,
+        "worst5Mean": 13.499999999999993,
+        "worst5Count": 6,
+        "max": 20.000000000000018
+      },
+      "underByMoreThan10Cents": 0,
+      "overByMoreThan10Cents": 6
+    },
+    "current_math": {
+      "absolute": {
+        "count": 105,
+        "p95": 39.199999999999946,
+        "worst5Mean": 51.50000000000003,
+        "worst5Count": 6,
+        "max": 56.00000000000005
+      },
+      "tooLow": {
+        "count": 105,
+        "p95": 0,
+        "worst5Mean": 2.666666666666669,
+        "worst5Count": 6,
+        "max": 10.000000000000053
+      },
+      "tooHigh": {
+        "count": 105,
+        "p95": 39.199999999999946,
+        "worst5Mean": 51.50000000000003,
+        "worst5Count": 6,
+        "max": 56.00000000000005
+      },
+      "underByMoreThan10Cents": 0,
+      "overByMoreThan10Cents": 15
+    },
+    "boosted_trees": {
+      "absolute": {
+        "count": 105,
+        "p95": 29.19827175514129,
+        "worst5Mean": 36.13301850806629,
+        "worst5Count": 6,
+        "max": 42.67547695993264
+      },
+      "tooLow": {
+        "count": 105,
+        "p95": 0,
+        "worst5Mean": 0.18437405892974823,
+        "worst5Count": 6,
+        "max": 1.1062443535784894
+      },
+      "tooHigh": {
+        "count": 105,
+        "p95": 29.19827175514129,
+        "worst5Mean": 36.13301850806629,
+        "worst5Count": 6,
+        "max": 42.67547695993264
+      },
+      "underByMoreThan10Cents": 0,
+      "overByMoreThan10Cents": 62
+    },
+    "ridge": {
+      "absolute": {
+        "count": 105,
+        "p95": 23.400336305211002,
+        "worst5Mean": 27.79940951864961,
+        "worst5Count": 6,
+        "max": 33.69116796049951
+      },
+      "tooLow": {
+        "count": 105,
+        "p95": 0,
+        "worst5Mean": 0.2489138402208102,
+        "worst5Count": 6,
+        "max": 1.4934830413248612
+      },
+      "tooHigh": {
+        "count": 105,
+        "p95": 23.400336305211002,
+        "worst5Mean": 27.79940951864961,
+        "worst5Count": 6,
+        "max": 33.69116796049951
+      },
+      "underByMoreThan10Cents": 0,
+      "overByMoreThan10Cents": 74
+    },
+    "huber": {
+      "absolute": {
+        "count": 105,
+        "p95": 25.429796850544832,
+        "worst5Mean": 28.416401368072197,
+        "worst5Count": 6,
+        "max": 33.15278476232484
+      },
+      "tooLow": {
+        "count": 105,
+        "p95": 0,
+        "worst5Mean": 0.1513206270566947,
+        "worst5Count": 6,
+        "max": 0.9079237623401681
+      },
+      "tooHigh": {
+        "count": 105,
+        "p95": 25.429796850544832,
+        "worst5Mean": 28.416401368072197,
+        "worst5Count": 6,
+        "max": 33.15278476232484
+      },
+      "underByMoreThan10Cents": 0,
+      "overByMoreThan10Cents": 69
+    },
+    "tiny_mlp_price": {
+      "absolute": {
+        "count": 105,
+        "p95": 26.2139743401984,
+        "worst5Mean": 35.61104470481572,
+        "worst5Count": 6,
+        "max": 47.52085403240063
+      },
+      "tooLow": {
+        "count": 105,
+        "p95": 8.081073783249373,
+        "worst5Mean": 11.857596804798957,
+        "worst5Count": 6,
+        "max": 12.854703900120468
+      },
+      "tooHigh": {
+        "count": 105,
+        "p95": 26.2139743401984,
+        "worst5Mean": 35.61104470481572,
+        "worst5Count": 6,
+        "max": 47.52085403240063
+      },
+      "underByMoreThan10Cents": 5,
+      "overByMoreThan10Cents": 59
+    },
+    "gpt-6-luna/none": {
+      "absolute": {
+        "count": 105,
+        "p95": 22.40000000000003,
+        "worst5Mean": 28.16666666666669,
+        "worst5Count": 6,
+        "max": 32.00000000000003
+      },
+      "tooLow": {
+        "count": 105,
+        "p95": 0,
+        "worst5Mean": 2.1666666666666647,
+        "worst5Count": 6,
+        "max": 8.999999999999986
+      },
+      "tooHigh": {
+        "count": 105,
+        "p95": 22.40000000000003,
+        "worst5Mean": 28.16666666666669,
+        "worst5Count": 6,
+        "max": 32.00000000000003
+      },
+      "underByMoreThan10Cents": 0,
+      "overByMoreThan10Cents": 21
+    },
+    "gpt-5.6-terra/none": {
+      "absolute": {
+        "count": 105,
+        "p95": 36.00000000000003,
+        "worst5Mean": 46.666666666666664,
+        "worst5Count": 6,
+        "max": 59.999999999999964
+      },
+      "tooLow": {
+        "count": 105,
+        "p95": 0,
+        "worst5Mean": 16.16666666666666,
+        "worst5Count": 6,
+        "max": 59.999999999999964
+      },
+      "tooHigh": {
+        "count": 105,
+        "p95": 35.80000000000001,
+        "worst5Mean": 42.66666666666668,
+        "worst5Count": 6,
+        "max": 46
+      },
+      "underByMoreThan10Cents": 2,
+      "overByMoreThan10Cents": 24
+    },
+    "gpt-6.1-sol/low": {
+      "absolute": {
+        "count": 105,
+        "p95": 12.00000000000001,
+        "worst5Mean": 14.833333333333357,
+        "worst5Count": 6,
+        "max": 22.000000000000064
+      },
+      "tooLow": {
+        "count": 105,
+        "p95": 1.5600000000000216,
+        "worst5Mean": 4.100000000000008,
+        "worst5Count": 6,
+        "max": 8.999999999999986
+      },
+      "tooHigh": {
+        "count": 105,
+        "p95": 12.00000000000001,
+        "worst5Mean": 14.833333333333357,
+        "worst5Count": 6,
+        "max": 22.000000000000064
+      },
+      "underByMoreThan10Cents": 0,
+      "overByMoreThan10Cents": 11
+    }
+  },
+  "currentMathWorstSlice": {
+    "baseline": "current_math",
+    "cutoffCents": 20.999999999999996,
+    "countWithBoundaryTies": 24,
+    "uniqueStations": 13,
+    "cases": [
+      {
+        "case": 42,
+        "station": "2621",
+        "sourceAt": "2026-09-29T01:04:29.227Z",
+        "targetPrice": 4.68
+      },
+      {
+        "case": 51,
+        "station": "2621",
+        "sourceAt": "2026-09-29T02:05:27.740Z",
+        "targetPrice": 4.68
+      },
+      {
+        "case": 59,
+        "station": "2621",
+        "sourceAt": "2026-09-29T02:05:27.740Z",
+        "targetPrice": 4.68
+      },
+      {
+        "case": 67,
+        "station": "2621",
+        "sourceAt": "2026-09-29T14:38:41.739Z",
+        "targetPrice": 4.68
+      },
+      {
+        "case": 75,
+        "station": "2621",
+        "sourceAt": "2026-09-29T22:03:39.693Z",
+        "targetPrice": 4.68
+      },
+      {
+        "case": 79,
+        "station": "187190",
+        "sourceAt": "2026-09-29T21:00:55.173Z",
+        "targetPrice": 4.79
+      },
+      {
+        "case": 37,
+        "station": "187360",
+        "sourceAt": "2026-09-29T01:01:02.563Z",
+        "targetPrice": 4.95
+      },
+      {
+        "case": 90,
+        "station": "74927",
+        "sourceAt": "2026-09-29T22:00:04.011Z",
+        "targetPrice": 5.08
+      },
+      {
+        "case": 37,
+        "station": "210603",
+        "sourceAt": "2026-09-28T02:24:28.507Z",
+        "targetPrice": 5.05
+      },
+      {
+        "case": 21,
+        "station": "123230",
+        "sourceAt": "2026-09-28T11:56:12.479Z",
+        "targetPrice": 4.19
+      },
+      {
+        "case": 24,
+        "station": "123230",
+        "sourceAt": "2026-09-28T11:56:12.479Z",
+        "targetPrice": 4.19
+      },
+      {
+        "case": 25,
+        "station": "172657",
+        "sourceAt": "2026-09-27T20:20:34.257Z",
+        "targetPrice": 4.84
+      },
+      {
+        "case": 61,
+        "station": "110136",
+        "sourceAt": "2026-09-28T03:01:25.224Z",
+        "targetPrice": 5.79
+      },
+      {
+        "case": 63,
+        "station": "135837",
+        "sourceAt": "2026-09-28T02:21:10.692Z",
+        "targetPrice": 4.31
+      },
+      {
+        "case": 63,
+        "station": "133641",
+        "sourceAt": "2026-09-28T02:23:02.977Z",
+        "targetPrice": 4.17
+      },
+      {
+        "case": 5,
+        "station": "133641",
+        "sourceAt": "2026-09-28T02:23:02.977Z",
+        "targetPrice": 4.17
+      },
+      {
+        "case": 21,
+        "station": "133641",
+        "sourceAt": "2026-09-28T02:23:02.977Z",
+        "targetPrice": 4.17
+      },
+      {
+        "case": 24,
+        "station": "133641",
+        "sourceAt": "2026-09-28T02:23:02.977Z",
+        "targetPrice": 4.17
+      },
+      {
+        "case": 41,
+        "station": "72017",
+        "sourceAt": "2026-09-28T02:21:40.479Z",
+        "targetPrice": 5.13
+      },
+      {
+        "case": 41,
+        "station": "72119",
+        "sourceAt": "2026-09-28T11:28:47.176Z",
+        "targetPrice": 5.13
+      },
+      {
+        "case": 57,
+        "station": "7984",
+        "sourceAt": "2026-09-28T02:21:42.007Z",
+        "targetPrice": 4.99
+      },
+      {
+        "case": 65,
+        "station": "133641",
+        "sourceAt": "2026-09-28T02:23:02.977Z",
+        "targetPrice": 4.17
+      },
+      {
+        "case": 68,
+        "station": "133641",
+        "sourceAt": "2026-09-28T02:23:02.977Z",
+        "targetPrice": 4.17
+      },
+      {
+        "case": 43,
+        "station": "72119",
+        "sourceAt": "2026-09-28T11:28:47.176Z",
+        "targetPrice": 5.13
+      }
+    ],
+    "policies": {
+      "raw": {
+        "meanAbsoluteErrorCents": 5.583333333333336,
+        "improved": 24,
+        "worsened": 0,
+        "absolute": {
+          "count": 24,
+          "p95": 11.000000000000032,
+          "worst5Mean": 12.00000000000001,
+          "worst5Count": 2,
+          "max": 12.99999999999999
+        },
+        "tooLow": {
+          "count": 24,
+          "p95": 6.799999999999989,
+          "worst5Mean": 8.000000000000007,
+          "worst5Count": 2,
+          "max": 8.000000000000007
+        },
+        "tooHigh": {
+          "count": 24,
+          "p95": 11.000000000000032,
+          "worst5Mean": 12.00000000000001,
+          "worst5Count": 2,
+          "max": 12.99999999999999
+        },
+        "underByMoreThan10Cents": 0,
+        "overByMoreThan10Cents": 7
+      },
+      "current_math": {
+        "meanAbsoluteErrorCents": 34.50833333333334,
+        "improved": 0,
+        "worsened": 0,
+        "absolute": {
+          "count": 24,
+          "p95": 56.00000000000005,
+          "worst5Mean": 56.00000000000005,
+          "worst5Count": 2,
+          "max": 56.00000000000005
+        },
+        "tooLow": {
+          "count": 24,
+          "p95": 0,
+          "worst5Mean": 15.200000000000014,
+          "worst5Count": 2,
+          "max": 30.400000000000027
+        },
+        "tooHigh": {
+          "count": 24,
+          "p95": 56.00000000000005,
+          "worst5Mean": 56.00000000000005,
+          "worst5Count": 2,
+          "max": 56.00000000000005
+        },
+        "underByMoreThan10Cents": 1,
+        "overByMoreThan10Cents": 23
+      },
+      "boosted_trees": {
+        "meanAbsoluteErrorCents": 13.203741314173222,
+        "improved": 21,
+        "worsened": 3,
+        "absolute": {
+          "count": 24,
+          "p95": 24.299963347877416,
+          "worst5Mean": 25.23076250802383,
+          "worst5Count": 2,
+          "max": 25.801837148508966
+        },
+        "tooLow": {
+          "count": 24,
+          "p95": 0,
+          "worst5Mean": 1.590335558444611,
+          "worst5Count": 2,
+          "max": 3.180671116889222
+        },
+        "tooHigh": {
+          "count": 24,
+          "p95": 24.299963347877416,
+          "worst5Mean": 25.23076250802383,
+          "worst5Count": 2,
+          "max": 25.801837148508966
+        },
+        "underByMoreThan10Cents": 0,
+        "overByMoreThan10Cents": 16
+      },
+      "ridge": {
+        "meanAbsoluteErrorCents": 15.116188566258884,
+        "improved": 24,
+        "worsened": 0,
+        "absolute": {
+          "count": 24,
+          "p95": 21.03020452821751,
+          "worst5Mean": 22.28099109694952,
+          "worst5Count": 2,
+          "max": 23.40395146478773
+        },
+        "tooLow": {
+          "count": 24,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 2,
+          "max": 0
+        },
+        "tooHigh": {
+          "count": 24,
+          "p95": 21.03020452821751,
+          "worst5Mean": 22.28099109694952,
+          "worst5Count": 2,
+          "max": 23.40395146478773
+        },
+        "underByMoreThan10Cents": 0,
+        "overByMoreThan10Cents": 21
+      },
+      "huber": {
+        "meanAbsoluteErrorCents": 14.810221829310292,
+        "improved": 24,
+        "worsened": 0,
+        "absolute": {
+          "count": 24,
+          "p95": 25.068925975207804,
+          "worst5Mean": 26.635785988566507,
+          "worst5Count": 2,
+          "max": 28.08476418423087
+        },
+        "tooLow": {
+          "count": 24,
+          "p95": 0.5831117067374055,
+          "worst5Mean": 1.9036566339391214,
+          "worst5Count": 2,
+          "max": 3.1212994952459994
+        },
+        "tooHigh": {
+          "count": 24,
+          "p95": 25.068925975207804,
+          "worst5Mean": 26.635785988566507,
+          "worst5Count": 2,
+          "max": 28.08476418423087
+        },
+        "underByMoreThan10Cents": 0,
+        "overByMoreThan10Cents": 19
+      },
+      "tiny_mlp_price": {
+        "meanAbsoluteErrorCents": 13.135417779922228,
+        "improved": 22,
+        "worsened": 2,
+        "absolute": {
+          "count": 24,
+          "p95": 28.55856761188229,
+          "worst5Mean": 33.72454321342029,
+          "worst5Count": 2,
+          "max": 38.73706313689533
+        },
+        "tooLow": {
+          "count": 24,
+          "p95": 5.508680727166327,
+          "worst5Mean": 7.716441168230803,
+          "worst5Count": 2,
+          "max": 9.318646457427082
+        },
+        "tooHigh": {
+          "count": 24,
+          "p95": 28.55856761188229,
+          "worst5Mean": 33.72454321342029,
+          "worst5Count": 2,
+          "max": 38.73706313689533
+        },
+        "underByMoreThan10Cents": 0,
+        "overByMoreThan10Cents": 13
+      },
+      "gpt-6-luna/none": {
+        "meanAbsoluteErrorCents": 17.166666666666675,
+        "improved": 23,
+        "worsened": 1,
+        "absolute": {
+          "count": 24,
+          "p95": 32.00000000000003,
+          "worst5Mean": 32.00000000000003,
+          "worst5Count": 2,
+          "max": 32.00000000000003
+        },
+        "tooLow": {
+          "count": 24,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 2,
+          "max": 0
+        },
+        "tooHigh": {
+          "count": 24,
+          "p95": 32.00000000000003,
+          "worst5Mean": 32.00000000000003,
+          "worst5Count": 2,
+          "max": 32.00000000000003
+        },
+        "underByMoreThan10Cents": 0,
+        "overByMoreThan10Cents": 18
+      },
+      "gpt-5.6-terra/none": {
+        "meanAbsoluteErrorCents": 28.333333333333332,
+        "improved": 19,
+        "worsened": 2,
+        "absolute": {
+          "count": 24,
+          "p95": 46,
+          "worst5Mean": 46,
+          "worst5Count": 2,
+          "max": 46
+        },
+        "tooLow": {
+          "count": 24,
+          "p95": 0,
+          "worst5Mean": 20.000000000000018,
+          "worst5Count": 2,
+          "max": 40.000000000000036
+        },
+        "tooHigh": {
+          "count": 24,
+          "p95": 46,
+          "worst5Mean": 46,
+          "worst5Count": 2,
+          "max": 46
+        },
+        "underByMoreThan10Cents": 1,
+        "overByMoreThan10Cents": 23
+      },
+      "gpt-6.1-sol/low": {
+        "meanAbsoluteErrorCents": 8.81666666666668,
+        "improved": 24,
+        "worsened": 0,
+        "absolute": {
+          "count": 24,
+          "p95": 16.69999999999998,
+          "worst5Mean": 17.99999999999997,
+          "worst5Count": 2,
+          "max": 18.99999999999995
+        },
+        "tooLow": {
+          "count": 24,
+          "p95": 2.550000000000015,
+          "worst5Mean": 8.499999999999996,
+          "worst5Count": 2,
+          "max": 13.999999999999968
+        },
+        "tooHigh": {
+          "count": 24,
+          "p95": 16.69999999999998,
+          "worst5Mean": 17.99999999999997,
+          "worst5Count": 2,
+          "max": 18.99999999999995
+        },
+        "underByMoreThan10Cents": 1,
+        "overByMoreThan10Cents": 11
+      }
+    }
+  },
+  "rawWorstSlice": {
+    "baseline": "raw",
+    "cutoffCents": 11.000000000000032,
+    "countWithBoundaryTies": 31,
+    "uniqueStations": 6,
+    "cases": [
+      {
+        "case": 0,
+        "station": "146154",
+        "sourceAt": "2026-09-26T18:40:53.412Z",
+        "targetPrice": 4.52
+      },
+      {
+        "case": 5,
+        "station": "146154",
+        "sourceAt": "2026-09-26T18:40:53.412Z",
+        "targetPrice": 4.52
+      },
+      {
+        "case": 21,
+        "station": "146154",
+        "sourceAt": "2026-09-26T18:40:53.412Z",
+        "targetPrice": 4.52
+      },
+      {
+        "case": 41,
+        "station": "72031",
+        "sourceAt": "2026-09-28T23:35:38.587Z",
+        "targetPrice": 5.05
+      },
+      {
+        "case": 43,
+        "station": "72031",
+        "sourceAt": "2026-09-28T23:35:38.587Z",
+        "targetPrice": 5.05
+      },
+      {
+        "case": 46,
+        "station": "72031",
+        "sourceAt": "2026-09-28T23:35:38.587Z",
+        "targetPrice": 5.05
+      },
+      {
+        "case": 49,
+        "station": "72031",
+        "sourceAt": "2026-09-28T23:35:38.587Z",
+        "targetPrice": 5.05
+      },
+      {
+        "case": 34,
+        "station": "7984",
+        "sourceAt": "2026-09-28T02:21:42.007Z",
+        "targetPrice": 4.99
+      },
+      {
+        "case": 57,
+        "station": "7984",
+        "sourceAt": "2026-09-28T02:21:42.007Z",
+        "targetPrice": 4.99
+      },
+      {
+        "case": 27,
+        "station": "37209",
+        "sourceAt": "2026-09-28T20:49:11.331Z",
+        "targetPrice": 5.15
+      },
+      {
+        "case": 28,
+        "station": "37209",
+        "sourceAt": "2026-09-28T20:49:11.331Z",
+        "targetPrice": 5.15
+      },
+      {
+        "case": 29,
+        "station": "37209",
+        "sourceAt": "2026-09-28T20:49:11.331Z",
+        "targetPrice": 5.15
+      },
+      {
+        "case": 30,
+        "station": "37209",
+        "sourceAt": "2026-09-28T20:49:11.331Z",
+        "targetPrice": 5.15
+      },
+      {
+        "case": 32,
+        "station": "37209",
+        "sourceAt": "2026-09-28T20:49:11.331Z",
+        "targetPrice": 5.15
+      },
+      {
+        "case": 35,
+        "station": "37209",
+        "sourceAt": "2026-09-28T20:49:11.331Z",
+        "targetPrice": 5.15
+      },
+      {
+        "case": 42,
+        "station": "37209",
+        "sourceAt": "2026-09-28T20:49:11.331Z",
+        "targetPrice": 5.15
+      },
+      {
+        "case": 47,
+        "station": "37209",
+        "sourceAt": "2026-09-28T20:49:11.331Z",
+        "targetPrice": 5.15
+      },
+      {
+        "case": 51,
+        "station": "37209",
+        "sourceAt": "2026-09-28T20:49:11.331Z",
+        "targetPrice": 5.15
+      },
+      {
+        "case": 53,
+        "station": "37209",
+        "sourceAt": "2026-09-28T20:49:11.331Z",
+        "targetPrice": 5.15
+      },
+      {
+        "case": 59,
+        "station": "37209",
+        "sourceAt": "2026-09-28T20:49:11.331Z",
+        "targetPrice": 5.15
+      },
+      {
+        "case": 60,
+        "station": "37209",
+        "sourceAt": "2026-09-28T20:49:11.331Z",
+        "targetPrice": 5.15
+      },
+      {
+        "case": 0,
+        "station": "133641",
+        "sourceAt": "2026-09-28T02:23:02.977Z",
+        "targetPrice": 4.17
+      },
+      {
+        "case": 5,
+        "station": "133641",
+        "sourceAt": "2026-09-28T02:23:02.977Z",
+        "targetPrice": 4.17
+      },
+      {
+        "case": 21,
+        "station": "133641",
+        "sourceAt": "2026-09-28T02:23:02.977Z",
+        "targetPrice": 4.17
+      },
+      {
+        "case": 24,
+        "station": "133641",
+        "sourceAt": "2026-09-28T02:23:02.977Z",
+        "targetPrice": 4.17
+      },
+      {
+        "case": 63,
+        "station": "133641",
+        "sourceAt": "2026-09-28T02:23:02.977Z",
+        "targetPrice": 4.17
+      },
+      {
+        "case": 65,
+        "station": "133641",
+        "sourceAt": "2026-09-28T02:23:02.977Z",
+        "targetPrice": 4.17
+      },
+      {
+        "case": 68,
+        "station": "133641",
+        "sourceAt": "2026-09-28T02:23:02.977Z",
+        "targetPrice": 4.17
+      },
+      {
+        "case": 0,
+        "station": "63640",
+        "sourceAt": "2026-09-27T00:48:13.047Z",
+        "targetPrice": 4.23
+      },
+      {
+        "case": 5,
+        "station": "63640",
+        "sourceAt": "2026-09-27T00:48:13.047Z",
+        "targetPrice": 4.23
+      },
+      {
+        "case": 21,
+        "station": "63640",
+        "sourceAt": "2026-09-27T00:48:13.047Z",
+        "targetPrice": 4.23
+      }
+    ],
+    "policies": {
+      "raw": {
+        "meanAbsoluteErrorCents": 12.774193548387082,
+        "improved": 0,
+        "worsened": 0,
+        "absolute": {
+          "count": 31,
+          "p95": 20.000000000000018,
+          "worst5Mean": 20.000000000000018,
+          "worst5Count": 2,
+          "max": 20.000000000000018
+        },
+        "tooLow": {
+          "count": 31,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 2,
+          "max": 0
+        },
+        "tooHigh": {
+          "count": 31,
+          "p95": 20.000000000000018,
+          "worst5Mean": 20.000000000000018,
+          "worst5Count": 2,
+          "max": 20.000000000000018
+        },
+        "underByMoreThan10Cents": 0,
+        "overByMoreThan10Cents": 31
+      },
+      "current_math": {
+        "meanAbsoluteErrorCents": 14.83548387096771,
+        "improved": 2,
+        "worsened": 9,
+        "absolute": {
+          "count": 31,
+          "p95": 24.00000000000002,
+          "worst5Mean": 24.150000000000027,
+          "worst5Count": 2,
+          "max": 24.300000000000033
+        },
+        "tooLow": {
+          "count": 31,
+          "p95": 0.5999999999999783,
+          "worst5Mean": 1.9999999999999574,
+          "worst5Count": 2,
+          "max": 2.799999999999958
+        },
+        "tooHigh": {
+          "count": 31,
+          "p95": 24.00000000000002,
+          "worst5Mean": 24.150000000000027,
+          "worst5Count": 2,
+          "max": 24.300000000000033
+        },
+        "underByMoreThan10Cents": 0,
+        "overByMoreThan10Cents": 29
+      },
+      "boosted_trees": {
+        "meanAbsoluteErrorCents": 21.09849576577008,
+        "improved": 0,
+        "worsened": 31,
+        "absolute": {
+          "count": 31,
+          "p95": 27.58382346896284,
+          "worst5Mean": 33.86580978941676,
+          "worst5Count": 2,
+          "max": 38.365809789416794
+        },
+        "tooLow": {
+          "count": 31,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 2,
+          "max": 0
+        },
+        "tooHigh": {
+          "count": 31,
+          "p95": 27.58382346896284,
+          "worst5Mean": 33.86580978941676,
+          "worst5Count": 2,
+          "max": 38.365809789416794
+        },
+        "underByMoreThan10Cents": 0,
+        "overByMoreThan10Cents": 31
+      },
+      "ridge": {
+        "meanAbsoluteErrorCents": 19.556897196245433,
+        "improved": 0,
+        "worsened": 31,
+        "absolute": {
+          "count": 31,
+          "p95": 25.579751722481525,
+          "worst5Mean": 30.332435644242793,
+          "worst5Count": 2,
+          "max": 33.69116796049951
+        },
+        "tooLow": {
+          "count": 31,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 2,
+          "max": 0
+        },
+        "tooHigh": {
+          "count": 31,
+          "p95": 25.579751722481525,
+          "worst5Mean": 30.332435644242793,
+          "worst5Count": 2,
+          "max": 33.69116796049951
+        },
+        "underByMoreThan10Cents": 0,
+        "overByMoreThan10Cents": 31
+      },
+      "huber": {
+        "meanAbsoluteErrorCents": 20.586977982888605,
+        "improved": 2,
+        "worsened": 29,
+        "absolute": {
+          "count": 31,
+          "p95": 26.760694114638994,
+          "worst5Mean": 28.82915563505888,
+          "worst5Count": 2,
+          "max": 30.881620899798445
+        },
+        "tooLow": {
+          "count": 31,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 2,
+          "max": 0
+        },
+        "tooHigh": {
+          "count": 31,
+          "p95": 26.760694114638994,
+          "worst5Mean": 28.82915563505888,
+          "worst5Count": 2,
+          "max": 30.881620899798445
+        },
+        "underByMoreThan10Cents": 0,
+        "overByMoreThan10Cents": 31
+      },
+      "tiny_mlp_price": {
+        "meanAbsoluteErrorCents": 27.244118885370803,
+        "improved": 9,
+        "worsened": 22,
+        "absolute": {
+          "count": 31,
+          "p95": 46.30529953933422,
+          "worst5Mean": 47.83333968067467,
+          "worst5Count": 2,
+          "max": 47.842089774470594
+        },
+        "tooLow": {
+          "count": 31,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 2,
+          "max": 0
+        },
+        "tooHigh": {
+          "count": 31,
+          "p95": 46.30529953933422,
+          "worst5Mean": 47.83333968067467,
+          "worst5Count": 2,
+          "max": 47.842089774470594
+        },
+        "underByMoreThan10Cents": 0,
+        "overByMoreThan10Cents": 24
+      },
+      "gpt-6-luna/none": {
+        "meanAbsoluteErrorCents": 14.709677419354826,
+        "improved": 0,
+        "worsened": 16,
+        "absolute": {
+          "count": 31,
+          "p95": 22.500000000000053,
+          "worst5Mean": 25.000000000000043,
+          "worst5Count": 2,
+          "max": 27.000000000000046
+        },
+        "tooLow": {
+          "count": 31,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 2,
+          "max": 0
+        },
+        "tooHigh": {
+          "count": 31,
+          "p95": 22.500000000000053,
+          "worst5Mean": 25.000000000000043,
+          "worst5Count": 2,
+          "max": 27.000000000000046
+        },
+        "underByMoreThan10Cents": 0,
+        "overByMoreThan10Cents": 31
+      },
+      "gpt-5.6-terra/none": {
+        "meanAbsoluteErrorCents": 14.967741935483842,
+        "improved": 2,
+        "worsened": 10,
+        "absolute": {
+          "count": 31,
+          "p95": 23.499999999999986,
+          "worst5Mean": 24.00000000000002,
+          "worst5Count": 2,
+          "max": 24.00000000000002
+        },
+        "tooLow": {
+          "count": 31,
+          "p95": 0,
+          "worst5Mean": 6.499999999999995,
+          "worst5Count": 2,
+          "max": 12.99999999999999
+        },
+        "tooHigh": {
+          "count": 31,
+          "p95": 23.499999999999986,
+          "worst5Mean": 24.00000000000002,
+          "worst5Count": 2,
+          "max": 24.00000000000002
+        },
+        "underByMoreThan10Cents": 1,
+        "overByMoreThan10Cents": 30
+      },
+      "gpt-6.1-sol/low": {
+        "meanAbsoluteErrorCents": 12.53548387096772,
+        "improved": 10,
+        "worsened": 10,
+        "absolute": {
+          "count": 31,
+          "p95": 14.999999999999991,
+          "worst5Mean": 18.50000000000005,
+          "worst5Count": 2,
+          "max": 22.000000000000064
+        },
+        "tooLow": {
+          "count": 31,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 2,
+          "max": 0
+        },
+        "tooHigh": {
+          "count": 31,
+          "p95": 14.999999999999991,
+          "worst5Mean": 18.50000000000005,
+          "worst5Count": 2,
+          "max": 22.000000000000064
+        },
+        "underByMoreThan10Cents": 0,
+        "overByMoreThan10Cents": 31
+      }
+    }
+  },
+  "selectionDiagnostics": {
+    "raw": {
+      "validCases": 95,
+      "unknown": 85,
+      "laterReportRegretLowerBoundCents": {
+        "count": 10,
+        "p95": 2.000000000000046,
+        "worst5Mean": 2.000000000000046,
+        "worst5Count": 1,
+        "max": 2.000000000000046
+      },
+      "warning": "Different partially labelled subsets; too few to estimate selection p95 reliably. Zero is not success."
+    },
+    "current_math": {
+      "validCases": 95,
+      "unknown": 81,
+      "laterReportRegretLowerBoundCents": {
+        "count": 14,
+        "p95": 6.200000000000014,
+        "worst5Mean": 13.999999999999968,
+        "worst5Count": 1,
+        "max": 13.999999999999968
+      },
+      "warning": "Different partially labelled subsets; too few to estimate selection p95 reliably. Zero is not success."
+    },
+    "boosted_trees": {
+      "validCases": 95,
+      "unknown": 82,
+      "laterReportRegretLowerBoundCents": {
+        "count": 13,
+        "p95": 0.8000000000000156,
+        "worst5Mean": 2.000000000000046,
+        "worst5Count": 1,
+        "max": 2.000000000000046
+      },
+      "warning": "Different partially labelled subsets; too few to estimate selection p95 reliably. Zero is not success."
+    },
+    "ridge": {
+      "validCases": 95,
+      "unknown": 80,
+      "laterReportRegretLowerBoundCents": {
+        "count": 15,
+        "p95": 2.000000000000046,
+        "worst5Mean": 2.000000000000046,
+        "worst5Count": 1,
+        "max": 2.000000000000046
+      },
+      "warning": "Different partially labelled subsets; too few to estimate selection p95 reliably. Zero is not success."
+    },
+    "huber": {
+      "validCases": 95,
+      "unknown": 81,
+      "laterReportRegretLowerBoundCents": {
+        "count": 14,
+        "p95": 2.000000000000046,
+        "worst5Mean": 2.000000000000046,
+        "worst5Count": 1,
+        "max": 2.000000000000046
+      },
+      "warning": "Different partially labelled subsets; too few to estimate selection p95 reliably. Zero is not success."
+    },
+    "tiny_mlp_price": {
+      "validCases": 95,
+      "unknown": 83,
+      "laterReportRegretLowerBoundCents": {
+        "count": 12,
+        "p95": 0,
+        "worst5Mean": 0,
+        "worst5Count": 1,
+        "max": 0
+      },
+      "warning": "Different partially labelled subsets; too few to estimate selection p95 reliably. Zero is not success."
+    },
+    "gpt-6-luna/none": {
+      "validCases": 95,
+      "unknown": 74,
+      "laterReportRegretLowerBoundCents": {
+        "count": 21,
+        "p95": 36.00000000000003,
+        "worst5Mean": 36.00000000000003,
+        "worst5Count": 2,
+        "max": 36.00000000000003
+      },
+      "warning": "Different partially labelled subsets; too few to estimate selection p95 reliably. Zero is not success."
+    },
+    "gpt-6-luna/none/lowest_prediction": {
+      "validCases": 95,
+      "unknown": 83,
+      "laterReportRegretLowerBoundCents": {
+        "count": 12,
+        "p95": 2.000000000000046,
+        "worst5Mean": 2.000000000000046,
+        "worst5Count": 1,
+        "max": 2.000000000000046
+      },
+      "warning": "Different partially labelled subsets; too few to estimate selection p95 reliably. Zero is not success."
+    },
+    "gpt-5.6-terra/none": {
+      "validCases": 95,
+      "unknown": 79,
+      "laterReportRegretLowerBoundCents": {
+        "count": 16,
+        "p95": 10.500000000000043,
+        "worst5Mean": 36.00000000000003,
+        "worst5Count": 1,
+        "max": 36.00000000000003
+      },
+      "warning": "Different partially labelled subsets; too few to estimate selection p95 reliably. Zero is not success."
+    },
+    "gpt-5.6-terra/none/lowest_prediction": {
+      "validCases": 95,
+      "unknown": 81,
+      "laterReportRegretLowerBoundCents": {
+        "count": 14,
+        "p95": 6.200000000000014,
+        "worst5Mean": 13.999999999999968,
+        "worst5Count": 1,
+        "max": 13.999999999999968
+      },
+      "warning": "Different partially labelled subsets; too few to estimate selection p95 reliably. Zero is not success."
+    },
+    "gpt-6.1-sol/low": {
+      "validCases": 95,
+      "unknown": 82,
+      "laterReportRegretLowerBoundCents": {
+        "count": 13,
+        "p95": 2.000000000000046,
+        "worst5Mean": 2.000000000000046,
+        "worst5Count": 1,
+        "max": 2.000000000000046
+      },
+      "warning": "Different partially labelled subsets; too few to estimate selection p95 reliably. Zero is not success."
+    },
+    "gpt-6.1-sol/low/lowest_prediction": {
+      "validCases": 95,
+      "unknown": 82,
+      "laterReportRegretLowerBoundCents": {
+        "count": 13,
+        "p95": 2.000000000000046,
+        "worst5Mean": 2.000000000000046,
+        "worst5Count": 1,
+        "max": 2.000000000000046
+      },
+      "warning": "Different partially labelled subsets; too few to estimate selection p95 reliably. Zero is not success."
+    }
+  }
+}
