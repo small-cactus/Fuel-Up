@@ -1,0 +1,163 @@
+{
+  "component": "Glass Lab clustering and coloring",
+  "version": "1.0.0",
+  "tag": "glass-clusters-v1.0.0",
+  "sourceCommit": "738516ece1c2fb2c77d034808cc40926089b22f8",
+  "scope": "Native clustering, morphs, tint identity, map/focus geometry, React integration, and regression tests. This is a component baseline, not an app release. Git tags identify repository commits; restore only listed files when restoring this component. Backend price-selection logic is outside this baseline.",
+  "acceptedByUser": "2026-09-30",
+  "verification": "Existing evidence: docs/qa/evidence/2026-09-30-glass-tint-isolation/validation.md. User accepted animation logic. Legacy Home probe limitation remains documented.",
+  "files": [
+    {
+      "path": "modules/fuel-up-map-kit-routing/expo-module.config.json",
+      "sha256": "fa3977b520d810f602acea7316baa1146b1facc371c340f4007a80de681512be"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/index.js",
+      "sha256": "889f275888c46490e81eb8c791bf3cc8cc5527dcb97dd3d30328deaba36fb549"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabCameraFit.swift",
+      "sha256": "a84db6fd0a6c83f1520e46214c63fe87ee1cfd3e226564c712da2997e8235ad7"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabDynamics.swift",
+      "sha256": "84bd5b45a1b604e6617dfcd221fef930f333efd1a1e5473184e9da6fdf774e26"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabEmphasis.swift",
+      "sha256": "caff413fcef232a2c09de81cde86cffb08f0bbdd4694d583e8aa625bc4c7ba0f"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabFocus.swift",
+      "sha256": "934e9489f65f618711e494b7af89e750e63a9c403005495f9087d25a555fd52e"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabFocusInteraction.swift",
+      "sha256": "9f9e0768619787079b9962b512868f51775dbd9a863735f720752c8317ea68c7"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabFrameClock.swift",
+      "sha256": "a848087efa94f8d8c016fdeed3f305533ee76be582998d22cff80ce96b4d67a1"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabGeometry.swift",
+      "sha256": "11c5a700fa67f185792ba5e96eec73f1d7e85a7f27e4610157531e2f7d24ccad"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabGlass.swift",
+      "sha256": "9f0bf42065948b2222ea86e040975a59e77993558d6adb8d15ea8f6d0ca140ce"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabGlassGrouping.swift",
+      "sha256": "164f3bf2e5371fe10ce0279f11275093513a5ee1a0a1c8239a81fa1b1db1093c"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabGlassGroups.swift",
+      "sha256": "0dfd685269e09fbbf0fd6f18201df17b7943b4ff0f25f86e99c6d9634ff1cf0c"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabLocationClearance.swift",
+      "sha256": "06064659a2fa896155145433e7127752c22db231c185ed8171358435c70c9f20"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabMapAnchor.swift",
+      "sha256": "966355bbca1dadff70f11ff7df19ef7504b7def9f17fd34197cac28c8889bace"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabMapView.swift",
+      "sha256": "9a4dac6a2b4253268ca8da7c4e129594cbbc788f93a7c2fc9c2831e4d6dda97a"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabMarket.swift",
+      "sha256": "ced8d01536c484d292a13bac608bc33b43319f15ac3db44019c52521b8b1f62b"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabPageControl.swift",
+      "sha256": "eff93f6bdca5280e44c7a0fca0fdf40ad729ff32be6cff3e743dd4d6f7701fe5"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabProbe.swift",
+      "sha256": "21d66e48534056fafacaa9c5b7543ffb6c5761c640e29fc09d7473f067d8682d"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/ClusterLabRenderer.swift",
+      "sha256": "01a428044522db7d936b2bb74b7e901e62928cbef7f50273b596931f8a519171"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/ClusterLab/README.md",
+      "sha256": "09d45f3b868add28e22d5e60890a225a8e47df6f845a12ca34b5b79d0c487b31"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/FuelUpMapKitRouting.podspec",
+      "sha256": "ea4af71b49f5ea4a6cc089afe3358435a0e410bbfb1bf058f34ca6e3b0fcd471"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/ios/FuelUpMapKitRoutingModule.swift",
+      "sha256": "b4010f6fe1407e2f13fc4a5a80aff02a885d57a577d079ccca3c9b8402defaff"
+    },
+    {
+      "path": "modules/fuel-up-map-kit-routing/package.json",
+      "sha256": "511eb2890f8eddb692b511257f4e69b2083ae9de80d62335cea0f4a9b8a67ce2"
+    },
+    {
+      "path": "scripts/measureClusterLabColors.py",
+      "sha256": "25fef61ec11960354d8318f6fec1a0816060f4d60d3dc59767ec75e258f57bd3"
+    },
+    {
+      "path": "src/screens/cluster-lab/ClusterLabScreen.js",
+      "sha256": "9b9eef9a6bb4cc9be8e3f49e8566c33150484c5b06104a68c1809dcb4ea7bd0f"
+    },
+    {
+      "path": "src/screens/cluster-lab/StationCardCarousel.js",
+      "sha256": "619ab4c4433667dcd3edda3ec6be96bb07f16dece57be9943b4d4bf80e060dc4"
+    },
+    {
+      "path": "src/screens/cluster-lab/StationPriceCard.js",
+      "sha256": "43b45224eaa4a8c35469fa593bad3850850e43859d9020d3102af5dae6134a77"
+    },
+    {
+      "path": "src/screens/cluster-lab/stationCardModel.js",
+      "sha256": "91a642d95e400f9d5bcab9f984e3431c8ba61e270cdc27c0c38fbc72a763469e"
+    },
+    {
+      "path": "src/screens/cluster-lab/useClusterLabStations.js",
+      "sha256": "492f29d0d7078e85a9eed59f21d9ae8eb6cee99701890829233f45208bdc276e"
+    },
+    {
+      "path": "tests/clusterLabCameraFit.test.cjs",
+      "sha256": "8560fca0c6a5cd56dc2114e051c428c266955e82169f2a229f385ef2f08c6cc2"
+    },
+    {
+      "path": "tests/clusterLabCards.test.mjs",
+      "sha256": "b3b1251c2f4e0b6ca5e4c17301f8dd43e6e81dcd232c65c5954c6f97e8020d3e"
+    },
+    {
+      "path": "tests/clusterLabDynamics.test.cjs",
+      "sha256": "0818202821b7a928c21b7b1d5c49dad7258650df34634385bfbf31372b76c8ae"
+    },
+    {
+      "path": "tests/clusterLabFocus.test.cjs",
+      "sha256": "7e51c5bc77166c027c67dfb33c657f9831c33cb5067392ee278837aca372e6c2"
+    },
+    {
+      "path": "tests/clusterLabGeometry.test.cjs",
+      "sha256": "0e473bd2654f3575ed8d81d7294a2f5aa4aadd3f008ab966694ca7858df802e0"
+    },
+    {
+      "path": "tests/clusterLabGlassGrouping.test.cjs",
+      "sha256": "7ae7792b49a94868f5db7b16ded95b3103aff63acd4bd779d29e53f04bef9e2c"
+    },
+    {
+      "path": "tests/clusterLabLocationClearance.test.cjs",
+      "sha256": "83a8f784a00f9e13072552f87d03504d3cd4f05d4a1a862ce69968a6f2c6a52f"
+    },
+    {
+      "path": "tests/clusterLabMarket.test.cjs",
+      "sha256": "56989ce53d763a8256a35ddeb5d881911d91de3c72f5a2e2d74ef4637f2bf7a5"
+    },
+    {
+      "path": "tests/clusterLabProbe.integration.test.cjs",
+      "sha256": "83df3f9cc5ad970b3c2755f13ea809b861edc12a4c46e97a55b97814a797c969"
+    }
+  ]
+}

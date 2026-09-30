@@ -1,0 +1,30 @@
+{
+  "localInputDirectory": "/tmp/fuelup-price-audit",
+  "inputs": [
+    {
+      "file": "history-before.json",
+      "sha256": "9399b7658f89d85ccc310344d2851076869288440c6fd12296987c683f401b64"
+    },
+    {
+      "file": "live-premium.json",
+      "sha256": "72cd449389c63eab17b9bb0dcd987c8dde7286d36ba03e36f912b098ff5d6f2c"
+    },
+    {
+      "file": "live-regular.json",
+      "sha256": "92810557dc86b4314aca8d148b2679e0b1c9a4322c250af2e28c584b42b6f26c"
+    },
+    {
+      "file": "provider-premium.json",
+      "sha256": "9c5b74b340d09dc8452995aebce99a98039c96aadcb1276ae91b974563df969d"
+    },
+    {
+      "file": "provider-regular.json",
+      "sha256": "c466700fb1fe3cf2c6c3f8f80c30326e26418b03f7c5a2475ffa0907bb38558a"
+    },
+    {
+      "file": "production-premium.json",
+      "sha256": "0e087ddf9afc572f2c3c09b1c7df0bd6317eab5e55173d25f5af0065b6852927"
+    }
+  ],
+  "note": "Raw inputs retained locally; contain public station quote details, no user identities or authentication keys. Aggregate evidence is committed."
+}

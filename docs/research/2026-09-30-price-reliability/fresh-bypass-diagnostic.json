@@ -1,0 +1,19 @@
+{
+  "description": "Synthetic diagnostic only: target price drops to $2 with a two-day-old timestamp newer than its four-day-old last trusted report.",
+  "decision": "accept",
+  "validity": 1,
+  "risk": 0.46,
+  "usedPrediction": false,
+  "finalDisplayedPrice": 2,
+  "predictedPrice": 5.14,
+  "features": {
+    "low": 1,
+    "abs": 1,
+    "stale": 0,
+    "plateau": 0,
+    "jump": 0,
+    "sourceAge": 1,
+    "replay": 0,
+    "sigma": 0.08
+  }
+}
