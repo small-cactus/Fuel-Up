@@ -1,0 +1,246 @@
+{
+  "measuredAt": "2026-09-30T19:09:06.084Z",
+  "scope": "Bounded read-only timing investigation. Single samples; no throughput/saturation test. Full all-price coverage was not completed.",
+  "singleFullPriceRequest": {
+    "startedAt": "2026-09-30T19:04:30.410Z",
+    "query": "query($search:String,$limit:Int){locationBySearchTerm(search:$search,priority:\"locality\"){displayName countryCode regionCode stations(priority:\"locality\",maxAge:0,limit:$limit){count results{id name latitude longitude address{locality region country} prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+    "variables": {
+      "search": "Florida",
+      "limit": 8000
+    },
+    "status": 200,
+    "errors": [
+      "request entity too large"
+    ],
+    "returned": 0,
+    "unique": 0,
+    "duplicates": 0,
+    "pricedStations": 0,
+    "unpricedStations": 0,
+    "byCountry": {},
+    "byRegion": {},
+    "decodedBodyBytes": 237,
+    "contentEncoding": "gzip",
+    "headersMs": 4013.822625,
+    "receivedMs": 4015.665584,
+    "parseMs": 0.031709000000319065,
+    "validationMs": 0.09508300000015879,
+    "requestThroughValidationMs": 4015.798,
+    "stationIdsSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "localFileWriteMs": 0.3850000000002183,
+    "requestThroughLocalSaveMs": 4016.386042
+  },
+  "fullInventoryRequest": {
+    "name": "florida-inventory8000",
+    "startedAt": "2026-09-30T19:05:19.957Z",
+    "status": 200,
+    "query": "{locationBySearchTerm(search:\"Florida\",priority:\"locality\"){stations(limit:8000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+    "variables": {},
+    "headersMs": 2612.288375,
+    "receivedMs": 2619.102084,
+    "parseMs": 3.2092090000005555,
+    "decodedBodyBytes": 122706,
+    "reportedCount": 7931,
+    "returned": 7931,
+    "unique": 7931,
+    "priced": 0
+  },
+  "pagedPriceRun": {
+    "startedAt": "2026-09-30T19:06:49.788Z",
+    "elapsedIncludingPacingMs": 24176.486249999998,
+    "initialPacingMs": 2000,
+    "reportedCount": 7931,
+    "expectedCount": 7931,
+    "returned": 7931,
+    "unique": 6258,
+    "missingCount": 1673,
+    "extraCount": 0,
+    "complete": false,
+    "requestCount": 8,
+    "records": [
+      {
+        "name": "florida-run-page1",
+        "startedAt": "2026-09-30T19:06:49.788Z",
+        "status": 200,
+        "query": "query($search:String,$limit:Int,$cursor:String){locationBySearchTerm(search:$search,priority:\"locality\"){displayName countryCode regionCode stations(priority:\"locality\",maxAge:0,limit:$limit,cursor:$cursor){count cursor{next} results{id name latitude longitude address{locality region country} prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+        "variables": {
+          "search": "Florida",
+          "limit": 1000
+        },
+        "headersMs": 922.3825420000001,
+        "receivedMs": 1072.505542,
+        "parseMs": 2.455999999999676,
+        "decodedBodyBytes": 563550,
+        "reportedCount": 7931,
+        "returned": 1000,
+        "unique": 1000,
+        "priced": 997
+      },
+      {
+        "name": "florida-run-page2",
+        "startedAt": "2026-09-30T19:06:52.868Z",
+        "status": 200,
+        "query": "query($search:String,$limit:Int,$cursor:String){locationBySearchTerm(search:$search,priority:\"locality\"){displayName countryCode regionCode stations(priority:\"locality\",maxAge:0,limit:$limit,cursor:$cursor){count cursor{next} results{id name latitude longitude address{locality region country} prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+        "variables": {
+          "search": "Florida",
+          "limit": 1000,
+          "cursor": "[provider-issued cursor omitted]"
+        },
+        "headersMs": 928.0408750000006,
+        "receivedMs": 1015.4632499999998,
+        "parseMs": 3.735458999999537,
+        "decodedBodyBytes": 556929,
+        "reportedCount": 7931,
+        "returned": 1000,
+        "unique": 1000,
+        "priced": 995
+      },
+      {
+        "name": "florida-run-page3",
+        "startedAt": "2026-09-30T19:06:55.890Z",
+        "status": 200,
+        "query": "query($search:String,$limit:Int,$cursor:String){locationBySearchTerm(search:$search,priority:\"locality\"){displayName countryCode regionCode stations(priority:\"locality\",maxAge:0,limit:$limit,cursor:$cursor){count cursor{next} results{id name latitude longitude address{locality region country} prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+        "variables": {
+          "search": "Florida",
+          "limit": 1000,
+          "cursor": "[provider-issued cursor omitted]"
+        },
+        "headersMs": 860.0869170000005,
+        "receivedMs": 910.3612919999996,
+        "parseMs": 3.600584000001618,
+        "decodedBodyBytes": 559724,
+        "reportedCount": 7931,
+        "returned": 1000,
+        "unique": 1000,
+        "priced": 992
+      },
+      {
+        "name": "florida-run-page4",
+        "startedAt": "2026-09-30T19:06:58.809Z",
+        "status": 200,
+        "query": "query($search:String,$limit:Int,$cursor:String){locationBySearchTerm(search:$search,priority:\"locality\"){displayName countryCode regionCode stations(priority:\"locality\",maxAge:0,limit:$limit,cursor:$cursor){count cursor{next} results{id name latitude longitude address{locality region country} prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+        "variables": {
+          "search": "Florida",
+          "limit": 1000,
+          "cursor": "[provider-issued cursor omitted]"
+        },
+        "headersMs": 879.2335000000003,
+        "receivedMs": 1086.9913340000003,
+        "parseMs": 3.4648749999996653,
+        "decodedBodyBytes": 562539,
+        "reportedCount": 7931,
+        "returned": 1000,
+        "unique": 1000,
+        "priced": 994
+      },
+      {
+        "name": "florida-run-page5",
+        "startedAt": "2026-09-30T19:07:01.906Z",
+        "status": 200,
+        "query": "query($search:String,$limit:Int,$cursor:String){locationBySearchTerm(search:$search,priority:\"locality\"){displayName countryCode regionCode stations(priority:\"locality\",maxAge:0,limit:$limit,cursor:$cursor){count cursor{next} results{id name latitude longitude address{locality region country} prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+        "variables": {
+          "search": "Florida",
+          "limit": 1000,
+          "cursor": "[provider-issued cursor omitted]"
+        },
+        "headersMs": 1240.1629999999986,
+        "receivedMs": 1372.9682079999984,
+        "parseMs": 2.837792000000263,
+        "decodedBodyBytes": 557946,
+        "reportedCount": 7931,
+        "returned": 1000,
+        "unique": 1000,
+        "priced": 995
+      },
+      {
+        "name": "florida-run-page6",
+        "startedAt": "2026-09-30T19:07:05.289Z",
+        "status": 200,
+        "query": "query($search:String,$limit:Int,$cursor:String){locationBySearchTerm(search:$search,priority:\"locality\"){displayName countryCode regionCode stations(priority:\"locality\",maxAge:0,limit:$limit,cursor:$cursor){count cursor{next} results{id name latitude longitude address{locality region country} prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+        "variables": {
+          "search": "Florida",
+          "limit": 1000,
+          "cursor": "[provider-issued cursor omitted]"
+        },
+        "headersMs": 895.5802089999997,
+        "receivedMs": 948.5684170000022,
+        "parseMs": 3.61449999999968,
+        "decodedBodyBytes": 500094,
+        "reportedCount": 7931,
+        "returned": 1000,
+        "unique": 1000,
+        "priced": 595
+      },
+      {
+        "name": "florida-run-page7",
+        "startedAt": "2026-09-30T19:07:08.249Z",
+        "status": 200,
+        "query": "query($search:String,$limit:Int,$cursor:String){locationBySearchTerm(search:$search,priority:\"locality\"){displayName countryCode regionCode stations(priority:\"locality\",maxAge:0,limit:$limit,cursor:$cursor){count cursor{next} results{id name latitude longitude address{locality region country} prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+        "variables": {
+          "search": "Florida",
+          "limit": 1000,
+          "cursor": "[provider-issued cursor omitted]"
+        },
+        "headersMs": 752.2764590000006,
+        "receivedMs": 833.9655419999981,
+        "parseMs": 4.1787919999987935,
+        "decodedBodyBytes": 443433,
+        "reportedCount": 7931,
+        "returned": 1000,
+        "unique": 1000,
+        "priced": 96
+      },
+      {
+        "name": "florida-run-page8",
+        "startedAt": "2026-09-30T19:07:11.091Z",
+        "status": 200,
+        "query": "query($search:String,$limit:Int,$cursor:String){locationBySearchTerm(search:$search,priority:\"locality\"){displayName countryCode regionCode stations(priority:\"locality\",maxAge:0,limit:$limit,cursor:$cursor){count cursor{next} results{id name latitude longitude address{locality region country} prices{fuelProduct cash{price postedTime} credit{price postedTime}}}}}}",
+        "variables": {
+          "search": "Florida",
+          "limit": 1000,
+          "cursor": "[provider-issued cursor omitted]"
+        },
+        "headersMs": 742.5826659999984,
+        "receivedMs": 863.5043330000008,
+        "parseMs": 2.460125000001426,
+        "decodedBodyBytes": 407756,
+        "reportedCount": 7931,
+        "returned": 931,
+        "unique": 931,
+        "priced": 91
+      }
+    ]
+  },
+  "fixedIdSample": {
+    "name": "florida-fixed-id100",
+    "startedAt": "2026-09-30T19:07:58.441Z",
+    "status": 200,
+    "query": "query { s0: station(id: <id0>) { id name latitude longitude address { locality region country } prices { fuelProduct cash { price postedTime } credit { price postedTime } } } ... s99: station(id: <id99>) { same fields } }",
+    "variables": {},
+    "headersMs": 498.4481249999999,
+    "receivedMs": 542.5334590000002,
+    "parseMs": 0.42758299999968585,
+    "decodedBodyBytes": 57903,
+    "returned": 100,
+    "unique": 100,
+    "priced": 100,
+    "requestedIds": 100,
+    "returnedStations": 100,
+    "uniqueStationIds": 100,
+    "missingRequestedIds": 0,
+    "pricedStations": 100
+  },
+  "estimate": {
+    "status": "Extrapolation, not an end-to-end measured completion",
+    "repairBatchesAt100": 17,
+    "assumedPausePerBatchMs": 2000,
+    "repairEstimateMs": 43230.337714,
+    "inventoryPlusPagingPlusRepairEstimateMs": 70029.135257,
+    "assumptions": [
+      "All remaining fixed-ID batches behave like the one 100-ID sample",
+      "No throttling, transient failures, or changing inventory",
+      "Same eight-page duplicate rate as measured",
+      "Same fields, host, and network conditions"
+    ]
+  }
+}

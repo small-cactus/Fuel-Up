@@ -146,3 +146,45 @@ and statewide bounds are evidence of larger scope, not verified full enumeration
 [Country probe evidence](country-probes.json) preserves these four queries and
 their geographic responses with cursor values omitted. The original 21-request
 accounting above is unchanged; this follow-up adds four requests.
+
+## Florida retrieval timing
+
+A subsequent bounded timing investigation tested whether all 7,931 Florida
+station records and prices could be retrieved together. Timings are individual
+observations on the development Mac/network, not latency percentiles or an
+approved throughput limit. No production collection changes were made.
+
+| Operation | Measured result | Time |
+| --- | --- | ---: |
+| One request, limit 8,000, station details and all prices | HTTP 200 with GraphQL `request entity too large`; no usable data | 4.016 s |
+| One request, limit 8,000, station IDs only | 7,931 returned IDs, all unique, matching count | 2.619 s download + 0.003 s parse |
+| One 1,000-station page with details and all fuel/payment prices | 1,000 unique stations | 1.150 s download + 0.005 s parse |
+| Eight consecutive 1,000-station price pages | 7,931 rows, **6,258 unique**, 1,673 inventory IDs missing | 24.176 s including eight deliberate two-second waits |
+| One fixed-ID request containing 100 `station(id:)` aliases | All 100 requested stations, all with a positive quote in at least one grade/payment | 0.543 s download + 0.0004 s parse |
+
+The oversized query error's path points to the first result's `prices` resolver.
+The ID-only full inventory succeeds, so the failure is in the all-price request,
+not evidence that Florida only has a few hundred records. The exact internal
+limit is unknown. A `stations(ids: [...])` request was rejected; the suggested
+singular `id` argument also rejected a list. Fixed-ID retrieval was therefore
+verified using ordinary single-station query fields with GraphQL aliases.
+
+The eight-page run is **not a successful full price snapshot**. Counting rows or
+stopping at the reported count would silently miss 21.1% of the known inventory.
+The 100-ID sample recovered 100 of those missing stations, but the remaining
+1,573 were not fetched as part of this bounded timing investigation.
+
+A plausible complete approach is: fetch the full ID inventory, retrieve broad
+price pages, compare distinct IDs against inventory, then fetch the missing IDs
+in fixed batches. For this sample, 17 batches of up to 100 IDs would repair the
+1,673 gaps. Extrapolating the measured 100-ID latency with a two-second pause per
+batch yields roughly **70 seconds total** for inventory + pages + repair. This
+is an estimate, **not a measured complete end-to-end run**, and assumes consistent
+latency, no throttling/errors, and no inventory churn. It is not a guarantee of
+price freshness or correctness. The fetched quotes remain crowd reports.
+
+[Timing evidence and assumptions](florida-timing.json) retain the exact timing
+samples, queries, and arithmetic. The investigation added 14 requests: one failed
+full-price request, one full inventory, one initial page sample, two batch-shape
+validation requests, eight timed pages, and one fixed-ID sample. Raw bulk price
+responses were saved only in temporary local files, not committed to the repo.
