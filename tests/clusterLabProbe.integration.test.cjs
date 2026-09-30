@@ -51,6 +51,18 @@ function assertParentTints(report, frame) {
             }
         }
     }
+    const highlightedFamilies = new Set(frame.views.filter(view => view.tintScore > 0).map(view => view.glassFamily));
+    for (const view of frame.views) {
+        const highlighted = highlightedFamilies.has(view.glassFamily);
+        assert.equal(view.glassHighlightDomain, highlighted, 'wrong native material pool');
+        assert.equal(view.glassGroup % 2, highlighted ? 1 : 0, 'native container changed tint domain');
+        assert.ok(view.materialReassertions >= 0 && view.materialReassertions <= view.tintUpdates,
+            'unbounded native material repairs');
+    }
+    for (const group of Map.groupBy(frame.views, view => view.glassGroup).values()) {
+        assert.equal(new Set(group.map(view => view.glassHighlightDomain)).size, 1,
+            'green composite was pooled with an unrelated neutral family');
+    }
     const connections = Map.groupBy(frame.views, view => view.glassConnection);
     assert.ok(!connections.has(undefined), 'missing physical glass connection');
     for (const view of frame.views) {
@@ -731,6 +743,17 @@ test('one station ID owns green through 50 rapid zoom cycles and a changed cheap
         const greenPrices = frame.views.filter(v => v.tintScore > 0 && v.role !== 'badge');
         assert.ok(greenPrices.length <= 1, 'multiple station pills were assigned green');
         for (const pill of greenPrices) assert.equal(pill.id, frame.cheapestStationID);
+    }
+    const repaired = report.samples.flatMap(frame => frame.views).filter(view => view.materialReassertions > 0);
+    assert.ok(repaired.length > 0, 'no native material reset after leaving a highlighted composite');
+    // The settled tail must not keep rebuilding material just because frames
+    // are being recorded. Color checks are cheap; effect writes are event-bound.
+    const tail = report.samples.filter(frame => frame.time > report.samples.at(-1).time - 0.5);
+    assert.ok(tail.length >= 10);
+    for (const view of tail[0].views) {
+        const last = tail.at(-1).views.find(other => other.id === view.id);
+        assert.ok(last, 'rapid test did not settle');
+        assert.equal(last.tintUpdates, view.tintUpdates, 'idle frames rebuilt native material');
     }
     const finalGreen = report.final.filter(v => v.tintScore > 0);
     assert.ok(finalGreen.length > 0);

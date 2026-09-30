@@ -1,0 +1,82 @@
+[
+  {
+    "token": "contact-1790785005356",
+    "frames": 420,
+    "unrelatedPillsSharingGreenContainer": 0,
+    "maximumNativeContainers": 4,
+    "maximumRepairsPerPill": 1,
+    "maximumTintWritesPerPill": 2
+  },
+  {
+    "token": "emphasis-1790784933525",
+    "frames": 180,
+    "unrelatedPillsSharingGreenContainer": 0,
+    "maximumNativeContainers": 3,
+    "maximumRepairsPerPill": 0,
+    "maximumTintWritesPerPill": 1
+  },
+  {
+    "token": "focus-north-1790784924282",
+    "frames": 240,
+    "unrelatedPillsSharingGreenContainer": 0,
+    "maximumNativeContainers": 4,
+    "maximumRepairsPerPill": 1,
+    "maximumTintWritesPerPill": 2
+  },
+  {
+    "token": "focus-rotated-1790784928862",
+    "frames": 240,
+    "unrelatedPillsSharingGreenContainer": 0,
+    "maximumNativeContainers": 3,
+    "maximumRepairsPerPill": 1,
+    "maximumTintWritesPerPill": 3
+  },
+  {
+    "token": "islands-1790784895955",
+    "frames": 1650,
+    "unrelatedPillsSharingGreenContainer": 0,
+    "maximumNativeContainers": 3,
+    "maximumRepairsPerPill": 1,
+    "maximumTintWritesPerPill": 3
+  },
+  {
+    "token": "overview-north-1790784937137",
+    "frames": 349,
+    "unrelatedPillsSharingGreenContainer": 0,
+    "maximumNativeContainers": 3,
+    "maximumRepairsPerPill": 3,
+    "maximumTintWritesPerPill": 4
+  },
+  {
+    "token": "overview-rotated-1790784943573",
+    "frames": 349,
+    "unrelatedPillsSharingGreenContainer": 0,
+    "maximumNativeContainers": 3,
+    "maximumRepairsPerPill": 2,
+    "maximumTintWritesPerPill": 4
+  },
+  {
+    "token": "rapid-1790784967191",
+    "frames": 2217,
+    "unrelatedPillsSharingGreenContainer": 0,
+    "maximumNativeContainers": 3,
+    "maximumRepairsPerPill": 1,
+    "maximumTintWritesPerPill": 3
+  },
+  {
+    "token": "roundtrip-1790784950078",
+    "frames": 960,
+    "unrelatedPillsSharingGreenContainer": 0,
+    "maximumNativeContainers": 3,
+    "maximumRepairsPerPill": 1,
+    "maximumTintWritesPerPill": 2
+  },
+  {
+    "token": "rows-1790784867404",
+    "frames": 1650,
+    "unrelatedPillsSharingGreenContainer": 0,
+    "maximumNativeContainers": 2,
+    "maximumRepairsPerPill": 1,
+    "maximumTintWritesPerPill": 3
+  }
+]

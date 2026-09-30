@@ -441,3 +441,26 @@ and back twice, requiring the first two pairs to combine and the last pair to st
 isolated. The general morph gate requires incoming views to connect to their
 committed parent before arrival, and forbids glass connections between independent
 parents. It no longer requires the incorrect pre-merge state with separate owners.
+
+### Native tint-composite isolation
+
+Per-frame station-ID checks already keep intended tints correct. They do not
+repair a native compositor retaining color after unrelated islands share an
+`UIGlassContainerEffect`. In the pre-isolation live report, independent untinted
+prices shared the green price's actual UIKit container in 427 of 1,646 frames.
+That is a confirmed sharing path, not a reproduction of the phone's green pixels.
+Apple documents that a container renders its child glass elements in one combined
+view: [UIGlassContainerEffect](https://developer.apple.com/documentation/uikit/uiglasscontainereffect).
+
+Neutral families and the highlighted family now use separate reusable container
+pools. Their even/odd identity namespaces prevent an old green container being
+reassigned to a neutral family. Actual connecting/departing members stay with
+their intended family, preserving native morphs. Distant neutral islands remain
+pooled; a pure layout test of 1,000 separated islands requires only two groups
+with one highlighted island.
+
+A pill leaving a highlighted composite reasserts its station material once after
+reparenting, even if its requested tint was already nil. Ordinary frame updates
+only compare identity/state; they do not replace native effects. The rapid probe
+checks real UIKit container membership, a mid-run cheapest-ID change, exit repairs,
+and zero additional tint writes throughout its settled final half-second.

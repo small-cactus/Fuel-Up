@@ -43,6 +43,26 @@ enum ClusterLabGlassGrouping {
     return result
   }
 
+  // UIKit composites an entire glass container. Pool neutral and highlighted
+  // families separately even when they are geographically far apart. Stable ID
+  // namespaces prevent a previously green container being reused as neutral.
+  static func isolatedLayout(_ input: [LabGlassItem], previous: [String: Int],
+                             highlightedFamilies: Set<String>, preparation: Bool = false) -> Layout {
+    var groups: [String: Int] = [:], connections: [String: String] = [:], layers: [Int: Int] = [:]
+    for scope in 0...1 {
+      let items = input.filter { item in
+        let highlighted = item.family.map { highlightedFamilies.contains($0) } ?? false
+        return highlighted == (scope == 1)
+      }
+      let compatible = previous.filter { $0.value % 2 == scope }.mapValues { $0 / 2 }
+      let result = layout(items, previous: compatible, preparation: preparation)
+      for (id, group) in result.groups { groups[id] = group * 2 + scope }
+      for (id, connection) in result.connections { connections[id] = connection }
+      for (group, layer) in result.layers { layers[group * 2 + scope] = layer * 2 + scope }
+    }
+    return Layout(groups: groups, connections: connections, layers: layers)
+  }
+
   static func layout(_ input: [LabGlassItem], previous: [String: Int], preparation: Bool = false) -> Layout {
     let items = input.sorted { $0.id < $1.id }
     guard !items.isEmpty else { return Layout(groups: [:], connections: [:], layers: [:]) }

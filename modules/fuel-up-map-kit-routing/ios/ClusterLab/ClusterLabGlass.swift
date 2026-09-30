@@ -60,6 +60,8 @@ final class ClusterLabPill {
   private(set) var tintScore: Double = 0
   private(set) var tintUpdateCount = 0
   private var hasTint = false
+  private var lastHighlightedContainer: Bool?
+  private(set) var materialReassertions = 0
   var materialTint: [CGFloat] {
     var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
     if #available(iOS 26.0, *), let glass = view as? UIVisualEffectView,
@@ -100,7 +102,19 @@ final class ClusterLabPill {
     hasTint = false
   }
 
-  func applyMarket(_ market: LabMarketAssessment) {
+  // Reassert neutral material after leaving a tinted native composite. The
+  // intended tint may still be nil even when UIKit retains the old appearance.
+  // This runs once per boundary crossing, never as an every-frame rebuild.
+  func didAssignGlassContainer(highlighted: Bool, market: LabMarketAssessment) {
+    let leftHighlight = lastHighlightedContainer == true && !highlighted
+    lastHighlightedContainer = highlighted
+    if leftHighlight {
+      materialReassertions += 1
+      applyMarket(market, force: true)
+    }
+  }
+
+  func applyMarket(_ market: LabMarketAssessment, force: Bool = false) {
     let isCheapest = stationID == market.cheapestStationID
     if lastCheapestPrice != market.cheapestPrice || wasCheapest != isCheapest {
       lastCheapestPrice = market.cheapestPrice
@@ -113,7 +127,7 @@ final class ClusterLabPill {
       } else { marketDescription = "Price comparison unavailable" }
     }
     let nextScore: Double = isCheapest ? 1 : 0
-    guard !hasTint || nextScore != tintScore else { return }
+    guard force || !hasTint || nextScore != tintScore else { return }
     hasTint = true; tintScore = nextScore; tintUpdateCount += 1
     let color = ClusterLabGlass.marketTint(score: nextScore)
     if #available(iOS 26.0, *), let glass = view as? UIVisualEffectView {
@@ -121,7 +135,8 @@ final class ClusterLabPill {
       effect.isInteractive = false
       effect.tintColor = color
       // Commit a content-role tint change once without a separate color tween.
-      // Unchanged station prices never recreate their native material.
+      // Also clear a stale tinted composite once when returning to a neutral
+      // container; ordinary unchanged frames never recreate their material.
       UIView.performWithoutAnimation { glass.effect = effect }
     } else { view.backgroundColor = color ?? .secondarySystemBackground }
   }

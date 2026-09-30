@@ -23,13 +23,16 @@ final class ClusterLabGlassGroups {
     return ClusterLabGlass.content(of: container)
   }
 
-  func update(_ views: [String: UIView], families: [String: String], anchors: [String: Int]) -> [String: String] {
+  func update(_ views: [String: UIView], families: [String: String], anchors: [String: Int],
+              highlightedFamilies: Set<String>) -> [String: String] {
     let items = views.map { LabGlassItem(id: $0.key, frame: $0.value.frame, family: families[$0.key], anchorPriority: anchors[$0.key] ?? 0) }
     // Prepare the shared effect before native glass reaches visible contact.
     // The effect's 36pt spacing and strict vertical contact remain unchanged.
-    let layout = ClusterLabGlassGrouping.layout(items, previous: assignments, preparation: true)
+    let layout = ClusterLabGlassGrouping.isolatedLayout(items, previous: assignments,
+      highlightedFamilies: highlightedFamilies, preparation: true)
     let next = layout.groups
-    let connections = ClusterLabGlassGrouping.layout(items, previous: next).connections
+    let connections = ClusterLabGlassGrouping.isolatedLayout(items, previous: next,
+      highlightedFamilies: highlightedFamilies).connections
     let live = Set(views.values.map(ObjectIdentifier.init))
     viewReparents = viewReparents.filter { live.contains($0.key) }
     for container in containers.values where container.frame != root.bounds { container.frame = root.bounds }
@@ -65,6 +68,10 @@ final class ClusterLabGlassGroups {
   // Read the actual UIKit hierarchy for the live probe, not planned assignments.
   func group(of view: UIView) -> Int? {
     containers.first { ClusterLabGlass.content(of: $0.value) === view.superview }?.key
+  }
+  func containsHighlight(_ view: UIView) -> Bool {
+    guard let group = group(of: view) else { return false }
+    return group % 2 == 1
   }
   func paintLayer(of view: UIView) -> Int? {
     guard let group = group(of: view), let container = containers[group] else { return nil }

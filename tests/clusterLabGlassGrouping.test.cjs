@@ -116,6 +116,27 @@ assert(Set(grouped(stack).values).count <= 3)
 // Merge back to the same horizontal effect regardless of earlier row assignments.
 let joined = grouped([item("a", 0, 0), item("b", 110, 0), item("c", 220, 0)], ["a": 0, "b": 1, "c": 2])
 assert(Set(joined.values).count == 1)
+// A green native composite cannot be pooled with unrelated neutral families,
+// even far outside glass reach. One green island plus 999 neutral islands uses
+// two containers, not a separate effect for every station.
+let tintedIslands = (0..<1000).map { index in
+  LabGlassItem(id: String(index), frame: item(String(index), CGFloat(index) * 400, 0).frame,
+               family: String(index))
+}
+let isolated = ClusterLabGlassGrouping.isolatedLayout(tintedIslands, previous: [:], highlightedFamilies: ["0"])
+assert(Set(isolated.groups.values).count == 2)
+assert(isolated.groups["0"]! % 2 == 1)
+for index in 1..<1000 { assert(isolated.groups[String(index)]! % 2 == 0) }
+let changedWinner = ClusterLabGlassGrouping.isolatedLayout(tintedIslands, previous: isolated.groups, highlightedFamilies: ["1"])
+assert(changedWinner.groups["1"]! % 2 == 1 && changedWinner.groups["0"]! % 2 == 0)
+assert(changedWinner.groups["0"] != isolated.groups["0"], "old green container reused for neutral glass")
+let clearedWinner = ClusterLabGlassGrouping.isolatedLayout(tintedIslands, previous: changedWinner.groups, highlightedFamilies: [])
+assert(Set(clearedWinner.groups.values).count == 1 && clearedWinner.groups.values.allSatisfy { $0 % 2 == 0 })
+// Intentional mixed-tint movers remain in their parent's native effect.
+let shared = cluster("winner", 0, 0) + [LabGlassItem(id: "mover", frame: item("mover", 110, 0).frame, family: "winner")]
+let tintedMerge = ClusterLabGlassGrouping.isolatedLayout(shared, previous: [:], highlightedFamilies: ["winner"], preparation: true)
+assert(Set(tintedMerge.groups.values).count == 1)
+assert(tintedMerge.connections["mover"] == tintedMerge.connections["winner"])
 print("native grouping passed")
 `);
         const binary = path.join(directory, 'grouping-test');

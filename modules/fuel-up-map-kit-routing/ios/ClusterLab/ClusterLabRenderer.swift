@@ -724,7 +724,16 @@ final class ClusterLabRenderer {
       guard let motion = motions[station.id], motion.owner == station.id, motion.settled else { return nil }
       return (station.id, stations.count - rank)
     })
-    let connections = glassGroups.update(renderedViews, families: logicalTints.mapValues { previews[$0] ?? $0 }, anchors: anchors)
+    let families = logicalTints.mapValues { previews[$0] ?? $0 }
+    let highlightedFamilies = Set(renderedPills.compactMap { id, pill in
+      pill.tintScore > 0 ? families[id] : nil
+    })
+    let connections = glassGroups.update(renderedViews, families: families, anchors: anchors,
+                                         highlightedFamilies: highlightedFamilies)
+    for pill in renderedPills.values {
+      pill.didAssignGlassContainer(highlighted: glassGroups.containsHighlight(pill.view),
+                                   market: markets[pill.stationID] ?? .unknown)
+    }
     if recording {
       // Handoffs are recorded as events; frame samples describe surviving views.
       samples.removeAll { renderedViews[$0["id"] as? String ?? ""] == nil }
@@ -741,6 +750,8 @@ final class ClusterLabRenderer {
             }
             samples[index]["tintScore"] = pill.tintScore
             samples[index]["tintUpdates"] = pill.tintUpdateCount
+            samples[index]["materialReassertions"] = pill.materialReassertions
+            samples[index]["glassHighlightDomain"] = glassGroups.containsHighlight(view)
             samples[index]["materialTint"] = pill.materialTint
           }
           samples[index]["glassGroup"] = glassGroups.group(of: view)
