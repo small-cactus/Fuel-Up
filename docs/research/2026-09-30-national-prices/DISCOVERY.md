@@ -1,6 +1,6 @@
 # Resumable regional discovery and rate-limit evidence
 
-Nationwide collection is not complete yet. The regional price queue is still paused until all 50 states plus DC reconcile. The discovery queue is server-side, region-pinned, leased, idempotent, and preserves partial inventories and every attempt. Initial bootstrap consists of 14 state groups and three remaining Texas brand groups; completed older Texas partitions are retained in the partial catalog artifact.
+Bootstrap is complete and the regional price queue is enabled for its first full hour at 22:00 UTC on September 30. Actual price-run verification is still pending; see [README.md](README.md). The discovery queue is server-side, region-pinned, leased, idempotent, and preserves partial inventories and every attempt. Initial bootstrap consists of 14 state groups and three remaining Texas brand groups; completed older Texas partitions are retained in the partial catalog artifact.
 
 On September 30 at 19:35:48 UTC, a local inventory probe received HTTP 429. That older probe did not capture response headers. Its one-hour cooldown was an operator assumption, not a measured provider policy. A single small request from the same local environment with unchanged headers succeeded at 20:23:42 UTC (47.9 minutes later). It returned neither Retry-After nor quota/reset headers. See `rate-limit-recovery.json`. This proves recovery for that small query by that time; it does not establish the earliest recovery, quota, limiter key, or the capacity available to larger queries.
 
@@ -18,14 +18,14 @@ Admin tooling:
 - `tests/nationalDiscovery.integration.sql`: transactional rollback verification of leases, shared cooldowns, permissions, regional ownership, and partial evidence. Requires an empty paused discovery queue.
 - `tests/providerRetry.integration.sql`: transactional rollback verification of explicit and missing Retry-After behavior.
 
-Verification: 58 focused Node tests passed. Transactional database tests covered regional leases and cooldowns. Real HTTP workers initially exposed Supabase safe-update enforcement missing from direct SQL tests; migration `20260930225000` adds explicit singleton predicates to all queue configuration updates. The first real East discovery batch then succeeded at 20:33 UTC. National price collection remains disabled pending complete inventory.
+Verification: 58 focused Node tests passed. Transactional database tests covered regional leases and cooldowns. Real HTTP workers initially exposed Supabase safe-update enforcement missing from direct SQL tests; migration `20260930225000` adds explicit singleton predicates to all queue configuration updates. The first real East discovery batch then succeeded at 20:33 UTC. At that checkpoint, national price collection remained disabled pending complete inventory.
 
 Subsequent controls:
 
 - `reconcile-scopes` queues a canonical state-name query, then the state abbreviation if needed, for results that failed scope checks. It never substitutes a local-area count for a statewide count.
 - `catalog [new-file]` reconciles complete state inventories and Texas partition unions. Missing states, wrong geographic scopes, stale observations, and count mismatches remain explicit gaps.
 - `configureDiscovery.sql` starts the bounded discovery schedule and preserves any provider cooldown. Repeating it does not extend the existing bootstrap deadline.
-- National price workers use a configurable database-enforced request interval and a 45-second work window. The first activation selects 10 seconds, allowing approximately five batches per minute (the initial paused default was 15 seconds / three per minute) while leaving room before the next cron tick. This is operator pacing, not a measured provider limit. National prices remain paused until the catalog is complete.
+- National price workers use a configurable database-enforced request interval and a 45-second work window. The first activation selects 10 seconds, allowing approximately five batches per minute (the initial paused default was 15 seconds / three per minute) while leaving room before the next cron tick. This is operator pacing, not a measured provider limit. Activation remains gated on a complete, evidenced catalog.
 - Both discovery and price transports retain allow-listed response metadata for diagnosing quota/reset information, excluding cookies and credentials.
 
 
@@ -46,3 +46,10 @@ Deployment operations:
 - `activate.mjs <end-ISO>` starts a bounded window of at most seven days, preserves provider cooldowns, disables bootstrap discovery, installs the minute dispatcher and five-minute watchdog, and allows 20,000 station lookups of retry headroom per hour. The configured budget is our cap, not a provider-issued quota. If the current hour has insufficient time at the measured scheduling pace, it starts at the next hour instead of creating an intentionally incomplete run.
 - `auditHour.mjs <run-id> [new-report.json]` downloads the immutable Storage objects through the authenticated Supabase CLI and independently checks hashes, exact station IDs, observation windows, missing-price counts, and execution regions. It makes no provider requests and does not print credentials. Temporary downloads are removed after verification.
 - Initial archive capacity is capped at 900 MB. Extrapolating the existing Florida snapshot gives roughly 4.1 MB per nationwide hour / 687 MB per seven days; this is a planning estimate, to be replaced by the first actual nationwide hour. Reaching the cap pauses acquisition without deleting evidence.
+
+
+### Final Texas aggregate discrepancy
+
+The complete 646-query Texas sweep covers the Census polygon with zero uncovered projected area. Every nearby response is complete, and every state/brand/fuel-scoped ID is present in the geographic inventory. It contains 15,272 distinct in-boundary IDs, while fresh provider statewide searches report 15,271. The cause is unconfirmed. No record was discarded to force agreement. `reconcileGeographicCatalog.py` independently verifies the geometry and preserves the reported aggregate, actual ID count, discrepancy, query receipts, and empirical radius assumption in the catalog. DC has a separate two-circle certificate. These are conditional provider-inventory coverage claims, not independently verified pump truth.
+
+`inventory-verification.json` records the evidence and input hashes. `verified-catalog.json.gz` preserves all 141,660 IDs and their dated coverage bases. The existing strict count-based reconciliation remains unchanged and still flags Texas until the separately reviewed geographic certificate is supplied.

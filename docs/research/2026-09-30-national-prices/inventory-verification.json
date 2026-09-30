@@ -1,0 +1,5216 @@
+{
+  "recordedAt": "2026-09-30T21:52:22.506Z",
+  "stationCount": 141660,
+  "catalogSha256": "18fb28e04e21a5ce728fb8acab254d5383a257a7947fc70e23cef4a2652d0e41",
+  "discoveryInputSha256": "8b6ab68fba2e56a82c6821aa65f563b71ab261fdcda849d5e25cbc62f6e2cc60",
+  "texas": {
+    "boundarySource": "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/0/query?where=STUSAB+IN+%28%27DC%27%2C%27TX%27%29&outFields=STUSAB%2CNAME%2CAREALAND%2CAREAWATER&outSR=4326&f=geojson&geometryPrecision=6&maxAllowableOffset=0.00005",
+    "projectedCoverageRadiusKm": 23,
+    "assumedNearbyRadiusKm": 25,
+    "uncoveredSquareKm": 0,
+    "completeQueryCount": 646,
+    "containsEveryStateScopedID": true,
+    "stateScopedIDCount": 14743,
+    "providerReportedCount": 15271,
+    "geographicCount": 15272,
+    "countDiscrepancy": 1,
+    "idSetSha256": "25c3c323db6e6d9181e7e8dbff1a8121fd497e55f9c552021f5dcc343b28f1bc",
+    "receipts": [
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -95.482393
+        },
+        "reportedCount": 1391,
+        "observedAt": "2026-09-30T21:12:02.408Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -96.877799
+        },
+        "reportedCount": 988,
+        "observedAt": "2026-09-30T21:12:02.408Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -98.47255
+        },
+        "reportedCount": 718,
+        "observedAt": "2026-09-30T21:12:02.408Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -95.083705
+        },
+        "reportedCount": 816,
+        "observedAt": "2026-09-30T21:12:02.408Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -97.077143
+        },
+        "reportedCount": 764,
+        "observedAt": "2026-09-30T21:12:02.408Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -95.681737
+        },
+        "reportedCount": 735,
+        "observedAt": "2026-09-30T21:12:02.408Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -97.874519
+        },
+        "reportedCount": 500,
+        "observedAt": "2026-09-30T21:12:02.408Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -95.283049
+        },
+        "reportedCount": 922,
+        "observedAt": "2026-09-30T21:12:02.408Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -97.276487
+        },
+        "reportedCount": 528,
+        "observedAt": "2026-09-30T21:19:01.812Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -97.675175
+        },
+        "reportedCount": 406,
+        "observedAt": "2026-09-30T21:19:01.812Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -96.678456
+        },
+        "reportedCount": 583,
+        "observedAt": "2026-09-30T21:19:01.812Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -97.475831
+        },
+        "reportedCount": 423,
+        "observedAt": "2026-09-30T21:19:01.812Z"
+      },
+      {
+        "center": {
+          "latitude": 31.760156,
+          "longitude": -106.44293
+        },
+        "reportedCount": 274,
+        "observedAt": "2026-09-30T21:19:01.812Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -95.482393
+        },
+        "reportedCount": 342,
+        "observedAt": "2026-09-30T21:19:01.812Z"
+      },
+      {
+        "center": {
+          "latitude": 26.133005,
+          "longitude": -98.273206
+        },
+        "reportedCount": 217,
+        "observedAt": "2026-09-30T21:19:01.812Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -96.678456
+        },
+        "reportedCount": 286,
+        "observedAt": "2026-09-30T21:19:01.812Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -96.479112
+        },
+        "reportedCount": 442,
+        "observedAt": "2026-09-30T21:20:02.331Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -98.273206
+        },
+        "reportedCount": 266,
+        "observedAt": "2026-09-30T21:20:02.331Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -95.283049
+        },
+        "reportedCount": 161,
+        "observedAt": "2026-09-30T21:20:02.331Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -94.086986
+        },
+        "reportedCount": 234,
+        "observedAt": "2026-09-30T21:20:02.331Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -95.88108
+        },
+        "reportedCount": 326,
+        "observedAt": "2026-09-30T21:20:02.331Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -102.260082
+        },
+        "reportedCount": 145,
+        "observedAt": "2026-09-30T21:20:02.331Z"
+      },
+      {
+        "center": {
+          "latitude": 27.908749,
+          "longitude": -97.475831
+        },
+        "reportedCount": 148,
+        "observedAt": "2026-09-30T21:20:02.331Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -97.077143
+        },
+        "reportedCount": 141,
+        "observedAt": "2026-09-30T21:20:02.331Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -102.060738
+        },
+        "reportedCount": 134,
+        "observedAt": "2026-09-30T21:21:01.648Z"
+      },
+      {
+        "center": {
+          "latitude": 35.011722,
+          "longitude": -101.861395
+        },
+        "reportedCount": 129,
+        "observedAt": "2026-09-30T21:21:01.648Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -96.479112
+        },
+        "reportedCount": 138,
+        "observedAt": "2026-09-30T21:21:01.648Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -97.675175
+        },
+        "reportedCount": 134,
+        "observedAt": "2026-09-30T21:21:01.648Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -97.077143
+        },
+        "reportedCount": 201,
+        "observedAt": "2026-09-30T21:21:01.648Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -94.884361
+        },
+        "reportedCount": 190,
+        "observedAt": "2026-09-30T21:21:01.648Z"
+      },
+      {
+        "center": {
+          "latitude": 26.133005,
+          "longitude": -97.874519
+        },
+        "reportedCount": 115,
+        "observedAt": "2026-09-30T21:21:01.648Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -99.668613
+        },
+        "reportedCount": 98,
+        "observedAt": "2026-09-30T21:21:01.648Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -98.671894
+        },
+        "reportedCount": 233,
+        "observedAt": "2026-09-30T21:22:00.818Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -98.073862
+        },
+        "reportedCount": 109,
+        "observedAt": "2026-09-30T21:22:00.818Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -97.475831
+        },
+        "reportedCount": 285,
+        "observedAt": "2026-09-30T21:22:00.818Z"
+      },
+      {
+        "center": {
+          "latitude": 27.631498,
+          "longitude": -99.658465
+        },
+        "reportedCount": 84,
+        "observedAt": "2026-09-30T21:22:00.818Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -94.685018
+        },
+        "reportedCount": 112,
+        "observedAt": "2026-09-30T21:22:00.818Z"
+      },
+      {
+        "center": {
+          "latitude": 25.933359,
+          "longitude": -97.582586
+        },
+        "reportedCount": 91,
+        "observedAt": "2026-09-30T21:22:00.818Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -97.276487
+        },
+        "reportedCount": 95,
+        "observedAt": "2026-09-30T21:22:00.818Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -94.685018
+        },
+        "reportedCount": 101,
+        "observedAt": "2026-09-30T21:22:00.818Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -96.678456
+        },
+        "reportedCount": 94,
+        "observedAt": "2026-09-30T21:23:01.724Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -98.671894
+        },
+        "reportedCount": 71,
+        "observedAt": "2026-09-30T21:23:01.724Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -97.276487
+        },
+        "reportedCount": 112,
+        "observedAt": "2026-09-30T21:23:01.724Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -95.482393
+        },
+        "reportedCount": 75,
+        "observedAt": "2026-09-30T21:23:01.724Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -97.874519
+        },
+        "reportedCount": 75,
+        "observedAt": "2026-09-30T21:23:01.724Z"
+      },
+      {
+        "center": {
+          "latitude": 27.612791,
+          "longitude": -97.276487
+        },
+        "reportedCount": 118,
+        "observedAt": "2026-09-30T21:23:01.724Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -95.283049
+        },
+        "reportedCount": 319,
+        "observedAt": "2026-09-30T21:23:01.724Z"
+      },
+      {
+        "center": {
+          "latitude": 28.79662,
+          "longitude": -96.877799
+        },
+        "reportedCount": 59,
+        "observedAt": "2026-09-30T21:23:01.724Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -102.459426
+        },
+        "reportedCount": 95,
+        "observedAt": "2026-09-30T21:24:00.717Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -100.266644
+        },
+        "reportedCount": 63,
+        "observedAt": "2026-09-30T21:24:00.717Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -96.080424
+        },
+        "reportedCount": 67,
+        "observedAt": "2026-09-30T21:24:00.717Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -94.086986
+        },
+        "reportedCount": 80,
+        "observedAt": "2026-09-30T21:24:00.717Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -94.884361
+        },
+        "reportedCount": 141,
+        "observedAt": "2026-09-30T21:24:00.717Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -95.482393
+        },
+        "reportedCount": 66,
+        "observedAt": "2026-09-30T21:24:00.717Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -97.874519
+        },
+        "reportedCount": 130,
+        "observedAt": "2026-09-30T21:24:00.717Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -94.884361
+        },
+        "reportedCount": 134,
+        "observedAt": "2026-09-30T21:24:00.717Z"
+      },
+      {
+        "center": {
+          "latitude": 27.908749,
+          "longitude": -97.077143
+        },
+        "reportedCount": 58,
+        "observedAt": "2026-09-30T21:25:02.522Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -96.877799
+        },
+        "reportedCount": 107,
+        "observedAt": "2026-09-30T21:25:02.522Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -96.080424
+        },
+        "reportedCount": 48,
+        "observedAt": "2026-09-30T21:25:02.522Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -97.675175
+        },
+        "reportedCount": 150,
+        "observedAt": "2026-09-30T21:25:02.522Z"
+      },
+      {
+        "center": {
+          "latitude": 30.021861,
+          "longitude": -93.741487
+        },
+        "reportedCount": 126,
+        "observedAt": "2026-09-30T21:25:02.522Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -95.083705
+        },
+        "reportedCount": 112,
+        "observedAt": "2026-09-30T21:25:02.522Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -96.279768
+        },
+        "reportedCount": 90,
+        "observedAt": "2026-09-30T21:25:02.522Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -97.675175
+        },
+        "reportedCount": 103,
+        "observedAt": "2026-09-30T21:25:02.522Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -98.871238
+        },
+        "reportedCount": 159,
+        "observedAt": "2026-09-30T21:26:00.811Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -98.073862
+        },
+        "reportedCount": 96,
+        "observedAt": "2026-09-30T21:26:00.811Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -94.28633
+        },
+        "reportedCount": 90,
+        "observedAt": "2026-09-30T21:26:00.811Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -96.279768
+        },
+        "reportedCount": 50,
+        "observedAt": "2026-09-30T21:26:00.811Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -97.675175
+        },
+        "reportedCount": 61,
+        "observedAt": "2026-09-30T21:26:00.811Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -97.276487
+        },
+        "reportedCount": 46,
+        "observedAt": "2026-09-30T21:26:00.811Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -96.279768
+        },
+        "reportedCount": 42,
+        "observedAt": "2026-09-30T21:26:00.811Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -99.269925
+        },
+        "reportedCount": 35,
+        "observedAt": "2026-09-30T21:26:00.811Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -95.88108
+        },
+        "reportedCount": 35,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -94.884361
+        },
+        "reportedCount": 52,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -96.080424
+        },
+        "reportedCount": 59,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 27.316834,
+          "longitude": -99.469269
+        },
+        "reportedCount": 58,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -95.681737
+        },
+        "reportedCount": 48,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -95.681737
+        },
+        "reportedCount": 42,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -95.083705
+        },
+        "reportedCount": 38,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 28.79662,
+          "longitude": -100.465988
+        },
+        "reportedCount": 28,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -95.681737
+        },
+        "reportedCount": 42,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -98.671894
+        },
+        "reportedCount": 60,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -95.681737
+        },
+        "reportedCount": 37,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -95.083705
+        },
+        "reportedCount": 45,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -94.28633
+        },
+        "reportedCount": 40,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -95.88108
+        },
+        "reportedCount": 74,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -97.475831
+        },
+        "reportedCount": 43,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -96.479112
+        },
+        "reportedCount": 39,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -97.077143
+        },
+        "reportedCount": 35,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 27.612791,
+          "longitude": -98.073862
+        },
+        "reportedCount": 33,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 35.30768,
+          "longitude": -101.662051
+        },
+        "reportedCount": 76,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -97.077143
+        },
+        "reportedCount": 29,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -98.871238
+        },
+        "reportedCount": 32,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -97.475831
+        },
+        "reportedCount": 71,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -97.276487
+        },
+        "reportedCount": 70,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -96.279768
+        },
+        "reportedCount": 35,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -101.662051
+        },
+        "reportedCount": 26,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -95.083705
+        },
+        "reportedCount": 45,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -98.273206
+        },
+        "reportedCount": 37,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -98.871238
+        },
+        "reportedCount": 23,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 27.612791,
+          "longitude": -97.675175
+        },
+        "reportedCount": 34,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -98.073862
+        },
+        "reportedCount": 32,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -96.877799
+        },
+        "reportedCount": 31,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -98.671894
+        },
+        "reportedCount": 19,
+        "observedAt": "2026-09-30T21:27:01.044Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -96.279768
+        },
+        "reportedCount": 27,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 34.123851,
+          "longitude": -101.662051
+        },
+        "reportedCount": 22,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -96.479112
+        },
+        "reportedCount": 74,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -98.073862
+        },
+        "reportedCount": 70,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -97.276487
+        },
+        "reportedCount": 44,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -94.485674
+        },
+        "reportedCount": 39,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -96.678456
+        },
+        "reportedCount": 30,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 26.428962,
+          "longitude": -98.871238
+        },
+        "reportedCount": 26,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -100.864676
+        },
+        "reportedCount": 21,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -101.662051
+        },
+        "reportedCount": 99,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 26.428962,
+          "longitude": -98.073862
+        },
+        "reportedCount": 72,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -95.88108
+        },
+        "reportedCount": 38,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -97.874519
+        },
+        "reportedCount": 24,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -95.283049
+        },
+        "reportedCount": 21,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -97.276487
+        },
+        "reportedCount": 26,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -103.456145
+        },
+        "reportedCount": 15,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -98.47255
+        },
+        "reportedCount": 36,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -95.88108
+        },
+        "reportedCount": 35,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 28.500663,
+          "longitude": -99.867957
+        },
+        "reportedCount": 18,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 28.500663,
+          "longitude": -97.874519
+        },
+        "reportedCount": 18,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -99.867957
+        },
+        "reportedCount": 20,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -103.057457
+        },
+        "reportedCount": 17,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 35.603637,
+          "longitude": -101.064019
+        },
+        "reportedCount": 17,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -95.681737
+        },
+        "reportedCount": 125,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -96.877799
+        },
+        "reportedCount": 29,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -94.685018
+        },
+        "reportedCount": 23,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 35.899594,
+          "longitude": -102.060738
+        },
+        "reportedCount": 16,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -96.279768
+        },
+        "reportedCount": 64,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -98.273206
+        },
+        "reportedCount": 33,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -98.273206
+        },
+        "reportedCount": 27,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -97.276487
+        },
+        "reportedCount": 26,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -96.479112
+        },
+        "reportedCount": 22,
+        "observedAt": "2026-09-30T21:28:01.497Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -98.073862
+        },
+        "reportedCount": 36,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -95.482393
+        },
+        "reportedCount": 20,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 28.500663,
+          "longitude": -99.070581
+        },
+        "reportedCount": 16,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -97.475831
+        },
+        "reportedCount": 14,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -99.269925
+        },
+        "reportedCount": 13,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -94.28633
+        },
+        "reportedCount": 26,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -102.459426
+        },
+        "reportedCount": 16,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 35.899594,
+          "longitude": -102.459426
+        },
+        "reportedCount": 13,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235756,
+          "longitude": -94.043458
+        },
+        "reportedCount": 64,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -96.080424
+        },
+        "reportedCount": 31,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -96.080424
+        },
+        "reportedCount": 31,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 26.131914,
+          "longitude": -97.110284
+        },
+        "reportedCount": 14,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 28.79662,
+          "longitude": -98.073862
+        },
+        "reportedCount": 18,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -96.279768
+        },
+        "reportedCount": 29,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -99.269925
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -99.668613
+        },
+        "reportedCount": 12,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -103.057457
+        },
+        "reportedCount": 17,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -100.465988
+        },
+        "reportedCount": 17,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -102.65877
+        },
+        "reportedCount": 13,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -102.459426
+        },
+        "reportedCount": 12,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 34.715765,
+          "longitude": -102.459426
+        },
+        "reportedCount": 20,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 35.603637,
+          "longitude": -101.462707
+        },
+        "reportedCount": 17,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -101.861395
+        },
+        "reportedCount": 57,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -99.867957
+        },
+        "reportedCount": 53,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 31.478659,
+          "longitude": -106.217455
+        },
+        "reportedCount": 39,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -99.070581
+        },
+        "reportedCount": 26,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -98.273206
+        },
+        "reportedCount": 31,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -96.877799
+        },
+        "reportedCount": 29,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -94.884361
+        },
+        "reportedCount": 48,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -96.080424
+        },
+        "reportedCount": 27,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -95.88108
+        },
+        "reportedCount": 37,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -94.485674
+        },
+        "reportedCount": 18,
+        "observedAt": "2026-09-30T21:29:01.307Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -96.080424
+        },
+        "reportedCount": 16,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 28.500663,
+          "longitude": -96.678456
+        },
+        "reportedCount": 17,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -94.485674
+        },
+        "reportedCount": 13,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -96.678456
+        },
+        "reportedCount": 19,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -95.88108
+        },
+        "reportedCount": 14,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -94.685018
+        },
+        "reportedCount": 12,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -93.887642
+        },
+        "reportedCount": 27,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -96.877799
+        },
+        "reportedCount": 17,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -96.678456
+        },
+        "reportedCount": 19,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -95.283049
+        },
+        "reportedCount": 20,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -95.482393
+        },
+        "reportedCount": 51,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -97.475831
+        },
+        "reportedCount": 28,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -95.283049
+        },
+        "reportedCount": 32,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -99.070581
+        },
+        "reportedCount": 12,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 27.316834,
+          "longitude": -98.273206
+        },
+        "reportedCount": 9,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 28.204706,
+          "longitude": -98.073862
+        },
+        "reportedCount": 9,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 28.204706,
+          "longitude": -97.276487
+        },
+        "reportedCount": 9,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -97.874519
+        },
+        "reportedCount": 12,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -98.671894
+        },
+        "reportedCount": 13,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -100.864676
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -101.064019
+        },
+        "reportedCount": 15,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -99.070581
+        },
+        "reportedCount": 12,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -98.671894
+        },
+        "reportedCount": 15,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 32.00005,
+          "longitude": -106.618073
+        },
+        "reportedCount": 95,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -97.675175
+        },
+        "reportedCount": 18,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -94.086986
+        },
+        "reportedCount": 28,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -102.260082
+        },
+        "reportedCount": 9,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -96.678456
+        },
+        "reportedCount": 15,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -100.465988
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -97.077143
+        },
+        "reportedCount": 17,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -104.851552
+        },
+        "reportedCount": 7,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -103.256801
+        },
+        "reportedCount": 9,
+        "observedAt": "2026-09-30T21:30:01.644Z"
+      },
+      {
+        "center": {
+          "latitude": 34.123851,
+          "longitude": -99.668613
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -96.080424
+        },
+        "reportedCount": 69,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -100.665332
+        },
+        "reportedCount": 60,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -95.482393
+        },
+        "reportedCount": 44,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -94.485674
+        },
+        "reportedCount": 45,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -94.485674
+        },
+        "reportedCount": 60,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 26.428962,
+          "longitude": -98.47255
+        },
+        "reportedCount": 35,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -98.47255
+        },
+        "reportedCount": 22,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -95.283049
+        },
+        "reportedCount": 37,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 28.204706,
+          "longitude": -97.675175
+        },
+        "reportedCount": 25,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -98.871238
+        },
+        "reportedCount": 19,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -96.678456
+        },
+        "reportedCount": 19,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 28.79662,
+          "longitude": -97.276487
+        },
+        "reportedCount": 11,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -103.854833
+        },
+        "reportedCount": 9,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -98.871238
+        },
+        "reportedCount": 7,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -94.086986
+        },
+        "reportedCount": 19,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -99.867957
+        },
+        "reportedCount": 14,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 35.899594,
+          "longitude": -101.662051
+        },
+        "reportedCount": 7,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -95.482393
+        },
+        "reportedCount": 36,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 28.79662,
+          "longitude": -98.47255
+        },
+        "reportedCount": 21,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -101.263363
+        },
+        "reportedCount": 22,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 26.428962,
+          "longitude": -97.675175
+        },
+        "reportedCount": 21,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -96.877799
+        },
+        "reportedCount": 25,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 28.500663,
+          "longitude": -98.273206
+        },
+        "reportedCount": 12,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 26.866248,
+          "longitude": -99.316463
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -96.877799
+        },
+        "reportedCount": 11,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -98.671894
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -99.269925
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -94.28633
+        },
+        "reportedCount": 11,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -98.073862
+        },
+        "reportedCount": 9,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -101.861395
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 34.123851,
+          "longitude": -99.269925
+        },
+        "reportedCount": 12,
+        "observedAt": "2026-09-30T21:31:02.077Z"
+      },
+      {
+        "center": {
+          "latitude": 34.419808,
+          "longitude": -100.266644
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 35.30768,
+          "longitude": -102.459426
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 36.195551,
+          "longitude": -101.064019
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 34.082838,
+          "longitude": -98.442391
+        },
+        "reportedCount": 59,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -97.874519
+        },
+        "reportedCount": 33,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -94.884361
+        },
+        "reportedCount": 47,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -94.685018
+        },
+        "reportedCount": 32,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -97.077143
+        },
+        "reportedCount": 15,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -97.675175
+        },
+        "reportedCount": 15,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 28.79662,
+          "longitude": -96.080424
+        },
+        "reportedCount": 32,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -101.462707
+        },
+        "reportedCount": 9,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 35.30768,
+          "longitude": -101.263363
+        },
+        "reportedCount": 11,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 27.908749,
+          "longitude": -98.671894
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -95.083705
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -101.263363
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -99.269925
+        },
+        "reportedCount": 7,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -101.263363
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -94.086986
+        },
+        "reportedCount": 9,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -98.671894
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -102.858114
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -94.485674
+        },
+        "reportedCount": 26,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -98.273206
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 34.419808,
+          "longitude": -101.861395
+        },
+        "reportedCount": 7,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 34.715765,
+          "longitude": -102.858114
+        },
+        "reportedCount": 7,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 35.30768,
+          "longitude": -100.465988
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 36.491509,
+          "longitude": -100.864676
+        },
+        "reportedCount": 11,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -106.047615
+        },
+        "reportedCount": 73,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 35.30768,
+          "longitude": -102.060738
+        },
+        "reportedCount": 86,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -93.887642
+        },
+        "reportedCount": 89,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -96.279768
+        },
+        "reportedCount": 60,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -96.678456
+        },
+        "reportedCount": 35,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -95.083705
+        },
+        "reportedCount": 41,
+        "observedAt": "2026-09-30T21:32:05.740Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -97.475831
+        },
+        "reportedCount": 30,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -98.073862
+        },
+        "reportedCount": 26,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -98.273206
+        },
+        "reportedCount": 39,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 27.316834,
+          "longitude": -97.874519
+        },
+        "reportedCount": 23,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -98.273206
+        },
+        "reportedCount": 29,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -97.874519
+        },
+        "reportedCount": 15,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -96.479112
+        },
+        "reportedCount": 12,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -103.456145
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -94.685018
+        },
+        "reportedCount": 15,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -100.0673
+        },
+        "reportedCount": 14,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -94.685018
+        },
+        "reportedCount": 14,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -99.867957
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -99.668613
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 27.908749,
+          "longitude": -99.469269
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 29.520546,
+          "longitude": -104.337885
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -99.867957
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -99.867957
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -103.655489
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -100.0673
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -98.273206
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -100.864676
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -99.070581
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -97.874519
+        },
+        "reportedCount": 16,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -94.086986
+        },
+        "reportedCount": 29,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -99.668613
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -101.462707
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -100.864676
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -94.884361
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -102.65877
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -102.260082
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 34.123851,
+          "longitude": -102.858114
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 36.491509,
+          "longitude": -102.060738
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:33:00.843Z"
+      },
+      {
+        "center": {
+          "latitude": 26.133005,
+          "longitude": -97.475831
+        },
+        "reportedCount": 111,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 27.612791,
+          "longitude": -99.269925
+        },
+        "reportedCount": 77,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -95.482393
+        },
+        "reportedCount": 50,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -97.475831
+        },
+        "reportedCount": 26,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -101.462707
+        },
+        "reportedCount": 25,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 27.908749,
+          "longitude": -97.874519
+        },
+        "reportedCount": 29,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 28.204706,
+          "longitude": -96.877799
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -100.0673
+        },
+        "reportedCount": 14,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -98.073862
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -99.269925
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -101.861395
+        },
+        "reportedCount": 19,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -94.485674
+        },
+        "reportedCount": 12,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 31.992054,
+          "longitude": -94.018881
+        },
+        "reportedCount": 11,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 34.123851,
+          "longitude": -102.060738
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 35.011722,
+          "longitude": -101.064019
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 27.316834,
+          "longitude": -98.671894
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 28.500663,
+          "longitude": -96.279768
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 28.79662,
+          "longitude": -98.871238
+        },
+        "reportedCount": 7,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -102.459426
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -100.665332
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -102.060738
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -95.681737
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -102.65877
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -102.260082
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -95.083705
+        },
+        "reportedCount": 7,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -100.465988
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -102.459426
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -100.0673
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -102.65877
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -101.861395
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -99.269925
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -97.874519
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:34:00.729Z"
+      },
+      {
+        "center": {
+          "latitude": 34.123851,
+          "longitude": -100.864676
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 34.123851,
+          "longitude": -98.871238
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 34.715765,
+          "longitude": -100.465988
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 34.715765,
+          "longitude": -100.0673
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 35.011722,
+          "longitude": -101.462707
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 35.603637,
+          "longitude": -100.266644
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 36.195527,
+          "longitude": -103.040548
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -95.681737
+        },
+        "reportedCount": 86,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 28.834009,
+          "longitude": -95.323306
+        },
+        "reportedCount": 32,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 26.235735,
+          "longitude": -98.664592
+        },
+        "reportedCount": 22,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -99.070581
+        },
+        "reportedCount": 24,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -94.28633
+        },
+        "reportedCount": 26,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -99.668613
+        },
+        "reportedCount": 21,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 28.79662,
+          "longitude": -97.675175
+        },
+        "reportedCount": 14,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 28.500663,
+          "longitude": -99.469269
+        },
+        "reportedCount": 11,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -98.47255
+        },
+        "reportedCount": 9,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -98.47255
+        },
+        "reportedCount": 16,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -100.266644
+        },
+        "reportedCount": 13,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -97.475831
+        },
+        "reportedCount": 13,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 34.419808,
+          "longitude": -102.260082
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -97.675175
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -98.47255
+        },
+        "reportedCount": 9,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -100.665332
+        },
+        "reportedCount": 11,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 29.444244,
+          "longitude": -94.518385
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -102.060738
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -99.469269
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -101.263363
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 34.419784,
+          "longitude": -103.04308
+        },
+        "reportedCount": 31,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 35.30768,
+          "longitude": -102.858114
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 36.195551,
+          "longitude": -101.462707
+        },
+        "reportedCount": 9,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 27.612791,
+          "longitude": -98.47255
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 28.500663,
+          "longitude": -98.671894
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:35:01.597Z"
+      },
+      {
+        "center": {
+          "latitude": 28.79662,
+          "longitude": -95.681737
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -103.655489
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -100.465988
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -96.479112
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -99.469269
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -100.0673
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -102.260082
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -101.861395
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -105.250239
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -104.452864
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -104.054177
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -100.864676
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -100.465988
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -98.47255
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -93.887642
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -104.054177
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -103.655489
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -102.65877
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -103.057457
+        },
+        "reportedCount": 37,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -102.060738
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -100.465988
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -100.266644
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -98.47255
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -100.266644
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 34.123851,
+          "longitude": -102.459426
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 34.419808,
+          "longitude": -101.462707
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 34.419808,
+          "longitude": -101.064019
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 35.899594,
+          "longitude": -100.465988
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 36.491509,
+          "longitude": -100.465988
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 26.036723,
+          "longitude": -98.076451
+        },
+        "reportedCount": 116,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 25.867446,
+          "longitude": -97.357106
+        },
+        "reportedCount": 72,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 29.229636,
+          "longitude": -94.778041
+        },
+        "reportedCount": 76,
+        "observedAt": "2026-09-30T21:36:00.785Z"
+      },
+      {
+        "center": {
+          "latitude": 32.001476,
+          "longitude": -106.24661
+        },
+        "reportedCount": 65,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 27.712685,
+          "longitude": -97.076564
+        },
+        "reportedCount": 39,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 30.26055,
+          "longitude": -93.703519
+        },
+        "reportedCount": 62,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -96.479112
+        },
+        "reportedCount": 39,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 33.840439,
+          "longitude": -97.076257
+        },
+        "reportedCount": 45,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 28.79662,
+          "longitude": -99.269925
+        },
+        "reportedCount": 19,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -97.077143
+        },
+        "reportedCount": 19,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 36.195551,
+          "longitude": -102.65877
+        },
+        "reportedCount": 12,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 28.027579,
+          "longitude": -96.81087
+        },
+        "reportedCount": 15,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -94.28633
+        },
+        "reportedCount": 14,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -102.858114
+        },
+        "reportedCount": 19,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -102.65877
+        },
+        "reportedCount": 17,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 33.770724,
+          "longitude": -96.286281
+        },
+        "reportedCount": 48,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -95.88108
+        },
+        "reportedCount": 14,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -98.871238
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -100.864676
+        },
+        "reportedCount": 7,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -94.28633
+        },
+        "reportedCount": 19,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -95.283049
+        },
+        "reportedCount": 19,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -94.086986
+        },
+        "reportedCount": 23,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 26.433935,
+          "longitude": -99.113265
+        },
+        "reportedCount": 12,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 27.020877,
+          "longitude": -99.269925
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -102.060738
+        },
+        "reportedCount": 19,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -94.884361
+        },
+        "reportedCount": 17,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 34.33854,
+          "longitude": -99.208571
+        },
+        "reportedCount": 21,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 36.195551,
+          "longitude": -101.861395
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 28.79662,
+          "longitude": -99.668613
+        },
+        "reportedCount": 11,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -101.064019
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -99.070581
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -103.057457
+        },
+        "reportedCount": 13,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 34.123851,
+          "longitude": -101.263363
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 34.419808,
+          "longitude": -99.867957
+        },
+        "reportedCount": 7,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 28.500663,
+          "longitude": -97.475831
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:37:01.545Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -104.25352
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -104.25352
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -101.662051
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -99.668613
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644664,
+          "longitude": -94.043631
+        },
+        "reportedCount": 29,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 34.419808,
+          "longitude": -102.65877
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 35.30768,
+          "longitude": -100.0673
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 28.204706,
+          "longitude": -99.269925
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 28.500663,
+          "longitude": -100.266644
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 28.500663,
+          "longitude": -97.077143
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 28.79662,
+          "longitude": -96.479112
+        },
+        "reportedCount": 13,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -93.887642
+        },
+        "reportedCount": 13,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -102.260082
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -103.655489
+        },
+        "reportedCount": 9,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 30.586045,
+          "longitude": -93.689189
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -103.854833
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940484,
+          "longitude": -103.064193
+        },
+        "reportedCount": 20,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -98.871238
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -99.867957
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 33.959077,
+          "longitude": -96.920836
+        },
+        "reportedCount": 27,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 33.941968,
+          "longitude": -95.597027
+        },
+        "reportedCount": 14,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 34.715765,
+          "longitude": -101.662051
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 35.011722,
+          "longitude": -100.266644
+        },
+        "reportedCount": 8,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 35.899594,
+          "longitude": -101.263363
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 36.491735,
+          "longitude": -103.041176
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 36.491509,
+          "longitude": -102.858114
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 27.908749,
+          "longitude": -98.273206
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 28.23695,
+          "longitude": -96.498015
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 29.477222,
+          "longitude": -101.151391
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 29.71741,
+          "longitude": -104.551728
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -103.057457
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -99.469269
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:38:01.370Z"
+      },
+      {
+        "center": {
+          "latitude": 31.313487,
+          "longitude": -105.932131
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -102.858114
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -102.459426
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -105.848271
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -103.854833
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 31.372122,
+          "longitude": -93.63979
+        },
+        "reportedCount": 11,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -101.662051
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 31.999727,
+          "longitude": -103.854812
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -100.266644
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -98.671894
+        },
+        "reportedCount": 10,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -101.662051
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -100.864676
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -103.057457
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -102.858114
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 33.757952,
+          "longitude": -94.76044
+        },
+        "reportedCount": 17,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 34.123851,
+          "longitude": -100.465988
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 34.396294,
+          "longitude": -99.470253
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 26.428962,
+          "longitude": -97.276487
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 26.72492,
+          "longitude": -99.070581
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 26.72492,
+          "longitude": -98.671894
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 26.72492,
+          "longitude": -98.273206
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 26.72492,
+          "longitude": -97.874519
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 26.72492,
+          "longitude": -97.475831
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 26.684096,
+          "longitude": -97.259038
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 27.061022,
+          "longitude": -99.451791
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 27.020877,
+          "longitude": -98.871238
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 27.020877,
+          "longitude": -98.47255
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 27.020877,
+          "longitude": -98.073862
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 27.020877,
+          "longitude": -97.675175
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 27.021575,
+          "longitude": -97.323515
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 27.316834,
+          "longitude": -99.070581
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 27.316834,
+          "longitude": -97.475831
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:39:00.987Z"
+      },
+      {
+        "center": {
+          "latitude": 27.360758,
+          "longitude": -97.26198
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 27.612791,
+          "longitude": -98.871238
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 27.908749,
+          "longitude": -99.867957
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 27.908749,
+          "longitude": -99.070581
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 28.278651,
+          "longitude": -100.292987
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 28.204706,
+          "longitude": -100.0673
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 28.204706,
+          "longitude": -99.668613
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 28.204706,
+          "longitude": -98.871238
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 28.204706,
+          "longitude": -98.47255
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 28.566227,
+          "longitude": -95.917285
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 28.977221,
+          "longitude": -103.280031
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 28.79662,
+          "longitude": -100.0673
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.220505,
+          "longitude": -103.776456
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -103.456145
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.09566,
+          "longitude": -103.059618
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -100.665332
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -100.266644
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.092578,
+          "longitude": -99.469269
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -104.054177
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -103.256801
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -102.858114
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.388535,
+          "longitude": -100.0673
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.572757,
+          "longitude": -94.184859
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -103.854833
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -103.456145
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -103.057457
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.677257,
+          "longitude": -102.694087
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.762079,
+          "longitude": -102.387077
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.781151,
+          "longitude": -101.805824
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.714206,
+          "longitude": -101.396504
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -101.064019
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -100.665332
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:41:00.650Z"
+      },
+      {
+        "center": {
+          "latitude": 29.684492,
+          "longitude": -100.266644
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.023572,
+          "longitude": -104.703321
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -104.452864
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -104.054177
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -103.655489
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -103.256801
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -102.858114
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -102.060738
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -101.662051
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -101.263363
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -100.864676
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -100.465988
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 29.980449,
+          "longitude": -99.668613
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.390479,
+          "longitude": -104.858839
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -104.652208
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -102.65877
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -101.861395
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -101.462707
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -101.064019
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -100.665332
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -100.266644
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.276407,
+          "longitude": -99.867957
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.700169,
+          "longitude": -105.080563
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -104.851552
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -104.452864
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -104.054177
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -103.256801
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -102.858114
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -102.459426
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -102.060738
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -101.662051
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -100.0673
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:42:02.189Z"
+      },
+      {
+        "center": {
+          "latitude": 30.572364,
+          "longitude": -98.871238
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 30.889039,
+          "longitude": -105.411687
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -105.050896
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -104.652208
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -104.25352
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -103.456145
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -101.462707
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -100.266644
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 30.868321,
+          "longitude": -99.469269
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 30.897817,
+          "longitude": -93.549589
+        },
+        "reportedCount": 16,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -105.648927
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -103.256801
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.164278,
+          "longitude": -93.688299
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -105.449583
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -105.050896
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -104.652208
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -104.25352
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -101.861395
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -101.462707
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -101.064019
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -99.867957
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -99.469269
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.460236,
+          "longitude": -99.070581
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -105.648927
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -105.250239
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -104.851552
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -104.452864
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -101.263363
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.756193,
+          "longitude": -99.668613
+        },
+        "reportedCount": 7,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 31.704631,
+          "longitude": -93.795472
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 32.001405,
+          "longitude": -105.848505
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 32.000349,
+          "longitude": -105.44976
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:43:01.413Z"
+      },
+      {
+        "center": {
+          "latitude": 32.000035,
+          "longitude": -105.05092
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 31.999984,
+          "longitude": -104.652143
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 31.999609,
+          "longitude": -104.253561
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 31.999905,
+          "longitude": -103.456163
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -101.064019
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -100.665332
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 32.05215,
+          "longitude": -99.469269
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348113,
+          "longitude": -103.064205
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 32.348107,
+          "longitude": -102.858114
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -102.260082
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 32.644065,
+          "longitude": -101.462707
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -101.263363
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 32.940022,
+          "longitude": -99.269925
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -101.064019
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -100.665332
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -99.469269
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.235979,
+          "longitude": -99.070581
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.528628,
+          "longitude": -103.053042
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -100.465988
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.531936,
+          "longitude": -100.0673
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.82775,
+          "longitude": -103.046815
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -101.064019
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -100.665332
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -99.469269
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -99.070581
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -95.88108
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.827893,
+          "longitude": -95.083705
+        },
+        "reportedCount": 16,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 34.124465,
+          "longitude": -103.043367
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 34.123851,
+          "longitude": -100.0673
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 34.127211,
+          "longitude": -98.090509
+        },
+        "reportedCount": 9,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.9911,
+          "longitude": -97.671179
+        },
+        "reportedCount": 7,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 33.961631,
+          "longitude": -95.226204
+        },
+        "reportedCount": 12,
+        "observedAt": "2026-09-30T21:44:00.741Z"
+      },
+      {
+        "center": {
+          "latitude": 34.419808,
+          "longitude": -100.665332
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 34.715488,
+          "longitude": -103.042523
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 34.715765,
+          "longitude": -102.060738
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 34.715765,
+          "longitude": -101.263363
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 34.715765,
+          "longitude": -100.864676
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.011717,
+          "longitude": -103.042087
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.011722,
+          "longitude": -102.65877
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.011722,
+          "longitude": -102.260082
+        },
+        "reportedCount": 11,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.011722,
+          "longitude": -100.665332
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.011711,
+          "longitude": -100.000922
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.307252,
+          "longitude": -103.041743
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.30768,
+          "longitude": -100.864676
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.603614,
+          "longitude": -103.041227
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.603637,
+          "longitude": -102.65877
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.603637,
+          "longitude": -102.260082
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.603637,
+          "longitude": -101.861395
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.603637,
+          "longitude": -100.665332
+        },
+        "reportedCount": 2,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.603635,
+          "longitude": -100.000917
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.90005,
+          "longitude": -103.040541
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.899594,
+          "longitude": -102.858114
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.899594,
+          "longitude": -100.864676
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 35.899594,
+          "longitude": -100.0673
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 36.195551,
+          "longitude": -102.260082
+        },
+        "reportedCount": 4,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 36.195551,
+          "longitude": -100.665332
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 36.195551,
+          "longitude": -100.266644
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 36.19555,
+          "longitude": -100.000926
+        },
+        "reportedCount": 5,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 36.491509,
+          "longitude": -102.459426
+        },
+        "reportedCount": 0,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 36.491509,
+          "longitude": -101.662051
+        },
+        "reportedCount": 6,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 36.491509,
+          "longitude": -101.263363
+        },
+        "reportedCount": 1,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      },
+      {
+        "center": {
+          "latitude": 36.491509,
+          "longitude": -100.0673
+        },
+        "reportedCount": 3,
+        "observedAt": "2026-09-30T21:45:00.701Z"
+      }
+    ]
+  },
+  "dc": {
+    "boundarySource": "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/0/query?where=STUSAB+IN+%28%27DC%27%2C%27TX%27%29&outFields=STUSAB%2CNAME%2CAREALAND%2CAREAWATER&outSR=4326&f=geojson&geometryPrecision=6&maxAllowableOffset=0.00005",
+    "assumedNearbyRadiusKm": 25,
+    "boundaryMarginKm": 2,
+    "centers": [
+      {
+        "center": {
+          "latitude": 38.8950982,
+          "longitude": -77.0363849
+        },
+        "farthestKm": 11.505726414394447,
+        "farthestReturnedKm": 24.855855797892417,
+        "reportedCount": 719,
+        "observedAt": "2026-09-30T20:59:01.884Z"
+      },
+      {
+        "center": {
+          "latitude": 38.904774,
+          "longitude": -77.028309
+        },
+        "farthestKm": 12.613451094935574,
+        "farthestReturnedKm": 24.97654409649954,
+        "reportedCount": 729,
+        "observedAt": "2026-09-30T21:09:01.293Z"
+      }
+    ]
+  }
+}
