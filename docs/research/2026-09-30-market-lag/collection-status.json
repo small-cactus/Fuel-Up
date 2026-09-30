@@ -1,0 +1,178 @@
+{
+  "cities": [
+    {
+      "city_id": "atlanta",
+      "last_success": null,
+      "missed": 0,
+      "succeeded": 0
+    },
+    {
+      "city_id": "austin",
+      "last_success": "2026-09-30T18:28:00.510864+00:00",
+      "missed": 0,
+      "succeeded": 1
+    },
+    {
+      "city_id": "boston",
+      "last_success": null,
+      "missed": 0,
+      "succeeded": 0
+    },
+    {
+      "city_id": "charlotte",
+      "last_success": null,
+      "missed": 0,
+      "succeeded": 0
+    },
+    {
+      "city_id": "chicago",
+      "last_success": "2026-09-30T18:21:03.629183+00:00",
+      "missed": 0,
+      "succeeded": 1
+    },
+    {
+      "city_id": "columbus",
+      "last_success": null,
+      "missed": 0,
+      "succeeded": 0
+    },
+    {
+      "city_id": "dallas",
+      "last_success": "2026-09-30T18:27:00.82129+00:00",
+      "missed": 0,
+      "succeeded": 1
+    },
+    {
+      "city_id": "denver",
+      "last_success": null,
+      "missed": 0,
+      "succeeded": 0
+    },
+    {
+      "city_id": "fort-worth",
+      "last_success": "2026-09-30T18:31:01.031236+00:00",
+      "missed": 0,
+      "succeeded": 1
+    },
+    {
+      "city_id": "houston",
+      "last_success": "2026-09-30T18:22:00.564277+00:00",
+      "missed": 0,
+      "succeeded": 1
+    },
+    {
+      "city_id": "indianapolis",
+      "last_success": null,
+      "missed": 0,
+      "succeeded": 0
+    },
+    {
+      "city_id": "jacksonville",
+      "last_success": "2026-09-30T18:29:00.91481+00:00",
+      "missed": 0,
+      "succeeded": 1
+    },
+    {
+      "city_id": "las-vegas",
+      "last_success": null,
+      "missed": 0,
+      "succeeded": 0
+    },
+    {
+      "city_id": "los-angeles",
+      "last_success": "2026-09-30T18:20:00.57568+00:00",
+      "missed": 0,
+      "succeeded": 1
+    },
+    {
+      "city_id": "miami",
+      "last_success": null,
+      "missed": 0,
+      "succeeded": 0
+    },
+    {
+      "city_id": "new-york",
+      "last_success": "2026-09-30T18:19:01.660868+00:00",
+      "missed": 0,
+      "succeeded": 1
+    },
+    {
+      "city_id": "philadelphia",
+      "last_success": "2026-09-30T18:24:00.69626+00:00",
+      "missed": 0,
+      "succeeded": 1
+    },
+    {
+      "city_id": "phoenix",
+      "last_success": "2026-09-30T18:23:00.60138+00:00",
+      "missed": 0,
+      "succeeded": 1
+    },
+    {
+      "city_id": "san-antonio",
+      "last_success": "2026-09-30T18:25:02.41605+00:00",
+      "missed": 0,
+      "succeeded": 1
+    },
+    {
+      "city_id": "san-diego",
+      "last_success": "2026-09-30T18:26:00.812683+00:00",
+      "missed": 0,
+      "succeeded": 1
+    },
+    {
+      "city_id": "san-jose",
+      "last_success": "2026-09-30T18:30:00.623162+00:00",
+      "missed": 0,
+      "succeeded": 1
+    },
+    {
+      "city_id": "seattle",
+      "last_success": null,
+      "missed": 0,
+      "succeeded": 0
+    },
+    {
+      "city_id": "tampa",
+      "last_success": null,
+      "missed": 0,
+      "succeeded": 0
+    },
+    {
+      "city_id": "washington-dc",
+      "last_success": null,
+      "missed": 0,
+      "succeeded": 0
+    }
+  ],
+  "cron": [
+    {
+      "active": true,
+      "name": "fuel-research-dispatch",
+      "schedule": "* * * * *"
+    },
+    {
+      "active": true,
+      "name": "fuel-research-watchdog",
+      "schedule": "*/5 * * * *"
+    }
+  ],
+  "database_bytes": 39701651,
+  "health": {
+    "cities_observed": 13,
+    "ends_at": "2026-10-07T18:19:00+00:00",
+    "id": "hourly-24-cities-20260930-v1",
+    "last_dispatch_at": "2026-09-30T18:31:00.016019+00:00",
+    "last_success_at": "2026-09-30T18:31:01.031236+00:00",
+    "missed": 0,
+    "planned_city_hours": 4032,
+    "provider_backoff_until": null,
+    "queued_due": 0,
+    "running": 0,
+    "starts_at": "2026-09-30T18:19:00+00:00",
+    "station_observations": 260,
+    "status": "active",
+    "succeeded": 13
+  },
+  "recent_errors": null
+}

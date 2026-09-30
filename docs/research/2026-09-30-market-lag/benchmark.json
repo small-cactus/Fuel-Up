@@ -1,0 +1,350 @@
+{
+  "version": "market-lag-v1",
+  "parameters": {
+    "shrinkage": 0.75
+  },
+  "historical": {
+    "labelledRows": 464,
+    "decisionRows": 1247,
+    "adjusted": 0,
+    "reasons": {
+      "insufficient_history": 738,
+      "no_coherent_upward_market_move": 472,
+      "insufficient_independent_peers": 37
+    },
+    "metrics": {
+      "raw": {
+        "meanErrorCents": 2.7500000000000027,
+        "tail": {
+          "count": 464,
+          "p95": 11.000000000000032,
+          "worst5Mean": 13.291666666666638,
+          "worst5Count": 24,
+          "max": 20.000000000000018
+        }
+      },
+      "current_math": {
+        "meanErrorCents": 6.7592672413793125,
+        "tail": {
+          "count": 464,
+          "p95": 20.954999999999984,
+          "worst5Mean": 34.50833333333333,
+          "worst5Count": 24,
+          "max": 56.00000000000005
+        }
+      },
+      "market_lag": {
+        "meanErrorCents": 2.7500000000000027,
+        "tail": {
+          "count": 464,
+          "p95": 11.000000000000032,
+          "worst5Mean": 13.291666666666638,
+          "worst5Count": 24,
+          "max": 20.000000000000018
+        }
+      }
+    },
+    "adjustments": []
+  },
+  "synthetic": {
+    "warning": "Simulated exact truth and chosen scenario mix. The scenario-midpoint/minimax candidate was derived after seeing the v1 held-discount failure; this is development evidence, not a held-out win or promotion gate.",
+    "seed": 20260930,
+    "results": {
+      "stale_refreshed_timestamp": {
+        "scenarios": 100,
+        "price": {
+          "raw": {
+            "meanErrorCents": 4.589405962266028,
+            "tail": {
+              "count": 1600,
+              "p95": 35.380545385181854,
+              "worst5Mean": 86.60759584279731,
+              "worst5Count": 80,
+              "max": 147.04878649208695
+            }
+          },
+          "market_lag": {
+            "meanErrorCents": 1.147351490566507,
+            "tail": {
+              "count": 1600,
+              "p95": 8.845136346295421,
+              "worst5Mean": 21.651898960699327,
+              "worst5Count": 80,
+              "max": 36.76219662302174
+            }
+          },
+          "scenario_midpoint": {
+            "meanErrorCents": 2.294702981133014,
+            "tail": {
+              "count": 1600,
+              "p95": 17.690272692590923,
+              "worst5Mean": 43.303797921398655,
+              "worst5Count": 80,
+              "max": 73.52439324604347
+            }
+          }
+        },
+        "rawSelectionRegret": {
+          "count": 100,
+          "p95": 18.00000000000006,
+          "worst5Mean": 18.00000000000006,
+          "worst5Count": 5,
+          "max": 18.00000000000006
+        },
+        "modelSelectionRegret": {
+          "count": 100,
+          "p95": 18.00000000000006,
+          "worst5Mean": 18.00000000000006,
+          "worst5Count": 5,
+          "max": 18.00000000000006
+        },
+        "robustSelectionRegret": {
+          "count": 100,
+          "p95": 18.00000000000006,
+          "worst5Mean": 18.00000000000006,
+          "worst5Count": 5,
+          "max": 18.00000000000006
+        },
+        "meanTargetStationRawErrorCents": 73.43049539625645,
+        "meanTargetStationModelErrorCents": 18.35762384906411,
+        "meanTargetStationMidpointErrorCents": 36.71524769812822
+      },
+      "genuine_held_discount": {
+        "scenarios": 100,
+        "price": {
+          "raw": {
+            "meanErrorCents": 0,
+            "tail": {
+              "count": 1600,
+              "p95": 0,
+              "worst5Mean": 0,
+              "worst5Count": 80,
+              "max": 0
+            }
+          },
+          "market_lag": {
+            "meanErrorCents": 3.3862334420671685,
+            "tail": {
+              "count": 1600,
+              "p95": 24.538094296236455,
+              "worst5Mean": 63.793970736383926,
+              "worst5Count": 80,
+              "max": 112.04674318316394
+            }
+          },
+          "scenario_midpoint": {
+            "meanErrorCents": 2.2574889613781126,
+            "tail": {
+              "count": 1600,
+              "p95": 16.35872953082433,
+              "worst5Mean": 42.52931382425595,
+              "worst5Count": 80,
+              "max": 74.69782878877602
+            }
+          }
+        },
+        "rawSelectionRegret": {
+          "count": 100,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 5,
+          "max": 0
+        },
+        "modelSelectionRegret": {
+          "count": 100,
+          "p95": 50.4881485505029,
+          "worst5Mean": 52.165483088232534,
+          "worst5Count": 5,
+          "max": 53.813634806312564
+        },
+        "robustSelectionRegret": {
+          "count": 100,
+          "p95": 14.717459061648668,
+          "worst5Mean": 16.662748406641185,
+          "worst5Count": 5,
+          "max": 16.972629458643507
+        },
+        "meanTargetStationRawErrorCents": 0,
+        "meanTargetStationModelErrorCents": 54.179735073074696,
+        "meanTargetStationMidpointErrorCents": 36.1198233820498
+      },
+      "tracks_market": {
+        "scenarios": 100,
+        "price": {
+          "raw": {
+            "meanErrorCents": 0,
+            "tail": {
+              "count": 1600,
+              "p95": 0,
+              "worst5Mean": 0,
+              "worst5Count": 80,
+              "max": 0
+            }
+          },
+          "market_lag": {
+            "meanErrorCents": 0,
+            "tail": {
+              "count": 1600,
+              "p95": 0,
+              "worst5Mean": 0,
+              "worst5Count": 80,
+              "max": 0
+            }
+          },
+          "scenario_midpoint": {
+            "meanErrorCents": 0,
+            "tail": {
+              "count": 1600,
+              "p95": 0,
+              "worst5Mean": 0,
+              "worst5Count": 80,
+              "max": 0
+            }
+          }
+        },
+        "rawSelectionRegret": {
+          "count": 100,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 5,
+          "max": 0
+        },
+        "modelSelectionRegret": {
+          "count": 100,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 5,
+          "max": 0
+        },
+        "robustSelectionRegret": {
+          "count": 100,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 5,
+          "max": 0
+        },
+        "meanTargetStationRawErrorCents": 0,
+        "meanTargetStationModelErrorCents": 0,
+        "meanTargetStationMidpointErrorCents": 0
+      },
+      "stationary": {
+        "scenarios": 100,
+        "price": {
+          "raw": {
+            "meanErrorCents": 0,
+            "tail": {
+              "count": 1600,
+              "p95": 0,
+              "worst5Mean": 0,
+              "worst5Count": 80,
+              "max": 0
+            }
+          },
+          "market_lag": {
+            "meanErrorCents": 0,
+            "tail": {
+              "count": 1600,
+              "p95": 0,
+              "worst5Mean": 0,
+              "worst5Count": 80,
+              "max": 0
+            }
+          },
+          "scenario_midpoint": {
+            "meanErrorCents": 0,
+            "tail": {
+              "count": 1600,
+              "p95": 0,
+              "worst5Mean": 0,
+              "worst5Count": 80,
+              "max": 0
+            }
+          }
+        },
+        "rawSelectionRegret": {
+          "count": 100,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 5,
+          "max": 0
+        },
+        "modelSelectionRegret": {
+          "count": 100,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 5,
+          "max": 0
+        },
+        "robustSelectionRegret": {
+          "count": 100,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 5,
+          "max": 0
+        },
+        "meanTargetStationRawErrorCents": 0,
+        "meanTargetStationModelErrorCents": 0,
+        "meanTargetStationMidpointErrorCents": 0
+      },
+      "market_falls": {
+        "scenarios": 100,
+        "price": {
+          "raw": {
+            "meanErrorCents": 0,
+            "tail": {
+              "count": 1600,
+              "p95": 0,
+              "worst5Mean": 0,
+              "worst5Count": 80,
+              "max": 0
+            }
+          },
+          "market_lag": {
+            "meanErrorCents": 0,
+            "tail": {
+              "count": 1600,
+              "p95": 0,
+              "worst5Mean": 0,
+              "worst5Count": 80,
+              "max": 0
+            }
+          },
+          "scenario_midpoint": {
+            "meanErrorCents": 0,
+            "tail": {
+              "count": 1600,
+              "p95": 0,
+              "worst5Mean": 0,
+              "worst5Count": 80,
+              "max": 0
+            }
+          }
+        },
+        "rawSelectionRegret": {
+          "count": 100,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 5,
+          "max": 0
+        },
+        "modelSelectionRegret": {
+          "count": 100,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 5,
+          "max": 0
+        },
+        "robustSelectionRegret": {
+          "count": 100,
+          "p95": 0,
+          "worst5Mean": 0,
+          "worst5Count": 5,
+          "max": 0
+        },
+        "meanTargetStationRawErrorCents": 0,
+        "meanTargetStationModelErrorCents": 0,
+        "meanTargetStationMidpointErrorCents": 0
+      }
+    }
+  }
+}

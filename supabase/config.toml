@@ -5,3 +5,7 @@ verify_jwt = true
 
 [functions.fuel-repair]
 verify_jwt = false
+
+# A dedicated server-only secret is checked inside the handler, never the app key.
+[functions.fuel-research]
+verify_jwt = false
