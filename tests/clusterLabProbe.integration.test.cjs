@@ -43,12 +43,10 @@ function assertParentTints(report, frame) {
     const connections = Map.groupBy(frame.views, view => view.glassConnection);
     assert.ok(!connections.has(undefined), 'missing physical glass connection');
     for (const view of frame.views) {
-        const expectedId = view.role === 'badge' ? view.id.slice(6) :
-            (view.countCopy && !view.revealingPrice ? view.copyParent :
-                (view.priceMix > 0 || view.revealingPrice ? view.id : view.logicalTintOwner));
+        const expectedId = view.role === 'badge' ? view.id.slice(6) : view.id;
         assert.ok(Number.isFinite(report.stationPrices[expectedId]), 'missing station quote');
         assert.equal(view.tintOwner, expectedId, `station tint followed glass connectivity for ${view.id}`);
-        const isCheapest = report.marketScores[expectedId] > 0;
+        const isCheapest = expectedId === (frame.cheapestStationID ?? report.cheapestStationID);
         assert.equal(view.tintScore, isCheapest ? 1 : 0, `price tint changed during motion for ${view.id}`);
         const expectedTint = isCheapest ? [0, 1, 47 / 255, 0.3] : [];
         assert.equal(view.materialTint.length, expectedTint.length,
@@ -162,8 +160,9 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
         view.role === 'split' && view.countCopy && view.progress < 1);
     assert.ok(departingCounts.length >= 4, 'missing outward count-copy coverage');
     for (const view of departingCounts) {
-        assert.equal(view.priceMix, 0, 'price/tint was revealed while the duplicate still overlapped its parent');
-        assert.notEqual(view.tintOwner, view.id, 'count copy acquired a station tint before reaching home');
+        assert.equal(view.priceMix, 0, 'price was revealed while the duplicate still overlapped its parent');
+        assert.equal(view.tintOwner, view.id, 'traveling count copy borrowed its parent identity');
+        assert.equal(view.tintScore, view.id === report.cheapestStationID ? 1 : 0, 'non-winning split copy turned green');
     }
     for (const view of report.samples.flatMap(frame => frame.views).filter(view => view.role === 'merge')) {
         assert.ok(view.progress < 1, 'duplicate count waited through rebound after reaching its accumulator');
@@ -171,7 +170,7 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     for (const view of report.final) {
         assert.ok(view.nativeLayoutError <= 0.01, `UIKit material layout stayed stale for ${view.id}: ${view.nativeLayoutError}pt`);
     }
-    t.diagnostic(`Main price recoil ${primaryTravel.toFixed(2)}pt; ${departingCounts.length} parent-colored outward copies`);
+    t.diagnostic(`Main price recoil ${primaryTravel.toFixed(2)}pt; ${departingCounts.length} identity-bound outward copies`);
     for (const event of report.events.filter(event => event.type.endsWith('handoff'))) {
         assert.ok(event.delta <= 0.12, `handoff moved ${event.delta}pt`);
         if (event.type === 'merge-handoff') assert.ok(event.renderedDelta <= 0.12, 'location clearance broke the rendered merge handoff');
@@ -679,4 +678,42 @@ test('Show all restores identical cluster membership and glass after repeated fo
         }
     }
     t.diagnostic('Six overview returns preserved membership, native glass connections, tint and geometry');
+});
+
+
+test('one station ID owns green through 50 rapid zoom cycles and a changed cheapest quote', { timeout: 60000 }, async t => {
+    const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+    const token = `rapid-${Date.now()}`;
+    const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+    const file = path.join(container, 'Documents/cluster-lab-probe.json');
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    let report;
+    const deadline = Date.now() + 50000;
+    while (Date.now() < deadline) {
+        try {
+            const value = JSON.parse(readFileSync(file, 'utf8'));
+            if (value.token === token) { report = value; break; }
+        } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    assert.ok(report, 'rapid zoom probe did not export');
+    assert.equal(report.status, 'completed');
+    assert.equal(report.focus.rapidZoomChanges, 100);
+    assert.ok(report.samples.length >= 500, 'insufficient rapid zoom frame coverage');
+    assert.deepEqual([...new Set(report.samples.map(f => f.cheapestStationID))].sort(), ['lab-0', 'lab-1']);
+    const distances = report.focusCameraSamples.map(f => f.distance);
+    assert.ok(Math.max(...distances) / Math.min(...distances) > 2, 'native camera did not actually zoom');
+    const splits = report.events.filter(e => e.type === 'split-spawn').length;
+    const merges = report.events.filter(e => e.type === 'merge-start').length;
+    assert.ok(splits >= 20 && merges >= 20, `insufficient real split/merge coverage: ${splits}/${merges}`);
+    for (const frame of report.samples) {
+        assertParentTints(report, frame);
+        const greenPrices = frame.views.filter(v => v.tintScore > 0 && v.role !== 'badge');
+        assert.ok(greenPrices.length <= 1, 'multiple station pills were assigned green');
+        for (const pill of greenPrices) assert.equal(pill.id, frame.cheapestStationID);
+    }
+    const finalGreen = report.final.filter(v => v.tintScore > 0);
+    assert.ok(finalGreen.length > 0);
+    assert.ok(finalGreen.every(v => v.tintOwner === 'lab-1'), 'old winner retained green');
+    t.diagnostic(`${report.samples.length} native frames; ${splits} splits; ${merges} merges; green remained exclusive to the current cheapest ID`);
 });

@@ -111,6 +111,7 @@ final class ClusterLabRenderer {
   var dark = false
   var onFocus: ((String) -> Bool)?
   var clusterOwners: [String: String] { owners }
+  private(set) var cheapestStationID: String?
 
   func station(at point: CGPoint, in source: UIView) -> String? {
     guard !container.isHidden else { return nil }
@@ -172,6 +173,7 @@ final class ClusterLabRenderer {
     markets = ClusterLabMarket.assess(snapshot.map {
       LabMarketQuote(id: $0.id, latitude: $0.latitude, longitude: $0.longitude, price: $0.price)
     })
+    cheapestStationID = markets.values.first?.cheapestStationID
     // A data refresh may change price/order; no stale price is retained in a
     // reused pill. Camera state belongs to the map and is left untouched.
     let changed = Set(next.filter { station in motions[station.id]?.station != station }.map(\.id))
@@ -203,7 +205,7 @@ final class ClusterLabRenderer {
   }
 
   private func makePill(_ motion: LabStationMotion) -> ClusterLabPill {
-    let pill = ClusterLabPill(price: motion.station.price, name: motion.station.name)
+    let pill = ClusterLabPill(stationID: motion.station.id, price: motion.station.price, name: motion.station.name)
     addFocusAction(pill, id: motion.station.id)
     motion.pill = pill
     return pill
@@ -286,7 +288,7 @@ final class ClusterLabRenderer {
         motions[station.id] = motion
         if ownerId == station.id { _ = makePill(motion) }
         else if badges[ownerId] == nil {
-          let badge = ClusterLabPill(price: owner.price, name: owner.name)
+          let badge = ClusterLabPill(stationID: owner.id, price: owner.price, name: owner.name)
           addFocusAction(badge, id: ownerId)
           badges[ownerId] = badge
         }
@@ -338,7 +340,7 @@ final class ClusterLabRenderer {
           center.x += motion.offset + motion.reaction.offset.x
           center.y += motion.reaction.offset.y
           pill.render(center: center, width: motion.width, priceMix: 0,
-                      count: motion.count, market: markets[motion.owner] ?? .unknown, dark: dark)
+                      count: motion.count, market: markets[station.id] ?? .unknown, dark: dark)
           let source = badges[motion.owner]?.view.center ?? center
           let sourceFrame = badges[motion.owner]?.view.frame ?? pill.view.frame
           event("split-spawn", id: station.id, delta: hypot(pill.view.center.x - source.x, pill.view.center.y - source.y),
@@ -565,6 +567,7 @@ final class ClusterLabRenderer {
         // The first arriving mover becomes the accumulator in place. The effect
         // view never remounts and no duplicate glass surface flashes underneath.
         badge = pill; first.pill = nil; badges[ownerId] = badge
+        badge.adoptCluster(stationID: ownerId, price: owner.station.price, name: owner.station.name)
         addFocusAction(badge, id: ownerId)
       } else { continue }
       var center = project(owner.station.mapPoint, map: map)
@@ -697,17 +700,11 @@ final class ClusterLabRenderer {
     let previews = ClusterLabGlassGrouping.layout(familyFrames.map {
       LabGlassItem(id: $0.key, frame: $0.value)
     }, previous: [:], preparation: true).connections
-    // Glass connectivity controls only morphing, never a station's market color.
-    // A surface showing a price keeps that station's global tint. Only +N
-    // content inherits the representative parent's tint, including split copies.
-    let visibleTints = Dictionary(uniqueKeysWithValues: renderedPills.keys.map { id in
-      let motion = motions[id]
-      let owner = id.hasPrefix("badge:") ? String(id.dropFirst(6)) :
-        (motion?.countCopy == true && motion?.revealStartedAt == nil ? motion?.copyTintOwner ?? id :
-          ((motion?.priceMix ?? 0) > 0 || motion?.revealStartedAt != nil ? id : logicalTints[id] ?? id))
-      return (id, owner)
-    })
-    for (id, pill) in renderedPills { pill.applyMarket(markets[visibleTints[id] ?? id] ?? .unknown) }
+    // Tint is locked to the station identity stored on the native pill. A
+    // moving +N copy never borrows the parent's winning ID. Only the attached
+    // accumulator represents its parent (bound when created or adopted).
+    let visibleTints = renderedPills.mapValues { $0.stationID }
+    for pill in renderedPills.values { pill.applyMarket(markets[pill.stationID] ?? .unknown) }
     let anchors = Dictionary(uniqueKeysWithValues: stations.enumerated().compactMap { rank, station -> (String, Int)? in
       guard let motion = motions[station.id], motion.owner == station.id, motion.settled else { return nil }
       return (station.id, stations.count - rank)
@@ -754,6 +751,7 @@ final class ClusterLabRenderer {
                            "glassMaterialResets": glassGroups.materialResetCount,
                            "stationCount": motions.count, "animating": animating, "owners": owners,
                            "selectedId": emphasis.selectedId ?? "",
+                           "cheapestStationID": cheapestStationID ?? "",
                            "userLocation": dot.map { ["x": $0.x, "y": $0.y] } ?? [:]])
     }
     return animating

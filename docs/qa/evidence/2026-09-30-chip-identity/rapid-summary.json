@@ -1,0 +1,145 @@
+{
+  "date": "2026-09-30",
+  "device": "iPhone 13 mini simulator, iOS 26.5",
+  "manualGestureRuns": {
+    "before": [
+      50,
+      50
+    ],
+    "after": [
+      50
+    ],
+    "note": "No persistent extra green price pill was reproduced in the manual simulator runs."
+  },
+  "nativeStress": {
+    "zoomCycles": 50,
+    "cameraChanges": 100,
+    "frames": 2219,
+    "splits": 132,
+    "merges": 135,
+    "winnerIDs": [
+      "lab-0",
+      "lab-1"
+    ],
+    "nonWinningGreenAssignments": 0
+  },
+  "settledImageAtVideoSeconds": 38.3,
+  "pixelSamples": [
+    {
+      "id": "lab-0",
+      "price": 3.1,
+      "assignedTint": [],
+      "fixedPatchRGB": [
+        [
+          253.0,
+          250.0,
+          245.0
+        ],
+        [
+          252.0,
+          252.0,
+          252.0
+        ],
+        [
+          250.0,
+          249.0,
+          248.0
+        ],
+        [
+          253.0,
+          251.0,
+          243.0
+        ],
+        [
+          250.0,
+          249.0,
+          248.0
+        ],
+        [
+          250.0,
+          249.0,
+          248.0
+        ]
+      ]
+    },
+    {
+      "id": "lab-1",
+      "price": 2.99,
+      "assignedTint": [
+        0,
+        1,
+        0.1843137254901961,
+        0.3
+      ],
+      "fixedPatchRGB": [
+        [
+          173.33,
+          249.67,
+          186.33
+        ],
+        [
+          176.0,
+          252.0,
+          184.0
+        ],
+        [
+          176.0,
+          252.0,
+          184.0
+        ],
+        [
+          176.0,
+          252.0,
+          184.0
+        ],
+        [
+          175.0,
+          250.0,
+          187.0
+        ],
+        [
+          175.0,
+          250.0,
+          187.33
+        ]
+      ]
+    },
+    {
+      "id": "lab-3",
+      "price": 3.4000000000000004,
+      "assignedTint": [],
+      "fixedPatchRGB": [
+        [
+          251.67,
+          249.33,
+          245.0
+        ],
+        [
+          250.0,
+          249.0,
+          248.0
+        ],
+        [
+          251.0,
+          252.0,
+          249.33
+        ],
+        [
+          253.0,
+          250.22,
+          245.0
+        ],
+        [
+          253.0,
+          251.0,
+          243.0
+        ],
+        [
+          251.11,
+          250.11,
+          245.78
+        ]
+      ]
+    }
+  ]
+}

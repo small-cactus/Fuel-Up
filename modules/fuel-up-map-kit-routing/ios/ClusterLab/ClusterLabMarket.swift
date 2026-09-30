@@ -11,10 +11,11 @@ struct LabMarketAssessment {
   let median: Double?
   let peerCount: Int
   let cheapestPrice: Double?
+  let cheapestStationID: String?
   // Positive selects the sole green station; magnitude is comparison metadata.
   // The renderer leaves every non-positive score untinted.
   let score: Double
-  static let unknown = LabMarketAssessment(median: nil, peerCount: 0, cheapestPrice: nil, score: 0)
+  static let unknown = LabMarketAssessment(median: nil, peerCount: 0, cheapestPrice: nil, cheapestStationID: nil, score: 0)
 }
 
 enum ClusterLabMarket {
@@ -58,7 +59,7 @@ enum ClusterLabMarket {
       let magnitude = isCheapest ? min(1, max(0.05, difference / fullScale)) :
         min(1, max(0.18, 0.55 + 0.45 * difference / fullScale))
       return LabMarketAssessment(median: median, peerCount: peers.count,
-                                 cheapestPrice: cheapest.price,
+                                 cheapestPrice: cheapest.price, cheapestStationID: cheapest.id,
                                  score: isCheapest ? magnitude : -magnitude)
     }
   }

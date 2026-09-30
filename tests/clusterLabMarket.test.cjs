@@ -16,6 +16,7 @@ func quote(_ id: String, _ price: Double, _ lat: Double = 27.95, _ lon: Double =
 let quotes = [quote("best", 2.8), quote("low", 3.1), quote("median", 3.2), quote("high", 3.3), quote("worst", 3.6)]
 let result = ClusterLabMarket.assess(quotes)
 assert(result["best"]!.score == 1)
+assert(result.values.allSatisfy { $0.cheapestStationID == "best" })
 assert(result["worst"]!.score == -1)
 assert(result.values.filter { $0.score > 0 }.count == 1)
 assert(result["median"]!.score < 0)
@@ -37,10 +38,12 @@ assert(noise.values.filter { $0.score < 0 }.count == 3)
 let tied = [quote("a", 3.2), quote("b", 3.2), quote("c", 3.2)]
 for input in [tied, Array(tied.reversed())] {
   let colors = ClusterLabMarket.assess(input)
+  assert(colors.values.allSatisfy { $0.cheapestStationID == "a" })
   assert(colors["a"]!.score == 0.05 && colors["b"]!.score == -0.55 && colors["c"]!.score == -0.55)
 }
 assert(ClusterLabMarket.assess([quote("only", 3.2)])["only"]!.score == 0.05)
 assert(ClusterLabMarket.assess([]).isEmpty)
+assert(LabMarketAssessment.unknown.cheapestStationID == nil)
 let duplicates = ClusterLabMarket.assess(quotes + [quotes[0]])
 assert(duplicates["best"]!.peerCount == 4)
 let invalid = ClusterLabMarket.assess(quotes + [quote("nan", .nan), quote("bad", -1), quote("lat", 3, 100)])

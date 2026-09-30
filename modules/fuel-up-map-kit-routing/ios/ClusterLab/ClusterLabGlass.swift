@@ -55,7 +55,8 @@ final class ClusterLabPill {
   private var marketDescription = "Price comparison unavailable"
   private var lastCheapestPrice: Double?
   private var wasCheapest = false
-  private let price: Double
+  private var price: Double
+  private(set) var stationID: String
   private(set) var tintScore: Double = 0
   private(set) var tintUpdateCount = 0
   private var hasTint = false
@@ -69,7 +70,8 @@ final class ClusterLabPill {
     return []
   }
 
-  init(price: Double, name: String) {
+  init(stationID: String, price: Double, name: String) {
+    self.stationID = stationID
     self.price = price
     view.isUserInteractionEnabled = false
     view.clipsToBounds = false
@@ -86,10 +88,23 @@ final class ClusterLabPill {
     view.accessibilityLabel = name
   }
 
+  // An arriving view may be reused as the attached cluster count. That is the
+  // only identity transfer; traveling station pills retain their own ID.
+  func adoptCluster(stationID: String, price: Double, name: String) {
+    self.stationID = stationID
+    self.price = price
+    priceLabel.text = String(format: "$%.2f", price)
+    view.accessibilityLabel = name
+    lastCheapestPrice = nil
+    wasCheapest = false
+    hasTint = false
+  }
+
   func applyMarket(_ market: LabMarketAssessment) {
-    if lastCheapestPrice != market.cheapestPrice || wasCheapest != (market.score > 0) {
+    let isCheapest = stationID == market.cheapestStationID
+    if lastCheapestPrice != market.cheapestPrice || wasCheapest != isCheapest {
       lastCheapestPrice = market.cheapestPrice
-      wasCheapest = market.score > 0
+      wasCheapest = isCheapest
       if let cheapest = market.cheapestPrice {
         let cents = Int((max(0, price - cheapest) * 100).rounded())
         marketDescription = wasCheapest ? "Cheapest confirmed station in this search" :
@@ -97,7 +112,7 @@ final class ClusterLabPill {
             "\(cents) cents above the cheapest confirmed station in this search")
       } else { marketDescription = "Price comparison unavailable" }
     }
-    let nextScore: Double = market.score > 0 ? 1 : 0
+    let nextScore: Double = isCheapest ? 1 : 0
     guard !hasTint || nextScore != tintScore else { return }
     hasTint = true; tintScore = nextScore; tintUpdateCount += 1
     let color = ClusterLabGlass.marketTint(score: nextScore)

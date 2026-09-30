@@ -85,8 +85,11 @@ matching cluster ownership. Every alternative is untinted regular glass, includi
 prices tied with the winner. The winner uses one fixed onboarding #00FF2F green
 at 30% opacity. Market scores remain available for comparison diagnostics, but
 the renderer maps them to only two tint states: green or no tint. Neither market
-spread nor camera movement varies saturation. Counts and traveling count copies
-inherit their displayed parent's tint until the existing price handoff.
+spread nor camera movement varies saturation. Each native station pill stores its station ID and compares it with the one
+`cheapestStationID` selected across the full snapshot. Traveling copies retain
+that identity, even while displaying +N; they cannot borrow green from a parent.
+Only the attached count badge represents the parent ID. A mover adopted as the
+attached badge explicitly rebinds once at arrival, preserving its native view.
 Adaptive system-label foregrounds preserve light/dark text legibility.
 
 `ClusterLabGlass` uses Apple's public container and pill effects. Native container effects are
@@ -392,3 +395,21 @@ card-covered pills, and compares six fixed 3x3 pixel patches plus text-free tint
 bands per pill. It reports geometry mismatches separately and includes repeated
 idle captures as a noise control. This complements the live native probe; tint
 property equality alone does not establish visible color consistency.
+
+### Cheapest-ID stress coverage
+
+The `rapid-` native probe performs 50 zoom-in/out cycles (100 camera requests,
+340 ms apart), then settles at the separated view. Halfway through it changes
+the cheapest station from `lab-0` to `lab-1`. Every recorded frame checks native
+material tint against the current global winner ID, including traveling +N
+copies and adopted badges. The test also requires actual camera travel and at
+least 20 split and merge events, so an idle map cannot pass.
+
+The September 30 run captured 2,219 frames, 132 splits, and 135 merges with no
+non-winning IDs assigned green. Recorded pixels confirm that the former winner
+is untinted after settling. Two 50-pinch runs on the previous build did not
+reproduce persistent extra green price pills on this simulator; one further
+50-pinch run exercised the updated build. This does not establish the cause of
+every reported rendered-color artifact on the phone.
+See [measurements](../../../../docs/qa/evidence/2026-09-30-chip-identity/rapid-summary.json)
+and [winner-change image](../../../../docs/qa/evidence/2026-09-30-chip-identity/winner-change.png).

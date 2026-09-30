@@ -62,6 +62,29 @@ final class ClusterLabProbe {
   func tick(time: Double) {
     guard let view, !finished else { return }
     if startTime == 0 { startTime = time }
+    if token.hasPrefix("rapid-") {
+      let elapsed = time - startTime
+      focusCameraSamples.append(["time": elapsed, "distance": view.map.camera.centerCoordinateDistance])
+      let next = Int(max(0, elapsed - 1) / 0.34)
+      if elapsed >= 1, next != stage, next <= 100 {
+        stage = next
+        if next == 50 {
+          // A refresh changes the winner while glass is actively merging. The
+          // former winner must explicitly lose its tint, including its badge.
+          view.renderer.setStations(view.renderer.stations.map { station in
+            ClusterLabStation(["id": station.id, "latitude": station.latitude,
+              "longitude": station.longitude, "price": station.id == "lab-1" ? 2.99 : station.price,
+              "name": station.name])!
+          })
+        }
+        let span = next.isMultiple(of: 2) ? 0.003 : 0.03
+        view.setRegion(.init(center: center, span: .init(latitudeDelta: span, longitudeDelta: span)), animated: true)
+        focusDetails["rapidZoomChanges"] = min(100, next + 1)
+        view.refresh()
+      }
+      if elapsed >= 37 { finish(status: "completed") }
+      return
+    }
     if token.hasPrefix("roundtrip-") {
       let elapsed = time - startTime
       let next = Int(max(0, elapsed - 1) / 1.25)
@@ -196,6 +219,7 @@ final class ClusterLabProbe {
       "focus": focusDetails, "startTime": startTime,
       "stationPrices": Dictionary(uniqueKeysWithValues: view.renderer.stations.map { ($0.id, $0.price) }),
       "focusCameraSamples": focusCameraSamples, "overviewReturns": overviewReturns,
+      "cheapestStationID": view.renderer.cheapestStationID ?? "",
       "marketScores": ClusterLabMarket.assess(view.renderer.stations.map {
         LabMarketQuote(id: $0.id, latitude: $0.latitude, longitude: $0.longitude, price: $0.price)
       }).mapValues { ($0.score * 20).rounded() / 20 },
