@@ -62,3 +62,8 @@ test('diagnostic write failure cannot suppress mandatory 429 cooldown', async ()
   assert.equal(result[0].evidenceSaved,false);
   assert.equal(calls.find(c=>c.name==='record_fuel_discovery_response').args.p_evidence.headers['set-cookie'],undefined);
 });
+test('scope reconciliation only permits explicit canonical state search variants', () => {
+ assert.match(discoveryQuery({kind:'states',states:['CT'],searchStyle:'name'},'us-east-1'),/search:"Connecticut"/);
+ assert.match(discoveryQuery({kind:'states',states:['CT'],searchStyle:'code'},'us-east-1'),/search:"CT"/);
+ assert.throws(()=>discoveryQuery({kind:'states',states:['CT'],searchStyle:'arbitrary'},'us-east-1'));
+});

@@ -19,3 +19,11 @@ Admin tooling:
 - `tests/providerRetry.integration.sql`: transactional rollback verification of explicit and missing Retry-After behavior.
 
 Verification: 45 focused Node tests passed. Transactional database tests covered regional leases and cooldowns. Real HTTP workers initially exposed Supabase safe-update enforcement missing from direct SQL tests; migration `20260930225000` adds explicit singleton predicates to all queue configuration updates. The first real East discovery batch then succeeded at 20:33 UTC. National price collection remains disabled pending complete inventory.
+
+Subsequent controls:
+
+- `reconcile-scopes` queues a canonical state-name query, then the state abbreviation if needed, for results that failed scope checks. It never substitutes a local-area count for a statewide count.
+- `catalog [new-file]` reconciles complete state inventories and Texas partition unions. Missing states, wrong geographic scopes, stale observations, and count mismatches remain explicit gaps.
+- `configureDiscovery.sql` starts the bounded discovery schedule and preserves any provider cooldown. Repeating it does not extend the existing bootstrap deadline.
+- National price workers use a database-enforced 15-second minimum request interval and a 45-second work window, allowing approximately three batches per minute while leaving room before the next cron tick. This is operator pacing, not a measured provider limit. National prices remain paused until the catalog is complete.
+- Both discovery and price transports retain allow-listed response metadata for diagnosing quota/reset information, excluding cookies and credentials.

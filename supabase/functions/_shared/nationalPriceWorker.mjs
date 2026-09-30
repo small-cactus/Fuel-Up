@@ -13,9 +13,10 @@ export async function collectNationalPrices({ db, fetchBatch = fetchNationalPric
   sleep = ms => new Promise(resolve => setTimeout(resolve, ms)), now = () => Date.now(), csrf, executionRegion }) {
   if (!NATIONAL_REGIONS[executionRegion]) throw new NationalPriceError('EXECUTION_REGION_REQUIRED');
   const started = now(), results = [];
-  for (let i = 0; i < 8 && now() - started < 55_000; i++) {
+  for (let i = 0; i < 8 && now() - started < 45_000; i++) {
     const jobs = await rpc(db, 'claim_fuel_national_region_job', { p_region: executionRegion });
     const job = jobs?.[0]; if (!job) break;
+    const claimedAt = now();
     try {
       if (job.execution_region !== executionRegion) throw new NationalPriceError('REGION_JOB_MISMATCH');
       const snapshot = { ...await fetchBatch(job.station_ids, { csrf }), executionRegion };
@@ -35,6 +36,10 @@ export async function collectNationalPrices({ db, fetchBatch = fetchNationalPric
       results.push({ id: job.id, status: 'succeeded', stations: snapshot.stations.length, priced });
     } catch (error) {
       const code = error instanceof NationalPriceError ? error.code : 'NETWORK_OR_RUNTIME_ERROR';
+      if (error.responseEvidence) {
+        try { await rpc(db, 'record_fuel_national_response', { p_id: job.id, p_token: job.lease_token, p_evidence: error.responseEvidence }); }
+        catch { /* Always persist the mandatory cooldown even if diagnostic storage fails. */ }
+      }
       await rpc(db, 'fail_fuel_national_job', { p_id: job.id, p_token: job.lease_token, p_code: code,
         p_retry_after_seconds: error instanceof NationalPriceError ? error.retryAfterSeconds : 0 });
       results.push({ id: job.id, status: 'failed', code });
@@ -42,7 +47,9 @@ export async function collectNationalPrices({ db, fetchBatch = fetchNationalPric
       // GraphQL error whose underlying access/rate status may be hidden.
       break;
     }
-    await sleep(2000);
+    const intervalMs = Math.max(1000, Number(job.request_interval_seconds || 15) * 1000);
+    const remaining = Math.min(intervalMs - (now() - claimedAt), 45_000 - (now() - started));
+    if (remaining > 0) await sleep(remaining);
   }
   return results;
 }

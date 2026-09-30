@@ -1,4 +1,5 @@
 import { buildGasBuddyGraphQLRequest } from './core.mjs';
+import { providerResponseEvidence } from './providerResponseEvidence.mjs';
 import { priceQuery, validatePriceBatch } from './nationalPriceBatch.mjs';
 
 export class NationalPriceError extends Error {
@@ -13,13 +14,15 @@ export function retryAfterSeconds(value, now = Date.now()) {
 
 export async function fetchNationalPriceBatch(ids, { fetchImpl = fetch, csrf, maxBytes = 8_000_000 } = {}) {
   if (!ids.length || ids.length > 2000) throw new NationalPriceError('INVALID_BATCH_SIZE');
-  const startedAt = new Date().toISOString();
+  const startedAt = new Date().toISOString(), started = performance.now();
   const { url, headers } = buildGasBuddyGraphQLRequest({ latitude: 0, longitude: 0 });
   const response = await fetchImpl(url, { method: 'POST', headers: { ...headers, ...(csrf ? { gbcsrf: csrf } : {}) },
     body: JSON.stringify({ query: priceQuery(ids), variables: {} }), signal: AbortSignal.timeout(25000) });
+  const responseEvidence = providerResponseEvidence(response, performance.now() - started);
   if (!response.ok) {
     await response.body?.cancel();
-    throw new NationalPriceError(`UPSTREAM_HTTP_${response.status}`, retryAfterSeconds(response.headers.get('retry-after')));
+    const error = new NationalPriceError(`UPSTREAM_HTTP_${response.status}`, retryAfterSeconds(response.headers.get('retry-after')));
+    error.responseEvidence = responseEvidence; throw error;
   }
   if (!response.body) throw new NationalPriceError('EMPTY_RESPONSE');
   const reader = response.body.getReader(), chunks = []; let size = 0;
@@ -35,10 +38,11 @@ export async function fetchNationalPriceBatch(ids, { fetchImpl = fetch, csrf, ma
   for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
   let body;
   try { body = JSON.parse(new TextDecoder().decode(bytes)); } catch { throw new NationalPriceError('INVALID_JSON'); }
-  if (body.errors?.length) throw new NationalPriceError('GRAPHQL_ERROR');
+  if (body.errors?.length) { const error = new NationalPriceError('GRAPHQL_ERROR');
+    error.responseEvidence = { ...responseEvidence, graphqlErrors: body.errors.map(e => String(e.message).slice(0, 500)).slice(0, 10) }; throw error; }
   let stations;
   try { stations = validatePriceBatch(body.data, ids); } catch { throw new NationalPriceError('COVERAGE_OR_SCHEMA_MISMATCH'); }
-  return { version: 1, provider: 'gasbuddy', startedAt, observedAt: new Date().toISOString(), stations };
+  return { version: 1, provider: 'gasbuddy', startedAt, observedAt: new Date().toISOString(), responseEvidence, stations };
 }
 
 export async function compressSnapshot(snapshot) {

@@ -14,11 +14,13 @@ export function discoveryQuery(task, region) {
   if (task.kind === 'states') {
     if (!Array.isArray(task.states) || !task.states.length || task.states.length > 4 || new Set(task.states).size !== task.states.length) throw new NationalPriceError('INVALID_DISCOVERY_STATES');
     task.states.forEach(stateAllowed);
-    return `query NationalInventory{${task.states.map((state, i) => `s${i}:locationBySearchTerm(search:${JSON.stringify(STATE_NAMES[state] + ', United States')},priority:"locality"){${locationFields} stations(limit:10000,maxAge:0,priority:"locality"){${selection}}}`).join(' ')}}`;
+    if (task.searchStyle && !['name','code','qualified'].includes(task.searchStyle)) throw new NationalPriceError('INVALID_SEARCH_STYLE');
+    const searchFor = state => task.searchStyle === 'name' ? STATE_NAMES[state] : task.searchStyle === 'code' ? state : STATE_NAMES[state] + ', United States';
+    return `query NationalInventory{${task.states.map((state, i) => `s${i}:locationBySearchTerm(search:${JSON.stringify(searchFor(state))},priority:"locality"){${locationFields} stations(limit:10000,maxAge:0,priority:"locality"){${selection}}}`).join(' ')}}`;
   }
   stateAllowed(task.state);
   if (task.kind === 'brands') {
-    if (!Array.isArray(task.brandIds) || !task.brandIds.length || task.brandIds.length > 8 || task.brandIds.some(id => !Number.isInteger(id) || id < 1 || id > 100000)) throw new NationalPriceError('INVALID_DISCOVERY_BRANDS');
+    if (!Array.isArray(task.brandIds) || !task.brandIds.length || task.brandIds.length > 8 || task.brandIds.some(id => !Number.isInteger(id) || id < 0 || id > 100000)) throw new NationalPriceError('INVALID_DISCOVERY_BRANDS');
     return `query BrandInventory{scope:locationBySearchTerm(search:${JSON.stringify(STATE_NAMES[task.state] + ', United States')},priority:"locality"){${locationFields} ${task.brandIds.map((id, i) => `s${i}:stations(brandId:${id},limit:10000,maxAge:0,priority:"locality"){${selection}}`).join(' ')}}}`;
   }
   if (task.kind === 'nearby') {
@@ -42,8 +44,8 @@ export function normalizeDiscovery(data, task, executionRegion) {
       if (!/^\d{1,12}$/.test(s.id) || ids.has(s.id) || !Number.isFinite(s.latitude) || !Number.isFinite(s.longitude)) throw new NationalPriceError('DISCOVERY_ID_OR_GEOMETRY_ERROR');
       ids.add(s.id);
     }
-    return { state, ...(brandId ? { brandId } : {}), reportedCount: rows.count, returnedCount: ids.size,
-      fullResponse: ids.size === rows.count, scopeMatches: location.countryCode === 'US' && location.regionCode === state,
+    return { state, ...(brandId !== undefined ? { brandId } : {}), reportedCount: rows.count, returnedCount: ids.size,
+      fullResponse: ids.size === rows.count, scopeMatches: String(location.countryCode).toUpperCase() === 'US' && String(location.regionCode).toUpperCase() === state,
       location: { displayName: location.displayName, countryCode: location.countryCode, regionCode: location.regionCode, latitude: location.latitude, longitude: location.longitude }, stations: rows.results };
   }) };
 }

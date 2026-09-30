@@ -83,3 +83,10 @@ test('disabled or cooled queue causes zero provider calls and zero storage write
   assert.deepEqual(await collectNationalPrices({ executionRegion: 'us-east-1', db, fetchBatch: async () => { fetched = true; } }), []);
   assert.equal(fetched, false); assert.equal(db.uploads.length, 0);
 });
+test('worker spaces provider calls and finishes its invocation before the next cron tick', async () => {
+ let clock=0; const fetchedAt=[];
+ const jobs=Array.from({length:8},(_,i)=>({id:i+1,run_id:10,lease_token:'token-'+i,station_ids:['1','2'],request_interval_seconds:15}));
+ const db=fakeDB({jobs});
+ const result=await collectNationalPrices({db,executionRegion:'us-east-1',now:()=>clock,sleep:async ms=>{clock+=ms;},fetchBatch:async()=>{fetchedAt.push(clock);clock+=3000;return snapshot;}});
+ assert.deepEqual(fetchedAt,[0,15000,30000]);assert.equal(result.length,3);assert.equal(clock,45000);
+});

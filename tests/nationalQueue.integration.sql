@@ -11,14 +11,14 @@ begin
   cat:=install_fuel_national_catalog(manifest);
   if (select count(*) from fuel_national_state_routes)<>51 or (select count(distinct execution_region) from fuel_national_batches where catalog_id=cat)<>3 then raise exception 'Incomplete regional mapping'; end if;
   if begin_fuel_national_hour() is not null then raise exception 'Disabled collector created a run'; end if;
-  update fuel_national_config set catalog_id=cat,enabled=true,ends_at=now()+interval '2 hours',approved_lookups_per_hour=500,provider_backoff_until=null;
+  update fuel_national_config set catalog_id=cat,enabled=true,ends_at=now()+interval '2 hours',approved_lookups_per_hour=500,provider_backoff_until=null,last_request_at=null;
   update fuel_research_campaigns set provider_backoff_until=null;
   run:=begin_fuel_national_hour();
   if run<>begin_fuel_national_hour() or (select count(*) from fuel_national_jobs where run_id=run)<>3 then raise exception 'Non-idempotent hour'; end if;
   select * into job from claim_fuel_national_region_job('us-east-1');
   if job.id is null or cardinality(job.station_ids)<>38 then raise exception 'Claim missing coverage'; end if;
   if job.execution_region<>'us-east-1' or '2'=any(job.station_ids) then raise exception 'East worker claimed Alaska'; end if;
-  update fuel_national_config set last_request_at=now()-interval '5 seconds';
+  update fuel_national_config set last_request_at=now()-interval '1 minute';
   if exists(select 1 from claim_fuel_national_region_job('us-east-1')) then raise exception 'Concurrent provider request'; end if;
   if finish_fuel_national_job(job.id,gen_random_uuid(),job.station_ids,now(),now(),'bad',100,repeat('a',64),0) then raise exception 'Accepted stale token'; end if;
   path:=job.run_id||'/'||job.id||'/'||job.lease_token||'.json.gz';
@@ -43,6 +43,8 @@ begin
   saved:=finish_fuel_national_job(other.id,other.lease_token,other.station_ids,now(),now(),path,100,repeat('b',64),1);
   if not saved or (select status from fuel_national_runs where id=run)<>'running' then raise exception 'Partial regional run marked complete'; end if;
   if finish_fuel_national_job(other.id,other.lease_token,other.station_ids,now(),now(),path,100,repeat('b',64),1) then raise exception 'Duplicate completion accepted'; end if;
+  update fuel_national_config set last_request_at=now();
+  if exists(select 1 from claim_fuel_national_region_job('us-west-1')) then raise exception 'Ignored shared request pacing'; end if;
   foreach host in array array['us-west-1','us-west-2'] loop
     update fuel_national_config set last_request_at=null;
     select * into other from claim_fuel_national_region_job(host);
