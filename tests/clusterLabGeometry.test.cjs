@@ -25,8 +25,30 @@ assert(ClusterLabGeometry.capsuleGap(priceFrame.offsetBy(dx: 84, dy: 32), priceF
 assert(ClusterLabGeometry.owners(separate, previous: [:]) == ["a": "a", "b": "b"])
 let contact = [station("a", 3, 0), station("b", 4, 83), station("c", 5, 162)]
 let merged = ClusterLabGeometry.owners(contact, previous: [:])
-assert(merged == ["a": "a", "b": "a", "c": "a"])
+assert(merged == ["a": "a", "b": "a", "c": "c"], "A hidden neighbor must not recruit a distant station")
 assert(ClusterLabGeometry.owners(Array(contact.reversed()), previous: [:]) == merged)
+// Even an old transitive cluster must release members beyond its actual parent.
+let oldChain = ["a": "a", "b": "a", "c": "a"]
+assert(ClusterLabGeometry.owners(contact, previous: oldChain) == merged)
+let verticalChain = [station("a", 3, 0), station("b", 4, 0, 30), station("c", 5, 0, 60)]
+assert(ClusterLabGeometry.owners(verticalChain, previous: oldChain) == merged)
+// A long street of individually close stations must produce bounded groups,
+// including when input order, focus size, and prior grouping vary.
+let street = (0..<100).map { station("s-" + String($0), 3 + Double($0) / 100, Double($0) * 70) }
+for input in [street, Array(street.reversed())] {
+  var history = Dictionary(uniqueKeysWithValues: street.map { ($0.id, "s-0") })
+  for zoom in [1.0, 0.7, 1.3, 1.0] {
+    let points = input.map { station($0.id, $0.price, Double($0.point.x) * zoom) }
+    let owners = ClusterLabGeometry.owners(points, previous: history, selectedId: "s-0")
+    assert(Set(owners.values).count > 25)
+    for point in points {
+      let parent = points.first { $0.id == owners[point.id]! }!
+      assert(abs(point.point.x - parent.point.x) <= 128, "Unbounded parent distance")
+    }
+    history = owners
+  }
+}
+
 let boundary = [station("a", 3, 0), station("b", 4, 105)]
 assert(ClusterLabGeometry.owners(boundary, previous: merged)["b"] == "a")
 assert(ClusterLabGeometry.owners(boundary, previous: [:])["b"] == "b")

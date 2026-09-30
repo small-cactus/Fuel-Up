@@ -5,7 +5,7 @@ const { mkdtempSync, writeFileSync, rmSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const path = require('node:path');
 
-test('native market tints highlight one cheapest station and grade every alternative red', () => {
+test('native market assessment identifies one cheapest station and scores alternatives', () => {
     const directory = mkdtempSync(path.join(tmpdir(), 'fuelup-market-'));
     try {
         const main = path.join(directory, 'main.swift');
@@ -54,8 +54,8 @@ let nearby = (0..<12).map { quote("n-\($0)", 3.2, 27.95 + Double($0) * 0.0001) }
 let distant = (0..<20).map { quote("d-\($0)", 2.0, 27.98 + Double($0) * 0.0001) }
 let bounded = ClusterLabMarket.assess([quote("target", 3.2)] + nearby + distant)
 assert(bounded["target"]!.peerCount == 12 && bounded["target"]!.median == 3.2)
-assert(bounded["target"]!.score == -0.55, "Median redness must stay local and independent of distant bargains")
-assert(abs(result["median"]!.score + 0.55) < 0.000001, "Typical alternatives should be clearly red")
+assert(bounded["target"]!.score == -0.55, "Median assessment must stay local and independent of distant bargains")
+assert(abs(result["median"]!.score + 0.55) < 0.000001, "Typical alternatives retain the median comparison score")
 assert(abs(result["high"]!.score) > abs(result["median"]!.score))
 assert(abs(result["worst"]!.score) > abs(result["high"]!.score))
 var previous: Double = 2

@@ -70,26 +70,24 @@ screen-space spatial hashing and contact hysteresis (84 × 32 pt to connect,
 120 × 56 pt to disconnect for side-by-side stations). Vertically dominant
 pairs connect at 32 pt and disconnect at 34 pt: a two-point anti-chatter band
 without the extended retention or pre-split count stretch. Spatial
-hash cells span this retained range so stretched neighbors remain discoverable. `ClusterLabRenderer` owns
+hash cells span this retained range so stretched neighbors remain discoverable.
+Only displayed representatives recruit nearby stations; hidden members cannot
+extend a cluster through a chain of neighbors. Every member must stay within
+its own representative's existing contact/retention range, so a long street
+cannot collapse into one distant badge. Price/ID order remains deterministic.
+`ClusterLabRenderer` owns
 station identity, projection, reversible motion, and atomic handoffs.
 `ClusterLabDynamics` handles mass-weighted impacts and magnetic home springs.
 `ClusterLabMarket` gives only the cheapest confirmed station in the loaded search
 snapshot a green tint. The input already excludes estimated prices and
 contains only the selected fuel grade. Stable station-ID order breaks price ties,
-matching cluster ownership. Every alternative is red, including tied prices.
-Median alternatives now have a red score of 0.55 (about 63% tint saturation).
-Red increases above the local median; below-market alternatives soften toward
-a floor of 0.18. This makes the one green bargain more distinct. The green
-winner grows more saturated with its savings below the local median. Full
-saturation means a difference of at least 15 cents or 8% of that reference,
-whichever is larger. The median uses up to 12 peers within five miles; with
-fewer than three, the loaded search median supplies the reference. This is
-recomputed only when data changes, so panning and zooming never reassign colors.
-
-The tint matches onboarding's #00FF2F green and #FF1900 red at 30% opacity.
-Saturation ranges from pastel to the original onboarding hue, with constant
-brightness and opacity. Adaptive system-label foregrounds match onboarding's
-light/dark text treatment and stay legible over the lighter regular glass.
+matching cluster ownership. Every alternative is untinted regular glass, including
+prices tied with the winner. The winner uses one fixed onboarding #00FF2F green
+at 30% opacity. Market scores remain available for comparison diagnostics, but
+the renderer maps them to only two tint states: green or no tint. Neither market
+spread nor camera movement varies saturation. Counts and traveling count copies
+inherit their displayed parent's tint until the existing price handoff.
+Adaptive system-label foregrounds preserve light/dark text legibility.
 
 `ClusterLabGlass` uses Apple's public container and pill effects. Native container effects are
 assigned once; layouts and membership changes never recreate their materials.

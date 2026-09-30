@@ -11,7 +11,8 @@ struct LabMarketAssessment {
   let median: Double?
   let peerCount: Int
   let cheapestPrice: Double?
-  // Sign selects the cheapest green station; magnitude is distance from market.
+  // Positive selects the sole green station; magnitude is comparison metadata.
+  // The renderer leaves every non-positive score untinted.
   let score: Double
   static let unknown = LabMarketAssessment(median: nil, peerCount: 0, cheapestPrice: nil, score: 0)
 }
@@ -48,9 +49,8 @@ enum ClusterLabMarket {
       let middle = peers.count / 2
       let median: Double? = peers.count >= minimumPeers ?
         (peers.count.isMultiple(of: 2) ? (peers[middle - 1] + peers[middle]) / 2 : peers[middle]) : nil
-      // Median alternatives are clearly red. Below-market alternatives remain
-      // softer, while premiums reach full red at the same market-relative spread.
-      // The winner's green strengthens with its savings below that same market.
+      // Preserve market-relative scores for comparison diagnostics. Appearance
+      // uses only the winner's positive sign, never this varying magnitude.
       let reference = median ?? snapshotMedian
       let isCheapest = quote.id == cheapest.id
       let difference = isCheapest ? reference - quote.price : quote.price - reference

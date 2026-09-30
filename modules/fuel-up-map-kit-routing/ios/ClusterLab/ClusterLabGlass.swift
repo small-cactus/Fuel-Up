@@ -38,14 +38,10 @@ enum ClusterLabGlass {
   }
 
   static func marketTint(score: Double) -> UIColor? {
-    guard abs(score) > 0.001 else { return nil }
-    let strength = CGFloat(min(1, abs(score)))
-    // Match WelcomeStep.OnboardingChip and PredictiveFuelingStep: #00FF2F
-    // green / #FF1900 red, at 30% tint opacity. Desaturate toward pastel at
-    // typical prices without darkening the native material or changing alpha.
-    let hue: CGFloat = score > 0 ? (2 + 47.0 / 255) / 6 : (25.0 / 255) / 6
-    return UIColor(hue: hue, saturation: 0.18 + 0.82 * strength,
-                   brightness: 1, alpha: 0.3)
+    guard score > 0 else { return nil }
+    // One fixed onboarding green (#00FF2F); every other pill is native,
+    // untinted regular glass, independent of its distance from the median.
+    return UIColor(red: 0, green: 1, blue: 47.0 / 255, alpha: 0.3)
   }
 }
 
@@ -101,7 +97,7 @@ final class ClusterLabPill {
             "\(cents) cents above the cheapest confirmed station in this search")
       } else { marketDescription = "Price comparison unavailable" }
     }
-    let nextScore = (market.score * 20).rounded() / 20
+    let nextScore: Double = market.score > 0 ? 1 : 0
     guard !hasTint || nextScore != tintScore else { return }
     hasTint = true; tintScore = nextScore; tintUpdateCount += 1
     let color = ClusterLabGlass.marketTint(score: nextScore)

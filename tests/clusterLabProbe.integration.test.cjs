@@ -48,13 +48,11 @@ function assertParentTints(report, frame) {
                 (view.priceMix > 0 || view.revealingPrice ? view.id : view.logicalTintOwner));
         assert.ok(Number.isFinite(report.stationPrices[expectedId]), 'missing station quote');
         assert.equal(view.tintOwner, expectedId, `station tint followed glass connectivity for ${view.id}`);
-        assert.equal(view.tintScore, report.marketScores[expectedId], `price tint changed during motion for ${view.id}`);
-        assert.equal(view.materialTint.length, 4, 'missing native glass material tint');
-        const score = report.marketScores[expectedId];
-        const saturation = 0.18 + 0.82 * Math.min(1, Math.abs(score));
-        const fraction = score > 0 ? 47 / 255 : 25 / 255;
-        const expectedTint = score > 0 ? [1 - saturation, 1, 1 - saturation * (1 - fraction), 0.3] :
-            [1, 1 - saturation * (1 - fraction), 1 - saturation, 0.3];
+        const isCheapest = report.marketScores[expectedId] > 0;
+        assert.equal(view.tintScore, isCheapest ? 1 : 0, `price tint changed during motion for ${view.id}`);
+        const expectedTint = isCheapest ? [0, 1, 47 / 255, 0.3] : [];
+        assert.equal(view.materialTint.length, expectedTint.length,
+            isCheapest ? 'missing green native glass tint' : 'alternative must have no native tint');
         view.materialTint.forEach((channel, i) => assert.ok(Math.abs(channel - expectedTint[i]) < 0.00001,
             `native material color changed for ${view.id}`));
         const sameOwner = frame.views.filter(other => other.tintOwner === expectedId);
@@ -84,7 +82,7 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     assert.equal(report.stagesCompleted, 11);
     assert.ok(report.samples.length >= 250, 'insufficient live frame coverage');
     assert.equal(report.baseline.filter(view => view.tintScore > 0).length, 1, 'expected exactly one cheapest green price');
-    assert.equal(report.baseline.filter(view => view.tintScore < 0).length, 5, 'every alternative should be red');
+    assert.equal(report.baseline.filter(view => view.tintScore === 0).length, 5, 'every alternative should be untinted');
     const types = new Set(report.events.map(event => event.type));
     for (const type of ['merge-start', 'merge-arrive', 'merge-handoff', 'split-spawn', 'split-handoff', 'merge-impulse', 'split-impulse', 'split-stretch', 'contact-catch']) {
         assert.ok(types.has(type), `missing ${type}`);
@@ -224,8 +222,8 @@ test('connected +1 moves outward before its split is triggered', { timeout: 9000
     assert.equal(report.final.length, 2);
     assert.ok(report.baseline.find(view => view.id === 'lab-0').tintScore > 0,
         'the cheapest confirmed price should remain green');
-    assert.ok(report.baseline.find(view => view.id === 'lab-1').tintScore < 0,
-        'the more expensive alternative should be red even with only two stations');
+    assert.ok(report.baseline.find(view => view.id === 'lab-1').tintScore === 0,
+        'the more expensive alternative should be untinted even with only two stations');
     const connected = report.samples.flatMap(frame => frame.views.filter(view => view.role === 'badge'));
     const intermediate = connected.filter(view => view.attachmentOffset > 58 && view.attachmentOffset < 73);
     assert.ok(intermediate.length >= 4, '+1 skipped the visible connected travel phase');

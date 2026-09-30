@@ -49,12 +49,7 @@ enum ClusterLabGeometry {
 
   static func owners(_ stations: [LabProjectedStation], previous: [String: String], selectedId: String? = nil) -> [String: String] {
     let sorted = stations.sorted { $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price }
-    var parent = Array(sorted.indices)
-    func root(_ index: Int) -> Int {
-      var result = index
-      while parent[result] != result { result = parent[result] }
-      return result
-    }
+    var owners: [String: String] = [:]
     struct Cell: Hashable { let x: Int; let y: Int }
     var grid: [Cell: [Int]] = [:]
     let extraWidth = pillSize.width * (focusedScale - 1) / 2
@@ -66,10 +61,11 @@ enum ClusterLabGeometry {
       // search cannot miss a stretched pair across a bucket boundary.
       let cell = Cell(x: Int(floor(station.point.x / cellWidth)),
                       y: Int(floor(station.point.y / cellHeight)))
+      var representative: Int?
       for x in (cell.x - 1)...(cell.x + 1) {
         for y in (cell.y - 1)...(cell.y + 1) {
           for other in grid[Cell(x: x, y: y)] ?? [] {
-            let retained = previous[station.id] != nil && previous[station.id] == previous[sorted[other].id]
+            let retained = previous[station.id] == sorted[other].id
             let dx = abs(station.point.x - sorted[other].point.x)
             let dy = abs(station.point.y - sorted[other].point.y)
             let vertical = isVertical(CGPoint(x: dx, y: dy))
@@ -77,15 +73,21 @@ enum ClusterLabGeometry {
             let selected = station.id == selectedId || sorted[other].id == selectedId
             if dx <= (retained ? disconnectRange.width : pillSize.width) + (selected ? extraWidth : 0) &&
                dy <= (retained ? retainedHeight : pillSize.height) + (selected ? extraHeight : 0) {
-              let a = root(index), b = root(other)
-              parent[max(a, b)] = min(a, b)
+              representative = min(representative ?? other, other)
             }
           }
         }
       }
-      grid[cell, default: []].append(index)
+      if let representative {
+        owners[station.id] = sorted[representative].id
+      } else {
+        owners[station.id] = station.id
+        // Only visible representatives recruit members. Hidden stations cannot
+        // form a transitive chain that pulls distant prices into this badge.
+        grid[cell, default: []].append(index)
+      }
     }
-    return Dictionary(uniqueKeysWithValues: sorted.indices.map { (sorted[$0].id, sorted[root($0)].id) })
+    return owners
   }
 
   // Follow the observed camera movement, with a bounded settling time instead
