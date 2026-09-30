@@ -122,3 +122,27 @@ increase the running seven-day campaign's request volume.
   separately established by live requests.
 
 No conclusion here assumes that a later crowd report is verified pump truth.
+
+## Country-search follow-up
+
+Four additional read-only queries (each limited to three station records) tested
+`USA`, `US`, `Canada`, and `United States` with `priority: "country"`. All returned
+HTTP 200, but none produced a national inventory:
+
+- `USA`, `US`, and `United States` with country priority resolved to
+  39.7837304, -100.445882 with null country/region codes. Each returned the same
+  three stations in Oberlin and Dresden, Kansas. This supports country-name
+  geocoding followed by a local search, rather than country-wide filtering.
+- `Canada` with locality priority resolved to **Canada Bay, NSW, Australia** and
+  returned zero stations. The search label must not be treated as verified scope.
+- Accepting the string `priority: "country"` did not change the US result. It is
+  not evidence that this is a supported country-enumeration mode.
+
+The prior table compared **fetched rows**, not geography totals: Clearwater's
+321 records covered its entire reported count, whereas Florida's 943 unique
+records were only two sampled pages out of a reported **7,931**. Florida's count
+and statewide bounds are evidence of larger scope, not verified full enumeration.
+
+[Country probe evidence](country-probes.json) preserves these four queries and
+their geographic responses with cursor values omitted. The original 21-request
+accounting above is unchanged; this follow-up adds four requests.

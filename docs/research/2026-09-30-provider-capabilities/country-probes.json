@@ -1,0 +1,217 @@
+{
+  "scope": "Four additional read-only country-name probes; limit three records per request. No collection changes.",
+  "records": [
+    {
+      "name": "country-usa",
+      "startedAt": "2026-09-30T19:01:16.483Z",
+      "status": 200,
+      "query": "query($search:String,$priority:String){locationBySearchTerm(search:$search,priority:$priority){displayName countryCode regionCode latitude longitude stations(priority:$priority,limit:3,maxAge:0){count cursor{next} results{id name latitude longitude address{locality region country}}}}}",
+      "variables": {
+        "search": "USA",
+        "priority": "locality"
+      },
+      "body": {
+        "data": {
+          "locationBySearchTerm": {
+            "displayName": "USA",
+            "countryCode": null,
+            "regionCode": null,
+            "latitude": 39.7837304,
+            "longitude": -100.445882,
+            "stations": {
+              "count": 3,
+              "cursor": {
+                "hasNext": true
+              },
+              "results": [
+                {
+                  "id": "133181",
+                  "name": "Cenex",
+                  "latitude": 39.828302445373,
+                  "longitude": -100.533678531647,
+                  "address": {
+                    "locality": "Oberlin",
+                    "region": "KS",
+                    "country": "US"
+                  }
+                },
+                {
+                  "id": "133182",
+                  "name": "Phillips 66",
+                  "latitude": 39.827765509229,
+                  "longitude": -100.534687042236,
+                  "address": {
+                    "locality": "Oberlin",
+                    "region": "KS",
+                    "country": "US"
+                  }
+                },
+                {
+                  "id": "189572",
+                  "name": "Ed's Tire & Oil",
+                  "latitude": 39.619784,
+                  "longitude": -100.421616,
+                  "address": {
+                    "locality": "Dresden",
+                    "region": "KS",
+                    "country": "US"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "country-us",
+      "startedAt": "2026-09-30T19:01:19.335Z",
+      "status": 200,
+      "query": "query($search:String,$priority:String){locationBySearchTerm(search:$search,priority:$priority){displayName countryCode regionCode latitude longitude stations(priority:$priority,limit:3,maxAge:0){count cursor{next} results{id name latitude longitude address{locality region country}}}}}",
+      "variables": {
+        "search": "US",
+        "priority": "locality"
+      },
+      "body": {
+        "data": {
+          "locationBySearchTerm": {
+            "displayName": "US",
+            "countryCode": null,
+            "regionCode": null,
+            "latitude": 39.7837304,
+            "longitude": -100.445882,
+            "stations": {
+              "count": 3,
+              "cursor": {
+                "hasNext": true
+              },
+              "results": [
+                {
+                  "id": "133181",
+                  "name": "Cenex",
+                  "latitude": 39.828302445373,
+                  "longitude": -100.533678531647,
+                  "address": {
+                    "locality": "Oberlin",
+                    "region": "KS",
+                    "country": "US"
+                  }
+                },
+                {
+                  "id": "133182",
+                  "name": "Phillips 66",
+                  "latitude": 39.827765509229,
+                  "longitude": -100.534687042236,
+                  "address": {
+                    "locality": "Oberlin",
+                    "region": "KS",
+                    "country": "US"
+                  }
+                },
+                {
+                  "id": "189572",
+                  "name": "Ed's Tire & Oil",
+                  "latitude": 39.619784,
+                  "longitude": -100.421616,
+                  "address": {
+                    "locality": "Dresden",
+                    "region": "KS",
+                    "country": "US"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "country-canada",
+      "startedAt": "2026-09-30T19:01:21.920Z",
+      "status": 200,
+      "query": "query($search:String,$priority:String){locationBySearchTerm(search:$search,priority:$priority){displayName countryCode regionCode latitude longitude stations(priority:$priority,limit:3,maxAge:0){count cursor{next} results{id name latitude longitude address{locality region country}}}}}",
+      "variables": {
+        "search": "Canada",
+        "priority": "locality"
+      },
+      "body": {
+        "data": {
+          "locationBySearchTerm": {
+            "displayName": "Canada Bay, NSW",
+            "countryCode": "AU",
+            "regionCode": "NSW",
+            "latitude": -33.865028935273024,
+            "longitude": 151.115819551744,
+            "stations": {
+              "count": 0,
+              "cursor": null,
+              "results": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "country-us-priority",
+      "startedAt": "2026-09-30T19:01:24.074Z",
+      "status": 200,
+      "query": "query($search:String,$priority:String){locationBySearchTerm(search:$search,priority:$priority){displayName countryCode regionCode latitude longitude stations(priority:$priority,limit:3,maxAge:0){count cursor{next} results{id name latitude longitude address{locality region country}}}}}",
+      "variables": {
+        "search": "United States",
+        "priority": "country"
+      },
+      "body": {
+        "data": {
+          "locationBySearchTerm": {
+            "displayName": "United States",
+            "countryCode": null,
+            "regionCode": null,
+            "latitude": 39.7837304,
+            "longitude": -100.445882,
+            "stations": {
+              "count": 3,
+              "cursor": {
+                "hasNext": true
+              },
+              "results": [
+                {
+                  "id": "133181",
+                  "name": "Cenex",
+                  "latitude": 39.828302445373,
+                  "longitude": -100.533678531647,
+                  "address": {
+                    "locality": "Oberlin",
+                    "region": "KS",
+                    "country": "US"
+                  }
+                },
+                {
+                  "id": "133182",
+                  "name": "Phillips 66",
+                  "latitude": 39.827765509229,
+                  "longitude": -100.534687042236,
+                  "address": {
+                    "locality": "Oberlin",
+                    "region": "KS",
+                    "country": "US"
+                  }
+                },
+                {
+                  "id": "189572",
+                  "name": "Ed's Tire & Oil",
+                  "latitude": 39.619784,
+                  "longitude": -100.421616,
+                  "address": {
+                    "locality": "Dresden",
+                    "region": "KS",
+                    "country": "US"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}
