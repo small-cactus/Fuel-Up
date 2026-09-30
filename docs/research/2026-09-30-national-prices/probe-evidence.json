@@ -1,0 +1,379 @@
+{
+  "recordedAt": "2026-09-30T19:45:57.208Z",
+  "completeNationalCatalog": false,
+  "providerDenial": {
+    "status": 429,
+    "at": "2026-09-30T19:35:48Z",
+    "phase": "Texas brand inventory IDs 120..127",
+    "retryAfter": "Not captured by the older probe transport; no further probes made",
+    "localStopFile": true,
+    "conservativeNewCollectorCooldownSeconds": 3600
+  },
+  "texas": {
+    "expected": 15271,
+    "baseInventoryUnique": 10000,
+    "brandsQueriedForCounts": 665,
+    "nonemptyBrands": 144,
+    "brandCountSumNotUnique": 14801,
+    "completedBrandInventoryPartitions": 120,
+    "uniqueKnownIDs": 12681,
+    "missingAgainstReportedCount": 2590
+  },
+  "scopes": {
+    "s0": {
+      "displayName": "New York",
+      "countryCode": "US",
+      "regionCode": "NY",
+      "latitude": null,
+      "longitude": null,
+      "stations": {
+        "count": 5356
+      }
+    },
+    "s1": {
+      "displayName": "New York",
+      "countryCode": "US",
+      "regionCode": "NY",
+      "latitude": null,
+      "longitude": null,
+      "stations": {
+        "count": 5356
+      }
+    },
+    "s2": {
+      "displayName": "Washington",
+      "countryCode": "US",
+      "regionCode": "WA",
+      "latitude": null,
+      "longitude": null,
+      "stations": {
+        "count": 2579
+      }
+    },
+    "s3": {
+      "displayName": "District of Columbia, United States",
+      "countryCode": null,
+      "regionCode": null,
+      "latitude": 38.8950982,
+      "longitude": -77.0363849,
+      "stations": {
+        "count": 719
+      }
+    },
+    "s4": {
+      "displayName": "Georgia",
+      "countryCode": "US",
+      "regionCode": "GA",
+      "latitude": null,
+      "longitude": null,
+      "stations": {
+        "count": 6701
+      }
+    }
+  },
+  "requests": [
+    {
+      "name": "texas-brand-count-sample",
+      "startedAt": "2026-09-30T19:32:11.675Z",
+      "status": 200,
+      "receivedMs": 351.36533299999996,
+      "decodedBodyBytes": 421,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:31,limit:1,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:48,limit:1,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:243,limit:1,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:2145,limit:1,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:122,limit:1,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:2094,limit:1,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:2096,limit:1,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:2226,limit:1,maxAge:0,priority:\"locality\"){count results{id}} b8:stations(brandId:3829,limit:1,maxAge:0,priority:\"locality\"){count results{id}} b9:stations(brandId:3235,limit:1,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "texas-brand-zero",
+      "startedAt": "2026-09-30T19:32:36.466Z",
+      "status": 200,
+      "receivedMs": 499.77308300000027,
+      "decodedBodyBytes": 133,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:0,limit:1,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:-1,limit:1,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-counts-0",
+      "startedAt": "2026-09-30T19:33:04.227Z",
+      "status": 200,
+      "receivedMs": 495.2866670000001,
+      "decodedBodyBytes": 950,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:208,limit:1,maxAge:0,priority:\"locality\"){count} b1:stations(brandId:2083,limit:1,maxAge:0,priority:\"locality\"){count} b2:stations(brandId:2068,limit:1,maxAge:0,priority:\"locality\"){count} b3:stations(brandId:2178,limit:1,maxAge:0,priority:\"locality\"){count} b4:stations(brandId:2223,limit:1,maxAge:0,priority:\"locality\"){count} b5:stations(brandId:324,limit:1,maxAge:0,priority:\"locality\"){count} b6:stations(brandId:15,limit:1,maxAge:0,priority:\"locality\"){count} b7:stations(brandId:14,limit:1,maxAge:0,priority:\"locality\"){count} b8:stations(brandId:16,limit:1,maxAge:0,priority:\"locality\"){count} b9:stations(brandId:300,limit:1,maxAge:0,priority:\"locality\"){count} b10:stations(brandId:17,limit:1,maxAge:0,priority:\"locality\"){count} b11:stations(brandId:2093,limit:1,maxAge:0,priority:\"locality\"){count} b12:stations(brandId:18,limit:1,maxAge:0,priority:\"locality\"){count} b13:stations(brandId:3202,limit:1,maxAge:0,priority:\"locality\"){count} b14:stations(brandId:3400,limit:1,maxAge:0,priority:\"locality\"){count} b15:stations(brandId:361,limit:1,maxAge:0,priority:\"locality\"){count} b16:stations(brandId:19,limit:1,maxAge:0,priority:\"locality\"){count} b17:stations(brandId:177,limit:1,maxAge:0,priority:\"locality\"){count} b18:stations(brandId:2029,limit:1,maxAge:0,priority:\"locality\"){count} b19:stations(brandId:253,limit:1,maxAge:0,priority:\"locality\"){count} b20:stations(brandId:187,limit:1,maxAge:0,priority:\"locality\"){count} b21:stations(brandId:352,limit:1,maxAge:0,priority:\"locality\"){count} b22:stations(brandId:367,limit:1,maxAge:0,priority:\"locality\"){count} b23:stations(brandId:2092,limit:1,maxAge:0,priority:\"locality\"){count} b24:stations(brandId:2180,limit:1,maxAge:0,priority:\"locality\"){count} b25:stations(brandId:328,limit:1,maxAge:0,priority:\"locality\"){count} b26:stations(brandId:2024,limit:1,maxAge:0,priority:\"locality\"){count} b27:stations(brandId:20,limit:1,maxAge:0,priority:\"locality\"){count} b28:stations(brandId:2225,limit:1,maxAge:0,priority:\"locality\"){count} b29:stations(brandId:2201,limit:1,maxAge:0,priority:\"locality\"){count} b30:stations(brandId:2117,limit:1,maxAge:0,priority:\"locality\"){count} b31:stations(brandId:2243,limit:1,maxAge:0,priority:\"locality\"){count} b32:stations(brandId:2030,limit:1,maxAge:0,priority:\"locality\"){count} b33:stations(brandId:2071,limit:1,maxAge:0,priority:\"locality\"){count} b34:stations(brandId:2047,limit:1,maxAge:0,priority:\"locality\"){count} b35:stations(brandId:2152,limit:1,maxAge:0,priority:\"locality\"){count} b36:stations(brandId:266,limit:1,maxAge:0,priority:\"locality\"){count} b37:stations(brandId:169,limit:1,maxAge:0,priority:\"locality\"){count} b38:stations(brandId:158,limit:1,maxAge:0,priority:\"locality\"){count} b39:stations(brandId:2120,limit:1,maxAge:0,priority:\"locality\"){count} b40:stations(brandId:2245,limit:1,maxAge:0,priority:\"locality\"){count} b41:stations(brandId:21,limit:1,maxAge:0,priority:\"locality\"){count} b42:stations(brandId:3565,limit:1,maxAge:0,priority:\"locality\"){count} b43:stations(brandId:4292,limit:1,maxAge:0,priority:\"locality\"){count} b44:stations(brandId:237,limit:1,maxAge:0,priority:\"locality\"){count} b45:stations(brandId:331,limit:1,maxAge:0,priority:\"locality\"){count} b46:stations(brandId:210,limit:1,maxAge:0,priority:\"locality\"){count} b47:stations(brandId:263,limit:1,maxAge:0,priority:\"locality\"){count} b48:stations(brandId:3037,limit:1,maxAge:0,priority:\"locality\"){count} b49:stations(brandId:204,limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-counts-50",
+      "startedAt": "2026-09-30T19:33:06.724Z",
+      "status": 200,
+      "receivedMs": 283.94795800000065,
+      "decodedBodyBytes": 951,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:2019,limit:1,maxAge:0,priority:\"locality\"){count} b1:stations(brandId:333,limit:1,maxAge:0,priority:\"locality\"){count} b2:stations(brandId:254,limit:1,maxAge:0,priority:\"locality\"){count} b3:stations(brandId:2213,limit:1,maxAge:0,priority:\"locality\"){count} b4:stations(brandId:235,limit:1,maxAge:0,priority:\"locality\"){count} b5:stations(brandId:2040,limit:1,maxAge:0,priority:\"locality\"){count} b6:stations(brandId:22,limit:1,maxAge:0,priority:\"locality\"){count} b7:stations(brandId:2121,limit:1,maxAge:0,priority:\"locality\"){count} b8:stations(brandId:4324,limit:1,maxAge:0,priority:\"locality\"){count} b9:stations(brandId:2211,limit:1,maxAge:0,priority:\"locality\"){count} b10:stations(brandId:2160,limit:1,maxAge:0,priority:\"locality\"){count} b11:stations(brandId:23,limit:1,maxAge:0,priority:\"locality\"){count} b12:stations(brandId:2041,limit:1,maxAge:0,priority:\"locality\"){count} b13:stations(brandId:332,limit:1,maxAge:0,priority:\"locality\"){count} b14:stations(brandId:2054,limit:1,maxAge:0,priority:\"locality\"){count} b15:stations(brandId:2097,limit:1,maxAge:0,priority:\"locality\"){count} b16:stations(brandId:24,limit:1,maxAge:0,priority:\"locality\"){count} b17:stations(brandId:345,limit:1,maxAge:0,priority:\"locality\"){count} b18:stations(brandId:337,limit:1,maxAge:0,priority:\"locality\"){count} b19:stations(brandId:314,limit:1,maxAge:0,priority:\"locality\"){count} b20:stations(brandId:3103,limit:1,maxAge:0,priority:\"locality\"){count} b21:stations(brandId:2196,limit:1,maxAge:0,priority:\"locality\"){count} b22:stations(brandId:4225,limit:1,maxAge:0,priority:\"locality\"){count} b23:stations(brandId:25,limit:1,maxAge:0,priority:\"locality\"){count} b24:stations(brandId:3664,limit:1,maxAge:0,priority:\"locality\"){count} b25:stations(brandId:281,limit:1,maxAge:0,priority:\"locality\"){count} b26:stations(brandId:26,limit:1,maxAge:0,priority:\"locality\"){count} b27:stations(brandId:2005,limit:1,maxAge:0,priority:\"locality\"){count} b28:stations(brandId:2218,limit:1,maxAge:0,priority:\"locality\"){count} b29:stations(brandId:27,limit:1,maxAge:0,priority:\"locality\"){count} b30:stations(brandId:2010,limit:1,maxAge:0,priority:\"locality\"){count} b31:stations(brandId:323,limit:1,maxAge:0,priority:\"locality\"){count} b32:stations(brandId:294,limit:1,maxAge:0,priority:\"locality\"){count} b33:stations(brandId:339,limit:1,maxAge:0,priority:\"locality\"){count} b34:stations(brandId:28,limit:1,maxAge:0,priority:\"locality\"){count} b35:stations(brandId:246,limit:1,maxAge:0,priority:\"locality\"){count} b36:stations(brandId:307,limit:1,maxAge:0,priority:\"locality\"){count} b37:stations(brandId:29,limit:1,maxAge:0,priority:\"locality\"){count} b38:stations(brandId:2140,limit:1,maxAge:0,priority:\"locality\"){count} b39:stations(brandId:2142,limit:1,maxAge:0,priority:\"locality\"){count} b40:stations(brandId:2182,limit:1,maxAge:0,priority:\"locality\"){count} b41:stations(brandId:30,limit:1,maxAge:0,priority:\"locality\"){count} b42:stations(brandId:2098,limit:1,maxAge:0,priority:\"locality\"){count} b43:stations(brandId:2086,limit:1,maxAge:0,priority:\"locality\"){count} b44:stations(brandId:31,limit:1,maxAge:0,priority:\"locality\"){count} b45:stations(brandId:3532,limit:1,maxAge:0,priority:\"locality\"){count} b46:stations(brandId:3466,limit:1,maxAge:0,priority:\"locality\"){count} b47:stations(brandId:335,limit:1,maxAge:0,priority:\"locality\"){count} b48:stations(brandId:4293,limit:1,maxAge:0,priority:\"locality\"){count} b49:stations(brandId:4297,limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-counts-100",
+      "startedAt": "2026-09-30T19:33:09.010Z",
+      "status": 200,
+      "receivedMs": 357.3704170000001,
+      "decodedBodyBytes": 954,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:2186,limit:1,maxAge:0,priority:\"locality\"){count} b1:stations(brandId:32,limit:1,maxAge:0,priority:\"locality\"){count} b2:stations(brandId:33,limit:1,maxAge:0,priority:\"locality\"){count} b3:stations(brandId:217,limit:1,maxAge:0,priority:\"locality\"){count} b4:stations(brandId:34,limit:1,maxAge:0,priority:\"locality\"){count} b5:stations(brandId:230,limit:1,maxAge:0,priority:\"locality\"){count} b6:stations(brandId:236,limit:1,maxAge:0,priority:\"locality\"){count} b7:stations(brandId:35,limit:1,maxAge:0,priority:\"locality\"){count} b8:stations(brandId:229,limit:1,maxAge:0,priority:\"locality\"){count} b9:stations(brandId:2181,limit:1,maxAge:0,priority:\"locality\"){count} b10:stations(brandId:282,limit:1,maxAge:0,priority:\"locality\"){count} b11:stations(brandId:2053,limit:1,maxAge:0,priority:\"locality\"){count} b12:stations(brandId:170,limit:1,maxAge:0,priority:\"locality\"){count} b13:stations(brandId:36,limit:1,maxAge:0,priority:\"locality\"){count} b14:stations(brandId:2149,limit:1,maxAge:0,priority:\"locality\"){count} b15:stations(brandId:37,limit:1,maxAge:0,priority:\"locality\"){count} b16:stations(brandId:2003,limit:1,maxAge:0,priority:\"locality\"){count} b17:stations(brandId:41,limit:1,maxAge:0,priority:\"locality\"){count} b18:stations(brandId:2740,limit:1,maxAge:0,priority:\"locality\"){count} b19:stations(brandId:38,limit:1,maxAge:0,priority:\"locality\"){count} b20:stations(brandId:39,limit:1,maxAge:0,priority:\"locality\"){count} b21:stations(brandId:40,limit:1,maxAge:0,priority:\"locality\"){count} b22:stations(brandId:4027,limit:1,maxAge:0,priority:\"locality\"){count} b23:stations(brandId:171,limit:1,maxAge:0,priority:\"locality\"){count} b24:stations(brandId:2183,limit:1,maxAge:0,priority:\"locality\"){count} b25:stations(brandId:2136,limit:1,maxAge:0,priority:\"locality\"){count} b26:stations(brandId:2051,limit:1,maxAge:0,priority:\"locality\"){count} b27:stations(brandId:64,limit:1,maxAge:0,priority:\"locality\"){count} b28:stations(brandId:42,limit:1,maxAge:0,priority:\"locality\"){count} b29:stations(brandId:293,limit:1,maxAge:0,priority:\"locality\"){count} b30:stations(brandId:43,limit:1,maxAge:0,priority:\"locality\"){count} b31:stations(brandId:2049,limit:1,maxAge:0,priority:\"locality\"){count} b32:stations(brandId:3136,limit:1,maxAge:0,priority:\"locality\"){count} b33:stations(brandId:44,limit:1,maxAge:0,priority:\"locality\"){count} b34:stations(brandId:193,limit:1,maxAge:0,priority:\"locality\"){count} b35:stations(brandId:2132,limit:1,maxAge:0,priority:\"locality\"){count} b36:stations(brandId:227,limit:1,maxAge:0,priority:\"locality\"){count} b37:stations(brandId:189,limit:1,maxAge:0,priority:\"locality\"){count} b38:stations(brandId:45,limit:1,maxAge:0,priority:\"locality\"){count} b39:stations(brandId:2052,limit:1,maxAge:0,priority:\"locality\"){count} b40:stations(brandId:46,limit:1,maxAge:0,priority:\"locality\"){count} b41:stations(brandId:211,limit:1,maxAge:0,priority:\"locality\"){count} b42:stations(brandId:320,limit:1,maxAge:0,priority:\"locality\"){count} b43:stations(brandId:2081,limit:1,maxAge:0,priority:\"locality\"){count} b44:stations(brandId:4093,limit:1,maxAge:0,priority:\"locality\"){count} b45:stations(brandId:2014,limit:1,maxAge:0,priority:\"locality\"){count} b46:stations(brandId:47,limit:1,maxAge:0,priority:\"locality\"){count} b47:stations(brandId:247,limit:1,maxAge:0,priority:\"locality\"){count} b48:stations(brandId:365,limit:1,maxAge:0,priority:\"locality\"){count} b49:stations(brandId:218,limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-counts-150",
+      "startedAt": "2026-09-30T19:33:11.370Z",
+      "status": 200,
+      "receivedMs": 358.75166699999863,
+      "decodedBodyBytes": 948,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:3004,limit:1,maxAge:0,priority:\"locality\"){count} b1:stations(brandId:190,limit:1,maxAge:0,priority:\"locality\"){count} b2:stations(brandId:4298,limit:1,maxAge:0,priority:\"locality\"){count} b3:stations(brandId:4299,limit:1,maxAge:0,priority:\"locality\"){count} b4:stations(brandId:2221,limit:1,maxAge:0,priority:\"locality\"){count} b5:stations(brandId:154,limit:1,maxAge:0,priority:\"locality\"){count} b6:stations(brandId:346,limit:1,maxAge:0,priority:\"locality\"){count} b7:stations(brandId:2207,limit:1,maxAge:0,priority:\"locality\"){count} b8:stations(brandId:2004,limit:1,maxAge:0,priority:\"locality\"){count} b9:stations(brandId:344,limit:1,maxAge:0,priority:\"locality\"){count} b10:stations(brandId:2198,limit:1,maxAge:0,priority:\"locality\"){count} b11:stations(brandId:3763,limit:1,maxAge:0,priority:\"locality\"){count} b12:stations(brandId:292,limit:1,maxAge:0,priority:\"locality\"){count} b13:stations(brandId:197,limit:1,maxAge:0,priority:\"locality\"){count} b14:stations(brandId:322,limit:1,maxAge:0,priority:\"locality\"){count} b15:stations(brandId:256,limit:1,maxAge:0,priority:\"locality\"){count} b16:stations(brandId:220,limit:1,maxAge:0,priority:\"locality\"){count} b17:stations(brandId:13,limit:1,maxAge:0,priority:\"locality\"){count} b18:stations(brandId:2217,limit:1,maxAge:0,priority:\"locality\"){count} b19:stations(brandId:2059,limit:1,maxAge:0,priority:\"locality\"){count} b20:stations(brandId:3169,limit:1,maxAge:0,priority:\"locality\"){count} b21:stations(brandId:2002,limit:1,maxAge:0,priority:\"locality\"){count} b22:stations(brandId:2016,limit:1,maxAge:0,priority:\"locality\"){count} b23:stations(brandId:223,limit:1,maxAge:0,priority:\"locality\"){count} b24:stations(brandId:48,limit:1,maxAge:0,priority:\"locality\"){count} b25:stations(brandId:2150,limit:1,maxAge:0,priority:\"locality\"){count} b26:stations(brandId:49,limit:1,maxAge:0,priority:\"locality\"){count} b27:stations(brandId:2077,limit:1,maxAge:0,priority:\"locality\"){count} b28:stations(brandId:341,limit:1,maxAge:0,priority:\"locality\"){count} b29:stations(brandId:50,limit:1,maxAge:0,priority:\"locality\"){count} b30:stations(brandId:296,limit:1,maxAge:0,priority:\"locality\"){count} b31:stations(brandId:295,limit:1,maxAge:0,priority:\"locality\"){count} b32:stations(brandId:51,limit:1,maxAge:0,priority:\"locality\"){count} b33:stations(brandId:196,limit:1,maxAge:0,priority:\"locality\"){count} b34:stations(brandId:363,limit:1,maxAge:0,priority:\"locality\"){count} b35:stations(brandId:2095,limit:1,maxAge:0,priority:\"locality\"){count} b36:stations(brandId:249,limit:1,maxAge:0,priority:\"locality\"){count} b37:stations(brandId:228,limit:1,maxAge:0,priority:\"locality\"){count} b38:stations(brandId:52,limit:1,maxAge:0,priority:\"locality\"){count} b39:stations(brandId:156,limit:1,maxAge:0,priority:\"locality\"){count} b40:stations(brandId:2104,limit:1,maxAge:0,priority:\"locality\"){count} b41:stations(brandId:2103,limit:1,maxAge:0,priority:\"locality\"){count} b42:stations(brandId:2025,limit:1,maxAge:0,priority:\"locality\"){count} b43:stations(brandId:2147,limit:1,maxAge:0,priority:\"locality\"){count} b44:stations(brandId:2509,limit:1,maxAge:0,priority:\"locality\"){count} b45:stations(brandId:2187,limit:1,maxAge:0,priority:\"locality\"){count} b46:stations(brandId:2153,limit:1,maxAge:0,priority:\"locality\"){count} b47:stations(brandId:53,limit:1,maxAge:0,priority:\"locality\"){count} b48:stations(brandId:2021,limit:1,maxAge:0,priority:\"locality\"){count} b49:stations(brandId:2575,limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-counts-200",
+      "startedAt": "2026-09-30T19:33:13.731Z",
+      "status": 200,
+      "receivedMs": 335.39750000000095,
+      "decodedBodyBytes": 945,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:2641,limit:1,maxAge:0,priority:\"locality\"){count} b1:stations(brandId:54,limit:1,maxAge:0,priority:\"locality\"){count} b2:stations(brandId:2244,limit:1,maxAge:0,priority:\"locality\"){count} b3:stations(brandId:201,limit:1,maxAge:0,priority:\"locality\"){count} b4:stations(brandId:55,limit:1,maxAge:0,priority:\"locality\"){count} b5:stations(brandId:2089,limit:1,maxAge:0,priority:\"locality\"){count} b6:stations(brandId:276,limit:1,maxAge:0,priority:\"locality\"){count} b7:stations(brandId:2062,limit:1,maxAge:0,priority:\"locality\"){count} b8:stations(brandId:277,limit:1,maxAge:0,priority:\"locality\"){count} b9:stations(brandId:4300,limit:1,maxAge:0,priority:\"locality\"){count} b10:stations(brandId:3961,limit:1,maxAge:0,priority:\"locality\"){count} b11:stations(brandId:2194,limit:1,maxAge:0,priority:\"locality\"){count} b12:stations(brandId:56,limit:1,maxAge:0,priority:\"locality\"){count} b13:stations(brandId:287,limit:1,maxAge:0,priority:\"locality\"){count} b14:stations(brandId:2219,limit:1,maxAge:0,priority:\"locality\"){count} b15:stations(brandId:188,limit:1,maxAge:0,priority:\"locality\"){count} b16:stations(brandId:2020,limit:1,maxAge:0,priority:\"locality\"){count} b17:stations(brandId:275,limit:1,maxAge:0,priority:\"locality\"){count} b18:stations(brandId:213,limit:1,maxAge:0,priority:\"locality\"){count} b19:stations(brandId:2061,limit:1,maxAge:0,priority:\"locality\"){count} b20:stations(brandId:347,limit:1,maxAge:0,priority:\"locality\"){count} b21:stations(brandId:2057,limit:1,maxAge:0,priority:\"locality\"){count} b22:stations(brandId:2177,limit:1,maxAge:0,priority:\"locality\"){count} b23:stations(brandId:2012,limit:1,maxAge:0,priority:\"locality\"){count} b24:stations(brandId:308,limit:1,maxAge:0,priority:\"locality\"){count} b25:stations(brandId:2141,limit:1,maxAge:0,priority:\"locality\"){count} b26:stations(brandId:2143,limit:1,maxAge:0,priority:\"locality\"){count} b27:stations(brandId:2232,limit:1,maxAge:0,priority:\"locality\"){count} b28:stations(brandId:4060,limit:1,maxAge:0,priority:\"locality\"){count} b29:stations(brandId:3928,limit:1,maxAge:0,priority:\"locality\"){count} b30:stations(brandId:2045,limit:1,maxAge:0,priority:\"locality\"){count} b31:stations(brandId:57,limit:1,maxAge:0,priority:\"locality\"){count} b32:stations(brandId:274,limit:1,maxAge:0,priority:\"locality\"){count} b33:stations(brandId:348,limit:1,maxAge:0,priority:\"locality\"){count} b34:stations(brandId:2237,limit:1,maxAge:0,priority:\"locality\"){count} b35:stations(brandId:2242,limit:1,maxAge:0,priority:\"locality\"){count} b36:stations(brandId:2203,limit:1,maxAge:0,priority:\"locality\"){count} b37:stations(brandId:175,limit:1,maxAge:0,priority:\"locality\"){count} b38:stations(brandId:2176,limit:1,maxAge:0,priority:\"locality\"){count} b39:stations(brandId:2344,limit:1,maxAge:0,priority:\"locality\"){count} b40:stations(brandId:2063,limit:1,maxAge:0,priority:\"locality\"){count} b41:stations(brandId:2011,limit:1,maxAge:0,priority:\"locality\"){count} b42:stations(brandId:2042,limit:1,maxAge:0,priority:\"locality\"){count} b43:stations(brandId:2107,limit:1,maxAge:0,priority:\"locality\"){count} b44:stations(brandId:58,limit:1,maxAge:0,priority:\"locality\"){count} b45:stations(brandId:2122,limit:1,maxAge:0,priority:\"locality\"){count} b46:stations(brandId:2075,limit:1,maxAge:0,priority:\"locality\"){count} b47:stations(brandId:267,limit:1,maxAge:0,priority:\"locality\"){count} b48:stations(brandId:180,limit:1,maxAge:0,priority:\"locality\"){count} b49:stations(brandId:59,limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-counts-250",
+      "startedAt": "2026-09-30T19:33:16.069Z",
+      "status": 200,
+      "receivedMs": 374.97450000000026,
+      "decodedBodyBytes": 947,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:233,limit:1,maxAge:0,priority:\"locality\"){count} b1:stations(brandId:2227,limit:1,maxAge:0,priority:\"locality\"){count} b2:stations(brandId:181,limit:1,maxAge:0,priority:\"locality\"){count} b3:stations(brandId:60,limit:1,maxAge:0,priority:\"locality\"){count} b4:stations(brandId:226,limit:1,maxAge:0,priority:\"locality\"){count} b5:stations(brandId:178,limit:1,maxAge:0,priority:\"locality\"){count} b6:stations(brandId:242,limit:1,maxAge:0,priority:\"locality\"){count} b7:stations(brandId:243,limit:1,maxAge:0,priority:\"locality\"){count} b8:stations(brandId:2173,limit:1,maxAge:0,priority:\"locality\"){count} b9:stations(brandId:2238,limit:1,maxAge:0,priority:\"locality\"){count} b10:stations(brandId:2872,limit:1,maxAge:0,priority:\"locality\"){count} b11:stations(brandId:2146,limit:1,maxAge:0,priority:\"locality\"){count} b12:stations(brandId:251,limit:1,maxAge:0,priority:\"locality\"){count} b13:stations(brandId:2208,limit:1,maxAge:0,priority:\"locality\"){count} b14:stations(brandId:2118,limit:1,maxAge:0,priority:\"locality\"){count} b15:stations(brandId:2134,limit:1,maxAge:0,priority:\"locality\"){count} b16:stations(brandId:3598,limit:1,maxAge:0,priority:\"locality\"){count} b17:stations(brandId:2101,limit:1,maxAge:0,priority:\"locality\"){count} b18:stations(brandId:61,limit:1,maxAge:0,priority:\"locality\"){count} b19:stations(brandId:288,limit:1,maxAge:0,priority:\"locality\"){count} b20:stations(brandId:317,limit:1,maxAge:0,priority:\"locality\"){count} b21:stations(brandId:62,limit:1,maxAge:0,priority:\"locality\"){count} b22:stations(brandId:2082,limit:1,maxAge:0,priority:\"locality\"){count} b23:stations(brandId:2220,limit:1,maxAge:0,priority:\"locality\"){count} b24:stations(brandId:312,limit:1,maxAge:0,priority:\"locality\"){count} b25:stations(brandId:268,limit:1,maxAge:0,priority:\"locality\"){count} b26:stations(brandId:2216,limit:1,maxAge:0,priority:\"locality\"){count} b27:stations(brandId:2240,limit:1,maxAge:0,priority:\"locality\"){count} b28:stations(brandId:63,limit:1,maxAge:0,priority:\"locality\"){count} b29:stations(brandId:330,limit:1,maxAge:0,priority:\"locality\"){count} b30:stations(brandId:65,limit:1,maxAge:0,priority:\"locality\"){count} b31:stations(brandId:334,limit:1,maxAge:0,priority:\"locality\"){count} b32:stations(brandId:2145,limit:1,maxAge:0,priority:\"locality\"){count} b33:stations(brandId:66,limit:1,maxAge:0,priority:\"locality\"){count} b34:stations(brandId:297,limit:1,maxAge:0,priority:\"locality\"){count} b35:stations(brandId:186,limit:1,maxAge:0,priority:\"locality\"){count} b36:stations(brandId:165,limit:1,maxAge:0,priority:\"locality\"){count} b37:stations(brandId:202,limit:1,maxAge:0,priority:\"locality\"){count} b38:stations(brandId:2055,limit:1,maxAge:0,priority:\"locality\"){count} b39:stations(brandId:2197,limit:1,maxAge:0,priority:\"locality\"){count} b40:stations(brandId:174,limit:1,maxAge:0,priority:\"locality\"){count} b41:stations(brandId:2170,limit:1,maxAge:0,priority:\"locality\"){count} b42:stations(brandId:194,limit:1,maxAge:0,priority:\"locality\"){count} b43:stations(brandId:2111,limit:1,maxAge:0,priority:\"locality\"){count} b44:stations(brandId:67,limit:1,maxAge:0,priority:\"locality\"){count} b45:stations(brandId:182,limit:1,maxAge:0,priority:\"locality\"){count} b46:stations(brandId:68,limit:1,maxAge:0,priority:\"locality\"){count} b47:stations(brandId:69,limit:1,maxAge:0,priority:\"locality\"){count} b48:stations(brandId:2236,limit:1,maxAge:0,priority:\"locality\"){count} b49:stations(brandId:2206,limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-counts-300",
+      "startedAt": "2026-09-30T19:33:18.447Z",
+      "status": 200,
+      "receivedMs": 440.04112500000156,
+      "decodedBodyBytes": 947,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:70,limit:1,maxAge:0,priority:\"locality\"){count} b1:stations(brandId:2128,limit:1,maxAge:0,priority:\"locality\"){count} b2:stations(brandId:71,limit:1,maxAge:0,priority:\"locality\"){count} b3:stations(brandId:291,limit:1,maxAge:0,priority:\"locality\"){count} b4:stations(brandId:2200,limit:1,maxAge:0,priority:\"locality\"){count} b5:stations(brandId:2185,limit:1,maxAge:0,priority:\"locality\"){count} b6:stations(brandId:265,limit:1,maxAge:0,priority:\"locality\"){count} b7:stations(brandId:2105,limit:1,maxAge:0,priority:\"locality\"){count} b8:stations(brandId:72,limit:1,maxAge:0,priority:\"locality\"){count} b9:stations(brandId:185,limit:1,maxAge:0,priority:\"locality\"){count} b10:stations(brandId:358,limit:1,maxAge:0,priority:\"locality\"){count} b11:stations(brandId:2199,limit:1,maxAge:0,priority:\"locality\"){count} b12:stations(brandId:73,limit:1,maxAge:0,priority:\"locality\"){count} b13:stations(brandId:183,limit:1,maxAge:0,priority:\"locality\"){count} b14:stations(brandId:279,limit:1,maxAge:0,priority:\"locality\"){count} b15:stations(brandId:155,limit:1,maxAge:0,priority:\"locality\"){count} b16:stations(brandId:212,limit:1,maxAge:0,priority:\"locality\"){count} b17:stations(brandId:3367,limit:1,maxAge:0,priority:\"locality\"){count} b18:stations(brandId:74,limit:1,maxAge:0,priority:\"locality\"){count} b19:stations(brandId:75,limit:1,maxAge:0,priority:\"locality\"){count} b20:stations(brandId:2674,limit:1,maxAge:0,priority:\"locality\"){count} b21:stations(brandId:76,limit:1,maxAge:0,priority:\"locality\"){count} b22:stations(brandId:77,limit:1,maxAge:0,priority:\"locality\"){count} b23:stations(brandId:78,limit:1,maxAge:0,priority:\"locality\"){count} b24:stations(brandId:2164,limit:1,maxAge:0,priority:\"locality\"){count} b25:stations(brandId:79,limit:1,maxAge:0,priority:\"locality\"){count} b26:stations(brandId:4301,limit:1,maxAge:0,priority:\"locality\"){count} b27:stations(brandId:2278,limit:1,maxAge:0,priority:\"locality\"){count} b28:stations(brandId:2001,limit:1,maxAge:0,priority:\"locality\"){count} b29:stations(brandId:80,limit:1,maxAge:0,priority:\"locality\"){count} b30:stations(brandId:289,limit:1,maxAge:0,priority:\"locality\"){count} b31:stations(brandId:2179,limit:1,maxAge:0,priority:\"locality\"){count} b32:stations(brandId:173,limit:1,maxAge:0,priority:\"locality\"){count} b33:stations(brandId:261,limit:1,maxAge:0,priority:\"locality\"){count} b34:stations(brandId:81,limit:1,maxAge:0,priority:\"locality\"){count} b35:stations(brandId:2159,limit:1,maxAge:0,priority:\"locality\"){count} b36:stations(brandId:2210,limit:1,maxAge:0,priority:\"locality\"){count} b37:stations(brandId:2017,limit:1,maxAge:0,priority:\"locality\"){count} b38:stations(brandId:3697,limit:1,maxAge:0,priority:\"locality\"){count} b39:stations(brandId:222,limit:1,maxAge:0,priority:\"locality\"){count} b40:stations(brandId:82,limit:1,maxAge:0,priority:\"locality\"){count} b41:stations(brandId:2109,limit:1,maxAge:0,priority:\"locality\"){count} b42:stations(brandId:83,limit:1,maxAge:0,priority:\"locality\"){count} b43:stations(brandId:2126,limit:1,maxAge:0,priority:\"locality\"){count} b44:stations(brandId:4192,limit:1,maxAge:0,priority:\"locality\"){count} b45:stations(brandId:84,limit:1,maxAge:0,priority:\"locality\"){count} b46:stations(brandId:259,limit:1,maxAge:0,priority:\"locality\"){count} b47:stations(brandId:162,limit:1,maxAge:0,priority:\"locality\"){count} b48:stations(brandId:85,limit:1,maxAge:0,priority:\"locality\"){count} b49:stations(brandId:86,limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-counts-350",
+      "startedAt": "2026-09-30T19:33:20.890Z",
+      "status": 200,
+      "receivedMs": 287.31745899999805,
+      "decodedBodyBytes": 949,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:87,limit:1,maxAge:0,priority:\"locality\"){count} b1:stations(brandId:2191,limit:1,maxAge:0,priority:\"locality\"){count} b2:stations(brandId:353,limit:1,maxAge:0,priority:\"locality\"){count} b3:stations(brandId:2169,limit:1,maxAge:0,priority:\"locality\"){count} b4:stations(brandId:2131,limit:1,maxAge:0,priority:\"locality\"){count} b5:stations(brandId:3895,limit:1,maxAge:0,priority:\"locality\"){count} b6:stations(brandId:225,limit:1,maxAge:0,priority:\"locality\"){count} b7:stations(brandId:286,limit:1,maxAge:0,priority:\"locality\"){count} b8:stations(brandId:2018,limit:1,maxAge:0,priority:\"locality\"){count} b9:stations(brandId:88,limit:1,maxAge:0,priority:\"locality\"){count} b10:stations(brandId:4423,limit:1,maxAge:0,priority:\"locality\"){count} b11:stations(brandId:4126,limit:1,maxAge:0,priority:\"locality\"){count} b12:stations(brandId:250,limit:1,maxAge:0,priority:\"locality\"){count} b13:stations(brandId:89,limit:1,maxAge:0,priority:\"locality\"){count} b14:stations(brandId:157,limit:1,maxAge:0,priority:\"locality\"){count} b15:stations(brandId:3268,limit:1,maxAge:0,priority:\"locality\"){count} b16:stations(brandId:199,limit:1,maxAge:0,priority:\"locality\"){count} b17:stations(brandId:2124,limit:1,maxAge:0,priority:\"locality\"){count} b18:stations(brandId:283,limit:1,maxAge:0,priority:\"locality\"){count} b19:stations(brandId:90,limit:1,maxAge:0,priority:\"locality\"){count} b20:stations(brandId:2070,limit:1,maxAge:0,priority:\"locality\"){count} b21:stations(brandId:2069,limit:1,maxAge:0,priority:\"locality\"){count} b22:stations(brandId:325,limit:1,maxAge:0,priority:\"locality\"){count} b23:stations(brandId:273,limit:1,maxAge:0,priority:\"locality\"){count} b24:stations(brandId:2137,limit:1,maxAge:0,priority:\"locality\"){count} b25:stations(brandId:258,limit:1,maxAge:0,priority:\"locality\"){count} b26:stations(brandId:369,limit:1,maxAge:0,priority:\"locality\"){count} b27:stations(brandId:203,limit:1,maxAge:0,priority:\"locality\"){count} b28:stations(brandId:91,limit:1,maxAge:0,priority:\"locality\"){count} b29:stations(brandId:2228,limit:1,maxAge:0,priority:\"locality\"){count} b30:stations(brandId:92,limit:1,maxAge:0,priority:\"locality\"){count} b31:stations(brandId:290,limit:1,maxAge:0,priority:\"locality\"){count} b32:stations(brandId:12,limit:1,maxAge:0,priority:\"locality\"){count} b33:stations(brandId:4302,limit:1,maxAge:0,priority:\"locality\"){count} b34:stations(brandId:4303,limit:1,maxAge:0,priority:\"locality\"){count} b35:stations(brandId:93,limit:1,maxAge:0,priority:\"locality\"){count} b36:stations(brandId:3070,limit:1,maxAge:0,priority:\"locality\"){count} b37:stations(brandId:4304,limit:1,maxAge:0,priority:\"locality\"){count} b38:stations(brandId:368,limit:1,maxAge:0,priority:\"locality\"){count} b39:stations(brandId:195,limit:1,maxAge:0,priority:\"locality\"){count} b40:stations(brandId:2023,limit:1,maxAge:0,priority:\"locality\"){count} b41:stations(brandId:362,limit:1,maxAge:0,priority:\"locality\"){count} b42:stations(brandId:2224,limit:1,maxAge:0,priority:\"locality\"){count} b43:stations(brandId:2038,limit:1,maxAge:0,priority:\"locality\"){count} b44:stations(brandId:94,limit:1,maxAge:0,priority:\"locality\"){count} b45:stations(brandId:2971,limit:1,maxAge:0,priority:\"locality\"){count} b46:stations(brandId:95,limit:1,maxAge:0,priority:\"locality\"){count} b47:stations(brandId:2133,limit:1,maxAge:0,priority:\"locality\"){count} b48:stations(brandId:2108,limit:1,maxAge:0,priority:\"locality\"){count} b49:stations(brandId:168,limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-counts-400",
+      "startedAt": "2026-09-30T19:33:23.181Z",
+      "status": 200,
+      "receivedMs": 294.9367089999978,
+      "decodedBodyBytes": 948,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:96,limit:1,maxAge:0,priority:\"locality\"){count} b1:stations(brandId:2008,limit:1,maxAge:0,priority:\"locality\"){count} b2:stations(brandId:359,limit:1,maxAge:0,priority:\"locality\"){count} b3:stations(brandId:2229,limit:1,maxAge:0,priority:\"locality\"){count} b4:stations(brandId:2175,limit:1,maxAge:0,priority:\"locality\"){count} b5:stations(brandId:2102,limit:1,maxAge:0,priority:\"locality\"){count} b6:stations(brandId:2119,limit:1,maxAge:0,priority:\"locality\"){count} b7:stations(brandId:248,limit:1,maxAge:0,priority:\"locality\"){count} b8:stations(brandId:97,limit:1,maxAge:0,priority:\"locality\"){count} b9:stations(brandId:2007,limit:1,maxAge:0,priority:\"locality\"){count} b10:stations(brandId:327,limit:1,maxAge:0,priority:\"locality\"){count} b11:stations(brandId:2087,limit:1,maxAge:0,priority:\"locality\"){count} b12:stations(brandId:2202,limit:1,maxAge:0,priority:\"locality\"){count} b13:stations(brandId:2410,limit:1,maxAge:0,priority:\"locality\"){count} b14:stations(brandId:2076,limit:1,maxAge:0,priority:\"locality\"){count} b15:stations(brandId:191,limit:1,maxAge:0,priority:\"locality\"){count} b16:stations(brandId:2311,limit:1,maxAge:0,priority:\"locality\"){count} b17:stations(brandId:2100,limit:1,maxAge:0,priority:\"locality\"){count} b18:stations(brandId:269,limit:1,maxAge:0,priority:\"locality\"){count} b19:stations(brandId:321,limit:1,maxAge:0,priority:\"locality\"){count} b20:stations(brandId:98,limit:1,maxAge:0,priority:\"locality\"){count} b21:stations(brandId:4294,limit:1,maxAge:0,priority:\"locality\"){count} b22:stations(brandId:4295,limit:1,maxAge:0,priority:\"locality\"){count} b23:stations(brandId:2022,limit:1,maxAge:0,priority:\"locality\"){count} b24:stations(brandId:2230,limit:1,maxAge:0,priority:\"locality\"){count} b25:stations(brandId:2050,limit:1,maxAge:0,priority:\"locality\"){count} b26:stations(brandId:99,limit:1,maxAge:0,priority:\"locality\"){count} b27:stations(brandId:4305,limit:1,maxAge:0,priority:\"locality\"){count} b28:stations(brandId:270,limit:1,maxAge:0,priority:\"locality\"){count} b29:stations(brandId:2110,limit:1,maxAge:0,priority:\"locality\"){count} b30:stations(brandId:2123,limit:1,maxAge:0,priority:\"locality\"){count} b31:stations(brandId:2073,limit:1,maxAge:0,priority:\"locality\"){count} b32:stations(brandId:100,limit:1,maxAge:0,priority:\"locality\"){count} b33:stations(brandId:343,limit:1,maxAge:0,priority:\"locality\"){count} b34:stations(brandId:2205,limit:1,maxAge:0,priority:\"locality\"){count} b35:stations(brandId:2036,limit:1,maxAge:0,priority:\"locality\"){count} b36:stations(brandId:264,limit:1,maxAge:0,priority:\"locality\"){count} b37:stations(brandId:318,limit:1,maxAge:0,priority:\"locality\"){count} b38:stations(brandId:101,limit:1,maxAge:0,priority:\"locality\"){count} b39:stations(brandId:2839,limit:1,maxAge:0,priority:\"locality\"){count} b40:stations(brandId:102,limit:1,maxAge:0,priority:\"locality\"){count} b41:stations(brandId:2088,limit:1,maxAge:0,priority:\"locality\"){count} b42:stations(brandId:370,limit:1,maxAge:0,priority:\"locality\"){count} b43:stations(brandId:103,limit:1,maxAge:0,priority:\"locality\"){count} b44:stations(brandId:2099,limit:1,maxAge:0,priority:\"locality\"){count} b45:stations(brandId:4291,limit:1,maxAge:0,priority:\"locality\"){count} b46:stations(brandId:160,limit:1,maxAge:0,priority:\"locality\"){count} b47:stations(brandId:2241,limit:1,maxAge:0,priority:\"locality\"){count} b48:stations(brandId:271,limit:1,maxAge:0,priority:\"locality\"){count} b49:stations(brandId:104,limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-counts-450",
+      "startedAt": "2026-09-30T19:33:25.478Z",
+      "status": 200,
+      "receivedMs": 405.17754200000127,
+      "decodedBodyBytes": 951,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:2080,limit:1,maxAge:0,priority:\"locality\"){count} b1:stations(brandId:105,limit:1,maxAge:0,priority:\"locality\"){count} b2:stations(brandId:3631,limit:1,maxAge:0,priority:\"locality\"){count} b3:stations(brandId:311,limit:1,maxAge:0,priority:\"locality\"){count} b4:stations(brandId:3994,limit:1,maxAge:0,priority:\"locality\"){count} b5:stations(brandId:164,limit:1,maxAge:0,priority:\"locality\"){count} b6:stations(brandId:260,limit:1,maxAge:0,priority:\"locality\"){count} b7:stations(brandId:316,limit:1,maxAge:0,priority:\"locality\"){count} b8:stations(brandId:231,limit:1,maxAge:0,priority:\"locality\"){count} b9:stations(brandId:106,limit:1,maxAge:0,priority:\"locality\"){count} b10:stations(brandId:2139,limit:1,maxAge:0,priority:\"locality\"){count} b11:stations(brandId:215,limit:1,maxAge:0,priority:\"locality\"){count} b12:stations(brandId:2233,limit:1,maxAge:0,priority:\"locality\"){count} b13:stations(brandId:153,limit:1,maxAge:0,priority:\"locality\"){count} b14:stations(brandId:152,limit:1,maxAge:0,priority:\"locality\"){count} b15:stations(brandId:241,limit:1,maxAge:0,priority:\"locality\"){count} b16:stations(brandId:326,limit:1,maxAge:0,priority:\"locality\"){count} b17:stations(brandId:150,limit:1,maxAge:0,priority:\"locality\"){count} b18:stations(brandId:2189,limit:1,maxAge:0,priority:\"locality\"){count} b19:stations(brandId:107,limit:1,maxAge:0,priority:\"locality\"){count} b20:stations(brandId:108,limit:1,maxAge:0,priority:\"locality\"){count} b21:stations(brandId:304,limit:1,maxAge:0,priority:\"locality\"){count} b22:stations(brandId:3796,limit:1,maxAge:0,priority:\"locality\"){count} b23:stations(brandId:109,limit:1,maxAge:0,priority:\"locality\"){count} b24:stations(brandId:110,limit:1,maxAge:0,priority:\"locality\"){count} b25:stations(brandId:111,limit:1,maxAge:0,priority:\"locality\"){count} b26:stations(brandId:2125,limit:1,maxAge:0,priority:\"locality\"){count} b27:stations(brandId:112,limit:1,maxAge:0,priority:\"locality\"){count} b28:stations(brandId:214,limit:1,maxAge:0,priority:\"locality\"){count} b29:stations(brandId:3301,limit:1,maxAge:0,priority:\"locality\"){count} b30:stations(brandId:2044,limit:1,maxAge:0,priority:\"locality\"){count} b31:stations(brandId:206,limit:1,maxAge:0,priority:\"locality\"){count} b32:stations(brandId:113,limit:1,maxAge:0,priority:\"locality\"){count} b33:stations(brandId:354,limit:1,maxAge:0,priority:\"locality\"){count} b34:stations(brandId:2443,limit:1,maxAge:0,priority:\"locality\"){count} b35:stations(brandId:3730,limit:1,maxAge:0,priority:\"locality\"){count} b36:stations(brandId:2006,limit:1,maxAge:0,priority:\"locality\"){count} b37:stations(brandId:209,limit:1,maxAge:0,priority:\"locality\"){count} b38:stations(brandId:2065,limit:1,maxAge:0,priority:\"locality\"){count} b39:stations(brandId:176,limit:1,maxAge:0,priority:\"locality\"){count} b40:stations(brandId:340,limit:1,maxAge:0,priority:\"locality\"){count} b41:stations(brandId:114,limit:1,maxAge:0,priority:\"locality\"){count} b42:stations(brandId:2171,limit:1,maxAge:0,priority:\"locality\"){count} b43:stations(brandId:2172,limit:1,maxAge:0,priority:\"locality\"){count} b44:stations(brandId:4306,limit:1,maxAge:0,priority:\"locality\"){count} b45:stations(brandId:234,limit:1,maxAge:0,priority:\"locality\"){count} b46:stations(brandId:115,limit:1,maxAge:0,priority:\"locality\"){count} b47:stations(brandId:2009,limit:1,maxAge:0,priority:\"locality\"){count} b48:stations(brandId:2032,limit:1,maxAge:0,priority:\"locality\"){count} b49:stations(brandId:2222,limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-counts-500",
+      "startedAt": "2026-09-30T19:33:27.886Z",
+      "status": 200,
+      "receivedMs": 436.93012499999895,
+      "decodedBodyBytes": 952,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:240,limit:1,maxAge:0,priority:\"locality\"){count} b1:stations(brandId:4307,limit:1,maxAge:0,priority:\"locality\"){count} b2:stations(brandId:2215,limit:1,maxAge:0,priority:\"locality\"){count} b3:stations(brandId:4308,limit:1,maxAge:0,priority:\"locality\"){count} b4:stations(brandId:2188,limit:1,maxAge:0,priority:\"locality\"){count} b5:stations(brandId:161,limit:1,maxAge:0,priority:\"locality\"){count} b6:stations(brandId:116,limit:1,maxAge:0,priority:\"locality\"){count} b7:stations(brandId:2026,limit:1,maxAge:0,priority:\"locality\"){count} b8:stations(brandId:244,limit:1,maxAge:0,priority:\"locality\"){count} b9:stations(brandId:2144,limit:1,maxAge:0,priority:\"locality\"){count} b10:stations(brandId:117,limit:1,maxAge:0,priority:\"locality\"){count} b11:stations(brandId:118,limit:1,maxAge:0,priority:\"locality\"){count} b12:stations(brandId:4159,limit:1,maxAge:0,priority:\"locality\"){count} b13:stations(brandId:119,limit:1,maxAge:0,priority:\"locality\"){count} b14:stations(brandId:4296,limit:1,maxAge:0,priority:\"locality\"){count} b15:stations(brandId:2190,limit:1,maxAge:0,priority:\"locality\"){count} b16:stations(brandId:2067,limit:1,maxAge:0,priority:\"locality\"){count} b17:stations(brandId:205,limit:1,maxAge:0,priority:\"locality\"){count} b18:stations(brandId:272,limit:1,maxAge:0,priority:\"locality\"){count} b19:stations(brandId:2056,limit:1,maxAge:0,priority:\"locality\"){count} b20:stations(brandId:2138,limit:1,maxAge:0,priority:\"locality\"){count} b21:stations(brandId:2476,limit:1,maxAge:0,priority:\"locality\"){count} b22:stations(brandId:303,limit:1,maxAge:0,priority:\"locality\"){count} b23:stations(brandId:120,limit:1,maxAge:0,priority:\"locality\"){count} b24:stations(brandId:2806,limit:1,maxAge:0,priority:\"locality\"){count} b25:stations(brandId:121,limit:1,maxAge:0,priority:\"locality\"){count} b26:stations(brandId:4390,limit:1,maxAge:0,priority:\"locality\"){count} b27:stations(brandId:122,limit:1,maxAge:0,priority:\"locality\"){count} b28:stations(brandId:2174,limit:1,maxAge:0,priority:\"locality\"){count} b29:stations(brandId:2773,limit:1,maxAge:0,priority:\"locality\"){count} b30:stations(brandId:239,limit:1,maxAge:0,priority:\"locality\"){count} b31:stations(brandId:2127,limit:1,maxAge:0,priority:\"locality\"){count} b32:stations(brandId:123,limit:1,maxAge:0,priority:\"locality\"){count} b33:stations(brandId:2033,limit:1,maxAge:0,priority:\"locality\"){count} b34:stations(brandId:2039,limit:1,maxAge:0,priority:\"locality\"){count} b35:stations(brandId:2037,limit:1,maxAge:0,priority:\"locality\"){count} b36:stations(brandId:2234,limit:1,maxAge:0,priority:\"locality\"){count} b37:stations(brandId:216,limit:1,maxAge:0,priority:\"locality\"){count} b38:stations(brandId:2231,limit:1,maxAge:0,priority:\"locality\"){count} b39:stations(brandId:2031,limit:1,maxAge:0,priority:\"locality\"){count} b40:stations(brandId:245,limit:1,maxAge:0,priority:\"locality\"){count} b41:stations(brandId:2542,limit:1,maxAge:0,priority:\"locality\"){count} b42:stations(brandId:124,limit:1,maxAge:0,priority:\"locality\"){count} b43:stations(brandId:257,limit:1,maxAge:0,priority:\"locality\"){count} b44:stations(brandId:2158,limit:1,maxAge:0,priority:\"locality\"){count} b45:stations(brandId:125,limit:1,maxAge:0,priority:\"locality\"){count} b46:stations(brandId:166,limit:1,maxAge:0,priority:\"locality\"){count} b47:stations(brandId:278,limit:1,maxAge:0,priority:\"locality\"){count} b48:stations(brandId:2035,limit:1,maxAge:0,priority:\"locality\"){count} b49:stations(brandId:221,limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-counts-550",
+      "startedAt": "2026-09-30T19:33:30.325Z",
+      "status": 200,
+      "receivedMs": 275.85129099999904,
+      "decodedBodyBytes": 951,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:126,limit:1,maxAge:0,priority:\"locality\"){count} b1:stations(brandId:2078,limit:1,maxAge:0,priority:\"locality\"){count} b2:stations(brandId:2064,limit:1,maxAge:0,priority:\"locality\"){count} b3:stations(brandId:2135,limit:1,maxAge:0,priority:\"locality\"){count} b4:stations(brandId:2204,limit:1,maxAge:0,priority:\"locality\"){count} b5:stations(brandId:2168,limit:1,maxAge:0,priority:\"locality\"){count} b6:stations(brandId:127,limit:1,maxAge:0,priority:\"locality\"){count} b7:stations(brandId:2015,limit:1,maxAge:0,priority:\"locality\"){count} b8:stations(brandId:2165,limit:1,maxAge:0,priority:\"locality\"){count} b9:stations(brandId:4258,limit:1,maxAge:0,priority:\"locality\"){count} b10:stations(brandId:2212,limit:1,maxAge:0,priority:\"locality\"){count} b11:stations(brandId:128,limit:1,maxAge:0,priority:\"locality\"){count} b12:stations(brandId:129,limit:1,maxAge:0,priority:\"locality\"){count} b13:stations(brandId:2151,limit:1,maxAge:0,priority:\"locality\"){count} b14:stations(brandId:2377,limit:1,maxAge:0,priority:\"locality\"){count} b15:stations(brandId:130,limit:1,maxAge:0,priority:\"locality\"){count} b16:stations(brandId:131,limit:1,maxAge:0,priority:\"locality\"){count} b17:stations(brandId:2707,limit:1,maxAge:0,priority:\"locality\"){count} b18:stations(brandId:2154,limit:1,maxAge:0,priority:\"locality\"){count} b19:stations(brandId:184,limit:1,maxAge:0,priority:\"locality\"){count} b20:stations(brandId:2155,limit:1,maxAge:0,priority:\"locality\"){count} b21:stations(brandId:132,limit:1,maxAge:0,priority:\"locality\"){count} b22:stations(brandId:3862,limit:1,maxAge:0,priority:\"locality\"){count} b23:stations(brandId:301,limit:1,maxAge:0,priority:\"locality\"){count} b24:stations(brandId:2905,limit:1,maxAge:0,priority:\"locality\"){count} b25:stations(brandId:2116,limit:1,maxAge:0,priority:\"locality\"){count} b26:stations(brandId:255,limit:1,maxAge:0,priority:\"locality\"){count} b27:stations(brandId:133,limit:1,maxAge:0,priority:\"locality\"){count} b28:stations(brandId:134,limit:1,maxAge:0,priority:\"locality\"){count} b29:stations(brandId:198,limit:1,maxAge:0,priority:\"locality\"){count} b30:stations(brandId:135,limit:1,maxAge:0,priority:\"locality\"){count} b31:stations(brandId:4309,limit:1,maxAge:0,priority:\"locality\"){count} b32:stations(brandId:2235,limit:1,maxAge:0,priority:\"locality\"){count} b33:stations(brandId:207,limit:1,maxAge:0,priority:\"locality\"){count} b34:stations(brandId:3533,limit:1,maxAge:0,priority:\"locality\"){count} b35:stations(brandId:4357,limit:1,maxAge:0,priority:\"locality\"){count} b36:stations(brandId:2112,limit:1,maxAge:0,priority:\"locality\"){count} b37:stations(brandId:224,limit:1,maxAge:0,priority:\"locality\"){count} b38:stations(brandId:351,limit:1,maxAge:0,priority:\"locality\"){count} b39:stations(brandId:2028,limit:1,maxAge:0,priority:\"locality\"){count} b40:stations(brandId:148,limit:1,maxAge:0,priority:\"locality\"){count} b41:stations(brandId:2156,limit:1,maxAge:0,priority:\"locality\"){count} b42:stations(brandId:136,limit:1,maxAge:0,priority:\"locality\"){count} b43:stations(brandId:2066,limit:1,maxAge:0,priority:\"locality\"){count} b44:stations(brandId:2166,limit:1,maxAge:0,priority:\"locality\"){count} b45:stations(brandId:2167,limit:1,maxAge:0,priority:\"locality\"){count} b46:stations(brandId:2085,limit:1,maxAge:0,priority:\"locality\"){count} b47:stations(brandId:167,limit:1,maxAge:0,priority:\"locality\"){count} b48:stations(brandId:137,limit:1,maxAge:0,priority:\"locality\"){count} b49:stations(brandId:200,limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-counts-600",
+      "startedAt": "2026-09-30T19:33:32.603Z",
+      "status": 200,
+      "receivedMs": 288.26650000000154,
+      "decodedBodyBytes": 952,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:2184,limit:1,maxAge:0,priority:\"locality\"){count} b1:stations(brandId:138,limit:1,maxAge:0,priority:\"locality\"){count} b2:stations(brandId:3334,limit:1,maxAge:0,priority:\"locality\"){count} b3:stations(brandId:252,limit:1,maxAge:0,priority:\"locality\"){count} b4:stations(brandId:4310,limit:1,maxAge:0,priority:\"locality\"){count} b5:stations(brandId:280,limit:1,maxAge:0,priority:\"locality\"){count} b6:stations(brandId:151,limit:1,maxAge:0,priority:\"locality\"){count} b7:stations(brandId:149,limit:1,maxAge:0,priority:\"locality\"){count} b8:stations(brandId:2084,limit:1,maxAge:0,priority:\"locality\"){count} b9:stations(brandId:2162,limit:1,maxAge:0,priority:\"locality\"){count} b10:stations(brandId:139,limit:1,maxAge:0,priority:\"locality\"){count} b11:stations(brandId:2043,limit:1,maxAge:0,priority:\"locality\"){count} b12:stations(brandId:2048,limit:1,maxAge:0,priority:\"locality\"){count} b13:stations(brandId:309,limit:1,maxAge:0,priority:\"locality\"){count} b14:stations(brandId:140,limit:1,maxAge:0,priority:\"locality\"){count} b15:stations(brandId:2094,limit:1,maxAge:0,priority:\"locality\"){count} b16:stations(brandId:2096,limit:1,maxAge:0,priority:\"locality\"){count} b17:stations(brandId:2226,limit:1,maxAge:0,priority:\"locality\"){count} b18:stations(brandId:3829,limit:1,maxAge:0,priority:\"locality\"){count} b19:stations(brandId:3235,limit:1,maxAge:0,priority:\"locality\"){count} b20:stations(brandId:141,limit:1,maxAge:0,priority:\"locality\"){count} b21:stations(brandId:336,limit:1,maxAge:0,priority:\"locality\"){count} b22:stations(brandId:2214,limit:1,maxAge:0,priority:\"locality\"){count} b23:stations(brandId:284,limit:1,maxAge:0,priority:\"locality\"){count} b24:stations(brandId:2239,limit:1,maxAge:0,priority:\"locality\"){count} b25:stations(brandId:2161,limit:1,maxAge:0,priority:\"locality\"){count} b26:stations(brandId:2157,limit:1,maxAge:0,priority:\"locality\"){count} b27:stations(brandId:232,limit:1,maxAge:0,priority:\"locality\"){count} b28:stations(brandId:3433,limit:1,maxAge:0,priority:\"locality\"){count} b29:stations(brandId:142,limit:1,maxAge:0,priority:\"locality\"){count} b30:stations(brandId:310,limit:1,maxAge:0,priority:\"locality\"){count} b31:stations(brandId:313,limit:1,maxAge:0,priority:\"locality\"){count} b32:stations(brandId:2209,limit:1,maxAge:0,priority:\"locality\"){count} b33:stations(brandId:302,limit:1,maxAge:0,priority:\"locality\"){count} b34:stations(brandId:2060,limit:1,maxAge:0,priority:\"locality\"){count} b35:stations(brandId:329,limit:1,maxAge:0,priority:\"locality\"){count} b36:stations(brandId:2115,limit:1,maxAge:0,priority:\"locality\"){count} b37:stations(brandId:3499,limit:1,maxAge:0,priority:\"locality\"){count} b38:stations(brandId:238,limit:1,maxAge:0,priority:\"locality\"){count} b39:stations(brandId:2027,limit:1,maxAge:0,priority:\"locality\"){count} b40:stations(brandId:143,limit:1,maxAge:0,priority:\"locality\"){count} b41:stations(brandId:2130,limit:1,maxAge:0,priority:\"locality\"){count} b42:stations(brandId:144,limit:1,maxAge:0,priority:\"locality\"){count} b43:stations(brandId:147,limit:1,maxAge:0,priority:\"locality\"){count} b44:stations(brandId:2013,limit:1,maxAge:0,priority:\"locality\"){count} b45:stations(brandId:319,limit:1,maxAge:0,priority:\"locality\"){count} b46:stations(brandId:2148,limit:1,maxAge:0,priority:\"locality\"){count} b47:stations(brandId:192,limit:1,maxAge:0,priority:\"locality\"){count} b48:stations(brandId:146,limit:1,maxAge:0,priority:\"locality\"){count} b49:stations(brandId:2114,limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-counts-650",
+      "startedAt": "2026-09-30T19:33:34.895Z",
+      "status": 200,
+      "receivedMs": 265.3044579999987,
+      "decodedBodyBytes": 315,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:285,limit:1,maxAge:0,priority:\"locality\"){count} b1:stations(brandId:2046,limit:1,maxAge:0,priority:\"locality\"){count} b2:stations(brandId:2074,limit:1,maxAge:0,priority:\"locality\"){count} b3:stations(brandId:2608,limit:1,maxAge:0,priority:\"locality\"){count} b4:stations(brandId:2079,limit:1,maxAge:0,priority:\"locality\"){count} b5:stations(brandId:2163,limit:1,maxAge:0,priority:\"locality\"){count} b6:stations(brandId:2938,limit:1,maxAge:0,priority:\"locality\"){count} b7:stations(brandId:2106,limit:1,maxAge:0,priority:\"locality\"){count} b8:stations(brandId:145,limit:1,maxAge:0,priority:\"locality\"){count} b9:stations(brandId:2192,limit:1,maxAge:0,priority:\"locality\"){count} b10:stations(brandId:2193,limit:1,maxAge:0,priority:\"locality\"){count} b11:stations(brandId:342,limit:1,maxAge:0,priority:\"locality\"){count} b12:stations(brandId:219,limit:1,maxAge:0,priority:\"locality\"){count} b13:stations(brandId:2113,limit:1,maxAge:0,priority:\"locality\"){count} b14:stations(brandId:2195,limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "county-harris-test",
+      "startedAt": "2026-09-30T19:33:50.836Z",
+      "status": 200,
+      "receivedMs": 1012.697958,
+      "decodedBodyBytes": 246,
+      "query": "query{a:locationBySearchTerm(search:\"Harris County, Texas\",priority:\"locality\"){displayName regionCode countryCode stations(limit:1,maxAge:0,priority:\"locality\"){count results{id}}} b:locationBySearchTerm(search:\"Texas\",priority:\"locality\"){displayName regionCode countryCode stations(limit:1,maxAge:0,priority:\"locality\",brandId:1){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "us-inventory-scope-check",
+      "startedAt": "2026-09-30T19:34:15.517Z",
+      "status": 200,
+      "receivedMs": 893.38825,
+      "decodedBodyBytes": 691,
+      "query": "query{s0:locationBySearchTerm(search:\"New York, United States\",priority:\"locality\"){displayName countryCode regionCode latitude longitude stations(limit:1,maxAge:0,priority:\"locality\"){count}} s1:locationBySearchTerm(search:\"New York State, United States\",priority:\"locality\"){displayName countryCode regionCode latitude longitude stations(limit:1,maxAge:0,priority:\"locality\"){count}} s2:locationBySearchTerm(search:\"Washington, United States\",priority:\"locality\"){displayName countryCode regionCode latitude longitude stations(limit:1,maxAge:0,priority:\"locality\"){count}} s3:locationBySearchTerm(search:\"District of Columbia, United States\",priority:\"locality\"){displayName countryCode regionCode latitude longitude stations(limit:1,maxAge:0,priority:\"locality\"){count}} s4:locationBySearchTerm(search:\"Georgia, United States\",priority:\"locality\"){displayName countryCode regionCode latitude longitude stations(limit:1,maxAge:0,priority:\"locality\"){count}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-0",
+      "startedAt": "2026-09-30T19:35:11.321Z",
+      "status": 200,
+      "receivedMs": 702.6069999999997,
+      "decodedBodyBytes": 17539,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:2083,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:2068,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:2178,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:324,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:15,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:14,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:16,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:2093,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-8",
+      "startedAt": "2026-09-30T19:35:14.027Z",
+      "status": 200,
+      "receivedMs": 676.8463750000001,
+      "decodedBodyBytes": 6685,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:18,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:177,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:328,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:2024,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:2225,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:158,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:3037,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:22,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-16",
+      "startedAt": "2026-09-30T19:35:16.707Z",
+      "status": 200,
+      "receivedMs": 215.01591700000063,
+      "decodedBodyBytes": 3033,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:4324,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:2160,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:24,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:345,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:337,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:314,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:2005,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:28,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-24",
+      "startedAt": "2026-09-30T19:35:18.925Z",
+      "status": 200,
+      "receivedMs": 557.965291999999,
+      "decodedBodyBytes": 35810,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:307,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:29,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:2182,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:30,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:31,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:2186,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:32,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:33,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-32",
+      "startedAt": "2026-09-30T19:35:21.487Z",
+      "status": 200,
+      "receivedMs": 265.18487500000083,
+      "decodedBodyBytes": 5128,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:35,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:2053,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:36,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:2149,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:37,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:41,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:38,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:2136,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-40",
+      "startedAt": "2026-09-30T19:35:23.755Z",
+      "status": 200,
+      "receivedMs": 627.4146250000013,
+      "decodedBodyBytes": 33081,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:2052,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:46,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:2081,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:48,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:49,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:2077,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:341,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:52,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-48",
+      "startedAt": "2026-09-30T19:35:26.385Z",
+      "status": 200,
+      "receivedMs": 365.0720829999991,
+      "decodedBodyBytes": 969,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:156,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:2103,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:2147,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:53,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:2244,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:55,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:2062,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:347,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-56",
+      "startedAt": "2026-09-30T19:35:28.753Z",
+      "status": 200,
+      "receivedMs": 339.70254099999875,
+      "decodedBodyBytes": 1021,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:308,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:2143,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:175,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:178,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:2118,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:2134,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:3598,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:61,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-64",
+      "startedAt": "2026-09-30T19:35:31.095Z",
+      "status": 200,
+      "receivedMs": 433.591290999997,
+      "decodedBodyBytes": 8695,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:65,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:2170,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:74,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:78,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:80,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:2017,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:82,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:87,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-72",
+      "startedAt": "2026-09-30T19:35:33.531Z",
+      "status": 200,
+      "receivedMs": 472.98541699999987,
+      "decodedBodyBytes": 5937,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:2131,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:88,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:250,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:273,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:258,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:92,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:368,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:362,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-80",
+      "startedAt": "2026-09-30T19:35:36.008Z",
+      "status": 200,
+      "receivedMs": 483.3763749999998,
+      "decodedBodyBytes": 6883,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:2038,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:94,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:168,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:2229,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:2119,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:2202,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:2410,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:2123,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-88",
+      "startedAt": "2026-09-30T19:35:38.496Z",
+      "status": 200,
+      "receivedMs": 262.7103339999994,
+      "decodedBodyBytes": 6619,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:101,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:102,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:164,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:260,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:231,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:2139,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:152,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:2189,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-96",
+      "startedAt": "2026-09-30T19:35:40.761Z",
+      "status": 200,
+      "receivedMs": 391.6427909999984,
+      "decodedBodyBytes": 8091,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:107,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:108,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:109,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:111,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:206,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:176,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:115,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:2009,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-104",
+      "startedAt": "2026-09-30T19:35:43.155Z",
+      "status": 200,
+      "receivedMs": 722.9937079999945,
+      "decodedBodyBytes": 30329,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:2032,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:2188,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:118,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:119,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:120,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:122,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:123,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:2031,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    },
+    {
+      "name": "tx-brand-ids-112",
+      "startedAt": "2026-09-30T19:35:45.881Z",
+      "status": 200,
+      "receivedMs": 295.8558339999945,
+      "decodedBodyBytes": 15438,
+      "query": "query{locationBySearchTerm(search:\"Texas\",priority:\"locality\"){regionCode b0:stations(brandId:245,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b1:stations(brandId:125,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b2:stations(brandId:166,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b3:stations(brandId:4258,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b4:stations(brandId:128,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b5:stations(brandId:129,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b6:stations(brandId:130,limit:10000,maxAge:0,priority:\"locality\"){count results{id}} b7:stations(brandId:132,limit:10000,maxAge:0,priority:\"locality\"){count results{id}}}}",
+      "variables": {}
+    }
+  ],
+  "limits": [
+    "No sustained hourly national collection tested",
+    "HTTP request count is not the number of station resolutions",
+    "The exact rate-limit window and threshold are unknown",
+    "State reported counts are provider inventory, not an independently verified real-world census"
+  ]
+}
