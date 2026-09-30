@@ -15,11 +15,11 @@ do $$ declare cfg fuel_national_config; cat fuel_national_catalogs; begin
  update fuel_discovery_config set enabled=false where id;
  update fuel_national_config set enabled=true,halt_reason='ACTIVE_BOUNDED_NATIONAL_RESEARCH',
   starts_at=case when extract(epoch from date_trunc('hour',now())+interval '1 hour'-now())>
-    (select sum(ceil(n/3.0))*60+180 from (select count(*) n from fuel_national_batches where catalog_id=cat.id group by execution_region) groups)
+    (select sum(ceil(n/5.0))*60+180 from (select count(*) n from fuel_national_batches where catalog_id=cat.id group by execution_region) regional_counts)
     then now() else date_trunc('hour',now())+interval '1 hour' end,
   ends_at='${new Date(end).toISOString()}',catalog_valid_until='${new Date(end).toISOString()}',
   approved_lookups_per_hour=cat.station_count+20000,max_requests_per_hour=cat.batch_count+20,
-  archive_budget_bytes=900000000,request_interval_seconds=15 where id;
+  archive_budget_bytes=900000000,request_interval_seconds=10 where id;
  insert into fuel_national_events(code) values('BOUNDED_NATIONAL_COLLECTION_ACTIVATED');
 end $$;
 select cron.schedule('fuel-national-dispatch','* * * * *','select public.dispatch_fuel_national();');

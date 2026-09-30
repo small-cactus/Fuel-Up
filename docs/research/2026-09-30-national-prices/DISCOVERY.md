@@ -25,7 +25,7 @@ Subsequent controls:
 - `reconcile-scopes` queues a canonical state-name query, then the state abbreviation if needed, for results that failed scope checks. It never substitutes a local-area count for a statewide count.
 - `catalog [new-file]` reconciles complete state inventories and Texas partition unions. Missing states, wrong geographic scopes, stale observations, and count mismatches remain explicit gaps.
 - `configureDiscovery.sql` starts the bounded discovery schedule and preserves any provider cooldown. Repeating it does not extend the existing bootstrap deadline.
-- National price workers use a database-enforced 15-second minimum request interval and a 45-second work window, allowing approximately three batches per minute while leaving room before the next cron tick. This is operator pacing, not a measured provider limit. National prices remain paused until the catalog is complete.
+- National price workers use a configurable database-enforced request interval and a 45-second work window. The first activation selects 10 seconds, allowing approximately five batches per minute (the initial paused default was 15 seconds / three per minute) while leaving room before the next cron tick. This is operator pacing, not a measured provider limit. National prices remain paused until the catalog is complete.
 - Both discovery and price transports retain allow-listed response metadata for diagnosing quota/reset information, excluding cookies and credentials.
 
 
