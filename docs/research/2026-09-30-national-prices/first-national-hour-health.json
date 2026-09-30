@@ -1,0 +1,116 @@
+{
+  "recordedAt": "2026-09-30T22:17:11.316Z",
+  "accounted_archive_bytes": 3668544,
+  "config": {
+    "approved_lookups_per_hour": 161660,
+    "archive_budget_bytes": 900000000,
+    "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+    "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+    "enabled": true,
+    "ends_at": "2026-10-07T18:19:00+00:00",
+    "halt_reason": "ACTIVE_BOUNDED_NATIONAL_RESEARCH",
+    "id": true,
+    "last_dispatch_at": "2026-09-30T22:14:00.181687+00:00",
+    "last_request_at": "2026-09-30T22:14:31.03612+00:00",
+    "max_requests_per_hour": 92,
+    "provider_backoff_until": null,
+    "request_interval_seconds": 10,
+    "starts_at": "2026-09-30T22:00:00+00:00"
+  },
+  "cron": [
+    {
+      "active": true,
+      "name": "fuel-national-dispatch",
+      "schedule": "* * * * *"
+    },
+    {
+      "active": true,
+      "name": "fuel-national-watchdog",
+      "schedule": "*/5 * * * *"
+    }
+  ],
+  "events": [
+    {
+      "code": "BOUNDED_NATIONAL_COLLECTION_ACTIVATED",
+      "created_at": "2026-09-30T21:52:39.978085+00:00",
+      "job_id": null,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "SAME_SOURCE_RECOVERY_HTTP_200_NO_RATE_HEADERS",
+      "created_at": "2026-09-30T20:27:30.867672+00:00",
+      "job_id": null,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "BOOTSTRAP_HTTP_429",
+      "created_at": "2026-09-30T19:35:48+00:00",
+      "job_id": null,
+      "retry_after_seconds": 3600
+    }
+  ],
+  "hours": [
+    {
+      "archive_bytes": 3668544,
+      "completed_at": "2026-09-30T22:14:34.4272+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 22,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 93169,
+      "slot_at": "2026-09-30T22:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    }
+  ],
+  "regional_hours": [
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 22,
+      "slot_at": "2026-09-30T22:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 22,
+      "slot_at": "2026-09-30T22:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 22,
+      "slot_at": "2026-09-30T22:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    }
+  ],
+  "regions": [
+    {
+      "enabled": true,
+      "function_name": "fuel-national-northwest",
+      "last_dispatch_at": "2026-09-30T22:00:00.054151+00:00",
+      "region": "us-west-2"
+    },
+    {
+      "enabled": true,
+      "function_name": "fuel-national-southwest",
+      "last_dispatch_at": "2026-09-30T22:03:00.028333+00:00",
+      "region": "us-west-1"
+    },
+    {
+      "enabled": true,
+      "function_name": "fuel-national-east",
+      "last_dispatch_at": "2026-09-30T22:14:00.181687+00:00",
+      "region": "us-east-1"
+    }
+  ]
+}

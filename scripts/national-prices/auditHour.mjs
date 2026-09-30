@@ -25,8 +25,19 @@ try {
   return {jobId:j.id,sha256:j.sha256,...result};
  });
  if(seen.size!==run.expected_stations)throw Error('Nationwide coverage mismatch');
+ const starts=batches.map(b=>Date.parse(b.startedAt)).sort((a,b)=>a-b);
+ const latencies=batches.map(b=>Date.parse(b.observedAt)-Date.parse(b.startedAt)).sort((a,b)=>a-b);
+ let left=0,maxRollingMinute=0;
+ for(let right=0;right<starts.length;right++){
+  while(starts[right]-starts[left]>=60000)left++;
+  maxRollingMinute=Math.max(maxRollingMinute,right-left+1);
+ }
+ const percentile=p=>latencies[Math.min(latencies.length-1,Math.ceil(latencies.length*p)-1)];
+ const timing={observationSpanSeconds:(Math.max(...batches.map(b=>Date.parse(b.observedAt)))-starts[0])/1000,
+  maxArchivedRequestsInRollingMinute:maxRollingMinute,
+  requestLatencyMs:{p50:percentile(0.5),p95:percentile(0.95),max:latencies.at(-1)}};
  const report={auditedAt:new Date().toISOString(),runId:run.id,slotAt:run.slot_at,verified:true,stationCount:seen.size,pricedCount:priced,
-  unpricedCount:seen.size-priced,archiveBytes:bytes,regional,batches,
+  unpricedCount:seen.size-priced,archiveBytes:bytes,workerAttempts:jobs.reduce((n,j)=>n+j.attempts,0),regional,timing,batches,
   limitation:'Verifies archived provider observations and regional provenance; does not verify current pump prices or undocumented provider inventory completeness.'};
  if(output)writeFileSync(output,JSON.stringify(report,null,2)+'\n',{flag:'wx'});
  console.log(JSON.stringify({...report,batches:report.batches.length},null,2));

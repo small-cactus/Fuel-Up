@@ -1,0 +1,188 @@
+{
+  "recordedAt": "2026-09-30T22:07:39.329Z",
+  "regions": [
+    {
+      "functionName": "fuel-national-east",
+      "allMatched": true,
+      "files": [
+        {
+          "file": "_shared/core.mjs",
+          "sha256": "9dfbff3c6d2861dc0121c409e6e3a2a226e38ebfdb59e316d7946941fc54fb69",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalDiscovery.mjs",
+          "sha256": "87db412f7fd690fd4407dc0ac8534de17375e90518f2098c489f22852fd6b530",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalPriceBatch.mjs",
+          "sha256": "4f0227997ee93eb2a1009ebff99478852ad6ee2c7cd21b79139d664e2716520f",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalPriceTransport.mjs",
+          "sha256": "bd3febdd2347024cc7261f6af3bce72f868f21c7ee009e6e7720b3fca924fae8",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalPriceWorker.mjs",
+          "sha256": "48b8c772ff90d790f33502aa8b193171a6fef0ad5c8f2e823c20816236abe7eb",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalRegionHandler.mjs",
+          "sha256": "af8fe1f64e34b722c253523554b03ece92be849a7359279b17f12f0edc7a1540",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalRegions.mjs",
+          "sha256": "d509d79779ad8685e193e60e22a77afaf3a7705fe28d3c87579238a1536788f0",
+          "matches": true
+        },
+        {
+          "file": "_shared/providerResponseEvidence.mjs",
+          "sha256": "8a01ec5da81eeed88c4047a4ded110962cfa66b3863c36d77ffb4a696ebedbe1",
+          "matches": true
+        },
+        {
+          "file": "_shared/researchCollector.mjs",
+          "sha256": "669eaf2f148371e702f6f241083e902efcf9d7bf55cd1fc9e05a518f81b5bc26",
+          "matches": true
+        },
+        {
+          "file": "_shared/serveNationalRegion.ts",
+          "sha256": "a1a373873e8d25d47c2fe4d1ccb6d4c6a44ea73d7c3b27bb7383be0b03854958",
+          "matches": true
+        },
+        {
+          "file": "fuel-national-east/index.ts",
+          "sha256": "60dc833cc73c6f20259a1c2f17e42fb8e60dd321ef16238fecca6c12958d2887",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "functionName": "fuel-national-southwest",
+      "allMatched": true,
+      "files": [
+        {
+          "file": "_shared/core.mjs",
+          "sha256": "9dfbff3c6d2861dc0121c409e6e3a2a226e38ebfdb59e316d7946941fc54fb69",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalDiscovery.mjs",
+          "sha256": "87db412f7fd690fd4407dc0ac8534de17375e90518f2098c489f22852fd6b530",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalPriceBatch.mjs",
+          "sha256": "4f0227997ee93eb2a1009ebff99478852ad6ee2c7cd21b79139d664e2716520f",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalPriceTransport.mjs",
+          "sha256": "bd3febdd2347024cc7261f6af3bce72f868f21c7ee009e6e7720b3fca924fae8",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalPriceWorker.mjs",
+          "sha256": "48b8c772ff90d790f33502aa8b193171a6fef0ad5c8f2e823c20816236abe7eb",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalRegionHandler.mjs",
+          "sha256": "af8fe1f64e34b722c253523554b03ece92be849a7359279b17f12f0edc7a1540",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalRegions.mjs",
+          "sha256": "d509d79779ad8685e193e60e22a77afaf3a7705fe28d3c87579238a1536788f0",
+          "matches": true
+        },
+        {
+          "file": "_shared/providerResponseEvidence.mjs",
+          "sha256": "8a01ec5da81eeed88c4047a4ded110962cfa66b3863c36d77ffb4a696ebedbe1",
+          "matches": true
+        },
+        {
+          "file": "_shared/researchCollector.mjs",
+          "sha256": "669eaf2f148371e702f6f241083e902efcf9d7bf55cd1fc9e05a518f81b5bc26",
+          "matches": true
+        },
+        {
+          "file": "_shared/serveNationalRegion.ts",
+          "sha256": "a1a373873e8d25d47c2fe4d1ccb6d4c6a44ea73d7c3b27bb7383be0b03854958",
+          "matches": true
+        },
+        {
+          "file": "fuel-national-southwest/index.ts",
+          "sha256": "6bab04545521ebdffb9ce834fc3d6dd24b77e768d8f9fa89f237494b8373bead",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "functionName": "fuel-national-northwest",
+      "allMatched": true,
+      "files": [
+        {
+          "file": "_shared/core.mjs",
+          "sha256": "9dfbff3c6d2861dc0121c409e6e3a2a226e38ebfdb59e316d7946941fc54fb69",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalDiscovery.mjs",
+          "sha256": "87db412f7fd690fd4407dc0ac8534de17375e90518f2098c489f22852fd6b530",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalPriceBatch.mjs",
+          "sha256": "4f0227997ee93eb2a1009ebff99478852ad6ee2c7cd21b79139d664e2716520f",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalPriceTransport.mjs",
+          "sha256": "bd3febdd2347024cc7261f6af3bce72f868f21c7ee009e6e7720b3fca924fae8",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalPriceWorker.mjs",
+          "sha256": "48b8c772ff90d790f33502aa8b193171a6fef0ad5c8f2e823c20816236abe7eb",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalRegionHandler.mjs",
+          "sha256": "af8fe1f64e34b722c253523554b03ece92be849a7359279b17f12f0edc7a1540",
+          "matches": true
+        },
+        {
+          "file": "_shared/nationalRegions.mjs",
+          "sha256": "d509d79779ad8685e193e60e22a77afaf3a7705fe28d3c87579238a1536788f0",
+          "matches": true
+        },
+        {
+          "file": "_shared/providerResponseEvidence.mjs",
+          "sha256": "8a01ec5da81eeed88c4047a4ded110962cfa66b3863c36d77ffb4a696ebedbe1",
+          "matches": true
+        },
+        {
+          "file": "_shared/researchCollector.mjs",
+          "sha256": "669eaf2f148371e702f6f241083e902efcf9d7bf55cd1fc9e05a518f81b5bc26",
+          "matches": true
+        },
+        {
+          "file": "_shared/serveNationalRegion.ts",
+          "sha256": "a1a373873e8d25d47c2fe4d1ccb6d4c6a44ea73d7c3b27bb7383be0b03854958",
+          "matches": true
+        },
+        {
+          "file": "fuel-national-northwest/index.ts",
+          "sha256": "d189fbef54a6f25774ad41e485805aa75c2eac2c8c5a1674a78fe151aaac9321",
+          "matches": true
+        }
+      ]
+    }
+  ]
+}
