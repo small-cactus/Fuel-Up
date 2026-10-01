@@ -1,7 +1,8 @@
+import { GlassForm as Form, GlassSection as Section } from '../../../modules/fuel-up-glass';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SymbolView } from 'expo-symbols';
-import { Form, Host, Picker, Section, Toggle, Text as NativeText } from '@expo/ui/swift-ui';
+import { Host, Picker, Toggle, Text as NativeText } from '@expo/ui/swift-ui';
 import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers';
 import { FUEL_GRADE_ORDER, getFuelGradeMeta } from '../../lib/fuelGrade';
 

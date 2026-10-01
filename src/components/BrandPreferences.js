@@ -1,6 +1,7 @@
+import { GlassForm as Form, GlassSection as Section } from '../../modules/fuel-up-glass';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, Form, Host, ProgressView, Section, Text, Toggle } from '@expo/ui/swift-ui';
+import { Button, Host, ProgressView, Text, Toggle } from '@expo/ui/swift-ui';
 import { getFuelGradeMeta } from '../lib/fuelGrade';
 import NativeSearchBar from '../../modules/fuel-up-native-search';
 import MembershipSection from './memberships/MembershipSection';

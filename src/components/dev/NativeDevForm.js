@@ -23,16 +23,15 @@
  * and `simulation` objects it used to assemble.
  */
 
+import { GlassForm as Form, GlassSection as Section } from '../../../modules/fuel-up-glass';
 import React from 'react';
 import {
     Button,
-    Form,
     Host,
     Label,
     LabeledContent,
     Picker,
     ProgressView,
-    Section,
     Text,
     Toggle,
 } from '@expo/ui/swift-ui';

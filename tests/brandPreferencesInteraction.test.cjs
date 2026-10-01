@@ -65,6 +65,7 @@ test('brand requests expose unavailable location, empty results, and retryable f
 test('native brand toggles preserve rapid selections, and local search does not replace selection', async () => {
     const changes = [];
     const Component = load('src/components/BrandPreferences.js', {
+        '../../modules/fuel-up-glass': { GlassForm: 'Form', GlassSection: 'Section' },
         'react-native': { View: 'View', StyleSheet: { create: x => x } },
         '@expo/ui/swift-ui': { Button: 'Button', Form: 'Form', Host: 'Host', ProgressView: 'ProgressView', Section: 'Section', Text: 'Text', Toggle: 'Toggle' },
         '../lib/fuelGrade': { getFuelGradeMeta: () => ({ label: 'Regular' }) },
@@ -93,6 +94,7 @@ test('native brand toggles preserve rapid selections, and local search does not 
 test('membership section keeps saved access editable outside its state and preserves rapid toggles', async () => {
     const changes = [];
     const Component = load('src/components/memberships/MembershipSection.js', {
+        '../../../modules/fuel-up-glass': { GlassSection: 'Section' },
         '@expo/ui/swift-ui': { Section: 'Section', Toggle: 'Toggle', Text: 'Text', ProgressView: 'ProgressView', Button: 'Button' },
         '../../lib/fuelMemberships': { FUEL_MEMBERSHIPS: [{ id: 'costco', label: 'Costco' }, { id: 'sams', label: 'Sam’s Club' }, { id: 'bjs', label: 'BJ’s' }] },
         './useMembershipOptions': { __esModule: true, default: () => ({ ids: ['costco', 'sams'], state: 'UT', hasLocation: true, loading: false }) },

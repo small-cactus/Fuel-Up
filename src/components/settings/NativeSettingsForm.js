@@ -14,15 +14,14 @@
  * state plumbing.
  */
 
+import { GlassForm as Form, GlassSection as Section } from '../../../modules/fuel-up-glass';
 import React from 'react';
 import {
     Button,
-    Form,
     Host,
     Label,
     LabeledContent,
     Picker,
-    Section,
     Slider,
     Text,
     Toggle,

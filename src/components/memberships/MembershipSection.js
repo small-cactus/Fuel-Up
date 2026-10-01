@@ -1,5 +1,6 @@
+import { GlassSection as Section } from '../../../modules/fuel-up-glass';
 import React, { useRef } from 'react';
-import { Section, Toggle, Text, ProgressView, Button } from '@expo/ui/swift-ui';
+import { Toggle, Text, ProgressView, Button } from '@expo/ui/swift-ui';
 import { FUEL_MEMBERSHIPS } from '../../lib/fuelMemberships';
 import useMembershipOptions from './useMembershipOptions';
 

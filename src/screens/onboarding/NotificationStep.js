@@ -1,3 +1,4 @@
+import NativeGlassContainer from '../../components/native/NativeGlassContainer';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import LiveActivityPreview from './LiveActivityPreview';
@@ -29,9 +30,9 @@ export function NotificationStep({ isDark, themeColors, insets, permissionStatus
                 <View style={[styles.locationHighlightsContainer, { paddingBottom: 0 }]}>
                     {highlights.map((item, index) => (
                         <View key={index} style={styles.locationHighlightItem}>
-                            <View style={[styles.locationHighlightIconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
+                            <NativeGlassContainer colorScheme={isDark ? 'dark' : 'light'} style={[styles.locationHighlightIconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
                                 <SymbolView name={item.icon} size={24} tintColor="#FF3B30" />
-                            </View>
+                            </NativeGlassContainer>
                             <Text style={[styles.locationHighlightText, { color: themeColors.text }]}>
                                 {item.text}
                             </Text>

@@ -1,3 +1,4 @@
+import NativeGlassContainer from '../../components/native/NativeGlassContainer';
 import { hasPredictiveLocationAccess, getLocationStatusCopy } from './locationCopy.js';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SymbolView } from 'expo-symbols';
@@ -28,9 +29,9 @@ export function LocationStep({ isDark, themeColors, insets, permissionState }) {
                 <View style={styles.locationHighlightsContainer}>
                     {highlights.map((item, index) => (
                         <View key={index} style={styles.locationHighlightItem}>
-                            <View style={[styles.locationHighlightIconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
+                            <NativeGlassContainer colorScheme={isDark ? 'dark' : 'light'} style={[styles.locationHighlightIconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
                                 <SymbolView name={item.icon} size={24} tintColor="#007AFF" />
-                            </View>
+                            </NativeGlassContainer>
                             <Text style={[styles.locationHighlightText, { color: themeColors.text }]}>
                                 {item.text}
                             </Text>
@@ -38,7 +39,8 @@ export function LocationStep({ isDark, themeColors, insets, permissionState }) {
                     ))}
                 </View>
 
-                <View
+                <NativeGlassContainer
+                    colorScheme={isDark ? 'dark' : 'light'}
                     style={[
                         styles.grantedRow,
                         {
@@ -54,7 +56,7 @@ export function LocationStep({ isDark, themeColors, insets, permissionState }) {
                         tintColor={hasFullAccess ? '#34C759' : '#007AFF'}
                     />
                     <Text style={[styles.grantedText, { color: themeColors.text }]}>{statusCopy}</Text>
-                </View>
+                </NativeGlassContainer>
             </View>
         </ScrollView>
     );

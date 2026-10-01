@@ -1,3 +1,4 @@
+import NativeGlassContainer from '../src/components/native/NativeGlassContainer';
 /**
  * Live Activity Designer — in-app, pixel-accurate preview + prop
  * editor for the Predictive Fueling Live Activity.
@@ -261,7 +262,7 @@ export default function LiveActivityDesignerScreen() {
                 </View>
 
                 {/* ────────── Controls ────────── */}
-                <View style={[styles.controlsSection, isDark && styles.controlsSectionDark]}>
+                <NativeGlassContainer colorScheme={isDark ? 'dark' : 'light'} style={[styles.controlsSection, isDark && styles.controlsSectionDark]}>
                     <Text style={[styles.sectionHeader, isDark && styles.sectionHeaderDark]}>
                         Props
                     </Text>
@@ -335,7 +336,7 @@ export default function LiveActivityDesignerScreen() {
                             isDark={isDark}
                         />
                     </View>
-                </View>
+                </NativeGlassContainer>
 
                 {/* ────────── Actions ────────── */}
                 <View style={styles.actionsSection}>

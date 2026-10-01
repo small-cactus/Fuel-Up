@@ -67,6 +67,8 @@ async function setup({ requestLocation } = {}) {
             openPredictiveTrackingSettingsAsync: async () => {},
         },
     };
+    mocks['../../../modules/fuel-up-glass'] = { GlassForm: 'Form', GlassSection: 'Section' };
+    mocks['../../components/native/NativeGlassContainer'] = { __esModule: true, default: 'NativeGlassContainer' };
     mocks['@expo/ui/swift-ui'] = { Host: 'Host', Form: 'Form', Picker: 'NativePicker', Section: 'Section', Text: 'NativeText', Toggle: 'NativeToggle', Button: 'NativeButton', HStack: 'HStack', VStack: 'VStack', Image: 'NativeImage', Spacer: 'Spacer', Slider: 'Slider' };
     mocks['@expo/ui/swift-ui/modifiers'] = Object.fromEntries(['pickerStyle', 'tag', 'accessibilityLabel', 'accessibilityHint', 'accessibilityValue', 'buttonStyle', 'controlSize', 'disabled', 'font', 'foregroundStyle', 'frame', 'tint', 'fixedSize', 'padding', 'glassEffect'].map(name => [name, value => ({ [name]: value })]));
     mocks['../components/native/GlassActionButton'] = load('src/components/native/GlassActionButton.js', mocks);
