@@ -27,6 +27,7 @@ test('normalizeFuelSearchPreferences preserves diesel and normalizes defaults', 
         minimumRating: 4.5,
         navigationApp: 'apple-maps',
         preferredBrands: [],
+        fuelMemberships: [],
         requiresE85: false,
     });
 });

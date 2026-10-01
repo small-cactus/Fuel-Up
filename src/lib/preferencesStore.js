@@ -10,6 +10,7 @@ export const DEFAULT_PREFERENCES = {
     debugClusterAnimations: false,
     excludedBrands: [],
     preferredBrands: [],
+    fuelMemberships: [],
     requiresE85: false,
     hasCompletedOnboarding: false,
 };

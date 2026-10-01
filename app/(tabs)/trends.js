@@ -177,6 +177,7 @@ export default function TrendsScreen() {
     const preferredProvider = normalizedFuelSearchPreferences.preferredProvider;
     const minimumRating = normalizedFuelSearchPreferences.minimumRating;
     const preferredBrands = normalizedFuelSearchPreferences.preferredBrands;
+    const fuelMemberships = normalizedFuelSearchPreferences.fuelMemberships;
     const requiresE85 = normalizedFuelSearchPreferences.requiresE85;
     const selectedFuelGradeMeta = getFuelGradeMeta(selectedFuelGrade);
     const resolvedManualOrigin = useMemo(() => {
@@ -225,12 +226,14 @@ export default function TrendsScreen() {
                 preferredProvider,
                 minimumRating,
                 preferredBrands,
+                fuelMemberships,
                 requiresE85,
             })
             : ''
     ), [
         minimumRating,
         preferredBrands,
+        fuelMemberships,
         requiresE85,
         preferredProvider,
         searchRadiusMiles,
@@ -246,6 +249,7 @@ export default function TrendsScreen() {
             preferredProvider,
             minimumRating,
             preferredBrands,
+            fuelMemberships,
             requiresE85,
         });
 
@@ -255,6 +259,7 @@ export default function TrendsScreen() {
     }, [
         minimumRating,
         preferredBrands,
+        fuelMemberships,
         requiresE85,
         preferredProvider,
         searchRadiusMiles,
@@ -271,6 +276,7 @@ export default function TrendsScreen() {
         preferredProvider,
         minimumRating,
         preferredBrands,
+        fuelMemberships,
         requiresE85,
         resetToken: fuelResetToken,
         commitOrigin: commitResolvedSearchOrigin,

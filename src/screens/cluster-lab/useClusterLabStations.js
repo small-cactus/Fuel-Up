@@ -31,7 +31,7 @@ export default function useClusterLabStations(active) {
         let expiryTimer;
         const publish = (origin, snapshot) => {
             if (cancelled) return;
-            const stations = buildLabStations(snapshot, { origin, radiusMiles, minimumRating, fuelGrade: fuelType, requiresE85 });
+            const stations = buildLabStations(snapshot, { origin, radiusMiles, minimumRating, fuelGrade: fuelType, requiresE85, preferredBrands: preferences.preferredBrands, fuelMemberships: preferences.fuelMemberships });
             setResult({ scope, origin: { latitude: origin.latitude, longitude: origin.longitude }, stations });
             clearTimeout(expiryTimer);
             const expirations = stations.map(station => Date.parse(station.updatedAt) + REPORTED_PRICE_MAX_AGE_MS).filter(Number.isFinite);
@@ -59,7 +59,7 @@ export default function useClusterLabStations(active) {
                 if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
                     setResolvedFuelSearchContext(buildResolvedFuelSearchContext({
                         origin, locationSource: 'device', fuelGrade: fuelType, radiusMiles,
-                        preferredProvider, minimumRating, preferredBrands: preferences.preferredBrands, requiresE85,
+                        preferredProvider, minimumRating, preferredBrands: preferences.preferredBrands, fuelMemberships: preferences.fuelMemberships, requiresE85,
                     }));
                 }
                 const query = { latitude: origin.latitude, longitude: origin.longitude, fuelType, radiusMiles, preferredProvider, requiresE85 };
@@ -76,7 +76,7 @@ export default function useClusterLabStations(active) {
         const timer = setInterval(refresh, 5 * 60_000);
         const subscription = AppState.addEventListener('change', state => { if (state === 'active') refresh(); });
         return () => { cancelled = true; clearInterval(timer); clearTimeout(expiryTimer); subscription.remove(); };
-    }, [active, scope, latitude, longitude, fuelType, radiusMiles, minimumRating, preferredProvider, requiresE85, setResolvedFuelSearchContext, preferences.preferredBrands]);
+    }, [active, scope, latitude, longitude, fuelType, radiusMiles, minimumRating, preferredProvider, requiresE85, setResolvedFuelSearchContext, preferences.preferredBrands, preferences.fuelMemberships]);
 
     return useMemo(() => result?.scope === scope ? result : { origin: null, stations: [] }, [result, scope]);
 }

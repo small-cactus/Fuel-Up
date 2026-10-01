@@ -4,16 +4,16 @@ import { buildStationBrandOptions, normalizePreferredBrands, rankStationQuotes, 
 import { buildFuelSearchRequestKey, normalizeFuelSearchPreferences } from '../src/lib/fuelSearchState.js';
 import { createPreferencesStore, PREFERENCES_STORAGE_KEY } from '../src/lib/preferencesStore.js';
 const quote = (id, brand, price, extra = {}) => ({ stationId: id, stationName: brand, providerTier: 'station', fuelType: 'premium', price, allPrices: { premium: price }, distanceMiles: 1, ...extra });
-test('preferred brands rank strongly ahead of cheaper other brands without hiding them or changing prices', () => {
+test('preferred brand advantage is bounded and never changes prices', () => {
     const input = [quote('a','Other',2),quote('b','Shell',5),quote('c','Shell',4)];
     const ranked = rankStationQuotes(input, { preferredBrands: [' SHELL '] });
-    assert.deepEqual(ranked.map(q=>q.stationId),['c','b','a']);
+    assert.deepEqual(ranked.map(q=>q.stationId),['a','c','b']);
     assert.deepEqual(input.map(q=>q.stationId),['a','b','c']);
-    assert.equal(ranked[1],input[1]);
+    assert.equal(ranked[2],input[1]);
 });
 test('E85 requires explicit availability and remains independent of selected fuel and brands', () => {
     const input = [quote('a','Shell',3),quote('b','Other',4,{allPrices:{premium:4,e85:2.5}}),quote('c','Shell',5,{availableFuelGrades:['premium','e85']})];
-    assert.deepEqual(rankStationQuotes(input,{requiresE85:true,preferredBrands:['shell']}).map(q=>q.stationId),['c','b']);
+    assert.deepEqual(rankStationQuotes(input,{requiresE85:true,preferredBrands:['shell']}).map(q=>q.stationId),['b','c']);
     assert.equal(stationOffersE85({stationName:'E85 Depot'}),false);
     assert.equal(stationOffersE85({allPrices:{e85:0}}),false);
     assert.equal(stationOffersE85({fuelType:'e85',price:2}),true);

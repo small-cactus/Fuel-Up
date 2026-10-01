@@ -1,3 +1,4 @@
+import MembershipStep from './onboarding/MembershipStep';
 import { WelcomeStep } from './onboarding/WelcomeStep.js';
 import { LocationStep } from './onboarding/LocationStep.js';
 import { NotificationStep } from './onboarding/NotificationStep.js';
@@ -108,6 +109,7 @@ export default function OnboardingScreen() {
     const [radius, setRadius] = useState(preferences.searchRadiusMiles);
     const [octane, setOctane] = useState(preferences.preferredOctane);
     const [requiresE85, setRequiresE85] = useState(Boolean(preferences.requiresE85));
+    const [fuelMemberships, setFuelMemberships] = useState(preferences.fuelMemberships || []);
     const [preferredBrands, setPreferredBrands] = useState(preferences.preferredBrands || []);
     const [locationPermissionState, setLocationPermissionState] = useState(null);
     const [notifPermissionStatus, setNotifPermissionStatus] = useState(null);
@@ -207,7 +209,7 @@ export default function OnboardingScreen() {
             return;
         }
 
-        if (currentStep === 3 && notifPermissionStatus !== 'granted') {
+        if (ONBOARDING_STEPS[currentStep] === 'notifications' && notifPermissionStatus !== 'granted') {
             handleRequestNotifications();
             return;
         }
@@ -218,6 +220,7 @@ export default function OnboardingScreen() {
                 radius,
                 octane,
                 requiresE85,
+                fuelMemberships,
             }).forEach(([preferenceKey, preferenceValue]) => {
                 updatePreference(preferenceKey, preferenceValue);
             });
@@ -225,14 +228,14 @@ export default function OnboardingScreen() {
             scrollViewRef.current?.scrollTo({ x: (currentStep + 1) * SCREEN_WIDTH, animated: true });
         } else {
             // Final step
-            completeOnboarding({ searchRadiusMiles: radius, preferredOctane: octane, requiresE85, preferredBrands });
+            completeOnboarding({ searchRadiusMiles: radius, preferredOctane: octane, requiresE85, preferredBrands, fuelMemberships });
         }
     };
 
     const isLastStep = currentStep === totalSteps - 1;
     const canSkipPermission = (
         currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState)
-    ) || (currentStep === 3 && notifPermissionStatus !== 'granted');
+    ) || (ONBOARDING_STEPS[currentStep] === 'notifications' && notifPermissionStatus !== 'granted');
     const handleSkipPermission = () => {
         if (permissionRequestRef.current || !canSkipPermission) return;
         clearTimeout(advanceTimerRef.current);
@@ -273,11 +276,13 @@ export default function OnboardingScreen() {
                     />
 
                     <MemoLocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionState={locationPermissionState} />
+                    <MembershipStep width={SCREEN_WIDTH} insets={insets} themeColors={themeColors} isDark={isDark}
+                        coordinate={onboardingCoordinate} isActive={ONBOARDING_STEPS[currentStep] === 'memberships'} selected={fuelMemberships} onChange={setFuelMemberships} />
                     <MemoNotificationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={notifPermissionStatus} />
-                    <RadiusStep isActive={currentStep === 4} width={SCREEN_WIDTH} isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} coordinate={onboardingCoordinate} />
+                    <RadiusStep isActive={ONBOARDING_STEPS[currentStep] === 'radius'} width={SCREEN_WIDTH} isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} coordinate={onboardingCoordinate} />
                     <FuelGradeStep width={SCREEN_WIDTH} isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} requiresE85={requiresE85} onRequiresE85Change={setRequiresE85} />
                     <BrandStep width={SCREEN_WIDTH} insets={insets} themeColors={themeColors} isDark={isDark}
-                        isActive={currentStep === 6} coordinate={onboardingCoordinate} radiusMiles={radius} fuelGrade={octane}
+                        isActive={ONBOARDING_STEPS[currentStep] === 'brands'} coordinate={onboardingCoordinate} radiusMiles={radius} fuelGrade={octane}
                         requiresE85={requiresE85} selectedBrands={preferredBrands} onChange={setPreferredBrands} />
                 </ScrollView>
             </View>
@@ -317,11 +322,11 @@ export default function OnboardingScreen() {
                         <ContinueButtonContent
                             text={isLastStep ? 'Get Started' : (
                                 currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? getLocationActionLabel(locationPermissionState) :
-                                    currentStep === 3 && notifPermissionStatus !== 'granted' ? 'Enable Notifications' : 'Continue'
+                                    ONBOARDING_STEPS[currentStep] === 'notifications' && notifPermissionStatus !== 'granted' ? 'Enable Notifications' : 'Continue'
                             )}
                             icon={isLastStep ? 'checkmark' : (
                                 currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? 'location.fill' :
-                                    currentStep === 3 && notifPermissionStatus !== 'granted' ? 'bell.fill' : 'arrow.right'
+                                    ONBOARDING_STEPS[currentStep] === 'notifications' && notifPermissionStatus !== 'granted' ? 'bell.fill' : 'arrow.right'
                             )}
                             isDark={isDark}
                         />

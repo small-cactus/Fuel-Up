@@ -26,11 +26,12 @@ export default function useTrendData({
     preferredProvider,
     minimumRating,
     preferredBrands,
+    fuelMemberships,
     requiresE85,
     resetToken,
     commitOrigin,
 }) {
-    const scope = JSON.stringify([currentRequestKey, fuelGrade, radiusMiles, preferredProvider, minimumRating, preferredBrands, requiresE85, resetToken]);
+    const scope = JSON.stringify([currentRequestKey, fuelGrade, radiusMiles, preferredProvider, minimumRating, preferredBrands, fuelMemberships, requiresE85, resetToken]);
     const scopeRef = useRef(scope);
     scopeRef.current = scope;
     const mounted = useRef(false);
@@ -92,6 +93,7 @@ export default function useTrendData({
                     preferredProvider,
                     minimumRating,
                     preferredBrands,
+                    fuelMemberships,
                     requiresE85,
                 });
                 const data = await prefetchTrendData({
@@ -102,6 +104,7 @@ export default function useTrendData({
                     preferredProvider,
                     minimumRating,
                     preferredBrands,
+                    fuelMemberships,
                     requiresE85,
                     requestKey,
                 });
@@ -125,7 +128,7 @@ export default function useTrendData({
             }
         })();
         return request.promise;
-    }, [enabled, scope, origin, fuelGrade, radiusMiles, preferredProvider, minimumRating, preferredBrands, requiresE85, currentRequestKey, commitOrigin, resetToken]);
+    }, [enabled, scope, origin, fuelGrade, radiusMiles, preferredProvider, minimumRating, preferredBrands, fuelMemberships, requiresE85, currentRequestKey, commitOrigin, resetToken]);
 
     useFocusEffect(useCallback(() => {
         if (!enabled) return;

@@ -68,6 +68,8 @@ export default function NativeSettingsForm({
     requiresE85,
     onRequiresE85Change,
     preferredBrands = [],
+    fuelMemberships = [],
+    onEditMemberships,
     onEditPreferredBrands,
     // Navigation
     navigationApp,
@@ -102,7 +104,7 @@ export default function NativeSettingsForm({
                                 foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
                             ]}
                         >
-                            Regular 85–88 · Midgrade 89–90 · Premium 91–94+ · Diesel · E85. Require E85 limits results to stations with an E85 price. Preferred brands appear first, with other stations still available.
+                            Regular 85–88 · Midgrade 89–90 · Premium 91–94+ · Diesel · E85. Require E85 limits results to stations with an E85 price. Preferred brands get a 20¢/gal ranking advantage. Pump prices stay unchanged.
                         </Text>
                     }
                 >
@@ -172,6 +174,11 @@ export default function NativeSettingsForm({
                     </Picker>
                     <Toggle label="Require E85" systemImage="leaf.fill" isOn={Boolean(requiresE85)}
                         onIsOnChange={onRequiresE85Change} testID="settings-requires-e85" />
+                    <Button onPress={onEditMemberships} testID="settings-fuel-memberships">
+                        <LabeledContent label={<Label title="Gas Memberships" systemImage="person.crop.rectangle" />}>
+                            <Text>{fuelMemberships.length ? `${fuelMemberships.length} selected` : 'None'}</Text>
+                        </LabeledContent>
+                    </Button>
                     <Button onPress={onEditPreferredBrands} testID="settings-preferred-brands">
                         <LabeledContent label={<Label title="Preferred Brands" systemImage="heart" />}>
                             <Text modifiers={[foregroundStyle({ type: 'hierarchical', style: 'secondary' })]}>

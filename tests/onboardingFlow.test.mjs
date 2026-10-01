@@ -12,6 +12,7 @@ test('onboarding flow places optional brand preferences after fuel grade', () =>
         'welcome',
         'predictive',
         'location',
+        'memberships',
         'notifications',
         'radius',
         'octane',
@@ -22,7 +23,7 @@ test('onboarding flow places optional brand preferences after fuel grade', () =>
 test('onboarding only commits radius and octane on their respective steps', () => {
     assert.deepEqual(
         buildOnboardingPreferenceUpdates({
-            currentStep: 4,
+            currentStep: 5,
             radius: 20,
             octane: 'diesel',
         }),
@@ -31,7 +32,7 @@ test('onboarding only commits radius and octane on their respective steps', () =
 
     assert.deepEqual(
         buildOnboardingPreferenceUpdates({
-            currentStep: 5,
+            currentStep: 6,
             radius: 20,
             octane: 'diesel',
         }),
@@ -42,6 +43,6 @@ test('onboarding only commits radius and octane on their respective steps', () =
 test('onboarding translucency stays limited to the intended steps', () => {
     assert.equal(isTranslucentOnboardingStep(0), true);
     assert.equal(isTranslucentOnboardingStep(1), true);
-    assert.equal(isTranslucentOnboardingStep(4), true);
-    assert.equal(isTranslucentOnboardingStep(5), false);
+    assert.equal(isTranslucentOnboardingStep(5), true);
+    assert.equal(isTranslucentOnboardingStep(6), false);
 });

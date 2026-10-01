@@ -61,7 +61,7 @@ const StationCardCarousel = forwardRef(function StationCardCarousel({ stations, 
             onLayout={event => onHeight(event.nativeEvent.layout.height + bottom)}>
             <View pointerEvents="box-none" style={styles.resetRow}>
                 {!overview && <Pressable accessibilityRole="button" accessibilityLabel="Show all stations"
-                    accessibilityHint="Fits all stations on the map and shows the cheapest card"
+                    accessibilityHint="Fits all stations on the map and shows the top recommended card"
                     style={({ pressed }) => pressed && styles.pressed}
                     onPress={onShowAll}>
                     <GlassView glassEffectStyle="regular" style={styles.reset}>

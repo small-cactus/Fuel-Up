@@ -1,3 +1,4 @@
+import { rankStationQuotes } from '../../lib/stationPreferences.js';
 import { supabase } from '../../lib/supabase.js';
 import { buildVisibleStations } from '../../lib/visibleStations.js';
 import { buildFuelSearchRequestKey } from '../../lib/fuelSearchState.js';
@@ -61,6 +62,7 @@ export function buildTrendRequestKey({
     preferredProvider = 'gasbuddy',
     minimumRating = 0,
     preferredBrands = [],
+    fuelMemberships = [],
     requiresE85 = false,
     requestKey = '',
 }) {
@@ -78,6 +80,7 @@ export function buildTrendRequestKey({
         preferredProvider,
         minimumRating,
         preferredBrands,
+        fuelMemberships,
         requiresE85,
     });
 }
@@ -89,6 +92,7 @@ export async function fetchTrendData({
     radiusMiles = 10,
     minimumRating = 0,
     preferredBrands = [],
+    fuelMemberships = [],
     requiresE85 = false,
 }) {
     const searchLat = Math.round(latitude * 10) / 10;
@@ -121,7 +125,7 @@ export async function fetchTrendData({
 
     const rawRows = !error && Array.isArray(rows) ? buildRawTrendRows(rows, fuelType) : [];
     const rankedLatestQuotes = buildVisibleStations(snapshot, {
-        origin: { latitude, longitude }, radiusMiles, minimumRating, fuelGrade: fuelType, requiresE85,
+        origin: { latitude, longitude }, radiusMiles, minimumRating, fuelGrade: fuelType, requiresE85, preferredBrands, fuelMemberships,
     });
     const visibleStationIds = new Set(
         rankedLatestQuotes
@@ -260,9 +264,9 @@ export async function fetchTrendData({
 
     const leaderboard = buildTrendLeaderboard({
         rankedLatestQuotes,
-        earliestRankedQuotes: rankedLatestQuotes.filter(quote => stationHistoryById.has(String(quote.stationId))).map(quote => ({
+        earliestRankedQuotes: rankStationQuotes(rankedLatestQuotes.filter(quote => stationHistoryById.has(String(quote.stationId))).map(quote => ({
             ...quote, price: stationHistoryById.get(String(quote.stationId)).earliestPrice,
-        })).sort((a, b) => a.price - b.price || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)),
+        })), { preferredBrands }),
         stationHistoryById,
         limit: 5,
     });
@@ -326,6 +330,7 @@ export async function prefetchTrendData({
     preferredProvider = 'gasbuddy',
     minimumRating = 0,
     preferredBrands = [],
+    fuelMemberships = [],
     requiresE85 = false,
     requestKey = '',
 }) {
@@ -337,6 +342,7 @@ export async function prefetchTrendData({
         preferredProvider,
         minimumRating,
         preferredBrands,
+        fuelMemberships,
         requiresE85,
         requestKey,
     });
@@ -357,6 +363,7 @@ export async function prefetchTrendData({
                 radiusMiles,
                 minimumRating,
                 preferredBrands,
+                fuelMemberships,
                 requiresE85,
             });
             if (!isTrendCacheGenerationCurrent(requestGeneration)) {

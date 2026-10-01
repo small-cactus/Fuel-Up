@@ -82,3 +82,19 @@ test('local leaderboard exactly matches Home candidate filtering and ID tie orde
     assert.deepEqual(result.leaderboard.map(s => s.stationId), home.slice(0, 5).map(s => s.id));
     assert.deepEqual(result.leaderboard.map(s => s.stationId), ['01', '10', '20', 'preferred']);
 });
+
+test('Home and Local use identical membership exclusions and bounded preferred ranks', async () => {
+    const { buildVisibleStations } = await import('../src/lib/visibleStations.js');
+    const updatedAt = new Date().toISOString();
+    const quote = (stationId, stationName, price) => ({stationId, stationName, price, allPrices:{regular:price}, updatedAt,
+        fuelType:'regular', providerTier:'station', latitude:27.95, longitude:-82.45});
+    const cachedSnapshot = {fetchedAt:updatedAt,topStations:[quote('sams',"Sam's Club",2.5),quote('other','Other',3),quote('shell','Shell',3.19)]};
+    const trends = await setup({cachedSnapshot,noRefetch:true});
+    for (const fuelMemberships of [[], ['sams']]) {
+        const options={latitude:27.95,longitude:-82.45,fuelType:'regular',preferredBrands:['shell'],fuelMemberships};
+        const local=await trends.fetchTrendData(options);
+        const home=buildVisibleStations(cachedSnapshot,{...options,origin:options,fuelGrade:'regular'});
+        assert.deepEqual(local.leaderboard.map(s=>s.stationId),home.map(s=>s.id));
+        assert.equal(local.leaderboard[0].stationId,fuelMemberships.length?'sams':'shell');
+    }
+});

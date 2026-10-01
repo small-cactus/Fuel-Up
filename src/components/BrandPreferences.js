@@ -49,7 +49,7 @@ export default function BrandPreferences({ isDark, themeColors, coordinate, radi
                         {hasLocation && !loading && (error || !options.length) && <Button label="Try Again" systemImage="arrow.clockwise" onPress={retry} />}
                     </Section>}
                     {rows.length > 0 && <Section title={`${getFuelGradeMeta(fuelGrade).label} · Within ${radiusMiles} mi`}
-                        footer={<Text>Preferred brands appear first. Other stations stay available.</Text>}>
+                        footer={<Text>Preferred brands get a 20¢/gal ranking advantage. Pump prices stay unchanged.</Text>}>
                         {rows.map(brand => (
                             <Toggle key={brand.id} testID={`brand-preference-${brand.id}`} isOn={selectedBrands.includes(brand.id)}
                                 onIsOnChange={selected => setSelected(brand.id, selected)}>

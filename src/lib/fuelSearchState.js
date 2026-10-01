@@ -1,3 +1,4 @@
+import { normalizeFuelMemberships } from './fuelMemberships.js';
 import { normalizeFuelGrade } from './fuelGrade.js';
 import { normalizePreferredBrands } from './stationPreferences.js';
 
@@ -58,6 +59,7 @@ export function normalizeFuelSearchPreferences(preferences = {}) {
         minimumRating: normalizeMinimumRating(preferences.minimumRating),
         navigationApp: normalizeNavigationApp(preferences.navigationApp),
         preferredBrands: normalizePreferredBrands(preferences.preferredBrands),
+        fuelMemberships: normalizeFuelMemberships(preferences.fuelMemberships),
         requiresE85: preferences.requiresE85 === true,
     };
 }
@@ -70,6 +72,7 @@ export function buildFuelSearchCriteriaSignature({
     preferredProvider,
     minimumRating = DEFAULT_MINIMUM_RATING,
     preferredBrands = [],
+    fuelMemberships = [],
     requiresE85 = false,
 }) {
     return [
@@ -78,6 +81,7 @@ export function buildFuelSearchCriteriaSignature({
         normalizePreferredProvider(preferredProvider),
         normalizeMinimumRating(minimumRating).toFixed(1),
         ...(requiresE85 || normalizePreferredBrands(preferredBrands).length ? [JSON.stringify([requiresE85 === true, normalizePreferredBrands(preferredBrands)])] : []),
+        ...(normalizeFuelMemberships(fuelMemberships).length ? [JSON.stringify(normalizeFuelMemberships(fuelMemberships))] : []),
     ].join('|');
 }
 
@@ -101,6 +105,7 @@ export function buildFuelSearchRequestKey({
     preferredProvider,
     minimumRating = DEFAULT_MINIMUM_RATING,
     preferredBrands = [],
+    fuelMemberships = [],
     requiresE85 = false,
 }) {
     return [
@@ -113,6 +118,7 @@ export function buildFuelSearchRequestKey({
             preferredProvider,
             minimumRating,
             preferredBrands,
+            fuelMemberships,
             requiresE85,
         }),
     ].join('|');
@@ -128,6 +134,7 @@ export function buildResolvedFuelSearchContext({
     preferredProvider,
     minimumRating = DEFAULT_MINIMUM_RATING,
     preferredBrands = [],
+    fuelMemberships = [],
     requiresE85 = false,
 }) {
     if (!origin || buildFuelSearchLocationKey(origin) === 'unresolved') {
@@ -148,6 +155,7 @@ export function buildResolvedFuelSearchContext({
             preferredProvider,
             minimumRating,
             preferredBrands,
+            fuelMemberships,
             requiresE85,
         }),
         requestKey: buildFuelSearchRequestKey({
@@ -159,6 +167,7 @@ export function buildResolvedFuelSearchContext({
             preferredProvider,
             minimumRating,
             preferredBrands,
+            fuelMemberships,
             requiresE85,
         }),
         updatedAt: new Date().toISOString(),

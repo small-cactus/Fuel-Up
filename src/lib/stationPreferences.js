@@ -23,13 +23,16 @@ export function stationOffersE85(quote) {
     return ['e85', 'e_85'].includes(quote?.fuelType) && Number(quote?.price) > 0;
 }
 
+export const PREFERRED_BRAND_ADVANTAGE = 0.20;
+
 export function rankStationQuotes(quotes, { preferredBrands = [], requiresE85 = false } = {}) {
     const preferred = new Set(normalizePreferredBrands(preferredBrands));
     const isPreferred = quote => stationBrandNames(quote).some(name => preferred.has(normalizeStationBrand(name)));
     const distance = quote => Number.isFinite(quote.distanceMiles) ? quote.distanceMiles : Infinity;
     return (quotes || []).filter(quote => !requiresE85 || stationOffersE85(quote)).slice().sort((a, b) =>
-        Number(isPreferred(b)) - Number(isPreferred(a)) ||
-        a.price - b.price || distance(a) - distance(b) || String(a.stationId).localeCompare(String(b.stationId)));
+        (Math.round(a.price * 1000) - (isPreferred(a) ? Math.round(PREFERRED_BRAND_ADVANTAGE * 1000) : 0)) -
+        (Math.round(b.price * 1000) - (isPreferred(b) ? Math.round(PREFERRED_BRAND_ADVANTAGE * 1000) : 0)) ||
+        a.price - b.price || String(a.stationId).localeCompare(String(b.stationId)) || distance(a) - distance(b));
 }
 
 function distanceFrom(origin, quote) {
