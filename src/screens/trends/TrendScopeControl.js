@@ -1,21 +1,20 @@
 import React from 'react';
 import { Platform, View, Pressable, Text, StyleSheet } from 'react-native';
 import { Host, Menu, Picker, HStack, Image, Text as NativeText } from '@expo/ui/swift-ui';
-import { pickerStyle, tag, buttonStyle, controlSize, font, foregroundStyle, fixedSize } from '@expo/ui/swift-ui/modifiers';
+import { pickerStyle, tag, buttonStyle, controlSize, font, foregroundStyle, fixedSize, frame } from '@expo/ui/swift-ui/modifiers';
 export default function TrendScopeControl({
   value,
   onChange,
   isDark,
   themeColors
 }) {
-  if (Platform.OS === 'ios') return <View style={styles.control}>
-    <Host matchContents colorScheme={isDark ? 'dark' : 'light'}>
-      <Menu modifiers={[buttonStyle('glass'), controlSize('large')]} label={
-        <HStack spacing={8} modifiers={[fixedSize({ horizontal: true, vertical: true })]}>
-          <NativeText modifiers={[font({ size: 17, weight: 'semibold' }), foregroundStyle(themeColors.text)]}>
+  if (Platform.OS === 'ios') return <Host style={styles.control} matchContents colorScheme={isDark ? 'dark' : 'light'}>
+      <Menu modifiers={[buttonStyle('glass'), controlSize('small'), frame({ minHeight: 44 })]} label={
+        <HStack spacing={6} modifiers={[fixedSize({ horizontal: true, vertical: true })]}>
+          <NativeText modifiers={[font({ size: 14, weight: 'semibold' }), foregroundStyle(themeColors.text)]}>
             {value === 'local' ? 'Local' : 'National'}
           </NativeText>
-          <Image systemName="chevron.down" size={12} color={themeColors.text} />
+          <Image systemName="chevron.down" size={10} color={themeColors.text} />
         </HStack>
       }>
         <Picker label="Price region" selection={value} onSelectionChange={onChange} modifiers={[pickerStyle('inline')]}>
@@ -23,8 +22,7 @@ export default function TrendScopeControl({
           <NativeText modifiers={[tag('national')]}>National</NativeText>
         </Picker>
       </Menu>
-    </Host>
-  </View>;
+    </Host>;
   return <View style={styles.fallback}>{['local', 'national'].map(scope => <Pressable key={scope} accessibilityRole="button" accessibilityState={{
       selected: value === scope
     }} onPress={() => onChange(scope)} style={styles.button}>
@@ -36,17 +34,14 @@ export default function TrendScopeControl({
 }
 const styles = StyleSheet.create({
   control: {
-    alignItems: 'flex-start',
-    marginHorizontal: 24,
-    marginTop: 12,
-    marginBottom: 20
+    flexShrink: 0
   },
   fallback: {
     flexDirection: 'row',
-    marginHorizontal: 24
+    flexShrink: 0
   },
   button: {
-    flex: 1,
+    paddingHorizontal: 8,
     minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center'

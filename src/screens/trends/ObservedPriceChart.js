@@ -41,7 +41,8 @@ export default function ObservedPriceChart({ data, width, height, trendColor, to
 
 
     return (
-        <View style={{ width, height, marginTop: -margin.top }}>
+        // The top bleed overlaps the header; this decorative chart must not intercept menu taps.
+        <View pointerEvents="none" style={{ width, height, marginTop: -margin.top }}>
             <Svg width={width} height={height}>
                 <Defs>
                     <SvgLinearGradient id="gradientTrend" x1="0%" y1="0%" x2="0%" y2="100%">

@@ -423,25 +423,30 @@ export default function TrendsScreen() {
                     )}
                 >
                     <View style={styles.contentWrap}>
-                        <TrendScopeControl value={priceScope} onChange={setPriceScope} isDark={isDark} themeColors={themeColors} />
+                        <View style={styles.heroGraphPad}>
+                            <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>
+                                Reported {selectedFuelGradeMeta.label} {priceScope === 'national' ? 'National' : 'Local'} Average
+                            </Text>
+                            <View style={styles.heroPriceRow}>
+                                <View style={styles.heroPriceValues}>
+                                    {hasHeroTrendData ? <>
+                                        <Text numberOfLines={1} adjustsFontSizeToFit maxFontSizeMultiplier={2} style={[styles.heroPrice, numericTextStyle, darkModeWeightStyle.heroPrice, { color: themeColors.text }]}>
+                                            ${chartPoints.at(-1).price.toFixed(2)}
+                                        </Text>
+                                        {heroDeltaLabel ? <Text maxFontSizeMultiplier={2} style={[styles.heroDelta, numericTextStyle, darkModeWeightStyle.heroDelta, { color: primaryTrendColor }]}>
+                                            {heroDeltaLabel}
+                                        </Text> : null}
+                                    </> : chartLoading ? <>
+                                        <View style={[styles.heroPricePlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }]} />
+                                        <View style={[styles.heroDeltaPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]} />
+                                    </> : <Text style={[styles.heroPrice, numericTextStyle, { color: themeColors.textOpacity }]}>—</Text>}
+                                </View>
+                                <TrendScopeControl value={priceScope} onChange={setPriceScope} isDark={isDark} themeColors={themeColors} />
+                            </View>
+                        </View>
                             {/* Display-only carry-forward; raw observations remain unchanged. */}
                             {hasHeroTrendData ? (
                                 <View style={styles.heroGraphSection}>
-                                    <View style={styles.heroGraphPad}>
-                                        <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>
-                                            Reported {selectedFuelGradeMeta.label} {priceScope === 'national' ? 'National' : 'Local'} Average
-                                        </Text>
-                                        <View style={styles.heroPriceRow}>
-                                            <Text numberOfLines={1} adjustsFontSizeToFit maxFontSizeMultiplier={2} style={[styles.heroPrice, numericTextStyle, darkModeWeightStyle.heroPrice, { color: themeColors.text }]}>
-                                                ${chartPoints.at(-1).price.toFixed(2)}
-                                            </Text>
-                                            {heroDeltaLabel ? (
-                                                <Text maxFontSizeMultiplier={2} style={[styles.heroDelta, numericTextStyle, darkModeWeightStyle.heroDelta, { color: primaryTrendColor }]}>
-                                                    {heroDeltaLabel}
-                                                </Text>
-                                            ) : null}
-                                        </View>
-                                    </View>
                                     <ObservedPriceChart
                                         data={chartPoints}
                                         width={SCREEN_WIDTH}
@@ -470,15 +475,6 @@ export default function TrendsScreen() {
                                 </View>
                             ) : chartLoading ? (
                                 <View style={styles.heroGraphPlaceholderSection}>
-                                    <View style={styles.heroGraphPad}>
-                                        <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>
-                                            Reported {selectedFuelGradeMeta.label} {priceScope === 'national' ? 'National' : 'Local'} Average
-                                        </Text>
-                                        <View style={styles.heroPriceRow}>
-                                            <View style={[styles.heroPricePlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }]} />
-                                            <View style={[styles.heroDeltaPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]} />
-                                        </View>
-                                    </View>
                                     <View style={styles.heroChartPlaceholderWrap}>
                                         <View style={[styles.heroChartPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }]} />
                                     </View>
@@ -576,6 +572,12 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     heroPriceRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    heroPriceValues: {
+        flex: 1,
         flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'baseline',
