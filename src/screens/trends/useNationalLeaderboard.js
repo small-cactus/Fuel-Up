@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { AppState } from 'react-native';
-import { fetchNationalLeaderboard } from '../../services/fuel/nationalLeaderboard';
+import { fetchNationalTrends } from '../../services/fuel/nationalLeaderboard';
 import { isFreshReportedQuote, REPORTED_PRICE_MAX_AGE_MS } from '../../services/fuel/reportedPrices';
 export default function useNationalLeaderboard({
   enabled,
@@ -24,14 +24,14 @@ export default function useNationalLeaderboard({
     setRefreshing(showRefresh);
     const timeout = setTimeout(() => controller.abort(), 20000);
     try {
-      const quotes = await fetchNationalLeaderboard({
+      const response = await fetchNationalTrends({
         fuelType,
         requiresE85,
         signal: controller.signal
       });
       if (!controller.signal.aborted && current.current === scope) setResult({
         scope,
-        quotes,
+        ...response,
         error: null
       });
     } catch (error) {
@@ -77,6 +77,8 @@ export default function useNationalLeaderboard({
   }, [enabled, data, load, scope]);
   return {
     quotes: (data?.quotes || []).filter(q => isFreshReportedQuote(q)),
+    trendData: data?.trendData || null,
+    historyError: data?.historyError || null,
     loading: !data,
     refreshing,
     error: data?.error,

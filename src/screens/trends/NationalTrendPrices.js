@@ -21,8 +21,8 @@ export default function NationalTrendPrices({
 }
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 24,
-    paddingBottom: 24
+    padding: 16,
+    paddingBottom: 16
   },
   loading: {
     marginTop: 40

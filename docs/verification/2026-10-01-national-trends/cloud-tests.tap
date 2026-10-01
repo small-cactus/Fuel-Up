@@ -1,0 +1,289 @@
+
+> fuel-up@1.0.0 test:fuel-cloud
+> node scripts/buildFuelFunctionShared.cjs --check && node --test tests/gasPricesFunction.test.mjs tests/fuelRepair.test.mjs tests/fuelDataContracts.test.cjs tests/fuelCacheReset.test.cjs tests/priceValidation.test.cjs tests/fuelSearchState.test.mjs tests/cachedGasPrices.test.mjs
+
+TAP version 13
+# nearby-cache TRANSPORT_ERROR undefined
+# Subtest: fresh DB reads are cache-only, including forceRefresh; preserve payment and observation times
+ok 1 - fresh DB reads are cache-only, including forceRefresh; preserve payment and observation times
+  ---
+  duration_ms: 2.944459
+  ...
+# Subtest: exact radius, requested grade, and E85 restrictions survive DB normalization
+ok 2 - exact radius, requested grade, and E85 restrictions survive DB normalization
+  ---
+  duration_ms: 1.192375
+  ...
+# Subtest: empty cache and failed DB never invoke a fallback or write
+ok 3 - empty cache and failed DB never invoke a fallback or write
+  ---
+  duration_ms: 0.814125
+  ...
+# Subtest: serving returns raw reported prices only, with a 24-hour cutoff for the selected payment and grade
+ok 4 - serving returns raw reported prices only, with a 24-hour cutoff for the selected payment and grade
+  ---
+  duration_ms: 0.678291
+  ...
+# Subtest: clearFuelPriceCache prevents an in-flight DB read from repopulating cache
+ok 5 - clearFuelPriceCache prevents an in-flight DB read from repopulating cache
+  ---
+  duration_ms: 23.401959
+  ...
+# Subtest: empty nationwide DB results clear an old winner without fetching the provider
+ok 6 - empty nationwide DB results clear an old winner without fetching the provider
+  ---
+  duration_ms: 1.247792
+  ...
+# Subtest: refresh persists the exact reported price locally, without prediction or history writes
+ok 7 - refresh persists the exact reported price locally, without prediction or history writes
+  ---
+  duration_ms: 1.133875
+  ...
+# Subtest: uniform multi-grade prices exclude unsupported higher grades
+ok 8 - uniform multi-grade prices exclude unsupported higher grades
+  ---
+  duration_ms: 0.552125
+  ...
+# Subtest: duplicate higher grades stay suppressed in the local cache
+ok 9 - duplicate higher grades stay suppressed in the local cache
+  ---
+  duration_ms: 1.047917
+  ...
+# Subtest: a requested duplicate higher grade does not reappear via the client cache
+ok 10 - a requested duplicate higher grade does not reappear via the client cache
+  ---
+  duration_ms: 0.94025
+  ...
+# Subtest: buildTomTomSearchUrl produces a location-scoped station search request
+ok 11 - buildTomTomSearchUrl produces a location-scoped station search request
+  ---
+  duration_ms: 1.289125
+  ...
+# Subtest: buildBarchartUrl supports geographic and postal lookups
+ok 12 - buildBarchartUrl supports geographic and postal lookups
+  ---
+  duration_ms: 0.266875
+  ...
+# Subtest: TomTom station bundle normalizes into an actual station quote
+ok 13 - TomTom station bundle normalizes into an actual station quote
+  ---
+  duration_ms: 2.377709
+  ...
+# Subtest: Barchart payload normalizes and filters to the requested fuel type
+ok 14 - Barchart payload normalizes and filters to the requested fuel type
+  ---
+  duration_ms: 0.211416
+  ...
+# Subtest: Google nearby search request and payload normalize into a station quote
+ok 15 - Google nearby search request and payload normalize into a station quote
+  ---
+  duration_ms: 0.947542
+  ...
+# Subtest: Public area-level providers normalize into estimated quotes
+ok 16 - Public area-level providers normalize into estimated quotes
+  ---
+  duration_ms: 0.300583
+  ...
+# Subtest: Cheapest actual station wins over estimated fallbacks
+ok 17 - Cheapest actual station wins over estimated fallbacks
+  ---
+  duration_ms: 0.189459
+  ...
+# Subtest: No station quotes means no preferred quote is returned
+ok 18 - No station quotes means no preferred quote is returned
+  ---
+  duration_ms: 0.055
+  ...
+# Subtest: Fuel failure messaging distinguishes bad location from missing station prices
+ok 19 - Fuel failure messaging distinguishes bad location from missing station prices
+  ---
+  duration_ms: 0.506917
+  ...
+# Subtest: cache keys preserve exact search centers and freshness respects the ttl
+ok 20 - cache keys preserve exact search centers and freshness respects the ttl
+  ---
+  duration_ms: 0.362
+  ...
+# Subtest: GasBuddy fuel type mapping covers all app fuel types
+ok 21 - GasBuddy fuel type mapping covers all app fuel types
+  ---
+  duration_ms: 0.103334
+  ...
+# Subtest: buildGasBuddyGraphQLRequest produces a valid GraphQL POST config
+ok 22 - buildGasBuddyGraphQLRequest produces a valid GraphQL POST config
+  ---
+  duration_ms: 0.088291
+  ...
+# Subtest: GasBuddy GraphQL payload normalizes into station quotes with credit-first fallback to cash
+ok 23 - GasBuddy GraphQL payload normalizes into station quotes with credit-first fallback to cash
+  ---
+  duration_ms: 0.285833
+  ...
+# Subtest: GasBuddy station quote wins preferred selection
+ok 24 - GasBuddy station quote wins preferred selection
+  ---
+  duration_ms: 0.040958
+  ...
+# Subtest: GasBuddy uses verified diesel and E85 filters with matching product keys
+ok 25 - GasBuddy uses verified diesel and E85 filters with matching product keys
+  ---
+  duration_ms: 0.207542
+  ...
+# Subtest: repair scope protects tests, migrations, worker and credentials
+ok 26 - repair scope protects tests, migrations, worker and credentials
+  ---
+  duration_ms: 0.97425
+  ...
+# Subtest: incident prompt accepts only fixed error codes
+ok 27 - incident prompt accepts only fixed error codes
+  ---
+  duration_ms: 0.136292
+  ...
+# Subtest: production verification failure deploys previous code and reports failure
+ok 28 - production verification failure deploys previous code and reports failure
+  ---
+  duration_ms: 0.80075
+  ...
+# Subtest: successful production verification never rolls back
+ok 29 - successful production verification never rolls back
+  ---
+  duration_ms: 0.122417
+  ...
+# Subtest: failed rollback remains a reported deployment failure
+ok 30 - failed rollback remains a reported deployment failure
+  ---
+  duration_ms: 1.2055
+  ...
+# Subtest: candidate wrapper enforces a private secret and read-only service mode
+ok 31 - candidate wrapper enforces a private secret and read-only service mode
+  ---
+  duration_ms: 0.541667
+  ...
+# (node:22195) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelSearchState.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: normalizeFuelSearchPreferences preserves diesel and normalizes defaults
+ok 32 - normalizeFuelSearchPreferences preserves diesel and normalizes defaults
+  ---
+  duration_ms: 0.676667
+  ...
+# Subtest: normalizeFuelSearchPreferences accepts google-maps as navigationApp
+ok 33 - normalizeFuelSearchPreferences accepts google-maps as navigationApp
+  ---
+  duration_ms: 0.112958
+  ...
+# Subtest: normalizeFuelSearchPreferences falls back to apple-maps for unknown navigation apps
+ok 34 - normalizeFuelSearchPreferences falls back to apple-maps for unknown navigation apps
+  ---
+  duration_ms: 0.050334
+  ...
+# Subtest: fuel search request keys change for location and every request-affecting preference
+ok 35 - fuel search request keys change for location and every request-affecting preference
+  ---
+  duration_ms: 0.399958
+  ...
+# Subtest: resolved fuel search context carries a full request key and criteria signature
+ok 36 - resolved fuel search context carries a full request key and criteria signature
+  ---
+  duration_ms: 1.1705
+  ...
+# Subtest: reject invalid inputs before touching the cache or provider
+ok 37 - reject invalid inputs before touching the cache or provider
+  ---
+  duration_ms: 1.978667
+  ...
+# Subtest: cache keys isolate grade, radius and geographically distinct queries
+ok 38 - cache keys isolate grade, radius and geographically distinct queries
+  ---
+  duration_ms: 0.154875
+  ...
+# Subtest: fresh cache returns without provider calls and rejects other providers
+ok 39 - fresh cache returns without provider calls and rejects other providers
+  ---
+  duration_ms: 0.886375
+  ...
+# Subtest: cache miss validates, writes and returns live GasBuddy prices
+ok 40 - cache miss validates, writes and returns live GasBuddy prices
+  ---
+  duration_ms: 13.864292
+  ...
+# Subtest: HTTP 200 with GraphQL errors or schema changes is a failure
+ok 41 - HTTP 200 with GraphQL errors or schema changes is a failure
+  ---
+  duration_ms: 0.622
+  ...
+# Subtest: empty coverage is negative-cached without a repair incident
+ok 42 - empty coverage is negative-cached without a repair incident
+  ---
+  duration_ms: 0.278625
+  ...
+# Subtest: cache failure and duplicate refresh do not trigger provider repair
+ok 43 - cache failure and duplicate refresh do not trigger provider repair
+  ---
+  duration_ms: 0.158833
+  ...
+# Subtest: a provider timeout or 429 is recorded once and never cached as success
+ok 44 - a provider timeout or 429 is recorded once and never cached as success
+  ---
+  duration_ms: 0.417583
+  ...
+# Subtest: cache-fill uses GasBuddy history without a live call
+ok 45 - cache-fill uses GasBuddy history without a live call
+  ---
+  duration_ms: 0.9065
+  ...
+# Subtest: cash-only fallback uses cash source timestamp
+ok 46 - cash-only fallback uses cash source timestamp
+  ---
+  duration_ms: 0.531875
+  ...
+# Subtest: candidate probes cannot modify cache, history or incident counters
+ok 47 - candidate probes cannot modify cache, history or incident counters
+  ---
+  duration_ms: 0.431125
+  ...
+# Subtest: E85 requirement searches E85 coverage but returns and stores requested-grade prices and brands
+ok 48 - E85 requirement searches E85 coverage but returns and stores requested-grade prices and brands
+  ---
+  duration_ms: 6.53525
+  ...
+# Subtest: E85 filter also applies to cached prices and cache-fill rows
+ok 49 - E85 filter also applies to cached prices and cache-fill rows
+  ---
+  duration_ms: 0.118084
+  ...
+# Subtest: rejects a stale low replay and replaces it with the predicted price
+ok 50 - rejects a stale low replay and replaces it with the predicted price
+  ---
+  duration_ms: 9.547667
+  ...
+# Subtest: accepts an API price that stays close to the station-market prediction
+ok 51 - accepts an API price that stays close to the station-market prediction
+  ---
+  duration_ms: 0.679792
+  ...
+# Subtest: accepts the API price on a cold start instead of forcing a replacement
+ok 52 - accepts the API price on a cold start instead of forcing a replacement
+  ---
+  duration_ms: 0.076458
+  ...
+# Subtest: trusts a newly updated source timestamp that changed from the last station price
+ok 53 - trusts a newly updated source timestamp that changed from the last station price
+  ---
+  duration_ms: 0.224292
+  ...
+# Subtest: keeps expensive stations above the local market when a stale source is corrected upward
+ok 54 - keeps expensive stations above the local market when a stale source is corrected upward
+  ---
+  duration_ms: 1.26975
+  ...
+1..54
+# tests 54
+# suites 0
+# pass 54
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 132.303459

@@ -3,7 +3,7 @@ import { Animated, StyleSheet, Text, View, ScrollView, Dimensions, RefreshContro
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/ThemeContext';
 import { LinearGradient as ExpoLinearGradient } from 'expo-linear-gradient';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import * as d3Shape from 'd3-shape';
 import * as d3Scale from 'd3-scale';
 import TrendScopeControl from '../../src/screens/trends/TrendScopeControl';
@@ -163,7 +163,7 @@ function areGradientColorSetsEqual(left, right) {
 function ObservedPriceChart({ data, width, height, isDark, trendColor, topBleed = 40 }) {
     if (!data || data.length === 0) return null;
 
-    const margin = { top: topBleed, right: 3, bottom: 0, left: 3 };
+    const margin = { top: topBleed, right: 0, bottom: 0, left: 0 };
     const chartWidth = width - margin.left - margin.right;
     const chartHeight = height - margin.top - margin.bottom;
 
@@ -184,9 +184,15 @@ function ObservedPriceChart({ data, width, height, isDark, trendColor, topBleed 
     const lineGenerator = d3Shape.line()
         .x(d => xScale(Date.parse(d.date)))
         .y(d => yScale(d.price))
-        .curve(d3Shape.curveLinear);
+        .curve(d3Shape.curveMonotoneX);
 
-    // Draw actual bucket averages, with no smoothing or bridges across gaps.
+    const areaGenerator = d3Shape.area()
+        .x(d => xScale(Date.parse(d.date)))
+        .y0(chartHeight)
+        .y1(d => yScale(d.price))
+        .curve(d3Shape.curveMonotoneX);
+
+    // Restore the curved line and fade without filling missing observations.
     const daily = data.every(point => Date.parse(point.date) % 86400000 === 0);
     const bucketMs = daily ? 86400000 : 3600000;
     const segments = [];
@@ -198,10 +204,19 @@ function ObservedPriceChart({ data, width, height, isDark, trendColor, topBleed 
     return (
         <View style={{ width, height, marginTop: -margin.top }}>
             <Svg width={width} height={height}>
+                <Defs>
+                    <SvgLinearGradient id="gradientTrend" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <Stop offset="0%" stopColor={trendColor} stopOpacity={0.35} />
+                        <Stop offset="80%" stopColor={trendColor} stopOpacity={0.05} />
+                        <Stop offset="100%" stopColor={trendColor} stopOpacity={0} />
+                    </SvgLinearGradient>
+                </Defs>
                 {segments.filter(segment => segment.length > 1).map(segment => (
-                    <Path key={segment[0].date} d={lineGenerator(segment)} fill="none" stroke={trendColor} strokeWidth={3} x={margin.left} y={margin.top} />
+                    <React.Fragment key={segment[0].date}>
+                        <Path d={areaGenerator(segment)} fill="url(#gradientTrend)" x={margin.left} y={margin.top} />
+                        <Path d={lineGenerator(segment)} fill="none" stroke={trendColor} strokeWidth={3} x={margin.left} y={margin.top} />
+                    </React.Fragment>
                 ))}
-                {data.map(point => <Circle key={point.date} cx={xScale(Date.parse(point.date)) + margin.left} cy={yScale(point.price) + margin.top} r={3} fill={trendColor} />)}
             </Svg>
         </View>
     );
@@ -329,9 +344,10 @@ export default function TrendsScreen() {
     }));
     const [incomingGradientColors, setIncomingGradientColors] = useState(null);
     const gradientFadeOpacity = useRef(new Animated.Value(1)).current;
-    const heroTrendData = priceScope === 'local' ? displayTrendData : null;
+    const heroTrendData = priceScope === 'local' ? displayTrendData : national.trendData;
+    const chartLoading = priceScope === 'local' ? loading : national.loading;
     const hasHeroTrendData = Boolean(heroTrendData?.averagePricesByDay?.length > 0);
-    const gradientSourceData = priceScope === 'local' ? displayTrendData || null : null;
+    const gradientSourceData = heroTrendData || null;
     const heroTrendDirection = useMemo(
         () => getTrendDirectionFromData(heroTrendData || null),
         [heroTrendData]
@@ -463,13 +479,12 @@ export default function TrendsScreen() {
                 >
                     <View style={styles.contentWrap}>
                         <TrendScopeControl value={priceScope} onChange={setPriceScope} isDark={isDark} themeColors={themeColors} />
-                        {priceScope === 'national' ? <NationalTrendPrices {...national} gradeLabel={selectedFuelGradeMeta.label} isDark={isDark} themeColors={themeColors} /> : <>
                             {/* Observed averages only; missing history stays empty. */}
                             {hasHeroTrendData ? (
                                 <View style={styles.heroGraphSection}>
                                     <View style={styles.heroGraphPad}>
                                         <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>
-                                            Reported {selectedFuelGradeMeta.label} Local Average
+                                            Reported {selectedFuelGradeMeta.label} {priceScope === 'national' ? 'National' : 'Local'} Average
                                         </Text>
                                         <View style={styles.heroPriceRow}>
                                             <Text numberOfLines={1} adjustsFontSizeToFit maxFontSizeMultiplier={2} style={[styles.heroPrice, numericTextStyle, darkModeWeightStyle.heroPrice, { color: themeColors.text }]}>
@@ -485,7 +500,7 @@ export default function TrendsScreen() {
                                     {shouldShowAwaitingLocalHistoryText ? (
                                         <View style={styles.heroStatusWrap}>
                                             <Text style={[styles.heroPreviewText, darkModeWeightStyle.itemSub, { color: themeColors.text }]}>
-                                                Price history will appear as local reports arrive.
+                                                Price history will appear as {priceScope === 'national' ? 'national' : 'local'} reports arrive.
                                             </Text>
                                         </View>
                                     ) : null}
@@ -518,11 +533,11 @@ export default function TrendsScreen() {
                                     </View>
                                     </>) : null}
                                 </View>
-                            ) : loading ? (
+                            ) : chartLoading ? (
                                 <View style={styles.heroGraphPlaceholderSection}>
                                     <View style={styles.heroGraphPad}>
                                         <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>
-                                            Reported {selectedFuelGradeMeta.label} Local Average
+                                            Reported {selectedFuelGradeMeta.label} {priceScope === 'national' ? 'National' : 'Local'} Average
                                         </Text>
                                         <View style={styles.heroPriceRow}>
                                             <View style={[styles.heroPricePlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }]} />
@@ -539,7 +554,10 @@ export default function TrendsScreen() {
                                 </View>
                             ) : null}
 
-                            <View style={styles.contentPad}>
+                            {priceScope === 'national' ? <>
+                                {!chartLoading && !hasHeroTrendData && <Text style={[styles.emptyText, { color: themeColors.textOpacity }]}>{national.historyError || 'National price history will appear as reports arrive.'}</Text>}
+                                <NationalTrendPrices {...national} gradeLabel={selectedFuelGradeMeta.label} isDark={isDark} themeColors={themeColors} />
+                            </> : <View style={styles.contentPad}>
                                 {/* 2. Leaderboard */}
                                 {displayTrendData?.leaderboard?.length > 0 && (
                                     <TrendLeaderboard
@@ -557,8 +575,7 @@ export default function TrendsScreen() {
                                         <Text style={[styles.emptyText, darkModeWeightStyle.emptyText, { color: themeColors.textOpacity }]}>{trendError || 'Not enough historical data collected yet to render trends. Check back soon.'}</Text>
                                     </View>
                                 )}
-                            </View>
-                        </>}
+                            </View>}
                         </View>
                 </ScrollView>
 

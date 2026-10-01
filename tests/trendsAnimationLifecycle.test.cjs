@@ -9,6 +9,7 @@ test('a gradient target starts once and superseded/unmounted animation work is s
     const animations = [];
     const snapshot = prices => ({ trendSeriesMode: 'historical', averagePricesByDay: prices.map((price, index) => ({ price, date: new Date(1700000000000 + index * 3600000).toISOString() })) });
     let data = snapshot([3, 3]);
+    const nationalData = snapshot([3.1,3.8,3.4]);
     const appState = {};
     const preferences = { normalizedFuelSearchPreferences: { preferredOctane: 'regular', searchRadiusMiles: 10 } };
     const Screen = load('app/(tabs)/trends.js', {
@@ -26,9 +27,9 @@ test('a gradient target starts once and superseded/unmounted animation work is s
         'react-native-svg': { __esModule: true, default: 'Svg', Path: 'Path', Defs: 'Defs', LinearGradient: 'SvgGradient', Stop: 'Stop', Circle: 'Circle' },
         'd3-shape': await import('d3-shape'), 'd3-scale': await import('d3-scale'),
         '../../src/screens/trends/TrendLeaderboard': () => null,
-        '../../src/screens/trends/TrendScopeControl': () => null,
+        '../../src/screens/trends/TrendScopeControl': 'ScopeControl',
         '../../src/screens/trends/NationalTrendPrices': () => null,
-        '../../src/screens/trends/useNationalLeaderboard': () => ({quotes:[],refreshing:false}),
+        '../../src/screens/trends/useNationalLeaderboard': () => ({quotes:[],refreshing:false,loading:false,trendData:nationalData}),
         '../../src/services/fuel/trends': { buildTrendRequestKey: () => 'test' },
         '../../src/screens/trends/useTrendData': () => ({ data, loading: false, refreshing: false }),
         '../../src/AppStateContext': { useAppState: () => appState },
@@ -49,6 +50,14 @@ test('a gradient target starts once and superseded/unmounted animation work is s
     await act(async () => renderer.update(React.createElement(Screen)));
     assert.equal(animations.length, 2);
     assert.equal(animations[0].stopped, 1);
+    const localLine = renderer.root.findAllByType('Path').find(p => p.props.stroke)?.props.d;
+    assert.equal(renderer.root.findAllByType('Circle').length,0);
+    assert(renderer.root.findAllByType('Path').some(p => p.props.fill === 'url(#gradientTrend)'));
+    await act(async () => renderer.root.findByType('ScopeControl').props.onChange('national'));
+    assert(renderer.root.findAllByType('Text').some(p => p.props.children?.includes?.('National')));
+    const nationalLine = renderer.root.findAllByType('Path').find(p => p.props.stroke)?.props.d;
+    assert(nationalLine);assert.notEqual(nationalLine,localLine);
+    assert.equal(renderer.root.findAllByType('Circle').length,0);
     await act(async () => renderer.unmount());
     assert.equal(animations[1].stopped, 1);
 });

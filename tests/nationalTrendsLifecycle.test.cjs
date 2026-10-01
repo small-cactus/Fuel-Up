@@ -10,7 +10,7 @@ test('switching national grades or leaving the screen cancels stale responses; i
     const useNational = load('src/screens/trends/useNationalLeaderboard.js', {
         'expo-router': { useFocusEffect: callback => React.useEffect(callback, [callback]) },
         'react-native': { AppState: { addEventListener: () => ({ remove() {} }) } },
-        '../../services/fuel/nationalLeaderboard': { fetchNationalLeaderboard: params => new Promise(resolve => requests.push({ ...params, resolve })) },
+        '../../services/fuel/nationalLeaderboard': { fetchNationalTrends: params => new Promise(resolve => requests.push({ ...params, resolve })) },
     }).default;
     let value, renderer;
     let props = { enabled: true, fuelType: 'regular', requiresE85: false, resetToken: 0 };
@@ -21,14 +21,16 @@ test('switching national grades or leaving the screen cancels stale responses; i
     assert.equal(value.refreshing, false);
     await update({ fuelType: 'premium' });
     assert.equal(requests[0].signal.aborted, true);
-    await act(async () => requests[1].resolve([quote('premium')]));
-    await act(async () => requests[0].resolve([quote('regular')]));
+    await act(async () => requests[1].resolve({quotes:[quote('premium')],trendData:{averagePricesByDay:[{date:'2026-10-01T00:00:00Z',price:4}]}}));
+    await act(async () => requests[0].resolve({quotes:[quote('regular')],trendData:{averagePricesByDay:[{date:'2026-10-01T00:00:00Z',price:3}]}}));
     assert.equal(value.quotes[0].fuelType, 'premium');
+    assert.equal(value.trendData.averagePricesByDay[0].price,4);
     await act(async () => { void value.onRefresh(); });
     assert.equal(value.refreshing, true);
     await update({ enabled: false });
     assert.equal(requests[2].signal.aborted, true);
-    await act(async () => requests[2].resolve([quote('regular')]));
+    await act(async () => requests[2].resolve({quotes:[quote('regular')],trendData:{averagePricesByDay:[{date:'2026-10-01T00:00:00Z',price:3}]}}));
     assert.equal(value.quotes[0].fuelType, 'premium');
+    assert.equal(value.trendData.averagePricesByDay[0].price,4);
     await act(async () => renderer.unmount());
 });
