@@ -1,11 +1,8 @@
 import { supabase } from '../../lib/supabase.js';
-import { filterStationQuotesForHome } from '../../lib/homeState.js';
-import { rankQuotesForFuelGrade } from '../../lib/fuelGrade.js';
-import { rankStationQuotes } from '../../lib/stationPreferences.js';
+import { buildVisibleStations } from '../../lib/visibleStations.js';
 import { buildFuelSearchRequestKey } from '../../lib/fuelSearchState.js';
-const { refreshFuelPriceSnapshot } = require('./index');
+const { refreshFuelPriceSnapshot, getCachedFuelPriceSnapshot } = require('./index');
 const { buildRawTrendRows } = require('./rawTrendRows');
-const { isFreshReportedQuote } = require('./reportedPrices');
 const { buildAveragePriceTrendSeries } = require('./trendAggregation');
 const { buildTrendLeaderboard } = require('./trendLeaderboard');
 
@@ -98,7 +95,16 @@ export async function fetchTrendData({
     const searchLng = Math.round(longitude * 10) / 10;
     const lookbackStartIso = new Date(Date.now() - TREND_HISTORY_LOOKBACK_MS).toISOString();
 
-    const [history, latest] = await Promise.all([supabase
+    const query = { latitude, longitude, radiusMiles, fuelType, requiresE85 };
+    // Home has just loaded this exact area. Reuse that snapshot instead of
+    // independently selecting from a second response on a tab switch.
+    const latestSnapshot = async () => {
+        const cached = await getCachedFuelPriceSnapshot(query);
+        const age = Date.now() - Date.parse(cached?.fetchedAt);
+        if (cached && age >= 0 && age < 5 * 60000) return cached;
+        return (await refreshFuelPriceSnapshot(query)).snapshot;
+    };
+    const [history, snapshot] = await Promise.all([supabase
         .from('station_prices')
         .select('*')
         .eq('search_latitude_rounded', searchLat)
@@ -107,28 +113,16 @@ export async function fetchTrendData({
         .gte('created_at', lookbackStartIso)
         .order('created_at', { ascending: false })
         .limit(TREND_HISTORY_MAX_ROWS),
-        refreshFuelPriceSnapshot({ latitude, longitude, radiusMiles, fuelType, requiresE85 }),
+        latestSnapshot(),
     ]);
     const { data: descendingRows, error } = history;
 
     const rows = Array.isArray(descendingRows) ? descendingRows.slice().reverse() : descendingRows;
 
     const rawRows = !error && Array.isArray(rows) ? buildRawTrendRows(rows, fuelType) : [];
-    const latestQuotes = (latest.snapshot?.topStations || []).filter(quote => isFreshReportedQuote(quote));
-    const rankedLatestQuotes = rankStationQuotes(rankQuotesForFuelGrade(
-        filterStationQuotesForHome({
-            quotes: latestQuotes,
-            origin: {
-                latitude,
-                longitude,
-            },
-            radiusMiles,
-            minimumRating,
-            preferredBrands,
-            requiresE85,
-        }),
-        fuelType
-    ), { preferredBrands, requiresE85 });
+    const rankedLatestQuotes = buildVisibleStations(snapshot, {
+        origin: { latitude, longitude }, radiusMiles, minimumRating, fuelGrade: fuelType, requiresE85,
+    });
     const visibleStationIds = new Set(
         rankedLatestQuotes
             .map(quote => String(quote?.stationId || '').trim())
@@ -260,9 +254,9 @@ export async function fetchTrendData({
 
     const leaderboard = buildTrendLeaderboard({
         rankedLatestQuotes,
-        earliestRankedQuotes: rankStationQuotes(rankedLatestQuotes.filter(quote => stationHistoryById.has(String(quote.stationId))).map(quote => ({
+        earliestRankedQuotes: rankedLatestQuotes.filter(quote => stationHistoryById.has(String(quote.stationId))).map(quote => ({
             ...quote, price: stationHistoryById.get(String(quote.stationId)).earliestPrice,
-        })), { preferredBrands, requiresE85 }),
+        })).sort((a, b) => a.price - b.price || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)),
         stationHistoryById,
         limit: 5,
     });

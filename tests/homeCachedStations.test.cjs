@@ -2,6 +2,31 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const load=require('./helpers/loadComponent.cjs');
 
+test('Home shares its fallback GPS origin so Trends searches the same radius center',async t=>{
+    let effect;
+    const commits=[], queries=[];
+    const origin={latitude:27.95,longitude:-82.45};
+    const hook=load('src/screens/cluster-lab/useClusterLabStations.js',{
+        react:{useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,()=>{}]},
+        'react-native':{AppState:{currentState:'active',addEventListener:()=>({remove(){}})}},
+        'expo-location':{getForegroundPermissionsAsync:async()=>({status:'granted'}),getLastKnownPositionAsync:async()=>({coords:origin})},
+        '../../AppStateContext':{useAppState:()=>({setResolvedFuelSearchContext:value=>commits.push(value)})},
+        '../../PreferencesContext':{usePreferences:()=>({preferences:{preferredOctane:'regular',searchRadiusMiles:5}})},
+        '../../lib/deviceLocationCache':{getLastDeviceLocationRegion:async()=>null},
+        '../../services/fuel':{getCachedFuelPriceSnapshot:async()=>null,refreshFuelPriceSnapshot:async query=>{queries.push(query);return {snapshot:{}};}},
+        './stationCardModel':{buildLabStations:()=>[]},
+    }).default;
+    hook(true);t.after(effect());
+    await new Promise(setImmediate);
+    assert.equal(commits.length,1);
+    assert.equal(commits[0].latitude,origin.latitude);
+    assert.equal(commits[0].longitude,origin.longitude);
+    assert.equal(commits[0].locationSource,'device');
+    assert.equal(queries[0].latitude,commits[0].latitude);
+    assert.equal(queries[0].longitude,commits[0].longitude);
+    assert.equal(queries[0].radiusMiles,5);
+});
+
 test('Home publishes local data then refreshes DB on focus and foreground; cleanup prevents old query results',async()=>{
     let effect, cleanup, foreground, resolveRefresh, calls=0;
     const results=[];

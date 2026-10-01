@@ -9,12 +9,13 @@ export async function getNationalLeaderboard({
   const fuelType = input.fuelType || 'regular';
   if (!['regular', 'midgrade', 'premium', 'diesel', 'e85'].includes(fuelType) || input.requiresE85 != null && typeof input.requiresE85 !== 'boolean') throw new ServiceError('INVALID_INPUT', 400);
   const {
-    data: rows,
+    data: result,
     error
-  } = await db.rpc('national_fuel_station_cache', {
+  } = await db.rpc('national_fuel_trends', {
     p_fuel_type: fuelType,
     p_requires_e85: input.requiresE85 === true
   });
+  const rows = result?.stations;
   if (error || !Array.isArray(rows)) throw new ServiceError('CACHE_UNAVAILABLE', 503);
   const now = Date.now();
   const quotes = sanitizeStationQuotesForFuelType(normalizeGasBuddyResponse({
@@ -32,21 +33,17 @@ export async function getNationalLeaderboard({
         }
       }
     }
-  }) || [], fuelType).filter(q => isFreshReportedQuote(q, now)).sort((a, b) => a.price - b.price || a.stationId.localeCompare(b.stationId)).slice(0, 5).map(({
-    distanceMiles,
-    ...q
-  }) => ({
-    ...q,
-    observedAt: rows.find(r => String(r.station.id) === q.stationId)?.observedAt
+  }) || [], fuelType).filter(q => isFreshReportedQuote(q, now)).sort((a, b) => a.price - b.price || a.stationId.localeCompare(b.stationId)).slice(0, 5).map(q => ({
+    stationId: q.stationId, stationName: q.stationName, address: q.address,
+    price: q.price, fuelType: q.fuelType, updatedAt: q.updatedAt,
+    providerTier: q.providerTier, providerId: q.providerId,
+    paymentType: q.allPrices?._payment?.[q.fuelType]?.selected,
   }));
-  const { data: history, error: historyError } = await db.rpc('national_fuel_trend_history', {
-    p_fuel_type: fuelType,
-    p_requires_e85: input.requiresE85 === true
-  });
+  const history = Array.isArray(result.history) ? result.history.map(({date, price, stationCount}) => ({date, price, stationCount})) : [];
   return {
     version: 1,
-    history: historyError || !Array.isArray(history) ? [] : history,
-    historyError: historyError ? 'Unable to load national price history.' : null,
+    history,
+    historyError: result.historyError || null,
     source: 'national-cache',
     scope: 'national',
     quotes,

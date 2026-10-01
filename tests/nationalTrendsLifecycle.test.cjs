@@ -34,3 +34,44 @@ test('switching national grades or leaving the screen cancels stale responses; i
     assert.equal(value.trendData.averagePricesByDay[0].price,4);
     await act(async () => renderer.unmount());
 });
+
+test('national cache returns immediately on revisit, stays isolated by grade/filter/reset, and refreshes after five minutes', async t => {
+    const now = Date.parse('2026-10-01T18:00:00Z');
+    t.mock.timers.enable({ apis: ['Date'], now });
+    const requests = [];
+    const useNational = load('src/screens/trends/useNationalLeaderboard.js', {
+        'expo-router': { useFocusEffect: callback => React.useEffect(callback, [callback]) },
+        'react-native': { AppState: { addEventListener: () => ({ remove() {} }) } },
+        '../../services/fuel/nationalLeaderboard': { fetchNationalTrends: params => new Promise((resolve, reject) => requests.push({ ...params, resolve, reject })) },
+    }).default;
+    let value, renderer, props = { enabled: true, fuelType: 'regular', requiresE85: false, resetToken: 0 };
+    function Consumer(input) { value = useNational(input); return null; }
+    const update = async patch => { props = { ...props, ...patch }; await act(async () => renderer.update(React.createElement(Consumer, props))); };
+    const response = { quotes: [{ stationId: 'a', providerTier: 'station', fuelType: 'regular', price: 3, updatedAt: new Date(now).toISOString() }], trendData: { averagePricesByDay: [{ date: new Date(now).toISOString(), price: 3 }] } };
+    await act(async () => { renderer = create(React.createElement(Consumer, props)); });
+    await act(async () => requests[0].resolve(response));
+    await update({ enabled: false });
+    await update({ enabled: true });
+    assert.equal(requests.length, 1);
+    assert.equal(value.loading, false);
+    assert.equal(value.quotes[0].stationId, 'a');
+    await update({ fuelType: 'premium' });
+    assert.equal(value.loading, true);
+    await update({ fuelType: 'regular' });
+    assert.equal(requests.length, 2);
+    assert.equal(value.loading, false);
+    await update({ requiresE85: true });
+    assert.equal(requests.length, 3); assert.equal(value.loading, true);
+    await update({ requiresE85: false });
+    assert.equal(value.quotes[0].stationId, 'a');
+    await update({ enabled: false });
+    t.mock.timers.tick(300001);
+    await update({ enabled: true });
+    assert.equal(requests.length, 4);
+    assert.equal(value.quotes[0].stationId, 'a', 'keep valid data visible during refresh');
+    await act(async () => requests[3].reject(new Error('offline')));
+    assert.equal(value.quotes[0].stationId, 'a');
+    await update({ resetToken: 1 });
+    assert.equal(value.loading, true); assert.equal(requests.length, 5);
+    await act(async () => renderer.unmount());
+});

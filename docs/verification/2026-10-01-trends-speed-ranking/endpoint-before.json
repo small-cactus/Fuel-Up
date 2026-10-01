@@ -1,0 +1,92 @@
+[
+  {
+    "fuelType": "regular",
+    "requiresE85": false,
+    "status": 200,
+    "ms": 1315,
+    "bytes": 6062,
+    "quotes": [
+      "214508",
+      "49116",
+      "210741",
+      "19326",
+      "213088"
+    ],
+    "history": 11
+  },
+  {
+    "fuelType": "premium",
+    "requiresE85": false,
+    "status": 200,
+    "ms": 841,
+    "bytes": 6083,
+    "quotes": [
+      "198526",
+      "93796",
+      "49742",
+      "23510",
+      "76288"
+    ],
+    "history": 11
+  },
+  {
+    "fuelType": "e85",
+    "requiresE85": false,
+    "status": 200,
+    "ms": 717,
+    "bytes": 5843,
+    "quotes": [
+      "215788",
+      "175181",
+      "54250",
+      "54252",
+      "113713"
+    ],
+    "history": 11
+  },
+  {
+    "fuelType": "regular",
+    "requiresE85": true,
+    "status": 200,
+    "ms": 479,
+    "bytes": 6533,
+    "quotes": [
+      "200664",
+      "201189",
+      "175863",
+      "199966",
+      "204335"
+    ],
+    "history": 11
+  },
+  {
+    "fuelType": "premium",
+    "requiresE85": true,
+    "status": 200,
+    "ms": 660,
+    "bytes": 6612,
+    "quotes": [
+      "102507",
+      "152193",
+      "139517",
+      "200664",
+      "201189"
+    ],
+    "history": 11
+  },
+  {
+    "fuelType": "e85",
+    "requiresE85": true,
+    "status": 200,
+    "ms": 508,
+    "bytes": 5843,
+    "quotes": [
+      "215788",
+      "175181",
+      "54250",
+      "54252",
+      "113713"
+    ],
+    "history": 11
+  }
+]

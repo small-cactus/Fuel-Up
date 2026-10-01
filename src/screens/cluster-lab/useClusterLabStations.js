@@ -6,12 +6,13 @@ import { usePreferences } from '../../PreferencesContext';
 import { getLastDeviceLocationRegion } from '../../lib/deviceLocationCache';
 import { getCachedFuelPriceSnapshot, refreshFuelPriceSnapshot } from '../../services/fuel';
 import { buildLabStations } from './stationCardModel';
+import { buildResolvedFuelSearchContext } from '../../lib/fuelSearchState';
 import { REPORTED_PRICE_MAX_AGE_MS } from '../../services/fuel/reportedPrices';
 
 // Data crosses the bridge once per search. The Swift view owns all camera and
 // animation work. The five-minute DB refresh never drives animation frames.
 export default function useClusterLabStations(active) {
-    const { resolvedFuelSearchContext, manualLocationOverride, fuelResetToken } = useAppState();
+    const { resolvedFuelSearchContext, manualLocationOverride, fuelResetToken, setResolvedFuelSearchContext } = useAppState();
     const { preferences, fuelSearchCriteriaSignature } = usePreferences();
     const [result, setResult] = useState(null);
     const latitude = manualLocationOverride?.latitude ?? resolvedFuelSearchContext?.latitude;
@@ -55,6 +56,12 @@ export default function useClusterLabStations(active) {
                     origin = fix.coords;
                 }
                 if (cancelled) return;
+                if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+                    setResolvedFuelSearchContext(buildResolvedFuelSearchContext({
+                        origin, locationSource: 'device', fuelGrade: fuelType, radiusMiles,
+                        preferredProvider, minimumRating, preferredBrands: preferences.preferredBrands, requiresE85,
+                    }));
+                }
                 const query = { latitude: origin.latitude, longitude: origin.longitude, fuelType, radiusMiles, preferredProvider, requiresE85 };
                 const cached = await getCachedFuelPriceSnapshot(query);
                 if (cancelled) return;
@@ -69,7 +76,7 @@ export default function useClusterLabStations(active) {
         const timer = setInterval(refresh, 5 * 60_000);
         const subscription = AppState.addEventListener('change', state => { if (state === 'active') refresh(); });
         return () => { cancelled = true; clearInterval(timer); clearTimeout(expiryTimer); subscription.remove(); };
-    }, [active, scope, latitude, longitude, fuelType, radiusMiles, minimumRating, preferredProvider, requiresE85]);
+    }, [active, scope, latitude, longitude, fuelType, radiusMiles, minimumRating, preferredProvider, requiresE85, setResolvedFuelSearchContext, preferences.preferredBrands]);
 
     return useMemo(() => result?.scope === scope ? result : { origin: null, stations: [] }, [result, scope]);
 }

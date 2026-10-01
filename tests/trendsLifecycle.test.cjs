@@ -42,6 +42,7 @@ async function setup(options = {}) {
         },
     };
     const useTrendData = load('src/screens/trends/useTrendData.js', {
+        'react-native': { AppState: { addEventListener: () => ({ remove() {} }) } },
         'expo-router': { useFocusEffect: callback => React.useEffect(callback, [callback]) },
         'expo-location': { Accuracy: { Balanced: 3 }, getForegroundPermissionsAsync: async () => ({ status: options.denied ? 'denied' : 'granted' }),
             getCurrentPositionAsync: () => gps.promise },

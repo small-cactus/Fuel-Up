@@ -2,18 +2,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { isFreshReportedPrice, REPORTED_PRICE_MAX_AGE_MS } from '../../services/fuel/reportedPrices';
 import * as Location from 'expo-location';
+import { AppState } from 'react-native';
 import {
     buildTrendRequestKey,
     captureTrendCacheGeneration,
     clearTrendDataCache,
     getCachedTrendData,
     getLastResolvedTrendData,
-    getLastTrendsScreenViewedAt,
     isTrendCacheGenerationCurrent,
     prefetchTrendData,
 } from '../../services/fuel/trends';
 
-const REFRESH_INTERVAL_MS = 60 * 60 * 1000;
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 // Each result belongs to one location, grade, radius and cache generation. An older
 // request may finish, but it cannot replace a newer selection or resurrect a reset.
@@ -129,12 +129,15 @@ export default function useTrendData({
 
     useFocusEffect(useCallback(() => {
         if (!enabled) return;
-        const cached = currentRequestKey ? getCachedTrendData(currentRequestKey) : null;
-        const resolvedAt = currentRequestKey ? getLastTrendsScreenViewedAt(currentRequestKey) : 0;
-        if (!cached || Date.now() - resolvedAt > REFRESH_INTERVAL_MS) void load();
-        // Data arrival does not re-enter this effect. Freshness is measured from
-        // the successful fetch, rather than extended on every visit to the tab.
-    }, [enabled, currentRequestKey, load]));
+        // Reconcile with Home's shared station cache on every visit. The
+        // previous result stays visible while raw history refreshes.
+        void load();
+        const interval = setInterval(() => void load(), REFRESH_INTERVAL_MS);
+        const subscription = AppState.addEventListener('change', state => {
+            if (state === 'active') void load();
+        });
+        return () => { clearInterval(interval); subscription.remove(); };
+    }, [enabled, load]));
 
     const onPullToRefresh = useCallback(() => load({ refreshing: true }), [load]);
     const currentResult = result && isTrendCacheGenerationCurrent(result.generation) && result.resetToken === resetToken &&

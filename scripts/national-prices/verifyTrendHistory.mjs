@@ -16,7 +16,7 @@ for(const fuelType of grades)for(const requiresE85 of [false,true]){
  const expected=rows.find(r=>r.grade===fuelType&&r.filter_e85===requiresE85).history;
  assert(expected.length>=2,'National chart needs real history');
  // A new complete sweep may appear between reads; compare the fixed common history.
- for(const p of expected){const got=result.history.find(x=>x.date===p.date);assert.deepEqual(got,p);assert(got.price>0&&got.stationCount>0);}
+ for(const p of expected){const got=result.history.find(x=>x.date===p.date);assert.deepEqual(got,{date:p.date,price:p.price,stationCount:p.stationCount});assert(got.price>0&&got.stationCount>0);}
  assert(result.quotes.length<=5);
  checks.push({fuelType,requiresE85,verifiedPoints:expected.length,latest:expected.at(-1)});
 }
