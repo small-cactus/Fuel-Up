@@ -22,3 +22,9 @@ The 07:00 UTC sweep retained 7/72 batches. The 08:00–12:00 UTC sweeps were not
 - `live-recovery.json` records the observed resumed collection and original incident evidence. A successful restart is distinct from a complete nationwide hour.
 
 These are provider observations, not verified pump truth. The fixed catalog's documented Texas/DC assumptions and original seven-day deadline remain unchanged.
+
+## Live recovery result at 13:53 UTC
+
+The scheduled sweep has archived 15/72 batches (28,213 station observations) across all three required regions, with zero wrong-region jobs and no new failure events. City collection has 480 successful checks and zero missed jobs. The new nationwide sweep is still in progress, and its late start means this does not establish full-hour coverage.
+
+Read back and verified four immutable archives: one from each region plus the exact 2,000-ID batch (ordinal 62) that caused the original shutdown. The formerly failing batch succeeded with HTTP 200 in 2.76 seconds using the original header configuration. All four archives passed hash, size, exact ordered station IDs, price schema, priced counts, actual observation times, and regional provenance checks. See `archive-readback.json` and `national-health.json`.
