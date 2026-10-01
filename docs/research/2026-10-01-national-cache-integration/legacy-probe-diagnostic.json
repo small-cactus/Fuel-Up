@@ -1,0 +1,16 @@
+{
+  "status": "completed",
+  "message": "Completed with idle timeouts in zoom-out-13, zoom-out-14, zoom-out-15, zoom-oneshot-in, zoom-oneshot-out.",
+  "sampleCount": 3216,
+  "transitionCount": 0,
+  "maxFrameDelta": 0,
+  "timedOutStages": [
+    "zoom-out-13",
+    "zoom-out-14",
+    "zoom-out-15",
+    "zoom-oneshot-in",
+    "zoom-oneshot-out"
+  ],
+  "trigger": "automation:probe-test-1790867808111",
+  "note": "Diagnostic attempt temporarily enabled the retired renderer and removed its second camera-motion latch. It reached export but its test then failed on test.diagnostic; no transition coverage was recorded. Temporary retired-renderer edits were reverted; production native Home and test gates were not weakened."
+}
