@@ -100,3 +100,14 @@ test('metadata travels with the existing price batch and is published behind the
   assert.deepEqual(db.calls.find(c=>c.name==='finish_fuel_national_serving_job').args.p_stations,snapshot.stations);
   assert(db.calls.find(c=>c.name==='fuel_station_metadata_needed'));
 });
+
+test('scheduled metadata query avoids the failing optional brand resolver without dropping raw prices', async () => {
+  let query;
+  await fetchNationalPriceBatch(['1'], {includeMetadata:true, fetchImpl:async(_,options)=>{
+    query=JSON.parse(options.body).query;
+    return new Response(JSON.stringify({data:{s0:quote('1')}}));
+  }});
+  assert.doesNotMatch(query,/\bbrands\b/);
+  assert.match(query,/name latitude longitude address/);
+  assert.match(query,/prices\{fuelProduct cash\{price postedTime\} credit\{price postedTime\}\}/);
+});

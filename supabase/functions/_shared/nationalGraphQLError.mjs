@@ -20,3 +20,23 @@ export function classifyNationalGraphQLErrors(errors, retryAfter = 0) {
   }
   return { code: 'GRAPHQL_ERROR', retryAfterSeconds: retryAfter };
 }
+
+// The first ten errors can all be transient while a later error determines the
+// batch outcome. Keep counts over the entire list and examples for each class.
+// This is diagnostic only: classification and retry/access policy stay intact.
+export function summarizeNationalGraphQLErrors(errors) {
+  const classes = new Map(), extensionCodes = new Map();
+  for (const error of errors) {
+    const classification = classifyNationalGraphQLErrors([error]).code;
+    const extensionCode = String(error?.extensions?.code || '').toUpperCase().slice(0, 100);
+    extensionCodes.set(extensionCode, (extensionCodes.get(extensionCode) || 0) + 1);
+    const entry = classes.get(classification) || { count: 0, examples: [] };
+    entry.count++;
+    if (entry.examples.length < 3) entry.examples.push({
+      message: String(error?.message || '').slice(0, 500), extensionCode,
+    });
+    classes.set(classification, entry);
+  }
+  return { total: errors.length, classes: Object.fromEntries(classes),
+    extensionCodes: Object.fromEntries(extensionCodes) };
+}

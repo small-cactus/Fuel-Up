@@ -1,7 +1,7 @@
 import { buildGasBuddyGraphQLRequest } from './core.mjs';
 import { providerResponseEvidence } from './providerResponseEvidence.mjs';
 import { priceQuery, validatePriceBatch } from './nationalPriceBatch.mjs';
-import { classifyNationalGraphQLErrors } from './nationalGraphQLError.mjs';
+import { classifyNationalGraphQLErrors, summarizeNationalGraphQLErrors } from './nationalGraphQLError.mjs';
 
 export class NationalPriceError extends Error {
   constructor(code, retryAfterSeconds = 0) { super(code); this.code = code; this.retryAfterSeconds = retryAfterSeconds; }
@@ -44,7 +44,9 @@ export async function fetchNationalPriceBatch(ids, { fetchImpl = fetch, csrf, in
   if (body.errors?.length) {
     const classification = classifyNationalGraphQLErrors(body.errors, retryAfterSeconds(response.headers.get('retry-after')));
     const error = new NationalPriceError(classification.code, classification.retryAfterSeconds);
-    error.responseEvidence = { ...responseEvidence, graphqlErrors: body.errors.map(e => String(e.message).slice(0, 500)).slice(0, 10) }; throw error; }
+    error.responseEvidence = { ...responseEvidence,
+      graphqlErrors: body.errors.slice(0, 10).map(e => String(e?.message || '').slice(0, 500)),
+      graphqlErrorSummary: summarizeNationalGraphQLErrors(body.errors) }; throw error; }
   let stations;
   try { stations = validatePriceBatch(body.data, ids); } catch { throw new NationalPriceError('COVERAGE_OR_SCHEMA_MISMATCH'); }
   return { version: 1, provider: 'gasbuddy', startedAt, observedAt: new Date().toISOString(), responseEvidence, stations };

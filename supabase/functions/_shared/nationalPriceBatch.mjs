@@ -1,7 +1,9 @@
 export function priceQuery(ids, includeMetadata = false) {
   if (!ids.length || new Set(ids).size !== ids.length) throw new Error('Price IDs must be nonempty and unique');
+  // Brand resolution fails independently (INTERNAL_SERVER_ERROR: Brand get failed).
+  // Optional enrichment must not make the scheduled raw-price query depend on it.
   return `query StatePrices{${ids.map((id, i) => `s${i}:station(id:${JSON.stringify(id)}){...P}`).join(' ')}}
-    fragment P on Station{id ${includeMetadata ? 'name latitude longitude address{line1 locality region postalCode} brands{name} starRating ratingsCount' : ''} prices{fuelProduct cash{price postedTime} credit{price postedTime}}}`;
+    fragment P on Station{id ${includeMetadata ? 'name latitude longitude address{line1 locality region postalCode} starRating ratingsCount' : ''} prices{fuelProduct cash{price postedTime} credit{price postedTime}}}`;
 }
 
 export function validatePriceBatch(data, ids) {

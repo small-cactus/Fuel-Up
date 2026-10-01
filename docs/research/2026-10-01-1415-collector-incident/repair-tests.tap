@@ -1,0 +1,135 @@
+TAP version 13
+# Subtest: clearFuelPriceCache prevents an in-flight DB read from repopulating cache
+ok 1 - clearFuelPriceCache prevents an in-flight DB read from repopulating cache
+  ---
+  duration_ms: 19.096333
+  ...
+# Subtest: empty nationwide DB results clear an old winner without fetching the provider
+ok 2 - empty nationwide DB results clear an old winner without fetching the provider
+  ---
+  duration_ms: 1.732792
+  ...
+# Subtest: refresh persists the exact reported price locally, without prediction or history writes
+ok 3 - refresh persists the exact reported price locally, without prediction or history writes
+  ---
+  duration_ms: 1.062334
+  ...
+# Subtest: uniform multi-grade prices exclude unsupported higher grades
+ok 4 - uniform multi-grade prices exclude unsupported higher grades
+  ---
+  duration_ms: 0.518833
+  ...
+# Subtest: duplicate higher grades stay suppressed in the local cache
+ok 5 - duplicate higher grades stay suppressed in the local cache
+  ---
+  duration_ms: 0.998958
+  ...
+# Subtest: a requested duplicate higher grade does not reappear via the client cache
+ok 6 - a requested duplicate higher grade does not reappear via the client cache
+  ---
+  duration_ms: 1.111458
+  ...
+# Subtest: known provider connection failures retry with a floor and respect longer Retry-After
+ok 7 - known provider connection failures retry with a floor and respect longer Retry-After
+  ---
+  duration_ms: 1.168458
+  ...
+# Subtest: denials anywhere in a large mixed list dominate transient classification
+ok 8 - denials anywhere in a large mixed list dominate transient classification
+  ---
+  duration_ms: 0.182125
+  ...
+# Subtest: unknown or malformed GraphQL failures retain review requirement
+ok 9 - unknown or malformed GraphQL failures retain review requirement
+  ---
+  duration_ms: 0.067166
+  ...
+# Subtest: transport rejects partial data, records original evidence, and does not retry internally
+ok 10 - transport rejects partial data, records original evidence, and does not retry internally
+  ---
+  duration_ms: 13.7815
+  ...
+# Subtest: HTTP 200 rate denial preserves Retry-After
+ok 11 - HTTP 200 rate denial preserves Retry-After
+  ---
+  duration_ms: 0.383542
+  ...
+# Subtest: diagnostics retain the deciding error beyond the first ten without changing retry policy
+ok 12 - diagnostics retain the deciding error beyond the first ten without changing retry policy
+  ---
+  duration_ms: 8.568833
+  ...
+# Subtest: national planning deduplicates across states and budgets station resolutions, not envelopes
+ok 13 - national planning deduplicates across states and budgets station resolutions, not envelopes
+  ---
+  duration_ms: 0.888916
+  ...
+# Subtest: national planning rejects missing states, duplicate states, unreconciled counts and unknown scope
+ok 14 - national planning rejects missing states, duplicate states, unreconciled counts and unknown scope
+  ---
+  duration_ms: 0.905333
+  ...
+# Subtest: Retry-After handles seconds and HTTP dates, with no shortening to an arbitrary maximum
+ok 15 - Retry-After handles seconds and HTTP dates, with no shortening to an arbitrary maximum
+  ---
+  duration_ms: 0.214459
+  ...
+# Subtest: national transport preserves exact raw quotes, absent prices, and separate observation time
+ok 16 - national transport preserves exact raw quotes, absent prices, and separate observation time
+  ---
+  duration_ms: 18.332875
+  ...
+# Subtest: national transport rejects partial data, silent alias reorder, HTTP200 GraphQL errors and oversized responses
+ok 17 - national transport rejects partial data, silent alias reorder, HTTP200 GraphQL errors and oversized responses
+  ---
+  duration_ms: 1.746208
+  ...
+# Subtest: national transport captures 429 Retry-After and sends no retry
+ok 18 - national transport captures 429 Retry-After and sends no retry
+  ---
+  duration_ms: 0.381916
+  ...
+# Subtest: worker archives first, then commits exact IDs, checksum and unpriced coverage; never overwrites artifacts
+ok 19 - worker archives first, then commits exact IDs, checksum and unpriced coverage; never overwrites artifacts
+  ---
+  duration_ms: 2.649917
+  ...
+# Subtest: archive failure or stale lease cannot publish a successful batch
+ok 20 - archive failure or stale lease cannot publish a successful batch
+  ---
+  duration_ms: 1.764042
+  ...
+# Subtest: rate denial stops the worker loop immediately and persists the cooldown
+ok 21 - rate denial stops the worker loop immediately and persists the cooldown
+  ---
+  duration_ms: 0.366667
+  ...
+# Subtest: disabled or cooled queue causes zero provider calls and zero storage writes
+ok 22 - disabled or cooled queue causes zero provider calls and zero storage writes
+  ---
+  duration_ms: 0.415541
+  ...
+# Subtest: worker spaces provider calls and finishes its invocation before the next cron tick
+ok 23 - worker spaces provider calls and finishes its invocation before the next cron tick
+  ---
+  duration_ms: 5.909958
+  ...
+# Subtest: metadata travels with the existing price batch and is published behind the archive fence
+ok 24 - metadata travels with the existing price batch and is published behind the archive fence
+  ---
+  duration_ms: 0.483791
+  ...
+# Subtest: scheduled metadata query avoids the failing optional brand resolver without dropping raw prices
+ok 25 - scheduled metadata query avoids the failing optional brand resolver without dropping raw prices
+  ---
+  duration_ms: 0.335834
+  ...
+1..25
+# tests 25
+# suites 0
+# pass 25
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 109.297958

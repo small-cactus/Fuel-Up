@@ -37,3 +37,28 @@ test('HTTP 200 rate denial preserves Retry-After', async () => {
   await assert.rejects(fetchNationalPriceBatch(['1'], { fetchImpl: async () => new Response(JSON.stringify({ errors: [{ message: 'too many requests' }] }), { headers: { 'retry-after': '7200' } }) }),
     error => error.code === 'UPSTREAM_HTTP_429' && error.retryAfterSeconds === 7200);
 });
+
+test('diagnostics retain the deciding error beyond the first ten without changing retry policy', async () => {
+  for (const [last, expected] of [
+    [{ message: 'unknown schema failure', extensions: { code: 'SCHEMA_ERROR' } }, 'GRAPHQL_ERROR'],
+    [{ message: 'forbidden' }, 'UPSTREAM_HTTP_403'],
+    [{ message: 'too many requests' }, 'UPSTREAM_HTTP_429'],
+  ]) {
+    let calls = 0;
+    await assert.rejects(fetchNationalPriceBatch(['1'], { fetchImpl: async () => {
+      calls++;
+      return new Response(JSON.stringify({ errors: [...Array(2000).fill(transient), last] }));
+    } }), error => {
+      assert.equal(error.code, expected);
+      const summary = error.responseEvidence.graphqlErrorSummary;
+      assert.equal(summary.total, 2001);
+      assert.equal(summary.classes.UPSTREAM_TRANSIENT_GRAPHQL.count, 2000);
+      assert.equal(summary.classes.UPSTREAM_TRANSIENT_GRAPHQL.examples.length, 3);
+      assert.equal(summary.classes[expected].count, 1);
+      assert.equal(summary.classes[expected].examples[0].message, last.message);
+      assert.equal(error.responseEvidence.graphqlErrors.length, 10);
+      return true;
+    });
+    assert.equal(calls, 1);
+  }
+});
