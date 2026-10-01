@@ -70,3 +70,14 @@ test('independent AFDC stations appear only for E85 and never inherit another gr
   assert.equal(e85.length,1);assert.equal(e85[0].providerId,'afdc');assert.equal(e85[0].price,null);
   assert.equal((await cached({input,db})).quotes.length,0);
 });
+
+test('supplemental E85 sources preserve provenance, no price, and exact radius',async()=>{
+  const rows=['e85prices','thorntons'].map((source,i)=>{
+    const r=row(`${source}:123`,input.longitude+i*0.001);Object.assign(r.station,{availabilitySource:source,offersE85:true,prices:[]});return r;
+  });
+  const result=await cached({input:{...input,fuelType:'e85'},db:database(rows)});
+  assert.deepEqual(result.quotes.map(q=>q.providerId),['e85prices','thorntons']);
+  assert.deepEqual(result.quotes.map(q=>q.sourceLabel),['E85Prices / RFA','Thorntons']);
+  for(const q of result.quotes){assert.equal(q.price,null);assert.equal(q.updatedAt,null);assert.deepEqual(q.allPrices,{});assert(q.distanceMiles<=5);}
+  assert.equal((await cached({input,db:database(rows)})).quotes.length,0);
+});

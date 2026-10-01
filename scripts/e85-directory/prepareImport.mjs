@@ -18,7 +18,8 @@ if (new Set(rows.map(r=>r.source_id)).size !== rows.length) throw Error('Duplica
 const literal = JSON.stringify(rows).replaceAll("'", "''");
 writeFileSync(output, `BEGIN;
 SET LOCAL lock_timeout='5s';
-UPDATE fuel_e85_directory SET active=false;
+SELECT pg_advisory_xact_lock(hashtext('fuel-e85-directory'));
+UPDATE fuel_e85_directory SET active=false WHERE source='afdc';
 INSERT INTO fuel_e85_directory(source_id,name,street,city,state,postal_code,latitude,longitude,confirmed_at,source_updated_at,fetched_at,access_hours)
 SELECT source_id,name,street,city,state,postal_code,latitude,longitude,confirmed_at,source_updated_at,fetched_at,access_hours
 FROM jsonb_populate_recordset(null::fuel_e85_directory,'${literal}'::jsonb)
@@ -26,40 +27,7 @@ ON CONFLICT(source_id) DO UPDATE SET name=excluded.name,street=excluded.street,c
  postal_code=excluded.postal_code,latitude=excluded.latitude,longitude=excluded.longitude,confirmed_at=excluded.confirmed_at,
  source_updated_at=excluded.source_updated_at,fetched_at=excluded.fetched_at,access_hours=excluded.access_hours,active=true,
  matched_station_id=null,match_rule=null;
-CREATE FUNCTION pg_temp.e85_address_key(address text) RETURNS text LANGUAGE sql IMMUTABLE AS $$
- SELECT string_agg(CASE word WHEN 'street' THEN 'st' WHEN 'avenue' THEN 'ave' WHEN 'boulevard' THEN 'blvd'
- WHEN 'road' THEN 'rd' WHEN 'drive' THEN 'dr' WHEN 'highway' THEN 'hwy' WHEN 'parkway' THEN 'pkwy'
- WHEN 'lane' THEN 'ln' WHEN 'court' THEN 'ct' WHEN 'north' THEN 'n' WHEN 'south' THEN 's'
- WHEN 'east' THEN 'e' WHEN 'west' THEN 'w' ELSE word END,'' ORDER BY ord)
- FROM unnest(regexp_split_to_array(lower(address),'[^a-z0-9]+')) WITH ORDINALITY a(word,ord)
-$$;
--- Match only an unambiguous address at the same site. Distance alone can confuse
--- opposing corners. Direction letters and road numbers remain in the key.
-WITH matches AS (
- SELECT d.source_id,l.station_id,count(*) OVER(PARTITION BY d.source_id) candidates
- FROM fuel_e85_directory d JOIN fuel_station_latest l
- ON l.latitude BETWEEN d.latitude-0.002 AND d.latitude+0.002
- AND l.longitude BETWEEN d.longitude-0.004 AND d.longitude+0.004
- AND pg_temp.e85_address_key(l.station#>>'{address,line1}') = pg_temp.e85_address_key(d.street)
- WHERE d.active AND 2*6371000*asin(sqrt(least(1.0,power(sin(radians(l.latitude-d.latitude)/2),2)+cos(radians(d.latitude))*cos(radians(l.latitude))*power(sin(radians(l.longitude-d.longitude)/2),2)))) <= 200
-)
-UPDATE fuel_e85_directory d SET matched_station_id=m.station_id,match_rule='exact-address-within-200m'
-FROM matches m WHERE m.source_id=d.source_id AND m.candidates=1;
--- Address aliases (US-19 vs US Highway 19) require matching brand + house
--- number within 150m. A unique same-brand location within 25m also handles
--- an address typo; ambiguous candidates remain separate, never borrow prices.
-WITH matches AS (
- SELECT d.source_id,l.station_id,count(*) OVER(PARTITION BY d.source_id) candidates
- FROM fuel_e85_directory d JOIN fuel_station_latest l
- ON l.latitude BETWEEN d.latitude-0.0015 AND d.latitude+0.0015
- AND l.longitude BETWEEN d.longitude-0.003 AND d.longitude+0.003
- AND regexp_replace(lower(split_part(d.name,'#',1)),'[^a-z0-9]','','g') = regexp_replace(lower(l.station->>'name'),'[^a-z0-9]','','g')
- CROSS JOIN LATERAL (SELECT 2*6371000*asin(sqrt(least(1.0,power(sin(radians(l.latitude-d.latitude)/2),2)+cos(radians(d.latitude))*cos(radians(l.latitude))*power(sin(radians(l.longitude-d.longitude)/2),2)))) meters) distance
- WHERE d.active AND d.matched_station_id IS NULL AND (distance.meters<=25 OR
-  (distance.meters<=150 AND substring(d.street from '^[0-9]+')=substring(l.station#>>'{address,line1}' from '^[0-9]+')))
-)
-UPDATE fuel_e85_directory d SET matched_station_id=m.station_id,match_rule='unique-brand-address-site'
-FROM matches m WHERE m.source_id=d.source_id AND m.candidates=1;
+SELECT public.reconcile_fuel_e85_directory();
 COMMIT;
 SELECT count(*) FILTER(WHERE active) active,count(*) FILTER(WHERE active AND matched_station_id IS NOT NULL) matched,
  count(*) FILTER(WHERE active AND matched_station_id IS NULL) standalone FROM fuel_e85_directory;

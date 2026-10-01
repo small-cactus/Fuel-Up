@@ -1,0 +1,55 @@
+{
+  "counts": [
+    {
+      "active": 212,
+      "matched": 198,
+      "source": "thorntons",
+      "total": 212
+    },
+    {
+      "active": 4801,
+      "matched": 4024,
+      "source": "afdc",
+      "total": 4801
+    },
+    {
+      "active": 6262,
+      "matched": 4170,
+      "source": "e85prices",
+      "total": 6262
+    }
+  ],
+  "cron": [
+    {
+      "active": true,
+      "name": "fuel-e85-directory-daily",
+      "schedule": "45 6 * * *"
+    }
+  ],
+  "sources": [
+    {
+      "enabled": true,
+      "imported_count": 212,
+      "last_error": null,
+      "last_error_at": null,
+      "last_success_at": "2026-10-01T20:34:01.147862+00:00",
+      "lease_until": null,
+      "next_refresh_at": "2026-10-02T00:00:00+00:00",
+      "rejected_count": 1,
+      "response_sha256": "bdff996fe9438f1fda4e21b8236a3d5e8f8d9d9852a4ce87f793157024a4151a",
+      "source": "thorntons"
+    },
+    {
+      "enabled": true,
+      "imported_count": 6262,
+      "last_error": "IMPORT_FAILED",
+      "last_error_at": "2026-10-01T20:33:59.293896+00:00",
+      "last_success_at": "2026-10-01T20:37:26.983986+00:00",
+      "lease_until": null,
+      "next_refresh_at": "2026-10-02T00:00:00+00:00",
+      "rejected_count": 32,
+      "response_sha256": "ab41a68db94ca6f0ddb88ac28ad5d7a635443d1a3b973e1f790d6d5f5cc7970c",
+      "source": "e85prices"
+    }
+  ]
+}

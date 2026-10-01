@@ -51,7 +51,7 @@ function normalizeCoordinate(value) {
 
 function buildCacheKey({ latitude, longitude, radiusMiles, fuelType, requiresE85 = false, preferredProvider = 'gasbuddy' }) {
     return [
-        'fuel-national-reported-v4',
+        'fuel-national-reported-v5',
         normalizeFuelTypeName(fuelType),
         'gasbuddy',
         Math.max(1, toFiniteNumber(radiusMiles) || 10),
@@ -711,7 +711,7 @@ function normalizeGasBuddyResponse({ origin, fuelType, payload }) {
             }
 
             return createQuote({
-                providerId: station.availabilitySource === 'afdc' ? 'afdc' : 'gasbuddy',
+                providerId: ['afdc', 'e85prices', 'thorntons'].includes(station.availabilitySource) ? station.availabilitySource : 'gasbuddy',
                 providerTier: 'station',
                 stationId: String(station.id || ''),
                 stationName: station.name || (station.brands?.[0]?.name) || 'Gas station',
@@ -726,7 +726,7 @@ function normalizeGasBuddyResponse({ origin, fuelType, payload }) {
                 updatedAt: postedTime,
                 currency: USD,
                 isEstimated: false,
-                sourceLabel: station.availabilitySource === 'afdc' ? 'DOE AFDC' : PROVIDER_LABELS.gasbuddy,
+                sourceLabel: ({ afdc: 'DOE AFDC', e85prices: 'E85Prices / RFA', thorntons: 'Thorntons' })[station.availabilitySource] || PROVIDER_LABELS.gasbuddy,
                 origin,
                 rating: typeof station.starRating === 'number' ? station.starRating : null,
                 userRatingCount: typeof station.ratingsCount === 'number' ? station.ratingsCount : null,

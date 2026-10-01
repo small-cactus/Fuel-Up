@@ -1,0 +1,155 @@
+{
+  "checkedAt": "2026-10-01T20:38:15.967Z",
+  "results": [
+    {
+      "radiusMiles": 5,
+      "count": 3,
+      "unpriced": 2,
+      "stations": [
+        {
+          "id": "187190",
+          "name": "RaceTrac",
+          "address": "1201 East Bay Dr, Largo, FL, 33771",
+          "price": 2.99,
+          "source": "GasBuddy",
+          "distanceMiles": 3.97
+        },
+        {
+          "id": "155716",
+          "name": "Thorntons",
+          "address": "1698 Gulf to Bay Blvd, Clearwater, FL, 33755",
+          "price": null,
+          "source": "GasBuddy",
+          "distanceMiles": 0.84
+        },
+        {
+          "id": "172657",
+          "name": "Wawa",
+          "address": "2177 Gulf to Bay Blvd, Clearwater, FL, 33765",
+          "price": null,
+          "source": "GasBuddy",
+          "distanceMiles": 1.35
+        }
+      ]
+    },
+    {
+      "radiusMiles": 15,
+      "count": 14,
+      "unpriced": 10,
+      "stations": [
+        {
+          "id": "187190",
+          "name": "RaceTrac",
+          "address": "1201 East Bay Dr, Largo, FL, 33771",
+          "price": 2.99,
+          "source": "GasBuddy",
+          "distanceMiles": 3.97
+        },
+        {
+          "id": "187360",
+          "name": "RaceTrac",
+          "address": "12750 W Hillsborough Ave, Tampa, FL, 33635",
+          "price": 2.99,
+          "source": "GasBuddy",
+          "distanceMiles": 8.61
+        },
+        {
+          "id": "74927",
+          "name": "RaceTrac",
+          "address": "38590 Us Hwy 19 N, Palm Harbor, FL, 34684",
+          "price": 2.99,
+          "source": "GasBuddy",
+          "distanceMiles": 10.42
+        },
+        {
+          "id": "193297",
+          "name": "Thorntons",
+          "address": "1351 34th St N, St Petersburg, FL, 33713",
+          "price": 3.47,
+          "source": "GasBuddy",
+          "distanceMiles": 13.98
+        },
+        {
+          "id": "155716",
+          "name": "Thorntons",
+          "address": "1698 Gulf to Bay Blvd, Clearwater, FL, 33755",
+          "price": null,
+          "source": "GasBuddy",
+          "distanceMiles": 0.84
+        },
+        {
+          "id": "172657",
+          "name": "Wawa",
+          "address": "2177 Gulf to Bay Blvd, Clearwater, FL, 33765",
+          "price": null,
+          "source": "GasBuddy",
+          "distanceMiles": 1.35
+        },
+        {
+          "id": "75762",
+          "name": "Chevron",
+          "address": "1595 Seminole Blvd, Largo, FL, 33770",
+          "price": null,
+          "source": "GasBuddy",
+          "distanceMiles": 5.09
+        },
+        {
+          "id": "156714",
+          "name": "Thorntons",
+          "address": "8875 Ulmerton Rd, Largo, FL, 33771",
+          "price": null,
+          "source": "GasBuddy",
+          "distanceMiles": 5.4
+        },
+        {
+          "id": "196214",
+          "name": "RaceTrac",
+          "address": "6601 Ulmerton Rd, Largo, FL, 33771",
+          "price": null,
+          "source": "GasBuddy",
+          "distanceMiles": 5.83
+        },
+        {
+          "id": "63556",
+          "name": "Thorntons",
+          "address": "32490 US-19 N, Palm Harbor, FL, 34684",
+          "price": null,
+          "source": "GasBuddy",
+          "distanceMiles": 6.65
+        },
+        {
+          "id": "177822",
+          "name": "Thorntons",
+          "address": "3780 Tampa Rd, Oldsmar, FL, 34677-3041",
+          "price": null,
+          "source": "GasBuddy",
+          "distanceMiles": 7.16
+        },
+        {
+          "id": "192881",
+          "name": "RaceTrac",
+          "address": "4625 66th St N, St. Petersburg, FL, 33709",
+          "price": null,
+          "source": "GasBuddy",
+          "distanceMiles": 11.2
+        },
+        {
+          "id": "63669",
+          "name": "Marathon",
+          "address": "8212 Sheldon Rd  , Tampa, FL, 33615",
+          "price": null,
+          "source": "GasBuddy",
+          "distanceMiles": 11.57
+        },
+        {
+          "id": "160694",
+          "name": "Thorntons",
+          "address": "6405 W Hillsborough Ave, Tampa, FL, 33634",
+          "price": null,
+          "source": "GasBuddy",
+          "distanceMiles": 13.11
+        }
+      ]
+    }
+  ]
+}

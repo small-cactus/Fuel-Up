@@ -21,3 +21,6 @@ verify_jwt = false
 
 [functions.fuel-national-northwest]
 verify_jwt = false
+
+[functions.fuel-e85-directory]
+verify_jwt = false
