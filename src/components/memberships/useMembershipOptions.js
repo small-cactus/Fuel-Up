@@ -15,20 +15,27 @@ export default function useMembershipOptions(coordinate, active) {
         if (!active || !key) return;
         let cancelled = false;
         void (async () => {
-            try {
-                const [address] = await Location.reverseGeocodeAsync({ latitude: Number(key.split(':')[0]), longitude: Number(key.split(':')[1]) });
-                const state = address?.isoCountryCode === 'US' ? normalizeUSState(address.region) : null;
-                if (!state) throw new Error('Your US state could not be found. You can choose memberships later in Settings.');
-                let ids = stateCache.get(state);
-                if (!ids) {
-                    const { data, error } = await supabase.rpc('fuel_memberships_for_state', { p_state: state });
-                    if (error || !Array.isArray(data)) throw new Error('Could not load memberships. Try again or choose them later in Settings.');
-                    ids = data;
-                    stateCache.set(state, ids);
+            // A first Core Location lookup can fail transiently during permission
+            // setup. Retry once while earlier onboarding pages are still visible.
+            for (let retry = 0; retry < 2 && !cancelled; retry++) {
+                try {
+                    const [address] = await Location.reverseGeocodeAsync({ latitude: Number(key.split(':')[0]), longitude: Number(key.split(':')[1]) });
+                    const state = address?.isoCountryCode === 'US' ? normalizeUSState(address.region) : null;
+                    if (!state) throw new Error('Your US state could not be found. You can choose memberships later in Settings.');
+                    let ids = stateCache.get(state);
+                    if (!ids) {
+                        const { data, error } = await supabase.rpc('fuel_memberships_for_state', { p_state: state });
+                        if (error || !Array.isArray(data)) throw new Error('Could not load memberships. Try again or choose them later in Settings.');
+                        ids = data;
+                        stateCache.set(state, ids);
+                    }
+                    if (!cancelled) setResult({ key, state, ids });
+                    return;
+                } catch (error) {
+                    if (cancelled) return;
+                    if (retry === 0) await new Promise(resolve => setTimeout(resolve, 1000));
+                    else setResult({ key, error: error.message, ids: [] });
                 }
-                if (!cancelled) setResult({ key, state, ids });
-            } catch (error) {
-                if (!cancelled) setResult({ key, error: error.message, ids: [] });
             }
         })();
         return () => { cancelled = true; };

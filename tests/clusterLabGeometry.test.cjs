@@ -36,6 +36,14 @@ for x in stride(from: 0.0, through: 140, by: 2) {
   }
 }
 
+// Onboarding uses the same ownership algorithm with compact icon footprints.
+let icons = [station("a", 0, 0), station("b", 0, 70), station("c", 0, 140)]
+let iconOwners = ClusterLabGeometry.owners(icons, previous: [:], pillWidth: 44)
+assert(iconOwners == ["a": "a", "b": "a", "c": "c"])
+assert(ClusterLabGeometry.owners(Array(icons.reversed()), previous: [:], pillWidth: 44) == iconOwners)
+let iconSplit = [station("a", 0, 0), station("b", 0, 90)]
+assert(ClusterLabGeometry.owners(iconSplit, previous: iconOwners, pillWidth: 44)["b"] == "b")
+
 let priceFrame = CGRect(x: -42, y: -16, width: 84, height: 32)
 assert(ClusterLabGeometry.capsuleGap(priceFrame, CGRect(x: 34, y: -16, width: 44, height: 32)) == 0)
 assert(ClusterLabGeometry.capsuleGap(priceFrame, priceFrame.offsetBy(dx: 120, dy: 0)) == 36)

@@ -79,7 +79,7 @@ enum ClusterLabGeometry {
   }
 
   static func owners(_ stations: [LabProjectedStation], previous: [String: String], selectedId: String? = nil,
-                     displayOffsets: [String: CGFloat] = [:]) -> [String: String] {
+                     displayOffsets: [String: CGFloat] = [:], pillWidth: CGFloat = pillSize.width) -> [String: String] {
     let sorted = stations.sorted {
       if $0.isRecommended != $1.isRecommended { return $0.isRecommended }
       return $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price
@@ -89,7 +89,8 @@ enum ClusterLabGeometry {
     var grid: [Cell: [Int]] = [:]
     let extraWidth = pillSize.width * (focusedScale - 1) / 2
     let extraHeight = pillSize.height * (focusedScale - 1) / 2
-    let cellWidth = disconnectRange.width + extraWidth
+    let retainedWidth = disconnectRange.width - pillSize.width + pillWidth
+    let cellWidth = retainedWidth + extraWidth
     let cellHeight = disconnectRange.height + extraHeight + 2 * (displayOffsets.values.map { abs($0) }.max() ?? 0)
     for (index, station) in sorted.enumerated() {
       // A cell spans the largest retained connection, so the adjacent-cell
@@ -106,14 +107,14 @@ enum ClusterLabGeometry {
             let vertical = isVertical(CGPoint(x: dx, y: dy))
             let retainedHeight = vertical ? verticalDisconnectDistance : disconnectRange.height
             let selected = station.id == selectedId || sorted[other].id == selectedId
-            let ownFrame = pillFrame(at: station.point, selected: station.id == selectedId)
-            let parentFrame = pillFrame(at: sorted[other].point, selected: sorted[other].id == selectedId)
+            let ownFrame = pillFrame(at: station.point, selected: station.id == selectedId).insetBy(dx: (pillSize.width - pillWidth) / 2, dy: 0)
+            let parentFrame = pillFrame(at: sorted[other].point, selected: sorted[other].id == selectedId).insetBy(dx: (pillSize.width - pillWidth) / 2, dy: 0)
             // A geographic contact will share one nudge after merging. Separate
             // hypothetical nudges must not prevent that original connection.
             let contact = canBlend(ownFrame, parentFrame) || canBlend(
               ownFrame.offsetBy(dx: 0, dy: displayOffsets[station.id] ?? 0),
               parentFrame.offsetBy(dx: 0, dy: displayOffsets[sorted[other].id] ?? 0))
-            let held = retained && dx <= disconnectRange.width + (selected ? extraWidth : 0) &&
+            let held = retained && dx <= retainedWidth + (selected ? extraWidth : 0) &&
               dy <= retainedHeight + (selected ? extraHeight : 0)
             if contact || held {
               representative = min(representative ?? other, other)

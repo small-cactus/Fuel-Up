@@ -1,3 +1,4 @@
+// Legacy fallback coverage for Android and pre-iOS 16. Native bridge coverage is in nativeOnboarding.test.cjs.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const React = require('react');
@@ -87,7 +88,7 @@ async function setup({ requestLocation } = {}) {
     mocks['./onboarding/RadiusStep'] = load('src/screens/onboarding/RadiusStep.js', mocks);
     mocks['./onboarding/BrandStep'] = { __esModule: true, default: props => React.createElement('BrandStep', props) };
     mocks['./onboarding/useOnboardingLocation'] = { __esModule: true, default: () => null };
-    const Component = load('src/screens/OnboardingScreen.js', mocks).default;
+    const Component = load('src/screens/OnboardingScreen.legacy.js', mocks).default;
     let renderer;
     await act(async () => { renderer = create(React.createElement(Component)); });
     return {

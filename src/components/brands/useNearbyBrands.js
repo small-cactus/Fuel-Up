@@ -36,6 +36,6 @@ export default function useNearbyBrands({ coordinate, radiusMiles, fuelGrade, re
     const options = useMemo(() => buildStationBrandOptions(quotes, {
         latitude, longitude, radiusMiles, fuelGrade, requiresE85,
     }), [quotes, latitude, longitude, radiusMiles, fuelGrade, requiresE85]);
-    return { options, hasLocation, loading: hasLocation && isActive && (result.key !== queryKey || result.loading),
+    return { options, quotes, hasLocation, loading: hasLocation && isActive && (result.key !== queryKey || result.loading),
         error: result.key === queryKey ? result.error : null, retry };
 }
