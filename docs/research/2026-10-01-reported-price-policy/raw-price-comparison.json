@@ -1,0 +1,69 @@
+{
+  "verifiedAt": "2026-10-01T15:41:21.027Z",
+  "providerRequests": 0,
+  "checks": [
+    {
+      "city": "Clearwater",
+      "radiusMiles": 15,
+      "storedStations": 304,
+      "stationsWithRegularPrice": 227,
+      "eligibleReports": 160,
+      "served": 160,
+      "exactIdsPricesAndTimestamps": true
+    },
+    {
+      "city": "Tampa",
+      "radiusMiles": 15,
+      "storedStations": 485,
+      "stationsWithRegularPrice": 319,
+      "eligibleReports": 189,
+      "served": 189,
+      "exactIdsPricesAndTimestamps": true
+    },
+    {
+      "city": "New York",
+      "radiusMiles": 15,
+      "storedStations": 1348,
+      "stationsWithRegularPrice": 654,
+      "eligibleReports": 411,
+      "served": 411,
+      "exactIdsPricesAndTimestamps": true
+    },
+    {
+      "city": "Los Angeles",
+      "radiusMiles": 15,
+      "storedStations": 1079,
+      "stationsWithRegularPrice": 819,
+      "eligibleReports": 595,
+      "served": 595,
+      "exactIdsPricesAndTimestamps": true
+    },
+    {
+      "city": "Seattle",
+      "radiusMiles": 15,
+      "storedStations": 407,
+      "stationsWithRegularPrice": 311,
+      "eligibleReports": 214,
+      "served": 214,
+      "exactIdsPricesAndTimestamps": true
+    },
+    {
+      "city": "Honolulu",
+      "radiusMiles": 15,
+      "storedStations": 163,
+      "stationsWithRegularPrice": 105,
+      "eligibleReports": 76,
+      "served": 76,
+      "exactIdsPricesAndTimestamps": true
+    },
+    {
+      "city": "Anchorage",
+      "radiusMiles": 15,
+      "storedStations": 71,
+      "stationsWithRegularPrice": 63,
+      "eligibleReports": 53,
+      "served": 53,
+      "exactIdsPricesAndTimestamps": true
+    }
+  ]
+}

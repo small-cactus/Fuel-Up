@@ -1,4 +1,5 @@
 const { sanitizeStationQuotesForFuelType } = require('./stationData');
+const { isFreshReportedQuote } = require('./reportedPrices');
 
 async function fetchGasBuddyQuote({ latitude, longitude, radiusMiles, fuelType, requiresE85 = false, config, forceLive }) {
     const debugEntry = {
@@ -21,7 +22,7 @@ async function fetchGasBuddyQuote({ latitude, longitude, radiusMiles, fuelType, 
         if (result.error) throw result.error;
         const data = result.data;
         if (data?.version !== 1 || !Array.isArray(data.quotes)) throw new Error('Invalid gas-prices response.');
-        const quotes = sanitizeStationQuotesForFuelType(data.quotes.filter(q => q.providerId === 'gasbuddy'), fuelType);
+        const quotes = sanitizeStationQuotesForFuelType(data.quotes.filter(q => q.providerId === 'gasbuddy' && isFreshReportedQuote(q)), fuelType);
         debugEntry.summary = { ...data.summary, source: data.source, totalQuoteCount: quotes.length };
         debugEntry.quoteReturned = quotes.length > 0;
         debugEntry.requests.push({ step: 'gas-prices', url: 'supabase://functions/gas-prices', status: 200,

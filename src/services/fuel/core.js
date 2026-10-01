@@ -50,7 +50,7 @@ function normalizeCoordinate(value) {
 
 function buildCacheKey({ latitude, longitude, radiusMiles, fuelType, requiresE85 = false, preferredProvider = 'gasbuddy' }) {
     return [
-        'fuel-national-v1',
+        'fuel-national-reported-v2',
         normalizeFuelTypeName(fuelType),
         'gasbuddy',
         Math.max(1, toFiniteNumber(radiusMiles) || 10),

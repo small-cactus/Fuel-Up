@@ -50,7 +50,7 @@ test('a narrower reused window removes the old cheapest outside the new radius',
         './cacheStore':cache,'./stationData':{...stationData,snapshotHasCurrentValidation:()=>true},'./remote':{},'../../lib/trajectoryFuelFetch':{},
     });
     const query={latitude:27.95,longitude:-82.45,radiusMiles:10,fuelType:'regular'};
-    const base={providerId:'gasbuddy',providerTier:'station',fuelType:'regular',longitude:-82.45,isEstimated:false};
+    const base={providerId:'gasbuddy',providerTier:'station',fuelType:'regular',longitude:-82.45,isEstimated:false,updatedAt:new Date().toISOString()};
     const near={...base,stationId:'near',latitude:27.95,price:4,allPrices:{regular:4}};
     const far={...base,stationId:'far',latitude:28.05,price:3,allPrices:{regular:3}};
     await cache.setCachedEntry(core.buildCacheKey(query),{quote:far,topStations:[far,near],fetchedAt:new Date().toISOString()},

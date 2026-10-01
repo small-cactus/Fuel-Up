@@ -24,3 +24,27 @@ test('Home publishes local data then refreshes DB on focus and foreground; clean
     resolveRefresh({snapshot:{topStations:['wrong-old-query']}});await new Promise(setImmediate);
     assert.equal(results.length,count);assert.equal(foreground,null);
 });
+
+test('Home removes a quote immediately after its 24-hour expiry without a network request',async t=>{
+    const now=Date.parse('2026-10-01T15:00:00Z');
+    t.mock.timers.enable({apis:['Date','setTimeout'],now});
+    let effect,calls=0;
+    const results=[];
+    const quote={providerTier:'station',price:3.10,updatedAt:new Date(now-86400000+1000).toISOString()};
+    const {isFreshReportedQuote}=require('../src/services/fuel/reportedPrices');
+    const hook=load('src/screens/cluster-lab/useClusterLabStations.js',{
+        react:{useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,value=>results.push(value)]},
+        'react-native':{AppState:{currentState:'active',addEventListener:()=>({remove(){}})}},
+        'expo-location':{},'../../AppStateContext':{useAppState:()=>({resolvedFuelSearchContext:{latitude:27.95,longitude:-82.45}})},
+        '../../PreferencesContext':{usePreferences:()=>({preferences:{preferredOctane:'regular',searchRadiusMiles:5}})},
+        '../../lib/deviceLocationCache':{},
+        '../../services/fuel':{getCachedFuelPriceSnapshot:async()=>({topStations:[quote]}),refreshFuelPriceSnapshot:async()=>{calls++;return {snapshot:{topStations:[quote]}};}},
+        './stationCardModel':{buildLabStations:s=>s.topStations.filter(q=>isFreshReportedQuote(q))},
+    }).default;
+    hook(true);const cleanup=effect();t.after(cleanup);
+    await new Promise(setImmediate);
+    assert.equal(results.at(-1).stations.length,1);
+    t.mock.timers.tick(1000);assert.equal(results.at(-1).stations.length,1);
+    t.mock.timers.tick(1);assert.deepEqual(results.at(-1).stations,[]);
+    assert.equal(calls,1);
+});

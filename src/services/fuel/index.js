@@ -11,10 +11,10 @@ const {
     buildQuoteIdentity,
     sanitizeStationQuotesForFuelType,
     sanitizeSnapshotForFuelType,
-    snapshotHasCurrentValidation,
     buildLatestQuotesFromRows,
 } = require('./stationData');
 const { fetchGasBuddyQuote } = require('./remote');
+const { filterReportedSnapshot, isFreshReportedQuote } = require('./reportedPrices');
 const {
     annotateStationWithRouteContext,
     isTrajectoryRouteUnavailableError,
@@ -244,7 +244,7 @@ function findUsableCachedFuelWindow({
     let bestMatch = null;
 
     for (const entry of listSpatialCacheEntries()) {
-        if (!entry.cacheKey?.startsWith('fuel-national-v1:')) continue;
+        if (!entry.cacheKey?.startsWith('fuel-national-reported-v2:')) continue;
         if (Boolean(entry.requiresE85) !== Boolean(requiresE85)) continue;
         if (normFuelType && entry.fuelType && entry.fuelType !== normFuelType) {
             continue;
@@ -334,10 +334,6 @@ async function findUsableCachedFuelSnapshot({
         return null;
     }
 
-    if (!snapshotHasCurrentValidation(cacheEntry)) {
-        return null;
-    }
-
     preferredProvider = 'gasbuddy';
     const config = getFuelServiceConfig();
     const ttlMs = cacheEntry.quote?.isEstimated ? config.areaCacheTtlMs : config.stationCacheTtlMs;
@@ -357,7 +353,7 @@ async function findUsableCachedFuelSnapshot({
         ? cacheEntry.regionalQuotes.map(quote => rebaseQuoteToOrigin(quote, origin)).filter(insideRadius)
         : [];
 
-    return sanitizeSnapshotForFuelType({
+    return filterReportedSnapshot(sanitizeSnapshotForFuelType({
         ...cacheEntry,
         quote: rebasedQuote,
         topStations: rebasedTopStations,
@@ -373,7 +369,7 @@ async function findUsableCachedFuelSnapshot({
             edgeBufferFraction,
             fetchedAt: window.fetchedAt,
         },
-    }, fuelType);
+    }, fuelType));
 }
 
 async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fuelType, requiresE85 = false, preferredProvider = 'gasbuddy' }) {
@@ -408,17 +404,13 @@ async function getCachedFuelPriceSnapshot({ latitude, longitude, radiusMiles, fu
         return null;
     }
 
-    if (!snapshotHasCurrentValidation(cacheEntry)) {
-        return null;
-    }
-
-    return sanitizeSnapshotForFuelType({
+    return filterReportedSnapshot(sanitizeSnapshotForFuelType({
         ...cacheEntry,
         isFresh: isCacheEntryFresh(
             cacheEntry,
             cacheEntry.quote?.isEstimated ? getFuelServiceConfig().areaCacheTtlMs : getFuelServiceConfig().stationCacheTtlMs
         ),
-    }, fuelType);
+    }, fuelType));
 }
 
 /**
@@ -503,7 +495,7 @@ async function refreshFuelPriceSnapshot({
         debugState.providers = providerResults.map(result => result.debugEntry);
 
         let allQuotes = sanitizeStationQuotesForFuelType(
-            providerResults.flatMap(result => result.quotes || result.quote || []).filter(Boolean),
+            providerResults.flatMap(result => result.quotes || result.quote || []).filter(quote => isFreshReportedQuote(quote)),
             normalizedFuelType
         );
         const stationQuotes = allQuotes.filter(quote => quote.providerTier === 'station' && !quote.isEstimated);

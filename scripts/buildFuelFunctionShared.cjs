@@ -2,7 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
-for (const name of ['core', 'priceValidation', 'stationData']) {
+for (const name of ['core', 'priceValidation', 'stationData', 'reportedPrices']) {
     let source = fs.readFileSync(path.join(root, 'src/services/fuel', `${name}.js`), 'utf8');
     source = source.replace(/const (\{[^;]+?\}) = require\('\.\/(\w+)'\);/g, 'import $1 from "./$2.mjs";');
     source = source.replace('module.exports = {', 'export {');

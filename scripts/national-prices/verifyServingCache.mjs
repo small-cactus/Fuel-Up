@@ -19,7 +19,8 @@ for (const [city, latitude, longitude] of cities) {
     const result = await response.json();
     assert.equal(response.status,200,`${city}: ${result.error}`);
     assert.equal(result.source,'national-cache');
-    assert(result.quotes.length>0,`${city}: no cached prices`);
+    assert.equal(result.summary.pricePolicy,'reported-last-24-hours');
+    // An empty cache response is valid when every local report has expired.
     const ids = new Set(result.quotes.map(q=>q.stationId));
     assert.equal(ids.size,result.quotes.length);
     for (const id of previous) assert(ids.has(id),`${city}: expanded radius lost ${id}`);
@@ -27,6 +28,8 @@ for (const [city, latitude, longitude] of cities) {
       assert(q.distanceMiles<=radiusMiles && q.distanceMiles>=0);
       assert(Number.isFinite(Date.parse(q.observedAt)));
       assert(q.price>0 && q.fuelType==='regular');
+      assert(!q.isEstimated && !q.validation?.usedPrediction);
+      assert(Date.parse(q.updatedAt)<=Date.now() && Date.now()-Date.parse(q.updatedAt)<=86400000);
     }
     previous = ids;
     const check={city,radiusMiles,stations:ids.size,milliseconds:Math.round(performance.now()-started),...result.summary};

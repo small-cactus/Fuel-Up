@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { buildLabStations, stationAge, stationDistance, pageFromOffset, matchingHomeStationSnapshot } from '../src/screens/cluster-lab/stationCardModel.js';
 
 test('card and map share station IDs and cheapest ordering without losing quote metadata', () => {
-    const base = { providerTier: 'station', latitude: 27.9, longitude: -82.4, price: 3.2 };
-    const validation = { usedPrediction: true, finalPrice: 3.2 };
+    const base = { providerTier: 'station', latitude: 27.9, longitude: -82.4, price: 3.2, updatedAt: new Date().toISOString() };
+    const validation = { usedPrediction: false, finalPrice: 3.2 };
     const result = buildLabStations({ topStations: [
         { ...base, stationId: 'b' }, { ...base, stationId: 'a', address: '123 Main St', rating: 4.5, distanceMiles: 2,
-            updatedAt: '2026-09-29T12:00:00Z', validation, allPrices: { regular: 3.2 } },
+            updatedAt: new Date().toISOString(), validation, allPrices: { regular: 3.2 } },
         { ...base, stationId: 'estimate', isEstimated: true }, { ...base, stationId: 'invalid', price: NaN },
     ], quote: { ...base, stationId: 'b', stationName: 'Updated name' } });
     assert.deepEqual(result.map(station => station.id), ['a', 'b']);
@@ -43,7 +43,7 @@ test('pagination clamps overscroll and rejects unavailable layouts', () => {
 
 test('Glass Lab cache fallback applies Home radius, rating, selected fuel and E85 eligibility', () => {
     const base = { providerTier: 'station', latitude: 27.95, longitude: -82.45,
-        price: 3.2, fuelType: 'regular', rating: 4.5, distanceMiles: 1, allPrices: { regular: 3.2, premium: 4.1, e85: 2.6 } };
+        price: 3.2, updatedAt: new Date().toISOString(), fuelType: 'regular', rating: 4.5, distanceMiles: 1, allPrices: { regular: 3.2, premium: 4.1, e85: 2.6 } };
     const topStations = [
         { ...base, stationId: 'eligible' },
         { ...base, stationId: 'outside', distanceMiles: 12 },

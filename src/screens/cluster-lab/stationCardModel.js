@@ -1,9 +1,10 @@
 import { filterStationQuotesForHome } from '../../lib/homeState.js';
 import { rankQuotesForFuelGrade } from '../../lib/fuelGrade.js';
 import { stationOffersE85 } from '../../lib/stationPreferences.js';
+import { isFreshReportedQuote } from '../../services/fuel/reportedPrices.js';
 
 // Keep station identity and all quote metadata outside the rendered carousel.
-export function buildLabStations(snapshot, { origin, radiusMiles, minimumRating = 0, fuelGrade, requiresE85 = false } = {}) {
+export function buildLabStations(snapshot, { origin, radiusMiles, minimumRating = 0, fuelGrade, requiresE85 = false, now = Date.now() } = {}) {
     let quotes = [...(snapshot?.topStations || [])];
     if (snapshot?.quote) quotes.unshift(snapshot.quote);
     quotes = filterStationQuotesForHome({ quotes, origin, radiusMiles, minimumRating });
@@ -11,6 +12,7 @@ export function buildLabStations(snapshot, { origin, radiusMiles, minimumRating 
     if (requiresE85) quotes = quotes.filter(stationOffersE85);
     const byId = new Map();
     for (const quote of quotes) {
+        if (!isFreshReportedQuote(quote, now)) continue;
         if (quote.providerTier !== 'station' || quote.isEstimated || quote.stationId == null ||
             !Number.isFinite(quote.latitude) || !Number.isFinite(quote.longitude) ||
             Math.abs(quote.latitude) > 90 || Math.abs(quote.longitude) > 180 ||

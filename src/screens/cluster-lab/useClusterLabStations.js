@@ -6,6 +6,7 @@ import { usePreferences } from '../../PreferencesContext';
 import { getLastDeviceLocationRegion } from '../../lib/deviceLocationCache';
 import { getCachedFuelPriceSnapshot, refreshFuelPriceSnapshot } from '../../services/fuel';
 import { buildLabStations } from './stationCardModel';
+import { REPORTED_PRICE_MAX_AGE_MS } from '../../services/fuel/reportedPrices';
 
 // Data crosses the bridge once per search. The Swift view owns all camera and
 // animation work. The five-minute DB refresh never drives animation frames.
@@ -26,9 +27,18 @@ export default function useClusterLabStations(active) {
         if (!active) return;
         let cancelled = false;
         let refreshing = false;
+        let expiryTimer;
         const publish = (origin, snapshot) => {
             if (cancelled) return;
-            setResult({ scope, origin: { latitude: origin.latitude, longitude: origin.longitude }, stations: buildLabStations(snapshot, { origin, radiusMiles, minimumRating, fuelGrade: fuelType, requiresE85 }) });
+            const stations = buildLabStations(snapshot, { origin, radiusMiles, minimumRating, fuelGrade: fuelType, requiresE85 });
+            setResult({ scope, origin: { latitude: origin.latitude, longitude: origin.longitude }, stations });
+            clearTimeout(expiryTimer);
+            const expirations = stations.map(station => Date.parse(station.updatedAt) + REPORTED_PRICE_MAX_AGE_MS).filter(Number.isFinite);
+            if (expirations.length) {
+                // Remove an expired price even while idle/offline. This only
+                // re-filters the snapshot; it does not make a network request.
+                expiryTimer = setTimeout(() => publish(origin, snapshot), Math.max(1, Math.min(...expirations) - Date.now() + 1));
+            }
         };
         const refresh = async () => {
             if (refreshing || AppState.currentState === 'background') return;
@@ -58,7 +68,7 @@ export default function useClusterLabStations(active) {
         refresh();
         const timer = setInterval(refresh, 5 * 60_000);
         const subscription = AppState.addEventListener('change', state => { if (state === 'active') refresh(); });
-        return () => { cancelled = true; clearInterval(timer); subscription.remove(); };
+        return () => { cancelled = true; clearInterval(timer); clearTimeout(expiryTimer); subscription.remove(); };
     }, [active, scope, latitude, longitude, fuelType, radiusMiles, minimumRating, preferredProvider, requiresE85]);
 
     return useMemo(() => result?.scope === scope ? result : { origin: null, stations: [] }, [result, scope]);

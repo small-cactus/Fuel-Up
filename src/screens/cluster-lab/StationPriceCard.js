@@ -2,7 +2,6 @@ import React, { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { GlassView } from 'expo-glass-effect';
 import { SymbolView } from 'expo-symbols';
-import PredictedPriceFlag from '../../components/PredictedPriceFlag';
 import { getFuelGradeMeta, resolveQuotePriceForFuelGrade } from '../../lib/fuelGrade';
 import { stationAge, stationDistance } from './stationCardModel';
 
@@ -24,8 +23,6 @@ function StationPriceCard({ station, rank, fuelGrade, isDark, themeColors, now, 
                                 <SymbolView name="star.fill" size={11} tintColor="#FFB800" />
                                 <Text style={[styles.secondary, text]}>{rating}</Text>
                             </View>}
-                            <PredictedPriceFlag validation={station.validationByFuelType?.[fuelGrade] || station.validation}
-                                isDark={isDark} themeColors={themeColors} compact hitSlop={14} />
                         </View>
                     </View>
                     <Pressable accessibilityRole="button" accessibilityLabel={`Navigate to ${station.name}`}

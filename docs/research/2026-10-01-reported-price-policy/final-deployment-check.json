@@ -1,0 +1,12 @@
+{
+  "verifiedAt": "2026-10-01T15:42:37.923Z",
+  "status": 200,
+  "city": "Clearwater",
+  "radiusMiles": 10,
+  "quotes": 84,
+  "stationCount": 166,
+  "quoteCount": 84,
+  "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+  "newestObservedAt": "2026-10-01T14:15:09.929+00:00",
+  "pricePolicy": "reported-last-24-hours"
+}

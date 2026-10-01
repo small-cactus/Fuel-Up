@@ -1,0 +1,269 @@
+{
+  "verifiedAt": "2026-10-01T15:40:59.531Z",
+  "checks": [
+    {
+      "city": "Clearwater",
+      "radiusMiles": 2,
+      "stations": 4,
+      "milliseconds": 603,
+      "stationCount": 13,
+      "quoteCount": 4,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:05:03.925+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Clearwater",
+      "radiusMiles": 5,
+      "stations": 34,
+      "milliseconds": 404,
+      "stationCount": 66,
+      "quoteCount": 34,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:14:33.757+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Clearwater",
+      "radiusMiles": 10,
+      "stations": 84,
+      "milliseconds": 356,
+      "stationCount": 166,
+      "quoteCount": 84,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:15:09.929+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Clearwater",
+      "radiusMiles": 15,
+      "stations": 160,
+      "milliseconds": 368,
+      "stationCount": 304,
+      "quoteCount": 160,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:15:09.929+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "New York",
+      "radiusMiles": 2,
+      "stations": 0,
+      "milliseconds": 435,
+      "stationCount": 2,
+      "quoteCount": 0,
+      "oldestObservedAt": "2026-10-01T06:11:43.615+00:00",
+      "newestObservedAt": "2026-10-01T06:13:42.163+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "New York",
+      "radiusMiles": 5,
+      "stations": 65,
+      "milliseconds": 1108,
+      "stationCount": 160,
+      "quoteCount": 65,
+      "oldestObservedAt": "2026-10-01T06:11:43.615+00:00",
+      "newestObservedAt": "2026-10-01T14:14:23.169+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "New York",
+      "radiusMiles": 10,
+      "stations": 233,
+      "milliseconds": 1038,
+      "stationCount": 683,
+      "quoteCount": 233,
+      "oldestObservedAt": "2026-10-01T06:11:43.615+00:00",
+      "newestObservedAt": "2026-10-01T14:14:23.169+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "New York",
+      "radiusMiles": 15,
+      "stations": 411,
+      "milliseconds": 540,
+      "stationCount": 1348,
+      "quoteCount": 411,
+      "oldestObservedAt": "2026-10-01T06:11:43.615+00:00",
+      "newestObservedAt": "2026-10-01T14:15:25.745+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Los Angeles",
+      "radiusMiles": 2,
+      "stations": 14,
+      "milliseconds": 555,
+      "stationCount": 26,
+      "quoteCount": 14,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Los Angeles",
+      "radiusMiles": 5,
+      "stations": 90,
+      "milliseconds": 509,
+      "stationCount": 170,
+      "quoteCount": 90,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Los Angeles",
+      "radiusMiles": 10,
+      "stations": 308,
+      "milliseconds": 1589,
+      "stationCount": 579,
+      "quoteCount": 308,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Los Angeles",
+      "radiusMiles": 15,
+      "stations": 596,
+      "milliseconds": 490,
+      "stationCount": 1079,
+      "quoteCount": 596,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Seattle",
+      "radiusMiles": 2,
+      "stations": 8,
+      "milliseconds": 295,
+      "stationCount": 20,
+      "quoteCount": 8,
+      "oldestObservedAt": "2026-10-01T14:00:14.257+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Seattle",
+      "radiusMiles": 5,
+      "stations": 40,
+      "milliseconds": 326,
+      "stationCount": 81,
+      "quoteCount": 40,
+      "oldestObservedAt": "2026-10-01T14:00:05.522+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Seattle",
+      "radiusMiles": 10,
+      "stations": 120,
+      "milliseconds": 374,
+      "stationCount": 234,
+      "quoteCount": 120,
+      "oldestObservedAt": "2026-10-01T14:00:05.522+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Seattle",
+      "radiusMiles": 15,
+      "stations": 214,
+      "milliseconds": 410,
+      "stationCount": 407,
+      "quoteCount": 214,
+      "oldestObservedAt": "2026-10-01T14:00:05.522+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Honolulu",
+      "radiusMiles": 2,
+      "stations": 18,
+      "milliseconds": 308,
+      "stationCount": 33,
+      "quoteCount": 18,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Honolulu",
+      "radiusMiles": 5,
+      "stations": 35,
+      "milliseconds": 355,
+      "stationCount": 71,
+      "quoteCount": 35,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Honolulu",
+      "radiusMiles": 10,
+      "stations": 59,
+      "milliseconds": 296,
+      "stationCount": 117,
+      "quoteCount": 59,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Honolulu",
+      "radiusMiles": 15,
+      "stations": 76,
+      "milliseconds": 338,
+      "stationCount": 163,
+      "quoteCount": 76,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Anchorage",
+      "radiusMiles": 2,
+      "stations": 11,
+      "milliseconds": 377,
+      "stationCount": 14,
+      "quoteCount": 11,
+      "oldestObservedAt": "2026-10-01T14:00:05.522+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Anchorage",
+      "radiusMiles": 5,
+      "stations": 30,
+      "milliseconds": 288,
+      "stationCount": 41,
+      "quoteCount": 30,
+      "oldestObservedAt": "2026-10-01T14:00:05.522+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Anchorage",
+      "radiusMiles": 10,
+      "stations": 47,
+      "milliseconds": 330,
+      "stationCount": 65,
+      "quoteCount": 47,
+      "oldestObservedAt": "2026-10-01T14:00:05.522+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    },
+    {
+      "city": "Anchorage",
+      "radiusMiles": 15,
+      "stations": 53,
+      "milliseconds": 432,
+      "stationCount": 71,
+      "quoteCount": 53,
+      "oldestObservedAt": "2026-10-01T14:00:05.522+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00",
+      "pricePolicy": "reported-last-24-hours"
+    }
+  ]
+}
