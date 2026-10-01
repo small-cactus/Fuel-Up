@@ -244,6 +244,7 @@ function findUsableCachedFuelWindow({
     let bestMatch = null;
 
     for (const entry of listSpatialCacheEntries()) {
+        if (!entry.cacheKey?.startsWith('fuel-national-v1:')) continue;
         if (Boolean(entry.requiresE85) !== Boolean(requiresE85)) continue;
         if (normFuelType && entry.fuelType && entry.fuelType !== normFuelType) {
             continue;
@@ -276,6 +277,8 @@ function findUsableCachedFuelWindow({
             entry.centerLng
         );
         const safeRadius = entry.radiusMiles * (1 - bufferFraction);
+
+        if (Number.isFinite(requestedRadius) && distanceMiles + requestedRadius > entry.radiusMiles + 0.000001) continue;
 
         if (distanceMiles > safeRadius) {
             continue;
@@ -344,12 +347,14 @@ async function findUsableCachedFuelSnapshot({
     }
 
     const origin = { latitude, longitude };
-    const rebasedQuote = rebaseQuoteToOrigin(cacheEntry.quote, origin);
+    const insideRadius = quote => quote && quote.distanceMiles <= Number(radiusMiles || config.defaultRadiusMiles);
+    const originalBest = rebaseQuoteToOrigin(cacheEntry.quote, origin);
     const rebasedTopStations = Array.isArray(cacheEntry.topStations)
-        ? cacheEntry.topStations.map(quote => rebaseQuoteToOrigin(quote, origin))
+        ? cacheEntry.topStations.map(quote => rebaseQuoteToOrigin(quote, origin)).filter(insideRadius)
         : [];
+    const rebasedQuote = selectPreferredQuote([...rebasedTopStations, originalBest].filter(insideRadius));
     const rebasedRegionalQuotes = Array.isArray(cacheEntry.regionalQuotes)
-        ? cacheEntry.regionalQuotes.map(quote => rebaseQuoteToOrigin(quote, origin))
+        ? cacheEntry.regionalQuotes.map(quote => rebaseQuoteToOrigin(quote, origin)).filter(insideRadius)
         : [];
 
     return sanitizeSnapshotForFuelType({
@@ -536,7 +541,7 @@ async function refreshFuelPriceSnapshot({
         const bestQuote = selectPreferredQuote(allQuotes);
         const supplementalQuotes = allQuotes.filter(quote => quote.providerTier === 'area');
 
-        if (!bestQuote) {
+        if (!bestQuote && debugState.providers?.[0]?.summary?.source !== 'national-cache') {
             const requestError = new Error('No fuel price providers returned usable data.');
             requestError.debugState = debugState;
             requestError.userMessage = getFuelFailureMessage({ debugState });

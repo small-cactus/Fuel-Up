@@ -19,7 +19,8 @@ export async function collectNationalPrices({ db, fetchBatch = fetchNationalPric
     const claimedAt = now();
     try {
       if (job.execution_region !== executionRegion) throw new NationalPriceError('REGION_JOB_MISMATCH');
-      const snapshot = { ...await fetchBatch(job.station_ids, { csrf }), executionRegion };
+      const includeMetadata = await rpc(db, 'fuel_station_metadata_needed', { p_ids: job.station_ids });
+      const snapshot = { ...await fetchBatch(job.station_ids, { csrf, includeMetadata }), executionRegion };
       const compressed = await compressSnapshot(snapshot);
       const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', compressed))].map(b => b.toString(16).padStart(2, '0')).join('');
       // Lease-specific immutable keys: a stale worker cannot overwrite a newer
@@ -29,9 +30,9 @@ export async function collectNationalPrices({ db, fetchBatch = fetchNationalPric
         contentType: 'application/gzip', upsert: false, cacheControl: '31536000' });
       if (error) throw new NationalPriceError('ARCHIVE_WRITE_FAILED');
       const priced = snapshot.stations.filter(s => s.prices.some(p => p.cash?.price > 0 || p.credit?.price > 0)).length;
-      const saved = await rpc(db, 'finish_fuel_national_job', { p_id: job.id, p_token: job.lease_token,
+      const saved = await rpc(db, 'finish_fuel_national_serving_job', { p_id: job.id, p_token: job.lease_token,
         p_ids: snapshot.stations.map(s => s.id), p_started_at: snapshot.startedAt, p_observed_at: snapshot.observedAt,
-        p_path: path, p_bytes: compressed.byteLength, p_sha256: hash, p_priced: priced });
+        p_path: path, p_bytes: compressed.byteLength, p_sha256: hash, p_priced: priced, p_stations: snapshot.stations });
       if (!saved) throw new NationalPriceError('LEASE_LOST');
       results.push({ id: job.id, status: 'succeeded', stations: snapshot.stations.length, priced });
     } catch (error) {

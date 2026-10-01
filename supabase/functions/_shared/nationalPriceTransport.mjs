@@ -13,12 +13,12 @@ export function retryAfterSeconds(value, now = Date.now()) {
   return Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
 }
 
-export async function fetchNationalPriceBatch(ids, { fetchImpl = fetch, csrf, maxBytes = 8_000_000 } = {}) {
+export async function fetchNationalPriceBatch(ids, { fetchImpl = fetch, csrf, includeMetadata = false, maxBytes = 8_000_000 } = {}) {
   if (!ids.length || ids.length > 2000) throw new NationalPriceError('INVALID_BATCH_SIZE');
   const startedAt = new Date().toISOString(), started = performance.now();
   const { url, headers } = buildGasBuddyGraphQLRequest({ latitude: 0, longitude: 0 });
   const response = await fetchImpl(url, { method: 'POST', headers: { ...headers, ...(csrf ? { gbcsrf: csrf } : {}) },
-    body: JSON.stringify({ query: priceQuery(ids), variables: {} }), signal: AbortSignal.timeout(25000) });
+    body: JSON.stringify({ query: priceQuery(ids, includeMetadata), variables: {} }), signal: AbortSignal.timeout(25000) });
   const responseEvidence = providerResponseEvidence(response, performance.now() - started);
   if (!response.ok) {
     await response.body?.cancel();

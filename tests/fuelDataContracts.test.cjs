@@ -380,7 +380,7 @@ test('Fuel failure messaging distinguishes bad location from missing station pri
     assert.match(priceMessage, /no prices returned/i);
 });
 
-test('cache keys are bucketed by search region and freshness respects the ttl', () => {
+test('cache keys preserve exact search centers and freshness respects the ttl', () => {
     const cacheKey = buildCacheKey({
         latitude: 40.71288,
         longitude: -74.00591,
@@ -389,7 +389,7 @@ test('cache keys are bucketed by search region and freshness respects the ttl', 
         preferredProvider: 'gasbuddy',
     });
 
-    assert.equal(cacheKey, 'fuel:regular:gasbuddy:10:40.71:-74.01');
+    assert.equal(cacheKey, 'fuel-national-v1:regular:gasbuddy:10:40.71288:-74.00591');
     assert.equal(
         isCacheEntryFresh(
             {

@@ -1,0 +1,30 @@
+{
+  "response_evidence": {
+    "decodedBodyBytes": 767875,
+    "elapsedMs": 2786,
+    "fullElapsedMs": 2836,
+    "graphqlErrors": [
+      "request to http://poi-serv:8000/v2/station/52356 failed, reason: read ECONNRESET",
+      "request to http://poi-serv:8000/v2/station/52357 failed, reason: read ECONNRESET",
+      "request to http://poi-serv:8000/v2/station/52365 failed, reason: read ECONNRESET",
+      "request to http://poi-serv:8000/v2/station/52366 failed, reason: read ECONNRESET",
+      "request to http://poi-serv:8000/v2/station/52368 failed, reason: read ECONNRESET",
+      "request to http://poi-serv:8000/v2/station/52379 failed, reason: read ECONNRESET",
+      "request to http://poi-serv:8000/v2/station/52383 failed, reason: read ECONNRESET",
+      "request to http://poi-serv:8000/v2/station/52389 failed, reason: read ECONNRESET",
+      "request to http://poi-serv:8000/v2/station/52396 failed, reason: read ECONNRESET",
+      "request to http://poi-serv:8000/v2/station/52394 failed, reason: read ECONNRESET"
+    ],
+    "headers": {
+      "age": "0",
+      "cf-ray": "a43c14864853d8d1-IAD",
+      "content-type": "application/json; charset=utf-8",
+      "date": "Thu, 01 Oct 2026 14:15:36 GMT",
+      "server": "cloudflare",
+      "via": "1.1 varnish-v4",
+      "x-cache": "MISS"
+    },
+    "observedAt": "2026-10-01T14:15:36.903Z",
+    "status": 200
+  }
+}

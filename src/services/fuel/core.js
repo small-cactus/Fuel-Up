@@ -45,15 +45,15 @@ function formatFuelProductName(fuelType) {
 }
 
 function normalizeCoordinate(value) {
-    return Number(value).toFixed(2);
+    return String(Number(value));
 }
 
 function buildCacheKey({ latitude, longitude, radiusMiles, fuelType, requiresE85 = false, preferredProvider = 'gasbuddy' }) {
     return [
-        'fuel',
+        'fuel-national-v1',
         normalizeFuelTypeName(fuelType),
         'gasbuddy',
-        Math.max(1, Math.round(toFiniteNumber(radiusMiles) || 10)),
+        Math.max(1, toFiniteNumber(radiusMiles) || 10),
         normalizeCoordinate(latitude),
         normalizeCoordinate(longitude),
         ...(requiresE85 ? ['with-e85'] : []),

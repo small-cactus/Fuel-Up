@@ -1,7 +1,7 @@
-export function priceQuery(ids) {
+export function priceQuery(ids, includeMetadata = false) {
   if (!ids.length || new Set(ids).size !== ids.length) throw new Error('Price IDs must be nonempty and unique');
   return `query StatePrices{${ids.map((id, i) => `s${i}:station(id:${JSON.stringify(id)}){...P}`).join(' ')}}
-    fragment P on Station{id prices{fuelProduct cash{price postedTime} credit{price postedTime}}}`;
+    fragment P on Station{id ${includeMetadata ? 'name latitude longitude address{line1 locality region postalCode} brands{name} starRating ratingsCount' : ''} prices{fuelProduct cash{price postedTime} credit{price postedTime}}}`;
 }
 
 export function validatePriceBatch(data, ids) {

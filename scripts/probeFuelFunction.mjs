@@ -23,8 +23,8 @@ for (const fuelType of grades) {
       assert.ok(Number.isFinite(quote.price) && quote.price > 0 && quote.price < 20);
       assert.ok(quote.distanceMiles >= 0 && quote.distanceMiles <= body.radiusMiles);
     }
-    if (attempt && endpoint === 'gas-prices') assert.equal(result.source, 'cache');
-    if (!attempt && body.forceRefresh) {
+    if (endpoint === 'gas-prices') assert.equal(result.source, 'national-cache');
+    if (endpoint !== 'gas-prices' && !attempt && body.forceRefresh) {
       assert.equal(result.source, 'live');
       if (endpoint === 'gas-prices') assert.ok(result.summary.persistedLiveRowCount > 0, 'Live history must persist');
     }

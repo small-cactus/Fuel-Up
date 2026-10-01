@@ -52,7 +52,7 @@ function fakeDB({ jobs = [{ id: 1, run_id: 10, lease_token: 'token', station_ids
   const calls = [], uploads = [];
   jobs.forEach(job => job.execution_region = 'us-east-1');
   return { calls, uploads,
-    rpc: async (name, args) => { calls.push({ name, args }); return { data: name === 'claim_fuel_national_region_job' ? (jobs.length ? [jobs.shift()] : []) : name === 'finish_fuel_national_job' ? save : true }; },
+    rpc: async (name, args) => { calls.push({ name, args }); return { data: name === 'claim_fuel_national_region_job' ? (jobs.length ? [jobs.shift()] : []) : name === 'finish_fuel_national_serving_job' ? save : true }; },
     storage: { from: bucket => ({ upload: async (path, bytes, options) => { uploads.push({ bucket, path, bytes, options }); return { error: uploadError ? 'failed' : null }; } }) } };
 }
 const snapshot = { startedAt: new Date().toISOString(), observedAt: new Date().toISOString(), stations: [quote('1'), { id: '2', prices: [] }] };
@@ -61,14 +61,14 @@ test('worker archives first, then commits exact IDs, checksum and unpriced cover
   assert.equal(r[0].stations, 2); assert.equal(r[0].priced, 1);
   assert.equal(db.uploads[0].options.upsert, false);
   assert.deepEqual(JSON.parse(gunzipSync(db.uploads[0].bytes)), { ...snapshot, executionRegion: 'us-east-1' });
-  const saved = db.calls.find(c => c.name === 'finish_fuel_national_job');
+  const saved = db.calls.find(c => c.name === 'finish_fuel_national_serving_job');
   assert.deepEqual(saved.args.p_ids, ['1', '2']); assert.equal(saved.args.p_priced, 1); assert.equal(saved.args.p_sha256.length, 64);
 });
 test('archive failure or stale lease cannot publish a successful batch', async () => {
   for (const option of [{ uploadError: true }, { save: false }]) {
     const db = fakeDB(option); const r = await collectNationalPrices({ executionRegion: 'us-east-1', db, fetchBatch: async () => snapshot });
     assert.equal(r[0].status, 'failed'); assert(db.calls.some(c => c.name === 'fail_fuel_national_job'));
-    if (option.uploadError) assert(!db.calls.some(c => c.name === 'finish_fuel_national_job'));
+    if (option.uploadError) assert(!db.calls.some(c => c.name === 'finish_fuel_national_serving_job'));
   }
 });
 test('rate denial stops the worker loop immediately and persists the cooldown', async () => {
@@ -91,4 +91,12 @@ test('worker spaces provider calls and finishes its invocation before the next c
  const result=await collectNationalPrices({db,executionRegion:'us-east-1',now:()=>clock,sleep:async ms=>{clock+=ms;},fetchBatch:async()=>{fetchedAt.push(clock);clock+=3000;return snapshot;}});
  assert.deepEqual(fetchedAt,expected);assert.equal(result.length,expected.length);assert.equal(clock,45000);
  }
+});
+
+test('metadata travels with the existing price batch and is published behind the archive fence',async()=>{
+  const db=fakeDB();let options;
+  const result=await collectNationalPrices({db,executionRegion:'us-east-1',sleep:async()=>{},fetchBatch:async(ids,opts)=>{options=opts;return snapshot;}});
+  assert.equal(result[0].status,'succeeded');assert.equal(options.includeMetadata,true);
+  assert.deepEqual(db.calls.find(c=>c.name==='finish_fuel_national_serving_job').args.p_stations,snapshot.stations);
+  assert(db.calls.find(c=>c.name==='fuel_station_metadata_needed'));
 });

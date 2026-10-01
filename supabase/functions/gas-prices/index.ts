@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.98.0';
-import { getGasPrices, ServiceError } from '../_shared/gasPrices.mjs';
+import { ServiceError } from '../_shared/gasPrices.mjs';
+import { getCachedGasPrices } from '../_shared/cachedGasPrices.mjs';
 const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, x-region',
   'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Cache-Control': 'no-store' };
@@ -14,12 +15,7 @@ Deno.serve(async (request: Request) => {
     if (raw.length > 2048) throw new ServiceError('INVALID_INPUT', 400);
     let input;
     try { input = JSON.parse(raw); } catch { throw new ServiceError('INVALID_INPUT', 400); }
-    const result = await getGasPrices({ input, db, csrf: Deno.env.get('GASBUDDY_CSRF'),
-      recordOutcome: async (success: boolean, code: string) => {
-        const { error } = await db.rpc('record_fuel_provider_result', { p_success: success, p_code: code });
-        if (error) console.error('Fuel incident recording failed', error.code);
-      },
-    });
+    const result = await getCachedGasPrices({ input, db });
     return new Response(JSON.stringify(result), { headers });
   } catch (error) {
     const status = error instanceof ServiceError ? error.status : 500;
