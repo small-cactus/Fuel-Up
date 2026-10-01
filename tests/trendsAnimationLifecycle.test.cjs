@@ -12,7 +12,13 @@ test('a gradient target starts once and superseded/unmounted animation work is s
     const nationalData = snapshot([3.1,3.8,3.4]);
     const appState = {};
     const preferences = { normalizedFuelSearchPreferences: { preferredOctane: 'regular', searchRadiusMiles: 10 } };
+    const Chart = load('src/screens/trends/ObservedPriceChart.js', {
+        'react-native': { View: 'View' },
+        'react-native-svg': { __esModule: true, default: 'Svg', Path: 'Path', Defs: 'Defs', LinearGradient: 'SvgGradient', Stop: 'Stop' },
+        'd3-shape': await import('d3-shape'), 'd3-scale': await import('d3-scale'),
+    }).default;
     const Screen = load('app/(tabs)/trends.js', {
+        '../../src/screens/trends/ObservedPriceChart': Chart,
         'react-native': { View: 'View', Text: 'Text', ScrollView: 'ScrollView', RefreshControl: 'RefreshControl',
             Dimensions: { get: () => ({ width: 440 }) }, StyleSheet: { create: value => value, absoluteFillObject: {}, absoluteFill: {} },
             Animated: { View: 'AnimatedView', Value: class { setValue() {} }, timing: () => {
@@ -58,6 +64,12 @@ test('a gradient target starts once and superseded/unmounted animation work is s
     const nationalLine = renderer.root.findAllByType('Path').find(p => p.props.stroke)?.props.d;
     assert(nationalLine);assert.notEqual(nationalLine,localLine);
     assert.equal(renderer.root.findAllByType('Circle').length,0);
+    data = { averagePricesByDay: [], overallTrend: null,
+        latestObservedAverage: { date: new Date().toISOString(), price: 3.25 } };
+    await act(async () => renderer.root.findByType('ScopeControl').props.onChange('local'));
+    const flatLine = renderer.root.findAllByType('Path').find(p => p.props.stroke)?.props.d;
+    assert(flatLine && !flatLine.includes('NaN'), 'a new local area must render its current raw average');
+    assert(renderer.root.findAllByType('Text').some(p => Array.isArray(p.props.children) && p.props.children.includes('3.25')));
     await act(async () => renderer.unmount());
-    assert.equal(animations[1].stopped, 1);
+    assert(animations.every(animation => animation.stopped >= 1));
 });

@@ -3,9 +3,8 @@ import { Animated, StyleSheet, Text, View, ScrollView, Dimensions, RefreshContro
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/ThemeContext';
 import { LinearGradient as ExpoLinearGradient } from 'expo-linear-gradient';
-import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
-import * as d3Shape from 'd3-shape';
-import * as d3Scale from 'd3-scale';
+import ObservedPriceChart from '../../src/screens/trends/ObservedPriceChart';
+import { buildDisplayTrendSeries } from '../../src/screens/trends/displayTrendSeries';
 import TrendScopeControl from '../../src/screens/trends/TrendScopeControl';
 import NationalTrendPrices from '../../src/screens/trends/NationalTrendPrices';
 import useNationalLeaderboard from '../../src/screens/trends/useNationalLeaderboard';
@@ -160,68 +159,6 @@ function areGradientColorSetsEqual(left, right) {
     return left.every((color, index) => color === right[index]);
 }
 
-function ObservedPriceChart({ data, width, height, isDark, trendColor, topBleed = 40 }) {
-    if (!data || data.length === 0) return null;
-
-    const margin = { top: topBleed, right: 0, bottom: 0, left: 0 };
-    const chartWidth = width - margin.left - margin.right;
-    const chartHeight = height - margin.top - margin.bottom;
-
-    const xExtent = [Date.parse(data[0].date), Date.parse(data.at(-1).date)];
-    const yExtent = [
-        Math.min(...data.map(d => d.price)) * 0.99, // slight bottom padding natively
-        Math.max(...data.map(d => d.price)) * 1.01
-    ];
-
-    const xScale = d3Scale.scaleLinear()
-        .domain(xExtent)
-        .range([0, chartWidth]);
-
-    const yScale = d3Scale.scaleLinear()
-        .domain(yExtent)
-        .range([chartHeight, 0]);
-
-    const lineGenerator = d3Shape.line()
-        .x(d => xScale(Date.parse(d.date)))
-        .y(d => yScale(d.price))
-        .curve(d3Shape.curveMonotoneX);
-
-    const areaGenerator = d3Shape.area()
-        .x(d => xScale(Date.parse(d.date)))
-        .y0(chartHeight)
-        .y1(d => yScale(d.price))
-        .curve(d3Shape.curveMonotoneX);
-
-    // Restore the curved line and fade without filling missing observations.
-    const daily = data.every(point => Date.parse(point.date) % 86400000 === 0);
-    const bucketMs = daily ? 86400000 : 3600000;
-    const segments = [];
-    data.forEach((point, index) => {
-        if (!index || Date.parse(point.date) - Date.parse(data[index - 1].date) > bucketMs) segments.push([]);
-        segments.at(-1).push(point);
-    });
-
-    return (
-        <View style={{ width, height, marginTop: -margin.top }}>
-            <Svg width={width} height={height}>
-                <Defs>
-                    <SvgLinearGradient id="gradientTrend" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <Stop offset="0%" stopColor={trendColor} stopOpacity={0.35} />
-                        <Stop offset="80%" stopColor={trendColor} stopOpacity={0.05} />
-                        <Stop offset="100%" stopColor={trendColor} stopOpacity={0} />
-                    </SvgLinearGradient>
-                </Defs>
-                {segments.filter(segment => segment.length > 1).map(segment => (
-                    <React.Fragment key={segment[0].date}>
-                        <Path d={areaGenerator(segment)} fill="url(#gradientTrend)" x={margin.left} y={margin.top} />
-                        <Path d={lineGenerator(segment)} fill="none" stroke={trendColor} strokeWidth={3} x={margin.left} y={margin.top} />
-                    </React.Fragment>
-                ))}
-            </Svg>
-        </View>
-    );
-}
-
 export default function TrendsScreen() {
     const insets = useSafeAreaInsets();
     const [priceScope, setPriceScope] = useState('local');
@@ -346,7 +283,10 @@ export default function TrendsScreen() {
     const gradientFadeOpacity = useRef(new Animated.Value(1)).current;
     const heroTrendData = priceScope === 'local' ? displayTrendData : national.trendData;
     const chartLoading = priceScope === 'local' ? loading : national.loading;
-    const hasHeroTrendData = Boolean(heroTrendData?.averagePricesByDay?.length > 0);
+    const chartPoints = useMemo(() => buildDisplayTrendSeries(
+        heroTrendData?.averagePricesByDay, { latestObservedAverage: heroTrendData?.latestObservedAverage }
+    ), [heroTrendData]);
+    const hasHeroTrendData = chartPoints.length > 0;
     const gradientSourceData = heroTrendData || null;
     const heroTrendDirection = useMemo(
         () => getTrendDirectionFromData(heroTrendData || null),
@@ -419,7 +359,6 @@ export default function TrendsScreen() {
             heroTrendData.averagePricesByDay[0]?.price
         );
     }, [heroTrendData]);
-    const shouldShowAwaitingLocalHistoryText = (heroTrendData?.averagePricesByDay?.length || 0) < 2;
     const darkModeWeightStyle = useMemo(() => ({
         heroSub: { fontWeight: isDark ? '600' : '700' },
         heroPrice: { fontWeight: isDark ? '700' : '800' },
@@ -479,7 +418,7 @@ export default function TrendsScreen() {
                 >
                     <View style={styles.contentWrap}>
                         <TrendScopeControl value={priceScope} onChange={setPriceScope} isDark={isDark} themeColors={themeColors} />
-                            {/* Observed averages only; missing history stays empty. */}
+                            {/* Display-only carry-forward; raw observations remain unchanged. */}
                             {hasHeroTrendData ? (
                                 <View style={styles.heroGraphSection}>
                                     <View style={styles.heroGraphPad}>
@@ -488,7 +427,7 @@ export default function TrendsScreen() {
                                         </Text>
                                         <View style={styles.heroPriceRow}>
                                             <Text numberOfLines={1} adjustsFontSizeToFit maxFontSizeMultiplier={2} style={[styles.heroPrice, numericTextStyle, darkModeWeightStyle.heroPrice, { color: themeColors.text }]}>
-                                                ${heroTrendData.averagePricesByDay[heroTrendData.averagePricesByDay.length - 1].price.toFixed(2)}
+                                                ${chartPoints.at(-1).price.toFixed(2)}
                                             </Text>
                                             {heroDeltaLabel ? (
                                                 <Text maxFontSizeMultiplier={2} style={[styles.heroDelta, numericTextStyle, darkModeWeightStyle.heroDelta, { color: primaryTrendColor }]}>
@@ -497,41 +436,31 @@ export default function TrendsScreen() {
                                             ) : null}
                                         </View>
                                     </View>
-                                    {shouldShowAwaitingLocalHistoryText ? (
-                                        <View style={styles.heroStatusWrap}>
-                                            <Text style={[styles.heroPreviewText, darkModeWeightStyle.itemSub, { color: themeColors.text }]}>
-                                                Price history will appear as {priceScope === 'national' ? 'national' : 'local'} reports arrive.
-                                            </Text>
-                                        </View>
-                                    ) : null}
-
-                                    {!shouldShowAwaitingLocalHistoryText ? (<>
                                     <ObservedPriceChart
-                                        data={heroTrendData.averagePricesByDay}
+                                        data={chartPoints}
                                         width={SCREEN_WIDTH}
                                         height={CHART_HEIGHT}
                                         isDark={isDark}
                                         trendColor={primaryTrendColor}
-                                        topBleed={shouldShowAwaitingLocalHistoryText ? 0 : 40}
+                                        topBleed={40}
                                     />
 
                                     <View style={styles.heroAxis}>
                                         <Text style={[styles.axisText, numericTextStyle, darkModeWeightStyle.axisText, { color: themeColors.textOpacity }]}>
                                             {formatTrendAxisLabel(
-                                                heroTrendData.averagePricesByDay[0].date,
-                                                heroTrendData.averagePricesByDay[0].date,
-                                                heroTrendData.averagePricesByDay[heroTrendData.averagePricesByDay.length - 1].date
+                                                chartPoints[0].date,
+                                                chartPoints[0].date,
+                                                chartPoints.at(-1).date
                                             )}
                                         </Text>
                                         <Text style={[styles.axisText, numericTextStyle, darkModeWeightStyle.axisText, { color: themeColors.textOpacity }]}>
                                             {formatTrendAxisLabel(
-                                                heroTrendData.averagePricesByDay[heroTrendData.averagePricesByDay.length - 1].date,
-                                                heroTrendData.averagePricesByDay[0].date,
-                                                heroTrendData.averagePricesByDay[heroTrendData.averagePricesByDay.length - 1].date
+                                                chartPoints.at(-1).date,
+                                                chartPoints[0].date,
+                                                chartPoints.at(-1).date
                                             )}
                                         </Text>
                                     </View>
-                                    </>) : null}
                                 </View>
                             ) : chartLoading ? (
                                 <View style={styles.heroGraphPlaceholderSection}>
@@ -667,17 +596,6 @@ const styles = StyleSheet.create({
         width: 72,
         height: 20,
         borderRadius: 10,
-    },
-    heroPreviewText: {
-        fontSize: 13,
-        lineHeight: 18,
-        letterSpacing: -0.2,
-    },
-    heroStatusWrap: {
-        minHeight: 40,
-        paddingHorizontal: 24,
-        paddingTop: 8,
-        paddingBottom: 12,
     },
     heroChartPlaceholderWrap: {
         width: '100%',

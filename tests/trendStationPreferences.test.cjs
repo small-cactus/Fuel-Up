@@ -59,6 +59,8 @@ test('fresh local prices remain available without history; no historical values 
     const result = await trends.fetchTrendData({ latitude: 27.95, longitude: -82.45, fuelType: 'regular' });
     assert.equal(result.leaderboard.length, 3);
     assert.deepEqual(result.averagePricesByDay, []);
+    assert.equal(result.latestObservedAverage.price, 3.5);
+    assert(Number.isFinite(Date.parse(result.latestObservedAverage.date)));
     assert.equal(result.overallTrend, null);
     assert.ok(result.leaderboard.every(station => station.earliestPrice === null && station.rankShift === null));
 });

@@ -146,6 +146,12 @@ export async function fetchTrendData({
     const leaderboardLatestReportedAt = new Date(Math.max(...rankedLatestQuotes.slice(0, 5)
         .map(quote => Date.parse(quote.updatedAt)))).toISOString();
 
+    // A live raw average gives a new area a real starting point before local
+    // history exists. Only the chart display carries this known value forward.
+    const latestObservedAverage = {
+        date: Number.isFinite(Date.parse(snapshot?.fetchedAt)) ? snapshot.fetchedAt : new Date().toISOString(),
+        price: rankedLatestQuotes.reduce((sum, quote) => sum + quote.price, 0) / rankedLatestQuotes.length,
+    };
     // Only occupied observation buckets. No estimates or synthetic history.
     const averagePricesByDay = buildAveragePriceTrendSeries(displayedRows);
     const hasHistoricalTrendSeries = averagePricesByDay.length >= 2;
@@ -265,6 +271,7 @@ export async function fetchTrendData({
         overallTrend,
         averagePricesByDay,
         trendSeriesMode,
+        latestObservedAverage,
         leaderboard,
         leaderboardLatestReportedAt,
         mapHeatmapPoints

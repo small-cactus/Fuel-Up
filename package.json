@@ -26,7 +26,7 @@
     "fuel:probe": "node scripts/probeFuelFunction.mjs --all-grades",
     "fuel:deploy": "npm run test:fuel-cloud && npx --yes supabase@2.118.0 functions deploy gas-prices fuel-repair --project-ref vjindchxfebaltbslqwc --use-api && npm run fuel:probe",
     "fuel:repair:install": "node scripts/fuel-repair/install.mjs",
-    "test:trends": "node --test tests/trendData.test.cjs tests/rawTrendRows.test.cjs tests/trendStationPreferences.test.cjs tests/trendsLifecycle.test.cjs tests/trendsAnimationLifecycle.test.cjs tests/nationalLeaderboard.test.mjs tests/nationalTrendsLifecycle.test.cjs"
+    "test:trends": "node --test tests/displayTrendSeries.test.cjs tests/trendData.test.cjs tests/rawTrendRows.test.cjs tests/trendStationPreferences.test.cjs tests/trendsLifecycle.test.cjs tests/trendsAnimationLifecycle.test.cjs tests/nationalLeaderboard.test.mjs tests/nationalTrendsLifecycle.test.cjs"
   },
   "dependencies": {
     "@callstack/liquid-glass": "^0.7.0",
