@@ -8,7 +8,7 @@ That scheduled request failed at 15:28 (events 43/44). Full diagnostics now show
 
 All three workers are deployed; six provider-free regional health checks pass (`brand-repair-regions.json`). Query/error/worker regression tests pass, including explicit exclusion of the failing resolver.
 
-**Recovery pending:** the recorded cooldown ends 2026-10-01 16:28:04.429593 UTC. It has not been shortened or cleared. The existing ten-minute monitor now carries a one-time instruction to inspect state after expiry and run `resume-brand-repair.sql` (attempt 2 of at most 3) only if all guards hold. It must verify successful scheduled jobs and immutable archive read-back before claiming recovery. No successful archive exists for this attempted recovery yet.
+**Recovery verified (16:40 UTC):** attempt 2 resumed existing Cron after the recorded cooldown expired. Successful immutable archive samples from all three assigned regions passed hash, exact station-ID, price-schema and provenance checks. The 16:00 sweep is still running; this is recovery verification, not full-hour completion. Original failure evidence and historical gaps remain below.
 
 Both main Cron schedules/watchdogs remain active, and archive capacity was 38.7 MB of the 900 MB budget. Raw observations, existing historical gaps, and original failure evidence remain intact. Research windows still end October 7 at 18:19 UTC.
 
@@ -28,3 +28,37 @@ not counted as failed. City totals are 496 successful / 32 missed slots and
 9,920 observations; 14 additional misses accumulated during the existing
 cooldown. This evidence is saved in `heartbeat-1624.json`. Attempt 2 remains
 pending under the existing guarded recovery instructions.
+
+
+## 16:35–16:41 UTC guarded recovery
+
+The guards in `resume-brand-repair.sql` passed at 16:35:08.359102 UTC: the
+recorded cooldown had expired, the incident matched, no newer denial existed,
+and the campaign/budget limits permitted resumption. Attempt 2 enabled the
+existing scheduled collector and recorded `USER_AUTHORIZED_BRAND_QUERY_RECOVERY`.
+The cooldown value was neither shortened nor cleared. This monitor made zero
+provider requests; Cron performed collection with unchanged identity and routing.
+
+All 30 query/error/region/archive regression tests passed
+(`brand-recovery-tests.tap`). Six provider-free regional checks passed
+(`brand-recovery-regions.json`), including rejection of wrong-region requests.
+`auditRegionalSample.mjs` downloaded and verified one successful immutable batch
+from each assigned region: 3,960 station records total. It checked compressed
+size and SHA-256, exact manifest station IDs, raw price schema and regional
+provenance. Evidence is in `brand-recovery-archive-sample.json`; this sample
+must not be treated as a complete-hour audit or verified pump truth.
+
+At 16:41 UTC, run 566 had progressed to 23/72 successful batches; both western
+regions were complete and Virginia was continuing. There were no new provider
+errors following recovery, no wrong-region jobs, and no Cron failures in the
+last 30 minutes. All four main/watchdog schedules remained active. City
+collection reached 518 successful / 32 missed slots and 10,360 observations,
+with no due queue at the 16:40 check. Archive usage was 41,819,437 of 900,000,000
+bytes; database size was 279,235,731 bytes. `brand-recovery-after.json` contains
+the timestamped snapshots (independent queries may show different progress).
+
+Expected-hour accounting remains nine complete historical hours, four partial
+hours and five expired unstarted hours. The current 16:00 hour is running
+before its deadline and is not a new failure. All prior gaps remain preserved.
+The raw-price serving policy remains priced stations reported within 24 hours,
+without estimates; no production ranking or app behavior was changed.

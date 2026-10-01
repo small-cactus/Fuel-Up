@@ -1,0 +1,86 @@
+{
+  "recordedAt": "2026-10-01T16:36:32.225Z",
+  "projectRef": "vjindchxfebaltbslqwc",
+  "providerRequests": 0,
+  "allPassed": true,
+  "results": [
+    {
+      "functionName": "fuel-national-east",
+      "expectedRegion": "us-east-1",
+      "requestedRegion": "us-east-1",
+      "gatewayRegion": "us-east-1",
+      "httpStatus": 200,
+      "body": {
+        "status": "region_verified",
+        "expectedRegion": "us-east-1",
+        "actualRegion": "us-east-1"
+      },
+      "passed": true
+    },
+    {
+      "functionName": "fuel-national-east",
+      "expectedRegion": "us-east-1",
+      "requestedRegion": "us-west-1",
+      "gatewayRegion": "us-west-1",
+      "httpStatus": 409,
+      "body": {
+        "error": "WRONG_EXECUTION_REGION",
+        "expectedRegion": "us-east-1",
+        "actualRegion": "us-west-1"
+      },
+      "passed": true
+    },
+    {
+      "functionName": "fuel-national-southwest",
+      "expectedRegion": "us-west-1",
+      "requestedRegion": "us-west-1",
+      "gatewayRegion": "us-west-1",
+      "httpStatus": 200,
+      "body": {
+        "status": "region_verified",
+        "expectedRegion": "us-west-1",
+        "actualRegion": "us-west-1"
+      },
+      "passed": true
+    },
+    {
+      "functionName": "fuel-national-southwest",
+      "expectedRegion": "us-west-1",
+      "requestedRegion": "us-west-2",
+      "gatewayRegion": "us-west-2",
+      "httpStatus": 409,
+      "body": {
+        "error": "WRONG_EXECUTION_REGION",
+        "expectedRegion": "us-west-1",
+        "actualRegion": "us-west-2"
+      },
+      "passed": true
+    },
+    {
+      "functionName": "fuel-national-northwest",
+      "expectedRegion": "us-west-2",
+      "requestedRegion": "us-west-2",
+      "gatewayRegion": "us-west-2",
+      "httpStatus": 200,
+      "body": {
+        "status": "region_verified",
+        "expectedRegion": "us-west-2",
+        "actualRegion": "us-west-2"
+      },
+      "passed": true
+    },
+    {
+      "functionName": "fuel-national-northwest",
+      "expectedRegion": "us-west-2",
+      "requestedRegion": "us-east-1",
+      "gatewayRegion": "us-east-1",
+      "httpStatus": 409,
+      "body": {
+        "error": "WRONG_EXECUTION_REGION",
+        "expectedRegion": "us-west-2",
+        "actualRegion": "us-east-1"
+      },
+      "passed": true
+    }
+  ]
+}
