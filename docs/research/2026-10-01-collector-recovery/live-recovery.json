@@ -1,0 +1,156 @@
+{
+  "config": {
+    "approved_lookups_per_hour": 161660,
+    "archive_budget_bytes": 900000000,
+    "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+    "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+    "enabled": true,
+    "ends_at": "2026-10-07T18:19:00+00:00",
+    "halt_reason": "USER_AUTHORIZED_TRANSIENT_RECOVERY",
+    "id": true,
+    "last_dispatch_at": "2026-10-01T13:50:00.05168+00:00",
+    "last_request_at": "2026-10-01T13:50:12.256358+00:00",
+    "max_requests_per_hour": 92,
+    "provider_backoff_until": "2026-10-01T08:01:35.143117+00:00",
+    "request_interval_seconds": 10,
+    "starts_at": "2026-09-30T22:00:00+00:00"
+  },
+  "events": [
+    {
+      "code": "PROVIDER_RESPONSE",
+      "created_at": "2026-10-01T07:01:35.052805+00:00",
+      "id": 27,
+      "job_id": 37200,
+      "response_evidence": {
+        "decodedBodyBytes": 869687,
+        "elapsedMs": 3350,
+        "fullElapsedMs": 3740,
+        "graphqlErrors": [
+          "request to http://poi-serv:8000/v2/station/203865 failed, reason: socket hang up",
+          "request to http://poi-serv:8000/v2/station/203810 failed, reason: socket hang up",
+          "request to http://poi-serv:8000/v2/station/203667 failed, reason: socket hang up",
+          "request to http://poi-serv:8000/v2/station/203656 failed, reason: socket hang up",
+          "request to http://poi-serv:8000/v2/station/203540 failed, reason: socket hang up",
+          "request to http://poi-serv:8000/v2/station/203299 failed, reason: socket hang up",
+          "request to http://poi-serv:8000/v2/station/20323 failed, reason: socket hang up",
+          "request to http://poi-serv:8000/v2/station/20329 failed, reason: socket hang up",
+          "request to http://poi-serv:8000/v2/station/203184 failed, reason: socket hang up",
+          "request to http://poi-serv:8000/v2/station/202834 failed, reason: socket hang up"
+        ],
+        "headers": {
+          "age": "0",
+          "cf-ray": "a43998b57cfd5f13-SJC",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Thu, 01 Oct 2026 07:01:34 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "observedAt": "2026-10-01T07:01:34.462Z",
+        "status": 200
+      },
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "GRAPHQL_ERROR",
+      "created_at": "2026-10-01T07:01:35.143117+00:00",
+      "id": 28,
+      "job_id": 37200,
+      "response_evidence": null,
+      "retry_after_seconds": 3600
+    },
+    {
+      "code": "USER_AUTHORIZED_TRANSIENT_RECOVERY",
+      "created_at": "2026-10-01T13:49:06.753998+00:00",
+      "id": 33,
+      "job_id": null,
+      "response_evidence": {
+        "change": "Known transient GraphQL failures use bounded retries; original headers and regional routing retained",
+        "original_event_id": 28,
+        "original_pause_until": "2026-10-01T08:01:35.143117+00:00"
+      },
+      "retry_after_seconds": 0
+    }
+  ],
+  "hours": [
+    {
+      "archive_bytes": 94185,
+      "completed_at": null,
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 539,
+      "missed_batches": 0,
+      "observed_stations": 4000,
+      "priced_stations": 2522,
+      "slot_at": "2026-10-01T13:00:00+00:00",
+      "status": "running",
+      "succeeded_batches": 2
+    },
+    {
+      "archive_bytes": 337237,
+      "completed_at": "2026-10-01T08:00:00.051465+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 537,
+      "missed_batches": 65,
+      "observed_stations": 12213,
+      "priced_stations": 7888,
+      "slot_at": "2026-10-01T07:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 7
+    },
+    {
+      "archive_bytes": 3687620,
+      "completed_at": "2026-10-01T06:14:33.113242+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 477,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 93548,
+      "slot_at": "2026-10-01T06:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    }
+  ],
+  "recorded_at": "2026-10-01T13:50:16.97841+00:00",
+  "regions": [
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 4000,
+      "run_id": 539,
+      "slot_at": "2026-10-01T13:00:00+00:00",
+      "succeeded_batches": 2,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 0,
+      "run_id": 539,
+      "slot_at": "2026-10-01T13:00:00+00:00",
+      "succeeded_batches": 0,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 0,
+      "run_id": 539,
+      "slot_at": "2026-10-01T13:00:00+00:00",
+      "succeeded_batches": 0,
+      "wrong_region_jobs": 0
+    }
+  ],
+  "same_batch_as_failure": [
+    {
+      "attempts": 0,
+      "id": 37344,
+      "observed_at": null,
+      "region": null,
+      "run_id": 539,
+      "status": "queued"
+    }
+  ]
+}
