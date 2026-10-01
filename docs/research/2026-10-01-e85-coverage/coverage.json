@@ -1,0 +1,61 @@
+{
+  "as_of": "2026-10-01T18:49:04.96082+00:00",
+  "coverage": [
+    {
+      "inventory": 7928,
+      "regular_fresh_e85_fresh": 120,
+      "regular_fresh_e85_known": 123,
+      "scope": "FL",
+      "stale_e85": 16,
+      "with_e85_price": 139,
+      "with_fresh_e85": 123
+    },
+    {
+      "inventory": 141660,
+      "regular_fresh_e85_fresh": 2937,
+      "regular_fresh_e85_known": 3222,
+      "scope": "US",
+      "stale_e85": 624,
+      "with_e85_price": 3633,
+      "with_fresh_e85": 3009
+    },
+    {
+      "inventory": 270,
+      "regular_fresh_e85_fresh": 3,
+      "regular_fresh_e85_known": 3,
+      "scope": "Clearwater bounding box",
+      "stale_e85": 0,
+      "with_e85_price": 3,
+      "with_fresh_e85": 3
+    }
+  ],
+  "local_e85_examples": [
+    {
+      "address": "38590 Us Hwy 19 N",
+      "e85_price": 2.99,
+      "fresh_e85": true,
+      "fresh_regular": true,
+      "last_e85": "2026-10-01T17:00:12.48+00:00",
+      "name": "RaceTrac",
+      "station_id": "74927"
+    },
+    {
+      "address": "12750 W Hillsborough Ave",
+      "e85_price": 2.99,
+      "fresh_e85": true,
+      "fresh_regular": true,
+      "last_e85": "2026-10-01T16:00:24.598+00:00",
+      "name": "RaceTrac",
+      "station_id": "187360"
+    },
+    {
+      "address": "1201 East Bay Dr",
+      "e85_price": 2.99,
+      "fresh_e85": true,
+      "fresh_regular": true,
+      "last_e85": "2026-10-01T16:00:12.779+00:00",
+      "name": "RaceTrac",
+      "station_id": "187190"
+    }
+  ]
+}

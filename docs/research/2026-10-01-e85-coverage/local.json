@@ -1,0 +1,64 @@
+{
+  "example": {
+    "address": {
+      "line1": "3650 34th St N",
+      "locality": "St Petersburg",
+      "postalCode": "33713",
+      "region": "FL"
+    },
+    "id": "164743",
+    "latitude": 27.805505510687,
+    "longitude": -82.680155038834,
+    "name": "Wawa",
+    "prices": [
+      {
+        "cash": null,
+        "credit": {
+          "postedTime": "2026-10-01T11:33:09.153Z",
+          "price": 4.16
+        },
+        "fuelProduct": "regular_gas"
+      },
+      {
+        "cash": null,
+        "credit": {
+          "postedTime": "2026-09-30T14:26:16.127Z",
+          "price": 4.49
+        },
+        "fuelProduct": "midgrade_gas"
+      },
+      {
+        "cash": null,
+        "credit": {
+          "postedTime": "2026-09-30T14:26:16.143Z",
+          "price": 4.79
+        },
+        "fuelProduct": "premium_gas"
+      },
+      {
+        "cash": null,
+        "credit": {
+          "postedTime": "2026-10-01T11:33:09.200Z",
+          "price": 5.74
+        },
+        "fuelProduct": "diesel"
+      }
+    ],
+    "ratingsCount": 171,
+    "starRating": 4
+  },
+  "local_brands": [
+    {
+      "e85_entry": 3,
+      "e85_positive_price": 3,
+      "name": "RaceTrac",
+      "stations": 8
+    },
+    {
+      "e85_entry": 1,
+      "e85_positive_price": 0,
+      "name": "Wawa",
+      "stations": 17
+    }
+  ]
+}
