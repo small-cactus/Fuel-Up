@@ -1,0 +1,23 @@
+{
+  "startedAt": "2026-10-01T00:31:59.201Z",
+  "observedAt": "2026-10-01T00:32:01.816Z",
+  "executionRegion": "us-east-1",
+  "responseEvidence": {
+    "status": 200,
+    "observedAt": "2026-10-01T00:32:01.766Z",
+    "elapsedMs": 2564,
+    "headers": {
+      "age": "0",
+      "cf-ray": "a4375e1b2d05c95f-IAD",
+      "content-type": "application/json; charset=utf-8",
+      "date": "Thu, 01 Oct 2026 00:32:01 GMT",
+      "server": "cloudflare",
+      "via": "1.1 varnish-v4",
+      "x-cache": "MISS"
+    },
+    "decodedBodyBytes": 724193,
+    "fullElapsedMs": 2602
+  },
+  "stationCount": 2000,
+  "verifiedSHA256": "d5f5fca40b7d4f1ba787991a6787e44433e37f82e199babe4b347dc510c7dde4"
+}

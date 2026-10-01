@@ -1,0 +1,67 @@
+{
+  "recordedAt": "2026-10-01T00:31:03.253Z",
+  "status": 200,
+  "gatewayRegion": "us-east-1",
+  "region": "us-east-1",
+  "results": [
+    {
+      "name": "plain-placeholder-header",
+      "startedAt": "2026-10-01T00:31:03.074Z",
+      "status": 200,
+      "elapsedMs": 145,
+      "bodyBytes": 418,
+      "headers": {
+        "age": "0",
+        "cf-ray": "a4375cbc9936209f-IAD",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Thu, 01 Oct 2026 00:31:03 GMT",
+        "server": "cloudflare",
+        "via": "1.1 varnish-v4",
+        "x-cache": "MISS"
+      },
+      "response": {
+        "data": {
+          "station": {
+            "id": "138294",
+            "prices": [
+              {
+                "fuelProduct": "regular_gas",
+                "cash": null,
+                "credit": {
+                  "price": 4.09,
+                  "postedTime": "2026-09-29T21:44:15.580Z"
+                }
+              },
+              {
+                "fuelProduct": "midgrade_gas",
+                "cash": null,
+                "credit": {
+                  "price": 0,
+                  "postedTime": null
+                }
+              },
+              {
+                "fuelProduct": "premium_gas",
+                "cash": null,
+                "credit": {
+                  "price": 0,
+                  "postedTime": null
+                }
+              },
+              {
+                "fuelProduct": "diesel",
+                "cash": null,
+                "credit": {
+                  "price": 5.89,
+                  "postedTime": "2026-09-29T21:44:15.596Z"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "stopped": false,
+  "finished": true
+}

@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-10-01T00:30:26.580Z",
+  "status": 200,
+  "gatewayRegion": "us-east-1",
+  "region": "us-east-1",
+  "results": [
+    {
+      "name": "header-omitted",
+      "startedAt": "2026-10-01T00:30:26.411Z",
+      "status": 400,
+      "elapsedMs": 66,
+      "bodyBytes": 11,
+      "headers": {
+        "age": "0",
+        "cf-ray": "a4375bd74d535df7-IAD",
+        "content-type": "text/plain; charset=utf-8",
+        "date": "Thu, 01 Oct 2026 00:30:26 GMT",
+        "server": "cloudflare",
+        "via": "1.1 varnish-v4",
+        "x-cache": "MISS"
+      },
+      "nonJSONPreview": "Bad Request"
+    }
+  ],
+  "stopped": true,
+  "finished": true
+}

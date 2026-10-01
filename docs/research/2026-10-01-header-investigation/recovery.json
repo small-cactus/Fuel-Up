@@ -1,0 +1,47 @@
+{
+  "at": "2026-10-01T00:32:23.52752+00:00",
+  "city_health": {
+    "cities_observed": 24,
+    "ends_at": "2026-10-07T18:19:00+00:00",
+    "id": "hourly-24-cities-20260930-v1",
+    "last_dispatch_at": "2026-10-01T00:32:00.179589+00:00",
+    "last_success_at": "2026-09-30T23:42:00.729032+00:00",
+    "missed": 0,
+    "planned_city_hours": 4032,
+    "provider_backoff_until": null,
+    "queued_due": 14,
+    "running": 0,
+    "starts_at": "2026-09-30T18:19:00+00:00",
+    "station_observations": 2880,
+    "status": "active",
+    "succeeded": 144
+  },
+  "config": {
+    "backoff_until": null,
+    "enabled": true,
+    "halt_reason": "USER_APPROVED_RETRY_AFTER_HEADER_DIAGNOSTIC"
+  },
+  "hour": {
+    "archive_bytes": 1425873,
+    "completed_at": null,
+    "expected_batches": 72,
+    "expected_stations": 141660,
+    "id": 142,
+    "missed_batches": 0,
+    "observed_stations": 53960,
+    "priced_stations": 35155,
+    "slot_at": "2026-10-01T00:00:00+00:00",
+    "status": "running",
+    "succeeded_batches": 28
+  },
+  "retry_job": {
+    "attempts": 2,
+    "execution_region": "us-east-1",
+    "id": 8710,
+    "last_error": "GRAPHQL_ERROR",
+    "object_path": "142/8710/4d53910a-f947-4126-ba69-65c0c080bdad.json.gz",
+    "observed_at": "2026-10-01T00:32:01.816+00:00",
+    "sha256": "d5f5fca40b7d4f1ba787991a6787e44433e37f82e199babe4b347dc510c7dde4",
+    "status": "succeeded"
+  }
+}

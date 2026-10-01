@@ -1,0 +1,99 @@
+{
+  "at": "2026-10-01T00:33:10.709278+00:00",
+  "city_health": {
+    "cities_observed": 24,
+    "ends_at": "2026-10-07T18:19:00+00:00",
+    "id": "hourly-24-cities-20260930-v1",
+    "last_dispatch_at": "2026-10-01T00:33:00.023401+00:00",
+    "last_success_at": "2026-10-01T00:33:00.707648+00:00",
+    "missed": 0,
+    "planned_city_hours": 4032,
+    "provider_backoff_until": null,
+    "queued_due": 11,
+    "running": 0,
+    "starts_at": "2026-09-30T18:19:00+00:00",
+    "station_observations": 2960,
+    "status": "active",
+    "succeeded": 148
+  },
+  "config": {
+    "backoff_until": null,
+    "enabled": true,
+    "halt_reason": "USER_APPROVED_RETRY_AFTER_HEADER_DIAGNOSTIC"
+  },
+  "hour": {
+    "archive_bytes": 1535914,
+    "completed_at": null,
+    "expected_batches": 72,
+    "expected_stations": 141660,
+    "id": 142,
+    "missed_batches": 0,
+    "observed_stations": 59960,
+    "priced_stations": 38071,
+    "slot_at": "2026-10-01T00:00:00+00:00",
+    "status": "running",
+    "succeeded_batches": 31
+  },
+  "incident_events": [
+    {
+      "code": "PROVIDER_RESPONSE",
+      "created_at": "2026-10-01T00:05:22.629942+00:00",
+      "id": 19,
+      "job_id": 8710,
+      "response_evidence": {
+        "decodedBodyBytes": 719814,
+        "elapsedMs": 1619,
+        "fullElapsedMs": 1648,
+        "graphqlErrors": [
+          "408",
+          "408",
+          "408",
+          "408",
+          "408",
+          "408",
+          "408",
+          "408",
+          "408",
+          "408"
+        ],
+        "headers": {
+          "age": "0",
+          "cf-ray": "a43737159f1685c0-IAD",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Thu, 01 Oct 2026 00:05:22 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "observedAt": "2026-10-01T00:05:22.511Z",
+        "status": 200
+      },
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "GRAPHQL_ERROR",
+      "created_at": "2026-10-01T00:05:22.73448+00:00",
+      "id": 20,
+      "job_id": 8710,
+      "response_evidence": null,
+      "retry_after_seconds": 3600
+    },
+    {
+      "code": "USER_APPROVED_RETRY_AFTER_HEADER_DIAGNOSTIC",
+      "created_at": "2026-10-01T00:31:57.869733+00:00",
+      "id": 21,
+      "job_id": null,
+      "response_evidence": {
+        "configured_header_status": 200,
+        "diagnostic_http_requests": 4,
+        "diagnostic_station_lookups": 3,
+        "execution_region": "us-east-1",
+        "omitted_header_status": 400,
+        "original_event_id": 20,
+        "original_pause_until": "2026-10-01T01:05:22.73448+00:00",
+        "placeholder_header_status": 200
+      },
+      "retry_after_seconds": 0
+    }
+  ]
+}
