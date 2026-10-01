@@ -28,7 +28,11 @@ Light and dark simulator screenshots are included. Release build and installatio
 on the iPhone 18 Pro Max succeeded; the phone app was not opened.
 
 Both migrations are applied and recorded, and the cache-only gas-prices endpoint
-is deployed. Historical import from immutable Storage is in progress at this
-checkpoint; `publishTrendHistory.mjs` is resumable and verifies every archive's
-hash, exact IDs, schema and region before deriving totals. Original archives,
-collection limits, routing, provider identity and production ranking are intact.
+is deployed. Historical import completed for ten complete nationwide sweeps:
+720 batches, each sweep covering the same 141,660 station IDs. The import verified
+every archive's hash, exact IDs, schema and region before deriving totals, without
+provider requests. Public history matches stored totals for all five fuel grades
+and both E85-filter settings. An independent calculation from all 72 baseline
+archives also matches the database counts and averages for all ten combinations.
+Original archives, collection limits, routing, provider identity and production
+ranking are intact. See `archive-history.json` and `history-check.json`.
