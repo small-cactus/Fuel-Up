@@ -32,6 +32,7 @@ async function setup({ requestLocation } = {}) {
     const mocks = {
         'react-native': {
             View: 'View', Text: 'Text', Image: 'Image', Pressable: 'Pressable', ScrollView,
+            Platform: { OS: 'ios' }, useWindowDimensions: () => ({ width: 440, height: 956, fontScale: 1 }),
             StyleSheet: { create: x => x, absoluteFill: {} }, Dimensions: { get: () => ({ width: 440, height: 956 }) },
             Alert: { alert: (...args) => calls.alerts.push(args) },
             AppState: { addEventListener: (_, listener) => { subscriptions.add(listener); return { remove: () => subscriptions.delete(listener) }; } },
@@ -66,8 +67,12 @@ async function setup({ requestLocation } = {}) {
             openPredictiveTrackingSettingsAsync: async () => {},
         },
     };
-    mocks['@expo/ui/swift-ui'] = { Host: 'Host', Form: 'Form', Picker: 'NativePicker', Section: 'Section', Text: 'NativeText', Toggle: 'NativeToggle' };
-    mocks['@expo/ui/swift-ui/modifiers'] = { pickerStyle: x => x, tag: x => x };
+    mocks['@expo/ui/swift-ui'] = { Host: 'Host', Form: 'Form', Picker: 'NativePicker', Section: 'Section', Text: 'NativeText', Toggle: 'NativeToggle', Button: 'NativeButton', HStack: 'HStack', VStack: 'VStack', Image: 'NativeImage', Spacer: 'Spacer', Slider: 'Slider' };
+    mocks['@expo/ui/swift-ui/modifiers'] = Object.fromEntries(['pickerStyle', 'tag', 'accessibilityLabel', 'accessibilityHint', 'accessibilityValue', 'buttonStyle', 'controlSize', 'disabled', 'font', 'foregroundStyle', 'frame', 'tint', 'fixedSize', 'padding', 'glassEffect'].map(name => [name, value => ({ [name]: value })]));
+    mocks['../components/native/GlassActionButton'] = load('src/components/native/GlassActionButton.js', mocks);
+    mocks['./RadiusControl'] = load('src/screens/onboarding/RadiusControl.js', mocks);
+    mocks['./ExamplePricePill'] = { __esModule: true, default: () => null };
+    mocks['./LiveActivityPreview'] = { __esModule: true, default: () => null };
     mocks['./presentation.js'] = load('src/screens/onboarding/presentation.js', mocks);
     mocks['./locationCopy.js'] = load('src/screens/onboarding/locationCopy.js', mocks);
     for (const name of ['TopCanopy', 'BottomCanopy', 'FuelUpHeaderLogo']) {
@@ -86,7 +91,7 @@ async function setup({ requestLocation } = {}) {
     return {
         renderer, store, scrolls, saved: () => JSON.parse(saved), calls, permissions, tracking, subscriptions,
         swipe: async step => act(async () => renderer.root.findByProps({ testID: 'onboarding-pages' }).props.onMomentumScrollEnd({ nativeEvent: { contentOffset: { x: step * 440 } } })),
-        continue: async () => act(async () => renderer.root.findAllByType('Pressable').find(n => n.props.accessibilityRole === 'button').props.onPress()),
+        continue: async () => act(async () => renderer.root.findByType('NativeButton').props.onPress()),
         dispose: async () => act(async () => renderer.unmount()),
     };
 }
@@ -111,7 +116,7 @@ test('permission refresh on return from Settings and duplicate taps do not creat
     const app = await setup();
     await app.swipe(3);
     await act(async () => {
-        const button = app.renderer.root.findAllByType('Pressable').find(n => n.props.accessibilityRole === 'button');
+        const button = app.renderer.root.findByType('NativeButton');
         button.props.onPress(); button.props.onPress();
     });
     assert.equal(app.calls.notifications, 1);
@@ -128,8 +133,8 @@ test('permission refresh on return from Settings and duplicate taps do not creat
 test('onboarding radius uses the same range as the saved preferences', async () => {
     const app = await setup();
     const slider = app.renderer.root.findByType('Slider');
-    assert.equal(slider.props.minimumValue, 2);
-    assert.equal(slider.props.maximumValue, 15);
+    assert.equal(slider.props.min, 2);
+    assert.equal(slider.props.max, 15);
     await app.dispose();
 });
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker, PROVIDER_APPLE } from 'react-native-maps';
-import { LiquidGlassView } from '@callstack/liquid-glass';
+import ExamplePricePill from '../ExamplePricePill';
 import { SymbolView } from 'expo-symbols';
 import { SCREEN_WIDTH, LIGHT_SCREEN_BACKGROUND } from '../presentation';
 
@@ -35,11 +35,7 @@ export default function PredictiveFuelingStep({ insets, isDark }) {
                     accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
                     {EXAMPLE_STOPS.map(stop => (
                         <Marker key={stop.id} coordinate={stop.coordinate} anchor={{ x: 0.5, y: 0.5 }}>
-                            <LiquidGlassView effect="regular" colorScheme={isDark ? 'dark' : 'light'}
-                                tintColor={stop.cheaper ? 'rgba(0, 255, 47, 0.3)' : 'rgba(255, 25, 0, 0.3)'} style={styles.priceChip}>
-                                <Text style={[styles.price, { color: textColor }]}>{stop.price}</Text>
-                                <Text style={[styles.stopLabel, { color: textColor }]}>{stop.label}</Text>
-                            </LiquidGlassView>
+                            <ExamplePricePill price={stop.price} label={stop.label} cheapest={stop.cheaper} isDark={isDark} />
                         </Marker>
                     ))}
                 </MapView>
@@ -69,9 +65,7 @@ const styles = StyleSheet.create({
     title: { fontSize: 28, fontWeight: '800', fontFamily: 'ui-rounded', textAlign: 'center' },
     subtitle: { fontSize: 17, lineHeight: 23, textAlign: 'center', opacity: 0.7 },
     mapCard: { height: 230, borderRadius: 24, overflow: 'hidden' },
-    priceChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 18, alignItems: 'center' },
-    price: { fontSize: 19, fontWeight: '800', fontVariant: ['tabular-nums'] },
-    stopLabel: { fontSize: 12, fontWeight: '600' },
+
     caption: { fontSize: 13, textAlign: 'center', opacity: 0.65, marginTop: -10 },
     detail: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
     detailText: { flex: 1, gap: 5 },

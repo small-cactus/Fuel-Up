@@ -9,8 +9,7 @@ import BrandStep from './onboarding/BrandStep';
 import useOnboardingLocation from './onboarding/useOnboardingLocation';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppState, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { LiquidGlassView as GlassView } from '@callstack/liquid-glass';
-import { SymbolView } from 'expo-symbols';
+import GlassActionButton from '../components/native/GlassActionButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
 
@@ -27,17 +26,6 @@ import { enablePredictiveTrackingAsync, getPredictiveTrackingPermissionStateAsyn
 
 import { buildOnboardingPreferenceUpdates, isTranslucentOnboardingStep, ONBOARDING_STEPS } from '../lib/onboardingFlow';
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
-
-function ContinueButtonContent({ text, icon }) {
-    return (
-        <View style={styles.continueButtonInner}>
-            <Text style={styles.continueText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
-                {text}
-            </Text>
-            <SymbolView name={icon} size={18} tintColor="#FFFFFF" />
-        </View>
-    );
-}
 
 const MemoWelcomeStep = React.memo(WelcomeStep);
 const MemoLocationStep = React.memo(LocationStep);
@@ -310,25 +298,19 @@ export default function OnboardingScreen() {
                 </View>
 
                 <View style={styles.continueActions}>
-                    <Pressable testID="onboarding-continue" accessibilityRole="button" accessibilityValue={{ text: `${currentStep + 1} of ${totalSteps}` }} accessibilityState={{ busy: isRequestingPermission, disabled: isRequestingPermission }} disabled={isRequestingPermission} onPress={handleContinue} style={styles.continueButton}>
-                        <GlassView
-                            effect="regular"
-                            tintColor="#007AFF"
-                            pointerEvents="none"
-                            style={[StyleSheet.absoluteFillObject, styles.continueGlass]}
-                        />
-                        <ContinueButtonContent
-                            text={isLastStep ? 'Get Started' : (
-                                currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? getLocationActionLabel(locationPermissionState) :
-                                    ONBOARDING_STEPS[currentStep] === 'notifications' && notifPermissionStatus !== 'granted' ? 'Enable Notifications' : 'Continue'
-                            )}
-                            icon={isLastStep ? 'checkmark' : (
-                                currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? 'location.fill' :
-                                    ONBOARDING_STEPS[currentStep] === 'notifications' && notifPermissionStatus !== 'granted' ? 'bell.fill' : 'arrow.right'
-                            )}
-                            isDark={isDark}
-                        />
-                    </Pressable>
+                    <GlassActionButton testID="onboarding-continue" prominent fullWidth
+                        value={`${currentStep + 1} of ${totalSteps}`} disabled={isRequestingPermission}
+                        onPress={handleContinue}
+                        title={isLastStep ? 'Get Started' : (
+                            currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? getLocationActionLabel(locationPermissionState) :
+                                ONBOARDING_STEPS[currentStep] === 'notifications' && notifPermissionStatus !== 'granted' ? 'Enable Notifications' : 'Continue'
+                        )}
+                        icon={isLastStep ? 'checkmark' : (
+                            currentStep === 2 && !hasPredictiveLocationAccess(locationPermissionState) ? 'location.fill' :
+                                ONBOARDING_STEPS[currentStep] === 'notifications' && notifPermissionStatus !== 'granted' ? 'bell.fill' : 'arrow.right'
+                        )}
+                        isDark={isDark}
+                    />
                     {canSkipPermission && (
                         <Pressable testID="onboarding-permission-skip" accessibilityRole="button"
                             accessibilityLabel={currentStep === 2 ? 'Not now, set up location later' : 'Not now, set up notifications later'}
@@ -410,25 +392,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500'
   },
-  continueButton: {
-    minHeight: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%'
-  },
-  continueGlass: {
-    borderRadius: 20,
-    overflow: 'hidden'
-  },
-  continueButtonInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8
-  },
-  continueText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '700'
-  }
 });

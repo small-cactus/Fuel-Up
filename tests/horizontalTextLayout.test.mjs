@@ -30,7 +30,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const FUEL_SUMMARY_CARD_PATH = path.join(REPO_ROOT, 'src', 'components', 'FuelSummaryCard.js');
+const FUEL_SUMMARY_CARD_PATH = path.join(REPO_ROOT, 'src', 'components', 'FuelSummaryCardFallback.js');
 const HOME_SCREEN_PATH = path.join(REPO_ROOT, 'src', 'screens', 'LegacyHomeScreen.js');
 const ONBOARDING_PATH = path.join(REPO_ROOT, 'src', 'screens', 'OnboardingScreen.js');
 const SETTINGS_PATH = path.join(REPO_ROOT, 'app', '(tabs)', 'settings.js');
@@ -280,13 +280,9 @@ test('FuelSummaryCard cardMeta (footer row) Text blocks carry shrink-to-fit prop
 // Grade rows now use Apple's inline SwiftUI Picker. Selection and persistence
 // are covered by onboardingInteraction; actual layout is checked on iOS.
 
-test('Onboarding demo chip + continue button Text carry shrink-to-fit props', () => {
-    const source = readSource(ONBOARDING_PATH);
-    const demoBlocks = findTextBlocksWithStyle(readSource('src/screens/onboarding/WelcomeStep.js'), 'styles.demoChipText');
-    const continueBlocks = findTextBlocksWithStyle(source, 'styles.continueText');
-    assertTextBlockHasShrinkToFitProps({ blocks: demoBlocks, label: 'Onboarding demoChipText' });
-    assertTextBlockHasShrinkToFitProps({ blocks: continueBlocks, label: 'Onboarding continueText' });
-});
+// Onboarding pills and actions now use native SwiftUI layout. Validate their
+// actual rendered bounds and long labels on the simulator; RN style parsing
+// applies only to the retained non-iOS summary card above.
 
 // ============================================================================
 // Settings screen

@@ -59,10 +59,10 @@ test('the radius preview does not animate while its onboarding page is offscreen
         return React.createElement('Map', props);
     });
     const RadiusStep = load('src/screens/onboarding/RadiusStep.js', {
-        'react-native': { View: 'View', Text: 'Text', StyleSheet: { create: x => x } },
+        'react-native': { ScrollView: 'ScrollView', View: 'View', Text: 'Text', StyleSheet: { create: x => x } },
         'react-native-maps': { __esModule: true, default: Map, Circle: 'Circle' },
         '@react-native-community/slider': { __esModule: true, default: 'Slider' },
-        '@callstack/liquid-glass': { LiquidGlassView: 'Glass' },
+        './RadiusControl': { __esModule: true, default: 'RadiusControl' },
     }).default;
     const props = { insets: { top: 0, bottom: 0 }, themeColors: {}, width: 375,
         value: 5, onChange() {}, coordinate: { latitude: 28, longitude: -82 }, isActive: false };

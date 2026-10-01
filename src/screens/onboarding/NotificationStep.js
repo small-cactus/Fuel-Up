@@ -1,6 +1,6 @@
-import { ScrollView, View, Text, Image, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SymbolView } from 'expo-symbols';
-import { LiquidGlassView as GlassView } from '@callstack/liquid-glass';
+import LiveActivityPreview from './LiveActivityPreview';
 import { SCREEN_WIDTH } from './presentation.js';
 
 export function NotificationStep({ isDark, themeColors, insets, permissionStatus }) {
@@ -23,45 +23,7 @@ export function NotificationStep({ isDark, themeColors, insets, permissionStatus
 
             <View style={[styles.stepContent, { gap: 24, justifyContent: 'flex-start', marginTop: 32 }]}>
                 <View style={styles.mockLiveActivityContainer}>
-                    <GlassView
-                        effect="regular"
-                        tintColor="#000000"
-                        style={styles.mockLiveActivityGlass}
-                    >
-                        <View style={styles.mockLiveActivityHeader}>
-                            <View style={styles.mockLiveActivityAppIcon}>
-                                <Image
-                                    source={require('../../../assets/predictive-fueling.png')}
-                                    style={{ width: 22, height: 22, borderRadius: 5 }}
-                                    resizeMode="contain"
-                                />
-                            </View>
-                            <Text style={[styles.mockLiveActivityTitle, { color: '#FFFFFF' }]}>Predictive Fueling</Text>
-                            <Text style={[styles.mockLiveActivityTime, { color: '#FFFFFF', opacity: 0.5 }]}>now</Text>
-                        </View>
-
-                        <View style={styles.mockLiveActivityContent}>
-                            <View style={styles.mockLiveActivityMain}>
-                                <View style={styles.mockLiveActivityStationInfo}>
-                                    <Text style={[styles.mockLiveActivityStationName, { color: '#FFFFFF' }]}>Save $12.92 at Mobil One</Text>
-                                    <View style={styles.mockLiveActivityBadge}>
-                                        <Text style={styles.mockLiveActivityBadgeText}>on the way</Text>
-                                    </View>
-                                </View>
-                                <View style={styles.mockLiveActivityPriceContainer}>
-                                    <Text style={[styles.mockLiveActivityPriceLabel, { color: '#FFFFFF', opacity: 0.6 }]}>Regular</Text>
-                                    <Text style={[styles.mockLiveActivityPrice, { color: '#00cb36ff' }]}>$2.62</Text>
-                                </View>
-                            </View>
-
-                            <View style={[styles.mockLiveActivityDivider, { backgroundColor: 'rgba(255,255,255,0.1)' }]} />
-
-                            <View style={styles.mockLiveActivityFooter}>
-                                <SymbolView name="location.fill" size={12} tintColor="#FFFFFF" style={{ opacity: 0.6 }} />
-                                <Text style={[styles.mockLiveActivityDistance, { color: '#FFFFFF', opacity: 0.6 }]}>0.4 mi away • Take Next Left</Text>
-                            </View>
-                        </View>
-                    </GlassView>
+                    <LiveActivityPreview />
                 </View>
 
                 <View style={[styles.locationHighlightsContainer, { paddingBottom: 0 }]}>
@@ -142,87 +104,5 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH - 48,
     alignItems: 'center'
   },
-  mockLiveActivityGlass: {
-    width: '100%',
-    borderRadius: 24,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 10
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 200
-  },
-  mockLiveActivityHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12
-  },
-  mockLiveActivityAppIcon: {
-    marginRight: 8
-  },
-  mockLiveActivityTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    flex: 1
-  },
-  mockLiveActivityTime: {
-    fontSize: 12
-  },
-  mockLiveActivityContent: {
-    gap: 12
-  },
-  mockLiveActivityMain: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  mockLiveActivityStationInfo: {
-    gap: 4
-  },
-  mockLiveActivityStationName: {
-    fontSize: 18,
-    fontWeight: '700',
-    fontFamily: 'ui-rounded'
-  },
-  mockLiveActivityBadge: {
-    backgroundColor: 'rgba(0, 255, 47, 0.15)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    alignSelf: 'flex-start'
-  },
-  mockLiveActivityBadgeText: {
-    color: '#00C838',
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase'
-  },
-  mockLiveActivityPriceContainer: {
-    alignItems: 'flex-end'
-  },
-  mockLiveActivityPriceLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    textTransform: 'uppercase'
-  },
-  mockLiveActivityPrice: {
-    fontSize: 24,
-    fontWeight: '800',
-    fontFamily: 'ui-rounded'
-  },
-  mockLiveActivityDivider: {
-    height: 1,
-    width: '100%'
-  },
-  mockLiveActivityFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6
-  },
-  mockLiveActivityDistance: {
-    fontSize: 13,
-    fontWeight: '500'
-  }
+
 });

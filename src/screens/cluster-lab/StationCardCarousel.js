@@ -1,7 +1,6 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { GlassView } from 'expo-glass-effect';
-import { SymbolView } from 'expo-symbols';
+import { FlatList, StyleSheet, View, useWindowDimensions } from 'react-native';
+import GlassActionButton from '../../components/native/GlassActionButton';
 import { requireNativeViewManager } from 'expo-modules-core';
 import StationPriceCard from './StationPriceCard';
 import { pageFromOffset } from './stationCardModel';
@@ -60,15 +59,9 @@ const StationCardCarousel = forwardRef(function StationCardCarousel({ stations, 
         <View pointerEvents="box-none" style={[styles.overlay, { bottom }]}
             onLayout={event => onHeight(event.nativeEvent.layout.height + bottom)}>
             <View pointerEvents="box-none" style={styles.resetRow}>
-                {!overview && <Pressable accessibilityRole="button" accessibilityLabel="Show all stations"
-                    accessibilityHint="Fits all stations on the map and shows the top recommended card"
-                    style={({ pressed }) => pressed && styles.pressed}
-                    onPress={onShowAll}>
-                    <GlassView glassEffectStyle="regular" style={styles.reset}>
-                        <SymbolView name="arrow.up.left.and.arrow.down.right" size={14} tintColor={themeColors.text} />
-                        <Text style={[styles.resetText, { color: themeColors.text }]}>Show all</Text>
-                    </GlassView>
-                </Pressable>}
+                {!overview && <GlassActionButton title="Show all" icon="arrow.up.left.and.arrow.down.right"
+                    label="Show all stations" hint="Fits all stations and your location on the map"
+                    isDark={isDark} onPress={onShowAll} />}
             </View>
             <FlatList key={`${width}:${fontScale}`} ref={list} testID="glass-lab-station-cards" data={stations} horizontal pagingEnabled
                 style={{ height: cardHeight, flexGrow: 0 }} contentContainerStyle={styles.items}
@@ -103,9 +96,6 @@ export default StationCardCarousel;
 const styles = StyleSheet.create({
     overlay: { position: 'absolute', left: 0, right: 0 },
     resetRow: { minHeight: 52, paddingBottom: 8, alignItems: 'center' },
-    reset: { minHeight: 44, borderRadius: 22, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 7 },
-    resetText: { fontSize: 14, fontWeight: '600' },
-    pressed: { opacity: 0.7 },
     items: { alignItems: 'flex-start' },
     pages: { height: 44, marginHorizontal: 24 },
 });

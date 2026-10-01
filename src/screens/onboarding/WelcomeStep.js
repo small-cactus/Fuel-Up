@@ -6,8 +6,7 @@ import TopCanopy from '../../components/TopCanopy';
 import BottomCanopy from '../../components/BottomCanopy';
 import { LinearGradient } from 'expo-linear-gradient';
 import FuelUpHeaderLogo from '../../components/FuelUpHeaderLogo';
-import { LiquidGlassView as GlassView } from '@callstack/liquid-glass';
-import { SymbolView } from 'expo-symbols';
+import ExamplePricePill from './ExamplePricePill';
 
 export function WelcomeStep({ isDark, themeColors, insets, mapRegion }) {
     const [hasMapLoaded, setHasMapLoaded] = useState(false);
@@ -104,48 +103,9 @@ export function WelcomeStep({ isDark, themeColors, insets, mapRegion }) {
     );
 }
 
-export const OnboardingChip = ({ price, isCheapest, isDark, top, left }) => {
-
-    const chipTint = isCheapest ? 'rgba(0, 255, 47, 0.3)' : 'rgba(255, 25, 0, 0.3)';
-
-    return (
-        <View style={{
-            position: 'absolute',
-            top: `${top}%`,
-            left: `${left}%`,
-            zIndex: 10,
-        }}>
-            <GlassView
-                tintColor={chipTint}
-                effect="clear"
-                colorScheme={isDark ? 'dark' : 'light'}
-                interactive={false}
-                style={styles.demoChip}
-            >
-
-                <SymbolView
-                    name="fuelpump.fill"
-                    size={14}
-                    tintColor={isDark ? '#FFFFFF' : '#000000'}
-                    style={styles.demoChipIcon}
-                />
-                <Text
-                    style={[
-                        styles.demoChipText,
-                        { color: isDark ? '#FFFFFF' : '#000000' },
-                        isCheapest && styles.demoChipTextCheapest,
-                    ]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.75}
-                    allowFontScaling={false}
-                >
-                    ${price.toFixed(2)}
-                </Text>
-            </GlassView>
-        </View>
-    );
-};
+export const OnboardingChip = ({ price, isCheapest, isDark }) => (
+    <ExamplePricePill price={`$${price.toFixed(2)}`} cheapest={isCheapest} isDark={isDark} pump />
+);
 
 export const DEMO_STATIONS = [
     { lat: 37.7760, lng: -122.4300, price: 3.89, name: 'Costco' },
@@ -186,25 +146,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     maxWidth: 280
   },
-  demoChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 6,
-    overflow: 'hidden'
-  },
-  demoChipIcon: {
-    marginRight: 2
-  },
-  demoChipText: {
-    fontSize: 15,
-    fontWeight: '700'
-  },
-  demoChipTextCheapest: {
-    fontWeight: '700'
-  },
+
   footerGradient: {
     position: 'absolute',
     bottom: 0,

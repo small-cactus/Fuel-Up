@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import MapView, { Circle, PROVIDER_APPLE } from 'react-native-maps';
-import Slider from '@react-native-community/slider';
-import { LiquidGlassView } from '@callstack/liquid-glass';
-import { MIN_SEARCH_RADIUS_MILES, MAX_SEARCH_RADIUS_MILES } from '../../lib/fuelSearchState';
+import RadiusControl from './RadiusControl';
 
 function radiusRegion(coordinate, radius) {
     const latitudeDelta = radius * 1609.344 / 111000 * 2.8;
@@ -17,7 +15,8 @@ export default function RadiusStep({ isDark, themeColors, insets, value, onChang
         if (isActive && coordinate) map.current?.animateToRegion(radiusRegion(coordinate, fittedRadius));
     }, [coordinate, fittedRadius, isActive]);
     return (
-        <View style={{ width, flex: 1, paddingBottom: insets.bottom + 100, backgroundColor: themeColors.background }}>
+        <ScrollView style={{ width, flex: 1, backgroundColor: themeColors.background }}
+            contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 140 }} showsVerticalScrollIndicator={false}>
             <View style={[styles.header, { paddingTop: insets.top + 32 }]}>
                 <Text style={[styles.title, { color: themeColors.text }]}>Search Nearby</Text>
                 <Text style={[styles.subtitle, { color: themeColors.text }]}>How far would you go for a better price?</Text>
@@ -33,24 +32,15 @@ export default function RadiusStep({ isDark, themeColors, insets, value, onChang
                     <Text style={[styles.subtitle, { color: themeColors.text, padding: 24 }]}>Your radius applies wherever you are. Enable location to preview your area.</Text>
                 )}
             </View>
-            <LiquidGlassView style={styles.controls} tintColor={isDark ? '#252525' : '#FFFFFF'}>
-                <Text accessibilityLiveRegion="polite" style={[styles.value, { color: themeColors.text }]}>{value} mi</Text>
-                <Slider testID="onboarding-radius" accessibilityLabel="Search radius in miles" accessibilityRole="adjustable"
-                    minimumValue={MIN_SEARCH_RADIUS_MILES} maximumValue={MAX_SEARCH_RADIUS_MILES} step={1}
-                    value={value} onValueChange={onChange} onSlidingComplete={setFittedRadius}
-                    minimumTrackTintColor="#007AFF" style={styles.slider} />
-                <View style={styles.range}><Text style={{ color: themeColors.text }}>2 mi</Text><Text style={{ color: themeColors.text }}>15 mi</Text></View>
-            </LiquidGlassView>
-        </View>
+            <View style={{ margin: 24 }}>
+                <RadiusControl value={value} onChange={onChange} onComplete={setFittedRadius} isDark={isDark} themeColors={themeColors} />
+            </View>
+        </ScrollView>
     );
 }
 const styles = StyleSheet.create({
-    header: { alignItems: 'center', paddingHorizontal: 24, gap: 12, paddingBottom: 20 },
-    title: { fontSize: 28, fontWeight: '800', fontFamily: 'ui-rounded' },
+    header: { flexShrink: 0, alignItems: 'center', paddingHorizontal: 24, gap: 12, paddingBottom: 20 },
+    title: { alignSelf: 'stretch', textAlign: 'center', fontSize: 28, fontWeight: '800', fontFamily: 'ui-rounded' },
     subtitle: { fontSize: 16, opacity: 0.65, textAlign: 'center', lineHeight: 22 },
-    mapContainer: { flex: 1, minHeight: 120, marginHorizontal: 24, borderRadius: 24, overflow: 'hidden', justifyContent: 'center' },
-    controls: { margin: 24, padding: 20, borderRadius: 24 },
-    value: { fontSize: 32, fontWeight: '700', textAlign: 'center', fontVariant: ['tabular-nums'] },
-    slider: { height: 44, width: '100%' },
-    range: { flexDirection: 'row', justifyContent: 'space-between', opacity: 0.6 },
+    mapContainer: { flex: 1, minHeight: 180, marginHorizontal: 24, borderRadius: 24, overflow: 'hidden', justifyContent: 'center' },
 });
