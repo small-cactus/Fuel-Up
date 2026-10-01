@@ -6,7 +6,13 @@ import { join, basename } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { auditArchive } from './auditArchive.mjs';
 const grades=['regular','midgrade','premium','diesel','e85'];
-const sql=`select grade,filter_e85,national_fuel_trend_history(grade,filter_e85) history from unnest(array['regular','midgrade','premium','diesel','e85']) grade cross join unnest(array[false,true]) filter_e85`;
+// Compare up to the last published complete scan; the minute publisher can
+// legitimately trail collection completion without exposing a partial result.
+const sql=`select grade,filter_e85,coalesce((select jsonb_agg(point order by point->>'date')
+ from jsonb_array_elements(national_fuel_trend_history(grade,filter_e85)) point
+ where (point->>'date')::timestamptz <= (select r.slot_at from fuel_national_trends_cache c
+ join fuel_national_runs r on r.id=c.run_id where c.fuel_type=grade and c.requires_e85=filter_e85)),'[]'::jsonb) history
+ from unnest(array['regular','midgrade','premium','diesel','e85']) grade cross join unnest(array[false,true]) filter_e85`;
 const rows=JSON.parse(execFileSync('npx',['--no-install','supabase@2.118.0','db','query','--linked','--project-ref','vjindchxfebaltbslqwc',sql,'--output','json'],{encoding:'utf8',stdio:['ignore','pipe','pipe']})).rows;
 const {url,key}=JSON.parse(readFileSync('app.json')).expo.extra.supabase;
 const checks=[];

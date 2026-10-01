@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-01T17:50:55.760Z",
+  "health": {
+    "cron": [
+      {
+        "end_time": "2026-10-01T17:50:00.176203+00:00",
+        "return_message": "1 row",
+        "start_time": "2026-10-01T17:50:00.16657+00:00",
+        "status": "succeeded"
+      },
+      {
+        "end_time": "2026-10-01T17:49:00.13372+00:00",
+        "return_message": "1 row",
+        "start_time": "2026-10-01T17:49:00.128192+00:00",
+        "status": "succeeded"
+      }
+    ],
+    "runs": [
+      590
+    ],
+    "schedule": {
+      "active": true,
+      "schedule": "* * * * *"
+    },
+    "scopes": 10,
+    "size_bytes": 19183
+  },
+  "api": {
+    "status": 200,
+    "ms": 1034,
+    "scanId": 590,
+    "completedAt": "2026-10-01T17:21:26.018832+00:00",
+    "refreshAfter": "2026-10-01T18:21:26.018832+00:00",
+    "quotes": 5,
+    "history": 11
+  }
+}

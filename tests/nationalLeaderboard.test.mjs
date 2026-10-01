@@ -6,8 +6,9 @@ test('national serving uses only the protected cache RPC and preserves fresh rep
  let calls=0;
  const result=await getNationalLeaderboard({input:{fuelType:'regular',requiresE85:true},db:{rpc:async(name,args)=>{
   calls++;assert.equal(name,'national_fuel_trends');assert.deepEqual(args,{p_fuel_type:'regular',p_requires_e85:true});
-  return {data:{stations:[row('b',3.2),row('a',3.1),row('old',1,86400001)],history:[{date:'2026-10-01T00:00:00Z',price:3.25,stationCount:90000}]}};
+  return {data:{scanId:590,completedAt:'2026-10-01T17:21:26Z',refreshAfter:'2026-10-01T18:21:26Z',stations:[row('b',3.2),row('a',3.1),row('old',1,86400001)],history:[{date:'2026-10-01T00:00:00Z',price:3.25,stationCount:90000}]}};
  }}});
+ assert.equal(result.scanId,590);assert.equal(result.refreshAfter,'2026-10-01T18:21:26Z');
  assert.equal(calls,1);assert.equal(result.history[0].stationCount,90000);assert.equal(result.scope,'national');assert.deepEqual(result.quotes.map(q=>q.price),[3.1,3.2]);
  assert(result.quotes.every(q=>!('distanceMiles' in q)&&!q.isEstimated&&!q.validation));
 });

@@ -29,7 +29,7 @@ async function fetchNationalTrends({
   ).sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
   const delta = averagePricesByDay.length > 1
     ? averagePricesByDay.at(-1).price - averagePricesByDay[0].price : null;
-  return { quotes, trendData: {
+  return { quotes, scanId: data.scanId, completedAt: data.completedAt, refreshAfter: data.refreshAfter, trendData: {
     averagePricesByDay,
     overallTrend: delta === null ? null : { delta, isIncrease: delta > 0, isDecrease: delta < 0 },
   }, historyError: data.historyError || null };

@@ -3,7 +3,7 @@ import { useFocusEffect } from 'expo-router';
 import { AppState } from 'react-native';
 import { fetchNationalTrends } from '../../services/fuel/nationalLeaderboard';
 import { isFreshReportedQuote, REPORTED_PRICE_MAX_AGE_MS } from '../../services/fuel/reportedPrices';
-const CACHE_TTL_MS = 5 * 60000;
+const CACHE_TTL_MS = 60 * 60000;
 // Ten grade/filter combinations. Cache only successful responses, keyed by reset
 // generation too, so returning to a recently viewed scope needs no network wait.
 const cache = new Map();
@@ -30,7 +30,7 @@ export default function useNationalLeaderboard({
   } = {}) => {
     if (!enabled || active.current) return;
     const cached = cache.get(scope);
-    if (!force && cached && Date.now() >= cached.loadedAt && Date.now() - cached.loadedAt < CACHE_TTL_MS && cached.quotes.every(q => isFreshReportedQuote(q))) {
+    if (!force && cached && Date.now() >= cached.loadedAt && Date.now() < Math.min(cached.loadedAt + CACHE_TTL_MS, Date.parse(cached.refreshAfter) || Infinity)) {
       setResult(cached);
       return;
     }
@@ -65,7 +65,8 @@ export default function useNationalLeaderboard({
   useFocusEffect(useCallback(() => {
     if (!enabled) return;
     void load();
-    const interval = setInterval(load, 5 * 60000);
+    // This cheap local check only fetches when the completed-scan cache expires.
+    const interval = setInterval(load, 60000);
     const subscription = AppState.addEventListener('change', state => {
       if (state === 'active') void load();
     });
@@ -81,12 +82,10 @@ export default function useNationalLeaderboard({
     if (!enabled || !data?.quotes.length) return;
     const nextExpiry = Math.min(...data.quotes.map(q => Date.parse(q.updatedAt) + REPORTED_PRICE_MAX_AGE_MS));
     const timer = setTimeout(() => {
-      setResult(previous => previous?.scope === scope ? {
-        ...previous,
-        quotes: previous.quotes.filter(q => isFreshReportedQuote(q))
-      } : previous);
-      cache.delete(scope);
-      void load({ force: true });
+      const fresh = { ...data, quotes: data.quotes.filter(q => isFreshReportedQuote(q)) };
+      if (!fresh.error && !fresh.historyError) remember(scope, fresh);
+      setResult(previous => previous?.scope === scope ? fresh : previous);
+      // Expiry hides a stale quote; it cannot produce a newer completed scan.
     }, Math.max(1, nextExpiry - Date.now() + 1));
     return () => clearTimeout(timer);
   }, [enabled, data, load, scope]);

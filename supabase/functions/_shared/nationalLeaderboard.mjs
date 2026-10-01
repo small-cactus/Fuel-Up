@@ -42,6 +42,9 @@ export async function getNationalLeaderboard({
   const history = Array.isArray(result.history) ? result.history.map(({date, price, stationCount}) => ({date, price, stationCount})) : [];
   return {
     version: 1,
+    scanId: result.scanId,
+    completedAt: result.completedAt,
+    refreshAfter: result.refreshAfter,
     history,
     historyError: result.historyError || null,
     source: 'national-cache',
