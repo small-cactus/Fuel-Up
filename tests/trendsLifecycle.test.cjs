@@ -6,6 +6,19 @@ const load = require('./helpers/loadComponent.cjs');
 global.IS_REACT_ACT_ENVIRONMENT = true;
 const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
 
+test('local freshness removes expired reports and preserves data identity between unchanged renders', async () => {
+    const state = await setup();
+    await act(async () => state.requests[0].resolve({ leaderboard: [
+        { stationId: 'fresh', latestPrice: 3.49, updatedAt: new Date().toISOString() },
+        { stationId: 'old', latestPrice: 1, updatedAt: new Date(Date.now() - 86400001).toISOString() },
+    ] }));
+    const displayed = state.value.data;
+    assert.deepEqual(displayed.leaderboard.map(row => row.stationId), ['fresh']);
+    await state.update({});
+    assert.equal(state.value.data, displayed, 'ordinary renders must not restart the trend background animation');
+    await state.unmount();
+});
+
 async function setup(options = {}) {
     let generation = 0; let value; let renderer;
     const requests = []; const commits = []; const cache = new Map(); const rendered = [];

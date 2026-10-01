@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const load = require('./helpers/loadComponent.cjs');
 
-async function setup() {
+async function setup(options = {}) {
     const grades = await import('../src/lib/fuelGrade.js');
     const home = await import('../src/lib/homeState.js');
     const preferences = await import('../src/lib/stationPreferences.js');
@@ -11,21 +11,21 @@ async function setup() {
         { stationId: 'cheap', stationName: 'Other', brandNames: ['Other'], price: 3, allPrices: { regular: 3 } },
         { stationId: 'preferred', stationName: 'Shell', brandNames: ['Shell'], price: 4, allPrices: { regular: 4, e85: 2.5 } },
         { stationId: 'flex', stationName: 'Mobil', brandNames: ['Mobil'], price: 3.5, allPrices: { regular: 3.5, e85: 2.8 } },
-    ].map(quote => ({ ...quote, latitude: 27.95, longitude: -82.45, fuelType: 'regular', providerTier: 'station', providerId: 'gasbuddy', rating: 4 }));
+    ].map(quote => ({ ...quote, latitude: 27.95, longitude: -82.45, fuelType: 'regular', providerTier: 'station', providerId: 'gasbuddy', rating: 4, updatedAt: new Date().toISOString() }));
     const rows = [1, 25].flatMap(hours => quotes.map(quote => ({
         station_id: quote.stationId, station_name: quote.stationName, fuel_type: 'regular', price: quote.price,
-        all_prices: quote.allPrices, latitude: quote.latitude, longitude: quote.longitude,
+        provider_id: 'gasbuddy', all_prices: { ...quote.allPrices, _payment: { regular: { credit: quote.price } } }, updated_at_source: new Date(Date.now() - hours * 3600000).toISOString(), latitude: quote.latitude, longitude: quote.longitude,
         created_at: new Date(Date.now() - hours * 3600000).toISOString(),
     })));
     const db = { select() { return this; }, eq() { return this; }, gte() { return this; }, order() { return this; },
-        limit: async () => ({ data: rows, error: null }) };
+        limit: async () => ({ data: options.noHistory ? [] : rows, error: null }) };
     return load('src/services/fuel/trends.js', {
         '../../lib/supabase.js': { supabase: { from: () => db } },
         '../../lib/fuelGrade.js': grades,
         '../../lib/homeState.js': home,
         '../../lib/stationPreferences.js': preferences,
         '../../lib/fuelSearchState.js': search,
-        './index': { buildLatestFuelStationQuotesFromRows: () => quotes },
+        './index': { refreshFuelPriceSnapshot: async () => ({ snapshot: { topStations: quotes } }) },
         './priceValidation': { buildValidationState: input => ({ outputs: input.map(row => ({ row, result: { finalDisplayedPrice: row.price } })) }) },
     });
 }
@@ -51,4 +51,14 @@ test('trend request keys distinguish brand and E85 preferences', async () => {
     const base = { latitude: 27.95, longitude: -82.45, fuelType: 'regular' };
     assert.notEqual(trends.buildTrendRequestKey(base), trends.buildTrendRequestKey({ ...base, preferredBrands: ['shell'] }));
     assert.notEqual(trends.buildTrendRequestKey(base), trends.buildTrendRequestKey({ ...base, requiresE85: true }));
+});
+
+
+test('fresh local prices remain available without history; no historical values are invented', async () => {
+    const trends = await setup({ noHistory: true });
+    const result = await trends.fetchTrendData({ latitude: 27.95, longitude: -82.45, fuelType: 'regular' });
+    assert.equal(result.leaderboard.length, 3);
+    assert.deepEqual(result.averagePricesByDay, []);
+    assert.equal(result.overallTrend, null);
+    assert.ok(result.leaderboard.every(station => station.earliestPrice === null && station.rankShift === null));
 });

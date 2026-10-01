@@ -7,7 +7,7 @@ global.IS_REACT_ACT_ENVIRONMENT = true;
 
 test('a gradient target starts once and superseded/unmounted animation work is stopped', async () => {
     const animations = [];
-    const snapshot = prices => ({ trendSeriesMode: 'current_average_snapshot', averagePricesByDay: prices.map(price => ({ price })) });
+    const snapshot = prices => ({ trendSeriesMode: 'historical', averagePricesByDay: prices.map((price, index) => ({ price, date: new Date(1700000000000 + index * 3600000).toISOString() })) });
     let data = snapshot([3, 3]);
     const appState = {};
     const preferences = { normalizedFuelSearchPreferences: { preferredOctane: 'regular', searchRadiusMiles: 10 } };
@@ -23,9 +23,12 @@ test('a gradient target starts once and superseded/unmounted animation work is s
         'react-native-safe-area-context': { useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) },
         '../../src/ThemeContext': { useTheme: () => ({ isDark: false, themeColors: { text: '#000' } }) },
         'expo-linear-gradient': { LinearGradient: 'Gradient' },
-        'react-native-svg': { default: 'Svg', Path: 'Path', Defs: 'Defs', LinearGradient: 'SvgGradient', Stop: 'Stop' },
-        'd3-shape': {}, 'd3-scale': {},
+        'react-native-svg': { __esModule: true, default: 'Svg', Path: 'Path', Defs: 'Defs', LinearGradient: 'SvgGradient', Stop: 'Stop', Circle: 'Circle' },
+        'd3-shape': await import('d3-shape'), 'd3-scale': await import('d3-scale'),
         '../../src/screens/trends/TrendLeaderboard': () => null,
+        '../../src/screens/trends/TrendScopeControl': () => null,
+        '../../src/screens/trends/NationalTrendPrices': () => null,
+        '../../src/screens/trends/useNationalLeaderboard': () => ({quotes:[],refreshing:false}),
         '../../src/services/fuel/trends': { buildTrendRequestKey: () => 'test' },
         '../../src/screens/trends/useTrendData': () => ({ data, loading: false, refreshing: false }),
         '../../src/AppStateContext': { useAppState: () => appState },

@@ -21,7 +21,7 @@ function buildTrendLeaderboard({ rankedLatestQuotes, earliestRankedQuotes, stati
     return rankedQuotes.slice(0, limit).map((quote, index) => {
         const stationId = String(quote?.stationId || '').trim();
         const history = historyMap.get(stationId) || {};
-        const earliestRank = earliestRankByStationId.get(stationId) ?? index;
+        const earliestRank = earliestRankByStationId.get(stationId) ?? null;
 
         return {
             stationId,
@@ -33,12 +33,15 @@ function buildTrendLeaderboard({ rankedLatestQuotes, earliestRankedQuotes, stati
                 ? Number(quote.distanceMiles)
                 : (Number.isFinite(Number(history.distanceMiles)) ? Number(history.distanceMiles) : null),
             latestPrice: Number(quote?.price),
+            updatedAt: quote.updatedAt,
+            fuelType: quote.fuelType,
+            paymentType: quote.allPrices?._payment?.[quote.fuelType]?.selected,
             earliestPrice: Number.isFinite(Number(history.earliestPrice))
                 ? Number(history.earliestPrice)
-                : Number(quote?.price),
+                : null,
             earliestRank,
             latestRank: index,
-            rankShift: earliestRank - index,
+            rankShift: eligibleHistory.length === rankedQuotes.length && earliestRank !== null ? earliestRank - index : null,
         };
     });
 }

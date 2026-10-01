@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Animated, StyleSheet, Text, View, ScrollView, Dimensions, RefreshControl } from 'react-native';
-import { GlassView } from 'expo-glass-effect';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/ThemeContext';
 import { LinearGradient as ExpoLinearGradient } from 'expo-linear-gradient';
-import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
+import Svg, { Path, Circle } from 'react-native-svg';
 import * as d3Shape from 'd3-shape';
 import * as d3Scale from 'd3-scale';
+import TrendScopeControl from '../../src/screens/trends/TrendScopeControl';
+import NationalTrendPrices from '../../src/screens/trends/NationalTrendPrices';
+import useNationalLeaderboard from '../../src/screens/trends/useNationalLeaderboard';
 import TrendLeaderboard from '../../src/screens/trends/TrendLeaderboard';
 import { buildTrendRequestKey } from '../../src/services/fuel/trends';
 import useTrendData from '../../src/screens/trends/useTrendData';
@@ -158,14 +160,14 @@ function areGradientColorSetsEqual(left, right) {
     return left.every((color, index) => color === right[index]);
 }
 
-function ContainerlessAreaChart({ data, width, height, isDark, trendColor, topBleed = 40 }) {
+function ObservedPriceChart({ data, width, height, isDark, trendColor, topBleed = 40 }) {
     if (!data || data.length === 0) return null;
 
-    const margin = { top: topBleed, right: 0, bottom: 0, left: 0 };
+    const margin = { top: topBleed, right: 3, bottom: 0, left: 3 };
     const chartWidth = width - margin.left - margin.right;
     const chartHeight = height - margin.top - margin.bottom;
 
-    const xExtent = [0, data.length - 1];
+    const xExtent = [Date.parse(data[0].date), Date.parse(data.at(-1).date)];
     const yExtent = [
         Math.min(...data.map(d => d.price)) * 0.99, // slight bottom padding natively
         Math.max(...data.map(d => d.price)) * 1.01
@@ -180,31 +182,26 @@ function ContainerlessAreaChart({ data, width, height, isDark, trendColor, topBl
         .range([chartHeight, 0]);
 
     const lineGenerator = d3Shape.line()
-        .x((d, i) => xScale(i))
+        .x(d => xScale(Date.parse(d.date)))
         .y(d => yScale(d.price))
-        .curve(d3Shape.curveMonotoneX);
+        .curve(d3Shape.curveLinear);
 
-    const areaGenerator = d3Shape.area()
-        .x((d, i) => xScale(i))
-        .y0(chartHeight)
-        .y1(d => yScale(d.price))
-        .curve(d3Shape.curveMonotoneX);
-
-    const pathData = lineGenerator(data);
-    const areaData = areaGenerator(data);
+    // Draw actual bucket averages, with no smoothing or bridges across gaps.
+    const daily = data.every(point => Date.parse(point.date) % 86400000 === 0);
+    const bucketMs = daily ? 86400000 : 3600000;
+    const segments = [];
+    data.forEach((point, index) => {
+        if (!index || Date.parse(point.date) - Date.parse(data[index - 1].date) > bucketMs) segments.push([]);
+        segments.at(-1).push(point);
+    });
 
     return (
         <View style={{ width, height, marginTop: -margin.top }}>
             <Svg width={width} height={height}>
-                <Defs>
-                    <SvgLinearGradient id="gradientTrend" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <Stop offset="0%" stopColor={trendColor} stopOpacity={0.35} />
-                        <Stop offset="80%" stopColor={trendColor} stopOpacity={0.05} />
-                        <Stop offset="100%" stopColor={trendColor} stopOpacity={0} />
-                    </SvgLinearGradient>
-                </Defs>
-                <Path d={areaData} fill="url(#gradientTrend)" x={margin.left} y={margin.top} />
-                <Path d={pathData} fill="none" stroke={trendColor} strokeWidth={3} x={margin.left} y={margin.top} />
+                {segments.filter(segment => segment.length > 1).map(segment => (
+                    <Path key={segment[0].date} d={lineGenerator(segment)} fill="none" stroke={trendColor} strokeWidth={3} x={margin.left} y={margin.top} />
+                ))}
+                {data.map(point => <Circle key={point.date} cx={xScale(Date.parse(point.date)) + margin.left} cy={yScale(point.price) + margin.top} r={3} fill={trendColor} />)}
             </Svg>
         </View>
     );
@@ -212,6 +209,7 @@ function ContainerlessAreaChart({ data, width, height, isDark, trendColor, topBl
 
 export default function TrendsScreen() {
     const insets = useSafeAreaInsets();
+    const [priceScope, setPriceScope] = useState('local');
     const { isDark, themeColors } = useTheme();
     const {
         fuelResetToken,
@@ -313,6 +311,7 @@ export default function TrendsScreen() {
     ]);
 
     const { data: displayTrendData, loading, refreshing, error: trendError, onPullToRefresh } = useTrendData({
+        enabled: priceScope === 'local',
         currentRequestKey: currentTrendRequestKey,
         origin: sharedSearchOrigin,
         fuelGrade: selectedFuelGrade,
@@ -324,14 +323,15 @@ export default function TrendsScreen() {
         resetToken: fuelResetToken,
         commitOrigin: commitResolvedSearchOrigin,
     });
+    const national = useNationalLeaderboard({ enabled: priceScope === 'national', fuelType: selectedFuelGrade, requiresE85, resetToken: fuelResetToken });
     const [activeGradientColors, setActiveGradientColors] = useState(() => buildTrendBackgroundGradientColors({
         direction: getTrendDirectionFromData(displayTrendData), isDark,
     }));
     const [incomingGradientColors, setIncomingGradientColors] = useState(null);
     const gradientFadeOpacity = useRef(new Animated.Value(1)).current;
-    const heroTrendData = displayTrendData;
-    const hasHeroTrendData = Boolean(heroTrendData?.averagePricesByDay?.length > 1);
-    const gradientSourceData = displayTrendData || null;
+    const heroTrendData = priceScope === 'local' ? displayTrendData : null;
+    const hasHeroTrendData = Boolean(heroTrendData?.averagePricesByDay?.length > 0);
+    const gradientSourceData = priceScope === 'local' ? displayTrendData || null : null;
     const heroTrendDirection = useMemo(
         () => getTrendDirectionFromData(heroTrendData || null),
         [heroTrendData]
@@ -385,14 +385,13 @@ export default function TrendsScreen() {
         targetGradientColors,
     ]);
 
-    const glassTintColor = isDark ? '#101010ff' : '#FFFFFF';
     const canopyEdgeLine = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
     const topCanopyHeight = insets.top + TOP_CANOPY_HEIGHT;
     const gradientSpread = clamp01(TREND_BACKGROUND_GRADIENT_SPREAD);
     const numericTextStyle = styles.numericRounded;
     const leaderboardUpdatedLabel = useMemo(
-        () => formatRelativeTime(displayTrendData?.leaderboardLastChangedAt),
-        [displayTrendData?.leaderboardLastChangedAt]
+        () => formatRelativeTime(displayTrendData?.leaderboardLatestReportedAt),
+        [displayTrendData?.leaderboardLatestReportedAt]
     );
     const heroDeltaLabel = useMemo(() => {
         if (!heroTrendData?.overallTrend || heroTrendData.averagePricesByDay.length < 2) {
@@ -404,7 +403,7 @@ export default function TrendsScreen() {
             heroTrendData.averagePricesByDay[0]?.price
         );
     }, [heroTrendData]);
-    const shouldShowAwaitingLocalHistoryText = heroTrendData?.trendSeriesMode === 'current_average_snapshot';
+    const shouldShowAwaitingLocalHistoryText = (heroTrendData?.averagePricesByDay?.length || 0) < 2;
     const darkModeWeightStyle = useMemo(() => ({
         heroSub: { fontWeight: isDark ? '600' : '700' },
         heroPrice: { fontWeight: isDark ? '700' : '800' },
@@ -453,8 +452,8 @@ export default function TrendsScreen() {
                     bounces={true}
                     refreshControl={(
                         <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={onPullToRefresh}
+                            refreshing={priceScope === 'national' ? national.refreshing : refreshing}
+                            onRefresh={priceScope === 'national' ? national.onRefresh : onPullToRefresh}
                             tintColor={themeColors.text}
                             colors={[themeColors.text]}
                             progressBackgroundColor={isDark ? '#111111' : '#FFFFFF'}
@@ -463,19 +462,21 @@ export default function TrendsScreen() {
                     )}
                 >
                     <View style={styles.contentWrap}>
-                            {/* 1. Containerless Area Chart (Bleeding Edges) */}
+                        <TrendScopeControl value={priceScope} onChange={setPriceScope} isDark={isDark} themeColors={themeColors} />
+                        {priceScope === 'national' ? <NationalTrendPrices {...national} gradeLabel={selectedFuelGradeMeta.label} isDark={isDark} themeColors={themeColors} /> : <>
+                            {/* Observed averages only; missing history stays empty. */}
                             {hasHeroTrendData ? (
                                 <View style={styles.heroGraphSection}>
                                     <View style={styles.heroGraphPad}>
                                         <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>
-                                            Your {selectedFuelGradeMeta.label} Local Average
+                                            Reported {selectedFuelGradeMeta.label} Local Average
                                         </Text>
                                         <View style={styles.heroPriceRow}>
-                                            <Text style={[styles.heroPrice, numericTextStyle, darkModeWeightStyle.heroPrice, { color: themeColors.text }]}>
+                                            <Text numberOfLines={1} adjustsFontSizeToFit maxFontSizeMultiplier={2} style={[styles.heroPrice, numericTextStyle, darkModeWeightStyle.heroPrice, { color: themeColors.text }]}>
                                                 ${heroTrendData.averagePricesByDay[heroTrendData.averagePricesByDay.length - 1].price.toFixed(2)}
                                             </Text>
                                             {heroDeltaLabel ? (
-                                                <Text style={[styles.heroDelta, numericTextStyle, darkModeWeightStyle.heroDelta, { color: primaryTrendColor }]}>
+                                                <Text maxFontSizeMultiplier={2} style={[styles.heroDelta, numericTextStyle, darkModeWeightStyle.heroDelta, { color: primaryTrendColor }]}>
                                                     {heroDeltaLabel}
                                                 </Text>
                                             ) : null}
@@ -490,7 +491,7 @@ export default function TrendsScreen() {
                                     ) : null}
 
                                     {!shouldShowAwaitingLocalHistoryText ? (<>
-                                    <ContainerlessAreaChart
+                                    <ObservedPriceChart
                                         data={heroTrendData.averagePricesByDay}
                                         width={SCREEN_WIDTH}
                                         height={CHART_HEIGHT}
@@ -521,7 +522,7 @@ export default function TrendsScreen() {
                                 <View style={styles.heroGraphPlaceholderSection}>
                                     <View style={styles.heroGraphPad}>
                                         <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>
-                                            Your {selectedFuelGradeMeta.label} Local Average
+                                            Reported {selectedFuelGradeMeta.label} Local Average
                                         </Text>
                                         <View style={styles.heroPriceRow}>
                                             <View style={[styles.heroPricePlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }]} />
@@ -550,36 +551,6 @@ export default function TrendsScreen() {
                                     />
                                 )}
 
-                                {/* 3. Competitor Clusters */}
-                                {displayTrendData?.competitorClusters?.length > 0 && (
-                                    <GlassView
-                                        style={[styles.glassCard, { marginTop: 16 }]}
-                                        glassEffectStyle="regular"
-                                        tintColor={glassTintColor}
-                                    >
-                                        <Text style={[styles.cardTitle, darkModeWeightStyle.cardTitle, { color: themeColors.text, marginBottom: 4 }]}>Fierce Competitors</Text>
-                                        <Text style={[styles.cardSubTitle, darkModeWeightStyle.cardSubTitle, { color: themeColors.textOpacity, marginBottom: 16 }]}>Stations battling on the same block</Text>
-
-                                        {displayTrendData.competitorClusters.map((cluster, idx) => (
-                                            <View key={`cluster-${idx}`} style={[styles.listItem, idx > 0 && { borderTopWidth: 1, borderTopColor: isDark ? '#333' : '#EEE' }]}>
-                                                <View style={styles.listTextCol}>
-                                                    <Text style={[styles.itemName, darkModeWeightStyle.itemName, { color: themeColors.text }]}>
-                                                        {cluster.stations[0].name} vs {cluster.stations[1].name}
-                                                    </Text>
-                                                    <Text style={[styles.itemSub, numericTextStyle, darkModeWeightStyle.itemSub, { color: themeColors.textOpacity }]}>
-                                                        {cluster.totalUpdates} updates recently
-                                                    </Text>
-                                                </View>
-                                                <View style={styles.valPill}>
-                                                    <Text style={[styles.itemVal, numericTextStyle, darkModeWeightStyle.itemVal, { color: themeColors.text }]}>
-                                                        Avg ±{cluster.averageJumpAmount.toFixed(2)}¢
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        ))}
-                                    </GlassView>
-                                )}
-
                                 {/* Empty/No Data Fallback */}
                                 {!loading && !displayTrendData?.averagePricesByDay?.length && !displayTrendData?.leaderboard?.length && (
                                     <View style={styles.emptyState}>
@@ -587,6 +558,7 @@ export default function TrendsScreen() {
                                     </View>
                                 )}
                             </View>
+                        </>}
                         </View>
                 </ScrollView>
 
@@ -653,9 +625,11 @@ const styles = StyleSheet.create({
     },
     heroPriceRow: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         alignItems: 'baseline',
     },
     heroPrice: {
+        flexShrink: 1,
         fontSize: 42,
         fontWeight: '800',
         letterSpacing: -1.5,
@@ -716,51 +690,6 @@ const styles = StyleSheet.create({
     contentPad: {
         padding: 16,
     },
-    glassCard: {
-        borderRadius: 24,
-        padding: 24,
-        overflow: 'hidden',
-    },
-    cardTitle: {
-        fontSize: 19,
-        fontWeight: '800',
-        letterSpacing: -0.5,
-    },
-
-    cardSubTitle: {
-        fontSize: 14,
-        fontWeight: '500',
-        letterSpacing: -0.3,
-    },
-    listItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 14,
-    },
-    listTextCol: {
-        flex: 1,
-        paddingRight: 16,
-    },
-    itemName: {
-        fontSize: 16,
-        fontWeight: '700',
-        letterSpacing: -0.3,
-        marginBottom: 4,
-    },
-    itemSub: {
-        fontSize: 14,
-        fontWeight: '500',
-    },
-    valPill: {
-        justifyContent: 'center',
-    },
-    itemVal: {
-        fontSize: 17,
-        fontWeight: '800',
-        letterSpacing: -0.5,
-    },
-
     emptyState: {
         marginTop: 40,
         padding: 20,

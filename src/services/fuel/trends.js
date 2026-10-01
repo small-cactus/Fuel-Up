@@ -3,9 +3,9 @@ import { filterStationQuotesForHome } from '../../lib/homeState.js';
 import { rankQuotesForFuelGrade } from '../../lib/fuelGrade.js';
 import { rankStationQuotes } from '../../lib/stationPreferences.js';
 import { buildFuelSearchRequestKey } from '../../lib/fuelSearchState.js';
-const { buildLatestFuelStationQuotesFromRows } = require('./index');
-const { buildValidationState } = require('./priceValidation');
-const { applyCurrentStationQuoteProjection } = require('./trendProjection');
+const { refreshFuelPriceSnapshot } = require('./index');
+const { buildRawTrendRows } = require('./rawTrendRows');
+const { isFreshReportedQuote } = require('./reportedPrices');
 const { buildAveragePriceTrendSeries } = require('./trendAggregation');
 const { buildTrendLeaderboard } = require('./trendLeaderboard');
 
@@ -16,14 +16,6 @@ const inFlightTrendDataRequestsByRequestKey = {};
 let trendCacheGeneration = 0;
 const TREND_HISTORY_LOOKBACK_MS = 14 * 24 * 60 * 60 * 1000;
 const TREND_HISTORY_MAX_ROWS = 1500;
-const FUEL_GRADE_ALIASES = {
-    regular: ['regular', 'regular_gas'],
-    midgrade: ['midgrade', 'midgrade_gas'],
-    premium: ['premium', 'premium_gas'],
-    diesel: ['diesel'],
-        e85: ['e85', 'e_85'],
-};
-
 // Helper: Calculate distance between two coords in miles
 function getDistanceMiles(lat1, lon1, lat2, lon2) {
     const R = 3958.8; // Radius of the earth in miles
@@ -35,90 +27,6 @@ function getDistanceMiles(lat1, lon1, lat2, lon2) {
         Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
-}
-
-function toPositiveNumber(value) {
-    const numeric = Number(value);
-    return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
-}
-
-function resolveStoredFuelPrice(allPrices, fuelType) {
-    if (!allPrices || typeof allPrices !== 'object') {
-        return null;
-    }
-
-    const aliases = FUEL_GRADE_ALIASES[String(fuelType || 'regular').toLowerCase()] || [fuelType];
-
-    for (const alias of aliases) {
-        const directPrice = toPositiveNumber(allPrices[alias]);
-        if (directPrice !== null) {
-            return directPrice;
-        }
-    }
-
-    const paymentMap = allPrices._payment && typeof allPrices._payment === 'object'
-        ? allPrices._payment
-        : {};
-
-    for (const alias of aliases) {
-        const paymentEntry = paymentMap[alias];
-
-        if (!paymentEntry || typeof paymentEntry !== 'object') {
-            continue;
-        }
-
-        const creditPrice = toPositiveNumber(paymentEntry.credit);
-        if (creditPrice !== null) {
-            return creditPrice;
-        }
-
-        const cashPrice = toPositiveNumber(paymentEntry.cash);
-        if (cashPrice !== null) {
-            return cashPrice;
-        }
-    }
-
-    return null;
-}
-
-function buildValidatedTrendRows(rows, fuelType) {
-    const normalizedFuelType = String(fuelType || 'regular').toLowerCase();
-    const validationRows = (rows || [])
-        .map(row => {
-            const rowPrice = (
-                resolveStoredFuelPrice(row.all_prices, normalizedFuelType) ??
-                (String(row.fuel_type || '').toLowerCase() === normalizedFuelType ? toPositiveNumber(row.price) : null)
-            );
-            const timestampMs = Date.parse(row.created_at || '');
-
-            if (rowPrice === null || !Number.isFinite(timestampMs)) {
-                return null;
-            }
-
-            return {
-                stationId: row.station_id ? String(row.station_id) : '',
-                fuelType: normalizedFuelType,
-                price: rowPrice,
-                timestampMs,
-                lat: Number(row.latitude),
-                lon: Number(row.longitude),
-                originalRow: row,
-            };
-        })
-        .filter(Boolean);
-    const validationState = buildValidationState(validationRows);
-
-    return validationState.outputs.map(({ row, result }) => ({
-        ...row.originalRow,
-        timestampMs: row.timestampMs,
-        price: result.finalDisplayedPrice,
-        api_price: result.apiPrice,
-        predicted_price: result.predictedPrice,
-        used_prediction: result.usedPrediction,
-        validation_decision: result.decision,
-        risk: result.risk,
-        validity: result.validity,
-    }));
 }
 
 function clearObjectValues(target, requestKey = null) {
@@ -190,7 +98,7 @@ export async function fetchTrendData({
     const searchLng = Math.round(longitude * 10) / 10;
     const lookbackStartIso = new Date(Date.now() - TREND_HISTORY_LOOKBACK_MS).toISOString();
 
-    const { data: descendingRows, error } = await supabase
+    const [history, latest] = await Promise.all([supabase
         .from('station_prices')
         .select('*')
         .eq('search_latitude_rounded', searchLat)
@@ -198,25 +106,18 @@ export async function fetchTrendData({
         .eq('fuel_type', fuelType)
         .gte('created_at', lookbackStartIso)
         .order('created_at', { ascending: false })
-        .limit(TREND_HISTORY_MAX_ROWS);
+        .limit(TREND_HISTORY_MAX_ROWS),
+        refreshFuelPriceSnapshot({ latitude, longitude, radiusMiles, fuelType, requiresE85 }),
+    ]);
+    const { data: descendingRows, error } = history;
 
     const rows = Array.isArray(descendingRows) ? descendingRows.slice().reverse() : descendingRows;
 
-    const validatedRows = !error && Array.isArray(rows)
-        ? buildValidatedTrendRows(rows, fuelType)
-        : [];
-    const projectedLatestQuotes = validatedRows.length > 0
-        ? buildLatestFuelStationQuotesFromRows({
-            rows,
-            origin: {
-                latitude,
-                longitude,
-            },
-        })
-        : [];
+    const rawRows = !error && Array.isArray(rows) ? buildRawTrendRows(rows, fuelType) : [];
+    const latestQuotes = (latest.snapshot?.topStations || []).filter(quote => isFreshReportedQuote(quote));
     const rankedLatestQuotes = rankStationQuotes(rankQuotesForFuelGrade(
         filterStationQuotesForHome({
-            quotes: projectedLatestQuotes,
+            quotes: latestQuotes,
             origin: {
                 latitude,
                 longitude,
@@ -233,58 +134,28 @@ export async function fetchTrendData({
             .map(quote => String(quote?.stationId || '').trim())
             .filter(Boolean)
     );
-    const projectedRows = applyCurrentStationQuoteProjection(validatedRows, projectedLatestQuotes);
     const displayedRows = visibleStationIds.size > 0
-        ? projectedRows.filter(row => visibleStationIds.has(String(row?.station_id || '').trim()))
+        ? rawRows.filter(row => visibleStationIds.has(String(row?.station_id || '').trim()))
         : [];
 
-    if (error || displayedRows.length === 0 || rankedLatestQuotes.length === 0) {
+    if (rankedLatestQuotes.length === 0) {
         return {
             overallTrend: null,
             averagePricesByDay: [],
             stationsWithLargestDelta: [],
             leaderboard: [],
-            leaderboardLastChangedAt: null,
-            competitorClusters: [],
+            leaderboardLatestReportedAt: null,
             mapHeatmapPoints: [],
         };
     }
 
-    // Tracks when the visible top-5 leaderboard snapshot last changed.
-    let leaderboardLastChangedAt = null;
-    const latestPriceByStation = new Map();
-    let previousLeaderboardSnapshotKey = null;
-    const latestQuoteById = new Map(rankedLatestQuotes.map(quote => [String(quote.stationId), quote]));
+    const leaderboardLatestReportedAt = new Date(Math.max(...rankedLatestQuotes.slice(0, 5)
+        .map(quote => Date.parse(quote.updatedAt)))).toISOString();
 
-    displayedRows.forEach(row => {
-        latestPriceByStation.set(row.station_id, row.price);
-
-        const rankingSnapshot = rankStationQuotes([...latestPriceByStation.entries()].map(([stationId, price]) => ({
-            ...latestQuoteById.get(String(stationId)), stationId, price,
-        })), { preferredBrands, requiresE85 })
-            .slice(0, 5)
-            .map((quote, index) => `${index + 1}:${quote.stationId}:${Number(quote.price).toFixed(3)}`)
-            .join('|');
-
-        if (rankingSnapshot !== previousLeaderboardSnapshotKey) {
-            previousLeaderboardSnapshotKey = rankingSnapshot;
-            leaderboardLastChangedAt = row.created_at;
-        }
-    });
-
-    // 1. Average prices grouped by day (for the main chart). If we only have
-    // a single history bucket, fall back to the live current average so the
-    // chart stays truthful without inventing a synthetic trend.
-    const historicalAveragePricesByDay = buildAveragePriceTrendSeries(displayedRows);
-    const hasHistoricalTrendSeries = historicalAveragePricesByDay.length >= 2;
-    const averagePricesByDay = hasHistoricalTrendSeries
-        ? historicalAveragePricesByDay
-        : buildAveragePriceTrendSeries(displayedRows, {
-            fallbackLatestQuotes: rankedLatestQuotes,
-        });
-    const trendSeriesMode = hasHistoricalTrendSeries
-        ? 'historical'
-        : (averagePricesByDay.length >= 2 ? 'current_average_snapshot' : 'empty');
+    // Only occupied observation buckets. No estimates or synthetic history.
+    const averagePricesByDay = buildAveragePriceTrendSeries(displayedRows);
+    const hasHistoricalTrendSeries = averagePricesByDay.length >= 2;
+    const trendSeriesMode = averagePricesByDay.length ? 'historical' : 'empty';
 
     // Determine overall area trend
     let overallTrend = null;
@@ -299,7 +170,7 @@ export async function fetchTrendData({
         };
     }
 
-    // 2. Stations with the largest delta and grouping for competition
+    // Observed per-station history for comparison.
     const stationAggregation = {};
     // For heatmap, average price of each station over its history
     const mapHeatmapPoints = [];
@@ -389,59 +260,19 @@ export async function fetchTrendData({
 
     const leaderboard = buildTrendLeaderboard({
         rankedLatestQuotes,
-        earliestRankedQuotes: rankStationQuotes(rankedLatestQuotes.map(quote => ({
-            ...quote, price: stationHistoryById.get(String(quote.stationId))?.earliestPrice ?? quote.price,
+        earliestRankedQuotes: rankStationQuotes(rankedLatestQuotes.filter(quote => stationHistoryById.has(String(quote.stationId))).map(quote => ({
+            ...quote, price: stationHistoryById.get(String(quote.stationId)).earliestPrice,
         })), { preferredBrands, requiresE85 }),
         stationHistoryById,
         limit: 5,
     });
-
-    // 3. Competitor Clusters (Stations within 0.5 miles of each other)
-    const processedPairs = new Set();
-    const competitorClusters = [];
-
-    for (let i = 0; i < stations.length; i++) {
-        for (let j = i + 1; j < stations.length; j++) {
-            const st1 = stations[i];
-            const st2 = stations[j];
-            const pairKey = `${st1.stationId}-${st2.stationId}`;
-
-            if (processedPairs.has(pairKey)) continue;
-            processedPairs.add(pairKey);
-
-            const distance = getDistanceMiles(st1.latitude, st1.longitude, st2.latitude, st2.longitude);
-            if (distance <= 0.5) { // Same block / very close
-                // Check if they update frequently
-                const combinedUpdates = st1.updatesCount + st2.updatesCount;
-                if (combinedUpdates > 0) {
-                    // Calculate typical schedule / amount
-                    const allJumps = [...st1.priceJumps, ...st2.priceJumps];
-                    const avgJumpAmount = allJumps.length > 0
-                        ? allJumps.reduce((acc, jump) => acc + Math.abs(jump.amount), 0) / allJumps.length
-                        : 0;
-
-                    competitorClusters.push({
-                        stations: [st1, st2],
-                        distanceMiles: distance,
-                        totalUpdates: combinedUpdates,
-                        averageJumpAmount: avgJumpAmount,
-                        updateFrequencyDesc: combinedUpdates > 5 ? 'High frequency' : 'Moderate frequency'
-                    });
-                }
-            }
-        }
-    }
-
-    // Sort clusters by most competitive
-    competitorClusters.sort((a, b) => b.totalUpdates - a.totalUpdates);
 
     return {
         overallTrend,
         averagePricesByDay,
         trendSeriesMode,
         leaderboard,
-        leaderboardLastChangedAt,
-        competitorClusters: competitorClusters.slice(0, 5), // Top 5 competitive blocks
+        leaderboardLatestReportedAt,
         mapHeatmapPoints
     };
 }

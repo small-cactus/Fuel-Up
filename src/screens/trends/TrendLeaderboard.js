@@ -1,18 +1,19 @@
 import React from 'react';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { GlassView } from 'expo-glass-effect';
+import { stationAge } from '../cluster-lab/stationCardModel';
 import { SymbolView } from 'expo-symbols';
 
-export default function TrendLeaderboard({ stations, gradeLabel, updatedLabel, isDark, themeColors }) {
+export default function TrendLeaderboard({ stations, gradeLabel, updatedLabel, isDark, themeColors, national = false }) {
     const { fontScale } = useWindowDimensions();
     const stacked = fontScale > 1.3;
     const textColor = { color: themeColors.text };
     const secondaryColor = { color: themeColors.textOpacity };
     return (
         <GlassView style={styles.card} glassEffectStyle="regular" tintColor={isDark ? '#101010ff' : '#FFFFFF'}>
-            <View style={[styles.header, stacked && styles.stacked]}>
-                <Text maxFontSizeMultiplier={2} accessibilityRole="header" style={[styles.title, textColor, { fontWeight: isDark ? '700' : '800' }]}>{gradeLabel} Leaderboard</Text>
-                <Text style={[styles.updated, secondaryColor]}>Updated {updatedLabel}</Text>
+            <View style={[styles.header, (stacked || national) && styles.stacked]}>
+                <Text maxFontSizeMultiplier={2} accessibilityRole="header" style={[styles.title, textColor, { fontWeight: isDark ? '700' : '800' }]}>{national ? `Cheapest ${gradeLabel}` : `${gradeLabel} Leaderboard`}</Text>
+                <Text style={[styles.updated, secondaryColor]}>{national ? 'United States · Last 24 hours' : `Latest report ${updatedLabel}`}</Text>
             </View>
             {stations.map((station, index) => {
                 const rank = index === 0 ? '1st' : index === 1 ? '2nd' : index === 2 ? '3rd' : `${index + 1}th`;
@@ -35,8 +36,8 @@ export default function TrendLeaderboard({ stations, gradeLabel, updatedLabel, i
                                 </View>
                             </View>
                             <View style={[styles.addressRow, stacked && styles.stacked]}>
-                                <Text style={[styles.address, secondaryColor]}>{station.address?.split(',')[0]}</Text>
-                                {Number.isFinite(station.distanceMiles) && (
+                                <Text style={[styles.address, secondaryColor]}>{national ? station.address : station.address?.split(',')[0]}</Text>
+                                {!national && Number.isFinite(station.distanceMiles) && (
                                     <View style={styles.distance}>
                                         {!stacked && <Text style={[styles.address, secondaryColor]}>·</Text>}
                                         <SymbolView name="car.fill" tintColor={themeColors.textOpacity} size={18} />
@@ -47,10 +48,11 @@ export default function TrendLeaderboard({ stations, gradeLabel, updatedLabel, i
                         </View>
                         <View style={[styles.priceColumn, stacked && styles.priceRow]}>
                             <Text style={[styles.price, styles.numeric, textColor, { fontWeight: isDark ? '700' : '800' }]}>${station.latestPrice.toFixed(2)}</Text>
-                            <View style={styles.shift}>
+                            {(station.paymentType === 'cash' || station.allPrices?._payment?.[station.fuelType]?.selected === 'cash') && <Text style={[styles.updated, secondaryColor]}>Cash</Text>}
+                            {national ? <Text style={[styles.updated, secondaryColor]}>{stationAge(station.updatedAt)}</Text> : <View style={styles.shift}>
                                 {shift !== 0 && <SymbolView name={shift > 0 ? 'arrow.up' : 'arrow.down'} tintColor={shiftColor} size={13} weight="bold" />}
                                 <Text style={[styles.numeric, { fontSize: 13, fontWeight: '600', color: shiftColor }]}>{shift === 0 ? '—' : Math.abs(shift)}</Text>
-                            </View>
+                            </View>}
                         </View>
                     </View>
                 );
@@ -78,5 +80,5 @@ const styles = StyleSheet.create({
     numeric: { fontFamily: 'ui-rounded' },
     stacked: { flexDirection: 'column', alignItems: 'flex-start', gap: 8 },
     fullWidth: { flex: 0, width: '100%' },
-    priceRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+    priceRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 16 },
 });

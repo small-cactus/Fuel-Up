@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
+import { isFreshReportedPrice, REPORTED_PRICE_MAX_AGE_MS } from '../../services/fuel/reportedPrices';
 import * as Location from 'expo-location';
 import {
     buildTrendRequestKey,
@@ -17,6 +18,7 @@ const REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 // Each result belongs to one location, grade, radius and cache generation. An older
 // request may finish, but it cannot replace a newer selection or resurrect a reset.
 export default function useTrendData({
+    enabled = true,
     currentRequestKey,
     origin,
     fuelGrade,
@@ -34,6 +36,7 @@ export default function useTrendData({
     const mounted = useRef(false);
     const activeRequest = useRef(null);
     const previousReset = useRef(resetToken);
+    const [freshnessTick, setFreshnessTick] = useState(0);
     const [result, setResult] = useState(null);
     const [refreshingScope, setRefreshingScope] = useState(null);
 
@@ -55,6 +58,7 @@ export default function useTrendData({
     }, [resetToken]);
 
     const load = useCallback(({ refreshing = false } = {}) => {
+        if (!enabled) return Promise.resolve();
         if (activeRequest.current?.scope === scope) return activeRequest.current.promise;
         const request = { scope, promise: null };
         const generation = captureTrendCacheGeneration();
@@ -121,22 +125,39 @@ export default function useTrendData({
             }
         })();
         return request.promise;
-    }, [scope, origin, fuelGrade, radiusMiles, preferredProvider, minimumRating, preferredBrands, requiresE85, currentRequestKey, commitOrigin, resetToken]);
+    }, [enabled, scope, origin, fuelGrade, radiusMiles, preferredProvider, minimumRating, preferredBrands, requiresE85, currentRequestKey, commitOrigin, resetToken]);
 
     useFocusEffect(useCallback(() => {
+        if (!enabled) return;
         const cached = currentRequestKey ? getCachedTrendData(currentRequestKey) : null;
         const resolvedAt = currentRequestKey ? getLastTrendsScreenViewedAt(currentRequestKey) : 0;
         if (!cached || Date.now() - resolvedAt > REFRESH_INTERVAL_MS) void load();
         // Data arrival does not re-enter this effect. Freshness is measured from
         // the successful fetch, rather than extended on every visit to the tab.
-    }, [currentRequestKey, load]));
+    }, [enabled, currentRequestKey, load]));
 
     const onPullToRefresh = useCallback(() => load({ refreshing: true }), [load]);
     const currentResult = result && isTrendCacheGenerationCurrent(result.generation) && result.resetToken === resetToken &&
         (result.scope === scope || (currentRequestKey && result.requestKey === currentRequestKey)) ? result : null;
     const cached = currentRequestKey ? getCachedTrendData(currentRequestKey) || getLastResolvedTrendData(currentRequestKey) : null;
+    const data = cached || currentResult?.data || null;
+    const freshData = useMemo(() => data?.leaderboard ? {
+        ...data,
+        leaderboard: data.leaderboard.filter(station => isFreshReportedPrice(station.latestPrice, station.updatedAt)),
+    } : data, [data, freshnessTick, enabled]);
+    useEffect(() => {
+        if (!enabled || !data?.leaderboard?.length) return;
+        const expiries = data.leaderboard.map(station => Date.parse(station.updatedAt) + REPORTED_PRICE_MAX_AGE_MS)
+            .filter(expiry => Number.isFinite(expiry) && expiry >= Date.now());
+        if (!expiries.length) return;
+        const timer = setTimeout(() => {
+            setFreshnessTick(tick => tick + 1);
+            void load();
+        }, Math.max(1, Math.min(...expiries) - Date.now() + 1));
+        return () => clearTimeout(timer);
+    }, [enabled, data, load, freshnessTick]);
     return {
-        data: cached || currentResult?.data || null,
+        data: freshData,
         loading: !cached && !currentResult,
         refreshing: refreshingScope === scope,
         error: currentResult?.error || null,
