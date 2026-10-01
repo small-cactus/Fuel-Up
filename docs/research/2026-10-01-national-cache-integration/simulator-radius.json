@@ -1,0 +1,20 @@
+{
+  "device": "FuelUp Glass Lab simulator",
+  "udid": "0EE3DFFD-087C-483C-A651-C55C59A719A3",
+  "build": "Debug rebuilt native camera solver",
+  "checks": [
+    {
+      "radiusMiles": 3,
+      "visiblePageCount": 25,
+      "homeTapAtMs": 1790867098196,
+      "renderedScreenshotAtMs": 1790867099595
+    },
+    {
+      "radiusMiles": 15,
+      "visiblePageCount": 319,
+      "homeTapAtMs": 1790867121541,
+      "renderedScreenshotAtMs": 1790867123122
+    }
+  ],
+  "note": "Counts read from native accessibility pagination; screenshot timing is an upper bound to visible results, not an isolated API or frame-duration benchmark. Phone was not opened."
+}

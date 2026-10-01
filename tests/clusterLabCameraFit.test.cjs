@@ -63,6 +63,24 @@ for size in [CGSize(width: 320, height: 568), CGSize(width: 375, height: 812),
     assert(abs(reverse.minX - fit.minX) < 0.000001 && abs(reverse.width - fit.width) < 0.000001)
   }
 }
+// The national cache can expose thousands of stations in a dense metro.
+// All real capsule extents must fit, with deterministic input-order behavior.
+let denseStart = Date()
+for count in [65, 400, 1000, 2000] {
+  let stations = (0..<count).map { point($0, random(), random()) }
+  for size in [CGSize(width: 320, height: 568), CGSize(width: 440, height: 956)] {
+    let usable = CGRect(x: 17, y: 76, width: size.width - 34, height: size.height - 178)
+    let fit = ClusterLabCameraFit.rect(for: stations, viewport: size, usable: usable, maximumScale: 2)!
+    let scale = size.width / fit.width
+    let occupied = extent(stations, scale).offsetBy(dx: -fit.minX * scale, dy: -fit.minY * scale)
+    assert(usable.insetBy(dx: -0.00001, dy: -0.00001).contains(occupied), "dense pill clipped")
+    let reverse = ClusterLabCameraFit.rect(for: Array(stations.reversed()), viewport: size, usable: usable, maximumScale: 2)!
+    assert(abs(reverse.width-fit.width) < 0.000001 && abs(reverse.minX-fit.minX) < 0.000001)
+  }
+}
+let denseDuration = Date().timeIntervalSince(denseStart)
+assert(denseDuration < 5, "dense camera search exceeded its bounded work budget")
+print("dense fixtures seconds: "+String(denseDuration))
 print("camera fit passed")
 `);
         const binary = path.join(directory, 'fit-test');

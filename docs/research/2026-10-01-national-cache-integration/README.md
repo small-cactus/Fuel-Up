@@ -22,7 +22,12 @@ Home presents an on-device snapshot immediately, then reads the database on focu
 - 138 app unit tests and 50 existing cloud tests passed.
 - Focused cache/worker/Home lifecycle tests cover cache-only reads, payment/observation timestamps, radius/grade/E85 boundaries, full-circle coverage after movement, narrower-radius cheapest selection, focus refresh, cancellation, and archival publication.
 - `nationalServing.integration.sql` passed in a rolled-back transaction against the real migrated DB: projection idempotency, wrong-ID rejection, older observation protection, exact radius, >1,000 stations without truncation, and RPC access control.
-- Live archive bootstrap, endpoint checks, and simulator verification are in progress at this checkpoint.
+- Read back and hash/ID/provenance-verified all 72 latest successful archive batches. All 141,660 catalog stations have a serving observation; see `bootstrap.jsonl` and `cache-coverage.json`.
+- All 24 live radius checks passed (six cities at 2, 5, 10, and 15 miles). Sets expand monotonically, every returned station is inside its radius, and force-refresh requests still return `national-cache`. Median request latency was 568 ms, maximum 1,745 ms. See `live-radius-checks.json`.
+- All five fuel-grade checks passed. Correct-region worker health returned 200 and wrong-region probes returned 409 for each of the three workers. App endpoint probes did not change the collector's last provider-request timestamp.
+- Simulator testing exposed a native camera-fit bottleneck with hundreds of stations: main-thread samples were entirely inside the old exhaustive contact-interval solver. Searches above 64 stations now use a bounded deterministic search of real capsule bounds. Smaller searches retain the exact solver; merge/split animation code is unchanged.
+- Native camera tests pass with 65, 400, 1,000, and 2,000 stations across small/large phone viewports, preserving capsule bounds and input-order independence. The dense fixture set has a five-second total debug-test budget. Simulator interaction confirms 25 cards at 3 miles and 319 at 15 miles, visible by the 1.4/1.6-second post-tap screenshots. This is a UI observation bound, not an isolated request benchmark. See `simulator-radius.json`.
+- The current Swift renderer passed its live transition test (1,615 frames / 113 transitions) and first-frame camera-fit gate (84 frames with every pill/count inside the inset). The original retired-map probe is being checked separately; no thresholds or timeouts were relaxed.
 
 ## Limits and incident evidence
 

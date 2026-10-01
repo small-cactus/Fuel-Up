@@ -1,0 +1,122 @@
+[
+  {
+    "fuelType": "regular",
+    "source": "national-cache",
+    "stations": 215,
+    "milliseconds": 1962,
+    "summary": {
+      "stationCount": 333,
+      "quoteCount": 215,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:15:09.929+00:00"
+    }
+  },
+  {
+    "fuelType": "regular",
+    "source": "national-cache",
+    "stations": 215,
+    "milliseconds": 979,
+    "summary": {
+      "stationCount": 333,
+      "quoteCount": 215,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:15:09.929+00:00"
+    }
+  },
+  {
+    "fuelType": "midgrade",
+    "source": "national-cache",
+    "stations": 148,
+    "milliseconds": 455,
+    "summary": {
+      "stationCount": 333,
+      "quoteCount": 148,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:15:09.929+00:00"
+    }
+  },
+  {
+    "fuelType": "midgrade",
+    "source": "national-cache",
+    "stations": 148,
+    "milliseconds": 520,
+    "summary": {
+      "stationCount": 333,
+      "quoteCount": 148,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:15:09.929+00:00"
+    }
+  },
+  {
+    "fuelType": "premium",
+    "source": "national-cache",
+    "stations": 152,
+    "milliseconds": 496,
+    "summary": {
+      "stationCount": 333,
+      "quoteCount": 152,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:15:09.929+00:00"
+    }
+  },
+  {
+    "fuelType": "premium",
+    "source": "national-cache",
+    "stations": 152,
+    "milliseconds": 568,
+    "summary": {
+      "stationCount": 333,
+      "quoteCount": 152,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:15:09.929+00:00"
+    }
+  },
+  {
+    "fuelType": "diesel",
+    "source": "national-cache",
+    "stations": 118,
+    "milliseconds": 450,
+    "summary": {
+      "stationCount": 333,
+      "quoteCount": 118,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:15:09.929+00:00"
+    }
+  },
+  {
+    "fuelType": "diesel",
+    "source": "national-cache",
+    "stations": 118,
+    "milliseconds": 460,
+    "summary": {
+      "stationCount": 333,
+      "quoteCount": 118,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:15:09.929+00:00"
+    }
+  },
+  {
+    "fuelType": "e85",
+    "source": "national-cache",
+    "stations": 3,
+    "milliseconds": 1056,
+    "summary": {
+      "stationCount": 333,
+      "quoteCount": 3,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:15:09.929+00:00"
+    }
+  },
+  {
+    "fuelType": "e85",
+    "source": "national-cache",
+    "stations": 3,
+    "milliseconds": 305,
+    "summary": {
+      "stationCount": 333,
+      "quoteCount": 3,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:15:09.929+00:00"
+    }
+  }
+]

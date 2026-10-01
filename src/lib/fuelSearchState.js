@@ -1,19 +1,8 @@
 import { normalizeFuelGrade } from './fuelGrade.js';
 import { normalizePreferredBrands } from './stationPreferences.js';
 
-// The supported search radius range was determined by testing the live
-// GasBuddy return set across ~20 US cities (dense urban → extreme rural).
-// GasBuddy adaptively returns stations within its own cluster, so our
-// `radiusMiles` is ONLY a client-side filter on the returned set:
-//
-//   - Urban centers (SF, NYC, LA, Sacramento) return 10–17 stations
-//     with a max distance of 1.4–2.8 mi. A radius < 2 mi filters some
-//     of those to zero (e.g. Sacramento, NYC, Anchorage), which is a
-//     broken UX, so 2 mi is the effective minimum.
-//   - Small towns (Fallon NV) return stations up to ~5 mi.
-//   - Remote rural (Death Valley) returns a single station at ~12 mi.
-//   - Above 15 mi we never saw any additional stations in testing, so
-//     15 mi is the effective maximum. Anything larger is wasted scale.
+// Preserve the established 2–15 mile setting. Nationwide cache queries now
+// search this exact geographic radius, independent of provider search limits.
 export const DEFAULT_SEARCH_RADIUS_MILES = 10;
 export const MIN_SEARCH_RADIUS_MILES = 2;
 export const MAX_SEARCH_RADIUS_MILES = 15;

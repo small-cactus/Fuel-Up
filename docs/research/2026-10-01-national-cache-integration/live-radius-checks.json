@@ -1,0 +1,245 @@
+{
+  "verifiedAt": "2026-10-01T14:48:57.063Z",
+  "checks": [
+    {
+      "city": "Clearwater",
+      "radiusMiles": 2,
+      "stations": 6,
+      "milliseconds": 1745,
+      "stationCount": 13,
+      "quoteCount": 6,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:05:03.925+00:00"
+    },
+    {
+      "city": "Clearwater",
+      "radiusMiles": 5,
+      "stations": 44,
+      "milliseconds": 736,
+      "stationCount": 66,
+      "quoteCount": 44,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:14:33.757+00:00"
+    },
+    {
+      "city": "Clearwater",
+      "radiusMiles": 10,
+      "stations": 117,
+      "milliseconds": 663,
+      "stationCount": 166,
+      "quoteCount": 117,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:15:09.929+00:00"
+    },
+    {
+      "city": "Clearwater",
+      "radiusMiles": 15,
+      "stations": 227,
+      "milliseconds": 673,
+      "stationCount": 304,
+      "quoteCount": 227,
+      "oldestObservedAt": "2026-10-01T06:12:22.785+00:00",
+      "newestObservedAt": "2026-10-01T14:15:09.929+00:00"
+    },
+    {
+      "city": "New York",
+      "radiusMiles": 2,
+      "stations": 1,
+      "milliseconds": 450,
+      "stationCount": 2,
+      "quoteCount": 1,
+      "oldestObservedAt": "2026-10-01T06:11:43.615+00:00",
+      "newestObservedAt": "2026-10-01T06:13:42.163+00:00"
+    },
+    {
+      "city": "New York",
+      "radiusMiles": 5,
+      "stations": 91,
+      "milliseconds": 568,
+      "stationCount": 160,
+      "quoteCount": 91,
+      "oldestObservedAt": "2026-10-01T06:11:43.615+00:00",
+      "newestObservedAt": "2026-10-01T14:14:23.169+00:00"
+    },
+    {
+      "city": "New York",
+      "radiusMiles": 10,
+      "stations": 349,
+      "milliseconds": 1312,
+      "stationCount": 683,
+      "quoteCount": 349,
+      "oldestObservedAt": "2026-10-01T06:11:43.615+00:00",
+      "newestObservedAt": "2026-10-01T14:14:23.169+00:00"
+    },
+    {
+      "city": "New York",
+      "radiusMiles": 15,
+      "stations": 654,
+      "milliseconds": 1126,
+      "stationCount": 1348,
+      "quoteCount": 654,
+      "oldestObservedAt": "2026-10-01T06:11:43.615+00:00",
+      "newestObservedAt": "2026-10-01T14:15:25.745+00:00"
+    },
+    {
+      "city": "Los Angeles",
+      "radiusMiles": 2,
+      "stations": 22,
+      "milliseconds": 705,
+      "stationCount": 26,
+      "quoteCount": 22,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00"
+    },
+    {
+      "city": "Los Angeles",
+      "radiusMiles": 5,
+      "stations": 123,
+      "milliseconds": 575,
+      "stationCount": 170,
+      "quoteCount": 123,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00"
+    },
+    {
+      "city": "Los Angeles",
+      "radiusMiles": 10,
+      "stations": 417,
+      "milliseconds": 993,
+      "stationCount": 579,
+      "quoteCount": 417,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00"
+    },
+    {
+      "city": "Los Angeles",
+      "radiusMiles": 15,
+      "stations": 819,
+      "milliseconds": 1340,
+      "stationCount": 1079,
+      "quoteCount": 819,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00"
+    },
+    {
+      "city": "Seattle",
+      "radiusMiles": 2,
+      "stations": 14,
+      "milliseconds": 394,
+      "stationCount": 20,
+      "quoteCount": 14,
+      "oldestObservedAt": "2026-10-01T14:00:14.257+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00"
+    },
+    {
+      "city": "Seattle",
+      "radiusMiles": 5,
+      "stations": 58,
+      "milliseconds": 483,
+      "stationCount": 81,
+      "quoteCount": 58,
+      "oldestObservedAt": "2026-10-01T14:00:05.522+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00"
+    },
+    {
+      "city": "Seattle",
+      "radiusMiles": 10,
+      "stations": 174,
+      "milliseconds": 546,
+      "stationCount": 234,
+      "quoteCount": 174,
+      "oldestObservedAt": "2026-10-01T14:00:05.522+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00"
+    },
+    {
+      "city": "Seattle",
+      "radiusMiles": 15,
+      "stations": 311,
+      "milliseconds": 643,
+      "stationCount": 407,
+      "quoteCount": 311,
+      "oldestObservedAt": "2026-10-01T14:00:05.522+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00"
+    },
+    {
+      "city": "Honolulu",
+      "radiusMiles": 2,
+      "stations": 21,
+      "milliseconds": 334,
+      "stationCount": 33,
+      "quoteCount": 21,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00"
+    },
+    {
+      "city": "Honolulu",
+      "radiusMiles": 5,
+      "stations": 43,
+      "milliseconds": 315,
+      "stationCount": 71,
+      "quoteCount": 43,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00"
+    },
+    {
+      "city": "Honolulu",
+      "radiusMiles": 10,
+      "stations": 73,
+      "milliseconds": 390,
+      "stationCount": 117,
+      "quoteCount": 73,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00"
+    },
+    {
+      "city": "Honolulu",
+      "radiusMiles": 15,
+      "stations": 105,
+      "milliseconds": 409,
+      "stationCount": 163,
+      "quoteCount": 105,
+      "oldestObservedAt": "2026-10-01T14:01:03.517+00:00",
+      "newestObservedAt": "2026-10-01T14:08:04.24+00:00"
+    },
+    {
+      "city": "Anchorage",
+      "radiusMiles": 2,
+      "stations": 12,
+      "milliseconds": 357,
+      "stationCount": 14,
+      "quoteCount": 12,
+      "oldestObservedAt": "2026-10-01T14:00:05.522+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00"
+    },
+    {
+      "city": "Anchorage",
+      "radiusMiles": 5,
+      "stations": 36,
+      "milliseconds": 325,
+      "stationCount": 41,
+      "quoteCount": 36,
+      "oldestObservedAt": "2026-10-01T14:00:05.522+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00"
+    },
+    {
+      "city": "Anchorage",
+      "radiusMiles": 10,
+      "stations": 57,
+      "milliseconds": 311,
+      "stationCount": 65,
+      "quoteCount": 57,
+      "oldestObservedAt": "2026-10-01T14:00:05.522+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00"
+    },
+    {
+      "city": "Anchorage",
+      "radiusMiles": 15,
+      "stations": 63,
+      "milliseconds": 376,
+      "stationCount": 71,
+      "quoteCount": 63,
+      "oldestObservedAt": "2026-10-01T14:00:05.522+00:00",
+      "newestObservedAt": "2026-10-01T14:00:33.342+00:00"
+    }
+  ]
+}

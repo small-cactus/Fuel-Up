@@ -1,0 +1,22 @@
+TAP version 13
+# Subtest: Swift Glass Lab renders timely transitions and preserves native container geometry
+ok 1 - Swift Glass Lab renders timely transitions and preserves native container geometry
+  ---
+  duration_ms: 29637.747917
+  ...
+# 26 native connection frames during committed merges; no false parent bridges
+# Visible contact resistance 4.82pt over 8 samples
+# Native stretch: 20 separated samples before recoil; release gaps 33.2, 28.8, 30.0, 33.2, 58.3, 51.6, 40.5, 37.5, 45.4, 68.3, 34.2, 38.0pt
+# Main price recoil 18.79pt; 56 identity-bound outward copies
+# Maximum rendered rebound 17.99pt
+# Longest transition 232ms; maximum measured travel 1094.13pt/frame
+# 1615 native frames; 113 transitions; /Users/anthonyh/Library/Developer/CoreSimulator/Devices/0EE3DFFD-087C-483C-A651-C55C59A719A3/data/Containers/Data/Application/5E54D8C6-62CD-4B99-BC08-DF7BA6FBF7FF/Documents/cluster-lab-probe.json
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 29701.903875
