@@ -1,0 +1,26 @@
+{
+  "enabled": true,
+  "jobs": [
+    {
+      "attempts": 2,
+      "id": 40978,
+      "last_error": "DATABASE_FINISH_FUEL_NATIONAL_SERVING_JOB_FAILED",
+      "status": "succeeded"
+    },
+    {
+      "attempts": 3,
+      "id": 41001,
+      "last_error": "DATABASE_FINISH_FUEL_NATIONAL_SERVING_JOB_FAILED",
+      "status": "succeeded"
+    },
+    {
+      "attempts": 3,
+      "id": 41002,
+      "last_error": "DATABASE_FINISH_FUEL_NATIONAL_SERVING_JOB_FAILED",
+      "status": "succeeded"
+    }
+  ],
+  "status": "running",
+  "summaries": 68,
+  "time": "2026-10-01T17:20:40.664187+00:00"
+}

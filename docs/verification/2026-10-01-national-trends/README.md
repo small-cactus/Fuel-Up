@@ -36,3 +36,10 @@ and both E85-filter settings. An independent calculation from all 72 baseline
 archives also matches the database counts and averages for all ten combinations.
 Original archives, collection limits, routing, provider identity and production
 ranking are intact. See `archive-history.json` and `history-check.json`.
+
+Final collection check at 17:20 UTC: collection remained enabled, with 68/72
+batches and matching trend summaries in the current sweep. Three database write
+retries all recovered through normal Cron. Their exact failure causes were not
+established; a public endpoint check also briefly returned 503 during import,
+then all ten checks passed after import. Historical error records were retained.
+The current sweep remains excluded from chart history until fully complete.
