@@ -1,0 +1,8 @@
+{
+  "cutoff": "2026-10-01T01:22:26.937Z",
+  "verified": true,
+  "comparisons": 605,
+  "losses": 6,
+  "p95_gap": "0.00",
+  "worst_gap": "0.20"
+}

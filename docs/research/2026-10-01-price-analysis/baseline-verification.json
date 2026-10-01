@@ -1,0 +1,30 @@
+{
+  "verified": true,
+  "runs": [
+    22,
+    177
+  ],
+  "archiveObjects": 144,
+  "archiveBytes": 7345807,
+  "stationsPerRun": 141660,
+  "counts": {
+    "unpriced_both": 665586,
+    "price_unchanged": 302695,
+    "price_changed": 11008,
+    "price_unchanged_advanced": 54903,
+    "newly_available_quotes": 5018,
+    "newly_missing_quotes": 4451
+  },
+  "changedStations": 5321,
+  "checks": [
+    "sha256",
+    "size",
+    "schema",
+    "ordered station IDs",
+    "regional provenance",
+    "observation timestamps",
+    "duplicate absence",
+    "priced counts",
+    "independent quote comparison"
+  ]
+}
