@@ -76,6 +76,14 @@ assert(ClusterLabGeometry.owners(boundary, previous: [:])["b"] == "b")
 assert(ClusterLabGeometry.owners(separate, previous: merged)["b"] == "b")
 assert(ClusterLabGeometry.owners([station("b", 3, 0), station("a", 3, 0)], previous: [:])["b"] == "a")
 assert(ClusterLabGeometry.owners([station("a", 3, -104), station("b", 4, -21)], previous: [:])["b"] == "a")
+// A personalized recommendation must remain its own visible representative even
+// when a cheaper raw-price neighbor touches it. Input order cannot change this.
+let recommended = LabProjectedStation(id: "recommended", price: 3.15, point: .zero, isRecommended: true)
+let cheaper = station("cheaper", 3.00, 50)
+for input in [[recommended, cheaper], [cheaper, recommended]] {
+  let grouped = ClusterLabGeometry.owners(input, previous: [:])
+  assert(grouped["recommended"] == "recommended" && grouped["cheaper"] == "recommended")
+}
 // A still-connected badge pulls away through the existing hysteresis band.
 assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 84, y: 32)) == 0)
 assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 102, y: 0)) == 9)

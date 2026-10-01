@@ -88,4 +88,28 @@ test('unpriced E85 remains on the map after fresh prices, preserving radius and 
     ]},{fuelGrade:'e85',radiusMiles:5,now});
     assert.deepEqual(stations.map(s=>s.id),['priced','unpriced-near','unpriced-far','expired']);
     assert(stations.slice(1).every(s=>s.price===null && Object.keys(s.allPrices).length===0));
+    const availabilityOnly = buildLabStations({ topStations: [
+        { ...base, stationId: 'near', distanceMiles: 1 },
+        { ...base, stationId: 'far', distanceMiles: 2 },
+    ] }, { fuelGrade: 'e85', radiusMiles: 5, now });
+    assert.deepEqual(availabilityOnly.filter(s => s.isRecommended).map(s => s.id), ['near']);
+    assert(availabilityOnly.every(s => s.price === null));
+});
+
+
+test('green map identity follows the same personalized first card without changing prices', () => {
+    const base = { providerTier: 'station', latitude: 27.9, longitude: -82.4, updatedAt: new Date().toISOString() };
+    const snapshot = { topStations: [
+        { ...base, stationId: 'cheap', stationName: 'Wawa', price: 3.00 },
+        { ...base, stationId: 'preferred', stationName: 'Shell', brandNames: ['Shell'], price: 3.15 },
+        { ...base, stationId: 'membership', stationName: "Sam's Club", price: 2.80 },
+    ] };
+    for (const preferredBrands of [['shell'], []]) {
+        const stations = buildLabStations(snapshot, { preferredBrands });
+        assert.equal(stations[0].id, preferredBrands.length ? 'preferred' : 'cheap');
+        assert.deepEqual(stations.filter(s => s.isRecommended).map(s => s.id), [stations[0].id]);
+        assert.equal(stations.find(s => s.id === 'preferred').price, 3.15);
+        assert.equal(stations.find(s => s.id === 'cheap').price, 3.00);
+        assert.ok(!stations.some(s => s.id === 'membership'));
+    }
 });

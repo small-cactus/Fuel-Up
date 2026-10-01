@@ -51,3 +51,44 @@ and data-fetching code were not changed by this conversion.
   follow the retained fallback file; native layout was checked on the simulator.
 - Trends regression checks: 35 passed.
 - Release device build succeeded. No cluster animation code or probe gates changed.
+
+## Remaining containers — October 1, 2026
+
+- Settings, developer tools, station brands/memberships, and onboarding fuel
+  preferences keep their original SwiftUI `Form` and `Section` layout. The local
+  `fuel-up-glass` module replaces only section backgrounds with regular Liquid
+  Glass. Native row-bound anchors produce one material per section; no JavaScript
+  layout callbacks, per-frame bridge traffic, or changes to row padding/heights.
+- Onboarding highlight tiles and permission status, plus the Live Activity
+  designer's control panel, use Apple's native `UIGlassEffect` through Expo's
+  `GlassView`. Their existing width, height, padding and corner radii are retained.
+- Plain page backgrounds, chart loading placeholders, map canopies, and actual
+  Dynamic Island previews are not cards and keep their intended treatment.
+- Unsupported systems retain their original simple backgrounds. This material
+  conversion does not change pricing, preferences, or collector behavior.
+- On the iPhone 13 mini simulator, Settings accessibility frames stayed identical
+  before/after the material swap. Checked light/dark appearance and long brand-list
+  scrolling; the background is clipped at the native form viewport.
+
+## Recommendation identity and overview return
+
+- Home's filtered, personalized station list assigns `isRecommended` to its first
+  station. The native map uses that ID for green and cluster ownership, including
+  unpriced E85 availability. Raw displayed prices are unchanged; other stations
+  remain neutral even when a preferred recommendation has a higher raw price.
+- The Show all button retains its measured layout while hidden. Layout updates
+  during the overview flight are coalesced until MapKit finishes, then any
+  remaining adjustment animates natively instead of applying an instant fit.
+- The recommendation probe exercises 50 rapid zoom cycles and changes the
+  recommended ID during a merge, independently from the raw cheapest ID.
+- Final checks: 151 standard tests, 27 targeted UI/model checks, and four native
+  geometry/market/camera/focus tests passed. Live recommendation stress captured
+  2,218 frames, 122 splits and 171 merges with exclusive recommendation tint.
+  North, rotated, and changing-layout overview returns each captured 54
+  intermediate camera frames. Native merge/split and raw-cheapest fallback
+  stress gates also passed. Settings was checked at accessibility-medium size.
+- Signed Release build installed on the iPhone 18 Pro Max without launching it.
+- The legacy `clusterProbe.integration.test.cjs` was attempted unchanged but
+  timed out waiting for a multi-station cluster. Its separate legacy Home path
+  already has `ENABLE_CLUSTER_MERGE_TRANSITIONS = false`; no gate was weakened
+  and this timeout is not counted as a pass.

@@ -26,6 +26,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   private var lastProbe: String?
   private var latestStations: [ClusterLabStation] = []
   private var needsCameraFit = true
+  private var animateDeferredFit = false
   private var fittedSize = CGSize.zero
   private var fittedInsets = UIEdgeInsets.zero
   private var isFittingCamera = false
@@ -261,7 +262,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     let points = stations.map { station -> LabProjectedStation in
       let p = station.mapPoint
       return LabProjectedStation(id: station.id, price: station.price,
-        point: CGPoint(x: p.x < start ? p.x + world : p.x, y: p.y))
+        point: CGPoint(x: p.x < start ? p.x + world : p.x, y: p.y), isRecommended: station.isRecommended)
     }
     let projectedLocation = location.map { CGPoint(x: $0.x < start ? $0.x + world : $0.x, y: $0.y) }
     let maximumScale = bounds.width / (250 * MKMapPointsPerMeterAtLatitude(first.latitude))
@@ -327,13 +328,25 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
 
   private func fitIfNeeded() {
     guard needsCameraFit, pendingProbe == nil else { return }
+    // MapKit may expose the destination camera while its presentation is still
+    // flying. Replacing that flight with another fit can jump to the destination.
+    // Coalesce layout changes until the native flight ends, then animate any
+    // remaining adjustment from the settled camera.
+    if overviewDestination != nil { animateDeferredFit = true; return }
+    let animateFit = animateDeferredFit && !UIAccessibility.isReduceMotionEnabled
+    animateDeferredFit = false
     if let probe {
       // Probe fixtures still receive real card/safe-area layout updates before
       // their camera sequence starts, just like the production station set.
       if probe.canRefitForLayoutChange { fitCamera(to: renderer.stations) }
+      else if animateFit {
+        fitCamera(to: renderer.stations, animated: true)
+      }
     } else if let id = focusedStationId, latestStations.contains(where: { $0.id == id }) {
       focusStation(id)
-    } else { fitCamera(to: latestStations) }
+    } else {
+      fitCamera(to: latestStations, animated: animateFit)
+    }
   }
 
   func refresh() {

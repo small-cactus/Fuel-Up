@@ -6,6 +6,7 @@ struct ClusterLabStation: Equatable {
   let longitude: Double
   let price: Double
   let name: String
+  let isRecommended: Bool
   var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
   var mapPoint: MKMapPoint { MKMapPoint(coordinate) }
 
@@ -21,6 +22,7 @@ struct ClusterLabStation: Equatable {
     let price = reported.flatMap { $0.isFinite && $0 > 0 ? $0 : nil } ?? .infinity
     self.id = id; self.latitude = latitude; self.longitude = longitude; self.price = price
     name = value["name"] as? String ?? "Gas station"
+    isRecommended = value["isRecommended"] as? Bool ?? false
   }
 }
 
@@ -116,6 +118,7 @@ final class ClusterLabRenderer {
   var onFocus: ((String) -> Bool)?
   var clusterOwners: [String: String] { owners }
   private(set) var cheapestStationID: String?
+  private(set) var recommendedStationID: String?
 
   func station(at point: CGPoint, in source: UIView) -> String? {
     guard !container.isHidden else { return nil }
@@ -178,6 +181,14 @@ final class ClusterLabRenderer {
       LabMarketQuote(id: $0.id, latitude: $0.latitude, longitude: $0.longitude, price: $0.price)
     })
     cheapestStationID = markets.values.first?.cheapestStationID
+    // The ranked JS snapshot is authoritative, including preference adjustments
+    // and availability-only E85. Legacy probe fixtures retain raw-price fallback.
+    recommendedStationID = snapshot.first(where: \.isRecommended)?.id ?? cheapestStationID
+    for station in snapshot {
+      var assessment = markets[station.id] ?? .unknown
+      assessment.recommendedStationID = recommendedStationID
+      markets[station.id] = assessment
+    }
     // A data refresh may change price/order; no stale price is retained in a
     // reused pill. Camera state belongs to the map and is left untouched.
     let changed = Set(next.filter { station in motions[station.id]?.station != station }.map(\.id))
@@ -245,7 +256,7 @@ final class ClusterLabRenderer {
     let candidates = stations.compactMap { station -> LabProjectedStation? in
       let point = map.convert(station.coordinate, toPointTo: map)
       guard point.x.isFinite, point.y.isFinite, visible.contains(point) else { return nil }
-      return LabProjectedStation(id: station.id, price: station.price, point: point)
+      return LabProjectedStation(id: station.id, price: station.price, point: point, isRecommended: station.id == recommendedStationID)
     }
     let now = CACurrentMediaTime()
     let interval = now - projectionTime
@@ -782,6 +793,7 @@ final class ClusterLabRenderer {
                            "stationCount": motions.count, "animating": animating, "owners": owners,
                            "selectedId": emphasis.selectedId ?? "",
                            "cheapestStationID": cheapestStationID ?? "",
+                           "recommendedStationID": recommendedStationID ?? "",
                            "userLocation": dot.map { ["x": $0.x, "y": $0.y] } ?? [:]])
     }
     return animating

@@ -38,7 +38,7 @@ extension ClusterLabMapView {
     guard bounds.width > 0, bounds.height > 0,
           let station = renderer.stations.first(where: { $0.id == id }) else { return false }
     let points = renderer.stations.map { LabProjectedStation(id: $0.id, price: $0.price,
-      point: map.convert($0.coordinate, toPointTo: map)) }
+      point: map.convert($0.coordinate, toPointTo: map), isRecommended: $0.isRecommended) }
     // MapKit observes its current camera: mutating it applies the destination
     // immediately. Configure an independent copy so setCamera can animate
     // from the existing viewport to the calculated destination.

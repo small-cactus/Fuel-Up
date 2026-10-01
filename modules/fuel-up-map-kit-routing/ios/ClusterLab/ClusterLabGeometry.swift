@@ -1,12 +1,13 @@
 import Foundation
 import CoreGraphics
 
-// Pure screen-space broad phase. Stable price/ID order chooses the cheapest
-// representative. Hysteresis prevents membership chatter at a contact boundary.
+// Pure screen-space broad phase. The recommendation owns its cluster; other
+// representatives use stable price/ID order. Hysteresis prevents membership chatter at a contact boundary.
 struct LabProjectedStation {
   let id: String
   let price: Double
   let point: CGPoint
+  var isRecommended: Bool = false
 }
 
 enum ClusterLabGeometry {
@@ -79,7 +80,10 @@ enum ClusterLabGeometry {
 
   static func owners(_ stations: [LabProjectedStation], previous: [String: String], selectedId: String? = nil,
                      displayOffsets: [String: CGFloat] = [:]) -> [String: String] {
-    let sorted = stations.sorted { $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price }
+    let sorted = stations.sorted {
+      if $0.isRecommended != $1.isRecommended { return $0.isRecommended }
+      return $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price
+    }
     var owners: [String: String] = [:]
     struct Cell: Hashable { let x: Int; let y: Int }
     var grid: [Cell: [Int]] = [:]

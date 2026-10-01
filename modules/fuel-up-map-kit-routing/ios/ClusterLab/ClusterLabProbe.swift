@@ -14,6 +14,9 @@ final class ClusterLabProbe {
   private var focusDetails: [String: Any] = [:]
   private var focusCameraSamples: [[String: Any]] = []
   private var overviewReturns: [[String: Any]] = []
+  private var overviewInset: CGFloat?
+  private var changedOverviewInset = false
+  private var restoredOverviewInset = false
   private let center: CLLocationCoordinate2D
   private var isFit: Bool { token.hasPrefix("fit-") || token.hasPrefix("location-") }
   var canRefitForLayoutChange: Bool {
@@ -46,7 +49,8 @@ final class ClusterLabProbe {
     view.renderer.setStations(offsets.enumerated().compactMap { index, offset in
       ClusterLabStation(["id": "lab-\(index)", "latitude": center.latitude + offset.0,
                          "longitude": center.longitude + offset.1 + (token.hasPrefix("fit-user-") ? 0.04 : 0), "price": 3.10 + Double(index) * 0.10,
-                         "name": "Probe station \(index)"])
+                         "name": "Probe station \(index)",
+                         "isRecommended": token.hasPrefix("rapid-recommended-") && index == 1])
     })
     if isFit || token.hasPrefix("overview-") || token.hasPrefix("roundtrip-") { view.fitCamera(to: view.renderer.stations) }
     else {
@@ -109,7 +113,8 @@ final class ClusterLabProbe {
           view.renderer.setStations(view.renderer.stations.map { station in
             ClusterLabStation(["id": station.id, "latitude": station.latitude,
               "longitude": station.longitude, "price": station.id == "lab-1" ? 2.99 : station.price,
-              "name": station.name])!
+              "name": station.name,
+              "isRecommended": token.hasPrefix("rapid-recommended-") && station.id == "lab-2"])!
           })
         }
         let span = next.isMultiple(of: 2) ? 0.003 : 0.03
@@ -163,7 +168,19 @@ final class ClusterLabProbe {
       if stage == 0 && elapsed >= 2.5 {
         stage = 1
         focusDetails["focusedDistance"] = view.map.camera.centerCoordinateDistance
+        overviewInset = view.bounds.height - view.fitBounds.maxY
         focusDetails["overviewRequested"] = view.showAll()
+      }
+      if token.hasPrefix("overview-layout-"), let inset = overviewInset {
+        // Reproduce a native card measurement arriving during the camera flight.
+        if elapsed >= 2.55 && !changedOverviewInset {
+          changedOverviewInset = true
+          view.setOverlayBottomInset(inset + 8)
+        }
+        if elapsed >= 2.75 && !restoredOverviewInset {
+          restoredOverviewInset = true
+          view.setOverlayBottomInset(inset)
+        }
       }
       if stage == 1 && elapsed >= 4 {
         stage = 2
@@ -260,6 +277,7 @@ final class ClusterLabProbe {
       "stationPrices": Dictionary(uniqueKeysWithValues: view.renderer.stations.map { ($0.id, $0.price) }),
       "focusCameraSamples": focusCameraSamples, "overviewReturns": overviewReturns,
       "cheapestStationID": view.renderer.cheapestStationID ?? "",
+      "recommendedStationID": view.renderer.recommendedStationID ?? "",
       "marketScores": ClusterLabMarket.assess(view.renderer.stations.map {
         LabMarketQuote(id: $0.id, latitude: $0.latitude, longitude: $0.longitude, price: $0.price)
       }).mapValues { ($0.score * 20).rounded() / 20 },

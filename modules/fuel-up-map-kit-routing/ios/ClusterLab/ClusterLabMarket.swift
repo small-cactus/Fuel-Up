@@ -14,6 +14,7 @@ struct LabMarketAssessment {
   let cheapestStationID: String?
   // Positive selects the sole green station; magnitude is comparison metadata.
   // The renderer leaves every non-positive score untinted.
+  var recommendedStationID: String? = nil
   let score: Double
   static let unknown = LabMarketAssessment(median: nil, peerCount: 0, cheapestPrice: nil, cheapestStationID: nil, score: 0)
 }

@@ -69,7 +69,7 @@ function assertParentTints(report, frame) {
         const expectedId = view.role === 'badge' ? view.id.slice(6) : view.id;
         assert.ok(Number.isFinite(report.stationPrices[expectedId]), 'missing station quote');
         assert.equal(view.tintOwner, expectedId, `station tint followed glass connectivity for ${view.id}`);
-        const isCheapest = expectedId === (frame.cheapestStationID ?? report.cheapestStationID);
+        const isCheapest = expectedId === (frame.recommendedStationID ?? report.recommendedStationID ?? frame.cheapestStationID ?? report.cheapestStationID);
         assert.equal(view.tintScore, isCheapest ? 1 : 0, `price tint changed during motion for ${view.id}`);
         const expectedTint = isCheapest ? [0, 1, 47 / 255, 0.3] : [];
         assert.equal(view.materialTint.length, expectedTint.length,
@@ -617,7 +617,7 @@ test('focused pill size retargets continuously without moving its map anchor or 
     t.diagnostic(`${intermediate} intermediate sizes; maximum width step ${maximumStep.toFixed(2)}pt`);
 });
 
-for (const heading of ['north', 'rotated']) {
+for (const heading of ['north', 'rotated', 'layout']) {
     test(`Show all restores the fitted overview after ${heading} focus and interruption`, { timeout: 30000 }, async t => {
         const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
         const token = `overview-${heading}-${Date.now()}`;
@@ -646,6 +646,15 @@ for (const heading of ['north', 'rotated']) {
         const travel = report.focusCameraSamples.filter(frame => frame.time > 2.5 && frame.time < 4 &&
             frame.distance > detail.focusedDistance * 1.01 && frame.distance < detail.overviewDistance * 0.99);
         assert.ok(travel.length >= 8, 'overview camera jumped instead of animating');
+        if (heading === 'layout') {
+            // setCamera briefly reports its destination before MapKit starts
+            // presenting the flight. Check the layout-change interval itself;
+            // it starts at 2.55, after that initial model-camera notification.
+            const flight = report.focusCameraSamples.filter(frame => frame.time >= 2.55 && frame.time < 4);
+            const range = detail.overviewDistance - detail.focusedDistance;
+            const largestStep = Math.max(...flight.slice(1).map((frame, i) => Math.abs(frame.distance - flight[i].distance)));
+            assert.ok(largestStep < range * 0.25, `layout update snapped the native flight: ${largestStep / range}`);
+        }
         const overviewFrames = report.samples.filter(frame => {
             const elapsed = frame.time - report.startTime;
             return elapsed > 2.5 && elapsed < 4;
@@ -839,4 +848,41 @@ test('overview fits the live user dot outside the station envelope', { timeout: 
             'fixture did not put user outside the stations');
     }
     t.diagnostic(`${report.samples.length} live frames include the outside user dot and all six stations`);
+});
+
+
+test('personalized recommendation exclusively owns green across 50 zoom cycles and a ranking change', { timeout: 60000 }, async t => {
+    const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+    const token = `rapid-recommended-${Date.now()}`;
+    const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+    const file = path.join(container, 'Documents/cluster-lab-probe.json');
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    let report;
+    const deadline = Date.now() + 50000;
+    while (Date.now() < deadline) {
+        try {
+            const value = JSON.parse(readFileSync(file, 'utf8'));
+            if (value.token === token) { report = value; break; }
+        } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    assert.ok(report, 'recommendation probe did not export');
+    assert.equal(report.status, 'completed');
+    assert.equal(report.focus.rapidZoomChanges, 100);
+    assert.ok(report.samples.length >= 500);
+    assert.deepEqual([...new Set(report.samples.map(f => f.recommendedStationID))].sort(), ['lab-1', 'lab-2']);
+    const splits = report.events.filter(e => e.type === 'split-spawn').length;
+    const merges = report.events.filter(e => e.type === 'merge-start').length;
+    assert.ok(splits >= 20 && merges >= 20);
+    for (const frame of report.samples) {
+        assert.notEqual(frame.recommendedStationID, frame.cheapestStationID, 'fixture must distinguish ranking from raw price');
+        assertParentTints(report, frame);
+        const green = frame.views.filter(v => v.tintScore > 0 && v.role !== 'badge');
+        assert.ok(green.length <= 1);
+        for (const pill of green) assert.equal(pill.id, frame.recommendedStationID);
+    }
+    const green = report.final.filter(v => v.tintScore > 0);
+    assert.ok(green.length > 0);
+    assert.ok(green.every(v => v.tintOwner === 'lab-2'));
+    t.diagnostic(`${report.samples.length} live frames; ${splits} splits and ${merges} merges; recommendation stayed green`);
 });

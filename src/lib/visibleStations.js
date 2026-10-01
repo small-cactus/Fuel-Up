@@ -23,7 +23,8 @@ export function buildVisibleStations(snapshot, { origin, radiusMiles, minimumRat
         if (!id) continue;
         byId.set(id, { ...quote, id, name: quote.stationName || quote.name || 'Gas station' });
     }
-    // Preference affects order only. Swift still colors the actual lowest raw price.
-    return rankStationQuotes([...byId.values()], { preferredBrands });
+    // The same ranked snapshot owns both card order and the map highlight.
+    return rankStationQuotes([...byId.values()], { preferredBrands })
+        .map((station, index) => ({ ...station, isRecommended: index === 0 }));
 }
 

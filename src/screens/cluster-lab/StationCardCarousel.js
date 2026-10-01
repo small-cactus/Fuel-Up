@@ -58,10 +58,12 @@ const StationCardCarousel = forwardRef(function StationCardCarousel({ stations, 
     return (
         <View pointerEvents="box-none" style={[styles.overlay, { bottom }]}
             onLayout={event => onHeight(event.nativeEvent.layout.height + bottom)}>
-            <View pointerEvents="box-none" style={styles.resetRow}>
-                {!overview && <GlassActionButton title="Show all" icon="arrow.up.left.and.arrow.down.right"
+            <View pointerEvents={overview ? 'none' : 'box-none'} accessibilityElementsHidden={overview}
+                importantForAccessibility={overview ? 'no-hide-descendants' : 'auto'}
+                style={[styles.resetRow, overview && styles.hiddenReset]}>
+                <GlassActionButton title="Show all" icon="arrow.up.left.and.arrow.down.right"
                     label="Show all stations" hint="Fits all stations and your location on the map"
-                    isDark={isDark} onPress={onShowAll} />}
+                    isDark={isDark} onPress={onShowAll} />
             </View>
             <FlatList key={`${width}:${fontScale}`} ref={list} testID="glass-lab-station-cards" data={stations} horizontal pagingEnabled
                 style={{ height: cardHeight, flexGrow: 0 }} contentContainerStyle={styles.items}
@@ -96,6 +98,9 @@ export default StationCardCarousel;
 const styles = StyleSheet.create({
     overlay: { position: 'absolute', left: 0, right: 0 },
     resetRow: { minHeight: 52, paddingBottom: 8, alignItems: 'center' },
+    // Preserve the native button's measured height while hiding it. Removing it
+    // changes the camera's usable viewport during the Show all flight.
+    hiddenReset: { opacity: 0 },
     items: { alignItems: 'flex-start' },
     pages: { height: 44, marginHorizontal: 24 },
 });
