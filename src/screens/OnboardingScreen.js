@@ -1,4 +1,3 @@
-import MembershipStep from './onboarding/MembershipStep';
 import { WelcomeStep } from './onboarding/WelcomeStep.js';
 import { LocationStep } from './onboarding/LocationStep.js';
 import { NotificationStep } from './onboarding/NotificationStep.js';
@@ -276,14 +275,13 @@ export default function OnboardingScreen() {
                     />
 
                     <MemoLocationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionState={locationPermissionState} />
-                    <MembershipStep width={SCREEN_WIDTH} insets={insets} themeColors={themeColors} isDark={isDark}
-                        coordinate={onboardingCoordinate} isActive={ONBOARDING_STEPS[currentStep] === 'memberships'} selected={fuelMemberships} onChange={setFuelMemberships} />
                     <MemoNotificationStep isDark={isDark} themeColors={themeColors} insets={insets} permissionStatus={notifPermissionStatus} />
                     <RadiusStep isActive={ONBOARDING_STEPS[currentStep] === 'radius'} width={SCREEN_WIDTH} isDark={isDark} themeColors={themeColors} insets={insets} value={radius} onChange={setRadius} coordinate={onboardingCoordinate} />
                     <FuelGradeStep width={SCREEN_WIDTH} isDark={isDark} themeColors={themeColors} insets={insets} value={octane} onChange={setOctane} requiresE85={requiresE85} onRequiresE85Change={setRequiresE85} />
                     <BrandStep width={SCREEN_WIDTH} insets={insets} themeColors={themeColors} isDark={isDark}
                         isActive={ONBOARDING_STEPS[currentStep] === 'brands'} coordinate={onboardingCoordinate} radiusMiles={radius} fuelGrade={octane}
-                        requiresE85={requiresE85} selectedBrands={preferredBrands} onChange={setPreferredBrands} />
+                        requiresE85={requiresE85} selectedBrands={preferredBrands} onChange={setPreferredBrands}
+                        fuelMemberships={fuelMemberships} onMembershipsChange={setFuelMemberships} />
                 </ScrollView>
             </View>
 

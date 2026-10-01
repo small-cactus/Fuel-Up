@@ -78,7 +78,6 @@ async function setup({ requestLocation } = {}) {
     }
     mocks['./onboarding/FuelGradeStep'] = load('src/screens/onboarding/FuelGradeStep.js', mocks);
     mocks['./onboarding/RadiusStep'] = load('src/screens/onboarding/RadiusStep.js', mocks);
-    mocks['./onboarding/MembershipStep'] = { __esModule: true, default: props => React.createElement('MembershipStep', props) };
     mocks['./onboarding/BrandStep'] = { __esModule: true, default: props => React.createElement('BrandStep', props) };
     mocks['./onboarding/useOnboardingLocation'] = { __esModule: true, default: () => null };
     const Component = load('src/screens/OnboardingScreen.js', mocks).default;
@@ -99,7 +98,7 @@ for (const grade of ['Regular', 'Midgrade', 'Premium', 'Diesel', 'E85']) {
             app.renderer.root.findByType('Slider').props.onValueChange(7);
             app.renderer.root.findByType('NativePicker').props.onSelectionChange(grade.toLowerCase());
         });
-        await app.swipe(7);
+        await app.swipe(6);
         await app.continue();
         assert.equal(app.saved().preferredOctane, grade.toLowerCase());
         assert.equal(app.saved().searchRadiusMiles, 7);
@@ -110,7 +109,7 @@ for (const grade of ['Regular', 'Midgrade', 'Premium', 'Diesel', 'E85']) {
 
 test('permission refresh on return from Settings and duplicate taps do not create parallel requests', async () => {
     const app = await setup();
-    await app.swipe(4);
+    await app.swipe(3);
     await act(async () => {
         const button = app.renderer.root.findAllByType('Pressable').find(n => n.props.accessibilityRole === 'button');
         button.props.onPress(); button.props.onPress();
@@ -165,9 +164,9 @@ test('Get Started saves E85 availability and preferred brands atomically with fu
         app.renderer.root.findByType('NativePicker').props.onSelectionChange('premium');
         app.renderer.root.findByType('NativeToggle').props.onIsOnChange(true);
         app.renderer.root.findByType('BrandStep').props.onChange(['wawa', 'shell']);
-        app.renderer.root.findByType('MembershipStep').props.onChange(['sams']);
+        app.renderer.root.findByType('BrandStep').props.onMembershipsChange(['sams']);
     });
-    await app.swipe(7);
+    await app.swipe(6);
     await app.continue();
     assert.equal(app.saved().preferredOctane, 'premium');
     assert.equal(app.saved().searchRadiusMiles, 12);
@@ -179,7 +178,7 @@ test('Get Started saves E85 availability and preferred brands atomically with fu
 });
 
 
-for (const step of [2, 4]) {
+for (const step of [2, 3]) {
     test(`Not Now advances permission page ${step} without requesting access`, async () => {
         const app = await setup();
         await app.swipe(step);

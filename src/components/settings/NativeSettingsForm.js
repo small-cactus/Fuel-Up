@@ -69,7 +69,6 @@ export default function NativeSettingsForm({
     onRequiresE85Change,
     preferredBrands = [],
     fuelMemberships = [],
-    onEditMemberships,
     onEditPreferredBrands,
     // Navigation
     navigationApp,
@@ -174,15 +173,10 @@ export default function NativeSettingsForm({
                     </Picker>
                     <Toggle label="Require E85" systemImage="leaf.fill" isOn={Boolean(requiresE85)}
                         onIsOnChange={onRequiresE85Change} testID="settings-requires-e85" />
-                    <Button onPress={onEditMemberships} testID="settings-fuel-memberships">
-                        <LabeledContent label={<Label title="Gas Memberships" systemImage="person.crop.rectangle" />}>
-                            <Text>{fuelMemberships.length ? `${fuelMemberships.length} selected` : 'None'}</Text>
-                        </LabeledContent>
-                    </Button>
                     <Button onPress={onEditPreferredBrands} testID="settings-preferred-brands">
-                        <LabeledContent label={<Label title="Preferred Brands" systemImage="heart" />}>
+                        <LabeledContent label={<Label title="Station Brands" systemImage="heart" />}>
                             <Text modifiers={[foregroundStyle({ type: 'hierarchical', style: 'secondary' })]}>
-                                {preferredBrands.length ? `${preferredBrands.length} selected` : 'Any brand'}
+                                {`${fuelMemberships.length + preferredBrands.length} selected`}
                             </Text>
                         </LabeledContent>
                     </Button>

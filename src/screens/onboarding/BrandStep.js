@@ -6,8 +6,8 @@ export default function BrandStep({ width, insets, themeColors, ...props }) {
     return (
         <View style={{ width, flex: 1, backgroundColor: themeColors.background }}>
             <View style={[styles.header, { paddingTop: insets.top + 28 }]}>
-                <Text style={[styles.title, { color: themeColors.text }]}>Do you prefer any station brands?</Text>
-                <Text style={[styles.subtitle, { color: themeColors.text }]}>Optional. Most nearby stations first.</Text>
+                <Text style={[styles.title, { color: themeColors.text }]}>Your station brands</Text>
+                <Text style={[styles.subtitle, { color: themeColors.text }]}>Choose your memberships and favorites.</Text>
             </View>
             <BrandPreferences themeColors={themeColors} {...props} />
         </View>

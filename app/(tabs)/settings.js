@@ -1,4 +1,3 @@
-import MembershipPreferencesSheet from '../../src/components/settings/MembershipPreferencesSheet';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, Alert, StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
@@ -30,7 +29,6 @@ export default function SettingsScreen() {
     const { requestFuelReset, setFuelDebugState, manualLocationOverride, resolvedFuelSearchContext } = useAppState();
     const { preferences, updatePreference, resetOnboarding } = usePreferences();
     const [trackingPermissionState, setTrackingPermissionState] = useState(null);
-    const [membershipsPresented, setMembershipsPresented] = useState(false);
     const [brandsPresented, setBrandsPresented] = useState(false);
     const brandCoordinate = useMemo(() => {
         const origin = manualLocationOverride || resolvedFuelSearchContext;
@@ -206,13 +204,11 @@ export default function SettingsScreen() {
 
     return (
         <View style={styles.container}>
-            <MembershipPreferencesSheet visible={membershipsPresented} onClose={() => setMembershipsPresented(false)}
-                isDark={isDark} themeColors={themeColors} coordinate={brandCoordinate}
-                selected={preferences.fuelMemberships || []} onChange={value => updatePreference('fuelMemberships', value)} />
             <BrandPreferencesSheet visible={brandsPresented} onClose={() => setBrandsPresented(false)}
                 isDark={isDark} themeColors={themeColors} coordinate={brandCoordinate}
                 radiusMiles={preferences.searchRadiusMiles} fuelGrade={preferences.preferredOctane}
                 requiresE85={preferences.requiresE85} selectedBrands={preferences.preferredBrands || []}
+                fuelMemberships={preferences.fuelMemberships || []} onMembershipsChange={value => updatePreference('fuelMemberships', value)}
                 onChange={brands => updatePreference('preferredBrands', brands)} />
             <View style={[styles.baseBackground, { backgroundColor: themeColors.background }]} />
             <View style={styles.foregroundLayer}>
@@ -234,7 +230,6 @@ export default function SettingsScreen() {
                         requiresE85={preferences.requiresE85}
                         onRequiresE85Change={value => updatePreference('requiresE85', value)}
                         fuelMemberships={preferences.fuelMemberships}
-                        onEditMemberships={() => setMembershipsPresented(true)}
                         preferredBrands={preferences.preferredBrands}
                         onEditPreferredBrands={() => setBrandsPresented(true)}
                         navigationApp={preferences.navigationApp}

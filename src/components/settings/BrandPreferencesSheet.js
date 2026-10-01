@@ -11,7 +11,7 @@ export default function BrandPreferencesSheet({ visible, onClose, isDark, themeC
             <View style={[styles.sheet, { backgroundColor: themeColors.background }]}>
                 <Host matchContents={{ vertical: true }} colorScheme={isDark ? 'dark' : 'light'}>
                     <HStack modifiers={[padding({ horizontal: 20, vertical: 16 })]}>
-                        <Text modifiers={[font({ size: 20, weight: 'bold' })]}>Preferred Brands</Text>
+                        <Text modifiers={[font({ size: 20, weight: 'bold' })]}>Station Brands</Text>
                         <Spacer />
                         <Button label="Done" onPress={onClose} />
                     </HStack>

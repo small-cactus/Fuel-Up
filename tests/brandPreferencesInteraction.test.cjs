@@ -65,9 +65,11 @@ test('brand requests expose unavailable location, empty results, and retryable f
 test('native brand toggles preserve rapid selections, and local search does not replace selection', async () => {
     const changes = [];
     const Component = load('src/components/BrandPreferences.js', {
-        'react-native': { View: 'View', TextInput: 'TextInput', StyleSheet: { create: x => x } },
+        'react-native': { View: 'View', StyleSheet: { create: x => x } },
         '@expo/ui/swift-ui': { Button: 'Button', Form: 'Form', Host: 'Host', ProgressView: 'ProgressView', Section: 'Section', Text: 'Text', Toggle: 'Toggle' },
         '../lib/fuelGrade': { getFuelGradeMeta: () => ({ label: 'Regular' }) },
+        '../../modules/fuel-up-native-search': { __esModule: true, default: 'NativeSearchBar' },
+        './memberships/MembershipSection': { __esModule: true, default: 'MembershipSection' },
         './brands/useNearbyBrands': { __esModule: true, default: () => ({ options: [{ id: 'shell', label: 'Shell', count: 4 }, { id: 'wawa', label: 'Wawa', count: 2 }], hasLocation: true, loading: false, retry() {} }) },
     }).default;
     let renderer;
@@ -77,10 +79,32 @@ test('native brand toggles preserve rapid selections, and local search does not 
         rows[0].props.onIsOnChange(true); rows[1].props.onIsOnChange(true);
     });
     assert.deepEqual(changes.at(-1), ['shell', 'wawa']);
-    await act(async () => renderer.root.findByType('Button').props.onPress());
-    await act(async () => renderer.root.findByType('TextInput').props.onChangeText('waw'));
+    await act(async () => renderer.root.findByType('NativeSearchBar').props.onQueryChange({ nativeEvent: { text: 'waw' } }));
     assert.equal(renderer.root.findAllByType('Toggle').length, 1);
     assert.equal(renderer.root.findByType('Toggle').props.testID, 'brand-preference-wawa');
     assert.equal(changes.length, 2);
+    assert.equal(renderer.root.findByType('MembershipSection').props.hidden, true);
+    await act(async () => renderer.root.findByType('NativeSearchBar').props.onQueryChange({ nativeEvent: { text: '' } }));
+    assert.equal(renderer.root.findByType('MembershipSection').props.hidden, false);
+    assert.equal(changes.length, 2, 'clearing search must not change either preference selection');
+    await act(async () => renderer.unmount());
+});
+
+test('membership section keeps saved access editable outside its state and preserves rapid toggles', async () => {
+    const changes = [];
+    const Component = load('src/components/memberships/MembershipSection.js', {
+        '@expo/ui/swift-ui': { Section: 'Section', Toggle: 'Toggle', Text: 'Text', ProgressView: 'ProgressView', Button: 'Button' },
+        '../../lib/fuelMemberships': { FUEL_MEMBERSHIPS: [{ id: 'costco', label: 'Costco' }, { id: 'sams', label: 'Sam’s Club' }, { id: 'bjs', label: 'BJ’s' }] },
+        './useMembershipOptions': { __esModule: true, default: () => ({ ids: ['costco', 'sams'], state: 'UT', hasLocation: true, loading: false }) },
+    }).default;
+    let renderer;
+    await act(async () => { renderer = create(React.createElement(Component, { selected: ['bjs'], onChange: next => changes.push(next) })); });
+    assert.equal(renderer.root.findAllByType('Toggle').length, 3);
+    await act(async () => {
+        renderer.root.findByProps({ testID: 'fuel-membership-costco' }).props.onIsOnChange(true);
+        renderer.root.findByProps({ testID: 'fuel-membership-sams' }).props.onIsOnChange(true);
+        renderer.root.findByProps({ testID: 'fuel-membership-bjs' }).props.onIsOnChange(false);
+    });
+    assert.deepEqual(changes.at(-1), ['costco', 'sams']);
     await act(async () => renderer.unmount());
 });

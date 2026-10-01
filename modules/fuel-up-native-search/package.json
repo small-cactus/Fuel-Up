@@ -1,0 +1,9 @@
+{
+  "name": "fuel-up-native-search",
+  "version": "1.0.0",
+  "description": "Apple native search controls for Fuel Up.",
+  "main": "index.js",
+  "private": true,
+  "license": "MIT",
+  "author": "Fuel Up"
+}

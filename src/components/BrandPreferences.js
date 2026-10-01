@@ -1,15 +1,17 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { Button, Form, Host, ProgressView, Section, Text, Toggle } from '@expo/ui/swift-ui';
 import { getFuelGradeMeta } from '../lib/fuelGrade';
+import NativeSearchBar from '../../modules/fuel-up-native-search';
+import MembershipSection from './memberships/MembershipSection';
 import useNearbyBrands from './brands/useNearbyBrands';
 
 const NO_BRANDS = [];
-export default function BrandPreferences({ isDark, themeColors, coordinate, radiusMiles, fuelGrade,
-    requiresE85 = false, selectedBrands = NO_BRANDS, onChange, isActive = true }) {
+export default function BrandPreferences({ isDark, coordinate, radiusMiles, fuelGrade,
+    requiresE85 = false, selectedBrands = NO_BRANDS, onChange, fuelMemberships = NO_BRANDS, onMembershipsChange, isActive = true }) {
     const { options, hasLocation, loading, error, retry } = useNearbyBrands({ coordinate, radiusMiles, fuelGrade, requiresE85, isActive });
-    const [isSearching, setIsSearching] = useState(false);
     const [search, setSearch] = useState('');
+    useEffect(() => { if (!isActive) setSearch(''); }, [isActive]);
     const selectionRef = useRef(selectedBrands);
     selectionRef.current = selectedBrands;
     const rows = useMemo(() => {
@@ -26,21 +28,11 @@ export default function BrandPreferences({ isDark, themeColors, coordinate, radi
     };
     return (
         <View style={styles.container}>
-            <Host style={styles.searchButton} colorScheme={isDark ? 'dark' : 'light'}>
-                <Button label={isSearching ? 'Done Searching' : 'Search Brands'} systemImage={isSearching ? 'checkmark' : 'magnifyingglass'}
-                    onPress={() => { setIsSearching(value => !value); setSearch(''); }} />
-            </Host>
-            {isSearching && (
-                // UIKit TextInput is native and avoids the known SwiftUI TextField
-                // first-responder crash when hosted inside React Native Fabric.
-                <TextInput testID="brand-search" accessibilityLabel="Search station brands" placeholder="Search brands"
-                    placeholderTextColor={isDark ? '#8E8E93' : '#636366'} style={[styles.searchInput, {
-                        color: themeColors.text, backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
-                    }]} value={search} onChangeText={setSearch} clearButtonMode="while-editing"
-                    autoCorrect={false} autoCapitalize="none" returnKeyType="search" />
-            )}
+            <NativeSearchBar style={styles.searchBar} isDark={isDark} active={isActive}
+                placeholder="Search preferred brands" onQueryChange={event => setSearch(event.nativeEvent.text)} />
             <Host style={styles.container} colorScheme={isDark ? 'dark' : 'light'}>
                 <Form>
+                    <MembershipSection hidden={Boolean(search.trim())} coordinate={coordinate} isActive={isActive} selected={fuelMemberships} onChange={onMembershipsChange} />
                     {(!hasLocation || loading || error || !rows.length) && <Section>
                         {!hasLocation && <Text>Enable location to see brands near you. You can choose brands later in Settings.</Text>}
                         {loading && <ProgressView><Text>Finding nearby brands…</Text></ProgressView>}
@@ -48,8 +40,8 @@ export default function BrandPreferences({ isDark, themeColors, coordinate, radi
                         {hasLocation && !loading && !rows.length && <Text>{search.trim() ? 'No matching brands.' : 'No matching stations found within your radius.'}</Text>}
                         {hasLocation && !loading && (error || !options.length) && <Button label="Try Again" systemImage="arrow.clockwise" onPress={retry} />}
                     </Section>}
-                    {rows.length > 0 && <Section title={`${getFuelGradeMeta(fuelGrade).label} · Within ${radiusMiles} mi`}
-                        footer={<Text>Preferred brands get a 20¢/gal ranking advantage. Pump prices stay unchanged.</Text>}>
+                    {rows.length > 0 && <Section title="Preferred brands"
+                        footer={<Text>{`${getFuelGradeMeta(fuelGrade).label} · Within ${radiusMiles} mi. Favor these by up to 20¢/gal; shown prices stay unchanged.`}</Text>}>
                         {rows.map(brand => (
                             <Toggle key={brand.id} testID={`brand-preference-${brand.id}`} isOn={selectedBrands.includes(brand.id)}
                                 onIsOnChange={selected => setSelected(brand.id, selected)}>
@@ -65,6 +57,5 @@ export default function BrandPreferences({ isDark, themeColors, coordinate, radi
 }
 const styles = StyleSheet.create({
     container: { flex: 1 },
-    searchButton: { height: 44, marginHorizontal: 24 },
-    searchInput: { minHeight: 44, marginHorizontal: 24, marginBottom: 8, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, fontSize: 17 },
+    searchBar: { height: 56, marginHorizontal: 12 },
 });

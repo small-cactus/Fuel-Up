@@ -2,7 +2,6 @@ export const ONBOARDING_STEPS = [
     'welcome',
     'predictive',
     'location',
-    'memberships',
     'notifications',
     'radius',
     'octane',
@@ -14,7 +13,6 @@ export function buildOnboardingPreferenceUpdates({
     radius,
     octane,
     requiresE85 = false,
-    fuelMemberships = [],
 }) {
     const updates = [];
 
@@ -27,7 +25,6 @@ export function buildOnboardingPreferenceUpdates({
         updates.push(['requiresE85', Boolean(requiresE85)]);
     }
 
-    if (ONBOARDING_STEPS[currentStep] === 'memberships') updates.push(['fuelMemberships', fuelMemberships]);
     return updates;
 }
 
