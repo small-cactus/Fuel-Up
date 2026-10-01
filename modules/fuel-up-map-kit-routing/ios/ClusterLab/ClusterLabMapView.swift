@@ -8,7 +8,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   let onOverviewChange = EventDispatcher()
   private var overview = true
   private var overviewDestination: MKMapCamera?
-  private var fittedOverview: (stations: [ClusterLabStation], bounds: CGRect, camera: MKMapCamera)?
+  private var fittedOverview: (stations: [ClusterLabStation], bounds: CGRect, location: CGPoint?, camera: MKMapCamera)?
   private var overlayBottomInset: CGFloat = 0
   private var focusedStationId: String?
   private lazy var mapAnchor = ClusterLabMapAnchor(container: renderer.container)
@@ -158,7 +158,21 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     refresh()
   }
 
-  func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) { refresh() }
+  func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
+    // A delayed first GPS fix can arrive after stations. Keep it visible in
+    // overview, but never interrupt a user's pan, station focus, or camera flight.
+    if overview && !cameraMoving && probe == nil, let coordinate = framingLocation {
+      let point = map.convert(coordinate, toPointTo: map)
+      if !fitBounds.insetBy(dx: 16, dy: 16).contains(point) { needsCameraFit = true }
+    }
+    refresh()
+  }
+
+  private var framingLocation: CLLocationCoordinate2D? {
+    if let location = map.userLocation.location, location.horizontalAccuracy >= 0,
+       CLLocationCoordinate2DIsValid(location.coordinate) { return location.coordinate }
+    return origin
+  }
   func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
     if !isFittingCamera, let destination = overviewDestination {
       overviewDestination = nil
@@ -234,7 +248,9 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   func fitCamera(to stations: [ClusterLabStation], animated: Bool = false) -> Bool {
     guard !isFittingCamera, let first = stations.first else { return false }
     let world = MKMapRect.world.width
-    let xs = stations.map { $0.mapPoint.x }.sorted()
+    let location = framingLocation.map(MKMapPoint.init)
+    let locationKey = location.map { CGPoint(x: $0.x, y: $0.y) }
+    let xs = (stations.map { $0.mapPoint.x } + (location.map { [$0.x] } ?? [])).sorted()
     // Unwrap the shortest longitude interval, including searches at ±180°.
     let gapIndex = xs.indices.max { a, b in
       let gapA = (a + 1 < xs.count ? xs[a + 1] : xs[0] + world) - xs[a]
@@ -247,9 +263,11 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
       return LabProjectedStation(id: station.id, price: station.price,
         point: CGPoint(x: p.x < start ? p.x + world : p.x, y: p.y))
     }
+    let projectedLocation = location.map { CGPoint(x: $0.x < start ? $0.x + world : $0.x, y: $0.y) }
     let maximumScale = bounds.width / (250 * MKMapPointsPerMeterAtLatitude(first.latitude))
     guard let fit = ClusterLabCameraFit.rect(for: points, viewport: bounds.size,
-                                             usable: fitBounds, maximumScale: maximumScale) else { return false }
+                                             usable: fitBounds, maximumScale: maximumScale,
+                                             userLocation: projectedLocation) else { return false }
     // MapKit fits into its layout margins. Convert that inner viewport from the
     // solved full-screen projection, so native safe areas aren't counted twice.
     let nativeViewport = map.bounds.inset(by: map.layoutMargins)
@@ -260,7 +278,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
                          height: nativeViewport.height * unitsPerPoint)
     isFittingCamera = true
     defer { isFittingCamera = false }
-    if animated, let saved = fittedOverview, saved.stations == stations, saved.bounds == fitBounds,
+    if animated, let saved = fittedOverview, saved.stations == stations, saved.bounds == fitBounds, saved.location == locationKey,
        let camera = saved.camera.copy() as? MKMapCamera {
       overviewDestination = camera.copy() as? MKMapCamera
       setOverview(true)
@@ -285,7 +303,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
       camera.centerCoordinateDistance *= unitsPerPoint / currentUnitsPerPoint * latitudeScale
       camera.centerCoordinate = target; camera.heading = 0; camera.pitch = 0
       overviewDestination = camera.copy() as? MKMapCamera
-      fittedOverview = (stations, fitBounds, camera.copy() as! MKMapCamera)
+      fittedOverview = (stations, fitBounds, locationKey, camera.copy() as! MKMapCamera)
       setOverview(true)
       map.setCamera(camera, animated: true)
       fittedSize = bounds.size; fittedInsets = safeAreaInsets
@@ -298,7 +316,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     map.setCamera(camera, animated: false)
     mapAnchor.prepareForCameraJump(to: MKMapPoint(x: rect.midX, y: rect.midY).coordinate)
     map.setVisibleMapRect(rect, animated: false)
-    fittedOverview = (stations, fitBounds, map.camera.copy() as! MKMapCamera)
+    fittedOverview = (stations, fitBounds, locationKey, map.camera.copy() as! MKMapCamera)
     renderer.prepareForCameraFit()
     overviewDestination = nil
     setOverview(true)
@@ -308,10 +326,14 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   }
 
   private func fitIfNeeded() {
-    if needsCameraFit && probe == nil && pendingProbe == nil {
-      if let id = focusedStationId, latestStations.contains(where: { $0.id == id }) { focusStation(id) }
-      else { fitCamera(to: latestStations) }
-    }
+    guard needsCameraFit, pendingProbe == nil else { return }
+    if let probe {
+      // Probe fixtures still receive real card/safe-area layout updates before
+      // their camera sequence starts, just like the production station set.
+      if probe.canRefitForLayoutChange { fitCamera(to: renderer.stations) }
+    } else if let id = focusedStationId, latestStations.contains(where: { $0.id == id }) {
+      focusStation(id)
+    } else { fitCamera(to: latestStations) }
   }
 
   func refresh() {

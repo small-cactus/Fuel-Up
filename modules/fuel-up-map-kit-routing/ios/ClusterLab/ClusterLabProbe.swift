@@ -16,12 +16,15 @@ final class ClusterLabProbe {
   private var overviewReturns: [[String: Any]] = []
   private let center: CLLocationCoordinate2D
   private var isFit: Bool { token.hasPrefix("fit-") || token.hasPrefix("location-") }
+  var canRefitForLayoutChange: Bool {
+    stage < 0 && (isFit || token.hasPrefix("overview-") || token.hasPrefix("roundtrip-"))
+  }
   private let spans: [Double] = [0.003, 0.006, 0.010, 0.018, 0.030, 0.018, 0.010, 0.006, 0.003, 0.030, 0.003]
 
   init(view: ClusterLabMapView, token: String) {
     self.view = view; self.token = token
     savedRegion = view.map.region
-    center = token.hasPrefix("location-") || token.hasPrefix("contact-") ?
+    center = ["location-", "contact-", "fit-", "overview-", "roundtrip-"].contains(where: token.hasPrefix) ?
       (view.map.userLocation.location?.coordinate ?? .init(latitude: 27.9506, longitude: -82.4572)) :
       .init(latitude: 27.9506, longitude: -82.4572)
   }
@@ -42,7 +45,7 @@ final class ClusterLabProbe {
       (token.hasPrefix("pair-") ? Array(fixture.prefix(2)) : fixture)
     view.renderer.setStations(offsets.enumerated().compactMap { index, offset in
       ClusterLabStation(["id": "lab-\(index)", "latitude": center.latitude + offset.0,
-                         "longitude": center.longitude + offset.1, "price": 3.10 + Double(index) * 0.10,
+                         "longitude": center.longitude + offset.1 + (token.hasPrefix("fit-user-") ? 0.04 : 0), "price": 3.10 + Double(index) * 0.10,
                          "name": "Probe station \(index)"])
     })
     if isFit || token.hasPrefix("overview-") || token.hasPrefix("roundtrip-") { view.fitCamera(to: view.renderer.stations) }
@@ -81,7 +84,12 @@ final class ClusterLabProbe {
       let next = Int(max(0, elapsed - 1) / 1.5)
       if elapsed >= 1, next != stage {
         stage = next
-        if let sample = view.renderer.frameSamples.last { overviewReturns.append(sample) }
+        if var sample = view.renderer.frameSamples.last {
+          sample["fitBounds"] = [view.fitBounds.minX, view.fitBounds.minY, view.fitBounds.width, view.fitBounds.height]
+          sample["camera"] = [view.map.camera.centerCoordinate.latitude, view.map.camera.centerCoordinate.longitude,
+                              view.map.camera.centerCoordinateDistance]
+          overviewReturns.append(sample)
+        }
         if next >= 4 { finish(status: "completed"); return }
         let span = next.isMultiple(of: 2) ? 0.003 : 0.002
         view.setRegion(.init(center: center, span: .init(latitudeDelta: span, longitudeDelta: span)), animated: true)
@@ -118,7 +126,12 @@ final class ClusterLabProbe {
       guard elapsed >= 1, next != stage else { return }
       stage = next
       if next.isMultiple(of: 2) {
-        if let sample = view.renderer.frameSamples.last { overviewReturns.append(sample) }
+        if var sample = view.renderer.frameSamples.last {
+          sample["fitBounds"] = [view.fitBounds.minX, view.fitBounds.minY, view.fitBounds.width, view.fitBounds.height]
+          sample["camera"] = [view.map.camera.centerCoordinate.latitude, view.map.camera.centerCoordinate.longitude,
+                              view.map.camera.centerCoordinateDistance]
+          overviewReturns.append(sample)
+        }
         if next >= 12 { finish(status: "completed"); return }
         switch next / 2 % 3 {
         case 0: view.focusStation("lab-1")

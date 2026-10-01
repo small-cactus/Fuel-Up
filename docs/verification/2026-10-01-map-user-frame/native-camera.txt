@@ -1,0 +1,51 @@
+TAP version 13
+# Subtest: initial camera fit shows every station and count within safe margins on its first rendered frame
+not ok 1 - initial camera fit shows every station and count within safe margins on its first rendered frame
+  ---
+  duration_ms: 7836.916541
+  location: '/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:364:1'
+  failureType: 'testCodeFailure'
+  error: 'fit clipped lab-2: -4.483979409997119e-9,257.000000004484,376.07246452484765,-47.072464524847646'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:395:20)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: Show all restores the fitted overview after north focus and interruption
+ok 2 - Show all restores the fitted overview after north focus and interruption
+  ---
+  duration_ms: 7475.958583
+  ...
+# 54 intermediate overview camera frames; all six stations visible and normal-sized
+# Subtest: Show all restores the fitted overview after rotated focus and interruption
+ok 3 - Show all restores the fitted overview after rotated focus and interruption
+  ---
+  duration_ms: 7492.307625
+  ...
+# 54 intermediate overview camera frames; all six stations visible and normal-sized
+# Subtest: Show all restores identical cluster membership and glass after repeated focus, zoom-out and rotation
+ok 4 - Show all restores identical cluster membership and glass after repeated focus, zoom-out and rotation
+  ---
+  duration_ms: 18227.436584
+  ...
+# Six overview returns preserved membership, native glass connections, tint and geometry
+# Subtest: overview fits the live user dot outside the station envelope
+ok 5 - overview fits the live user dot outside the station envelope
+  ---
+  duration_ms: 3880.442459
+  ...
+# 120 live frames include the outside user dot and all six stations
+1..5
+# tests 5
+# suites 0
+# pass 4
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 45127.696834

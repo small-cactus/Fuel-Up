@@ -63,6 +63,28 @@ for size in [CGSize(width: 320, height: 568), CGSize(width: 375, height: 812),
     assert(abs(reverse.minX - fit.minX) < 0.000001 && abs(reverse.width - fit.width) < 0.000001)
   }
 }
+// The user can be outside the station envelope in any direction. They must
+// stay visible without becoming a synthetic station or affecting memberships.
+for size in [CGSize(width: 320, height: 568), CGSize(width: 440, height: 956), CGSize(width: 812, height: 375)] {
+  let usable = CGRect(x: 17, y: 76, width: size.width - 34, height: size.height - 178)
+  for count in [1, 6, 80, 400] {
+    let stations = (0..<count).map { point($0, random(), random()) }
+    for location in [CGPoint(x: -3000, y: 500), CGPoint(x: 3000, y: 500),
+                     CGPoint(x: 500, y: -3000), CGPoint(x: 500, y: 3000),
+                     CGPoint(x: -3000, y: -3000), CGPoint(x: 3000, y: 3000), CGPoint(x: 500, y: 500)] {
+      let fit = ClusterLabCameraFit.rect(for: stations, viewport: size, usable: usable,
+                                         maximumScale: 2, userLocation: location)!
+      let scale = size.width / fit.width
+      let occupied = extent(stations, scale).offsetBy(dx: -fit.minX * scale, dy: -fit.minY * scale)
+      let dot = CGRect(x: (location.x-fit.minX)*scale-16, y: (location.y-fit.minY)*scale-16, width: 32, height: 32)
+      assert(usable.insetBy(dx: -0.00001, dy: -0.00001).contains(occupied), "location fit clipped a chip")
+      assert(usable.insetBy(dx: -0.00001, dy: -0.00001).contains(dot), "location dot clipped")
+      let reverse = ClusterLabCameraFit.rect(for: Array(stations.reversed()), viewport: size, usable: usable,
+                                             maximumScale: 2, userLocation: location)!
+      assert(abs(reverse.width-fit.width) < 0.000001 && abs(reverse.minX-fit.minX) < 0.000001)
+    }
+  }
+}
 // The national cache can expose thousands of stations in a dense metro.
 // All real capsule extents must fit, with deterministic input-order behavior.
 let denseStart = Date()

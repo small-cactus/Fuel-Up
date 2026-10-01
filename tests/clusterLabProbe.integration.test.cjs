@@ -801,3 +801,42 @@ test('touching price capsules combine while nearby independent counts cannot for
     assert.ok(report.events.some(e => e.type === 'merge-start') && report.events.some(e => e.type === 'split-spawn'));
     t.diagnostic('Both contact arrangements combined on each return; independent count neighbor remained isolated');
 });
+
+
+test('overview fits the live user dot outside the station envelope', { timeout: 30000 }, async t => {
+    const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+    const token = `fit-user-${Date.now()}`;
+    const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+    const file = path.join(container, 'Documents/cluster-lab-probe.json');
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    let report;
+    const deadline = Date.now() + 20000;
+    while (Date.now() < deadline) {
+        try {
+            const value = JSON.parse(readFileSync(file, 'utf8'));
+            if (value.token === token) { report = value; break; }
+        } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+        await new Promise(resolve => setTimeout(resolve, 250));
+    }
+    assert.ok(report, 'user framing probe did not export');
+    assert.equal(report.status, 'completed');
+    assert.equal(report.nativeUserLocationVisible, true);
+    assert.ok(report.samples.length >= 30);
+    const b = report.fitBounds;
+    for (const frame of report.samples) {
+        const dot = {x: frame.userLocation.x - 360, y: frame.userLocation.y - 360};
+        assert.ok(dot.x - 16 >= b.x - 1 && dot.x + 16 <= b.x + b.width + 1 &&
+            dot.y - 16 >= b.y - 1 && dot.y + 16 <= b.y + b.height + 1, 'user dot outside usable map');
+        assert.equal(frame.stationCount, 6, 'user was counted as a station');
+        const represented = frame.views.reduce((n, v) => n + (v.role === 'badge' ? v.count : 1), 0);
+        assert.equal(represented, 6, 'fit lost a station');
+        for (const v of frame.views) {
+            const x = v.x - 360, y = v.y - 360;
+            assert.ok(x-v.width/2 >= b.x-1 && x+v.width/2 <= b.x+b.width+1 &&
+                y-16 >= b.y-1 && y+16 <= b.y+b.height+1, 'user fit clipped a chip');
+        }
+        assert.ok(Math.min(...frame.views.map(v => v.x - 360)) - dot.x > 100,
+            'fixture did not put user outside the stations');
+    }
+    t.diagnostic(`${report.samples.length} live frames include the outside user dot and all six stations`);
+});

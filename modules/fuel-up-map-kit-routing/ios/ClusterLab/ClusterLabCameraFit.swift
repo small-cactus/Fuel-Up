@@ -6,11 +6,14 @@ import CoreGraphics
 // Count capsules are included in the width budget in both cases.
 enum ClusterLabCameraFit {
   static func rect(for stations: [LabProjectedStation], viewport: CGSize,
-                   usable: CGRect, maximumScale: CGFloat) -> CGRect? {
+                   usable: CGRect, maximumScale: CGFloat, userLocation: CGPoint? = nil) -> CGRect? {
     guard !stations.isEmpty, usable.width > 120, usable.height > 32,
           viewport.width > 0, viewport.height > 0, maximumScale > 0 else { return nil }
-    let minX = stations.map { $0.point.x }.min()!, maxX = stations.map { $0.point.x }.max()!
-    let minY = stations.map { $0.point.y }.min()!, maxY = stations.map { $0.point.y }.max()!
+    // The location is a framing anchor only, never a station in the cluster graph.
+    // Reserve the same edge breathing room as a chip (including the dot halo).
+    let anchors = stations.map(\.point) + (userLocation.map { [$0] } ?? [])
+    let minX = anchors.map(\.x).min()!, maxX = anchors.map(\.x).max()!
+    let minY = anchors.map(\.y).min()!, maxY = anchors.map(\.y).max()!
     let points = stations.map {
       LabProjectedStation(id: $0.id, price: $0.price, point: CGPoint(x: $0.point.x - minX, y: $0.point.y - minY))
     }
@@ -47,7 +50,7 @@ enum ClusterLabCameraFit {
       let owners = ClusterLabGeometry.owners(projected, previous: [:])
       let byId = Dictionary(uniqueKeysWithValues: points.map { ($0.id, $0.point) })
       func rightEdge(at value: CGFloat) -> CGFloat {
-        var result = points.map { $0.point.x * value + 42 }.max()!
+        var result = dx * value + 42
         for point in points {
           guard let ownerId = owners[point.id], ownerId != point.id, let owner = byId[ownerId] else { continue }
           let stretch = ClusterLabGeometry.badgeStretch(separation:
