@@ -58,5 +58,15 @@ test('E85 access survives old, empty and omitted quotes without filling a price'
   assert.deepEqual(result.quotes.map(q=>q.stationId),['old-e85','unpriced-e85','known-e85']);
   for(const q of result.quotes){assert.equal(q.offersE85,true);assert.equal(q.price,3.59);assert.equal(q.allPrices.e85,undefined);}
   // Buying E85 itself still cannot display an absent or stale quote as current.
-  assert.equal((await cached({input:{...input,fuelType:'e85'},db:database([old,empty,known])})).quotes.length,0);
+  const e85=await cached({input:{...input,fuelType:'e85'},db:database([old,empty,known,unknown])});
+  assert.deepEqual(e85.quotes.map(q=>q.stationId), ['old-e85','unpriced-e85','known-e85']);
+  for(const q of e85.quotes) { assert.equal(q.price,null); assert.equal(q.updatedAt,null); assert.deepEqual(q.allPrices,{}); }
+});
+
+test('independent AFDC stations appear only for E85 and never inherit another grade price',async()=>{
+  const afdc=row('afdc:123'); afdc.station.availabilitySource='afdc';afdc.station.offersE85=true;afdc.station.prices=[];
+  const db=database([afdc]);
+  const e85=(await cached({input:{...input,fuelType:'e85'},db})).quotes;
+  assert.equal(e85.length,1);assert.equal(e85[0].providerId,'afdc');assert.equal(e85[0].price,null);
+  assert.equal((await cached({input,db})).quotes.length,0);
 });

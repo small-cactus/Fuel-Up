@@ -14,7 +14,7 @@ const {
     buildLatestQuotesFromRows,
 } = require('./stationData');
 const { fetchGasBuddyQuote } = require('./remote');
-const { filterReportedSnapshot, isFreshReportedQuote } = require('./reportedPrices');
+const { filterReportedSnapshot, visibleReportedQuote } = require('./reportedPrices');
 const {
     annotateStationWithRouteContext,
     isTrajectoryRouteUnavailableError,
@@ -244,7 +244,7 @@ function findUsableCachedFuelWindow({
     let bestMatch = null;
 
     for (const entry of listSpatialCacheEntries()) {
-        if (!entry.cacheKey?.startsWith('fuel-national-reported-v3:')) continue;
+        if (!entry.cacheKey?.startsWith('fuel-national-reported-v4:')) continue;
         if (Boolean(entry.requiresE85) !== Boolean(requiresE85)) continue;
         if (normFuelType && entry.fuelType && entry.fuelType !== normFuelType) {
             continue;
@@ -495,7 +495,7 @@ async function refreshFuelPriceSnapshot({
         debugState.providers = providerResults.map(result => result.debugEntry);
 
         let allQuotes = sanitizeStationQuotesForFuelType(
-            providerResults.flatMap(result => result.quotes || result.quote || []).filter(quote => isFreshReportedQuote(quote)),
+            providerResults.flatMap(result => result.quotes || result.quote || []).map(quote => visibleReportedQuote(quote)).filter(Boolean),
             normalizedFuelType
         );
         const stationQuotes = allQuotes.filter(quote => quote.providerTier === 'station' && !quote.isEstimated);
@@ -508,13 +508,13 @@ async function refreshFuelPriceSnapshot({
                 return;
             }
 
-            if (!uniqueQuotesMap.has(id) || q.price < uniqueQuotesMap.get(id).price) {
+            if (!uniqueQuotesMap.has(id) || (q.price != null && (uniqueQuotesMap.get(id).price == null || q.price < uniqueQuotesMap.get(id).price))) {
                 uniqueQuotesMap.set(id, q);
             }
         });
 
         const topStations = Array.from(uniqueQuotesMap.values())
-            .sort((a, b) => a.price - b.price || a.distanceMiles - b.distanceMiles);
+            .sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity) || a.distanceMiles - b.distanceMiles);
         const dedupedStationCount = stationQuotes.length - uniqueQuotesMap.size;
 
         debugState.summary = {

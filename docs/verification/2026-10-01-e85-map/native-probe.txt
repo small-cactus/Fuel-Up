@@ -1,0 +1,188 @@
+TAP version 13
+# Subtest: Swift Glass Lab renders timely transitions and preserves native container geometry
+ok 1 - Swift Glass Lab renders timely transitions and preserves native container geometry
+  ---
+  duration_ms: 32839.0035
+  ...
+# 21 native connection frames during committed merges; no false parent bridges
+# Visible contact resistance 4.26pt over 10 samples
+# Native stretch: 19 separated samples before recoil; release gaps 18.0, 9.4, 56.3, 33.5, 37.5, 37.1, 30.1, 70.3, 34.2, 44.9pt
+# Main price recoil 21.20pt; 53 identity-bound outward copies
+# Maximum rendered rebound 18.00pt
+# Longest transition 296ms; maximum measured travel 1094.13pt/frame
+# 1648 native frames; 94 transitions; /Users/anthonyh/Library/Developer/CoreSimulator/Devices/0EE3DFFD-087C-483C-A651-C55C59A719A3/data/Containers/Data/Application/1B481673-CC39-4FBB-88A3-E72EAEC859C0/Documents/cluster-lab-probe.json
+# Subtest: connected +1 moves outward before its split is triggered
+not ok 2 - connected +1 moves outward before its split is triggered
+  ---
+  duration_ms: 75367.659667
+  location: '/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:235:1'
+  failureType: 'testCodeFailure'
+  error: 'pair probe did not export'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:250:12)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+  ...
+# Subtest: native map carrier stays attached across long pans and camera jumps
+not ok 3 - native map carrier stays attached across long pans and camera jumps
+  ---
+  duration_ms: 30838.764125
+  location: '/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:280:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    MapKit hid or faded the shared glass carrier
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:301:16)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+  ...
+# Subtest: stacked stations split without an intermediate connected count stretch
+ok 4 - stacked stations split without an intermediate connected count stretch
+  ---
+  duration_ms: 29070.972958
+  ...
+# 279 close vertical frames in separate native effects
+# 913 connected vertical frames without count stretch; 2 splits
+# Subtest: initial camera fit shows every station and count within safe margins on its first rendered frame
+ok 5 - initial camera fit shows every station and count within safe margins on its first rendered frame
+  ---
+  duration_ms: 3534.573167
+  ...
+# 115 fitted frames; minimum side clearance beyond 17pt inset: -0.00pt
+# Subtest: native user location stays visible with a nearby price and count gently displaced
+ok 6 - native user location stays visible with a nearby price and count gently displaced
+  ---
+  duration_ms: 3676.774917
+  ...
+# 120 frames with a native blue dot and bounded shared price/count clearance
+# Subtest: stacked price/count rows do not reconnect diagonally through their badges
+not ok 7 - stacked price/count rows do not reconnect diagonally through their badges
+  ---
+  duration_ms: 75442.459709
+  location: '/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:443:1'
+  failureType: 'testCodeFailure'
+  error: 'stacked rows probe did not export'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:458:12)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+  ...
+# Subtest: staggered neighboring clusters stay independent while their own price and count blend
+not ok 8 - staggered neighboring clusters stay independent while their own price and count blend
+  ---
+  duration_ms: 1828.430708
+  location: '/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:480:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'cancelled'
+    - 'completed'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'completed'
+  actual: 'cancelled'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:496:12)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+  ...
+# Subtest: native focus isolates a chip with north camera heading
+not ok 9 - native focus isolates a chip with north camera heading
+  ---
+  duration_ms: 20539.412875
+  location: '/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:517:5'
+  failureType: 'testCodeFailure'
+  error: 'focus probe did not export'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:532:16)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+  ...
+# Subtest: native focus isolates a chip with rotated camera heading
+not ok 10 - native focus isolates a chip with rotated camera heading
+  ---
+  duration_ms: 20341.541708
+  location: '/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:517:5'
+  failureType: 'testCodeFailure'
+  error: 'focus probe did not export'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:532:16)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+  ...
+# Subtest: focused pill size retargets continuously without moving its map anchor or adding views
+not ok 11 - focused pill size retargets continuously without moving its map anchor or adding views
+  ---
+  duration_ms: 20525.344084
+  location: '/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:575:1'
+  failureType: 'testCodeFailure'
+  error: 'emphasis probe did not export'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:590:12)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+  ...
+# Subtest: Show all restores the fitted overview after north focus and interruption
+not ok 12 - Show all restores the fitted overview after north focus and interruption
+  ---
+  duration_ms: 20259.816417
+  location: '/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:621:5'
+  failureType: 'testCodeFailure'
+  error: 'overview probe did not export'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:636:16)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+  ...
+# Subtest: Show all restores the fitted overview after rotated focus and interruption
+not ok 13 - Show all restores the fitted overview after rotated focus and interruption
+  ---
+  duration_ms: 20535.095667
+  location: '/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:621:5'
+  failureType: 'testCodeFailure'
+  error: 'overview probe did not export'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/Users/anthonyh/Desktop/Fuel Up/tests/clusterLabProbe.integration.test.cjs:636:16)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+  ...

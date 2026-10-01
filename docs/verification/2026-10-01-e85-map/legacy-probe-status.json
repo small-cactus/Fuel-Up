@@ -1,0 +1,9 @@
+{
+  "status": "waiting",
+  "trigger": "automation:probe-test-1790883469934",
+  "message": "Waiting for a multi-station cluster near the map center.",
+  "sampleCount": 0,
+  "transitionCount": 0,
+  "plan": null,
+  "timedOutStages": []
+}

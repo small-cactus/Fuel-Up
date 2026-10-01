@@ -78,7 +78,7 @@ final class ClusterLabPill {
     view.isUserInteractionEnabled = false
     view.clipsToBounds = false
     let content = ClusterLabGlass.content(of: view)
-    priceLabel.text = String(format: "$%.2f", price)
+    priceLabel.text = price.isFinite ? String(format: "$%.2f", price) : "E85"
     for label in [priceLabel, countLabel] {
       label.font = .systemFont(ofSize: 15, weight: .bold)
       label.textAlignment = .center
@@ -95,7 +95,7 @@ final class ClusterLabPill {
   func adoptCluster(stationID: String, price: Double, name: String) {
     self.stationID = stationID
     self.price = price
-    priceLabel.text = String(format: "$%.2f", price)
+    priceLabel.text = price.isFinite ? String(format: "$%.2f", price) : "E85"
     view.accessibilityLabel = name
     lastCheapestPrice = nil
     wasCheapest = false

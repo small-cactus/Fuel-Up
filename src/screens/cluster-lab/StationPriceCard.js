@@ -18,7 +18,7 @@ function StationPriceCard({ station, rank, fuelGrade, isDark, themeColors, now, 
                     <View style={styles.heading}>
                         <Text style={[styles.name, text]} numberOfLines={1}>{station.name}</Text>
                         <View style={styles.subtitle}>
-                            <Text style={[styles.secondary, { color: themeColors.textOpacity }]}>#{rank} · {grade.label}{grade.octane !== grade.label ? ` ${grade.octane}` : ''}</Text>
+                            <Text style={[styles.secondary, { color: themeColors.textOpacity }]}>{Number.isFinite(price) ? `#${rank} · ` : ''}{grade.label}{grade.octane !== grade.label ? ` ${grade.octane}` : ''}</Text>
                             {rating && <View style={styles.rating}>
                                 <SymbolView name="star.fill" size={11} tintColor="#FFB800" />
                                 <Text style={[styles.secondary, text]}>{rating}</Text>
@@ -31,11 +31,11 @@ function StationPriceCard({ station, rank, fuelGrade, isDark, themeColors, now, 
                         <Text style={styles.goText}>Go</Text>
                     </Pressable>
                 </View>
-                <View style={styles.priceRow}>
+                {Number.isFinite(price) ? <View style={styles.priceRow}>
                     <Text style={[styles.price, compact && styles.compactPrice, text]} numberOfLines={1}
                         adjustsFontSizeToFit minimumFontScale={0.7}>${Number.isFinite(price) ? price.toFixed(2) : '--'}</Text>
                     <Text style={[styles.unit, { color: themeColors.textOpacity }]}>/ gal</Text>
-                </View>
+                </View> : <Text style={[styles.secondary, { color: themeColors.textOpacity }]}>E85 available · Price unavailable</Text>}
                 {!compact && <>
                     {station.address ? <Text style={[styles.address, text]} numberOfLines={2}>{station.address}</Text> : null}
                     {details ? <Text style={[styles.secondary, { color: themeColors.textOpacity }]} numberOfLines={1}>{details}</Text> : null}

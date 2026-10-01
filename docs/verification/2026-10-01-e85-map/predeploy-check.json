@@ -1,0 +1,59 @@
+{
+  "active": 4801,
+  "local": [
+    {
+      "id": "155716",
+      "name": "Thorntons"
+    },
+    {
+      "id": "156714",
+      "name": "Thorntons"
+    },
+    {
+      "id": "160694",
+      "name": "Thorntons"
+    },
+    {
+      "id": "172657",
+      "name": "Wawa"
+    },
+    {
+      "id": "187190",
+      "name": "RaceTrac"
+    },
+    {
+      "id": "187360",
+      "name": "RaceTrac"
+    },
+    {
+      "id": "192881",
+      "name": "RaceTrac"
+    },
+    {
+      "id": "193297",
+      "name": "Thorntons"
+    },
+    {
+      "id": "196214",
+      "name": "RaceTrac"
+    },
+    {
+      "id": "63556",
+      "name": "Thorntons"
+    },
+    {
+      "id": "63669",
+      "name": "Marathon"
+    },
+    {
+      "id": "74927",
+      "name": "RaceTrac"
+    },
+    {
+      "id": "75762",
+      "name": "Chevron"
+    }
+  ],
+  "matched": 3954,
+  "private": true
+}

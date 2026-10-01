@@ -1,0 +1,16 @@
+{
+  "source": "DOE Alternative Fuels Data Center",
+  "documentation": "https://developer.nlr.gov/docs/transportation/alt-fuel-stations-v1/all/",
+  "query": {
+    "fuel_type": "E85",
+    "status": "E",
+    "access": "public",
+    "country": "US",
+    "limit": "all"
+  },
+  "sha256": "74cc69e9888601d5abf41d206fad45101d3b165a314e1c1f5bb3eca7c15a5f16",
+  "totalListings": 4804,
+  "eligiblePublicListings": 4801,
+  "excludedKeyAccessListings": 3,
+  "retrievedOn": "2026-10-01"
+}

@@ -12,9 +12,13 @@ struct ClusterLabStation: Equatable {
   init?(_ value: [String: Any]) {
     guard let id = value["id"] as? String, !id.isEmpty,
           let latitude = value["latitude"] as? Double, let longitude = value["longitude"] as? Double,
-          let price = value["price"] as? Double, price.isFinite, price > 0,
           latitude.isFinite, longitude.isFinite,
           CLLocationCoordinate2DIsValid(.init(latitude: latitude, longitude: longitude)) else { return nil }
+    let reported = value["price"] as? Double
+    let availableE85 = value["fuelType"] as? String == "e85" && value["offersE85"] as? Bool == true
+    guard (reported.map { $0.isFinite && $0 > 0 } ?? false) || availableE85 else { return nil }
+    // Infinity is an internal ordering sentinel only, never a displayed price.
+    let price = reported.flatMap { $0.isFinite && $0 > 0 ? $0 : nil } ?? .infinity
     self.id = id; self.latitude = latitude; self.longitude = longitude; self.price = price
     name = value["name"] as? String ?? "Gas station"
   }

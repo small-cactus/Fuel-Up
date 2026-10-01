@@ -126,7 +126,7 @@ export async function fetchTrendData({
     const rawRows = !error && Array.isArray(rows) ? buildRawTrendRows(rows, fuelType) : [];
     const rankedLatestQuotes = buildVisibleStations(snapshot, {
         origin: { latitude, longitude }, radiusMiles, minimumRating, fuelGrade: fuelType, requiresE85, preferredBrands, fuelMemberships,
-    });
+    }).filter(quote => Number.isFinite(quote.price) && quote.price > 0);
     const visibleStationIds = new Set(
         rankedLatestQuotes
             .map(quote => String(quote?.stationId || '').trim())

@@ -1,6 +1,6 @@
 import { normalizeGasBuddyResponse, calculateDistanceMiles } from './core.mjs';
 import { sanitizeStationQuotesForFuelType } from './stationData.mjs';
-import { freshReportedStation, isFreshReportedQuote } from './reportedPrices.mjs';
+import { freshReportedStation, visibleReportedQuote } from './reportedPrices.mjs';
 import { ServiceError, validateInput } from './gasPrices.mjs';
 
 // No provider transport, refresh lease or provider fallback. forceRefresh only
@@ -25,7 +25,8 @@ export async function getCachedGasPrices({ input: rawInput, db, now = Date.now()
   const quotes = sanitizeStationQuotesForFuelType(normalized, input.fuelType)
     .map(quote => ({ ...quote, observedAt: observed.get(quote.stationId),
       distanceMiles: calculateDistanceMiles(input, quote) }))
-    .filter(quote => isFreshReportedQuote(quote, now) && quote.distanceMiles <= input.radiusMiles &&
+    .map(quote => visibleReportedQuote(quote, now)).filter(Boolean)
+    .filter(quote => quote.distanceMiles <= input.radiusMiles &&
       (!input.requiresE85 || quote.offersE85 === true));
   const times = rows.map(row => row.observedAt).filter(Boolean).sort();
   return { version: 1, source: 'national-cache', quotes, summary: {

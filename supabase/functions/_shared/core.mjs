@@ -51,7 +51,7 @@ function normalizeCoordinate(value) {
 
 function buildCacheKey({ latitude, longitude, radiusMiles, fuelType, requiresE85 = false, preferredProvider = 'gasbuddy' }) {
     return [
-        'fuel-national-reported-v3',
+        'fuel-national-reported-v4',
         normalizeFuelTypeName(fuelType),
         'gasbuddy',
         Math.max(1, toFiniteNumber(radiusMiles) || 10),
@@ -326,7 +326,7 @@ function createQuote({
         latitude: toFiniteNumber(latitude),
         longitude: toFiniteNumber(longitude),
         fuelType: normalizeFuelTypeName(fuelType),
-        price: Number(Number(price).toFixed(3)),
+        price: price == null ? null : Number(Number(price).toFixed(3)),
         allPrices,
         ...(typeof offersE85 === 'boolean' ? { offersE85 } : {}),
         currency: currency || USD,
@@ -658,23 +658,23 @@ function normalizeGasBuddyResponse({ origin, fuelType, payload }) {
         .map(station => {
             const priceEntry = (station.prices || []).find(p => p.fuelProduct === targetProduct);
 
-            if (!priceEntry) {
+            if (!priceEntry && !(fuelType === 'e85' && station.offersE85 === true)) {
                 return null;
             }
 
-            const cashPrice = toFiniteNumber(priceEntry.cash?.price);
-            const creditPrice = toFiniteNumber(priceEntry.credit?.price);
+            const cashPrice = toFiniteNumber(priceEntry?.cash?.price);
+            const creditPrice = toFiniteNumber(priceEntry?.credit?.price);
             const bestPrice = creditPrice && creditPrice > 0
                 ? creditPrice
                 : cashPrice && cashPrice > 0
                     ? cashPrice
                     : null;
 
-            if (bestPrice === null) {
+            if (bestPrice === null && !(fuelType === 'e85' && station.offersE85 === true)) {
                 return null;
             }
 
-            const postedTime = creditPrice && creditPrice > 0 ? (priceEntry.credit?.postedTime || null) : (priceEntry.cash?.postedTime || null);
+            const postedTime = creditPrice && creditPrice > 0 ? (priceEntry?.credit?.postedTime || null) : (priceEntry?.cash?.postedTime || null);
             const addr = station.address || {};
             const addressLine = [addr.line1, addr.locality, addr.region, addr.postalCode]
                 .filter(Boolean)
@@ -711,7 +711,7 @@ function normalizeGasBuddyResponse({ origin, fuelType, payload }) {
             }
 
             return createQuote({
-                providerId: 'gasbuddy',
+                providerId: station.availabilitySource === 'afdc' ? 'afdc' : 'gasbuddy',
                 providerTier: 'station',
                 stationId: String(station.id || ''),
                 stationName: station.name || (station.brands?.[0]?.name) || 'Gas station',
@@ -726,7 +726,7 @@ function normalizeGasBuddyResponse({ origin, fuelType, payload }) {
                 updatedAt: postedTime,
                 currency: USD,
                 isEstimated: false,
-                sourceLabel: PROVIDER_LABELS.gasbuddy,
+                sourceLabel: station.availabilitySource === 'afdc' ? 'DOE AFDC' : PROVIDER_LABELS.gasbuddy,
                 origin,
                 rating: typeof station.starRating === 'number' ? station.starRating : null,
                 userRatingCount: typeof station.ratingsCount === 'number' ? station.ratingsCount : null,
@@ -739,12 +739,12 @@ function normalizeGasBuddyResponse({ origin, fuelType, payload }) {
 
 function selectLowestPricedQuote(quotes) {
     return (quotes || [])
-        .filter(quote => quote && toFiniteNumber(quote.price) !== null)
+        .filter(quote => quote && Number.isFinite(quote.price) && quote.price > 0)
         .sort((left, right) => left.price - right.price || left.distanceMiles - right.distanceMiles)[0] || null;
 }
 
 function selectPreferredQuote(quotes) {
-    const validQuotes = (quotes || []).filter(quote => quote && toFiniteNumber(quote.price) !== null);
+    const validQuotes = (quotes || []).filter(quote => quote && Number.isFinite(quote.price) && quote.price > 0);
     const stationQuotes = validQuotes.filter(quote => quote.providerTier === 'station' && !quote.isEstimated);
 
     if (stationQuotes.length) {

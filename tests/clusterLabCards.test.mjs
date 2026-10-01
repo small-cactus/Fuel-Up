@@ -73,3 +73,19 @@ test('Home snapshot survives tab returns but is rejected after changing search o
     const empty = { ...home, quotes: [] };
     assert.equal(matchingHomeStationSnapshot(empty, query), empty);
 });
+
+test('unpriced E85 remains on the map after fresh prices, preserving radius and membership rules', () => {
+    const now=Date.parse('2026-10-01T20:00:00Z');
+    const base={providerTier:'station',latitude:28,longitude:-82,fuelType:'e85',offersE85:true,price:null,allPrices:{}};
+    const stations=buildLabStations({topStations:[
+        {...base,stationId:'unpriced-near',distanceMiles:1},
+        {...base,stationId:'unpriced-far',distanceMiles:2},
+        {...base,stationId:'expired',price:1.2,allPrices:{e85:1.2},updatedAt:'2026-09-29T20:00:00Z',distanceMiles:3},
+        {...base,stationId:'priced',price:2.99,allPrices:{e85:2.99},updatedAt:'2026-10-01T19:00:00Z'},
+        {...base,stationId:'unknown',offersE85:false},
+        {...base,stationId:'outside',distanceMiles:6},
+        {...base,stationId:'membership',stationName:"Sam's Club",distanceMiles:1},
+    ]},{fuelGrade:'e85',radiusMiles:5,now});
+    assert.deepEqual(stations.map(s=>s.id),['priced','unpriced-near','unpriced-far','expired']);
+    assert(stations.slice(1).every(s=>s.price===null && Object.keys(s.allPrices).length===0));
+});

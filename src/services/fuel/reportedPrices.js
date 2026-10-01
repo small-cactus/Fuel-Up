@@ -26,13 +26,29 @@ function isFreshReportedQuote(quote, now = Date.now()) {
         isFreshReportedPrice(quote.price, quote.updatedAt, now);
 }
 
+// Availability-only records never qualify for price rankings or trend averages.
+function isE85AvailabilityQuote(quote) {
+    return quote?.fuelType === 'e85' && quote.offersE85 === true &&
+        quote.providerTier === 'station' && !quote.isEstimated &&
+        !quote.validation?.usedPrediction;
+}
+
+function visibleReportedQuote(quote, now = Date.now()) {
+    if (isFreshReportedQuote(quote, now)) return quote;
+    if (!isE85AvailabilityQuote(quote)) return null;
+    // An expiring cached price becomes an availability marker, never disappears
+    // or leaks an old price via allPrices/validation fallback.
+    return { ...quote, price: null, updatedAt: null, allPrices: {},
+        validation: null, validationByFuelType: {}, availableFuelGrades: ['e85'] };
+}
+
 // Recheck on cache reads: a recent DB fetch does not extend the price's age.
 // Re-select the cheapest if the former winner expired while stored locally.
 function filterReportedSnapshot(snapshot, now = Date.now()) {
     if (!snapshot) return snapshot;
-    const topStations = (snapshot.topStations || []).filter(quote => isFreshReportedQuote(quote, now));
+    const topStations = (snapshot.topStations || []).map(quote => visibleReportedQuote(quote, now)).filter(Boolean);
     const candidates = [...topStations, snapshot.quote].filter(quote => isFreshReportedQuote(quote, now));
     return { ...snapshot, quote: selectPreferredQuote(candidates), topStations, regionalQuotes: [] };
 }
 
-module.exports = { REPORTED_PRICE_MAX_AGE_MS, isFreshReportedPrice, freshReportedStation, isFreshReportedQuote, filterReportedSnapshot };
+module.exports = { REPORTED_PRICE_MAX_AGE_MS, isFreshReportedPrice, freshReportedStation, isFreshReportedQuote, filterReportedSnapshot, isE85AvailabilityQuote, visibleReportedQuote };

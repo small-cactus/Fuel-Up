@@ -32,3 +32,17 @@ test('local snapshots cannot revive old corrections or keep an expired cheapest 
   assert.equal(snapshot.quote.stationId,'fresh');assert.deepEqual(snapshot.topStations,[next]);assert.deepEqual(snapshot.regionalQuotes,[]);
   assert.equal(filterReportedSnapshot({quote:expired,topStations:[expired]},now).quote,null);
 });
+
+test('E85 expiry removes every price fallback but preserves a navigable availability record', () => {
+  const e85={...quote('e85',2.5,-day-1),fuelType:'e85',offersE85:true,allPrices:{e85:2.5},
+    validation:{finalPrice:2.5},validationByFuelType:{e85:{finalPrice:2.5}},latitude:28,longitude:-82};
+  const result=filterReportedSnapshot({quote:e85,topStations:[e85]},now);
+  assert.equal(result.quote,null,'unpriced station must not become the cheapest');
+  assert.equal(result.topStations.length,1);
+  assert.equal(result.topStations[0].price,null);
+  assert.equal(result.topStations[0].updatedAt,null);
+  assert.deepEqual(result.topStations[0].allPrices,{});
+  assert.equal(result.topStations[0].validation,null);
+  assert.deepEqual(result.topStations[0].validationByFuelType,{});
+  assert.equal(e85.price,2.5,'cache/archive input not mutated');
+});

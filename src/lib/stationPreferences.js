@@ -30,10 +30,13 @@ export function rankStationQuotes(quotes, { preferredBrands = [], requiresE85 = 
     const preferred = new Set(normalizePreferredBrands(preferredBrands));
     const isPreferred = quote => stationBrandNames(quote).some(name => preferred.has(normalizeStationBrand(name)));
     const distance = quote => Number.isFinite(quote.distanceMiles) ? quote.distanceMiles : Infinity;
-    return (quotes || []).filter(quote => !requiresE85 || stationOffersE85(quote)).slice().sort((a, b) =>
-        (Math.round(a.price * 1000) - (isPreferred(a) ? Math.round(PREFERRED_BRAND_ADVANTAGE * 1000) : 0)) -
+    return (quotes || []).filter(quote => !requiresE85 || stationOffersE85(quote)).slice().sort((a, b) => {
+        if (a.price == null || b.price == null) return (a.price == null) - (b.price == null) ||
+            distance(a) - distance(b) || String(a.stationId).localeCompare(String(b.stationId));
+        return (Math.round(a.price * 1000) - (isPreferred(a) ? Math.round(PREFERRED_BRAND_ADVANTAGE * 1000) : 0)) -
         (Math.round(b.price * 1000) - (isPreferred(b) ? Math.round(PREFERRED_BRAND_ADVANTAGE * 1000) : 0)) ||
-        a.price - b.price || String(a.stationId).localeCompare(String(b.stationId)) || distance(a) - distance(b));
+        a.price - b.price || String(a.stationId).localeCompare(String(b.stationId)) || distance(a) - distance(b);
+    });
 }
 
 function distanceFrom(origin, quote) {
@@ -48,7 +51,8 @@ export function buildStationBrandOptions(quotes, { latitude, longitude, radiusMi
     const groups = new Map();
     for (const quote of quotes || []) {
         if (quote.isEstimated || (quote.providerTier && quote.providerTier !== 'station')) continue;
-        if (resolveQuotePriceForFuelGrade(quote, fuelGrade) === null || (requiresE85 && !stationOffersE85(quote))) continue;
+        if ((resolveQuotePriceForFuelGrade(quote, fuelGrade) === null && !(fuelGrade === 'e85' && stationOffersE85(quote))) ||
+            (requiresE85 && !stationOffersE85(quote))) continue;
         const distance = distanceFrom({ latitude, longitude }, quote);
         if (!Number.isFinite(distance) || distance > radiusMiles) continue;
         for (const name of stationBrandNames(quote)) {

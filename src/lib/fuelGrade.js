@@ -168,7 +168,8 @@ export function applyFuelGradeToQuote(quote, fuelGrade) {
         (normalizeFuelGrade(quote.validation?.fuelType || quote.fuelType) === normalizedFuelGrade ? quote.validation : null);
 
     if (resolvedPrice === null) {
-        return null;
+        return normalizedFuelGrade === 'e85' && quote.offersE85 === true && quote.fuelType === 'e85'
+            ? { ...quote, price: null } : null;
     }
 
     return {
@@ -189,7 +190,7 @@ export function rankQuotesForFuelGrade(quotes, fuelGrade) {
             const leftStationId = String(left.stationId || '');
             const rightStationId = String(right.stationId || '');
 
-            return left.price - right.price ||
+            return (left.price ?? Infinity) - (right.price ?? Infinity) ||
                 leftDistance - rightDistance ||
                 leftStationId.localeCompare(rightStationId);
         });
