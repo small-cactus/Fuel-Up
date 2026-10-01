@@ -56,7 +56,7 @@ export default function useClusterLabStations(active) {
                 publish(origin, fresh.snapshot);
             }
         })().catch(error => {
-            if (!cancelled) console.warn('[Glass Lab] Station load failed:', error.message);
+            if (!cancelled) console.warn('[Home] Station load failed:', error.message);
         });
         return () => { cancelled = true; };
     }, [active, shared, scope, latitude, longitude, fuelType, radiusMiles, minimumRating, preferredProvider, requiresE85]);

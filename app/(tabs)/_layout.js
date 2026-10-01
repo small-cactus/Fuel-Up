@@ -1,11 +1,8 @@
 import React from 'react';
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
-import { useTheme } from '../../src/ThemeContext';
 import { DynamicColorIOS } from 'react-native';
 
 export default function TabLayout() {
-    const { isDark } = useTheme();
-
     return (
         <NativeTabs
             labelStyle={{
@@ -19,14 +16,9 @@ export default function TabLayout() {
                 light: 'black',
             })}
         >
-            <NativeTabs.Trigger name="index">
+            <NativeTabs.Trigger name="index" disableAutomaticContentInsets>
                 <NativeTabs.Trigger.Icon sf="location" md="home" />
                 <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-            </NativeTabs.Trigger>
-
-            <NativeTabs.Trigger name="cluster-lab" disableAutomaticContentInsets>
-                <NativeTabs.Trigger.Icon sf="circle.hexagongrid" md="bubble-chart" />
-                <NativeTabs.Trigger.Label>Glass Lab</NativeTabs.Trigger.Label>
             </NativeTabs.Trigger>
 
             <NativeTabs.Trigger name="trends">

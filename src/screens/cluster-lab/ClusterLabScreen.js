@@ -13,7 +13,7 @@ import StationCardCarousel from './StationCardCarousel';
 const NativeMap = Platform.OS === 'ios' ? requireNativeViewManager('FuelUpMapKitRouting') : null;
 const EMPTY_ORIGIN = {};
 
-export default function ClusterLabScreen() {
+export default function HomeScreen() {
     const active = useIsFocused();
     const { isDark, themeColors } = useTheme();
     const { preferences } = usePreferences();

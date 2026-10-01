@@ -31,7 +31,7 @@ import assert from 'node:assert/strict';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FUEL_SUMMARY_CARD_PATH = path.join(REPO_ROOT, 'src', 'components', 'FuelSummaryCard.js');
-const HOME_SCREEN_PATH = path.join(REPO_ROOT, 'app', '(tabs)', 'index.js');
+const HOME_SCREEN_PATH = path.join(REPO_ROOT, 'src', 'screens', 'LegacyHomeScreen.js');
 const ONBOARDING_PATH = path.join(REPO_ROOT, 'src', 'screens', 'OnboardingScreen.js');
 const SETTINGS_PATH = path.join(REPO_ROOT, 'app', '(tabs)', 'settings.js');
 
@@ -195,7 +195,7 @@ function buildFuelSummaryCardLayout() {
     };
 }
 
-test('iPhone 17 Pro viewport constants load from FuelSummaryCard + index.js', () => {
+test('iPhone 17 Pro viewport constants load from FuelSummaryCard + legacy Home fallback', () => {
     const layout = buildFuelSummaryCardLayout();
 
     assert.ok(layout.contentBlockHorizontalPadding > 0);
