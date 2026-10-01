@@ -50,7 +50,7 @@ function normalizeCoordinate(value) {
 
 function buildCacheKey({ latitude, longitude, radiusMiles, fuelType, requiresE85 = false, preferredProvider = 'gasbuddy' }) {
     return [
-        'fuel-national-reported-v2',
+        'fuel-national-reported-v3',
         normalizeFuelTypeName(fuelType),
         'gasbuddy',
         Math.max(1, toFiniteNumber(radiusMiles) || 10),
@@ -306,6 +306,7 @@ function createQuote({
     fuelType,
     price,
     allPrices = {},
+    offersE85 = null,
     updatedAt = null,
     currency = USD,
     isEstimated,
@@ -326,6 +327,7 @@ function createQuote({
         fuelType: normalizeFuelTypeName(fuelType),
         price: Number(Number(price).toFixed(3)),
         allPrices,
+        ...(typeof offersE85 === 'boolean' ? { offersE85 } : {}),
         currency: currency || USD,
         priceUnit: GALLON,
         distanceMiles: calculateDistanceMiles(origin, { latitude, longitude }),
@@ -719,6 +721,7 @@ function normalizeGasBuddyResponse({ origin, fuelType, payload }) {
                 fuelType,
                 price: bestPrice,
                 allPrices,
+                offersE85: station.offersE85,
                 updatedAt: postedTime,
                 currency: USD,
                 isEstimated: false,

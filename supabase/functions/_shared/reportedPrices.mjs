@@ -12,7 +12,10 @@ function isFreshReportedPrice(price, postedAt, now = Date.now()) {
 // Apply age independently to each grade/payment quote before credit-first
 // selection. A fresh regular quote cannot refresh an old premium quote.
 function freshReportedStation(station, now = Date.now()) {
-    return { ...station, prices: (station.prices || []).map(entry => {
+    // Product presence is availability evidence, even when its quote is absent/old.
+    // Preserve the independent DB flag when an hourly response omits a product.
+    const offersE85 = station.offersE85 === true || (station.prices || []).some(entry => entry.fuelProduct === 'e85');
+    return { ...station, offersE85, prices: (station.prices || []).map(entry => {
         const fresh = payment => isFreshReportedPrice(payment?.price, payment?.postedTime, now) ? payment : null;
         return { ...entry, credit: fresh(entry.credit), cash: fresh(entry.cash) };
     }).filter(entry => entry.credit || entry.cash) };

@@ -16,6 +16,7 @@ export function stationBrandNames(quote) {
 }
 
 export function stationOffersE85(quote) {
+    if (typeof quote?.offersE85 === 'boolean') return quote.offersE85;
     // Unknown availability is not a match. Never infer E85 from a brand name.
     if (quote?.availableFuelGrades?.some(grade => ['e85', 'e_85'].includes(String(grade).toLowerCase()))) return true;
     const price = quote?.allPrices?.e85 ?? quote?.allPrices?.e_85;

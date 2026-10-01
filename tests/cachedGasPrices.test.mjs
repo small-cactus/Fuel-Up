@@ -48,3 +48,15 @@ test('serving returns raw reported prices only, with a 24-hour cutoff for the se
   assert.equal(result.quotes[2].price,3.2);assert.equal(result.quotes[2].allPrices._payment.regular.selected,'cash');
   assert.equal(result.summary.pricePolicy,'reported-last-24-hours');
 });
+
+test('E85 access survives old, empty and omitted quotes without filling a price', async () => {
+  const old=row('old-e85'),empty=row('unpriced-e85'),known=row('known-e85'),unknown=row('unknown');
+  old.station.prices.push({fuelProduct:'e85',credit:{price:2.49,postedTime:'2026-09-01T00:00:00Z'}});
+  empty.station.prices.push({fuelProduct:'e85',credit:null,cash:null});
+  known.station.offersE85=true;
+  const result=await cached({input:{...input,requiresE85:true},db:database([old,empty,known,unknown])});
+  assert.deepEqual(result.quotes.map(q=>q.stationId),['old-e85','unpriced-e85','known-e85']);
+  for(const q of result.quotes){assert.equal(q.offersE85,true);assert.equal(q.price,3.59);assert.equal(q.allPrices.e85,undefined);}
+  // Buying E85 itself still cannot display an absent or stale quote as current.
+  assert.equal((await cached({input:{...input,fuelType:'e85'},db:database([old,empty,known])})).quotes.length,0);
+});

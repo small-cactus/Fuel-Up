@@ -41,3 +41,8 @@ test('clean setup and relaunch retain grade, radius, brands and E85 together', a
     assert.deepEqual(second.getSnapshot().preferences.preferredBrands,['bp','shell']);
     assert.equal(second.getSnapshot().preferences.requiresE85,true);
 });
+
+test('explicit station E85 access does not require a current E85 price', () => {
+    assert.equal(stationOffersE85({offersE85:true, allPrices:{regular:4.1}}),true);
+    assert.equal(stationOffersE85({offersE85:false, allPrices:{e85:2.5}}),false);
+});

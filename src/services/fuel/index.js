@@ -244,7 +244,7 @@ function findUsableCachedFuelWindow({
     let bestMatch = null;
 
     for (const entry of listSpatialCacheEntries()) {
-        if (!entry.cacheKey?.startsWith('fuel-national-reported-v2:')) continue;
+        if (!entry.cacheKey?.startsWith('fuel-national-reported-v3:')) continue;
         if (Boolean(entry.requiresE85) !== Boolean(requiresE85)) continue;
         if (normFuelType && entry.fuelType && entry.fuelType !== normFuelType) {
             continue;

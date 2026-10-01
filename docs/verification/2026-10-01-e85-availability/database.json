@@ -1,0 +1,32 @@
+{
+  "cache_versions": [
+    {
+      "e85_availability_version": 0,
+      "run_id": 654,
+      "scopes": 10
+    }
+  ],
+  "e85_fresh_price": 3110,
+  "e85_listed": 6945,
+  "fl_listed": 299,
+  "latest_runs": [
+    {
+      "expected_batches": 72,
+      "id": 714,
+      "slot_at": "2026-10-01T19:00:00+00:00",
+      "status": "running",
+      "succeeded_batches": 56
+    },
+    {
+      "expected_batches": 72,
+      "id": 654,
+      "slot_at": "2026-10-01T18:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    }
+  ],
+  "local_listed": 8,
+  "now": "2026-10-01T19:13:53.858892+00:00",
+  "raw_table_private": true,
+  "regular_eligible": 4810
+}

@@ -114,7 +114,7 @@ test('refreshFuelPriceSnapshotAlongTrajectory merges current and ahead stations 
     assert.equal(result.debugState.summary.aheadStationCount, 1);
     assert.equal(result.debugState.summary.mergedStationCount, 2);
     assert.equal(cachedEntries.length, 1);
-    assert.match(cachedEntries[0].key, /^fuel-trajectory:fuel-national-reported-v2:regular:/);
+    assert.match(cachedEntries[0].key, /^fuel-trajectory:fuel-national-reported-v3:regular:/);
     assert.ok(result.snapshot.trajectory?.aheadPoint);
 });
 

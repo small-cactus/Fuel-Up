@@ -26,7 +26,7 @@ export async function getCachedGasPrices({ input: rawInput, db, now = Date.now()
     .map(quote => ({ ...quote, observedAt: observed.get(quote.stationId),
       distanceMiles: calculateDistanceMiles(input, quote) }))
     .filter(quote => isFreshReportedQuote(quote, now) && quote.distanceMiles <= input.radiusMiles &&
-      (!input.requiresE85 || Number(quote.allPrices?.e85 ?? quote.allPrices?.e_85) > 0));
+      (!input.requiresE85 || quote.offersE85 === true));
   const times = rows.map(row => row.observedAt).filter(Boolean).sort();
   return { version: 1, source: 'national-cache', quotes, summary: {
     stationCount: rows.length, quoteCount: quotes.length,

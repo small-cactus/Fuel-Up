@@ -103,7 +103,7 @@ export default function NativeSettingsForm({
                                 foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
                             ]}
                         >
-                            Regular 85–88 · Midgrade 89–90 · Premium 91–94+ · Diesel · E85. Require E85 limits results to stations with an E85 price. Preferred brands get a 20¢/gal ranking advantage. Pump prices stay unchanged.
+                            Regular 85–88 · Midgrade 89–90 · Premium 91–94+ · Diesel · E85. Require E85 shows stations that offer E85, even without a recent E85 price. Preferred brands get a 20¢/gal ranking advantage. Pump prices stay unchanged.
                         </Text>
                     }
                 >

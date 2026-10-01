@@ -1,0 +1,106 @@
+{
+  "verifiedAt": "2026-10-01T19:16:52.701Z",
+  "providerRequests": 0,
+  "checks": [
+    {
+      "requiresE85": false,
+      "count": 204,
+      "listedE85": 7,
+      "listedWithoutFreshE85Price": 3,
+      "stations": [
+        {
+          "id": "155716",
+          "name": "Thorntons",
+          "price": 4.25,
+          "e85Price": null
+        },
+        {
+          "id": "156714",
+          "name": "Thorntons",
+          "price": 3.99,
+          "e85Price": null
+        },
+        {
+          "id": "172657",
+          "name": "Wawa",
+          "price": 4.19,
+          "e85Price": null
+        },
+        {
+          "id": "187190",
+          "name": "RaceTrac",
+          "price": 4.04,
+          "e85Price": 2.99
+        },
+        {
+          "id": "187360",
+          "name": "RaceTrac",
+          "price": 4.13,
+          "e85Price": 2.99
+        },
+        {
+          "id": "193297",
+          "name": "Thorntons",
+          "price": 3.97,
+          "e85Price": 3.47
+        },
+        {
+          "id": "74927",
+          "name": "RaceTrac",
+          "price": 4.27,
+          "e85Price": 2.99
+        }
+      ]
+    },
+    {
+      "requiresE85": true,
+      "count": 7,
+      "listedE85": 7,
+      "listedWithoutFreshE85Price": 3,
+      "stations": [
+        {
+          "id": "155716",
+          "name": "Thorntons",
+          "price": 4.25,
+          "e85Price": null
+        },
+        {
+          "id": "156714",
+          "name": "Thorntons",
+          "price": 3.99,
+          "e85Price": null
+        },
+        {
+          "id": "172657",
+          "name": "Wawa",
+          "price": 4.19,
+          "e85Price": null
+        },
+        {
+          "id": "187190",
+          "name": "RaceTrac",
+          "price": 4.04,
+          "e85Price": 2.99
+        },
+        {
+          "id": "187360",
+          "name": "RaceTrac",
+          "price": 4.13,
+          "e85Price": 2.99
+        },
+        {
+          "id": "193297",
+          "name": "Thorntons",
+          "price": 3.97,
+          "e85Price": 3.47
+        },
+        {
+          "id": "74927",
+          "name": "RaceTrac",
+          "price": 4.27,
+          "e85Price": 2.99
+        }
+      ]
+    }
+  ]
+}

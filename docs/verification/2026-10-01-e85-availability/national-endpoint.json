@@ -1,0 +1,64 @@
+{
+  "verifiedAt": "2026-10-01T19:18:35.471Z",
+  "providerRequests": 0,
+  "runId": 714,
+  "availabilityVersion": 1,
+  "exactIdsPricesTimestamps": true,
+  "quotes": [
+    {
+      "stationId": "175863",
+      "stationName": "Maverik",
+      "address": "5480 E 120th Ave, Thornton, CO, 80241",
+      "price": 3.43,
+      "fuelType": "regular",
+      "updatedAt": "2026-10-01T18:25:04.243Z",
+      "providerTier": "station",
+      "providerId": "gasbuddy",
+      "paymentType": "credit"
+    },
+    {
+      "stationId": "200664",
+      "stationName": "Maverik",
+      "address": "4720 Tower Rd, Denver, CO, 80249",
+      "price": 3.44,
+      "fuelType": "regular",
+      "updatedAt": "2026-10-01T18:25:04.524Z",
+      "providerTier": "station",
+      "providerId": "gasbuddy",
+      "paymentType": "credit"
+    },
+    {
+      "stationId": "201189",
+      "stationName": "Maverik",
+      "address": "16351 Green Valley Ranch Blvd, Denver, CO, 80239",
+      "price": 3.44,
+      "fuelType": "regular",
+      "updatedAt": "2026-10-01T18:44:59.276Z",
+      "providerTier": "station",
+      "providerId": "gasbuddy",
+      "paymentType": "credit"
+    },
+    {
+      "stationId": "211508",
+      "stationName": "Circle K",
+      "address": "6702 Tower Rd, Denver, CO, 80249",
+      "price": 3.44,
+      "fuelType": "regular",
+      "updatedAt": "2026-10-01T16:22:41.213Z",
+      "providerTier": "station",
+      "providerId": "gasbuddy",
+      "paymentType": "credit"
+    },
+    {
+      "stationId": "199966",
+      "stationName": "Maverik",
+      "address": "237 E 120th Ave, Thornton, CO, 80233",
+      "price": 3.45,
+      "fuelType": "regular",
+      "updatedAt": "2026-10-01T18:25:07.821Z",
+      "providerTier": "station",
+      "providerId": "gasbuddy",
+      "paymentType": "credit"
+    }
+  ]
+}

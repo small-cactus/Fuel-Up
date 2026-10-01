@@ -389,7 +389,7 @@ test('cache keys preserve exact search centers and freshness respects the ttl', 
         preferredProvider: 'gasbuddy',
     });
 
-    assert.equal(cacheKey, 'fuel-national-reported-v2:regular:gasbuddy:10:40.71288:-74.00591');
+    assert.equal(cacheKey, 'fuel-national-reported-v3:regular:gasbuddy:10:40.71288:-74.00591');
     assert.equal(
         isCacheEntryFresh(
             {
