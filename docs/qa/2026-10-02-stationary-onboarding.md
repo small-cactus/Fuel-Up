@@ -25,3 +25,11 @@ Location permission uses an edge-to-edge, illustrated 2D Apple Park map, tightly
 [Page transition recording](evidence/2026-10-02-stationary-onboarding/stationary-continue.mp4)
 
 Native map appearance uses [Apple’s standard map configuration](https://developer.apple.com/documentation/mapkit/mkstandardmapconfiguration) with flat elevation, muted emphasis, and points of interest excluded..
+
+## San Francisco follow-up
+
+At the user’s request, the map center moved to Hayes Valley in San Francisco (37.7765, -122.4241). The same large flat illustrated map, framing, progressive edge treatment, and stationary footer remain. The accessibility label now names San Francisco. Native muted cartography still includes faint street names in this neighborhood; POIs and custom symbols remain absent.
+
+The signed Release and simulator builds passed, along with the same 28 focused tests. The final map was visually checked in the large simulator and Release installation on Anthony’s iPhone 18 Pro Max succeeded. The phone app was not launched.
+
+![San Francisco](evidence/2026-10-02-stationary-onboarding/location-san-francisco.png)

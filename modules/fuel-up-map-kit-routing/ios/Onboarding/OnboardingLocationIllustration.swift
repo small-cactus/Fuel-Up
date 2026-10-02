@@ -29,7 +29,7 @@ struct OnboardingLocationIllustration: View {
         .init(color: .clear, location: 1)
       ], startPoint: .top, endPoint: .bottom))
       .accessibilityElement(children: .ignore)
-      .accessibilityLabel("Map illustration of Apple Park")
+      .accessibilityLabel("Map illustration of San Francisco")
   }
 }
 
@@ -44,9 +44,9 @@ private struct LocationInvitationMap: UIViewRepresentable {
     configuration.pointOfInterestFilter = .excludingAll
     map.preferredConfiguration = configuration
     map.layoutMargins = UIEdgeInsets(top: 0, left: 12, bottom: 80, right: 12)
-    let center = CLLocationCoordinate2D(latitude: 37.3349, longitude: -122.0090)
+    let center = CLLocationCoordinate2D(latitude: 37.7765, longitude: -122.4241)
     map.setCamera(MKMapCamera(lookingAtCenter: center, fromDistance: 900, pitch: 0, heading: 0), animated: false)
-    // Muted cartography and excluded points of interest keep the campus graphic
+    // Muted cartography and excluded points of interest keep the neighborhood graphic
     // quiet. MapKit retains its required attribution.
     return map
   }
