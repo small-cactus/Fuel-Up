@@ -11,7 +11,7 @@ struct OnboardingFuelPage: View {
         VStack(spacing: 0) {
           ForEach(grades, id: \.0) { grade in
             OnboardingSelectionRow(title: grade.1, subtitle: grade.2.isEmpty ? nil : grade.2,
-                                   selected: model.fuel == grade.0) {
+                                   fuelIcon: grade.0, selected: model.fuel == grade.0) {
               model.fuel = grade.0
               model.changed()
             }.accessibilityIdentifier("onboarding-grade-\(grade.0)")

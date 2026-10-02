@@ -4,6 +4,7 @@ import SwiftUI
 struct OnboardingBrandsPage: View {
   @ObservedObject var model: OnboardingModel
   @State private var search = ""
+  @ScaledMetric(relativeTo: .body) private var searchHeight = 56.0
   private var brands: [OnboardingBrand] {
     let known = Set(model.brands.map(\.id))
     let saved = model.favorites.subtracting(known).sorted().compactMap {
@@ -12,15 +13,19 @@ struct OnboardingBrandsPage: View {
     return (model.brands + saved).filter { search.isEmpty || $0.label.localizedCaseInsensitiveContains(search) }
   }
   var body: some View {
+    VStack(spacing: 0) {
+    OnboardingSearchField(text: $search, focused: $model.searchFocused).frame(height: searchHeight).padding(.horizontal, 16)
     ScrollView {
       VStack(alignment: .leading, spacing: 24) {
-        OnboardingHeading(title: "Your usual stops", subtitle: "Have a membership or a favorite? Pick them here.")
+        if !model.searchFocused {
+          OnboardingHeading(title: "Your usual stops", subtitle: "Have a membership or a favorite? Pick them here.")
+        }
         if search.isEmpty {
           if !model.membershipOptions.isEmpty {
             sectionTitle("Memberships")
             VStack(spacing: 0) {
               ForEach(model.membershipOptions) { item in
-                OnboardingSelectionRow(title: item.label, selected: model.memberships.contains(item.id)) {
+                OnboardingSelectionRow(title: item.label, brandIcon: item.id, selected: model.memberships.contains(item.id)) {
                   toggle(item.id, in: &model.memberships)
                   model.changed()
                 }.accessibilityIdentifier("onboarding-membership-\(item.id)")
@@ -34,7 +39,7 @@ struct OnboardingBrandsPage: View {
         if !brands.isEmpty {
           LazyVStack(spacing: 0) {
             ForEach(brands) { item in
-              OnboardingSelectionRow(title: item.label, selected: model.favorites.contains(item.id)) {
+              OnboardingSelectionRow(title: item.label, brandIcon: item.id, selected: model.favorites.contains(item.id)) {
                 toggle(item.id, in: &model.favorites)
                 model.changed()
               }.accessibilityIdentifier("onboarding-brand-\(item.id)")
@@ -51,7 +56,8 @@ struct OnboardingBrandsPage: View {
       }.padding(24)
     }
     .scrollDismissesKeyboard(.interactively)
-    .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always), prompt: "Find a brand")
+
+  }
   }
   private func sectionTitle(_ text: String) -> some View {
     Text(text).font(.headline).accessibilityAddTraits(.isHeader)

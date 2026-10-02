@@ -14,7 +14,7 @@ export default function NativeOnboarding({ preferences, isDark, visible, onBack,
                 case 'location': setCoordinate({ latitude: event.latitude, longitude: event.longitude }); break;
                 case 'choices': setChoices(event.choices); break;
                 case 'complete': onComplete(event.choices); break;
-                case 'back': onBack(); break;
+                case 'back': onBack?.(); break;
                 case 'retry': retry(); break;
             }
         }} />;

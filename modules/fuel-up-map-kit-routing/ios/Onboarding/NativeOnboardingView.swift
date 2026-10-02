@@ -10,9 +10,7 @@ final class NativeOnboardingView: ExpoView {
     super.init(appContext: appContext)
     model.emit = { [weak self] payload in self?.onAction(payload) }
     if #available(iOS 16.0, *) {
-      let controller = UIHostingController(rootView: OnboardingFlow(model: model) { [weak self] in
-        self?.onAction(["type": "back"])
-      })
+      let controller = UIHostingController(rootView: OnboardingFlow(model: model))
       controller.view.backgroundColor = .clear
       host = controller
       addSubview(controller.view)

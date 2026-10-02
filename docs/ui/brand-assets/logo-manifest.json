@@ -1,0 +1,2816 @@
+{
+  "catalog": "name-suggestion-index@8.0.20260918",
+  "generatedAt": "2026-10-01T23:46:14.403Z",
+  "width": 64,
+  "height": 64,
+  "assets": [
+    {
+      "qid": "Q110716465",
+      "names": [
+        "Shell",
+        "Shell ",
+        "Shell",
+        "SHell",
+        "shell",
+        "Shell",
+        "SHELL",
+        "Shell Service Station",
+        "Shell",
+        "Shell"
+      ],
+      "stationCount": 12079,
+      "source": "https://commons.wikimedia.org/wiki/Special:FilePath/Shell wordmark 2019.svg",
+      "bytes": 1151,
+      "sha256": "77dc477d00929e8f86b24c24f619fee4d185b1510381a756d499b480d5f6a1e3",
+      "failures": []
+    },
+    {
+      "qid": "Q152057",
+      "names": [
+        "BP",
+        "Bp",
+        " BP",
+        "BP "
+      ],
+      "stationCount": 7174,
+      "source": "https://commons.wikimedia.org/wiki/Special:FilePath/Bp textlogo.svg",
+      "bytes": 1583,
+      "sha256": "f743e26f8b9e1c585bcf4f6436bea26c7d86361caee0625cfbadbafd864dda84",
+      "failures": []
+    },
+    {
+      "qid": "Q319642",
+      "names": [
+        "Chevron",
+        "Chevron ",
+        "chevron",
+        "CHevron"
+      ],
+      "stationCount": 6979,
+      "source": "https://commons.wikimedia.org/wiki/Special:FilePath/Chevron Logo.svg",
+      "bytes": 3512,
+      "sha256": "4b40cf3e3794ff828ceb3431f30b5de6421f4508d18d916735ef8cfa9502fb28",
+      "failures": []
+    },
+    {
+      "qid": "Q109675651",
+      "names": [
+        "Exxon",
+        "Exxon ",
+        "Exxon",
+        "Exxon   ",
+        "Exxon",
+        "EXXON"
+      ],
+      "stationCount": 6422,
+      "source": "https://commons.wikimedia.org/wiki/Special:FilePath/Exxon logo 2016.svg",
+      "bytes": 1294,
+      "sha256": "a597ea4209e8562b188eeef85fcf489baaca5853f3fe98c7e4a42845d84d6e33",
+      "failures": []
+    },
+    {
+      "qid": "Q458363",
+      "names": [
+        "Marathon",
+        "Marathon ",
+        "MARATHON",
+        "Marathon",
+        "marathon"
+      ],
+      "stationCount": 5739,
+      "source": "https://commons.wikimedia.org/wiki/Special:FilePath/Marathon Petroleum logo 2022.svg",
+      "bytes": 2902,
+      "sha256": "b14b5fa3495703e853c9740ccfa8fd07c2a282dea69d368ccfed387551f36418",
+      "failures": []
+    },
+    {
+      "qid": "Q1423218",
+      "names": [
+        "Sunoco",
+        "Sunoco",
+        "Sunoco ",
+        "SUNOCO"
+      ],
+      "stationCount": 5145,
+      "source": "https://graph.facebook.com/GoSunoco/picture?type=large",
+      "bytes": 3195,
+      "sha256": "6e1a2aa985abd24b2a16f281a3c2119ff234d367ddc148656964a37e54178d3d",
+      "failures": []
+    },
+    {
+      "qid": "Q109676002",
+      "names": [
+        "Mobil",
+        "Mobil ",
+        "mobil",
+        "MOBIL",
+        "Mobile",
+        "Mobil"
+      ],
+      "stationCount": 5098,
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Mobil logo.svg",
+          "error": "HTTP 429"
+        },
+        {
+          "url": "https://www.mobil.com/-/media/favicons/fav/favicon.ico",
+          "error": "Input buffer contains unsupported image format"
+        }
+      ]
+    },
+    {
+      "qid": "Q1283291",
+      "names": [
+        "Valero",
+        "Valero "
+      ],
+      "stationCount": 4574,
+      "source": "https://commons.wikimedia.org/wiki/Special:FilePath/Valero Energy logo.svg",
+      "bytes": 1691,
+      "sha256": "607ae0825c86af3043c078c66d6a43f76046a7cfcea183514d4ac9537d1900c5",
+      "failures": []
+    },
+    {
+      "qid": "Q2974437",
+      "names": [
+        "CITGO",
+        "Citgo"
+      ],
+      "stationCount": 4456,
+      "source": "https://graph.facebook.com/CITGOFuelingGood/picture?type=large",
+      "bytes": 8317,
+      "sha256": "3e21c0d021d976d81093772d8f2a082b6b710d5f513cb097de5beb7d12d898eb",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Citgo logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q3268010",
+      "names": [
+        "Circle K",
+        "Circle K",
+        "Circle k",
+        "CIrcle K",
+        "Mac's",
+        "Macs"
+      ],
+      "stationCount": 4426,
+      "source": "https://graph.facebook.com/IDCircleK/picture?type=large",
+      "bytes": 5126,
+      "sha256": "8b587a68661687ffd80c8eb60911566d768d1649b9772828e288a3aed2b4b0c6",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Circle K Logotype.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q259340",
+      "names": [
+        "7-Eleven",
+        "7 Eleven",
+        "7-ELEVEN",
+        "7-11",
+        "7- Eleven",
+        "7-Eleven",
+        "7-Eleven",
+        "7-Eleven",
+        "7Eleven",
+        "7-eleven"
+      ],
+      "stationCount": 3176,
+      "source": "https://graph.facebook.com/7ElevenMexico/picture?type=large",
+      "bytes": 2489,
+      "sha256": "8ba3e30dc15620313e9f608118616bc3375366104d0b141cf16e51ec7cd6acaf",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/7-Eleven logo 2021.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q7575683",
+      "names": [
+        "Speedway",
+        "Speedway Express",
+        "Speedway ",
+        "SpeedWay",
+        "Speedway",
+        "Speedway",
+        "Speedway"
+      ],
+      "stationCount": 3152,
+      "source": "https://graph.facebook.com/SpeedwayStores/picture?type=large",
+      "bytes": 5441,
+      "sha256": "a55e02322fe5f7494e1256cf951e39eac99902b6caf0dbae11d1bca1aaacde1f",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Speedway LLC logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q2940968",
+      "names": [
+        "Casey's"
+      ],
+      "stationCount": 2855,
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Casey's logo.svg",
+          "error": "HTTP 429"
+        },
+        {
+          "url": "https://www.caseys.com",
+          "error": "HTTP 403"
+        }
+      ]
+    },
+    {
+      "qid": "Q1656230",
+      "names": [
+        "Phillips 66",
+        "Phillips 66 "
+      ],
+      "stationCount": 2314,
+      "source": "https://graph.facebook.com/Phillips66Co/picture?type=large",
+      "bytes": 4887,
+      "sha256": "75b6819e146724e4eb307b2f5d8ea9a98f36217219ee24b67d58cb2fe38f9e77",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Phillips 66 logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q1658320",
+      "names": [
+        "76",
+        "76 "
+      ],
+      "stationCount": 2052,
+      "source": "https://graph.facebook.com/76gas/picture?type=large",
+      "bytes": 5417,
+      "sha256": "3a45b39cffc1fd98c7ee7f37e41fa58332ccc550d09db971b4f77fe680ebe129",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/76 Orange Logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q1290900",
+      "names": [
+        "Sinclair"
+      ],
+      "stationCount": 1980,
+      "source": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FSinclair%20gasoline%20sign%2C%20Route%2061%2C%20La%20Place%2C%20Louisiana%20LCCN2017703770.tif&width=150",
+      "bytes": 6082,
+      "sha256": "4528a020e814034c4604633ccefa2c6b97e09b9322477186d3473fddb1b89435",
+      "failures": []
+    },
+    {
+      "qid": "Q109341187",
+      "names": [
+        "Conoco",
+        "Conoco ",
+        " Conoco"
+      ],
+      "stationCount": 1768,
+      "source": "https://graph.facebook.com/conoco/picture?type=large",
+      "bytes": 3129,
+      "sha256": "37e5391c828f90d45207b740c2b625b19af0180e21b70353edd4b82d247e43e1",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Conoco logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q19604459",
+      "names": [
+        "Murphy USA",
+        "Murphy Express"
+      ],
+      "stationCount": 1681,
+      "source": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FMurphylogo3d2.jpg&width=150",
+      "bytes": 2784,
+      "sha256": "8273d7373ea37483bc71360e18cedd887e4123cb015ddca8c29d493a466b4c51",
+      "failures": []
+    },
+    {
+      "qid": "Q304769",
+      "names": [
+        "ARCO",
+        "Arco",
+        "ARCO "
+      ],
+      "stationCount": 1679,
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/ARCO.svg",
+          "error": "HTTP 429"
+        },
+        {
+          "url": "http://www.arco.com/favicon.ico?v=2",
+          "error": "Input buffer contains unsupported image format"
+        }
+      ],
+      "rejectedSource": "https://graph.facebook.com/arco/picture?type=large"
+    },
+    {
+      "qid": "Q62127191",
+      "names": [
+        "Cenex",
+        "CENEX",
+        "Cenex "
+      ],
+      "stationCount": 1574,
+      "source": "https://graph.facebook.com/CenexStores/picture?type=large",
+      "bytes": 4493,
+      "sha256": "4e56a31ee1fc3f63e9c9d95ec2bd8c5fa25759dc3c0d6d1c4b8db0f0d533ac67",
+      "failures": []
+    },
+    {
+      "qid": "Q775060",
+      "names": [
+        "Texaco",
+        "Texaco "
+      ],
+      "stationCount": 1401,
+      "source": "https://graph.facebook.com/TexacoWithTechron/picture?type=large",
+      "bytes": 6293,
+      "sha256": "9df66a2cfeff5d4cf14a38ae6595505fbedaf6109a36c0560988e104ce1cb028",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Texaco textlogo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q7271953",
+      "names": [
+        "QuikTrip",
+        "Quik Trip",
+        "Quiktrip",
+        "QUIKTRIP"
+      ],
+      "stationCount": 1226,
+      "source": "https://graph.facebook.com/Quiktrip/picture?type=large",
+      "bytes": 4083,
+      "sha256": "a76a96ca22a681886c913b8e4a5218511db54be82e7b05d39cd99fe42d493daf",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/QuikTrip new logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q5617505",
+      "names": [
+        "Gulf",
+        "Gulf"
+      ],
+      "stationCount": 1073,
+      "source": "https://graph.facebook.com/gulfge/picture?type=large",
+      "bytes": 6886,
+      "sha256": "aa3cd78504883c74f6bf6b76776624d366c800ed71fe1d72b88a024d173d4ede",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Gulf Oil logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q5936320",
+      "names": [
+        "Wawa",
+        "WaWa",
+        "WAWA"
+      ],
+      "stationCount": 1069,
+      "source": "https://graph.facebook.com/wawa/picture?type=large",
+      "bytes": 5473,
+      "sha256": "c17f51ccd1aab27696a708382f9b10e0f3a4f29d975408106fbd421397825ebf",
+      "failures": []
+    },
+    {
+      "qid": "Q153417",
+      "names": [
+        "Kroger",
+        "Kroger Fuel Center",
+        "Kroger Fuel"
+      ],
+      "stationCount": 1067,
+      "source": "https://graph.facebook.com/Kroger/picture?type=large",
+      "bytes": 4382,
+      "sha256": "c5e1cd54b752fd14b60df540818e6ab385e3e9790bfb4eea27e29c9a3e261f31",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Kroger logo (1961-2019).svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q465952",
+      "names": [
+        "Amoco",
+        "AMOCO"
+      ],
+      "stationCount": 1048,
+      "source": "https://graph.facebook.com/Amoco/picture?type=large",
+      "bytes": 5302,
+      "sha256": "8fbf98da8713cc0eee59d1ebd072a6e764c0ebfe83f4a7b2abff964e2f817103",
+      "failures": []
+    },
+    {
+      "qid": "Q7492551",
+      "names": [
+        "Sheetz"
+      ],
+      "stationCount": 872,
+      "source": "https://graph.facebook.com/sheetz/picture?type=large",
+      "bytes": 1754,
+      "sha256": "3b4a1e74d3525dfe50abc11fcbde842ff690d3c22982f38370f81cea621625f0",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Sheetz logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q64149010",
+      "names": [
+        "Maverik"
+      ],
+      "stationCount": 850,
+      "source": "https://graph.facebook.com/maverikadventure/picture?type=large",
+      "bytes": 2920,
+      "sha256": "674a1a419ecc54d2aec544cf2ed29440f4f4665b0ee2e25254fbe71ed64bcc38",
+      "failures": []
+    },
+    {
+      "qid": "Q6450420",
+      "names": [
+        "Kwik Trip"
+      ],
+      "stationCount": 732,
+      "source": "https://graph.facebook.com/KwikTrip/picture?type=large",
+      "bytes": 3719,
+      "sha256": "23898ce527628c40403d24a769228e5e3cff9b9eeca447c43c492fd5f5f60ebe",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Kwik Trip Logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q1872496",
+      "names": [
+        "Love's Travel Stop",
+        "Love's",
+        "Love\u2019s",
+        "LOVE'S"
+      ],
+      "stationCount": 627,
+      "source": "https://graph.facebook.com/lovestravelstops/picture?type=large",
+      "bytes": 3589,
+      "sha256": "a53075f81cdaac3b2d7f357ca0c8019c24f082800ddcf753619907d849b4540b",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Love's logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q62274304",
+      "names": [
+        "Alon"
+      ],
+      "stationCount": 618,
+      "source": "https://graph.facebook.com/alonbrands/picture?type=large",
+      "bytes": 8384,
+      "sha256": "ad4e7c38f873ac9f55171c50ba912f8c7c5741d58aa56fd1012dd12d967c5278",
+      "failures": []
+    },
+    {
+      "qid": "Q735942",
+      "names": [
+        "RaceTrac",
+        "Racetrac",
+        "RaceTrac"
+      ],
+      "stationCount": 618,
+      "source": "https://graph.facebook.com/RaceTrac/picture?type=large",
+      "bytes": 6354,
+      "sha256": "9f285411e49b01b7e5a1811ac0b3ade928ffcb41e237c4c43e04fedb6971b330",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FRaceTrac%20logo.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q715583",
+      "names": [
+        "Costco",
+        "Costco "
+      ],
+      "stationCount": 596,
+      "source": "https://commons.wikimedia.org/wiki/Special:FilePath/Costco Wholesale logo 2010-10-26.svg",
+      "bytes": 2156,
+      "sha256": "119f14a2e772321ca87454a9c7429b2800a8501ecc4713472c612f3b52d528b1",
+      "failures": []
+    },
+    {
+      "qid": "Q1143685",
+      "names": [
+        "Cumberland Farms",
+        "Cumberland farms"
+      ],
+      "stationCount": 582,
+      "source": "https://graph.facebook.com/CumberlandFarms/picture?type=large",
+      "bytes": 3475,
+      "sha256": "408d6a9677e29f5d68f9f67949e14574e31ebfb8d5e7f3ffca4af20657a4ced7",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Cumberland Farms logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q1972120",
+      "names": [
+        "Sam's Club",
+        "Sam\u2019s Club",
+        "Sams Club"
+      ],
+      "stationCount": 540,
+      "source": "https://graph.facebook.com/samsclub/picture?type=large",
+      "bytes": 2833,
+      "sha256": "2bc6d9e94c70348bb2a4a782909f5df0cdbc5c0067c83d31b520b6b559d569be",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Sam's Club logo 2026.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q5880490",
+      "names": [
+        "Holiday",
+        "Holiday "
+      ],
+      "stationCount": 532,
+      "source": "https://graph.facebook.com/holidaystations/picture?type=large",
+      "bytes": 6309,
+      "sha256": "6e812faec973d2bca0603d2a5c226cff6b194fc31710ee26a03d5a15e8c61df9",
+      "failures": []
+    },
+    {
+      "qid": "Q62606411",
+      "names": [
+        "Walmart",
+        "Walmart Neighborhood Market",
+        "Wal Mart",
+        "Wal-Mart"
+      ],
+      "stationCount": 458,
+      "source": "https://graph.facebook.com/walmart/picture?type=large",
+      "bytes": 5169,
+      "sha256": "68fbefb40b6582dbf2315b14591f0a53b09955ec3a6952a1359f1b1e9aac16bb",
+      "failures": []
+    },
+    {
+      "qid": "Q64128179",
+      "names": [
+        "Pilot",
+        "Pilot Travel Center",
+        "Pilot Dealer",
+        "Pilot "
+      ],
+      "stationCount": 440,
+      "source": "https://graph.facebook.com/pilottravelcenters/picture?type=large",
+      "bytes": 4426,
+      "sha256": "65ded5b8038adc2536d1ffa4506494440025230c8b7c276aa9dc37b97a8a3c34",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pilot Travel Centers logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q96781174",
+      "names": [
+        "Liberty",
+        "LIBERTY"
+      ],
+      "stationCount": 415,
+      "source": "https://graph.facebook.com/LibertyPetroleumLlc/picture?type=large",
+      "bytes": 10750,
+      "sha256": "7f0a2e26950910dd9f77803bd1d577dc6dd5363028349ab900c01c2005378523",
+      "failures": []
+    },
+    {
+      "qid": "Q1673286",
+      "names": [
+        "Irving",
+        "Irving Oil",
+        "Irving "
+      ],
+      "stationCount": 324,
+      "source": "https://graph.facebook.com/irvingoil/picture?type=large",
+      "bytes": 3108,
+      "sha256": "19f33f6a8e64a527c33325707afb0041f55a671e35da46755171270c688b2c7c",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Irving Oil Logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q73039084",
+      "names": [
+        "RaceWay",
+        "Raceway",
+        "Race Way"
+      ],
+      "stationCount": 314,
+      "source": "https://graph.facebook.com/720219901323849/picture?type=large",
+      "bytes": 11058,
+      "sha256": "1ecd925771e8a9c157e06ab2cffc8067302c298ba33542aefe5fcad0dfcd12c1",
+      "failures": []
+    },
+    {
+      "qid": "Q7615690",
+      "names": [
+        "Stewart's Shops",
+        "Stewart\u2019s Shops"
+      ],
+      "stationCount": 302,
+      "source": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FStewshop.png&width=150",
+      "bytes": 1693,
+      "sha256": "af163a7d62eced1ab7f61bf90747a38dd22b8ac5ea434a7fbbb2b704e10041eb",
+      "failures": []
+    },
+    {
+      "qid": "Q7374169",
+      "names": [
+        "Royal Farms"
+      ],
+      "stationCount": 295,
+      "source": "https://graph.facebook.com/Royalfarmsstores/picture?type=large",
+      "bytes": 6225,
+      "sha256": "eb30d014c98f67f99d36c237ae4bcd29fa2ba276683ef69641e976d3fc8fba8d",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Royal Farms logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q62274661",
+      "names": [
+        "Delta",
+        "Delta "
+      ],
+      "stationCount": 294,
+      "failures": []
+    },
+    {
+      "qid": "Q1508234",
+      "names": [
+        "Safeway",
+        "Safe-Way"
+      ],
+      "stationCount": 291,
+      "source": "https://graph.facebook.com/Safeway/picture?type=large",
+      "bytes": 3779,
+      "sha256": "48e9e2d0d016795bdbc7c6021d59c97a486e63532bd1e398b5c5a1616d9ae31b",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Safeway logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q108477252",
+      "names": [
+        "Kwik Fill",
+        "kwik fill"
+      ],
+      "stationCount": 285,
+      "source": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FKwik%20Fill%20logo.png&width=150",
+      "bytes": 2097,
+      "sha256": "3374546db7f9f6f2a14d2296160c7da2249d8573ffcfd1a0bbc5e51f7f5d061f",
+      "failures": []
+    },
+    {
+      "qid": "Q5127157",
+      "names": [
+        "Clark"
+      ],
+      "stationCount": 283,
+      "source": "https://graph.facebook.com/ClarkCrownBrands/picture?type=large",
+      "bytes": 5201,
+      "sha256": "0db4ef258a16ca860f2355f4056152730cf780b11c84d6c61b1bc62375913fe0",
+      "failures": []
+    },
+    {
+      "qid": "Q830621",
+      "names": [
+        "H-E-B",
+        "HEB",
+        "H-E-B Fuel"
+      ],
+      "stationCount": 281,
+      "source": "https://graph.facebook.com/HEB/picture?type=large",
+      "bytes": 3271,
+      "sha256": "6c4f6461206979da3f86bc6fffdbbb6b6662e8d7a9114f352c9ca1499b7833ee",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/HEB logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q5553766",
+      "names": [
+        "GetGo",
+        "Get & Go",
+        "GetGO"
+      ],
+      "stationCount": 268,
+      "source": "https://graph.facebook.com/GiantEagleGetGo/picture?type=large",
+      "bytes": 3449,
+      "sha256": "f1ed89b4905978aa729a6015c8c9dbe5aaf8b5134ffd48335786b58d73ec1d3a",
+      "failures": []
+    },
+    {
+      "qid": "Q107589462",
+      "names": [
+        "Mapco",
+        "MAPCO",
+        "Mapco ",
+        "MapCo"
+      ],
+      "stationCount": 255,
+      "source": "https://graph.facebook.com/mapcomart/picture?type=large",
+      "bytes": 7703,
+      "sha256": "0ea0a3efa931d4266c2a908cb12c47899477da367f59262e6bd92d61f5842f93",
+      "failures": []
+    },
+    {
+      "qid": "Q1917753",
+      "names": [
+        "Meijer"
+      ],
+      "stationCount": 245,
+      "source": "https://graph.facebook.com/meijer/picture?type=large",
+      "bytes": 3340,
+      "sha256": "3583fe61cc694d408d6ae38ccfba10975d97334a59356d9682ece0f571af9883",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Meijer logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q42376970",
+      "names": [
+        "Turkey Hill"
+      ],
+      "stationCount": 236,
+      "source": "https://graph.facebook.com/turkeyhillmm/picture?type=large",
+      "bytes": 2198,
+      "sha256": "8eddb523f79d9a6eebe155531da0e63744f2ebb3d30f21f6d31904e77351446c",
+      "failures": []
+    },
+    {
+      "qid": "Q4835754",
+      "names": [
+        "BJ's",
+        "BJ's Wholesale Club",
+        "BJ's Gas",
+        "BJ\u2019s",
+        "BJS",
+        "BJ\u2019s Gas",
+        "BJs Wholesale"
+      ],
+      "stationCount": 213,
+      "source": "https://graph.facebook.com/bjswholesaleclub/picture?type=large",
+      "bytes": 3781,
+      "sha256": "625a0e17e36a8e7204162715efe1a80669d45f00ad27ad339daff77e92f93bca",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/BJs Wholesale Club Logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q7796584",
+      "names": [
+        "Thorntons",
+        "Thornton's"
+      ],
+      "stationCount": 211,
+      "source": "https://graph.facebook.com/thorntonsllc/picture?type=large",
+      "bytes": 2163,
+      "sha256": "a2941fe7517b4ed05a34ace0f498e729796e29d7152fc12b97a0f32a99e81c45",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Thorntons logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q329347",
+      "names": [
+        "Lukoil",
+        "Mini Mart",
+        "LUKoil",
+        "LUKOIL",
+        "LukOil",
+        "MiniMart"
+      ],
+      "stationCount": 208,
+      "source": "https://graph.facebook.com/lukoil.georgia/picture?type=large",
+      "bytes": 6183,
+      "sha256": "c00d51e3ac49abfba94bf5cea4efa06114e77a7889b439a41c02d7d4003d6c4d",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Lukoil company logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q64130592",
+      "names": [
+        "Flying J",
+        "Flying  J",
+        "Flying J Travel Plaza"
+      ],
+      "stationCount": 195,
+      "source": "https://graph.facebook.com/pilottravelcenters/picture?type=large",
+      "bytes": 4426,
+      "sha256": "65ded5b8038adc2536d1ffa4506494440025230c8b7c276aa9dc37b97a8a3c34",
+      "failures": []
+    },
+    {
+      "qid": "Q123269534",
+      "names": [
+        "Kwik Star",
+        "KWIK STAR"
+      ],
+      "stationCount": 168,
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Kwik Star Logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q7887677",
+      "names": [
+        "United Dairy Farmers"
+      ],
+      "stationCount": 163,
+      "source": "https://graph.facebook.com/UnitedDairyFarmers/picture?type=large",
+      "bytes": 3466,
+      "sha256": "fb8594932998741f56f865c22de55e7990d3a42a4650d288bc591c1b54df8f93",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FUnited%20Dairy%20Farmers%20logo.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q6663398",
+      "names": [
+        "Loaf 'N Jug",
+        "Loaf N Jug",
+        "Loaf 'n Jug"
+      ],
+      "stationCount": 161,
+      "source": "https://graph.facebook.com/loafnjugstores/picture?type=large",
+      "bytes": 2174,
+      "sha256": "9ee82e98b1bfb2ce587910d8ab78cddb9a460a95e8dd71b35460a2971a2fca5e",
+      "failures": []
+    },
+    {
+      "qid": "Q7624135",
+      "names": [
+        "Stripes",
+        "Stripes "
+      ],
+      "stationCount": 160,
+      "source": "https://graph.facebook.com/stripesstores/picture?type=large",
+      "bytes": 6403,
+      "sha256": "f58324cb3893c2ea430d4e64d4252fee563890a827957bcaad918e4f5917ad41",
+      "failures": []
+    },
+    {
+      "qid": "Q56276328",
+      "names": [
+        "Huck's",
+        "Hucks"
+      ],
+      "stationCount": 134,
+      "source": "https://graph.facebook.com/GoToHucks/picture?type=large",
+      "bytes": 5436,
+      "sha256": "37d427daf2a389716024b6b6e473c9add4be5cdd95b5a04f2bc0f553f55b6122",
+      "failures": []
+    },
+    {
+      "qid": "Q110209230",
+      "names": [
+        "CEFCO"
+      ],
+      "stationCount": 127,
+      "source": "https://graph.facebook.com/CEFCO/picture?type=large",
+      "bytes": 2638,
+      "sha256": "da8f137cf8e3c5ef2403b96707573218103c18844e2548b14527ae36a4c97a18",
+      "failures": []
+    },
+    {
+      "qid": "Q6450417",
+      "names": [
+        "Kwik Shop",
+        "KwikShop",
+        "Kwik Shop ",
+        "KWIK shop"
+      ],
+      "stationCount": 125,
+      "source": "https://graph.facebook.com/kwikshopstores/picture?type=large",
+      "bytes": 2191,
+      "sha256": "178e514a9afeb58b0a82aff4e082200b29f5c3c5d63a85b412d6355bf6f90a73",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Kwik Shop logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q113207779",
+      "names": [
+        "Enmarket",
+        "EnMarket"
+      ],
+      "stationCount": 116,
+      "source": "https://graph.facebook.com/enmarketstations/picture?type=large",
+      "bytes": 3188,
+      "sha256": "427184eb1efd7f4ea583f84a02f9eb178f4394856e0252c65de4b84c1b410734",
+      "failures": []
+    },
+    {
+      "qid": "Q7544856",
+      "names": [
+        "Smith's",
+        "Smiths"
+      ],
+      "stationCount": 116,
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FSmithsFoodDrug-logo.png&width=150",
+          "error": "HTTP 429"
+        },
+        {
+          "url": "https://www.smithsfoodanddrug.com/",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q7271689",
+      "names": [
+        "QuickChek",
+        "Quick Chek"
+      ],
+      "stationCount": 116,
+      "source": "https://graph.facebook.com/QuickChek/picture?type=large",
+      "bytes": 3621,
+      "sha256": "64245c287ce71e729693ed15dab585307a394f88b1cb2e612ae037108bf3765c",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/QuickCheck.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q5506547",
+      "names": [
+        "Fry's",
+        "Fry\u2019s"
+      ],
+      "stationCount": 115,
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Fry's Logo.svg",
+          "error": "HTTP 429"
+        },
+        {
+          "url": "https://www.frysfood.com/",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q5574575",
+      "names": [
+        "Go Mart"
+      ],
+      "stationCount": 114,
+      "source": "https://graph.facebook.com/gomartstores/picture?type=large",
+      "bytes": 3769,
+      "sha256": "4681335d094a9629ddacb3ca82b9aaf8d2db543e5d59287bee8eee798935c728",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/GoMart logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q3658429",
+      "names": [
+        "Stop & Shop",
+        "Stop&Shop"
+      ],
+      "stationCount": 113,
+      "source": "https://graph.facebook.com/StopandShop/picture?type=large",
+      "bytes": 3019,
+      "sha256": "cfdbcba089a0c51a44198a80c19305f962c57338f393918457fa2a0b6a9c85a8",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Stop & Shop Logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q109291457",
+      "names": [
+        "Carroll Motor Fuels",
+        "Carroll Fuel",
+        "CARROLL MOTOR FUELS"
+      ],
+      "stationCount": 112,
+      "source": "https://graph.facebook.com/Carrollfuel/picture?type=large",
+      "bytes": 2933,
+      "sha256": "9d9a94d67e3e403c2196b2ba2201b0e5c32958c10b6f534420b33b3804798815",
+      "failures": []
+    },
+    {
+      "qid": "Q5495932",
+      "names": [
+        "Fred Meyer"
+      ],
+      "stationCount": 111,
+      "source": "https://graph.facebook.com/fredmeyer/picture?type=large",
+      "bytes": 2756,
+      "sha256": "e18ff83501cf5d1fc7ab105ace40ad85bc91062f142d2d0ff6ccdff33ea4ff8c",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Fred Meyer logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q6032595",
+      "names": [
+        "Ingles",
+        "Ingles Gas Express",
+        "INGLES"
+      ],
+      "stationCount": 109,
+      "source": "https://graph.facebook.com/inglesmarkets/picture?type=large",
+      "bytes": 1442,
+      "sha256": "0bbf933650ec0a12960464f845c528a79ef78728d478acbf111995ee62de03b9",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Ingles Markets Logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q105141709",
+      "names": [
+        "Quik Stop",
+        "QuikStop"
+      ],
+      "stationCount": 99,
+      "failures": []
+    },
+    {
+      "qid": "Q121851498",
+      "names": [
+        "Spinx"
+      ],
+      "stationCount": 96,
+      "source": "https://graph.facebook.com/TheSpinxCompany/picture?type=large",
+      "bytes": 4805,
+      "sha256": "c17d03dff3beea78d35d4bea036844d91f445610ee57eafdf0bafc1b88edbd4a",
+      "failures": []
+    },
+    {
+      "qid": "Q7383544",
+      "names": [
+        "Rutter's"
+      ],
+      "stationCount": 95,
+      "source": "https://graph.facebook.com/rutters/picture?type=large",
+      "bytes": 2874,
+      "sha256": "59f4f1416a279da408100a14234731cc524e10350efaa48d7eca4de6fe74a318",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FRutter's%20Logo.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q6412065",
+      "names": [
+        "King Soopers"
+      ],
+      "stationCount": 91,
+      "source": "https://graph.facebook.com/kingsoopers/picture?type=large",
+      "bytes": 2756,
+      "sha256": "e18ff83501cf5d1fc7ab105ace40ad85bc91062f142d2d0ff6ccdff33ea4ff8c",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/King Soopers logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q7979844",
+      "names": [
+        "Weigel's",
+        "Weigel\u2019s"
+      ],
+      "stationCount": 90,
+      "source": "https://graph.facebook.com/weigelsstores/picture?type=large",
+      "bytes": 3069,
+      "sha256": "f5c6812fa4fdfafbb281eb3ffb641c92f92a0bcc93eff3ae42b32d687833db12",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FWeigel's%20logo-black.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q85760458",
+      "names": [
+        "Family Express"
+      ],
+      "stationCount": 88,
+      "source": "https://graph.facebook.com/familyexpress/picture?type=large",
+      "bytes": 6716,
+      "sha256": "471d8a606a53e5d5554f7c5a160c7e166178ef3104047036c1eb73d60436611e",
+      "failures": []
+    },
+    {
+      "qid": "Q16973722",
+      "names": [
+        "Diamond Shamrock"
+      ],
+      "stationCount": 87,
+      "failures": []
+    },
+    {
+      "qid": "Q5665067",
+      "names": [
+        "Harris Teeter"
+      ],
+      "stationCount": 86,
+      "source": "https://graph.facebook.com/harristeeter/picture?type=large",
+      "bytes": 4191,
+      "sha256": "3d7449683cb73f9c36a73b91e1bd0bd79759c7206d6b4280bf15320694df4447",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FHarris-Teeter.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q17126373",
+      "names": [
+        "USA Gasoline"
+      ],
+      "stationCount": 85,
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/USA Gasoline Logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q7122637",
+      "names": [
+        "Pacific Pride"
+      ],
+      "stationCount": 85,
+      "failures": [],
+      "rejectedSource": "https://graph.facebook.com/PacificPrideUSA/picture?type=large",
+      "source": "https://www.pacificprideusa.com/wp-content/uploads/2021/11/pp-icon.png",
+      "bytes": 4751,
+      "sha256": "3f41cc055c572e76415714b1c44d22e2bebea466602e902ddb3406f3d64e1fb1"
+    },
+    {
+      "qid": "Q123414862",
+      "names": [
+        "Tesoro"
+      ],
+      "stationCount": 84,
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tesoro Logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q126673947",
+      "names": [
+        "Byrne Dairy",
+        "Byrne Dairy & Deli"
+      ],
+      "stationCount": 82,
+      "failures": [],
+      "rejectedSource": "https://graph.facebook.com/ByrneDairyDeli/picture?type=large",
+      "source": "https://byrnedairystores.com/wp-content/smush-webp/2025/12/cropped-Image20251219131001-1-32x32.png.webp",
+      "bytes": 6598,
+      "sha256": "5befee546a76028ee22e77406ccd111f2e2a78fb36d672e0e46795fb864c7020"
+    },
+    {
+      "qid": "Q111698204",
+      "names": [
+        "BellStores"
+      ],
+      "stationCount": 79,
+      "source": "https://graph.facebook.com/BellStores/picture?type=large",
+      "bytes": 6074,
+      "sha256": "2668ad3683a8c649f4cd49a73b7c30799a1a4f677452de0afeb14599caed7ce0",
+      "failures": []
+    },
+    {
+      "qid": "Q1639719",
+      "names": [
+        "Hy-Vee",
+        "Hy-Vee Gas"
+      ],
+      "stationCount": 78,
+      "source": "https://graph.facebook.com/HyVee/picture?type=large",
+      "bytes": 1836,
+      "sha256": "675cc42475a388097140059418f9a310adc51206e73c00f699038eb08e43df97",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Hy-Vee logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q5189323",
+      "names": [
+        "Crown"
+      ],
+      "stationCount": 76,
+      "failures": [],
+      "source": "https://crowncentral.com/wp-content/uploads/2024/07/Crown-logo-with-tag-line.jpg",
+      "bytes": 6625,
+      "sha256": "a2db52557392c8ae03d2f83f314399cb8075ec8d841822b893c699ebadbe72c7"
+    },
+    {
+      "qid": "Q4975085",
+      "names": [
+        "Brookshire's",
+        "Brookshire\u2019s"
+      ],
+      "stationCount": 75,
+      "source": "https://graph.facebook.com/Brookshires/picture?type=large",
+      "bytes": 3877,
+      "sha256": "3847f637e526fc6a4366309757ce009e5b29d512eb2afc5e5e4e6f93d5f69cb2",
+      "failures": []
+    },
+    {
+      "qid": "Q64051305",
+      "names": [
+        "Petro",
+        "Petro Stopping Center",
+        "Petro "
+      ],
+      "stationCount": 73,
+      "source": "https://graph.facebook.com/TravelCentersOfAmerica/picture?type=large",
+      "bytes": 5030,
+      "sha256": "f90500787be56f6384bcec6ece3b706208132d5e63afad6f342ddce4b8e81981",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Petro Stopping Centers logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q77885501",
+      "names": [
+        "Krist"
+      ],
+      "stationCount": 72,
+      "source": "https://graph.facebook.com/kristoil/picture?type=large",
+      "bytes": 2996,
+      "sha256": "fbbcc7967684d530a26863041529f269203313b56c23ab3469de334da12cb9bc",
+      "failures": []
+    },
+    {
+      "qid": "Q104664954",
+      "names": [
+        "DK",
+        "DK Gas Station"
+      ],
+      "stationCount": 70,
+      "source": "https://graph.facebook.com/DelekUSofficial/picture?type=large",
+      "bytes": 2450,
+      "sha256": "c70d29a29d7f80179c72b4985d5f87745228f57580438ded0331af742772ddfd",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FDelek-US.jpg&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q5526991",
+      "names": [
+        "Gate",
+        "GATE"
+      ],
+      "stationCount": 68,
+      "failures": [],
+      "source": "https://www.mygatestore.com/wp-content/uploads/2022/02/gate-icon-150x150.png",
+      "bytes": 4074,
+      "sha256": "ccb5fd1f966e126d4cf3eda6aa5273b06246a6f047cb4595332e05ecbffa74f4"
+    },
+    {
+      "qid": "Q4982335",
+      "names": [
+        "Buc-ee's",
+        "Buc-ee\u2019s",
+        "Buc-Ees"
+      ],
+      "stationCount": 60,
+      "source": "https://graph.facebook.com/bucees/picture?type=large",
+      "bytes": 6834,
+      "sha256": "55cd8b182c730a479f579683fa24be62ab41481f848b8980acf22a2c29ad1a25",
+      "failures": []
+    },
+    {
+      "qid": "Q7949045",
+      "names": [
+        "Wesco"
+      ],
+      "stationCount": 59,
+      "source": "https://graph.facebook.com/gowesco/picture?type=large",
+      "bytes": 7459,
+      "sha256": "550bdf0d897a06dbaf3ad41df7faf10776637a8285e6a622c8da338920dfb816",
+      "failures": []
+    },
+    {
+      "qid": "Q117324848",
+      "names": [
+        "Fastrac",
+        "FASTRAC"
+      ],
+      "stationCount": 58,
+      "failures": [
+        {
+          "url": "https://fastraccafe.com/media/p5gdckfv/favicon-3.ico?culture=en",
+          "error": "Input buffer contains unsupported image format"
+        }
+      ]
+    },
+    {
+      "qid": "Q116734101",
+      "names": [
+        "Fast Stop",
+        "Faststop",
+        "FastStop"
+      ],
+      "stationCount": 58,
+      "failures": [
+        {
+          "url": "https://edge.sitecorecloud.io/growmarkinc9cb1-gmk61e9-prod9012-bbe2/media/project/platform/efaststop/fast-stop-favicon.ico",
+          "error": "Input buffer contains unsupported image format"
+        }
+      ]
+    },
+    {
+      "qid": "Q7339377",
+      "names": [
+        "Road Ranger"
+      ],
+      "stationCount": 58,
+      "source": "https://graph.facebook.com/roadrangerusa/picture?type=large",
+      "bytes": 5286,
+      "sha256": "1c93719e54653de74d72ff7c074335ce14d889c2dcc2861574fdb0f86c1511cc",
+      "failures": []
+    },
+    {
+      "qid": "Q75851666",
+      "names": [
+        "Yesway"
+      ],
+      "stationCount": 56,
+      "source": "https://graph.facebook.com/YeswayStores/picture?type=large",
+      "bytes": 7335,
+      "sha256": "b7b71742264053cc271dfd42d93ef14fa0c37f17a6f8caa5657259dfd6257f82",
+      "failures": []
+    },
+    {
+      "qid": "Q121160101",
+      "names": [
+        "XtraMart",
+        "Xtra Fuels",
+        "XtraFuels",
+        "Xtramart",
+        "Xtra Mart"
+      ],
+      "stationCount": 54,
+      "failures": []
+    },
+    {
+      "qid": "Q16994839",
+      "names": [
+        "Harps",
+        "Harp's"
+      ],
+      "stationCount": 51,
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Harps Food Stores logo.svg",
+          "error": "HTTP 429"
+        },
+        {
+          "url": "https://www.harpsfood.com",
+          "error": "HTTP 403"
+        }
+      ]
+    },
+    {
+      "qid": "Q121160135",
+      "names": [
+        "Global"
+      ],
+      "stationCount": 50,
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Global Partners logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q18154470",
+      "names": [
+        "Minit Mart"
+      ],
+      "stationCount": 49,
+      "source": "https://graph.facebook.com/MinitMartOfficial/picture?type=large",
+      "bytes": 2136,
+      "sha256": "34a0890af2214f10ddd043231713eeda7fc39d5514577c3416e8e2d19e95f1bf",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FMinit%20Mart%20logo.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q5276954",
+      "names": [
+        "Dillons"
+      ],
+      "stationCount": 48,
+      "source": "https://graph.facebook.com/Dillons/picture?type=large",
+      "bytes": 3028,
+      "sha256": "53ae0c0a9827d1ba54873c477bef7a09f16f0b68039421f0a9cd4332591966f6",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Dillons logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q131870508",
+      "names": [
+        "Rebel",
+        "Rebel ",
+        "REBEL"
+      ],
+      "stationCount": 44,
+      "source": "https://graph.facebook.com/rebel.stores.us/picture?type=large",
+      "bytes": 2502,
+      "sha256": "48f58d929bc08b720e74b145d1bd32e4612026eb40cf1effd330d02e8353f665",
+      "failures": []
+    },
+    {
+      "qid": "Q145168",
+      "names": [
+        "Dollar General",
+        "Dollar General Market"
+      ],
+      "stationCount": 41,
+      "source": "https://graph.facebook.com/dollargeneral/picture?type=large",
+      "bytes": 4953,
+      "sha256": "359fd6e3ea69023b0965813288713612e2230c4c219cd76ddb79f21f752df4f4",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FLogo%20DG%20Pinch%20Yellow.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q99196505",
+      "names": [
+        "Hele"
+      ],
+      "stationCount": 39,
+      "source": "https://graph.facebook.com/HeleGas/picture?type=large",
+      "bytes": 2730,
+      "sha256": "cb448919e4e5003f7cf29fdc88cf0f40ec42e0bc3d32b18687189055771c6e7e",
+      "failures": []
+    },
+    {
+      "qid": "Q87378070",
+      "names": [
+        "Rotten Robbie"
+      ],
+      "stationCount": 38,
+      "source": "https://graph.facebook.com/rottenrobbies/picture?type=large",
+      "bytes": 3479,
+      "sha256": "692aad93d8295f0c393f007a1cb82ea66ec0df2a25379688992538b84009e2d0",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FRotten%20Robbie%20logo.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q100148356",
+      "names": [
+        "Certified"
+      ],
+      "stationCount": 38,
+      "source": "https://graph.facebook.com/CertifiedOil/picture?type=large",
+      "bytes": 2382,
+      "sha256": "c1ab3b68a28cf9afd0419302ba77adfe2e70fd504a171a051673849181fd4b61",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FCertified%20Oil%20logo.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q4733292",
+      "names": [
+        "Allsup's",
+        "Allsups",
+        "Allsup's Convenience Store",
+        "Allsup\u2019s",
+        "Allsup\u2019s Convenience Store",
+        "AllSup's"
+      ],
+      "stationCount": 38,
+      "source": "https://graph.facebook.com/allsups940/picture?type=large",
+      "bytes": 4167,
+      "sha256": "d86c78ff5134a115d6ac411a9c4916b0103a8ca81d6dfd4753b26f4eb79ffa35",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Allsup's.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q5465282",
+      "names": [
+        "Food 4 Less",
+        "Food4Less",
+        "Foods Co"
+      ],
+      "stationCount": 36,
+      "source": "https://graph.facebook.com/myfood4less/picture?type=large",
+      "bytes": 3073,
+      "sha256": "11525c25d7001d9f44be14c27d7f70488a565ff5361a1cf3347aac3e012c7b5e",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Food4Less logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q6443340",
+      "names": [
+        "Kum & Go"
+      ],
+      "stationCount": 32,
+      "source": "https://graph.facebook.com/kumandgo/picture?type=large",
+      "bytes": 4236,
+      "sha256": "37c697e3c9af6133a22d6bb07f6101234fb19ee288257b12b4aa3862790b12f5",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Kum & Go logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q126914775",
+      "names": [
+        "Delta Sonic",
+        "Delta Sonic Car Wash"
+      ],
+      "stationCount": 31,
+      "source": "https://graph.facebook.com/DeltaSonicWash/picture?type=large",
+      "bytes": 3929,
+      "sha256": "b68b612fdcb21593fb646b09f2b6e68ba5d6945fd860323550322c02e9d49eb2",
+      "failures": []
+    },
+    {
+      "qid": "Q65706152",
+      "names": [
+        "1st Stop",
+        "First Stop",
+        "1st STOP",
+        "1ST STOP"
+      ],
+      "stationCount": 31,
+      "failures": []
+    },
+    {
+      "qid": "Q114570150",
+      "names": [
+        "Rhodes 101",
+        "Rhodes"
+      ],
+      "stationCount": 30,
+      "failures": [],
+      "source": "https://rhodes101.com/wp-content/uploads/2023/11/cropped-favicon-32x32.png",
+      "bytes": 4669,
+      "sha256": "19d67f2814284925981ceb8a27df3d884093ebd012c0371dd3669a164032de16"
+    },
+    {
+      "qid": "Q124987140",
+      "names": [
+        "Refuel",
+        "Cruizers"
+      ],
+      "stationCount": 28,
+      "source": "https://graph.facebook.com/refuelmarketsc/picture?type=large",
+      "bytes": 6929,
+      "sha256": "0260a24072b615a7d3dda852d06740a3b782cff6799321cd85560cd42c502fd2",
+      "failures": []
+    },
+    {
+      "qid": "Q7980370",
+      "names": [
+        "Weis",
+        "Weis Gas N Go",
+        "Weis Gas n Go",
+        "Weis Gas n' Go",
+        "Weis Gas-N-Go",
+        "Weis Gas-n-Go",
+        "WEIS GAS N' GO",
+        "Weis Gas N\u2019 Go"
+      ],
+      "stationCount": 26,
+      "source": "https://graph.facebook.com/WeisMarkets/picture?type=large",
+      "bytes": 3834,
+      "sha256": "e11e7800f667427b36c11d458ddcf3007a1c6fa03993e059c7ee9a17df6caa34",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Weis Markets logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q109338068",
+      "names": [
+        "Astro",
+        "ASTRO"
+      ],
+      "stationCount": 23,
+      "failures": []
+    },
+    {
+      "qid": "Q7306166",
+      "names": [
+        "Redner's",
+        "Redner\u2019s"
+      ],
+      "stationCount": 23,
+      "failures": [],
+      "rejectedSource": "https://www.rednersmarkets.com/logo192.png",
+      "rejectionReason": "Generic framework favicon or blank artwork, not a recognizable brand mark"
+    },
+    {
+      "qid": "Q110300768",
+      "names": [
+        "Friendly Express"
+      ],
+      "stationCount": 23,
+      "source": "https://graph.facebook.com/friendlyexpressstores/picture?type=large",
+      "bytes": 10305,
+      "sha256": "b8fbc2d1e38edc106e319aa8b941950e1dae6d2a3d3c8f93ac3255dc1a761d79",
+      "failures": []
+    },
+    {
+      "qid": "Q5123299",
+      "names": [
+        "City Market"
+      ],
+      "stationCount": 22,
+      "source": "https://graph.facebook.com/CityMarketGrocery/picture?type=large",
+      "bytes": 2828,
+      "sha256": "517902fdcfa7ac6b9930b1cec915b225e7ea845b8f20693475ac55fc2a7d0ade",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/City Market logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q124150984",
+      "names": [
+        "Haffner's",
+        "Haffner\u2019s"
+      ],
+      "stationCount": 22,
+      "source": "https://graph.facebook.com/haffnersenergy/picture?type=large",
+      "bytes": 4076,
+      "sha256": "aa9dfd3273263856a785b41a2f6705a439080fe624a16571a30a6b7b8b92eaab",
+      "failures": []
+    },
+    {
+      "qid": "Q120637476",
+      "names": [
+        "Nouria"
+      ],
+      "stationCount": 20,
+      "source": "https://graph.facebook.com/nouriaenergy/picture?type=large",
+      "bytes": 5470,
+      "sha256": "797ebc0428cb2202d2478c9f50dab19e7449d328d0558856587943391399a5ee",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Nouria logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q7941609",
+      "names": [
+        "Vons"
+      ],
+      "stationCount": 20,
+      "source": "https://graph.facebook.com/vons/picture?type=large",
+      "bytes": 2956,
+      "sha256": "8342877a29902c45bb142359f59260234a1aa1626dd11ec1371b15c98ff30ca6",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Vons logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q306960",
+      "names": [
+        "Am Pm",
+        "AMPM",
+        "ampm",
+        "AM-PM",
+        "AmPm"
+      ],
+      "stationCount": 20,
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Ampm storechain logo.svg",
+          "error": "HTTP 429"
+        },
+        {
+          "url": "https://www.ampm.com/apple-touch-icon.png",
+          "error": "HTTP 404"
+        },
+        {
+          "url": "https://www.ampm.com/android-icon.png",
+          "error": "HTTP 404"
+        }
+      ],
+      "rejectedSource": "https://graph.facebook.com/ampm/picture?type=large"
+    },
+    {
+      "qid": "Q19868045",
+      "names": [
+        "Family Fare"
+      ],
+      "stationCount": 19,
+      "source": "https://graph.facebook.com/shopfamilyfare/picture?type=large",
+      "bytes": 3722,
+      "sha256": "55a506088fac073b6d6776a1de1088dcc6e78a8f04840b8d3dca5b56d958414e",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FFamily%20fare%202022.jpg&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q3146662",
+      "names": [
+        "IGA"
+      ],
+      "stationCount": 19,
+      "source": "https://graph.facebook.com/IGACorp/picture?type=large",
+      "bytes": 3106,
+      "sha256": "5c5a181a363180464ef9da5a624cebff7daeff9ab8abef04a5c7a752e8f973c8",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/IGA logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q119586667",
+      "names": [
+        "Alltown"
+      ],
+      "stationCount": 18,
+      "source": "https://graph.facebook.com/Alltown/picture?type=large",
+      "bytes": 3234,
+      "sha256": "0aa46b9c87e4c53c7b334ac4a3aedc8292d2bb4e05be288da767d802ee1907ec",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Alltown logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q3929820",
+      "names": [
+        "Ralphs"
+      ],
+      "stationCount": 18,
+      "source": "https://graph.facebook.com/Ralphs/picture?type=large",
+      "bytes": 2756,
+      "sha256": "e18ff83501cf5d1fc7ab105ace40ad85bc91062f142d2d0ff6ccdff33ea4ff8c",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Ralphs.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q108809024",
+      "names": [
+        "Dash In",
+        "Dash in",
+        "Dash-In",
+        "DASH IN"
+      ],
+      "stationCount": 18,
+      "source": "https://graph.facebook.com/dashinstores/picture?type=large",
+      "bytes": 4777,
+      "sha256": "bf692218976f65fa7478fea658b1662710be73e4608ebc509e96a1efd61c8f70",
+      "failures": []
+    },
+    {
+      "qid": "Q103882231",
+      "names": [
+        "Flyers"
+      ],
+      "stationCount": 17,
+      "source": "https://graph.facebook.com/FlyersEnergy/picture?type=large",
+      "bytes": 2470,
+      "sha256": "193f554fdc5facb569ac08a115c254cee1e5bd4a08f794da981b2c5ebb8dfa2e",
+      "failures": []
+    },
+    {
+      "qid": "Q139631383",
+      "names": [
+        "Duck Thru"
+      ],
+      "stationCount": 17,
+      "source": "https://graph.facebook.com/duckthrufoodstore/picture?type=large",
+      "bytes": 5300,
+      "sha256": "f7d6f0e3570a9299e2e4eeb2c0ce38e29fda01ebd907c30fc42f024bb1ffb63f",
+      "failures": []
+    },
+    {
+      "qid": "Q110311797",
+      "names": [
+        "Alta Convenience"
+      ],
+      "stationCount": 16,
+      "source": "https://graph.facebook.com/AltaConvenience/picture?type=large",
+      "bytes": 3352,
+      "sha256": "81c57c96892bcdaf91629d5d56c1e90ed858585b005aca82ba6c2cdddb1bea06",
+      "failures": []
+    },
+    {
+      "qid": "Q7501097",
+      "names": [
+        "Shop Rite",
+        "ShopRite"
+      ],
+      "stationCount": 15,
+      "source": "https://graph.facebook.com/shoprite.supermarket/picture?type=large",
+      "bytes": 6487,
+      "sha256": "42842df7b739aabe3d13941749de8b5b6bc25353bcca056f941f743c8acf700e",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FShopRite%20Logo.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q61994857",
+      "names": [
+        "Star Mart",
+        "StarMart"
+      ],
+      "stationCount": 14,
+      "failures": []
+    },
+    {
+      "qid": "Q135268157",
+      "names": [
+        "AL Prime Energy",
+        "AL Prime",
+        "A.L. Prime Energy",
+        "Al Prime"
+      ],
+      "stationCount": 14,
+      "failures": []
+    },
+    {
+      "qid": "Q7825137",
+      "names": [
+        "Tops"
+      ],
+      "stationCount": 13,
+      "source": "https://graph.facebook.com/topsfriendlymarkets/picture?type=large",
+      "bytes": 3519,
+      "sha256": "ce15f46595dd56312366d8a7223d791aec3ee60b7bf0917fe3baa7e23f9ea038",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tops Friendly Markets logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q7830004",
+      "names": [
+        "Town Pump"
+      ],
+      "stationCount": 12,
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Town Pump logo.svg",
+          "error": "HTTP 429"
+        }
+      ],
+      "source": "https://irp-cdn.multiscreensite.com/cea319a6/dms3rep/multi/fav-400x268.png",
+      "bytes": 2831,
+      "sha256": "ac78217e5e120941be37e63f292b5746104d6e49de1b67de99f4d84698f8daba"
+    },
+    {
+      "qid": "Q113629559",
+      "names": [
+        "Qik-n-EZ",
+        "QiknEZ"
+      ],
+      "stationCount": 12,
+      "failures": [],
+      "source": "https://qiknez.com/wp-content/uploads/2020/09/2705-Chronister-Oil_QiknEZ-Logo-Vertical-Background-e1609103275719.png",
+      "bytes": 4597,
+      "sha256": "5cfff8d9cfb41eb8ca3068687fade09ef30cf609a9b1148aefc7928827785bb3"
+    },
+    {
+      "qid": "Q7265425",
+      "names": [
+        "QFC"
+      ],
+      "stationCount": 12,
+      "source": "https://graph.facebook.com/QFC/picture?type=large",
+      "bytes": 3867,
+      "sha256": "79e1e9acebe559298920bc37cc6f90dd8c364f1e7225e0e838ba4398882e71f3",
+      "failures": []
+    },
+    {
+      "qid": "Q4975084",
+      "names": [
+        "Brookshire Brothers"
+      ],
+      "stationCount": 11,
+      "source": "https://graph.facebook.com/BrookshireBros/picture?type=large",
+      "bytes": 6549,
+      "sha256": "e779c2377ad0014d1ca38597c2963e8d62ace28e5601c4947e89217d674583e7",
+      "failures": []
+    },
+    {
+      "qid": "Q3504127",
+      "names": [
+        "Super C"
+      ],
+      "stationCount": 11,
+      "source": "https://graph.facebook.com/superc.ca/picture?type=large",
+      "bytes": 2716,
+      "sha256": "be6d09c89715af59abc5f75455d0f75cfca8f1955f63bedc6bb399d0835ce97f",
+      "failures": []
+    },
+    {
+      "qid": "Q5754383",
+      "names": [
+        "High's",
+        "Highs"
+      ],
+      "stationCount": 11,
+      "failures": [],
+      "rejectedSource": "https://graph.facebook.com/highsdairy/picture?type=large",
+      "source": "https://highs.com/_assets/images/c8dfb422d160e96e8cd9e3a14443f828.png",
+      "bytes": 3951,
+      "sha256": "b34e09e9b0ab81a31d350790ab349a9731e8b2e977feff874890afea5f84dd80"
+    },
+    {
+      "qid": "Q116731804",
+      "names": [
+        "Fast Break",
+        "FastBreak"
+      ],
+      "stationCount": 11,
+      "source": "https://graph.facebook.com/myfastbreak/picture?type=large",
+      "bytes": 10958,
+      "sha256": "e15f2c0bf6e35c8cce3921ebd168491436a5353400dfbbc3e572915465b32e25",
+      "failures": []
+    },
+    {
+      "qid": "Q66048258",
+      "names": [
+        "AmeriStop",
+        "Ameristop"
+      ],
+      "stationCount": 11,
+      "source": "https://graph.facebook.com/ameristopreynoldsburg/picture?type=large",
+      "bytes": 9481,
+      "sha256": "1f347d23a84f02ba6f321513026caa9d3ee596b1007e554e7fa3586a131b7192",
+      "failures": []
+    },
+    {
+      "qid": "Q109826132",
+      "names": [
+        "Good2Go",
+        "Good 2 Go"
+      ],
+      "stationCount": 10,
+      "failures": [],
+      "source": "https://good2gostores.com/wp-content/uploads/2021/08/cropped-G2G-Icon-32x32.png",
+      "bytes": 5345,
+      "sha256": "086ae09223ee8d9fe113c1af4d92ee0c84d4323045fd6562700e6c0544cc57de"
+    },
+    {
+      "qid": "Q110622262",
+      "names": [
+        "Kent Kwik"
+      ],
+      "stationCount": 9,
+      "failures": [],
+      "rejectedSource": "https://i0.wp.com/kentkwik.com/wp-content/uploads/2019/07/cropped-Kent-kwik-web-icon.jpg?fit=32%2C32&#038;ssl=1",
+      "rejectionReason": "Generic framework favicon or blank artwork, not a recognizable brand mark"
+    },
+    {
+      "qid": "Q64224605",
+      "names": [
+        "ExtraMile",
+        "Extra Mile"
+      ],
+      "stationCount": 9,
+      "failures": [
+        {
+          "url": "https://www.chevronextramile.com/favicon.ico",
+          "error": "Input buffer contains unsupported image format"
+        }
+      ],
+      "rejectedSource": "https://graph.facebook.com/ExtraMileExtras/picture?type=large",
+      "source": "https://www.chevronextramile.com/content/themes/site/assets/images/site/icon.svg",
+      "bytes": 1286,
+      "sha256": "66330c056f8915b19b3482208f9c37836141986d082e2f2bb02a4d278350b505"
+    },
+    {
+      "qid": "Q7501110",
+      "names": [
+        "Shop N Save",
+        "Shop 'n Save",
+        "Shop 'N' Save",
+        "Shop 'n' Save"
+      ],
+      "stationCount": 9,
+      "source": "https://graph.facebook.com/shopnsavefood/picture?type=large",
+      "bytes": 5397,
+      "sha256": "c329bb407210a5aaea419331267974764944d599acb7a0166c6bee76510e76ea",
+      "failures": []
+    },
+    {
+      "qid": "Q57643977",
+      "names": [
+        "Tiger Mart"
+      ],
+      "stationCount": 8,
+      "failures": []
+    },
+    {
+      "qid": "Q119592174",
+      "names": [
+        "Jiffy Mart"
+      ],
+      "stationCount": 8,
+      "source": "https://graph.facebook.com/jiffymartstores/picture?type=large",
+      "bytes": 6105,
+      "sha256": "5bbd7a3d796d0fc1b6a17390bfd35709a55996e670b0a281ecbf221e6a8e6941",
+      "failures": []
+    },
+    {
+      "qid": "Q61747408",
+      "names": [
+        "Kangaroo Express",
+        "Kangaroo Express"
+      ],
+      "stationCount": 8,
+      "source": "https://graph.facebook.com/KangarooExpress/picture?type=large",
+      "bytes": 5650,
+      "sha256": "29fcbec3126aaca6019931f08cff565c91f918582a8060e73f0bf14cda3eae23",
+      "failures": []
+    },
+    {
+      "qid": "Q2831861",
+      "names": [
+        "Albertsons",
+        "Albertson's"
+      ],
+      "stationCount": 8,
+      "source": "https://graph.facebook.com/Albertsons/picture?type=large",
+      "bytes": 3659,
+      "sha256": "ccd88e216e830d9e56d9c27397d5225945a360bdddfb07ccbe4081420a258994",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Albertsons logo vertical.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q1615684",
+      "names": [
+        "Hess"
+      ],
+      "stationCount": 7,
+      "source": "https://graph.facebook.com/HessCorporation/picture?type=large",
+      "bytes": 3525,
+      "sha256": "38f25e697cae3895a4f5f67bd376598486d18dfc9dd3f94aa3edc09c0801cc37",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Hess Corporation Logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q3388303",
+      "names": [
+        "Piggly Wiggly"
+      ],
+      "stationCount": 7,
+      "source": "https://graph.facebook.com/pigglywigglystores/picture?type=large",
+      "bytes": 7941,
+      "sha256": "01d1d9c023ac0380442bb982a75562127d7227859f53ae7e738ea92ba39a5e90",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FPiggly%20wiggly.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q66134834",
+      "names": [
+        "Quality Mart"
+      ],
+      "stationCount": 6,
+      "source": "https://graph.facebook.com/QualityMart/picture?type=large",
+      "bytes": 6397,
+      "sha256": "d147771aaee831033b5658ad545c92d6298cac9d656814601bfad9102ed5f1e8",
+      "failures": []
+    },
+    {
+      "qid": "Q13610282",
+      "names": [
+        "Metro"
+      ],
+      "stationCount": 6,
+      "source": "https://graph.facebook.com/metro.deutschland/picture?type=large",
+      "bytes": 2318,
+      "sha256": "208773e51d7f82b9b1f636198d762fa400b8b7df3d2d17ad2ddfe2b29f8a7495",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/MetroC+C-Logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q7627481",
+      "names": [
+        "Stuckey's"
+      ],
+      "stationCount": 6,
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FStuckeyslogo.png&width=150",
+          "error": "HTTP 429"
+        }
+      ],
+      "rejectedSource": "https://graph.facebook.com/StuckeysCorporation/picture?type=large",
+      "source": "https://stuckeys.com/apple-touch-icon.png",
+      "bytes": 4349,
+      "sha256": "ac864e8bbbb2ada9ba8e192d529db9eae11fd27a0809c76d46c95768b8e356eb"
+    },
+    {
+      "qid": "Q7835892",
+      "names": [
+        "TA"
+      ],
+      "stationCount": 5,
+      "source": "https://graph.facebook.com/TravelCentersOfAmerica/picture?type=large",
+      "bytes": 5030,
+      "sha256": "f90500787be56f6384bcec6ece3b706208132d5e63afad6f342ddce4b8e81981",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/TravelCenters of America logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q6698032",
+      "names": [
+        "Lucky's",
+        "Luckys"
+      ],
+      "stationCount": 5,
+      "source": "https://graph.facebook.com/LuckySupermarkets/picture?type=large",
+      "bytes": 2647,
+      "sha256": "b0c1d33981e206cd3f1007aee0ee6c171f498ab2dc9ba30e8c472afc0667d6af",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Lucky Stores logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q5166143",
+      "names": [
+        "Convenient Food Mart"
+      ],
+      "stationCount": 5,
+      "source": "https://graph.facebook.com/convenientfoodmarts/picture?type=large",
+      "bytes": 6371,
+      "sha256": "d49f7cfbbb7b3c7a26b133f701bed91d82159acd01b2723fb74caec0224f07a0",
+      "failures": []
+    },
+    {
+      "qid": "Q568940",
+      "names": [
+        "Jet"
+      ],
+      "stationCount": 4,
+      "source": "https://graph.facebook.com/JETlocaluk/picture?type=large",
+      "bytes": 4076,
+      "sha256": "83d23b07b51c9d27b8211f03feca15f1db1a0b65c7100672e1df83b4c4558cd5",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FJet%20brand%20logo.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q121513516",
+      "names": [
+        "Rocket"
+      ],
+      "stationCount": 4,
+      "source": "https://graph.facebook.com/Rocket.Stores/picture?type=large",
+      "bytes": 4998,
+      "sha256": "ad8e9dee8ff7aae7dd6780496708d60764a2323aa8fb6a43ba94bffc9b4c1d29",
+      "failures": []
+    },
+    {
+      "qid": "Q65118218",
+      "names": [
+        "Clarks Pump N Shop",
+        "Clark's Pump-N-Shop",
+        "Clark\u2019s Pump N Shop",
+        "Clark's Pump N Shop"
+      ],
+      "stationCount": 4,
+      "source": "https://graph.facebook.com/clarkspumpnshop/picture?type=large",
+      "bytes": 9421,
+      "sha256": "016e4f092752d1980eb86a8037ece49cb500b1de9a4a03534f702d4ad8149e7d",
+      "failures": []
+    },
+    {
+      "qid": "Q7371288",
+      "names": [
+        "Pick 'n Save"
+      ],
+      "stationCount": 3,
+      "source": "https://graph.facebook.com/PickNSaveStores/picture?type=large",
+      "bytes": 4262,
+      "sha256": "fa48f177187c6852d4f18b287465f8cdfd8ca4ec0a7ff1d1b251947e60c407c6",
+      "failures": []
+    },
+    {
+      "qid": "Q95990164",
+      "names": [
+        "Stinker"
+      ],
+      "stationCount": 3,
+      "source": "https://graph.facebook.com/stinkerstores/picture?type=large",
+      "bytes": 7524,
+      "sha256": "1742eba9b3dbe3ffc823258dacfa95cc59fcff6f3cf37f17f47344d19d276a88",
+      "failures": []
+    },
+    {
+      "qid": "Q130527696",
+      "names": [
+        "US Market"
+      ],
+      "stationCount": 3,
+      "failures": [],
+      "rejectedSource": "https://graph.facebook.com/usmarketstores/picture?type=large",
+      "source": "https://irp.cdn-website.com/f9fa2d15/dms3rep/multi/US+Market+Official+Logo.png",
+      "bytes": 4100,
+      "sha256": "bc3a6f42e6a8f925cc2ac356e2f219bfd5ed086df2b72885972aef7cfc8f3c3a"
+    },
+    {
+      "qid": "Q341975",
+      "names": [
+        "Acme"
+      ],
+      "stationCount": 3,
+      "source": "https://graph.facebook.com/acmemarkets/picture?type=large",
+      "bytes": 2814,
+      "sha256": "fc2dd22b4f107fea96674d168c1f823052d762fae04a39caf5f0c171cbc1670b",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Acme Markets lolo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q7703648",
+      "names": [
+        "Terrible's",
+        "Terrible\u2019s"
+      ],
+      "stationCount": 3,
+      "source": "https://graph.facebook.com/TerribleHerbst/picture?type=large",
+      "bytes": 7056,
+      "sha256": "12f82ee874509ea23dd732208076bdbd9b3c17043f84abcf31eb22819bd068ca",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FTerrible%20Herbst%20logo.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q7367458",
+      "names": [
+        "Rosauers"
+      ],
+      "stationCount": 2,
+      "source": "https://graph.facebook.com/rosauers/picture?type=large",
+      "bytes": 2037,
+      "sha256": "27736c0e965a1c1de2ef6f0f58a7e20cccba4f0fe605be5a4f746f794f26e78f",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Rosauers Supermarkets logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q124073193",
+      "names": [
+        "Gulf Express"
+      ],
+      "stationCount": 2,
+      "failures": []
+    },
+    {
+      "qid": "Q2079198",
+      "names": [
+        "Market Basket"
+      ],
+      "stationCount": 2,
+      "source": "https://graph.facebook.com/marketbasket/picture?type=large",
+      "bytes": 5905,
+      "sha256": "fc18f0a81f979417c6ba73c2e5d19e6f8385e384ce5a59d54ed2ae007d9523b1",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Market Basket logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q125941013",
+      "names": [
+        "Holiday Oil"
+      ],
+      "stationCount": 2,
+      "source": "https://graph.facebook.com/HolidayOilCo/picture?type=large",
+      "bytes": 4794,
+      "sha256": "b06a3bd407bed97fd1f68aadaef6b305995e16702f4048af9e471d671ff7f104",
+      "failures": []
+    },
+    {
+      "qid": "Q7427972",
+      "names": [
+        "Save-a-Lot"
+      ],
+      "stationCount": 2,
+      "source": "https://graph.facebook.com/savealot/picture?type=large",
+      "bytes": 7035,
+      "sha256": "ef98100fda96f0b626c9ec4689ef667eb0ae9e49139eaa7083702f0c1ee25fb2",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Save A Lot logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q7178908",
+      "names": [
+        "Applegreen"
+      ],
+      "stationCount": 2,
+      "source": "https://graph.facebook.com/goapplegreen/picture?type=large",
+      "bytes": 8037,
+      "sha256": "fc454bab73fda49db21ea77476669b4bb26339485724cbec0d06a9c811015650",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FApplegreen%20Logo.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q4746234",
+      "names": [
+        "Amigo"
+      ],
+      "stationCount": 2,
+      "source": "https://graph.facebook.com/amigopuertorico/picture?type=large",
+      "bytes": 2589,
+      "sha256": "9ee2b3cd7411ffcc4ecf27e71387cb6e30c61c98f10ea1ab2dd8be51a2e3f1b7",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Amigo Supermarkets logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q124810975",
+      "names": [
+        "Superior"
+      ],
+      "stationCount": 2,
+      "source": "https://graph.facebook.com/Superiorgrocers/picture?type=large",
+      "bytes": 4044,
+      "sha256": "5bf6288ab74ffee893e2e2f65435fe3df2b123c50e39409189d0aca8e482ac66",
+      "failures": []
+    },
+    {
+      "qid": "Q4835620",
+      "names": [
+        "BiLo"
+      ],
+      "stationCount": 2,
+      "source": "https://graph.facebook.com/BILOSuperSaver/picture?type=large",
+      "bytes": 1995,
+      "sha256": "81a8a685f3c3ceef7dcca9b09af8ea3c645b41e2420981ec01ebaf24f5aa0881",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/BI-LO Logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q115350331",
+      "names": [
+        "Amigo's",
+        "Amigos"
+      ],
+      "stationCount": 2,
+      "source": "https://graph.facebook.com/AmigosTexas/picture?type=large",
+      "bytes": 1667,
+      "sha256": "4c49132ad114d454e6f70679d83cd6c6a0abb400d2cd0e1366f9a288b68fc797",
+      "failures": []
+    },
+    {
+      "qid": "Q6412914",
+      "names": [
+        "King's",
+        "Kings"
+      ],
+      "stationCount": 2,
+      "source": "https://graph.facebook.com/KingsFoodMarkets/picture?type=large",
+      "bytes": 5500,
+      "sha256": "ab1b72e67c934012a3a53ad7aa65335bee217a2d02c710e2b6628c68e0c1fd2f",
+      "failures": []
+    },
+    {
+      "qid": "Q16931259",
+      "names": [
+        "On The RUN",
+        "ON THE RUN"
+      ],
+      "stationCount": 2,
+      "source": "https://graph.facebook.com/OntheRunUS/picture?type=large",
+      "bytes": 2888,
+      "sha256": "930f3ef4c489b475100959f0a7aa745ae564cf21ca876f0ec70e5789e082fbd5",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FOntherun%20brand%20logo.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q4646934",
+      "names": [
+        "A Plus",
+        "APlus"
+      ],
+      "stationCount": 2,
+      "failures": [
+        {
+          "url": "https://www.myaplus.com/img/apple-touch-icon.png",
+          "error": "HTTP 404"
+        }
+      ],
+      "source": "https://www.myaplus.com/img/favicon-32x32.png",
+      "bytes": 3558,
+      "sha256": "cb79c2da939b1cc2f3f0cfea96368754bd5b0176c6e0627a0bea2b09c13314bc"
+    },
+    {
+      "qid": "Q108462506",
+      "names": [
+        "Clean Energy"
+      ],
+      "stationCount": 1,
+      "failures": [
+        {
+          "url": "https://cleanenergyfuels.com/wp-content/uploads/2025/03/favicon.ico",
+          "error": "Input buffer contains unsupported image format"
+        }
+      ]
+    },
+    {
+      "qid": "Q109648675",
+      "names": [
+        "Big Red"
+      ],
+      "stationCount": 1,
+      "failures": []
+    },
+    {
+      "qid": "Q111698565",
+      "names": [
+        "Duchess"
+      ],
+      "stationCount": 1,
+      "failures": [],
+      "source": "https://www.myduchess.com/wp-content/themes/fire/theme/assets/media/favicons/apple-touch-icon.png",
+      "bytes": 2005,
+      "sha256": "7f6f82ff3813e870350d19af347e5fd5365b33d5ac473bfaab04c5d9c8ab338f"
+    },
+    {
+      "qid": "Q123617635",
+      "names": [
+        "Big Apple"
+      ],
+      "stationCount": 1,
+      "source": "https://graph.facebook.com/BigAppleFoodStores/picture?type=large",
+      "bytes": 4747,
+      "sha256": "7125d18910b3a9aae45503c7e2c9baa1241dbd04e3300b0a3518ea39ba9f3052",
+      "failures": []
+    },
+    {
+      "qid": "Q123118540",
+      "names": [
+        "Big D Oil"
+      ],
+      "stationCount": 1,
+      "source": "https://graph.facebook.com/bigdoilco/picture?type=large",
+      "bytes": 4112,
+      "sha256": "6a5566ef3811c8c069f29144afe8238caee86cdf0a7b7ea45cab4062d0fba105",
+      "failures": []
+    },
+    {
+      "qid": "Q483551",
+      "names": [
+        "Walmart Super Center"
+      ],
+      "stationCount": 1,
+      "source": "https://graph.facebook.com/walmart/picture?type=large",
+      "bytes": 5169,
+      "sha256": "68fbefb40b6582dbf2315b14591f0a53b09955ec3a6952a1359f1b1e9aac16bb",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Walmart spark (2025).svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q4906701",
+      "names": [
+        "Big Y"
+      ],
+      "stationCount": 1,
+      "source": "https://graph.facebook.com/bigyworldclassmarket/picture?type=large",
+      "bytes": 4946,
+      "sha256": "61a11b38d26cda0aabde4250a9790bdd634f0e34d2a3ec4647609090c4534c99",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FBig%20Y%20Logo.jpg&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q7242560",
+      "names": [
+        "Price Rite"
+      ],
+      "stationCount": 1,
+      "source": "https://graph.facebook.com/PriceRiteStores/picture?type=large",
+      "bytes": 3158,
+      "sha256": "26b9cd8a2f702e9144971dc218799f52759cdd96ec74cf1740bb516ac96a5b6e",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FPriceRite%20Logo.png&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q111534515",
+      "names": [
+        "Hudson"
+      ],
+      "stationCount": 1,
+      "failures": []
+    },
+    {
+      "qid": "Q4650251",
+      "names": [
+        "ABC"
+      ],
+      "stationCount": 1,
+      "source": "https://graph.facebook.com/abcstores/picture?type=large",
+      "bytes": 6896,
+      "sha256": "37fba2f3b2c99b0795ca1753225093a4330d310e8471536a6b6ceb44f76c804e",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/w/index.php?title=Special%3ARedirect%2Ffile%2FABCStoresLogo.jpg&width=150",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q6693107",
+      "names": [
+        "Lowe's Market"
+      ],
+      "stationCount": 1,
+      "failures": [],
+      "source": "https://www.lowesmarket.com/favicons/PS3/3232/apple-touch-icon.png?v=2",
+      "bytes": 4385,
+      "sha256": "3e88d6d2ce664baed19d260c4829fc8dfd939ae79098233571355b1112cc6eee"
+    },
+    {
+      "qid": "Q119405196",
+      "names": [
+        "Market Street"
+      ],
+      "stationCount": 1,
+      "source": "https://graph.facebook.com/ShopMarketStreet/picture?type=large",
+      "bytes": 3417,
+      "sha256": "f949014d8f2a8c7ac9dedd110ea79b4c24dfd25f4d8969f4b0e5d632974c3085",
+      "failures": []
+    },
+    {
+      "qid": "Q1046951",
+      "names": [
+        "Target"
+      ],
+      "stationCount": 1,
+      "source": "https://graph.facebook.com/target/picture?type=large",
+      "bytes": 4946,
+      "sha256": "e0f8a247c0cdb57e7b2ee53cc1991150836894eed7af7d212508f1bfda76b6e6",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Target logo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    },
+    {
+      "qid": "Q867662",
+      "names": [
+        "Esso"
+      ],
+      "stationCount": 1,
+      "source": "https://graph.facebook.com/EssoGB/picture?type=large",
+      "bytes": 5272,
+      "sha256": "911b71c934a63939615d14626f4a8d4168457b6441c4d848b3e7f65315d2cfd3",
+      "failures": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Esso textlogo.svg",
+          "error": "HTTP 429"
+        }
+      ]
+    }
+  ]
+}

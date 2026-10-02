@@ -38,11 +38,14 @@ struct OnboardingPrimaryButton: View {
 struct OnboardingSelectionRow: View {
   let title: String
   var subtitle: String? = nil
+  var fuelIcon: String? = nil
+  var brandIcon: String? = nil
   let selected: Bool
   let action: () -> Void
   var body: some View {
     Button(action: action) {
       HStack(spacing: 14) {
+        if fuelIcon != nil || brandIcon != nil { OnboardingRowIcon(fuel: fuelIcon, brand: brandIcon) }
         VStack(alignment: .leading, spacing: 3) {
           Text(title).font(.body.weight(.medium)).foregroundStyle(.primary)
           if let subtitle { Text(subtitle).font(.subheadline).foregroundStyle(.secondary) }

@@ -13,7 +13,8 @@ struct OnboardingBrand: Identifiable {
 
 // Draft choices live in Swift throughout navigation. Only completion persists them.
 final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelegate {
-  @Published var path: [Int] = []
+  @Published var step = 0
+  @Published var searchFocused = false
   @Published var radius = 5.0
   @Published var adjustingRadius = false
   @Published var fuel = "regular"
@@ -71,17 +72,20 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
   }
   func changed() { emit?(["type": "choices", "choices": choices]) }
   func advanceLocation() {
-    if hasLocationAccess { path.append(1) }
+    if hasLocationAccess { location.startUpdatingLocation(); goToRadius() }
     else if locationBlocked {
       if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
     } else { wantsAdvance = true; location.requestWhenInUseAuthorization() }
   }
-  func skipLocation() { wantsAdvance = false; path.append(1) }
+  func skipLocation() { wantsAdvance = false; goToRadius() }
+  private func goToRadius() {
+    withAnimation(UIAccessibility.isReduceMotionEnabled ? nil : .easeInOut(duration: 0.3)) { step = 2 }
+  }
   func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
     permission = manager.authorizationStatus
     if hasLocationAccess {
       location.startUpdatingLocation()
-      if wantsAdvance && path.isEmpty { path.append(1) }
+      if wantsAdvance && step == 1 { goToRadius() }
     } else { location.stopUpdatingLocation() }
     wantsAdvance = false
   }

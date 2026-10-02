@@ -5,18 +5,20 @@ struct OnboardingLocationPage: View {
   var body: some View {
     GeometryReader { geometry in
       ScrollView {
-        VStack(alignment: .leading, spacing: 28) {
-          OnboardingHeading(title: "Gas near you", subtitle: "Use your location to find nearby stations.")
-          Spacer(minLength: 0)
-          Image(systemName: model.hasLocationAccess ? "location.circle.fill" : "location.circle")
-            .font(.system(size: min(geometry.size.width * 0.38, 150), weight: .light))
-            .foregroundStyle(.blue).frame(maxWidth: .infinity).accessibilityHidden(true)
-          Text(model.hasLocationAccess ? "You’re all set." : model.locationBlocked ? "You can enable location in Settings, or do this later." : "A better fill-up starts nearby.")
-            .font(.title3.weight(.medium)).multilineTextAlignment(.center).frame(maxWidth: .infinity)
-          if let error = model.locationError { Text(error).font(.subheadline).foregroundStyle(.secondary) }
-          Spacer(minLength: 0)
-        }.padding(24).frame(minHeight: geometry.size.height)
+        VStack(spacing: 28) {
+          ZStack {
+            Circle().fill(.blue.opacity(0.05)).frame(width: 230, height: 230)
+            Circle().fill(.blue.opacity(0.08)).frame(width: 166, height: 166)
+            Image(systemName: "location.fill").font(.system(size: 62, weight: .medium)).foregroundStyle(.blue)
+          }.accessibilityHidden(true)
+          VStack(spacing: 12) {
+            Text("Find gas near you").font(.system(.largeTitle, design: .rounded).bold())
+            Text("Use your location to see nearby stations.").font(.body).foregroundStyle(.secondary)
+            if model.locationBlocked { Text("Location is turned off. You can change it in Settings.").font(.footnote).foregroundStyle(.secondary) }
+          }.multilineTextAlignment(.center)
+        }.padding(.horizontal, 28).padding(.top, max(100, geometry.size.height * 0.17))
+          .padding(.bottom, 180).frame(maxWidth: .infinity)
       }
-    }
+    }.background(Color(uiColor: .systemGroupedBackground))
   }
 }

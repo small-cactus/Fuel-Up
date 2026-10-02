@@ -26,5 +26,7 @@ Pod::Spec.new do |s|
     'SWIFT_COMPILATION_MODE' => 'wholemodule'
   }
 
+  s.resource_bundles = { 'FuelUpOnboarding' => ['Resources/BrandLogos/*.{png,json}', 'Resources/OnboardingArt/*.png', 'Resources/*.xcassets'] }
+
   s.source_files = '**/*.{h,m,swift}'
 end

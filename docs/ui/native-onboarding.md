@@ -1,47 +1,56 @@
 # Native onboarding
 
-The existing welcome artwork and presentation are preserved. On iOS 16 and later,
-the remaining setup uses a native SwiftUI navigation stack with four pages:
+All five pages, including the preserved welcome artwork, now belong to one native
+SwiftUI paging TabView. Swipes, Back, page dots and Continue update the same draft.
+There are no pushed setup screens. The brands field is a UIKit UISearchBar, without
+an extra navigation controller or its empty navigation-bar space.
 
-1. **Gas near you:** foreground location permission, with a Not now path.
-2. **Your search radius:** persistent MapKit preview and a native slider.
-3. **Choose your fuel:** one selection list and an optional E85 requirement.
-4. **Your usual stops:** state-relevant memberships, favorites, and native search.
+1. Welcome: native MapKit with immediately installed demo annotations, so returning
+   to the page does not depend on a one-shot map-ready event.
+2. Location: always asks “Use my location”, including replay with existing access.
+   Granted access continues directly; undecided access requests Apple's prompt;
+   denied access links to Settings. iOS does not allow an app to reset a user's
+   prior permission decision. There is no redundant confirmation page.
+3. Radius: full-screen MapKit, no station annotations, fixed camera centered on
+   the user and fitted to the maximum 15-mile circle. Pinch changes only the circle;
+   release springs to the closest whole-mile notch, within 2–15 miles. A native
+   slider and VoiceOver adjustment provide alternatives. Reduce Motion removes
+   the spring. Moving location or changing viewport size refits the camera.
+4. Fuel: five choices with bundled vector pump illustrations and optional E85.
+5. Usual stops: state-relevant memberships and nearby favorites with offline logos.
 
-The predictive-fueling tutorial and Live Activity pitch are omitted from this
-flow. It does not request background location, motion, or notification permission.
-Copy describes the user's choice rather than ranking, caching, or implementation.
+Pages, map, search, artwork, model and bridge remain separate files. Swift owns
+interaction and draft state; the existing JavaScript services own cached DB reads,
+state-specific membership lookup and preference persistence. Location starts
+prefetching the maximum-radius inventory before brands become visible. Dragging
+and pinching do not fetch provider data. No Home ranking, collection, or raw prices
+changed. Android/older iOS retain the legacy flow.
 
-## Ownership and layout
+Native Liquid Glass uses no added borders or shadows. Fuel and brand lists scroll
+independently within the page. See [artwork provenance and coverage](brand-assets/README.md).
 
-Each page, shared styling, draft model, map, and Expo host lives separately under
-`modules/fuel-up-map-kit-routing/ios/Onboarding`. Swift owns navigation, controls,
-permission interaction, and draft choices. JavaScript retains the existing cached
-station service, membership service, and preference persistence. Completion saves
-all choices through the existing preference context. Back navigation retains the
-draft. Android and older iOS retain the separate legacy flow.
+## Pager revision verification — October 1, 2026
 
-Native regular Liquid Glass is used on supported systems, with simple system
-backgrounds otherwise. No custom shadows or glass borders were added. Pages scroll
-for larger text; the bottom action stays reachable. The map's height depends only
-on the available viewport, not station loading or slider state.
+- Simulator build passed; 151 standard and 23 existing onboarding tests passed.
+- Two additional asset/native-radius tests passed: PNG dimensions, hashes, bundle
+  membership coverage, SVG self-containment, and real Swift clamp/snap behavior.
+- The first standard-suite run had one intermittent existing fuel-cache assertion
+  failure; its isolated rerun and the complete rerun passed without test changes.
+- Live iPhone 13 mini simulator: all five pages swipe in both directions; existing
+  location permission still presents the request; welcome retains all six pills
+  after returning. Pinch changed 8 → 12 → 4 miles with fixed map geography and no
+  station pills. Fuel SVGs, memberships and favorite logos render from the bundle.
+- Final build passed after layout repairs. Welcome kept all six annotations during
+  five forward/back cycles. First-time permission showed Apple's prompt and moved
+  directly to Radius after approval. Dark/light and accessibility-extra-large
+  checks found and fixed search-height/keyboard overlap and radius-label clipping.
+  Search results remain visible above the keyboard at accessibility text sizes.
+  The shared Continue button/page dots retain their position on the location page.
+- This revision was verified in the simulator, not installed on a physical phone.
+  The production Home cluster renderer was not changed; the historical legacy
+  probe limitation below remains a limitation, not a passing gate.
 
-## Radius and prefetch
-
-Once location is available, the bridge fetches the maximum selectable radius from
-the cached database and starts state-specific membership loading. Radius dragging
-filters that inventory locally. Fuel changes refresh the applicable inventory
-before the brands page. A transient state lookup gets one bounded retry.
-
-The persistent MapKit preview uses pump symbols and cluster counts, without prices.
-It shares Home's contact/ownership geometry with an icon-sized footprint; the
-default Home footprint and behavior remain unchanged. Distance calculations are
-cached, frame work is coalesced, and the frame clock sleeps when idle. During a
-drag, the camera follows the slider directly; release rounds to a whole mile and
-uses native camera animation unless Reduce Motion is enabled. The initial fit is
-not animated. Skipping location shows a simple placeholder rather than fake data.
-
-## Verification — October 1, 2026
+## Earlier native-onboarding verification — October 1, 2026
 
 - Simulator build succeeded; 151 standard tests and 24 targeted tests passed.
 - Real iPhone 13 mini simulator walkthrough: preserved welcome, all four pages,
