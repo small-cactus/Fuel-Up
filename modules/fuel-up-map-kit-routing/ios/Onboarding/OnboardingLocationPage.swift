@@ -8,8 +8,8 @@ struct OnboardingLocationPage: View {
     GeometryReader { geometry in
       let mapHeight = min(440, max(340, geometry.size.width * 1.02))
       ScrollView {
-        VStack(spacing: 24) {
-          VStack(spacing: 12) {
+        VStack(spacing: 18) {
+          VStack(spacing: 10) {
             Text("Location permission")
               .font(.system(.largeTitle, design: .rounded).bold())
               .accessibilityAddTraits(.isHeader)
@@ -17,7 +17,7 @@ struct OnboardingLocationPage: View {
               .font(.body).fixedSize(horizontal: false, vertical: true)
           }.multilineTextAlignment(.center).padding(.horizontal, 28)
 
-          VStack(alignment: .leading, spacing: 22) {
+          VStack(alignment: .leading, spacing: 16) {
             benefit("Find nearby gas", detail: "See stations around you and how far away they are.", icon: "location.fill", color: .blue)
             benefit("Find a better price", detail: "Compare reported prices for the fuel you use.", icon: "fuelpump.fill", color: .purple)
             benefit("You’re in control", detail: "Change location access any time in Settings.", icon: "hand.raised.fill", color: .green)

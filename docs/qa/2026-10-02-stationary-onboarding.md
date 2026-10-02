@@ -59,3 +59,7 @@ After the user clarified that the content should enter the blur rather than chan
 ![Overlapping content, dark](evidence/2026-10-02-stationary-onboarding/location-overlap-dark.png)
 
 Corrected Release installed on Anthony’s iPhone 18 Pro Max; the phone app was not opened.
+
+## Tighter content spacing
+
+Reduced the location title-to-description gap from 12 to 10 points, the section gap from 24 to 18, and benefit-row gaps from 22 to 16. The full-size map, 50-point overlap, and fixed footer are unchanged. The large simulator confirms the title remains at normalized y=0.408 and Continue at (0.055, 0.879, 0.891, 0.069), while the benefit rows are closer together. Both builds passed and the Release installed successfully on the iPhone 18 Pro Max without launching it.
