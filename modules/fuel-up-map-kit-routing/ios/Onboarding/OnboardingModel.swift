@@ -15,6 +15,7 @@ struct OnboardingBrand: Identifiable {
 final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelegate {
   @Published var step = 0
   @Published var searchFocused = false
+  @Published var footerHeight: CGFloat = 134
   @Published var radius = 6.0
   @Published var adjustingRadius = false
   @Published var fuel = "regular"

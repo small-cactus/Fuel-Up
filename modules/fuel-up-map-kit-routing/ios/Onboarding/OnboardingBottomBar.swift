@@ -1,7 +1,7 @@
 import SwiftUI
 
-// Register the actual controls as a native scroll-edge bar. The scroll view
-// extends underneath it instead of being clipped above an opaque footer.
+// Reserve a native scroll-edge bar on each moving page. Its visible controls
+// live once in OnboardingFlow; scrolling content still gets a soft edge.
 @available(iOS 16.0, *)
 struct OnboardingBottomBar: ViewModifier {
   @ObservedObject var model: OnboardingModel
@@ -19,13 +19,25 @@ struct OnboardingBottomBar: ViewModifier {
     }
   }
 
+  // Preserve each page's native scroll-edge treatment and bottom content inset.
+  // Only the footer in OnboardingFlow is visible, so it never rides the pager.
+  private var footer: some View {
+    Color.clear.frame(height: model.searchFocused ? 0 : model.footerHeight)
+      .allowsHitTesting(false).accessibilityHidden(true)
+  }
+}
+
+@available(iOS 16.0, *)
+struct OnboardingFooter: View {
+  @ObservedObject var model: OnboardingModel
+
   private var buttonTitle: String {
     if model.step == 1 && model.locationBlocked { return "Open Settings" }
     if model.step == 1 && model.locationRequested && model.hasLocationAccess && !model.locationReady && model.locationError == nil { return "Finding your location…" }
     return model.step == 3 ? "Find gas" : "Continue"
   }
 
-  @ViewBuilder private var footer: some View {
+  @ViewBuilder var body: some View {
     if !model.searchFocused {
       VStack(spacing: 12) {
         OnboardingPageControl(selection: Binding(get: { model.step }, set: { model.selectStep($0) }), count: 4)
@@ -39,4 +51,9 @@ struct OnboardingBottomBar: ViewModifier {
       }.padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 16)
     }
   }
+}
+
+struct OnboardingFooterHeightKey: PreferenceKey {
+  static var defaultValue: CGFloat = 0
+  static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }

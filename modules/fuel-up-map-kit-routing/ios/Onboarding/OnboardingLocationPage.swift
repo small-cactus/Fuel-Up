@@ -9,9 +9,9 @@ struct OnboardingLocationPage: View {
       ScrollView {
         VStack(spacing: 24) {
           OnboardingLocationIllustration()
-            .frame(height: min(320, max(250, geometry.size.width * 0.72)))
+            .frame(height: min(440, max(340, geometry.size.width * 1.02)))
           VStack(spacing: 12) {
-            Text("Gas near you")
+            Text("Location permission")
               .font(.system(.largeTitle, design: .rounded).bold())
               .accessibilityAddTraits(.isHeader)
             Text("Use your location to discover nearby stations and find a better price at your next stop.")

@@ -2,68 +2,53 @@ import SwiftUI
 import MapKit
 
 // Decorative sample map: no live position or fabricated price observations.
+@available(iOS 16.0, *)
 struct OnboardingLocationIllustration: View {
   var body: some View {
-    GeometryReader { geometry in
-      ZStack {
-        LocationInvitationMap()
-          .mask(LinearGradient(stops: [.init(color: .black, location: 0),
-                                      .init(color: .black, location: 0.7),
-                                      .init(color: .clear, location: 1)],
-                               startPoint: .top, endPoint: .bottom))
-        symbol("location.fill", color: .blue, prominent: true)
-          .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.48)
-        symbol("fuelpump.fill", color: .green)
-          .position(x: geometry.size.width * 0.22, y: geometry.size.height * 0.30)
-        symbol("dollarsign", color: .blue)
-          .position(x: geometry.size.width * 0.79, y: geometry.size.height * 0.27)
-        symbol("star.fill", color: .purple)
-          .position(x: geometry.size.width * 0.76, y: geometry.size.height * 0.68)
+    LocationInvitationMap()
+      .overlay {
+        // Native backdrop blur is strongest at the edges, fading gently
+        // into the sharp map rather than ending at a material boundary.
+        Rectangle().fill(.ultraThinMaterial)
+          .mask(LinearGradient(stops: [
+            .init(color: .black, location: 0),
+            .init(color: .black.opacity(0.55), location: 0.12),
+            .init(color: .clear, location: 0.34),
+            .init(color: .clear, location: 0.50),
+            .init(color: .black.opacity(0.35), location: 0.72),
+            .init(color: .black, location: 1)
+          ], startPoint: .top, endPoint: .bottom))
+          .allowsHitTesting(false)
       }
-    }.accessibilityElement(children: .ignore)
-      .accessibilityLabel("Illustration of nearby gas and savings on a map")
-  }
-
-  private func symbol(_ name: String, color: Color, prominent: Bool = false) -> some View {
-    Image(systemName: name)
-      .font(.system(size: prominent ? 36 : 24, weight: .semibold))
-      .foregroundStyle(prominent ? .white : color)
-      .frame(width: prominent ? 76 : 56, height: prominent ? 76 : 56)
-      .modifier(InvitationSymbolSurface(prominent: prominent))
-  }
-}
-
-private struct InvitationSymbolSurface: ViewModifier {
-  let prominent: Bool
-  func body(content: Content) -> some View {
-    if prominent { content.background(.blue, in: Circle()) }
-    else if #available(iOS 26.0, *) { content.glassEffect(.regular, in: .circle) }
-    else { content.background(.regularMaterial, in: Circle()) }
+      .mask(LinearGradient(stops: [
+        .init(color: .black.opacity(0.35), location: 0),
+        .init(color: .black, location: 0.24),
+        .init(color: .black, location: 0.52),
+        .init(color: .black.opacity(0.85), location: 0.68),
+        .init(color: .black.opacity(0.35), location: 0.86),
+        .init(color: .clear, location: 1)
+      ], startPoint: .top, endPoint: .bottom))
+      .accessibilityElement(children: .ignore)
+      .accessibilityLabel("Map illustration of Apple Park")
   }
 }
 
+@available(iOS 16.0, *)
 private struct LocationInvitationMap: UIViewRepresentable {
-  func makeCoordinator() -> Coordinator { Coordinator() }
   func makeUIView(context: Context) -> MKMapView {
     let map = MKMapView()
-    map.delegate = context.coordinator
     map.isScrollEnabled = false; map.isZoomEnabled = false
     map.isRotateEnabled = false; map.isPitchEnabled = false
     map.showsCompass = false
-    map.pointOfInterestFilter = .excludingAll
+    let configuration = MKStandardMapConfiguration(elevationStyle: .flat, emphasisStyle: .muted)
+    configuration.pointOfInterestFilter = .excludingAll
+    map.preferredConfiguration = configuration
     map.layoutMargins = UIEdgeInsets(top: 0, left: 12, bottom: 80, right: 12)
-    let center = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-    map.setCamera(MKMapCamera(lookingAtCenter: center, fromDistance: 2200, pitch: 45, heading: 25), animated: false)
-    map.addOverlay(MKCircle(center: center, radius: 330))
+    let center = CLLocationCoordinate2D(latitude: 37.3349, longitude: -122.0090)
+    map.setCamera(MKMapCamera(lookingAtCenter: center, fromDistance: 900, pitch: 0, heading: 0), animated: false)
+    // Muted cartography and excluded points of interest keep the campus graphic
+    // quiet. MapKit retains its required attribution.
     return map
   }
   func updateUIView(_ view: MKMapView, context: Context) {}
-  final class Coordinator: NSObject, MKMapViewDelegate {
-    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-      guard let circle = overlay as? MKCircle else { return MKOverlayRenderer(overlay: overlay) }
-      let renderer = MKCircleRenderer(circle: circle)
-      renderer.fillColor = UIColor.systemBlue.withAlphaComponent(0.16)
-      return renderer
-    }
-  }
 }

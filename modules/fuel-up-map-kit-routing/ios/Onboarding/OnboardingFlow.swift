@@ -5,8 +5,32 @@ struct OnboardingFlow: View {
   @ObservedObject var model: OnboardingModel
 
   var body: some View {
-    OnboardingPager(model: model)
-      .ignoresSafeArea(.container, edges: .vertical)
+    ZStack(alignment: .bottom) {
+      OnboardingPager(model: model)
+        .ignoresSafeArea(.container, edges: .vertical)
+      OnboardingFooter(model: model)
+        .background {
+          // A continuous native-material fade protects the stationary controls
+          // while the pages and their scrolling content move underneath.
+          Rectangle().fill(.ultraThinMaterial)
+            .mask(LinearGradient(stops: [
+              .init(color: .clear, location: 0),
+              .init(color: .black.opacity(0.65), location: 0.35),
+              .init(color: .black, location: 0.65)
+            ], startPoint: .top, endPoint: .bottom))
+            .padding(.top, -40)
+            .ignoresSafeArea(.container, edges: .bottom)
+            .allowsHitTesting(false)
+        }
+        .background {
+          GeometryReader { geometry in
+            Color.clear.preference(key: OnboardingFooterHeightKey.self, value: geometry.size.height)
+          }
+        }
+        .onPreferenceChange(OnboardingFooterHeightKey.self) { height in
+          if height > 0 && abs(model.footerHeight - height) > 0.5 { model.footerHeight = height }
+        }
+    }
       .onChange(of: model.step) { step in
         if step != 3 {
           UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
