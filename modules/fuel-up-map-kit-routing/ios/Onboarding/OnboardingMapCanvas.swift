@@ -38,7 +38,7 @@ final class OnboardingMapCanvas: UIView, MKMapViewDelegate {
     addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(pinched(_:))))
     isAccessibilityElement = true; accessibilityTraits = .adjustable
     accessibilityLabel = "Search area"
-    accessibilityHint = "Pinch to resize, or use the radius slider."
+    accessibilityHint = "Swipe up or down to change the radius by one mile."
   }
   required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
   override func layoutSubviews() {
@@ -79,6 +79,7 @@ final class OnboardingMapCanvas: UIView, MKMapViewDelegate {
     switch gesture.state {
     case .began:
       isPinching = true; pinchStartRadius = radius; circle.removeAnimation(forKey: "radius-snap")
+      radiusChanged?(radius, false)
     case .changed:
       radius = RadiusSelection.scaled(pinchStartRadius, by: Double(gesture.scale))
       drawCircle(animated: false); radiusChanged?(radius, false)

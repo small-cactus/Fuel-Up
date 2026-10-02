@@ -10,3 +10,12 @@ test('native radius gesture snapping stays inside the same whole-mile settings r
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'fuelup-radius-'));
  try {const source=fs.readFileSync('modules/fuel-up-map-kit-routing/ios/Onboarding/RadiusSelection.swift','utf8');fs.writeFileSync(`${dir}/main.swift`,source+`\nassert(RadiusSelection.snap(6.49)==6)\nassert(RadiusSelection.snap(6.51)==7)\nassert(RadiusSelection.scaled(8,by:2)==15)\nassert(RadiusSelection.scaled(4,by:0.1)==2)\nassert(RadiusSelection.snap(.nan)==2)\nfor n in RadiusSelection.notches { assert(RadiusSelection.snap(Double(n))==Double(n)) }\n`);execFileSync('swift',[`${dir}/main.swift`],{timeout:30000});} finally {fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test('dark fuel artwork preserves labels and changes only the silhouette for contrast',()=>{
+ for(const fuel of ['regular','midgrade','premium','diesel','e85']){
+  const light=fs.readFileSync(`${root}/FuelIcons.xcassets/fuel-${fuel}.imageset/icon.svg`,'utf8');
+  const dark=fs.readFileSync(`${root}/FuelIcons.xcassets/fuel-${fuel}-dark.imageset/icon.svg`,'utf8');
+  assert.equal(dark,light.replaceAll('#34383E','#D6DBE3'));
+  assert.match(dark,/fill="#20242B"/);
+ }
+});

@@ -3,16 +3,17 @@ import SwiftUI
 @available(iOS 16.0, *)
 struct OnboardingFlow: View {
   @ObservedObject var model: OnboardingModel
-  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var footerHeight: CGFloat = 196
   var body: some View {
     ZStack {
-      TabView(selection: $model.step) {
+      TabView(selection: stepSelection) {
         OnboardingWelcomePage().tag(0)
         OnboardingLocationPage(model: model, bottomInset: max(220, footerHeight + 24)).tag(1)
+        if model.locationReady {
         OnboardingRadiusPage(model: model).tag(2)
         OnboardingFuelPage(model: model).padding(.top, 24).padding(.bottom, 126).tag(3)
         OnboardingBrandsPage(model: model).padding(.top, 16).padding(.bottom, model.searchFocused ? 0 : 126).tag(4)
+        }
       }
       .tabViewStyle(.page(indexDisplayMode: .never))
       .ignoresSafeArea(.container, edges: .vertical)
@@ -27,19 +28,12 @@ struct OnboardingFlow: View {
         Spacer()
         if !model.searchFocused {
         VStack(spacing: 12) {
-          if model.step == 1 {
-            Button { model.skipLocation() } label: {
-              Text("Not now").frame(minWidth: 88, minHeight: 44)
-            }
-              .accessibilityIdentifier("onboarding-skip-location")
-          }
-          OnboardingPageControl(selection: $model.step, count: 5)
+          OnboardingPageControl(selection: stepSelection, count: 5)
             .frame(width: 130, height: 28)
-          OnboardingPrimaryButton(title: model.step == 1 ? (model.locationBlocked ? "Open Settings" : "Use my location") : model.step == 4 ? "Find gas" : "Continue") {
-            if model.step == 1 { model.advanceLocation() }
-            else if model.step == 4 { model.finish() }
+          OnboardingPrimaryButton(title: model.step == 4 ? "Find gas" : "Continue") {
+            if model.step == 4 { model.finish() }
             else { model.changed(); move(to: model.step + 1) }
-          }.disabled(model.completing)
+          }.disabled(model.completing || (model.step == 1 && !model.locationReady))
         }.padding(.horizontal, 24).padding(.bottom, 16)
           .background(GeometryReader { geometry in
             Color.clear.preference(key: OnboardingFooterHeight.self, value: geometry.size.height)
@@ -49,9 +43,10 @@ struct OnboardingFlow: View {
     }.tint(.blue).background(Color(uiColor: .systemGroupedBackground))
       .onPreferenceChange(OnboardingFooterHeight.self) { footerHeight = $0 }
   }
-  private func move(to step: Int) {
-    withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { model.step = step }
+  private var stepSelection: Binding<Int> {
+    Binding(get: { model.step }, set: { model.selectStep($0) })
   }
+  private func move(to step: Int) { model.selectStep(step) }
 }
 
 private struct OnboardingFooterHeight: PreferenceKey {
@@ -83,6 +78,7 @@ struct OnboardingPageControl: UIViewRepresentable {
     @objc func changed(_ sender: UIPageControl) {
       withAnimation(UIAccessibility.isReduceMotionEnabled ? nil : .easeInOut(duration: 0.3)) {
         parent.selection = sender.currentPage
+        sender.currentPage = parent.selection
       }
     }
   }

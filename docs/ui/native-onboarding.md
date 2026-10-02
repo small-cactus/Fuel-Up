@@ -7,19 +7,20 @@ an extra navigation controller or its empty navigation-bar space.
 
 1. Welcome: native MapKit with immediately installed demo annotations, so returning
    to the page does not depend on a one-shot map-ready event.
-2. Location: an edge-to-edge native MapKit backdrop, one short headline and one
-   sentence. Before location is available, the map shows national geography; with
-   access and a fix, it shows the user's area. No fabricated station pins/prices.
-   Always asks “Use my location”, including replay with existing access.
-   Granted access continues directly; undecided access requests Apple's prompt;
-   denied access links to Settings. iOS does not allow an app to reset a user's
-   prior permission decision. There is no redundant confirmation page.
-3. Radius: full-screen MapKit, no station annotations, fixed camera centered on
-   the user and fitted to the maximum 15-mile circle. Pinch changes only the circle;
-   release springs to the closest whole-mile notch, within 2–15 miles. A native
-   slider and VoiceOver adjustment provide alternatives. Reduce Motion removes
-   the spring. Moving location or changing viewport size refits the camera.
+2. Location: shared heading/layout, native map backdrop, and a separate Enable
+   location button. Continue remains disabled until the user confirms location
+   and Core Location supplies a fix. Existing authorization still requires the
+   in-page action when replaying setup. Denial opens Settings. No skip action;
+   swiping, page dots, and completion cannot bypass the location requirement.
+3. Radius: edge-to-edge MapKit without blur/fades or station annotations, fixed
+   camera centered on the user and fitted to the maximum 15-mile circle. A dimmed
+   two-finger guide disappears when pinching begins. Pinch changes only the circle;
+   release springs to the closest whole-mile notch, within 2–15 miles. The current
+   miles remain visible in native glass. There is no slider. VoiceOver retains
+   native adjustable increment/decrement actions. Reduce Motion removes the spring
+   and guide animation. Moving location or changing viewport size refits the camera.
 4. Fuel: five choices with bundled vector pump illustrations and optional E85.
+   Light/dark illustrations preserve visible hoses, bases, and numeral contrast.
 5. Usual stops: state-relevant memberships and nearby favorites with offline logos.
 
 Pages, map, search, artwork, model and bridge remain separate files. Swift owns
@@ -32,7 +33,38 @@ changed. Android/older iOS retain the legacy flow.
 Native Liquid Glass uses no added borders or shadows. Fuel and brand lists scroll
 independently within the page. See [artwork provenance and coverage](brand-assets/README.md).
 
-## Location redesign — October 2, 2026
+## Required location and pinch radius — October 2, 2026
+
+Welcome and Location use the same native material blur bands. Dark mode has no
+opaque color wash; light mode retains its light fade. Radius has no bands at all.
+Location uses the same heading style as the other setup pages, a separate native
+permission action, and the shared Continue footer. New visual validation below
+supersedes the earlier skip-permission behavior.
+
+### Permission/pinch verification
+
+- All 26 targeted onboarding/asset checks passed, including compiled Swift
+  radius clamp/snap checks and dark-vector integrity.
+- Native Debug build passed. iPhone 13 mini and iPhone 17 Pro Max simulators
+  rendered the dark native blur, location action, and full-map radius guide.
+- Existing access still requires the in-page Enable location action. Continue
+  is initially disabled; swiping forward and tapping later dots cannot bypass it.
+- Reset authorization: tapping Enable location displayed Apple's actual prompt.
+  Denial kept Continue disabled and offered Open Settings. Approval kept the
+  location page visible and enabled Continue after the fix, without auto-advance.
+- Compact simulator pinch changed 8 → 11 → 5 miles, clearing the dimmed guide on
+  the first gesture; native map geography remained fixed. No slider is present.
+- Dark fuel screen showed light hoses/bases on all five icons. Light appearance
+  retains the original artwork. Maximum Dynamic Type uses a scrolling material
+  reading surface; the permission action remains reachable above the footer.
+- Visual captures: [Location](onboarding-permission-pinch/location-dark.png),
+  [Radius](onboarding-permission-pinch/radius-dark.png),
+  [Fuel](onboarding-permission-pinch/fuel-dark.png).
+- No physical phone install, live VoiceOver, or live Reduce Motion verification
+  is claimed for this revision. The existing unsigned Debug Expo notifications
+  keychain warning was dismissed during interactive validation.
+
+## Earlier location redesign — October 2, 2026
 
 Removed the onboarding Back button and its reserved header space. Native swipes
 and the accessible page control still revisit every step. Welcome artwork and

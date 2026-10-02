@@ -5,54 +5,55 @@ struct OnboardingLocationPage: View {
   @ObservedObject var model: OnboardingModel
   let bottomInset: CGFloat
   @Environment(\.dynamicTypeSize) private var typeSize
-  @ScaledMetric(relativeTo: .largeTitle) private var headlineSize = 40
 
   var body: some View {
     GeometryReader { geometry in
-      ZStack(alignment: .bottom) {
+      ZStack(alignment: .top) {
         OnboardingLocationMap(coordinate: model.hasLocationAccess ? model.coordinate : nil)
           .ignoresSafeArea().allowsHitTesting(false).accessibilityHidden(true)
-
-        // The map is atmosphere; a solid reading surface keeps the request clear
-        // in both appearances, with no glass simulation or decorative cards.
-        if typeSize.isAccessibilitySize {
-          background.ignoresSafeArea().allowsHitTesting(false)
-        } else {
-          LinearGradient(stops: [
-            .init(color: background.opacity(0), location: 0),
-            .init(color: background.opacity(0.95), location: 0.28),
-            .init(color: background, location: 0.52),
-          ], startPoint: .top, endPoint: .bottom)
-            .frame(height: geometry.size.height * 0.72)
-            .ignoresSafeArea(edges: .bottom).allowsHitTesting(false)
-        }
-
+        OnboardingMapScrim(topHeight: 330, bottomHeight: 260)
         ScrollView {
-          VStack(alignment: .leading, spacing: 16) {
-            Image(systemName: "location.fill")
-              .font(.title2.weight(.semibold)).foregroundStyle(.blue)
-              .accessibilityHidden(true)
-            Text("Find gas\nnear you.")
-              .font(.system(size: headlineSize, weight: .bold, design: .rounded))
-              .fixedSize(horizontal: false, vertical: true)
-              .accessibilityAddTraits(.isHeader)
-            Text(model.locationBlocked
-                 ? "Turn on location in Settings to find nearby gas."
-                 : "See nearby stations and their latest prices.")
-              .font(.body).foregroundStyle(.secondary)
-              .fixedSize(horizontal: false, vertical: true)
+          VStack(alignment: .leading, spacing: 24) {
+            OnboardingHeading(title: "Gas near you", subtitle: "Enable location to find nearby gas.")
+            locationAction
           }
-          .frame(maxWidth: 520, alignment: .leading)
-          .padding(.horizontal, 24)
-          .padding(.top, 24)
-          .frame(maxWidth: .infinity, minHeight: max(0, geometry.size.height - bottomInset), alignment: .bottomLeading)
+          .padding(.horizontal, 24).padding(.top, 24)
+          .padding(.bottom, 24)
         }
-        .scrollIndicators(.hidden)
         .frame(height: max(0, geometry.size.height - bottomInset))
-        .frame(maxHeight: .infinity, alignment: .top)
+        .scrollIndicators(.automatic)
+        .background {
+          if typeSize.isAccessibilitySize { Rectangle().fill(.regularMaterial) }
+        }
       }
-    }.background(background)
+    }
   }
 
-  private var background: Color { Color(uiColor: .systemGroupedBackground) }
+  private var locationAction: some View {
+    VStack(alignment: .leading, spacing: 12) {
+      Button { model.requestLocation() } label: {
+        Label(model.locationReady ? "Location enabled" : model.locationBlocked ? "Open Settings" : "Enable location",
+              systemImage: model.locationReady ? "checkmark.circle.fill" : "location.fill")
+          .font(.headline).frame(maxWidth: .infinity, minHeight: 44)
+      }
+      .buttonStyle(.borderedProminent).buttonBorderShape(.capsule).controlSize(.large)
+      .modifier(OnboardingLocationButtonStyle())
+      .disabled(model.locationReady)
+      .accessibilityIdentifier("onboarding-enable-location")
+      if let error = model.locationError {
+        Text(error).font(.subheadline).foregroundStyle(.primary)
+      } else if model.locationRequested && model.hasLocationAccess && !model.locationReady {
+        HStack { ProgressView(); Text("Finding your location…").font(.subheadline) }
+      } else if model.locationBlocked {
+        Text("Turn on location in Settings to continue.").font(.subheadline).foregroundStyle(.primary)
+      }
+    }
+  }
+}
+
+private struct OnboardingLocationButtonStyle: ViewModifier {
+  func body(content: Content) -> some View {
+    if #available(iOS 26.0, *) { content.buttonStyle(.glassProminent) }
+    else { content }
+  }
 }

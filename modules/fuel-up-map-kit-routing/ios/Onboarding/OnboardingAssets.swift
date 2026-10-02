@@ -31,11 +31,12 @@ enum OnboardingAssets {
 }
 
 struct OnboardingRowIcon: View {
+  @Environment(\.colorScheme) private var scheme
   let fuel: String?
   let brand: String?
   var body: some View {
     Group {
-      if let fuel, let image = OnboardingAssets.image("fuel-\(fuel)") {
+      if let fuel, let image = OnboardingAssets.image("fuel-\(fuel)\(scheme == .dark ? "-dark" : "")") {
         Image(uiImage: image).resizable().scaledToFit()
       } else if let brand, let image = OnboardingAssets.brand(brand) {
         Image(uiImage: image).resizable().scaledToFit().padding(4)

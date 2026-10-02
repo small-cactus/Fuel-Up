@@ -35,7 +35,8 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
   var emit: (([String: Any]) -> Void)?
   private let location = CLLocationManager()
   private var initialized = false
-  private var wantsAdvance = false
+  @Published var locationRequested = false
+  var locationReady: Bool { locationRequested && hasLocationAccess && coordinate != nil }
 
   override init() {
     super.init()
@@ -71,23 +72,26 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
      "preferredBrands": favorites.sorted(), "fuelMemberships": memberships.sorted()]
   }
   func changed() { emit?(["type": "choices", "choices": choices]) }
-  func advanceLocation() {
-    if hasLocationAccess { location.startUpdatingLocation(); goToRadius() }
+  func requestLocation() {
+    locationRequested = true
+    locationError = nil
+    if hasLocationAccess { location.startUpdatingLocation(); location.requestLocation() }
     else if locationBlocked {
       if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
-    } else { wantsAdvance = true; location.requestWhenInUseAuthorization() }
+    } else { location.requestWhenInUseAuthorization() }
   }
-  func skipLocation() { wantsAdvance = false; goToRadius() }
-  private func goToRadius() {
-    withAnimation(UIAccessibility.isReduceMotionEnabled ? nil : .easeInOut(duration: 0.3)) { step = 2 }
+  func selectStep(_ target: Int) {
+    let allowed = locationReady ? target : min(target, 1)
+    withAnimation(UIAccessibility.isReduceMotionEnabled ? nil : .easeInOut(duration: 0.3)) { step = allowed }
   }
   func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
     permission = manager.authorizationStatus
     if hasLocationAccess {
       location.startUpdatingLocation()
-      if wantsAdvance && step == 1 { goToRadius() }
-    } else { location.stopUpdatingLocation() }
-    wantsAdvance = false
+    } else {
+      location.stopUpdatingLocation(); coordinate = nil
+      if step > 1 { selectStep(1) }
+    }
   }
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
     guard let fix = locations.last, fix.horizontalAccuracy >= 0,
@@ -96,10 +100,11 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
     emit?(["type": "location", "latitude": fix.coordinate.latitude, "longitude": fix.coordinate.longitude])
   }
   func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-    locationError = "Your location isn’t available yet. You can keep going."
+    guard locationRequested, !locationReady else { return }
+    locationError = "Your location isn’t available yet. Tap Enable location to try again."
   }
   func finish() {
-    guard !completing else { return }
+    guard !completing, locationReady else { return }
     completing = true
     emit?(["type": "complete", "choices": choices])
   }

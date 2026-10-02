@@ -9,18 +9,7 @@ struct OnboardingWelcomePage: View {
     GeometryReader { geometry in
       ZStack(alignment: .top) {
         OnboardingWelcomeMap().ignoresSafeArea()
-        VStack {
-          Rectangle().fill(.ultraThinMaterial).frame(height: geometry.safeAreaInsets.top + 300)
-            .mask(LinearGradient(colors: [.black, .black, .clear], startPoint: .top, endPoint: .bottom))
-          Spacer()
-          Rectangle().fill(.ultraThinMaterial).frame(height: 270)
-            .mask(LinearGradient(colors: [.clear, .black], startPoint: .top, endPoint: .bottom))
-        }.ignoresSafeArea().allowsHitTesting(false)
-        VStack {
-          LinearGradient(stops: [.init(color: background, location: 0), .init(color: background.opacity(0.96), location: 0.65), .init(color: .clear, location: 1)], startPoint: .top, endPoint: .bottom).frame(height: 330)
-          Spacer()
-          LinearGradient(colors: [.clear, background.opacity(0.85), background], startPoint: .top, endPoint: .bottom).frame(height: 220)
-        }.ignoresSafeArea().allowsHitTesting(false)
+        OnboardingMapScrim(topHeight: 330, bottomHeight: 270)
         VStack(spacing: 12) {
           if let icon = OnboardingAssets.image("fuelup-icon.png") {
             Image(uiImage: icon).resizable().frame(width: 64, height: 64).clipShape(RoundedRectangle(cornerRadius: 14))
@@ -34,7 +23,6 @@ struct OnboardingWelcomePage: View {
       }
     }
   }
-  private var background: Color { scheme == .dark ? .black : Color(red: 242/255, green: 241/255, blue: 246/255) }
 }
 
 struct OnboardingWelcomeMap: UIViewRepresentable {

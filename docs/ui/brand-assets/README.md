@@ -43,7 +43,8 @@ updating it. Never replace a failed download with unrelated parent-company artwo
 
 `buildFuelIcons.py` produces original, simple SVG pump illustrations with outlined
 numerals. It needs Python fontTools and macOS Arial Bold. The compiled Xcode asset
-catalog preserves the vectors. Yellow gasoline/E85 and green diesel are illustrative
+catalog preserves the vectors. Separate dark variants use light hoses and bases
+while retaining dark numerals on the light pump labels. Yellow gasoline/E85 and green diesel are illustrative
 fuel cues, not a claim that nozzle colors are regulated by state. US octane labels
 are yellow/black nationally; retailer nozzle colors vary. Sources:
 [FTC fuel-rating rule](https://www.ftc.gov/business-guidance/resources/complying-ftc-fuel-rating-rule),

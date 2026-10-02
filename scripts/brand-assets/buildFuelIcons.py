@@ -22,6 +22,8 @@ for key,text,color in [('regular','87','#F9D838'),('midgrade','89','#F9D838'),('
  <path d="M14 45h22" stroke="#20242B" stroke-width="3" stroke-linecap="round"/>
  <rect x="4" y="54" width="42" height="5" rx="2.5" fill="#34383E"/>
 </svg>'''
- dest=root/f'fuel-{key}.imageset';dest.mkdir(exist_ok=True)
- (dest/'icon.svg').write_text(svg)
- (dest/'Contents.json').write_text(json.dumps({'images':[{'filename':'icon.svg','idiom':'universal'}],'info':{'author':'xcode','version':1},'properties':{'preserves-vector-representation':True}},indent=2))
+ # Keep the dark silhouette light while preserving the colored body and dark numerals.
+ for suffix,artwork in [('',svg),('-dark',svg.replace('#34383E','#D6DBE3'))]:
+  dest=root/f'fuel-{key}{suffix}.imageset';dest.mkdir(exist_ok=True)
+  (dest/'icon.svg').write_text(artwork)
+  (dest/'Contents.json').write_text(json.dumps({'images':[{'filename':'icon.svg','idiom':'universal'}],'info':{'author':'xcode','version':1},'properties':{'preserves-vector-representation':True}},indent=2))
