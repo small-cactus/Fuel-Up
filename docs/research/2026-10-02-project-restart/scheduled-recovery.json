@@ -1,0 +1,296 @@
+{
+  "activity": [
+    {
+      "age": "00:00:00.658724",
+      "backend_type": "client backend",
+      "query": "WITH pgrst_source AS (SELECT pgrst_call.pgrst_scalar FROM (SELECT $1 AS json_data) pgrst_payload, LATERAL (SELECT \"p_job",
+      "state": "active",
+      "wait_event": "DataFileRead",
+      "wait_event_type": "IO"
+    }
+  ],
+  "at": "2026-10-02T13:40:05.129823+00:00",
+  "cron": [
+    {
+      "jobname": "fuel-national-discovery",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:40:00.303698+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-research-dispatch",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:40:00.302435+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-national-trends-cache",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:40:00.301199+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-national-dispatch",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:40:00.299788+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-research-watchdog",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:40:00.298585+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-national-watchdog",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:40:00.296849+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-national-discovery",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:39:00.16591+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-research-dispatch",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:39:00.16402+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-national-trends-cache",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:39:00.160623+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-national-dispatch",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:39:00.158065+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-research-dispatch",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:36:01.464942+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-national-trends-cache",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:36:01.456959+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-national-dispatch",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:36:01.448997+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-national-discovery",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:36:01.440948+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-national-watchdog",
+      "message": "1 row",
+      "start_time": "2026-10-02T13:35:00.620969+00:00",
+      "status": "succeeded"
+    },
+    {
+      "jobname": "fuel-research-watchdog",
+      "message": "job startup timeout",
+      "start_time": "2026-10-02T13:35:00.000006+00:00",
+      "status": "failed"
+    },
+    {
+      "jobname": "fuel-national-dispatch",
+      "message": "job startup timeout",
+      "start_time": "2026-10-02T13:35:00.000006+00:00",
+      "status": "failed"
+    },
+    {
+      "jobname": "fuel-national-trends-cache",
+      "message": "job startup timeout",
+      "start_time": "2026-10-02T13:35:00.000006+00:00",
+      "status": "failed"
+    }
+  ],
+  "expected_hours": {
+    "complete": 27,
+    "expected": 40,
+    "expired_partial": 7,
+    "expired_unstarted": [
+      "2026-10-01T08:00:00+00:00",
+      "2026-10-01T09:00:00+00:00",
+      "2026-10-01T10:00:00+00:00",
+      "2026-10-01T11:00:00+00:00",
+      "2026-10-01T12:00:00+00:00"
+    ]
+  },
+  "latest_jobs": [
+    {
+      "completed_at": "2026-10-02T13:40:04.262598+00:00",
+      "execution_region": "us-east-1",
+      "id": 122609,
+      "last_error": null,
+      "observed_at": "2026-10-02T13:40:03.88+00:00",
+      "run_id": 1728,
+      "status": "succeeded"
+    },
+    {
+      "completed_at": "2026-10-02T13:39:07.417794+00:00",
+      "execution_region": "us-west-1",
+      "id": 122665,
+      "last_error": null,
+      "observed_at": "2026-10-02T13:39:06.653+00:00",
+      "run_id": 1728,
+      "status": "succeeded"
+    },
+    {
+      "completed_at": "2026-10-02T13:32:41.128516+00:00",
+      "execution_region": "us-east-1",
+      "id": 122608,
+      "last_error": null,
+      "observed_at": "2026-10-02T13:32:29.832+00:00",
+      "run_id": 1728,
+      "status": "succeeded"
+    },
+    {
+      "completed_at": "2026-10-02T13:25:07.162419+00:00",
+      "execution_region": "us-west-2",
+      "id": 122673,
+      "last_error": null,
+      "observed_at": "2026-10-02T13:25:05.704+00:00",
+      "run_id": 1728,
+      "status": "succeeded"
+    },
+    {
+      "completed_at": "2026-10-02T13:24:33.529412+00:00",
+      "execution_region": "us-west-2",
+      "id": 122672,
+      "last_error": null,
+      "observed_at": "2026-10-02T13:24:22.824+00:00",
+      "run_id": 1728,
+      "status": "succeeded"
+    },
+    {
+      "completed_at": "2026-10-02T13:21:41.580316+00:00",
+      "execution_region": "us-east-1",
+      "id": 122607,
+      "last_error": null,
+      "observed_at": "2026-10-02T13:21:34.678+00:00",
+      "run_id": 1728,
+      "status": "succeeded"
+    },
+    {
+      "completed_at": "2026-10-02T13:17:18.617351+00:00",
+      "execution_region": "us-west-1",
+      "id": 122664,
+      "last_error": null,
+      "observed_at": "2026-10-02T13:17:12.717+00:00",
+      "run_id": 1728,
+      "status": "succeeded"
+    },
+    {
+      "completed_at": "2026-10-02T13:13:17.25394+00:00",
+      "execution_region": "us-east-1",
+      "id": 122606,
+      "last_error": null,
+      "observed_at": "2026-10-02T13:12:44.285+00:00",
+      "run_id": 1728,
+      "status": "succeeded"
+    },
+    {
+      "completed_at": "2026-10-02T13:11:51.856852+00:00",
+      "execution_region": "us-west-1",
+      "id": 122663,
+      "last_error": null,
+      "observed_at": "2026-10-02T13:11:46.082+00:00",
+      "run_id": 1728,
+      "status": "succeeded"
+    },
+    {
+      "completed_at": "2026-10-02T13:08:38.645074+00:00",
+      "execution_region": "us-east-1",
+      "id": 122605,
+      "last_error": null,
+      "observed_at": "2026-10-02T13:08:36.79+00:00",
+      "run_id": 1728,
+      "status": "succeeded"
+    },
+    {
+      "completed_at": "2026-10-02T13:08:21.84479+00:00",
+      "execution_region": "us-east-1",
+      "id": 122604,
+      "last_error": null,
+      "observed_at": "2026-10-02T13:08:16.539+00:00",
+      "run_id": 1728,
+      "status": "succeeded"
+    },
+    {
+      "completed_at": "2026-10-02T10:14:25.938727+00:00",
+      "execution_region": "us-east-1",
+      "id": 114443,
+      "last_error": null,
+      "observed_at": "2026-10-02T10:14:25.436+00:00",
+      "run_id": 1614,
+      "status": "succeeded"
+    }
+  ],
+  "workers": [
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+      "created": "2026-10-02T13:39:00.248873+00:00",
+      "status_code": 503,
+      "timed_out": false
+    },
+    {
+      "content": "{\"results\":[{\"id\":6428,\"city\":\"charlotte\",\"status\":\"succeeded\",\"stations\":20},{\"id\":6596,\"city\":\"indianapolis\",\"status\":\"succeeded\",\"stations\":20}]}",
+      "created": "2026-10-02T13:39:00.248873+00:00",
+      "status_code": 200,
+      "timed_out": false
+    },
+    {
+      "content": "{\"error\":\"CLAIM_FAILED\"}",
+      "created": "2026-10-02T13:36:24.860918+00:00",
+      "status_code": 503,
+      "timed_out": false
+    },
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+      "created": "2026-10-02T13:36:24.860918+00:00",
+      "status_code": 503,
+      "timed_out": false
+    },
+    {
+      "content": null,
+      "created": "2026-10-02T13:32:09.624029+00:00",
+      "status_code": null,
+      "timed_out": null
+    },
+    {
+      "content": "{\"results\":[{\"id\":6260,\"city\":\"columbus\",\"status\":\"succeeded\",\"stations\":20}]}",
+      "created": "2026-10-02T13:32:01.747826+00:00",
+      "status_code": 200,
+      "timed_out": false
+    },
+    {
+      "content": "{\"results\":[{\"id\":5924,\"city\":\"san-jose\",\"status\":\"succeeded\",\"stations\":20},{\"id\":6092,\"city\":\"fort-worth\",\"status\":\"succeeded\",\"stations\":20}]}",
+      "created": "2026-10-02T13:31:03.235561+00:00",
+      "status_code": 200,
+      "timed_out": false
+    },
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+      "created": "2026-10-02T13:31:38.179702+00:00",
+      "status_code": 503,
+      "timed_out": false
+    }
+  ],
+  "wrong_regions": 0
+}

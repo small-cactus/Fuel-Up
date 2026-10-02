@@ -1,0 +1,1149 @@
+{
+  "accounted_archive_bytes": 117079212,
+  "config": {
+    "approved_lookups_per_hour": 161660,
+    "archive_budget_bytes": 900000000,
+    "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+    "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+    "enabled": true,
+    "ends_at": "2026-10-07T18:19:00+00:00",
+    "halt_reason": "UPSTREAM_HTTP_503",
+    "id": true,
+    "last_dispatch_at": "2026-10-02T13:41:00.201977+00:00",
+    "last_request_at": "2026-10-02T13:41:11.304297+00:00",
+    "max_requests_per_hour": 92,
+    "provider_backoff_until": "2026-10-02T10:08:11.093228+00:00",
+    "request_interval_seconds": 10,
+    "starts_at": "2026-09-30T22:00:00+00:00"
+  },
+  "cron": [
+    {
+      "active": true,
+      "name": "fuel-national-dispatch",
+      "schedule": "* * * * *"
+    },
+    {
+      "active": true,
+      "name": "fuel-national-watchdog",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "active": true,
+      "name": "fuel-national-trends-cache",
+      "schedule": "* * * * *"
+    }
+  ],
+  "database_bytes": 322497683,
+  "events": [
+    {
+      "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:40:21.069907+00:00",
+      "job_id": 122610,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:32:26.705208+00:00",
+      "job_id": 122608,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:27:59.642641+00:00",
+      "job_id": 122673,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:24:51.049079+00:00",
+      "job_id": 122673,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:24:42.401259+00:00",
+      "job_id": 122672,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:24:19.409035+00:00",
+      "job_id": 122672,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:22:27.24427+00:00",
+      "job_id": 122607,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:21:31.431404+00:00",
+      "job_id": 122607,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:17:10.275664+00:00",
+      "job_id": 122664,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:14:23.84871+00:00",
+      "job_id": 122606,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:12:42.415611+00:00",
+      "job_id": 122606,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:12:20.969996+00:00",
+      "job_id": 122663,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:11:42.960847+00:00",
+      "job_id": 122663,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:08:54.168276+00:00",
+      "job_id": 122605,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:08:34.84439+00:00",
+      "job_id": 122605,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:08:27.644376+00:00",
+      "job_id": 122604,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-02T13:08:13.052232+00:00",
+      "job_id": 122604,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T11:40:24.059256+00:00",
+      "job_id": 117338,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T11:39:20.611017+00:00",
+      "job_id": 117346,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T11:38:14.422526+00:00",
+      "job_id": 117278,
+      "retry_after_seconds": 0
+    }
+  ],
+  "hours": [
+    {
+      "archive_bytes": 807323,
+      "completed_at": null,
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1728,
+      "missed_batches": 0,
+      "observed_stations": 32213,
+      "priced_stations": 20535,
+      "slot_at": "2026-10-02T13:00:00+00:00",
+      "status": "running",
+      "succeeded_batches": 17
+    },
+    {
+      "archive_bytes": 0,
+      "completed_at": "2026-10-02T13:00:04.967338+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1701,
+      "missed_batches": 72,
+      "observed_stations": 0,
+      "priced_stations": 0,
+      "slot_at": "2026-10-02T12:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 0
+    },
+    {
+      "archive_bytes": 0,
+      "completed_at": "2026-10-02T12:00:07.73503+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1654,
+      "missed_batches": 72,
+      "observed_stations": 0,
+      "priced_stations": 0,
+      "slot_at": "2026-10-02T11:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 0
+    },
+    {
+      "archive_bytes": 3137006,
+      "completed_at": "2026-10-02T11:01:07.158781+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1614,
+      "missed_batches": 11,
+      "observed_stations": 119960,
+      "priced_stations": 79784,
+      "slot_at": "2026-10-02T10:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 61
+    },
+    {
+      "archive_bytes": 3709896,
+      "completed_at": "2026-10-02T09:16:25.666255+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1554,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 95117,
+      "slot_at": "2026-10-02T09:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3706877,
+      "completed_at": "2026-10-02T08:16:46.473434+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1494,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 95091,
+      "slot_at": "2026-10-02T08:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3710258,
+      "completed_at": "2026-10-02T07:17:13.881995+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1434,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 95094,
+      "slot_at": "2026-10-02T07:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3712385,
+      "completed_at": "2026-10-02T06:15:37.233384+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1374,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 95114,
+      "slot_at": "2026-10-02T06:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3709152,
+      "completed_at": "2026-10-02T05:16:35.107642+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1314,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 95108,
+      "slot_at": "2026-10-02T05:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3704173,
+      "completed_at": "2026-10-02T04:14:36.541093+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1254,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 95141,
+      "slot_at": "2026-10-02T04:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3702416,
+      "completed_at": "2026-10-02T03:15:08.219322+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1194,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 95104,
+      "slot_at": "2026-10-02T03:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3701273,
+      "completed_at": "2026-10-02T02:14:35.941413+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1134,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 94904,
+      "slot_at": "2026-10-02T02:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3693312,
+      "completed_at": "2026-10-02T01:16:37.887888+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1074,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 94328,
+      "slot_at": "2026-10-02T01:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3688893,
+      "completed_at": "2026-10-02T00:14:48.316149+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1014,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 94354,
+      "slot_at": "2026-10-02T00:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3683717,
+      "completed_at": "2026-10-01T23:14:35.54233+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 954,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 94358,
+      "slot_at": "2026-10-01T23:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3687153,
+      "completed_at": "2026-10-01T22:16:34.878963+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 894,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 94524,
+      "slot_at": "2026-10-01T22:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3687645,
+      "completed_at": "2026-10-01T21:16:50.632229+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 834,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 94599,
+      "slot_at": "2026-10-01T21:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3689519,
+      "completed_at": "2026-10-01T20:17:29.582759+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 774,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 94846,
+      "slot_at": "2026-10-01T20:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3665696,
+      "completed_at": "2026-10-01T19:17:23.665018+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 714,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 92757,
+      "slot_at": "2026-10-01T19:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3666364,
+      "completed_at": "2026-10-01T18:15:46.154672+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 654,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 92671,
+      "slot_at": "2026-10-01T18:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 3670679,
+      "completed_at": "2026-10-01T17:21:26.018832+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 590,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 92920,
+      "slot_at": "2026-10-01T17:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 10637816,
+      "completed_at": "2026-10-01T16:52:27.743789+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 566,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 92977,
+      "slot_at": "2026-10-01T16:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    {
+      "archive_bytes": 0,
+      "completed_at": "2026-10-01T16:00:00.057448+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 565,
+      "missed_batches": 72,
+      "observed_stations": 0,
+      "priced_stations": 0,
+      "slot_at": "2026-10-01T15:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 0
+    },
+    {
+      "archive_bytes": 2860386,
+      "completed_at": "2026-10-01T15:00:00.063288+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 549,
+      "missed_batches": 16,
+      "observed_stations": 109960,
+      "priced_stations": 71654,
+      "slot_at": "2026-10-01T14:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 56
+    }
+  ],
+  "regional_hours": [
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 20000,
+      "run_id": 1728,
+      "slot_at": "2026-10-02T13:00:00+00:00",
+      "succeeded_batches": 10,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 6000,
+      "run_id": 1728,
+      "slot_at": "2026-10-02T13:00:00+00:00",
+      "succeeded_batches": 3,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 1728,
+      "slot_at": "2026-10-02T13:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 0,
+      "run_id": 1701,
+      "slot_at": "2026-10-02T12:00:00+00:00",
+      "succeeded_batches": 0,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 0,
+      "run_id": 1701,
+      "slot_at": "2026-10-02T12:00:00+00:00",
+      "succeeded_batches": 0,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 0,
+      "run_id": 1701,
+      "slot_at": "2026-10-02T12:00:00+00:00",
+      "succeeded_batches": 0,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 0,
+      "run_id": 1654,
+      "slot_at": "2026-10-02T11:00:00+00:00",
+      "succeeded_batches": 0,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 0,
+      "run_id": 1654,
+      "slot_at": "2026-10-02T11:00:00+00:00",
+      "succeeded_batches": 0,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 0,
+      "run_id": 1654,
+      "slot_at": "2026-10-02T11:00:00+00:00",
+      "succeeded_batches": 0,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 1614,
+      "slot_at": "2026-10-02T10:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 1614,
+      "slot_at": "2026-10-02T10:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 96000,
+      "run_id": 1614,
+      "slot_at": "2026-10-02T10:00:00+00:00",
+      "succeeded_batches": 48,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 1554,
+      "slot_at": "2026-10-02T09:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 1554,
+      "slot_at": "2026-10-02T09:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 1554,
+      "slot_at": "2026-10-02T09:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 1494,
+      "slot_at": "2026-10-02T08:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 1494,
+      "slot_at": "2026-10-02T08:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 1494,
+      "slot_at": "2026-10-02T08:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 1434,
+      "slot_at": "2026-10-02T07:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 1434,
+      "slot_at": "2026-10-02T07:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 1434,
+      "slot_at": "2026-10-02T07:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 1374,
+      "slot_at": "2026-10-02T06:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 1374,
+      "slot_at": "2026-10-02T06:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 1374,
+      "slot_at": "2026-10-02T06:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 1314,
+      "slot_at": "2026-10-02T05:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 1314,
+      "slot_at": "2026-10-02T05:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 1314,
+      "slot_at": "2026-10-02T05:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 1254,
+      "slot_at": "2026-10-02T04:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 1254,
+      "slot_at": "2026-10-02T04:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 1254,
+      "slot_at": "2026-10-02T04:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 1194,
+      "slot_at": "2026-10-02T03:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 1194,
+      "slot_at": "2026-10-02T03:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 1194,
+      "slot_at": "2026-10-02T03:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 1134,
+      "slot_at": "2026-10-02T02:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 1134,
+      "slot_at": "2026-10-02T02:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 1134,
+      "slot_at": "2026-10-02T02:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 1074,
+      "slot_at": "2026-10-02T01:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 1074,
+      "slot_at": "2026-10-02T01:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 1074,
+      "slot_at": "2026-10-02T01:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 1014,
+      "slot_at": "2026-10-02T00:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 1014,
+      "slot_at": "2026-10-02T00:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 1014,
+      "slot_at": "2026-10-02T00:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 954,
+      "slot_at": "2026-10-01T23:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 954,
+      "slot_at": "2026-10-01T23:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 954,
+      "slot_at": "2026-10-01T23:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 894,
+      "slot_at": "2026-10-01T22:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 894,
+      "slot_at": "2026-10-01T22:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 894,
+      "slot_at": "2026-10-01T22:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 834,
+      "slot_at": "2026-10-01T21:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 834,
+      "slot_at": "2026-10-01T21:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 834,
+      "slot_at": "2026-10-01T21:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 774,
+      "slot_at": "2026-10-01T20:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 774,
+      "slot_at": "2026-10-01T20:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 774,
+      "slot_at": "2026-10-01T20:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 714,
+      "slot_at": "2026-10-01T19:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 714,
+      "slot_at": "2026-10-01T19:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 714,
+      "slot_at": "2026-10-01T19:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 654,
+      "slot_at": "2026-10-01T18:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 654,
+      "slot_at": "2026-10-01T18:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 654,
+      "slot_at": "2026-10-01T18:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 590,
+      "slot_at": "2026-10-01T17:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 590,
+      "slot_at": "2026-10-01T17:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 590,
+      "slot_at": "2026-10-01T17:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 566,
+      "slot_at": "2026-10-01T16:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 566,
+      "slot_at": "2026-10-01T16:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 566,
+      "slot_at": "2026-10-01T16:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 0,
+      "run_id": 565,
+      "slot_at": "2026-10-01T15:00:00+00:00",
+      "succeeded_batches": 0,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 0,
+      "run_id": 565,
+      "slot_at": "2026-10-01T15:00:00+00:00",
+      "succeeded_batches": 0,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 0,
+      "run_id": 565,
+      "slot_at": "2026-10-01T15:00:00+00:00",
+      "succeeded_batches": 0,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 549,
+      "slot_at": "2026-10-01T14:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 86000,
+      "run_id": 549,
+      "slot_at": "2026-10-01T14:00:00+00:00",
+      "succeeded_batches": 43,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 549,
+      "slot_at": "2026-10-01T14:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    }
+  ],
+  "regions": [
+    {
+      "enabled": true,
+      "function_name": "fuel-national-southwest",
+      "last_dispatch_at": "2026-10-02T13:39:00.158247+00:00",
+      "region": "us-west-1"
+    },
+    {
+      "enabled": true,
+      "function_name": "fuel-national-east",
+      "last_dispatch_at": "2026-10-02T13:40:00.299819+00:00",
+      "region": "us-east-1"
+    },
+    {
+      "enabled": true,
+      "function_name": "fuel-national-northwest",
+      "last_dispatch_at": "2026-10-02T13:41:00.201977+00:00",
+      "region": "us-west-2"
+    }
+  ],
+  "storage_bytes": 121354160,
+  "trends_cache": {
+    "published_at": "2026-10-02T09:17:00.221847+00:00",
+    "run_id": 1554,
+    "scopes": 10
+  }
+}
