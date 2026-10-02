@@ -3,6 +3,7 @@ import MapKit
 
 struct OnboardingRadiusPage: View {
   @ObservedObject var model: OnboardingModel
+  let bottomInset: CGFloat
   @State private var showsHint = true
   @Environment(\.dynamicTypeSize) private var typeSize
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -20,16 +21,17 @@ struct OnboardingRadiusPage: View {
             } else {
               OnboardingHeading(title: "Your search radius", subtitle: "How far would you go for a better price?")
             }
-          }.padding(20).modifier(OnboardingGlass())
+          }.padding(.horizontal, 12).padding(.vertical, 16).modifier(OnboardingGlass())
           Spacer()
           Text("\(Int(model.radius.rounded())) miles")
             .font(.system(.title, design: .rounded).bold()).monospacedDigit()
-            .padding(.horizontal, 20).padding(.vertical, 12).modifier(OnboardingGlass())
+            .padding(.horizontal, 16).padding(.vertical, 10).modifier(OnboardingGlass())
+            .padding(.leading, 12)
             .accessibilityLabel("Search radius, \(Int(model.radius.rounded())) miles")
             .accessibilityIdentifier("onboarding-radius-value")
         }
-        .padding(.horizontal, 24).padding(.top, max(24, geometry.safeAreaInsets.top + 16))
-        .padding(.bottom, 150).allowsHitTesting(false)
+        .padding(.horizontal, 12).padding(.top, 32)
+        .padding(.bottom, bottomInset).allowsHitTesting(false)
         if showsHint {
           OnboardingPinchHint().transition(.opacity).allowsHitTesting(false)
         }

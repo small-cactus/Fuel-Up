@@ -3,19 +3,10 @@ import SwiftUI
 @available(iOS 16.0, *)
 struct OnboardingFlow: View {
   @ObservedObject var model: OnboardingModel
-  @State private var footerHeight: CGFloat = 196
+  @State private var footerHeight: CGFloat = 126
   var body: some View {
     ZStack {
-      TabView(selection: stepSelection) {
-        OnboardingWelcomePage().tag(0)
-        OnboardingLocationPage(model: model, bottomInset: max(220, footerHeight + 24)).tag(1)
-        if model.locationReady {
-        OnboardingRadiusPage(model: model).tag(2)
-        OnboardingFuelPage(model: model).padding(.top, 24).padding(.bottom, 126).tag(3)
-        OnboardingBrandsPage(model: model).padding(.top, 16).padding(.bottom, model.searchFocused ? 0 : 126).tag(4)
-        }
-      }
-      .tabViewStyle(.page(indexDisplayMode: .never))
+      OnboardingPager(model: model, footerHeight: footerHeight)
       .ignoresSafeArea(.container, edges: .vertical)
       .onChange(of: model.step) { step in
         if step != 4 {
@@ -50,7 +41,7 @@ struct OnboardingFlow: View {
 }
 
 private struct OnboardingFooterHeight: PreferenceKey {
-  static var defaultValue: CGFloat = 196
+  static var defaultValue: CGFloat = 0
   static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
 }
 

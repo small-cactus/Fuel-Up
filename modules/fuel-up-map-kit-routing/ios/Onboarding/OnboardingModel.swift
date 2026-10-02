@@ -81,8 +81,8 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
     } else { location.requestWhenInUseAuthorization() }
   }
   func selectStep(_ target: Int) {
-    let allowed = locationReady ? target : min(target, 1)
-    withAnimation(UIAccessibility.isReduceMotionEnabled ? nil : .easeInOut(duration: 0.3)) { step = allowed }
+    let bounded = min(4, max(0, target))
+    step = locationReady ? bounded : min(bounded, 1)
   }
   func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
     permission = manager.authorizationStatus
