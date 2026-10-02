@@ -1,0 +1,13 @@
+{
+  "archive_bytes": 3665408,
+  "completed_at": null,
+  "expected_batches": 72,
+  "expected_stations": 141660,
+  "id": 2022,
+  "missed_batches": 0,
+  "observed_stations": 139960,
+  "priced_stations": 93889,
+  "slot_at": "2026-10-02T19:00:00+00:00",
+  "status": "running",
+  "succeeded_batches": 71
+}

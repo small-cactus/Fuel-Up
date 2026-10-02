@@ -1,0 +1,112 @@
+{
+  "latest_run": {
+    "archive_bytes": 3562849,
+    "completed_at": null,
+    "expected_batches": 72,
+    "expected_stations": 141660,
+    "id": 2022,
+    "missed_batches": 0,
+    "observed_stations": 135960,
+    "priced_stations": 91166,
+    "slot_at": "2026-10-02T19:00:00+00:00",
+    "status": "running",
+    "succeeded_batches": 69
+  },
+  "new_city_misses": [
+    {
+      "city_id": "fort-worth",
+      "deadline_at": "2026-10-02T19:19:00+00:00",
+      "due_at": "2026-10-02T18:31:00+00:00",
+      "last_error": "DEADLINE_MISSED"
+    },
+    {
+      "city_id": "columbus",
+      "deadline_at": "2026-10-02T19:19:00+00:00",
+      "due_at": "2026-10-02T18:32:00+00:00",
+      "last_error": "DEADLINE_MISSED"
+    },
+    {
+      "city_id": "charlotte",
+      "deadline_at": "2026-10-02T19:19:00+00:00",
+      "due_at": "2026-10-02T18:33:00+00:00",
+      "last_error": "DEADLINE_MISSED"
+    },
+    {
+      "city_id": "indianapolis",
+      "deadline_at": "2026-10-02T19:19:00+00:00",
+      "due_at": "2026-10-02T18:34:00+00:00",
+      "last_error": "DEADLINE_MISSED"
+    },
+    {
+      "city_id": "seattle",
+      "deadline_at": "2026-10-02T19:19:00+00:00",
+      "due_at": "2026-10-02T18:35:00+00:00",
+      "last_error": "DEADLINE_MISSED"
+    },
+    {
+      "city_id": "denver",
+      "deadline_at": "2026-10-02T19:19:00+00:00",
+      "due_at": "2026-10-02T18:36:00+00:00",
+      "last_error": "DEADLINE_MISSED"
+    },
+    {
+      "city_id": "boston",
+      "deadline_at": "2026-10-02T19:19:00+00:00",
+      "due_at": "2026-10-02T18:37:00+00:00",
+      "last_error": "DEADLINE_MISSED"
+    },
+    {
+      "city_id": "washington-dc",
+      "deadline_at": "2026-10-02T19:19:00+00:00",
+      "due_at": "2026-10-02T18:38:00+00:00",
+      "last_error": "DEADLINE_MISSED"
+    },
+    {
+      "city_id": "miami",
+      "deadline_at": "2026-10-02T19:19:00+00:00",
+      "due_at": "2026-10-02T18:39:00+00:00",
+      "last_error": "DEADLINE_MISSED"
+    },
+    {
+      "city_id": "atlanta",
+      "deadline_at": "2026-10-02T19:19:00+00:00",
+      "due_at": "2026-10-02T18:40:00+00:00",
+      "last_error": "DEADLINE_MISSED"
+    },
+    {
+      "city_id": "las-vegas",
+      "deadline_at": "2026-10-02T19:19:00+00:00",
+      "due_at": "2026-10-02T18:41:00+00:00",
+      "last_error": "DEADLINE_MISSED"
+    },
+    {
+      "city_id": "tampa",
+      "deadline_at": "2026-10-02T19:19:00+00:00",
+      "due_at": "2026-10-02T18:42:00+00:00",
+      "last_error": "DEADLINE_MISSED"
+    }
+  ],
+  "new_provider_denials": 0,
+  "oneoff_execution": [
+    {
+      "end_time": "2026-10-02T19:13:00.59041+00:00",
+      "return_message": "DO",
+      "start_time": "2026-10-02T19:13:00.243538+00:00",
+      "status": "succeeded"
+    }
+  ],
+  "oneoff_schedule_present": false,
+  "recovery_events": [
+    {
+      "code": "USER_AUTHORIZED_CONNECT_RESET_RECOVERY",
+      "created_at": "2026-10-02T19:13:00.243593+00:00",
+      "id": 228,
+      "response_evidence": {
+        "attempt": 1,
+        "change": "Classify known provider connect ECONNRESET as transient; preserve cooldown, identity and regional routing",
+        "original_event_id": 205,
+        "original_pause_until": "2026-10-02T19:12:07.13661+00:00"
+      }
+    }
+  ]
+}
