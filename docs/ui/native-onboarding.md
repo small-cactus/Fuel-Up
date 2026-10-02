@@ -1,13 +1,16 @@
 # Native onboarding
 
 All five pages, including the preserved welcome artwork, now belong to one native
-SwiftUI paging TabView. Swipes, Back, page dots and Continue update the same draft.
+SwiftUI paging TabView. Swipes, page dots and Continue update the same draft.
 There are no pushed setup screens. The brands field is a UIKit UISearchBar, without
 an extra navigation controller or its empty navigation-bar space.
 
 1. Welcome: native MapKit with immediately installed demo annotations, so returning
    to the page does not depend on a one-shot map-ready event.
-2. Location: always asks “Use my location”, including replay with existing access.
+2. Location: an edge-to-edge native MapKit backdrop, one short headline and one
+   sentence. Before location is available, the map shows national geography; with
+   access and a fix, it shows the user's area. No fabricated station pins/prices.
+   Always asks “Use my location”, including replay with existing access.
    Granted access continues directly; undecided access requests Apple's prompt;
    denied access links to Settings. iOS does not allow an app to reset a user's
    prior permission decision. There is no redundant confirmation page.
@@ -28,6 +31,35 @@ changed. Android/older iOS retain the legacy flow.
 
 Native Liquid Glass uses no added borders or shadows. Fuel and brand lists scroll
 independently within the page. See [artwork provenance and coverage](brand-assets/README.md).
+
+## Location redesign — October 2, 2026
+
+Removed the onboarding Back button and its reserved header space. Native swipes
+and the accessible page control still revisit every step. Welcome artwork and
+permission behavior remain unchanged. The location map and layout are separate
+Swift files, using Apple's [MKStandardMapConfiguration](https://developer.apple.com/documentation/mapkit/mkstandardmapconfiguration)
+with muted emphasis. Map movement respects Reduce Motion. The request uses a
+solid reading surface in accessibility text sizes, scrolls as needed, and reserves
+the actual footer height so large button text cannot cover the explanation.
+
+### Redesign verification
+
+- Debug iOS simulator build passed; all 25 targeted onboarding tests passed.
+- Final build rendered on iPhone 13 mini and iPhone 17 Pro Max simulators.
+  [Compact/light](onboarding-location-redesign/compact-light.png) and
+  [large/dark](onboarding-location-redesign/large-dark.png) captures are retained.
+- Compact simulator: permission prompt appears only after the action; approval
+  advances to Radius, denial changes the action to Open Settings, and Not now
+  still advances. Returning with permission granted offers Use my location again
+  and advances without a redundant confirmation screen.
+- Swipe back to Welcome retains all six demo annotations. Fuel and Radius render
+  without a back button or its reserved space.
+- Maximum Dynamic Type in dark mode exposed a text/footer overlap, fixed by
+  restricting the text scroll viewport above the footer. Scrolling now reveals
+  the complete explanation without covering Not now or Open Settings.
+- The unsigned Debug simulator emits an existing Expo notifications keychain
+  entitlement warning at launch; it was dismissed for clean visual captures.
+  No physical phone installation or live VoiceOver/Reduce Motion test is claimed.
 
 ## Pager revision verification — October 1, 2026
 

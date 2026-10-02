@@ -50,7 +50,7 @@ struct OnboardingRadiusPage: View {
             Spacer()
             Text("15 mi")
           }.font(.caption2).foregroundStyle(.secondary).accessibilityHidden(true)
-        }.padding(.horizontal, 24).padding(.top, max(110, geometry.safeAreaInsets.top + 72)).padding(.bottom, 164)
+        }.padding(.horizontal, 24).padding(.top, max(40, geometry.safeAreaInsets.top + 24)).padding(.bottom, 164)
       }
     }
   }

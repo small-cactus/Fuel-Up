@@ -4,14 +4,15 @@ import SwiftUI
 struct OnboardingFlow: View {
   @ObservedObject var model: OnboardingModel
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @State private var footerHeight: CGFloat = 196
   var body: some View {
     ZStack {
       TabView(selection: $model.step) {
         OnboardingWelcomePage().tag(0)
-        OnboardingLocationPage(model: model).tag(1)
+        OnboardingLocationPage(model: model, bottomInset: max(220, footerHeight + 24)).tag(1)
         OnboardingRadiusPage(model: model).tag(2)
-        OnboardingFuelPage(model: model).padding(.top, 68).padding(.bottom, 126).tag(3)
-        OnboardingBrandsPage(model: model).padding(.top, 60).padding(.bottom, model.searchFocused ? 0 : 126).tag(4)
+        OnboardingFuelPage(model: model).padding(.top, 24).padding(.bottom, 126).tag(3)
+        OnboardingBrandsPage(model: model).padding(.top, 16).padding(.bottom, model.searchFocused ? 0 : 126).tag(4)
       }
       .tabViewStyle(.page(indexDisplayMode: .never))
       .ignoresSafeArea(.container, edges: .vertical)
@@ -23,19 +24,13 @@ struct OnboardingFlow: View {
         model.changed()
       }
       VStack {
-        HStack {
-          if model.step > 0 {
-            Button { move(to: model.step - 1) } label: {
-              Image(systemName: "chevron.left").font(.headline).frame(width: 44, height: 44)
-            }.modifier(OnboardingBackStyle()).accessibilityLabel("Previous page")
-          }
-          Spacer()
-        }.padding(.horizontal, 20).padding(.top, 8)
         Spacer()
         if !model.searchFocused {
         VStack(spacing: 12) {
           if model.step == 1 {
-            Button("Not now") { model.skipLocation() }.frame(minHeight: 44)
+            Button { model.skipLocation() } label: {
+              Text("Not now").frame(minWidth: 88, minHeight: 44)
+            }
               .accessibilityIdentifier("onboarding-skip-location")
           }
           OnboardingPageControl(selection: $model.step, count: 5)
@@ -46,20 +41,22 @@ struct OnboardingFlow: View {
             else { model.changed(); move(to: model.step + 1) }
           }.disabled(model.completing)
         }.padding(.horizontal, 24).padding(.bottom, 16)
+          .background(GeometryReader { geometry in
+            Color.clear.preference(key: OnboardingFooterHeight.self, value: geometry.size.height)
+          })
         }
       }
     }.tint(.blue).background(Color(uiColor: .systemGroupedBackground))
+      .onPreferenceChange(OnboardingFooterHeight.self) { footerHeight = $0 }
   }
   private func move(to step: Int) {
     withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { model.step = step }
   }
 }
 
-private struct OnboardingBackStyle: ViewModifier {
-  func body(content: Content) -> some View {
-    if #available(iOS 26.0, *) { content.buttonStyle(.glass).buttonBorderShape(.circle) }
-    else { content.buttonStyle(.bordered).buttonBorderShape(.capsule) }
-  }
+private struct OnboardingFooterHeight: PreferenceKey {
+  static var defaultValue: CGFloat = 196
+  static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
 }
 
 struct OnboardingPageControl: UIViewRepresentable {
