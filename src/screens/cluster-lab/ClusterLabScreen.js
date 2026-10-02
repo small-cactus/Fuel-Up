@@ -8,6 +8,7 @@ import { usePreferences } from '../../PreferencesContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { openStationNavigation } from '../../lib/openNavigation';
 import useClusterLabStations from './useClusterLabStations';
+import useHomeDeviceLocation from './useHomeDeviceLocation';
 import StationCardCarousel from './StationCardCarousel';
 
 const NativeMap = Platform.OS === 'ios' ? requireNativeViewManager('FuelUpMapKitRouting') : null;
@@ -15,6 +16,7 @@ const EMPTY_ORIGIN = {};
 
 export default function HomeScreen() {
     const active = useIsFocused();
+    useHomeDeviceLocation(active);
     const { isDark, themeColors } = useTheme();
     const { preferences } = usePreferences();
     const insets = useSafeAreaInsets();

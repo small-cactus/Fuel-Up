@@ -73,3 +73,55 @@ test('Home removes a quote immediately after its 24-hour expiry without a networ
     t.mock.timers.tick(1);assert.deepEqual(results.at(-1).stations,[]);
     assert.equal(calls,1);
 });
+
+test('live Home location updates the shared search context and launch cache using current preferences', () => {
+    let effect, options;
+    const commits=[], persisted=[];
+    const hook=load('src/screens/cluster-lab/useHomeDeviceLocation.js', {
+        react:{useEffect:fn=>{effect=fn;},useRef:()=>({current:null})},
+        'react-native':{AppState:{}},'expo-location':{},
+        '../../AppStateContext':{useAppState:()=>({resolvedFuelSearchContext:{latitude:27.9,longitude:-82.8},setResolvedFuelSearchContext:c=>commits.push(c)})},
+        '../../PreferencesContext':{usePreferences:()=>({preferences:{preferredOctane:'premium',searchRadiusMiles:8,preferredBrands:['wawa'],fuelMemberships:['costco']}})},
+        '../../lib/homeDeviceLocation':{startHomeDeviceLocation:o=>{options=o;return ()=>{};}},
+        '../../lib/deviceLocationCache':{persistLastDeviceLocationRegion:(...args)=>persisted.push(args)},
+    }).default;
+    hook(true);effect();
+    options.onLocation({coords:{latitude:28.01,longitude:-82.577,accuracy:10},timestamp:123456});
+    assert.equal(commits[0].latitude,28.01);assert.equal(commits[0].longitude,-82.577);
+    assert.match(commits[0].criteriaSignature,/premium\|8/);
+    assert.equal(options.getOrigin().latitude,28.01);
+    assert.equal(persisted[0][1].capturedAt,123456);
+});
+
+test('live GPS does not override an explicit manual location or run on an unfocused Home', () => {
+    for (const [active,manualLocationOverride] of [[false,null],[true,{latitude:27,longitude:-82}]]) {
+        let effect, starts=0;
+        const hook=load('src/screens/cluster-lab/useHomeDeviceLocation.js', {
+            react:{useEffect:fn=>{effect=fn;},useRef:()=>({current:null})},
+            'react-native':{AppState:{}},'expo-location':{},
+            '../../AppStateContext':{useAppState:()=>({manualLocationOverride})},
+            '../../PreferencesContext':{usePreferences:()=>({preferences:{}})},
+            '../../lib/homeDeviceLocation':{startHomeDeviceLocation:()=>{starts++;}},
+            '../../lib/deviceLocationCache':{},
+        }).default;
+        hook(active);effect();assert.equal(starts,0);
+    }
+});
+
+test('cached station distances are recalculated from the current search center before filtering', async t => {
+    let effect;const results=[];
+    const stale={latitude:28.01,longitude:-82.577,distanceMiles:15};
+    const hook=load('src/screens/cluster-lab/useClusterLabStations.js',{
+        react:{useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,value=>results.push(value)]},
+        'react-native':{AppState:{currentState:'active',addEventListener:()=>({remove(){}})}},
+        'expo-location':{},'../../AppStateContext':{useAppState:()=>({resolvedFuelSearchContext:{latitude:28.01,longitude:-82.577}})},
+        '../../PreferencesContext':{usePreferences:()=>({preferences:{preferredOctane:'regular',searchRadiusMiles:5}})},
+        '../../lib/deviceLocationCache':{},
+        '../../services/fuel':{getCachedFuelPriceSnapshot:async()=>({quote:stale,topStations:[stale]}),refreshFuelPriceSnapshot:async()=>({snapshot:{quote:stale,topStations:[stale]}})},
+        './stationCardModel':{buildLabStations:s=>[s.quote,...s.topStations].filter(q=>q.distanceMiles<=5)},
+    }).default;
+    hook(true);t.after(effect());await new Promise(setImmediate);
+    assert.equal(results.at(-1).stations.length,2);
+    assert.equal(results.at(-1).stations[0].distanceMiles,0);
+    assert.equal(stale.distanceMiles,15);
+});

@@ -8,6 +8,7 @@ import { getCachedFuelPriceSnapshot, refreshFuelPriceSnapshot } from '../../serv
 import { buildLabStations } from './stationCardModel';
 import { buildResolvedFuelSearchContext } from '../../lib/fuelSearchState';
 import { REPORTED_PRICE_MAX_AGE_MS } from '../../services/fuel/reportedPrices';
+import { calculateDistanceMiles } from '../../lib/homeState';
 
 // Data crosses the bridge once per search. The Swift view owns all camera and
 // animation work. The five-minute DB refresh never drives animation frames.
@@ -31,7 +32,12 @@ export default function useClusterLabStations(active) {
         let expiryTimer;
         const publish = (origin, snapshot) => {
             if (cancelled) return;
-            const stations = buildLabStations(snapshot, { origin, radiusMiles, minimumRating, fuelGrade: fuelType, requiresE85, preferredBrands: preferences.preferredBrands, fuelMemberships: preferences.fuelMemberships });
+            // An exact-key cache hit can still come from a slightly different
+            // origin. Radius filtering and cards must use this search's fix.
+            const rebase = quote => quote && Number.isFinite(quote.latitude) && Number.isFinite(quote.longitude)
+                ? { ...quote, distanceMiles: calculateDistanceMiles(origin, quote) } : quote;
+            const localized = { ...snapshot, quote: rebase(snapshot?.quote), topStations: snapshot?.topStations?.map(rebase) };
+            const stations = buildLabStations(localized, { origin, radiusMiles, minimumRating, fuelGrade: fuelType, requiresE85, preferredBrands: preferences.preferredBrands, fuelMemberships: preferences.fuelMemberships });
             setResult({ scope, origin: { latitude: origin.latitude, longitude: origin.longitude }, stations });
             clearTimeout(expiryTimer);
             const expirations = stations.map(station => Date.parse(station.updatedAt) + REPORTED_PRICE_MAX_AGE_MS).filter(Number.isFinite);
