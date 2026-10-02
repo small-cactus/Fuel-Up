@@ -52,7 +52,7 @@ function fakeDB({ jobs = [{ id: 1, run_id: 10, lease_token: 'token', station_ids
   const calls = [], uploads = [];
   jobs.forEach(job => job.execution_region = 'us-east-1');
   return { calls, uploads,
-    rpc: async (name, args) => { calls.push({ name, args }); return { data: name === 'claim_fuel_national_region_job' ? (jobs.length ? [jobs.shift()] : []) : name === 'finish_fuel_national_serving_job' ? save : true }; },
+    rpc: async (name, args) => { calls.push({ name, args }); return { data: name === 'claim_fuel_national_region_job' ? (jobs.length ? [jobs.shift()] : []) : name === 'finish_fuel_national_job' ? save : true }; },
     storage: { from: bucket => ({ upload: async (path, bytes, options) => { uploads.push({ bucket, path, bytes, options }); return { error: uploadError ? 'failed' : null }; } }) } };
 }
 const snapshot = { startedAt: new Date().toISOString(), observedAt: new Date().toISOString(), stations: [quote('1'), { id: '2', prices: [] }] };
@@ -61,14 +61,14 @@ test('worker archives first, then commits exact IDs, checksum and unpriced cover
   assert.equal(r[0].stations, 2); assert.equal(r[0].priced, 1);
   assert.equal(db.uploads[0].options.upsert, false);
   assert.deepEqual(JSON.parse(gunzipSync(db.uploads[0].bytes)), { ...snapshot, executionRegion: 'us-east-1' });
-  const saved = db.calls.find(c => c.name === 'finish_fuel_national_serving_job');
+  const saved = db.calls.find(c => c.name === 'finish_fuel_national_job');
   assert.deepEqual(saved.args.p_ids, ['1', '2']); assert.equal(saved.args.p_priced, 1); assert.equal(saved.args.p_sha256.length, 64);
 });
 test('archive failure or stale lease cannot publish a successful batch', async () => {
   for (const option of [{ uploadError: true }, { save: false }]) {
     const db = fakeDB(option); const r = await collectNationalPrices({ executionRegion: 'us-east-1', db, fetchBatch: async () => snapshot });
     assert.equal(r[0].status, 'failed'); assert(db.calls.some(c => c.name === 'fail_fuel_national_job'));
-    if (option.uploadError) assert(!db.calls.some(c => c.name === 'finish_fuel_national_serving_job'));
+    if (option.uploadError) assert(!db.calls.some(c => c.name === 'finish_fuel_national_job'));
   }
 });
 test('rate denial stops the worker loop immediately and persists the cooldown', async () => {
@@ -97,7 +97,7 @@ test('metadata travels with the existing price batch and is published behind the
   const db=fakeDB();let options;
   const result=await collectNationalPrices({db,executionRegion:'us-east-1',sleep:async()=>{},fetchBatch:async(ids,opts)=>{options=opts;return snapshot;}});
   assert.equal(result[0].status,'succeeded');assert.equal(options.includeMetadata,true);
-  assert.deepEqual(db.calls.find(c=>c.name==='finish_fuel_national_serving_job').args.p_stations,snapshot.stations);
+  assert.deepEqual(db.calls.find(c=>c.name==='publish_fuel_station_batch').args.p_stations,snapshot.stations);
   assert(db.calls.find(c=>c.name==='fuel_station_metadata_needed'));
 });
 
@@ -110,4 +110,40 @@ test('scheduled metadata query avoids the failing optional brand resolver withou
   assert.doesNotMatch(query,/\bbrands\b/);
   assert.match(query,/name latitude longitude address/);
   assert.match(query,/prices\{fuelProduct cash\{price postedTime\} credit\{price postedTime\}\}/);
+});
+
+test('metadata timeout preserves evidence and collects prices without optional enrichment', async () => {
+  const db = fakeDB(); const original = db.rpc;
+  db.rpc = async (name,args) => name==='fuel_station_metadata_needed'
+    ? {error:{code:'57014'},status:500} : original(name,args);
+  let options;
+  const result=await collectNationalPrices({db,executionRegion:'us-east-1',sleep:async()=>{},fetchBatch:async(ids,opts)=>{options=opts;return snapshot;}});
+  assert.equal(result[0].status,'succeeded'); assert.equal(options.includeMetadata,false);
+  assert(db.calls.some(c=>c.name==='record_fuel_national_projection_event' && c.args.p_code==='METADATA_DEFERRED_57014'));
+  assert.equal(db.uploads.length,1);
+});
+
+test('metadata permission denial and unknown errors still prevent provider access', async () => {
+  for(const code of ['42501','28P01','UNKNOWN']) {
+    const db=fakeDB(); const original=db.rpc; let calls=0;
+    db.rpc=async(name,args)=>name==='fuel_station_metadata_needed'?{error:{code},status:403}:original(name,args);
+    const result=await collectNationalPrices({db,executionRegion:'us-east-1',fetchBatch:async()=>{calls++;return snapshot;}});
+    assert.equal(calls,0);assert.equal(result[0].status,'failed');assert.equal(db.uploads.length,0);
+  }
+});
+
+test('serving timeout cannot roll back or retry an archived provider observation',async()=>{
+  const db=fakeDB();const original=db.rpc;let fetches=0;
+  db.rpc=async(name,args)=>{if(name==='publish_fuel_station_batch'){db.calls.push({name,args});return {error:{code:'57014'}};}return original(name,args);};
+  const result=await collectNationalPrices({db,executionRegion:'us-east-1',sleep:async()=>{},fetchBatch:async()=>{fetches++;return snapshot;}});
+  assert.equal(fetches,1);assert.equal(result[0].status,'succeeded');assert.equal(result[0].projection,'pending');
+  assert(db.calls.findIndex(c=>c.name==='finish_fuel_national_job')<db.calls.findIndex(c=>c.name==='publish_fuel_station_batch'));
+  assert(!db.calls.some(c=>c.name==='fail_fuel_national_job'));
+  assert(db.calls.some(c=>c.name==='record_fuel_national_projection_event'&&c.args.p_code==='SERVING_DEFERRED_57014'));
+});
+
+test('failed archive fencing never attempts serving publication',async()=>{
+  const db=fakeDB({save:false});
+  const result=await collectNationalPrices({db,executionRegion:'us-east-1',fetchBatch:async()=>snapshot});
+  assert.equal(result[0].status,'failed');assert(!db.calls.some(c=>c.name==='publish_fuel_station_batch'));
 });

@@ -1,5 +1,6 @@
 import { fetchNationalPriceBatch, compressSnapshot, NationalPriceError } from './nationalPriceTransport.mjs';
 import { NATIONAL_REGIONS } from './nationalRegions.mjs';
+import { optionalMetadata, publishArchivedProjection } from './nationalPriceProjection.mjs';
 
 async function rpc(db, name, args = {}) {
   const { data, error } = await db.rpc(name, args);
@@ -19,7 +20,7 @@ export async function collectNationalPrices({ db, fetchBatch = fetchNationalPric
     const claimedAt = now();
     try {
       if (job.execution_region !== executionRegion) throw new NationalPriceError('REGION_JOB_MISMATCH');
-      const includeMetadata = await rpc(db, 'fuel_station_metadata_needed', { p_ids: job.station_ids });
+      const includeMetadata = await optionalMetadata(db, job);
       const snapshot = { ...await fetchBatch(job.station_ids, { csrf, includeMetadata }), executionRegion };
       const compressed = await compressSnapshot(snapshot);
       const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', compressed))].map(b => b.toString(16).padStart(2, '0')).join('');
@@ -30,11 +31,13 @@ export async function collectNationalPrices({ db, fetchBatch = fetchNationalPric
         contentType: 'application/gzip', upsert: false, cacheControl: '31536000' });
       if (error) throw new NationalPriceError('ARCHIVE_WRITE_FAILED');
       const priced = snapshot.stations.filter(s => s.prices.some(p => p.cash?.price > 0 || p.credit?.price > 0)).length;
-      const saved = await rpc(db, 'finish_fuel_national_serving_job', { p_id: job.id, p_token: job.lease_token,
+      const saved = await rpc(db, 'finish_fuel_national_job', { p_id: job.id, p_token: job.lease_token,
         p_ids: snapshot.stations.map(s => s.id), p_started_at: snapshot.startedAt, p_observed_at: snapshot.observedAt,
-        p_path: path, p_bytes: compressed.byteLength, p_sha256: hash, p_priced: priced, p_stations: snapshot.stations });
+        p_path: path, p_bytes: compressed.byteLength, p_sha256: hash, p_priced: priced });
       if (!saved) throw new NationalPriceError('LEASE_LOST');
-      results.push({ id: job.id, status: 'succeeded', stations: snapshot.stations.length, priced });
+      // The immutable archive must remain committed if the app projection times out.
+      const projection = await publishArchivedProjection(db, job, snapshot.stations);
+      results.push({ id: job.id, status: 'succeeded', stations: snapshot.stations.length, priced, projection });
     } catch (error) {
       const code = error instanceof NationalPriceError ? error.code : 'NETWORK_OR_RUNTIME_ERROR';
       if (error.responseEvidence) {

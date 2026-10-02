@@ -1,0 +1,10 @@
+{
+  "checks": [
+    {"rpc":"fuel_station_metadata_needed","arguments":{"p_ids":[]},"httpStatus":503,"code":"PGRST002","message":"Could not query the database for the schema cache. Retrying."},
+    {"rpc":"claim_fuel_national_region_job","arguments":{"p_region":"diagnostic-invalid-region"},"httpStatus":503,"code":"PGRST002","message":"Could not query the database for the schema cache. Retrying."}
+  ],
+  "providerRequests":0,
+  "jobMutations":0,
+  "credentialsPersisted":false,
+  "recoveryVerified":false
+}

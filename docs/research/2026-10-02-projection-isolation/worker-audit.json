@@ -1,0 +1,204 @@
+{
+  "at": "2026-10-02T11:52:37.220773+00:00",
+  "config": {
+    "approved_lookups_per_hour": 161660,
+    "archive_budget_bytes": 900000000,
+    "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+    "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+    "enabled": true,
+    "ends_at": "2026-10-07T18:19:00+00:00",
+    "halt_reason": "UPSTREAM_HTTP_503",
+    "id": true,
+    "last_dispatch_at": "2026-10-02T11:51:00.625038+00:00",
+    "last_request_at": "2026-10-02T11:43:07.548088+00:00",
+    "max_requests_per_hour": 92,
+    "provider_backoff_until": "2026-10-02T10:08:11.093228+00:00",
+    "request_interval_seconds": 10,
+    "starts_at": "2026-09-30T22:00:00+00:00"
+  },
+  "events": [
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T11:40:24.059256+00:00",
+      "job_id": 117338
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T11:39:20.611017+00:00",
+      "job_id": 117346
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T11:38:14.422526+00:00",
+      "job_id": 117278
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T11:37:44.878838+00:00",
+      "job_id": 117337
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T11:35:26.562178+00:00",
+      "job_id": 117346
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T11:33:29.905909+00:00",
+      "job_id": 117337
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T11:32:39.397786+00:00",
+      "job_id": 117346
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T11:30:13.811185+00:00",
+      "job_id": 117277
+    }
+  ],
+  "hour": {
+    "archive_bytes": 0,
+    "completed_at": null,
+    "expected_batches": 72,
+    "expected_stations": 141660,
+    "id": 1654,
+    "missed_batches": 7,
+    "observed_stations": 0,
+    "priced_stations": 0,
+    "slot_at": "2026-10-02T11:00:00+00:00",
+    "status": "running",
+    "succeeded_batches": 0
+  },
+  "responses": [
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+      "created": "2026-10-02T11:51:01.676975+00:00",
+      "error": null,
+      "id": 1535,
+      "status_code": 503,
+      "timed_out": false
+    },
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+      "created": "2026-10-02T11:50:07.620766+00:00",
+      "error": null,
+      "id": 1534,
+      "status_code": 503,
+      "timed_out": false
+    },
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+      "created": "2026-10-02T11:49:11.840565+00:00",
+      "error": null,
+      "id": 1533,
+      "status_code": 503,
+      "timed_out": false
+    },
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+      "created": "2026-10-02T11:47:09.132155+00:00",
+      "error": null,
+      "id": 1532,
+      "status_code": 503,
+      "timed_out": false
+    },
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+      "created": "2026-10-02T11:46:05.696054+00:00",
+      "error": null,
+      "id": 1531,
+      "status_code": 503,
+      "timed_out": false
+    },
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+      "created": "2026-10-02T11:45:09.739839+00:00",
+      "error": null,
+      "id": 1530,
+      "status_code": 503,
+      "timed_out": false
+    },
+    {
+      "content": "{\"results\":[{\"id\":7770,\"city\":\"las-vegas\",\"status\":\"succeeded\",\"stations\":20},{\"id\":7938,\"city\":\"tampa\",\"status\":\"succeeded\",\"stations\":20}]}",
+      "created": "2026-10-02T11:43:05.183505+00:00",
+      "error": null,
+      "id": 1529,
+      "status_code": 200,
+      "timed_out": false
+    },
+    {
+      "content": "{\"error\":\"DATABASE_FAIL_FUEL_NATIONAL_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+      "created": "2026-10-02T11:43:05.183505+00:00",
+      "error": null,
+      "id": 1528,
+      "status_code": 503,
+      "timed_out": false
+    },
+    {
+      "content": "{\"error\":\"DATABASE_FAIL_FUEL_NATIONAL_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+      "created": "2026-10-02T11:41:11.975253+00:00",
+      "error": null,
+      "id": 1527,
+      "status_code": 503,
+      "timed_out": false
+    },
+    {
+      "content": "{\"results\":[{\"id\":7602,\"city\":\"atlanta\",\"status\":\"succeeded\",\"stations\":20}]}",
+      "created": "2026-10-02T11:40:09.222947+00:00",
+      "error": null,
+      "id": 1526,
+      "status_code": 200,
+      "timed_out": false
+    },
+    {
+      "content": "{\"results\":[{\"id\":117338,\"status\":\"failed\",\"code\":\"DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED\"}],\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+      "created": "2026-10-02T11:40:09.222947+00:00",
+      "error": null,
+      "id": 1525,
+      "status_code": 200,
+      "timed_out": false
+    },
+    {
+      "content": "{\"results\":[{\"id\":7434,\"city\":\"miami\",\"status\":\"succeeded\",\"stations\":20}]}",
+      "created": "2026-10-02T11:39:04.09874+00:00",
+      "error": null,
+      "id": 1524,
+      "status_code": 200,
+      "timed_out": false
+    },
+    {
+      "content": "{\"results\":[{\"id\":117346,\"status\":\"failed\",\"code\":\"DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED\"}],\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+      "created": "2026-10-02T11:39:04.09874+00:00",
+      "error": null,
+      "id": 1523,
+      "status_code": 200,
+      "timed_out": false
+    },
+    {
+      "content": "{\"results\":[{\"id\":7266,\"city\":\"washington-dc\",\"status\":\"succeeded\",\"stations\":20}]}",
+      "created": "2026-10-02T11:38:02.198657+00:00",
+      "error": null,
+      "id": 1522,
+      "status_code": 200,
+      "timed_out": false
+    },
+    {
+      "content": "{\"results\":[{\"id\":117278,\"status\":\"failed\",\"code\":\"DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED\"}],\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+      "created": "2026-10-02T11:38:04.086608+00:00",
+      "error": null,
+      "id": 1521,
+      "status_code": 200,
+      "timed_out": false
+    },
+    {
+      "content": "{\"results\":[{\"id\":6930,\"city\":\"denver\",\"status\":\"succeeded\",\"stations\":20},{\"id\":7098,\"city\":\"boston\",\"status\":\"succeeded\",\"stations\":20}]}",
+      "created": "2026-10-02T11:37:15.466219+00:00",
+      "error": null,
+      "id": 1520,
+      "status_code": 200,
+      "timed_out": false
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+Deploying Function: fuel-national-east
+Uploading asset (fuel-national-east): supabase/functions/fuel-national-east/index.ts
+Uploading asset (fuel-national-east): supabase/functions/_shared/serveNationalRegion.ts
+Uploading asset (fuel-national-east): supabase/functions/_shared/nationalRegionHandler.mjs
+Uploading asset (fuel-national-east): supabase/functions/_shared/nationalDiscovery.mjs
+Uploading asset (fuel-national-east): supabase/functions/_shared/nationalPriceTransport.mjs
+Uploading asset (fuel-national-east): supabase/functions/_shared/nationalGraphQLError.mjs
+Uploading asset (fuel-national-east): supabase/functions/_shared/nationalPriceBatch.mjs
+Uploading asset (fuel-national-east): supabase/functions/_shared/providerResponseEvidence.mjs
+Uploading asset (fuel-national-east): supabase/functions/_shared/core.mjs
+Uploading asset (fuel-national-east): supabase/functions/_shared/nationalRegions.mjs
+Uploading asset (fuel-national-east): supabase/functions/_shared/nationalPriceWorker.mjs
+Uploading asset (fuel-national-east): supabase/functions/_shared/nationalPriceProjection.mjs
+Uploading asset (fuel-national-east): supabase/functions/_shared/researchCollector.mjs
+Deploying Function: fuel-national-southwest
+Uploading asset (fuel-national-southwest): supabase/functions/fuel-national-southwest/index.ts
+Uploading asset (fuel-national-southwest): supabase/functions/_shared/serveNationalRegion.ts
+Uploading asset (fuel-national-southwest): supabase/functions/_shared/nationalRegionHandler.mjs
+Uploading asset (fuel-national-southwest): supabase/functions/_shared/nationalDiscovery.mjs
+Uploading asset (fuel-national-southwest): supabase/functions/_shared/nationalPriceTransport.mjs
+Uploading asset (fuel-national-southwest): supabase/functions/_shared/nationalGraphQLError.mjs
+Uploading asset (fuel-national-southwest): supabase/functions/_shared/nationalPriceBatch.mjs
+Uploading asset (fuel-national-southwest): supabase/functions/_shared/providerResponseEvidence.mjs
+Uploading asset (fuel-national-southwest): supabase/functions/_shared/core.mjs
+Uploading asset (fuel-national-southwest): supabase/functions/_shared/nationalRegions.mjs
+Uploading asset (fuel-national-southwest): supabase/functions/_shared/nationalPriceWorker.mjs
+Uploading asset (fuel-national-southwest): supabase/functions/_shared/nationalPriceProjection.mjs
+Uploading asset (fuel-national-southwest): supabase/functions/_shared/researchCollector.mjs
+Deploying Function: fuel-national-northwest
+Uploading asset (fuel-national-northwest): supabase/functions/fuel-national-northwest/index.ts
+Uploading asset (fuel-national-northwest): supabase/functions/_shared/serveNationalRegion.ts
+Uploading asset (fuel-national-northwest): supabase/functions/_shared/nationalRegionHandler.mjs
+Uploading asset (fuel-national-northwest): supabase/functions/_shared/nationalDiscovery.mjs
+Uploading asset (fuel-national-northwest): supabase/functions/_shared/nationalPriceTransport.mjs
+Uploading asset (fuel-national-northwest): supabase/functions/_shared/nationalGraphQLError.mjs
+Uploading asset (fuel-national-northwest): supabase/functions/_shared/nationalPriceBatch.mjs
+Uploading asset (fuel-national-northwest): supabase/functions/_shared/providerResponseEvidence.mjs
+Uploading asset (fuel-national-northwest): supabase/functions/_shared/core.mjs
+Uploading asset (fuel-national-northwest): supabase/functions/_shared/nationalRegions.mjs
+Uploading asset (fuel-national-northwest): supabase/functions/_shared/nationalPriceWorker.mjs
+Uploading asset (fuel-national-northwest): supabase/functions/_shared/nationalPriceProjection.mjs
+Uploading asset (fuel-national-northwest): supabase/functions/_shared/researchCollector.mjs
+{"project_ref":"vjindchxfebaltbslqwc","functions":["fuel-national-east","fuel-national-southwest","fuel-national-northwest"],"dashboard_url":"https://supabase.com/dashboard/project/vjindchxfebaltbslqwc/functions","message":"Deployed Functions."}
+A new version of Supabase CLI is available: v2.119.0 (currently installed v2.118.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
