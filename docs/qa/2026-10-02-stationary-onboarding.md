@@ -33,3 +33,16 @@ At the user’s request, the map center moved to Hayes Valley in San Francisco (
 The signed Release and simulator builds passed, along with the same 28 focused tests. The final map was visually checked in the large simulator and Release installation on Anthony’s iPhone 18 Pro Max succeeded. The phone app was not launched.
 
 ![San Francisco](evidence/2026-10-02-stationary-onboarding/location-san-francisco.png)
+
+## Mission Creek composition
+
+The user requested a more interesting location matching the reference's mix of water, greenery, and city blocks. Reframed the native 2D illustration around Mission Creek (37.7720, -122.3954) with a 1,500 m camera distance so the waterway, park edges, and neighboring blocks appear together. The hero size, native edge material, stationary footer, and permission behavior are unchanged. Native street labels remain; no custom symbols were added.
+
+Both simulator and signed Release builds passed, plus 28 focused onboarding and preference tests. Light and dark appearance were visually checked in the iPhone 17 Pro Max simulator.
+
+![Mission Creek light](evidence/2026-10-02-stationary-onboarding/location-mission-creek-light.png)
+![Mission Creek dark](evidence/2026-10-02-stationary-onboarding/location-mission-creek-dark.png)
+
+Location reference: [Mission Creek Park, San Francisco Recreation and Parks](https://www.sfrecpark.org/Facilities/Facility/Details/Mission-Creek-Park-North-and-South-449).
+
+Release installation on Anthony’s iPhone 18 Pro Max succeeded. The phone app was not opened.
