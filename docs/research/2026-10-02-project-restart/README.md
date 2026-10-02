@@ -10,6 +10,31 @@ At the final status capture the 13:00 run (1728) had 17/72 batches, 32,213 catal
 
 All collector main/watchdog schedules remained active. The shared provider cooldown is expired; zero wrong-region jobs were observed. Database size is 322,497,683 bytes and Storage 121,354,160 bytes, with 117,079,212 bytes against the unchanged 900,000,000-byte national archive budget. Scheduled Cron executions at 13:39 and 13:40 succeeded. A serving-projection timeout at 13:40 remains recorded; raw collection continued successfully. Dashboard CPU remained elevated, so sustained recovery should be watched by the existing hourly monitor. No guarantee that resource pressure cannot recur is implied.
 
+## 14:08 UTC follow-up
+
+The recovered 13:00 national sweep completed at 13:55:34 with all 72 batches.
+`full-hour-1728-readback.json` independently verifies every immutable archived
+batch: hashes, schema, observation windows, fixed catalog IDs, and regional
+provenance. All 141,660 IDs are accounted for; 94,856 stations have reported
+prices and 46,804 do not. These remain provider observations, not pump truth;
+the catalog's Texas/DC coverage assumptions remain unchanged.
+
+There are now 41 expected national slots: 28 complete, 12 expired incomplete
+(including the five historical hours without run rows), and one current hour.
+The 14:00 sweep had 30/72 batches at the status capture and is before its 15:00
+deadline. City collection has 1,014 successes and the same 42 misses, no expired
+unfinished jobs, and its next city job is due at 14:19. No new gaps appeared.
+All recent scheduled jobs succeeded, both main/watchdog schedules remain active,
+and the shared cooldown is expired. Two transient 503 attempts during 13:00 were
+retried successfully; the original errors remain recorded. Optional serving
+projection timeouts persist without blocking the research archives.
+
+Database size was 335,064,211 bytes; Storage 125,759,964 bytes; accounted national
+archives 121,485,016 of the unchanged 900,000,000-byte budget. All six provider-free
+regional health checks passed and no wrong-region jobs were found. No collection
+was manually dispatched and no repair, budget, schedule, or window change was
+needed. The slot counts and regional checks are saved in the follow-up files.
+
 ## Requested phone installation
 
 The current master tree (61c3667, including onboarding change f0454f1) built successfully as a signed Release for the connected iPhone 18 Pro Max. `devicectl` confirmed installation of com.anthonyh.fuelup and a subsequent installed-app query found Fuel Up 1.0.0 (1). The app was not launched. This confirms build and installation, not device interaction or end-to-end UI validation.

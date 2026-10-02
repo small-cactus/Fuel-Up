@@ -1,0 +1,63 @@
+{
+  "at": "2026-10-02T14:08:20.372425+00:00",
+  "city_slots": {
+    "due": 1056,
+    "expired_unfinished": 0,
+    "missed": 42,
+    "next_due": "2026-10-02T14:19:00+00:00",
+    "succeeded": 1014
+  },
+  "cooldown_active": false,
+  "cron_recent": [
+    {
+      "executions": 15,
+      "jobname": "fuel-national-discovery",
+      "latest": "2026-10-02T14:08:00.447305+00:00",
+      "status": "succeeded"
+    },
+    {
+      "executions": 15,
+      "jobname": "fuel-national-dispatch",
+      "latest": "2026-10-02T14:08:00.442812+00:00",
+      "status": "succeeded"
+    },
+    {
+      "executions": 15,
+      "jobname": "fuel-national-trends-cache",
+      "latest": "2026-10-02T14:08:00.444675+00:00",
+      "status": "succeeded"
+    },
+    {
+      "executions": 3,
+      "jobname": "fuel-national-watchdog",
+      "latest": "2026-10-02T14:05:00.283171+00:00",
+      "status": "succeeded"
+    },
+    {
+      "executions": 15,
+      "jobname": "fuel-research-dispatch",
+      "latest": "2026-10-02T14:08:00.445998+00:00",
+      "status": "succeeded"
+    },
+    {
+      "executions": 3,
+      "jobname": "fuel-research-watchdog",
+      "latest": "2026-10-02T14:05:00.294778+00:00",
+      "status": "succeeded"
+    }
+  ],
+  "national_slots": {
+    "complete": 28,
+    "expected": 41,
+    "expired_incomplete": 12,
+    "in_progress": 1,
+    "missing_run_rows": [
+      "2026-10-01T08:00:00+00:00",
+      "2026-10-01T09:00:00+00:00",
+      "2026-10-01T10:00:00+00:00",
+      "2026-10-01T11:00:00+00:00",
+      "2026-10-01T12:00:00+00:00"
+    ]
+  },
+  "wrong_regions": 0
+}
