@@ -1,0 +1,29 @@
+{
+  "metadataLookup": {
+    "httpStatus": 400,
+    "sqlState": "57014",
+    "message": "canceling statement due to statement timeout",
+    "context": "SQL function fuel_station_metadata_needed statement 1",
+    "boundedReproductionTimeoutSeconds": 5
+  },
+  "managementConnection": {
+    "httpStatus": 544,
+    "message": "Connection terminated due to connection timeout",
+    "alsoAffectedLoginRoleCreation": true
+  },
+  "limitedRecoveryAttempt": {
+    "targetPid": 396198,
+    "targetQuery": "autovacuum: VACUUM public.fuel_station_latest",
+    "operation": "pg_cancel_backend guarded by backend type, exact query and age",
+    "httpStatus": 400,
+    "sqlState": "42501",
+    "message": "permission denied to cancel query",
+    "detail": "Only roles with the SUPERUSER attribute may cancel queries of roles with the SUPERUSER attribute.",
+    "succeeded": false
+  },
+  "restAndMetricsHealth": {
+    "requestTimeoutSeconds": 15,
+    "allThreeRequestsTimedOut": true,
+    "credentialsPersisted": false
+  }
+}

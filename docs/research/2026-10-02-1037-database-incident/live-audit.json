@@ -1,0 +1,303 @@
+{
+  "at": "2026-10-02T10:49:05.77366+00:00",
+  "city": {
+    "expired_pending": 0,
+    "missed": 32,
+    "succeeded": 952
+  },
+  "cron": [
+    {
+      "count": 17,
+      "jobname": "fuel-national-discovery",
+      "status": "failed"
+    },
+    {
+      "count": 1,
+      "jobname": "fuel-national-discovery",
+      "status": "running"
+    },
+    {
+      "count": 42,
+      "jobname": "fuel-national-discovery",
+      "status": "succeeded"
+    },
+    {
+      "count": 16,
+      "jobname": "fuel-national-dispatch",
+      "status": "failed"
+    },
+    {
+      "count": 1,
+      "jobname": "fuel-national-dispatch",
+      "status": "running"
+    },
+    {
+      "count": 43,
+      "jobname": "fuel-national-dispatch",
+      "status": "succeeded"
+    },
+    {
+      "count": 18,
+      "jobname": "fuel-national-trends-cache",
+      "status": "failed"
+    },
+    {
+      "count": 42,
+      "jobname": "fuel-national-trends-cache",
+      "status": "succeeded"
+    },
+    {
+      "count": 6,
+      "jobname": "fuel-national-watchdog",
+      "status": "failed"
+    },
+    {
+      "count": 6,
+      "jobname": "fuel-national-watchdog",
+      "status": "succeeded"
+    },
+    {
+      "count": 18,
+      "jobname": "fuel-research-dispatch",
+      "status": "failed"
+    },
+    {
+      "count": 42,
+      "jobname": "fuel-research-dispatch",
+      "status": "succeeded"
+    },
+    {
+      "count": 6,
+      "jobname": "fuel-research-watchdog",
+      "status": "failed"
+    },
+    {
+      "count": 6,
+      "jobname": "fuel-research-watchdog",
+      "status": "succeeded"
+    }
+  ],
+  "events": [
+    {
+      "code": "PROVIDER_RESPONSE",
+      "created_at": "2026-10-02T10:04:02.984891+00:00",
+      "id": 93,
+      "job_id": 114401,
+      "response_evidence": {
+        "elapsedMs": 879,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a442e170fb5ac983-IAD",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Fri, 02 Oct 2026 10:04:02 GMT",
+          "retry-after": "5",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "observedAt": "2026-10-02T10:04:02.924Z",
+        "status": 503
+      },
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "UPSTREAM_HTTP_503",
+      "created_at": "2026-10-02T10:04:03.134961+00:00",
+      "id": 94,
+      "job_id": 114401,
+      "response_evidence": null,
+      "retry_after_seconds": 5
+    },
+    {
+      "code": "PROVIDER_RESPONSE",
+      "created_at": "2026-10-02T10:08:05.936484+00:00",
+      "id": 95,
+      "job_id": 114416,
+      "response_evidence": {
+        "elapsedMs": 1355,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a442e75c5ee9731a-IAD",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Fri, 02 Oct 2026 10:08:05 GMT",
+          "retry-after": "5",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "observedAt": "2026-10-02T10:08:05.871Z",
+        "status": 503
+      },
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "UPSTREAM_HTTP_503",
+      "created_at": "2026-10-02T10:08:06.093228+00:00",
+      "id": 96,
+      "job_id": 114416,
+      "response_evidence": null,
+      "retry_after_seconds": 5
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T10:19:47.133831+00:00",
+      "id": 97,
+      "job_id": 114444,
+      "response_evidence": null,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T10:31:27.760458+00:00",
+      "id": 98,
+      "job_id": 114444,
+      "response_evidence": null,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T10:38:18.303103+00:00",
+      "id": 99,
+      "job_id": 114445,
+      "response_evidence": null,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T10:40:29.370914+00:00",
+      "id": 100,
+      "job_id": 114446,
+      "response_evidence": null,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "created_at": "2026-10-02T10:44:17.59195+00:00",
+      "id": 101,
+      "job_id": 114445,
+      "response_evidence": null,
+      "retry_after_seconds": 0
+    }
+  ],
+  "expected_hours": {
+    "complete": 27,
+    "expected": 37,
+    "expired_unstarted": [
+      "2026-10-01T08:00:00+00:00",
+      "2026-10-01T09:00:00+00:00",
+      "2026-10-01T10:00:00+00:00",
+      "2026-10-01T11:00:00+00:00",
+      "2026-10-01T12:00:00+00:00"
+    ],
+    "partial": 4
+  },
+  "hour": {
+    "archive_bytes": 3137006,
+    "completed_at": null,
+    "expected_batches": 72,
+    "expected_stations": 141660,
+    "id": 1614,
+    "missed_batches": 1,
+    "observed_stations": 119960,
+    "priced_stations": 79784,
+    "slot_at": "2026-10-02T10:00:00+00:00",
+    "status": "running",
+    "succeeded_batches": 61
+  },
+  "job_errors": [
+    {
+      "attempts": 3,
+      "id": 114444,
+      "last_error": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "ordinal": 48,
+      "status": "missed"
+    },
+    {
+      "attempts": 2,
+      "id": 114445,
+      "last_error": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "ordinal": 49,
+      "status": "queued"
+    },
+    {
+      "attempts": 1,
+      "id": 114446,
+      "last_error": "DATABASE_FUEL_STATION_METADATA_NEEDED_FAILED",
+      "ordinal": 50,
+      "status": "queued"
+    },
+    {
+      "attempts": 0,
+      "id": 114447,
+      "last_error": null,
+      "ordinal": 51,
+      "status": "queued"
+    },
+    {
+      "attempts": 0,
+      "id": 114448,
+      "last_error": null,
+      "ordinal": 52,
+      "status": "queued"
+    },
+    {
+      "attempts": 0,
+      "id": 114449,
+      "last_error": null,
+      "ordinal": 53,
+      "status": "queued"
+    },
+    {
+      "attempts": 0,
+      "id": 114450,
+      "last_error": null,
+      "ordinal": 54,
+      "status": "queued"
+    },
+    {
+      "attempts": 0,
+      "id": 114451,
+      "last_error": null,
+      "ordinal": 55,
+      "status": "queued"
+    },
+    {
+      "attempts": 0,
+      "id": 114452,
+      "last_error": null,
+      "ordinal": 56,
+      "status": "queued"
+    },
+    {
+      "attempts": 0,
+      "id": 114453,
+      "last_error": null,
+      "ordinal": 57,
+      "status": "queued"
+    },
+    {
+      "attempts": 0,
+      "id": 114454,
+      "last_error": null,
+      "ordinal": 58,
+      "status": "queued"
+    }
+  ],
+  "national_config": {
+    "approved_lookups_per_hour": 161660,
+    "archive_budget_bytes": 900000000,
+    "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+    "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+    "enabled": true,
+    "ends_at": "2026-10-07T18:19:00+00:00",
+    "halt_reason": "UPSTREAM_HTTP_503",
+    "id": true,
+    "last_dispatch_at": "2026-10-02T10:49:04.52468+00:00",
+    "last_request_at": "2026-10-02T10:44:06.431933+00:00",
+    "max_requests_per_hour": 92,
+    "provider_backoff_until": "2026-10-02T10:08:11.093228+00:00",
+    "request_interval_seconds": 10,
+    "starts_at": "2026-09-30T22:00:00+00:00"
+  },
+  "wrong_region_jobs": 0
+}
