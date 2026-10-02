@@ -1,0 +1,190 @@
+TAP version 13
+# Subtest: read-back audit verifies real bytes, exact IDs, region, window, and unpriced coverage
+ok 1 - read-back audit verifies real bytes, exact IDs, region, window, and unpriced coverage
+  ---
+  duration_ms: 1.678042
+  ...
+# Subtest: validly hashed stale or wrong-region snapshots still fail the audit
+ok 2 - validly hashed stale or wrong-region snapshots still fail the audit
+  ---
+  duration_ms: 0.579709
+  ...
+# Subtest: provider connect resets retry but never conceal a mixed denial or unknown error
+ok 3 - provider connect resets retry but never conceal a mixed denial or unknown error
+  ---
+  duration_ms: 1.746541
+  ...
+# Subtest: partial data with a connect reset is rejected without an immediate second request
+ok 4 - partial data with a connect reset is rejected without an immediate second request
+  ---
+  duration_ms: 16.620375
+  ...
+# Subtest: known provider connection failures retry with a floor and respect longer Retry-After
+ok 5 - known provider connection failures retry with a floor and respect longer Retry-After
+  ---
+  duration_ms: 0.202459
+  ...
+# Subtest: denials anywhere in a large mixed list dominate transient classification
+ok 6 - denials anywhere in a large mixed list dominate transient classification
+  ---
+  duration_ms: 0.178
+  ...
+# Subtest: unknown or malformed GraphQL failures retain review requirement
+ok 7 - unknown or malformed GraphQL failures retain review requirement
+  ---
+  duration_ms: 0.064083
+  ...
+# Subtest: transport rejects partial data, records original evidence, and does not retry internally
+ok 8 - transport rejects partial data, records original evidence, and does not retry internally
+  ---
+  duration_ms: 0.663792
+  ...
+# Subtest: HTTP 200 rate denial preserves Retry-After
+ok 9 - HTTP 200 rate denial preserves Retry-After
+  ---
+  duration_ms: 0.304792
+  ...
+# Subtest: diagnostics retain the deciding error beyond the first ten without changing retry policy
+ok 10 - diagnostics retain the deciding error beyond the first ten without changing retry policy
+  ---
+  duration_ms: 10.296875
+  ...
+# Subtest: national planning deduplicates across states and budgets station resolutions, not envelopes
+ok 11 - national planning deduplicates across states and budgets station resolutions, not envelopes
+  ---
+  duration_ms: 2.129709
+  ...
+# Subtest: national planning rejects missing states, duplicate states, unreconciled counts and unknown scope
+ok 12 - national planning rejects missing states, duplicate states, unreconciled counts and unknown scope
+  ---
+  duration_ms: 1.035583
+  ...
+# Subtest: Retry-After handles seconds and HTTP dates, with no shortening to an arbitrary maximum
+ok 13 - Retry-After handles seconds and HTTP dates, with no shortening to an arbitrary maximum
+  ---
+  duration_ms: 0.316916
+  ...
+# Subtest: national transport preserves exact raw quotes, absent prices, and separate observation time
+ok 14 - national transport preserves exact raw quotes, absent prices, and separate observation time
+  ---
+  duration_ms: 20.773834
+  ...
+# Subtest: national transport rejects partial data, silent alias reorder, HTTP200 GraphQL errors and oversized responses
+ok 15 - national transport rejects partial data, silent alias reorder, HTTP200 GraphQL errors and oversized responses
+  ---
+  duration_ms: 3.637083
+  ...
+# Subtest: national transport captures 429 Retry-After and sends no retry
+ok 16 - national transport captures 429 Retry-After and sends no retry
+  ---
+  duration_ms: 1.54975
+  ...
+# Subtest: worker archives first, then commits exact IDs, checksum and unpriced coverage; never overwrites artifacts
+ok 17 - worker archives first, then commits exact IDs, checksum and unpriced coverage; never overwrites artifacts
+  ---
+  duration_ms: 4.179375
+  ...
+# Subtest: archive failure or stale lease cannot publish a successful batch
+ok 18 - archive failure or stale lease cannot publish a successful batch
+  ---
+  duration_ms: 3.111
+  ...
+# Subtest: rate denial stops the worker loop immediately and persists the cooldown
+ok 19 - rate denial stops the worker loop immediately and persists the cooldown
+  ---
+  duration_ms: 0.370333
+  ...
+# Subtest: disabled or cooled queue causes zero provider calls and zero storage writes
+ok 20 - disabled or cooled queue causes zero provider calls and zero storage writes
+  ---
+  duration_ms: 0.2965
+  ...
+# Subtest: worker spaces provider calls and finishes its invocation before the next cron tick
+ok 21 - worker spaces provider calls and finishes its invocation before the next cron tick
+  ---
+  duration_ms: 5.841834
+  ...
+# Subtest: metadata travels with the existing price batch and is published behind the archive fence
+ok 22 - metadata travels with the existing price batch and is published behind the archive fence
+  ---
+  duration_ms: 0.987625
+  ...
+# Subtest: scheduled metadata query avoids the failing optional brand resolver without dropping raw prices
+ok 23 - scheduled metadata query avoids the failing optional brand resolver without dropping raw prices
+  ---
+  duration_ms: 0.556125
+  ...
+# Subtest: metadata timeout preserves evidence and collects prices without optional enrichment
+ok 24 - metadata timeout preserves evidence and collects prices without optional enrichment
+  ---
+  duration_ms: 1.615625
+  ...
+# Subtest: metadata permission denial and unknown errors still prevent provider access
+ok 25 - metadata permission denial and unknown errors still prevent provider access
+  ---
+  duration_ms: 0.29475
+  ...
+# Subtest: serving timeout cannot roll back or retry an archived provider observation
+ok 26 - serving timeout cannot roll back or retry an archived provider observation
+  ---
+  duration_ms: 1.470417
+  ...
+# Subtest: failed archive fencing never attempts serving publication
+ok 27 - failed archive fencing never attempts serving publication
+  ---
+  duration_ms: 1.181958
+  ...
+# Subtest: all 50 states plus DC have exactly one fixed regional owner
+ok 28 - all 50 states plus DC have exactly one fixed regional owner
+  ---
+  duration_ms: 2.514792
+  ...
+# Subtest: regional batches never mix owners and counts reconcile across the US
+ok 29 - regional batches never mix owners and counts reconcile across the US
+  ---
+  duration_ms: 1.924417
+  ...
+# Subtest: ambiguous cross-region station identity stops catalog publishing
+ok 30 - ambiguous cross-region station identity stops catalog publishing
+  ---
+  duration_ms: 0.248833
+  ...
+# Subtest: same-region cross-state duplicates deduplicate, without double charging provider work
+ok 31 - same-region cross-state duplicates deduplicate, without double charging provider work
+  ---
+  duration_ms: 0.218292
+  ...
+# Subtest: every wrong or missing execution region is rejected before collection
+ok 32 - every wrong or missing execution region is rejected before collection
+  ---
+  duration_ms: 13.70675
+  ...
+# Subtest: unauthorized regional invocation never touches database or provider
+ok 33 - unauthorized regional invocation never touches database or provider
+  ---
+  duration_ms: 0.165417
+  ...
+# Subtest: health verifies runtime geography without claiming jobs; collect passes only the verified runtime region
+ok 34 - health verifies runtime geography without claiming jobs; collect passes only the verified runtime region
+  ---
+  duration_ms: 1.635292
+  ...
+# Subtest: worker rejects a wrong-region job before making any provider request
+ok 35 - worker rejects a wrong-region job before making any provider request
+  ---
+  duration_ms: 0.378209
+  ...
+# Subtest: generic worker cannot run without a known execution region
+ok 36 - generic worker cannot run without a known execution region
+  ---
+  duration_ms: 0.310125
+  ...
+1..36
+# tests 36
+# suites 0
+# pass 36
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 125.117583

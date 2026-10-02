@@ -3,6 +3,27 @@ import assert from 'node:assert/strict';
 import { classifyNationalGraphQLErrors as classify } from '../supabase/functions/_shared/nationalGraphQLError.mjs';
 import { fetchNationalPriceBatch } from '../supabase/functions/_shared/nationalPriceTransport.mjs';
 const transient = { message: 'request to http://poi-serv:8000/v2/station/203865 failed, reason: socket hang up' };
+const connectionReset = {
+  message: 'request to http://poi-serv:8000/v2/station/49579 failed, reason: connect ECONNRESET 172.23.238.89:8000',
+  extensions: { code: 'INTERNAL_SERVER_ERROR' },
+};
+
+test('provider connect resets retry but never conceal a mixed denial or unknown error', () => {
+  assert.deepEqual(classify([connectionReset], 120), { code: 'UPSTREAM_TRANSIENT_GRAPHQL', retryAfterSeconds: 120 });
+  for (const [message, expected] of [['forbidden', 'UPSTREAM_HTTP_403'], ['too many requests', 'UPSTREAM_HTTP_429'], ['unknown failure', 'GRAPHQL_ERROR']]) {
+    assert.equal(classify([connectionReset, { message }]).code, expected);
+  }
+});
+
+test('partial data with a connect reset is rejected without an immediate second request', async () => {
+  let calls = 0;
+  await assert.rejects(fetchNationalPriceBatch(['49579'], { fetchImpl: async () => {
+    calls++;
+    return new Response(JSON.stringify({ data: { s0: null }, errors: [connectionReset] }));
+  } }), error => error.code === 'UPSTREAM_TRANSIENT_GRAPHQL' &&
+    error.responseEvidence.graphqlErrorSummary.classes.UPSTREAM_TRANSIENT_GRAPHQL.count === 1);
+  assert.equal(calls, 1);
+});
 
 test('known provider connection failures retry with a floor and respect longer Retry-After', () => {
   for (const message of [transient.message, '408', 'socket hang up', 'ETIMEDOUT']) {

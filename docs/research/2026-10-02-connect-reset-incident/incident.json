@@ -1,0 +1,97 @@
+{
+  "evidence": [
+    {
+      "code": "PROVIDER_RESPONSE",
+      "created_at": "2026-10-02T18:12:06.734182+00:00",
+      "id": 204,
+      "job_id": 142878,
+      "response_evidence": {
+        "decodedBodyBytes": 780392,
+        "elapsedMs": 2127,
+        "fullElapsedMs": 2167,
+        "graphqlErrorSummary": {
+          "classes": {
+            "GRAPHQL_ERROR": {
+              "count": 5,
+              "examples": [
+                {
+                  "extensionCode": "INTERNAL_SERVER_ERROR",
+                  "message": "request to http://poi-serv:8000/v2/station/49579 failed, reason: connect ECONNRESET 172.23.238.89:8000"
+                },
+                {
+                  "extensionCode": "INTERNAL_SERVER_ERROR",
+                  "message": "request to http://poi-serv:8000/v2/station/49589 failed, reason: connect ECONNRESET 172.23.238.89:8000"
+                },
+                {
+                  "extensionCode": "INTERNAL_SERVER_ERROR",
+                  "message": "request to http://poi-serv:8000/v2/station/49597 failed, reason: connect ECONNRESET 172.23.238.89:8000"
+                }
+              ]
+            }
+          },
+          "extensionCodes": {
+            "INTERNAL_SERVER_ERROR": 5
+          },
+          "total": 5
+        },
+        "graphqlErrors": [
+          "request to http://poi-serv:8000/v2/station/49579 failed, reason: connect ECONNRESET 172.23.238.89:8000",
+          "request to http://poi-serv:8000/v2/station/49589 failed, reason: connect ECONNRESET 172.23.238.89:8000",
+          "request to http://poi-serv:8000/v2/station/49597 failed, reason: connect ECONNRESET 172.23.238.89:8000",
+          "request to http://poi-serv:8000/v2/station/49602 failed, reason: connect ECONNRESET 172.23.238.89:8000",
+          "request to http://poi-serv:8000/v2/station/49626 failed, reason: connect ECONNRESET 172.23.238.89:8000"
+        ],
+        "headers": {
+          "age": "0",
+          "cf-ray": "a445ac574cd1d32b-IAD",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Fri, 02 Oct 2026 18:12:06 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "observedAt": "2026-10-02T18:12:06.456Z",
+        "status": 200
+      },
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "GRAPHQL_ERROR",
+      "created_at": "2026-10-02T18:12:07.13661+00:00",
+      "id": 205,
+      "job_id": 142878,
+      "response_evidence": null,
+      "retry_after_seconds": 3600
+    }
+  ],
+  "job": {
+    "archive_bytes": null,
+    "attempts": 1,
+    "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+    "completed_at": null,
+    "execution_region": "us-east-1",
+    "id": 142878,
+    "last_error": "GRAPHQL_ERROR",
+    "lease_until": null,
+    "next_attempt_at": "2026-10-02T19:12:07.13661+00:00",
+    "object_path": null,
+    "observed_at": null,
+    "ordinal": 42,
+    "priced_count": null,
+    "run_id": 2009,
+    "sha256": null,
+    "started_at": null,
+    "status": "queued"
+  },
+  "run": {
+    "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+    "completed_at": null,
+    "created_at": "2026-10-02T18:00:00.056655+00:00",
+    "deadline_at": "2026-10-02T19:00:00+00:00",
+    "expected_batches": 72,
+    "expected_stations": 141660,
+    "id": 2009,
+    "slot_at": "2026-10-02T18:00:00+00:00",
+    "status": "running"
+  }
+}
