@@ -3,61 +3,95 @@ import SwiftUI
 @available(iOS 16.0, *)
 struct OnboardingBrandsPage: View {
   @ObservedObject var model: OnboardingModel
-  @State private var search = ""
+  @State private var brandSearch = ""
+  @State private var membershipSearch = ""
   @ScaledMetric(relativeTo: .body) private var searchHeight = 56.0
-  private var brands: [OnboardingBrand] {
+
+  private var allBrands: [OnboardingBrand] {
     let known = Set(model.brands.map(\.id))
     let saved = model.favorites.subtracting(known).sorted().compactMap {
       OnboardingBrand(["id": $0, "label": $0.capitalized, "count": 0])
     }
-    return (model.brands + saved).filter { search.isEmpty || $0.label.localizedCaseInsensitiveContains(search) }
+    return model.brands + saved
   }
+  private var brands: [OnboardingBrand] { filtered(allBrands, query: brandSearch) }
+  private var memberships: [OnboardingBrand] { filtered(model.membershipOptions, query: membershipSearch) }
+
   var body: some View {
-    VStack(spacing: 0) {
-    OnboardingSearchField(text: $search, focused: $model.searchFocused).frame(height: searchHeight).padding(.horizontal, 16)
+    if #available(iOS 26.0, *) {
+      sections.safeAreaBar(edge: .top, spacing: 0) { heading }
+        .scrollEdgeEffectStyle(.soft, for: .all)
+    } else {
+      sections.safeAreaInset(edge: .top, spacing: 0) { heading.background(.ultraThinMaterial) }
+    }
+  }
+
+  private var heading: some View {
+    OnboardingHeading(title: "Gas preferences", subtitle: "Choose any stations you’d rather go to, even if another is cheaper")
+      .frame(maxWidth: .infinity, alignment: .leading).padding(24)
+  }
+
+  private var sections: some View {
     ScrollView {
-      VStack(alignment: .leading, spacing: 24) {
-        if !model.searchFocused {
-          OnboardingHeading(title: "Your usual stops", subtitle: "Have a membership or a favorite? Pick them here.")
-        }
-        if search.isEmpty {
-          if !model.membershipOptions.isEmpty {
+      VStack(alignment: .leading, spacing: 26) {
+        if !model.membershipOptions.isEmpty {
+          VStack(alignment: .leading, spacing: 12) {
             sectionTitle("Memberships")
-            VStack(spacing: 0) {
-              ForEach(model.membershipOptions) { item in
-                OnboardingSelectionRow(title: item.label, brandIcon: item.id, selected: model.memberships.contains(item.id)) {
-                  toggle(item.id, in: &model.memberships)
-                  model.changed()
-                }.accessibilityIdentifier("onboarding-membership-\(item.id)")
-                if item.id != model.membershipOptions.last?.id { Divider().padding(.horizontal, 20) }
+            if model.membershipOptions.count > 10 {
+              OnboardingSearchField(text: $membershipSearch, focused: $model.searchFocused,
+                                    placeholder: "Find a membership")
+                .frame(height: searchHeight).padding(.horizontal, -8)
+                .accessibilityIdentifier("onboarding-membership-search")
+            }
+            if memberships.isEmpty {
+              Text("No matching memberships.").foregroundStyle(.secondary)
+            } else {
+              VStack(spacing: 0) {
+                ForEach(memberships) { item in
+                  OnboardingSelectionRow(title: item.label, brandIcon: item.id, selected: model.memberships.contains(item.id)) {
+                    toggle(item.id, in: &model.memberships); model.changed()
+                  }.accessibilityIdentifier("onboarding-membership-\(item.id)")
+                  if item.id != memberships.last?.id { Divider().padding(.horizontal, 20) }
+                }
+              }.modifier(OnboardingGlass())
+            }
+          }
+        } else if model.membershipLoading { ProgressView("Finding memberships…") }
+        if model.membershipError != nil { retry("Memberships couldn’t load.") }
+
+        VStack(alignment: .leading, spacing: 12) {
+          sectionTitle("Favorites")
+          if allBrands.count > 10 {
+            OnboardingSearchField(text: $brandSearch, focused: $model.searchFocused,
+                                  placeholder: "Find a station")
+              .frame(height: searchHeight).padding(.horizontal, -8)
+              .accessibilityIdentifier("onboarding-brand-search")
+          }
+          if !brands.isEmpty {
+            LazyVStack(spacing: 0) {
+              ForEach(brands) { item in
+                OnboardingSelectionRow(title: item.label, brandIcon: item.id, selected: model.favorites.contains(item.id)) {
+                  toggle(item.id, in: &model.favorites); model.changed()
+                }.accessibilityIdentifier("onboarding-brand-\(item.id)")
+                if item.id != brands.last?.id { Divider().padding(.horizontal, 20) }
               }
             }.modifier(OnboardingGlass())
-          } else if model.membershipLoading { ProgressView("Finding memberships…") }
-          if model.membershipError != nil { retry("Memberships couldn’t load.") }
+          } else if model.loading { ProgressView("Finding nearby stations…") }
+          else {
+            Text(allBrands.count > 10 && !brandSearch.isEmpty ? "No matching stations." : "No nearby brands for this fuel.")
+              .foregroundStyle(.secondary)
+          }
+          if model.error != nil { retry("Nearby brands couldn’t load.") }
         }
-        sectionTitle("Favorites")
-        if !brands.isEmpty {
-          LazyVStack(spacing: 0) {
-            ForEach(brands) { item in
-              OnboardingSelectionRow(title: item.label, brandIcon: item.id, selected: model.favorites.contains(item.id)) {
-                toggle(item.id, in: &model.favorites)
-                model.changed()
-              }.accessibilityIdentifier("onboarding-brand-\(item.id)")
-              if item.id != brands.last?.id { Divider().padding(.horizontal, 20) }
-            }
-          }.modifier(OnboardingGlass())
-        } else if model.loading { ProgressView("Finding nearby stations…") }
-        else {
-          Text(!search.isEmpty ? "No matching brands." : model.coordinate == nil ? "Choose favorites later in Settings." : "No nearby brands for this fuel.")
-            .foregroundStyle(.secondary)
-        }
-        if model.error != nil { retry("Nearby brands couldn’t load.") }
         Text("Optional. You can change these in Settings.").font(.footnote).foregroundStyle(.secondary)
-      }.padding(24)
-    }
-    .scrollDismissesKeyboard(.interactively)
-
+      }.padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 24)
+    }.scrollDismissesKeyboard(.interactively)
   }
+
+  private func filtered(_ options: [OnboardingBrand], query: String) -> [OnboardingBrand] {
+    // A shrinking inventory must not leave a hidden search filtering the rows.
+    let term = options.count > 10 ? query.trimmingCharacters(in: .whitespacesAndNewlines) : ""
+    return options.filter { term.isEmpty || $0.label.localizedCaseInsensitiveContains(term) }
   }
   private func sectionTitle(_ text: String) -> some View {
     Text(text).font(.headline).accessibilityAddTraits(.isHeader)

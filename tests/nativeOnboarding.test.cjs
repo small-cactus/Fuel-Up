@@ -24,6 +24,8 @@ test('native completion saves exactly the final draft, including membership and 
         onComplete: choices => store.update({ ...choices, hasCompletedOnboarding: true }),
     })); });
     const send = event => act(async () => view.root.findByType('NativeFlow').props.onAction({ nativeEvent: event }));
+    assert.equal(query.choices.searchRadiusMiles, 6, 'onboarding starts at six miles before requesting nearby choices');
+    assert.equal(view.root.findByType('NativeFlow').props.initialChoices.searchRadiusMiles, 6);
     await send({ type: 'location', latitude: 27.98, longitude: -82.75 });
     assert.deepEqual(query.coordinate, { latitude: 27.98, longitude: -82.75 });
     const draft = { searchRadiusMiles: 12, preferredOctane: 'premium', requiresE85: true,

@@ -3,46 +3,25 @@ import SwiftUI
 @available(iOS 16.0, *)
 struct OnboardingFlow: View {
   @ObservedObject var model: OnboardingModel
-  @State private var footerHeight: CGFloat = 126
+
   var body: some View {
-    ZStack {
-      OnboardingPager(model: model, footerHeight: footerHeight)
+    OnboardingPager(model: model)
       .ignoresSafeArea(.container, edges: .vertical)
       .onChange(of: model.step) { step in
-        if step != 4 {
+        if step != 3 {
           UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
           model.searchFocused = false
         }
         model.changed()
       }
-      VStack {
-        Spacer()
-        if !model.searchFocused {
-        VStack(spacing: 12) {
-          OnboardingPageControl(selection: stepSelection, count: 5)
-            .frame(width: 130, height: 28)
-          OnboardingPrimaryButton(title: model.step == 4 ? "Find gas" : "Continue") {
-            if model.step == 4 { model.finish() }
-            else { model.changed(); move(to: model.step + 1) }
-          }.disabled(model.completing || (model.step == 1 && !model.locationReady))
-        }.padding(.horizontal, 24).padding(.bottom, 16)
-          .background(GeometryReader { geometry in
-            Color.clear.preference(key: OnboardingFooterHeight.self, value: geometry.size.height)
-          })
-        }
+      .onChange(of: model.locationReady) { ready in
+        // Wait for a usable location so the next pages can load nearby choices.
+        // Later GPS updates must not advance a user who swiped back.
+        if ready && model.step == 1 { model.selectStep(2) }
       }
-    }.tint(.blue).background(Color(uiColor: .systemGroupedBackground))
-      .onPreferenceChange(OnboardingFooterHeight.self) { footerHeight = $0 }
+      .tint(.blue)
+      .background(Color(uiColor: .systemGroupedBackground))
   }
-  private var stepSelection: Binding<Int> {
-    Binding(get: { model.step }, set: { model.selectStep($0) })
-  }
-  private func move(to step: Int) { model.selectStep(step) }
-}
-
-private struct OnboardingFooterHeight: PreferenceKey {
-  static var defaultValue: CGFloat = 0
-  static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
 }
 
 struct OnboardingPageControl: UIViewRepresentable {

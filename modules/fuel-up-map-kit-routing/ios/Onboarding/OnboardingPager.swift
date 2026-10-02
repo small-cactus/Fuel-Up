@@ -6,13 +6,12 @@ import UIKit
 @available(iOS 16.0, *)
 struct OnboardingPager: UIViewControllerRepresentable {
   @ObservedObject var model: OnboardingModel
-  let footerHeight: CGFloat
 
   func makeUIViewController(context: Context) -> OnboardingPagerController {
-    OnboardingPagerController(model: model, footerHeight: footerHeight)
+    OnboardingPagerController(model: model)
   }
   func updateUIViewController(_ controller: OnboardingPagerController, context: Context) {
-    controller.update(footerHeight: footerHeight)
+    controller.update()
   }
 }
 
@@ -20,18 +19,16 @@ struct OnboardingPager: UIViewControllerRepresentable {
 final class OnboardingPagerController: UIPageViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
   private let model: OnboardingModel
   private var pages: [UIHostingController<OnboardingPage>] = []
-  private var footerHeight: CGFloat
   private var transitioning = false
   private var gestureStartStep = 0
   private var locationReady: Bool
 
-  init(model: OnboardingModel, footerHeight: CGFloat) {
+  init(model: OnboardingModel) {
     self.model = model
-    self.footerHeight = footerHeight
     locationReady = model.locationReady
     super.init(transitionStyle: .scroll, navigationOrientation: .horizontal)
-    pages = (0..<5).map { index in
-      let host = UIHostingController(rootView: OnboardingPage(index: index, model: model, footerHeight: footerHeight))
+    pages = (0..<4).map { index in
+      let host = UIHostingController(rootView: OnboardingPage(index: index, model: model))
       host.view.backgroundColor = .clear
       return host
     }
@@ -41,15 +38,7 @@ final class OnboardingPagerController: UIPageViewController, UIPageViewControlle
   }
   required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-  func update(footerHeight: CGFloat) {
-    if self.footerHeight != footerHeight {
-      self.footerHeight = footerHeight
-      for (index, host) in pages.enumerated() {
-        host.rootView = OnboardingPage(index: index, model: model, footerHeight: footerHeight)
-      }
-    }
-    showRequestedPage()
-  }
+  func update() { showRequestedPage() }
 
   private func index(of controller: UIViewController?) -> Int? {
     pages.firstIndex { $0 === controller }
@@ -83,7 +72,7 @@ final class OnboardingPagerController: UIPageViewController, UIPageViewControlle
   }
   func pageViewController(_ pageViewController: UIPageViewController,
                           viewControllerAfter viewController: UIViewController) -> UIViewController? {
-    guard let current = index(of: viewController), current < (model.locationReady ? 4 : 1) else { return nil }
+    guard let current = index(of: viewController), current < (model.locationReady ? 3 : 1) else { return nil }
     return pages[current + 1]
   }
   func pageViewController(_ pageViewController: UIPageViewController,
@@ -105,22 +94,20 @@ final class OnboardingPagerController: UIPageViewController, UIPageViewControlle
 private struct OnboardingPage: View {
   let index: Int
   @ObservedObject var model: OnboardingModel
-  let footerHeight: CGFloat
 
   var body: some View {
-    Group {
-      switch index {
-      case 0: OnboardingWelcomePage()
-      case 1: OnboardingLocationPage(model: model)
-          .padding(.top, 24).padding(.bottom, footerHeight + 8)
-      case 2: OnboardingRadiusPage(model: model, bottomInset: footerHeight + 24)
-      case 3: OnboardingFuelPage(model: model)
-          .padding(.top, 24).padding(.bottom, footerHeight + 8)
-      default: OnboardingBrandsPage(model: model)
-          .padding(.top, 16).padding(.bottom, model.searchFocused ? 0 : footerHeight + 8)
-      }
+    page
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .modifier(OnboardingBottomBar(model: model))
+      .background(Color(uiColor: .systemGroupedBackground))
+  }
+
+  @ViewBuilder private var page: some View {
+    switch index {
+    case 0: OnboardingWelcomePage()
+    case 1: OnboardingLocationPage(model: model).padding(.top, 24)
+    case 2: OnboardingFuelPage(model: model).padding(.top, 24)
+    default: OnboardingBrandsPage(model: model)
     }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(Color(uiColor: .systemGroupedBackground))
   }
 }

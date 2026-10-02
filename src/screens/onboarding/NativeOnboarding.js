@@ -4,7 +4,7 @@ import useNativeOnboardingData from './useNativeOnboardingData';
 
 const NativeView = requireNativeViewManager('FuelUpMapKitRouting', 'NativeOnboardingView');
 export default function NativeOnboarding({ preferences, isDark, visible, onBack, onComplete }) {
-    const initial = useRef(preferences).current;
+    const initial = useRef({ ...preferences, searchRadiusMiles: 6 }).current;
     const [choices, setChoices] = useState(initial);
     const [coordinate, setCoordinate] = useState(null);
     const { data, retry } = useNativeOnboardingData(coordinate, choices);

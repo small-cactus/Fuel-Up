@@ -15,7 +15,7 @@ struct OnboardingBrand: Identifiable {
 final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelegate {
   @Published var step = 0
   @Published var searchFocused = false
-  @Published var radius = 5.0
+  @Published var radius = 6.0
   @Published var adjustingRadius = false
   @Published var fuel = "regular"
   @Published var requiresE85 = false
@@ -49,7 +49,7 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
   func configure(_ value: [String: Any]) {
     guard !initialized else { return }
     initialized = true
-    radius = min(15, max(2, value["searchRadiusMiles"] as? Double ?? 5))
+    radius = 6
     let grade = value["preferredOctane"] as? String ?? "regular"
     fuel = ["regular", "midgrade", "premium", "diesel", "e85"].contains(grade) ? grade : "regular"
     requiresE85 = value["requiresE85"] as? Bool ?? false
@@ -81,7 +81,7 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
     } else { location.requestWhenInUseAuthorization() }
   }
   func selectStep(_ target: Int) {
-    let bounded = min(4, max(0, target))
+    let bounded = min(3, max(0, target))
     step = locationReady ? bounded : min(bounded, 1)
   }
   func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {

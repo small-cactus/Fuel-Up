@@ -4,11 +4,12 @@ import SwiftUI
 struct OnboardingSearchField: UIViewRepresentable {
   @Binding var text: String
   @Binding var focused: Bool
+  var placeholder = "Find a station"
   func makeCoordinator() -> Coordinator { Coordinator(self) }
   func makeUIView(context: Context) -> UISearchBar {
     let view = UISearchBar()
     view.delegate = context.coordinator
-    view.placeholder = "Find a brand"
+    view.placeholder = placeholder
     view.searchBarStyle = .minimal
     view.autocapitalizationType = .none
     view.autocorrectionType = .no
@@ -17,6 +18,7 @@ struct OnboardingSearchField: UIViewRepresentable {
   }
   func updateUIView(_ view: UISearchBar, context: Context) {
     context.coordinator.parent = self
+    view.placeholder = placeholder
     if view.text != text { view.text = text }
   }
   final class Coordinator: NSObject, UISearchBarDelegate {
