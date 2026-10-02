@@ -98,7 +98,7 @@ private struct OnboardingPage: View {
   var body: some View {
     page
       .frame(maxWidth: .infinity, maxHeight: .infinity)
-      .modifier(OnboardingBottomBar(model: model))
+      .modifier(OnboardingBottomBar(model: model, overlaysMap: index == 0))
       .background(Color(uiColor: .systemGroupedBackground))
   }
 

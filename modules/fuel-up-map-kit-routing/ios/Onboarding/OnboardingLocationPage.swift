@@ -6,49 +6,29 @@ struct OnboardingLocationPage: View {
 
   var body: some View {
     ScrollView {
-      VStack(alignment: .leading, spacing: 26) {
-        OnboardingHeading(title: "Gas near you", subtitle: "Enable location to find nearby gas.")
-        VStack(alignment: .leading, spacing: 22) {
-          HStack(spacing: 16) {
-            Image(systemName: "location.fill")
-              .font(.system(size: 32, weight: .semibold)).foregroundStyle(.blue)
-              .frame(width: 48, height: 48).accessibilityHidden(true)
-            Text("Your current location").font(.headline)
-            Spacer(minLength: 0)
+      VStack(alignment: .leading, spacing: 28) {
+        OnboardingHeading(title: "Your next great stop", subtitle: "Good gas prices are closer than you think.")
+        OnboardingLocationIllustration()
+          .frame(height: 280)
+          .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
+          .accessibilityLabel("Illustration of gas stations on a map")
+        VStack(alignment: .leading, spacing: 12) {
+          Text("Find the savings around you").font(.title3.weight(.semibold))
+          Text("Fuel Up uses your location to find nearby stations, compare reported prices, and show how far away they are.")
+            .font(.body).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+          if model.locationBlocked {
+            Text("Location access is off. You can change it in Settings to find nearby gas.")
+              .font(.subheadline).foregroundStyle(.secondary)
+          } else if let error = model.locationError {
+            Text(error).font(.subheadline).foregroundStyle(.secondary)
+          } else if model.locationRequested && model.hasLocationAccess && !model.locationReady {
+            HStack(spacing: 10) { ProgressView(); Text("Finding your location…").font(.subheadline) }
+          } else if !model.hasLocationAccess {
+            Text("Continue opens Apple’s location permission prompt.")
+              .font(.footnote).foregroundStyle(.secondary)
           }
-          if model.locationReady {
-            Label("Location enabled", systemImage: "checkmark.circle.fill")
-              .font(.body.weight(.medium)).foregroundStyle(.primary)
-              .accessibilityIdentifier("onboarding-location-ready")
-          } else {
-            locationButton
-          }
-        }.padding(20).frame(maxWidth: .infinity, alignment: .leading).modifier(OnboardingGlass())
-        if let error = model.locationError {
-          Text(error).font(.subheadline).foregroundStyle(.secondary)
-        } else if model.locationRequested && model.hasLocationAccess && !model.locationReady {
-          HStack { ProgressView(); Text("Finding your location…").font(.subheadline) }
-        } else if model.locationBlocked {
-          Text("Turn on location in Settings to continue.").font(.subheadline).foregroundStyle(.secondary)
         }
       }.padding(24)
     }
-  }
-
-  private var locationButton: some View {
-    Button { model.requestLocation() } label: {
-      Text(model.locationBlocked ? "Open Settings" : "Enable location")
-        .font(.headline).frame(maxWidth: .infinity, minHeight: 28)
-    }
-    .buttonStyle(.borderedProminent).buttonBorderShape(.capsule).controlSize(.large)
-    .modifier(OnboardingLocationButtonStyle())
-    .accessibilityIdentifier("onboarding-enable-location")
-  }
-}
-
-private struct OnboardingLocationButtonStyle: ViewModifier {
-  func body(content: Content) -> some View {
-    if #available(iOS 26.0, *) { content.buttonStyle(.glassProminent) }
-    else { content }
   }
 }

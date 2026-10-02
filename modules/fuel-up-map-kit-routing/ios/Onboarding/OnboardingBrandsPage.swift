@@ -17,23 +17,17 @@ struct OnboardingBrandsPage: View {
   private var brands: [OnboardingBrand] { filtered(allBrands, query: brandSearch) }
   private var memberships: [OnboardingBrand] { filtered(model.membershipOptions, query: membershipSearch) }
 
-  var body: some View {
-    if #available(iOS 26.0, *) {
-      sections.safeAreaBar(edge: .top, spacing: 0) { heading }
-        .scrollEdgeEffectStyle(.soft, for: .all)
-    } else {
-      sections.safeAreaInset(edge: .top, spacing: 0) { heading.background(.ultraThinMaterial) }
-    }
-  }
+  var body: some View { sections }
 
   private var heading: some View {
     OnboardingHeading(title: "Gas preferences", subtitle: "Choose any stations you’d rather go to, even if another is cheaper")
-      .frame(maxWidth: .infinity, alignment: .leading).padding(24)
+      .frame(maxWidth: .infinity, alignment: .leading)
   }
 
   private var sections: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 26) {
+        heading
         if !model.membershipOptions.isEmpty {
           VStack(alignment: .leading, spacing: 12) {
             sectionTitle("Memberships")
@@ -84,7 +78,7 @@ struct OnboardingBrandsPage: View {
           if model.error != nil { retry("Nearby brands couldn’t load.") }
         }
         Text("Optional. You can change these in Settings.").font(.footnote).foregroundStyle(.secondary)
-      }.padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 24)
+      }.padding(.horizontal, 24).padding(.top, 48).padding(.bottom, 24)
     }.scrollDismissesKeyboard(.interactively)
   }
 

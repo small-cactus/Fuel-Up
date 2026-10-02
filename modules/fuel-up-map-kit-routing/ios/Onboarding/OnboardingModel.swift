@@ -101,7 +101,7 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
   }
   func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
     guard locationRequested, !locationReady else { return }
-    locationError = "Your location isn’t available yet. Tap Enable location to try again."
+    locationError = "Your location isn’t available yet. Tap Continue to try again."
   }
   func finish() {
     guard !completing, locationReady else { return }
