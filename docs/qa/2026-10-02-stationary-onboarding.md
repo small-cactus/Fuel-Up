@@ -50,3 +50,12 @@ Release installation on Anthony’s iPhone 18 Pro Max succeeded. The phone app w
 ## Location content spacing
 
 Moved the title, description, benefits, and permission status up by 30 points into the map fade by reducing the illustration's bottom layout spacing. The map frame and stationary footer remain unchanged. Simulator accessibility bounds confirm the title moved from normalized y=0.485 to 0.454 on the 956-point display (approximately 30 points), with Continue still at (0.055, 0.879, 0.891, 0.069). Visually checked the resulting overlap. Debug simulator and signed Release builds passed; Release installation on the iPhone 18 Pro Max succeeded. No phone app launch.
+
+## Full-size map with overlapping content
+
+After the user clarified that the content should enter the blur rather than change map spacing, replaced the negative-padding layout. The illustration is now an independently sized background, and the content begins 50 points above its bottom edge. On the large simulator the map stays at 440 points (normalized height 0.460), the title begins at y=390 (0.408), and Continue retains its exact frame. The map and content still scroll together. Light and dark visual checks passed, as did Debug and signed Release builds and all 28 focused onboarding/preference tests.
+
+![Overlapping content, light](evidence/2026-10-02-stationary-onboarding/location-overlap-light.png)
+![Overlapping content, dark](evidence/2026-10-02-stationary-onboarding/location-overlap-dark.png)
+
+Corrected Release installed on Anthony’s iPhone 18 Pro Max; the phone app was not opened.

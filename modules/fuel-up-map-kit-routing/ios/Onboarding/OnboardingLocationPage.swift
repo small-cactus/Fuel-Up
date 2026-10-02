@@ -6,11 +6,9 @@ struct OnboardingLocationPage: View {
 
   var body: some View {
     GeometryReader { geometry in
+      let mapHeight = min(440, max(340, geometry.size.width * 1.02))
       ScrollView {
         VStack(spacing: 24) {
-          OnboardingLocationIllustration()
-            .frame(height: min(440, max(340, geometry.size.width * 1.02)))
-            .padding(.bottom, -30)
           VStack(spacing: 12) {
             Text("Location permission")
               .font(.system(.largeTitle, design: .rounded).bold())
@@ -32,7 +30,16 @@ struct OnboardingLocationPage: View {
           } else if model.locationRequested && model.hasLocationAccess && !model.locationReady {
             HStack(spacing: 10) { ProgressView(); Text("Finding your location…").font(.subheadline) }
           }
-        }.padding(.bottom, 24)
+        }
+        .padding(.top, mapHeight - 50)
+        .padding(.bottom, 24)
+        .frame(maxWidth: .infinity)
+        .background(alignment: .top) {
+          // The map keeps its own full-size frame. Content overlaps its lower
+          // 50 points rather than changing the map's layout or camera bounds.
+          OnboardingLocationIllustration()
+            .frame(height: mapHeight)
+        }
       }.ignoresSafeArea(.container, edges: .top)
     }
   }
