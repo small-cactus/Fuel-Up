@@ -1,0 +1,275 @@
+{
+  "audit": {
+    "at": "2026-10-02T12:39:17.741663+00:00",
+    "city_expired_pending": 0,
+    "city_recent_missed": 0,
+    "expected_hours": {
+      "complete": 27,
+      "current_unstarted": null,
+      "expected": 39,
+      "expired_unstarted": [
+        "2026-10-01T08:00:00+00:00",
+        "2026-10-01T09:00:00+00:00",
+        "2026-10-01T10:00:00+00:00",
+        "2026-10-01T11:00:00+00:00",
+        "2026-10-01T12:00:00+00:00"
+      ],
+      "partial": 6
+    },
+    "recent_cron": [
+      {
+        "count": 31,
+        "jobname": "fuel-national-discovery",
+        "status": "failed"
+      },
+      {
+        "count": 29,
+        "jobname": "fuel-national-discovery",
+        "status": "succeeded"
+      },
+      {
+        "count": 29,
+        "jobname": "fuel-national-dispatch",
+        "status": "failed"
+      },
+      {
+        "count": 31,
+        "jobname": "fuel-national-dispatch",
+        "status": "succeeded"
+      },
+      {
+        "count": 29,
+        "jobname": "fuel-national-trends-cache",
+        "status": "failed"
+      },
+      {
+        "count": 31,
+        "jobname": "fuel-national-trends-cache",
+        "status": "succeeded"
+      },
+      {
+        "count": 6,
+        "jobname": "fuel-national-watchdog",
+        "status": "failed"
+      },
+      {
+        "count": 6,
+        "jobname": "fuel-national-watchdog",
+        "status": "succeeded"
+      },
+      {
+        "count": 32,
+        "jobname": "fuel-research-dispatch",
+        "status": "failed"
+      },
+      {
+        "count": 28,
+        "jobname": "fuel-research-dispatch",
+        "status": "succeeded"
+      },
+      {
+        "count": 7,
+        "jobname": "fuel-research-watchdog",
+        "status": "failed"
+      },
+      {
+        "count": 5,
+        "jobname": "fuel-research-watchdog",
+        "status": "succeeded"
+      }
+    ],
+    "recent_workers": [
+      {
+        "content": "{\"error\":\"CLAIM_FAILED\"}",
+        "created": "2026-10-02T12:39:00.764051+00:00",
+        "error": null,
+        "id": 1561,
+        "status_code": 503,
+        "timed_out": false
+      },
+      {
+        "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+        "created": "2026-10-02T12:39:00.764051+00:00",
+        "error": null,
+        "id": 1560,
+        "status_code": 503,
+        "timed_out": false
+      },
+      {
+        "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "created": "2026-10-02T12:38:13.851738+00:00",
+        "error": null,
+        "id": 1559,
+        "status_code": 503,
+        "timed_out": false
+      },
+      {
+        "content": "{\"error\":\"CLAIM_FAILED\"}",
+        "created": "2026-10-02T12:37:09.519541+00:00",
+        "error": null,
+        "id": 1558,
+        "status_code": 503,
+        "timed_out": false
+      },
+      {
+        "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+        "created": "2026-10-02T12:37:09.519541+00:00",
+        "error": null,
+        "id": 1557,
+        "status_code": 503,
+        "timed_out": false
+      }
+    ],
+    "wrong_region_jobs": 0
+  },
+  "dataApi": {
+    "checkedAt": "2026-10-02T12:39:42.612Z",
+    "providerRequests": 0,
+    "rpc": "fuel_station_metadata_needed",
+    "arguments": {
+      "p_ids": []
+    },
+    "status": 503,
+    "body": {
+      "code": "PGRST002",
+      "details": null,
+      "hint": null,
+      "message": "Could not query the database for the schema cache. Retrying."
+    }
+  },
+  "national": {
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_HTTP_503",
+      "id": true,
+      "last_dispatch_at": "2026-10-02T12:38:04.631928+00:00",
+      "last_request_at": "2026-10-02T11:43:07.548088+00:00",
+      "max_requests_per_hour": 92,
+      "provider_backoff_until": "2026-10-02T10:08:11.093228+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "cron": [
+      {
+        "active": true,
+        "name": "fuel-national-dispatch",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-watchdog",
+        "schedule": "*/5 * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-trends-cache",
+        "schedule": "* * * * *"
+      }
+    ],
+    "database_bytes": 321113235,
+    "storage_bytes": 120546837,
+    "accounted_archive_bytes": 116271889,
+    "regions": [
+      {
+        "enabled": true,
+        "function_name": "fuel-national-northwest",
+        "last_dispatch_at": "2026-10-02T12:31:03.105091+00:00",
+        "region": "us-west-2"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-southwest",
+        "last_dispatch_at": "2026-10-02T12:37:00.664021+00:00",
+        "region": "us-west-1"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-east",
+        "last_dispatch_at": "2026-10-02T12:38:04.631928+00:00",
+        "region": "us-east-1"
+      }
+    ],
+    "trends_cache": {
+      "published_at": "2026-10-02T09:17:00.221847+00:00",
+      "run_id": 1554,
+      "scopes": 10
+    }
+  },
+  "latestNationalHours": [
+    {
+      "archive_bytes": 0,
+      "completed_at": null,
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1701,
+      "missed_batches": 0,
+      "observed_stations": 0,
+      "priced_stations": 0,
+      "slot_at": "2026-10-02T12:00:00+00:00",
+      "status": "running",
+      "succeeded_batches": 0
+    },
+    {
+      "archive_bytes": 0,
+      "completed_at": "2026-10-02T12:00:07.73503+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1654,
+      "missed_batches": 72,
+      "observed_stations": 0,
+      "priced_stations": 0,
+      "slot_at": "2026-10-02T11:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 0
+    },
+    {
+      "archive_bytes": 3137006,
+      "completed_at": "2026-10-02T11:01:07.158781+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1614,
+      "missed_batches": 11,
+      "observed_stations": 119960,
+      "priced_stations": 79784,
+      "slot_at": "2026-10-02T10:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 61
+    }
+  ],
+  "city": {
+    "health": {
+      "cities_observed": 24,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "id": "hourly-24-cities-20260930-v1",
+      "last_dispatch_at": "2026-10-02T12:37:00.703836+00:00",
+      "last_success_at": "2026-10-02T11:43:11.719556+00:00",
+      "missed": 32,
+      "planned_city_hours": 4032,
+      "provider_backoff_until": "2026-10-02T10:08:11.093228+00:00",
+      "queued_due": 20,
+      "running": 0,
+      "starts_at": "2026-09-30T18:19:00+00:00",
+      "station_observations": 19520,
+      "status": "active",
+      "succeeded": 976
+    },
+    "cron": [
+      {
+        "active": true,
+        "name": "fuel-research-dispatch",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-research-watchdog",
+        "schedule": "*/5 * * * *"
+      }
+    ],
+    "database_bytes": 321113235
+  }
+}

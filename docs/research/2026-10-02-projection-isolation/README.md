@@ -35,3 +35,15 @@ A protected Data API diagnostic using `fuel_station_metadata_needed` with an emp
 Recovery is **not verified**, and there are no newly successful archives to read back. The three automatic attempts for this incident are exhausted: the platform-owned maintenance cancellation was denied, projection isolation was tested/deployed, and bounded optional RPCs were tested/deployed. A Supabase project/service restart or support intervention is now required if the Data API does not recover automatically. No further automated repair is attempted in this incident. Existing Cron remains enabled and will resume against the repaired workers when the Data API becomes available.
 
 Coverage at the checkpoint: 27 complete national hours; five partial hours including October 2 10:00 at 61/72 batches (119,960 IDs, approximately 84.7% of the fixed catalog); five historical unstarted hours; the current 11:00 hour still in progress. No new city gap was observed in the 11:38 status. Capacity remained within the existing database and archive budgets. Provider observations and all original failure evidence remain immutable; none of these records establish pump truth.
+
+## 12:38 UTC heartbeat: growing national gap, same external blocker
+
+`heartbeat-1238.json` records a fresh protected empty-ID metadata RPC returning HTTP 503 `PGRST002` at 12:39:42 UTC. Both national and city worker responses now show database claim failures. No additional repair was attempted: the incident's three-attempt limit remains exhausted.
+
+The 11:00 national run expired at 0/72, adding one confirmed empty hour. The current 12:00 run is 0/72 but still before its 13:00 deadline, so it is not counted as an expired missing hour. Across 39 expected slots there are 27 complete runs, six partial runs (including empty run rows), five historical unstarted hours, and the current running hour. October 2 10:00 remains preserved at 61/72, or 119,960 fixed-catalog IDs. Zero regional mismatches were observed.
+
+City collection last succeeded at 11:43:11 UTC and has 976 successes, 32 unchanged historical misses, and 20 queued-due jobs. No additional city misses or expired pending jobs were present at the 12:39 audit. All main/watchdog schedules and regional workers remain enabled, but the last hour contains numerous cron startup failures as well as successful dispatch calls whose worker requests fail to claim.
+
+The shared cooldown expired at 10:08:11. Database usage is 321,113,235 bytes; object storage is 120,546,837 bytes, with 116,271,889 bytes accounted against the 900,000,000-byte archive budget. Neither capacity nor provider cooldown explains this ongoing block. No provider requests, job resets, budget changes, raw-data modifications, or phone interaction occurred during this heartbeat. No new successful archives exist to verify, and service recovery remains unconfirmed.
+
+Validation: the new evidence JSON parses and the documentation diff passes whitespace checks. No executable code changed in this checkpoint. Supabase Data API recovery, potentially requiring a project restart or support intervention, remains the external action needed.
