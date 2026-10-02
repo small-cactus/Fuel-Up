@@ -35,10 +35,10 @@ struct OnboardingLocationPage: View {
         .padding(.bottom, 24)
         .frame(maxWidth: .infinity)
         .background(alignment: .top) {
-          // The map keeps its own full-size frame. Content overlaps its lower
-          // 50 points rather than changing the map's layout or camera bounds.
-          OnboardingLocationIllustration()
-            .frame(height: mapHeight)
+          // Extend the artwork behind the content without moving the heading
+          // or the stationary footer. Pills stay above the text overlap.
+          OnboardingLocationIllustration(isActive: model.step == 1, priceAreaHeight: mapHeight - 95)
+            .frame(height: mapHeight + 100)
         }
       }.ignoresSafeArea(.container, edges: .top)
     }

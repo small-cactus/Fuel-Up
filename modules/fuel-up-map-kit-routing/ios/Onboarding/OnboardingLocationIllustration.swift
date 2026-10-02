@@ -1,11 +1,18 @@
 import SwiftUI
 import MapKit
 
-// Decorative sample map: no live position or fabricated price observations.
+// Decorative sample map and illustrative prices, separate from live station data.
 @available(iOS 16.0, *)
 struct OnboardingLocationIllustration: View {
+  let isActive: Bool
+  let priceAreaHeight: CGFloat
+
   var body: some View {
     LocationInvitationMap()
+      .overlay(alignment: .top) {
+        OnboardingPricePills(isActive: isActive)
+          .frame(height: priceAreaHeight)
+      }
       .overlay {
         // Native backdrop blur is strongest at the edges, fading gently
         // into the sharp map rather than ending at a material boundary.
@@ -29,7 +36,7 @@ struct OnboardingLocationIllustration: View {
         .init(color: .clear, location: 1)
       ], startPoint: .top, endPoint: .bottom))
       .accessibilityElement(children: .ignore)
-      .accessibilityLabel("Map illustration of Mission Creek in San Francisco")
+      .accessibilityLabel("Map illustration of Mission Creek in San Francisco with sample gas prices")
   }
 }
 
@@ -43,7 +50,7 @@ private struct LocationInvitationMap: UIViewRepresentable {
     let configuration = MKStandardMapConfiguration(elevationStyle: .flat, emphasisStyle: .muted)
     configuration.pointOfInterestFilter = .excludingAll
     map.preferredConfiguration = configuration
-    map.layoutMargins = UIEdgeInsets(top: 0, left: 12, bottom: 80, right: 12)
+    map.layoutMargins = UIEdgeInsets(top: 0, left: 12, bottom: 180, right: 12)
     // Frame the creek, its park edges, and neighboring blocks together.
     let center = CLLocationCoordinate2D(latitude: 37.7720, longitude: -122.3954)
     map.setCamera(MKMapCamera(lookingAtCenter: center, fromDistance: 1500, pitch: 0, heading: 0), animated: false)
