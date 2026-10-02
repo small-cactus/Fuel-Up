@@ -10,6 +10,7 @@ struct OnboardingLocationPage: View {
         VStack(spacing: 24) {
           OnboardingLocationIllustration()
             .frame(height: min(440, max(340, geometry.size.width * 1.02)))
+            .padding(.bottom, -30)
           VStack(spacing: 12) {
             Text("Location permission")
               .font(.system(.largeTitle, design: .rounded).bold())

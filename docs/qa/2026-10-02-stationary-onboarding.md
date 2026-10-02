@@ -46,3 +46,7 @@ Both simulator and signed Release builds passed, plus 28 focused onboarding and 
 Location reference: [Mission Creek Park, San Francisco Recreation and Parks](https://www.sfrecpark.org/Facilities/Facility/Details/Mission-Creek-Park-North-and-South-449).
 
 Release installation on Anthony’s iPhone 18 Pro Max succeeded. The phone app was not opened.
+
+## Location content spacing
+
+Moved the title, description, benefits, and permission status up by 30 points into the map fade by reducing the illustration's bottom layout spacing. The map frame and stationary footer remain unchanged. Simulator accessibility bounds confirm the title moved from normalized y=0.485 to 0.454 on the 956-point display (approximately 30 points), with Continue still at (0.055, 0.879, 0.891, 0.069). Visually checked the resulting overlap. Debug simulator and signed Release builds passed; Release installation on the iPhone 18 Pro Max succeeded. No phone app launch.
