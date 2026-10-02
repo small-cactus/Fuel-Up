@@ -1,0 +1,238 @@
+{
+  "before": {
+    "database_bytes": 348032147,
+    "tables": [
+      {
+        "name": "fuel_station_latest",
+        "bytes": 193822720
+      },
+      {
+        "name": "fuel_station_price_lookup",
+        "bytes": 87744512
+      },
+      {
+        "name": "fuel_query_cache",
+        "bytes": 13606912
+      },
+      {
+        "name": "station_prices",
+        "bytes": 8331264
+      }
+    ]
+  },
+  "after": {
+    "archives": [
+      {
+        "archive_bytes": 3111737,
+        "cutoff": "2026-10-01T04:47:56.492874+00:00",
+        "object_path": "expired-query-cache/2026-10-02/2609ff09-df58-4f5a-aca5-fca72b272df8.json.gz",
+        "row_count": 72,
+        "sha256": "b8893cef9f669e544ae2b8ab15068a6f4df323b4327e401ab9eea441d9f44afb",
+        "source_table": "fuel_query_cache",
+        "verified_at": "2026-10-02T04:48:25.041866+00:00"
+      },
+      {
+        "archive_bytes": 83874,
+        "cutoff": "2026-09-02T04:48:59.276539+00:00",
+        "object_path": "legacy-station-prices/2026-10-02/b835c415-78ed-4b0a-a49f-8c11f0037c6e.json.gz",
+        "row_count": 500,
+        "sha256": "a6b6dfdfe5718e3ab958837836a5717ef67453c3fb208790284f13057c4bf7fc",
+        "source_table": "station_prices",
+        "verified_at": "2026-10-02T04:49:13.629102+00:00"
+      },
+      {
+        "archive_bytes": 85256,
+        "cutoff": "2026-09-02T04:48:59.276539+00:00",
+        "object_path": "legacy-station-prices/2026-10-02/37761d33-8819-47c1-a7a4-243900290795.json.gz",
+        "row_count": 500,
+        "sha256": "d4ac66b7992db17e78a642806d65eb3509ee7d42e1b7b66ef2529b8845624a6e",
+        "source_table": "station_prices",
+        "verified_at": "2026-10-02T04:49:27.989894+00:00"
+      },
+      {
+        "archive_bytes": 84878,
+        "cutoff": "2026-09-02T04:48:59.276539+00:00",
+        "object_path": "legacy-station-prices/2026-10-02/37c2050c-3c44-42ab-96ed-47cb33f7af0f.json.gz",
+        "row_count": 500,
+        "sha256": "6e09f4d9970ed4d6fdd1908eb7f1a60499d2588cf789aa7ac9715189b3b88d3b",
+        "source_table": "station_prices",
+        "verified_at": "2026-10-02T04:49:42.703352+00:00"
+      },
+      {
+        "archive_bytes": 83229,
+        "cutoff": "2026-09-02T04:48:59.276539+00:00",
+        "object_path": "legacy-station-prices/2026-10-02/bc77e36a-257b-4efa-a1c5-cadf446f78f4.json.gz",
+        "row_count": 500,
+        "sha256": "487f1eabdcd3682c7239ff938d34bfb16af7c4fc50b63a52bd56b1168aae8782",
+        "source_table": "station_prices",
+        "verified_at": "2026-10-02T04:49:56.772769+00:00"
+      },
+      {
+        "archive_bytes": 85540,
+        "cutoff": "2026-09-02T04:48:59.276539+00:00",
+        "object_path": "legacy-station-prices/2026-10-02/ac1c12c4-9f57-4c9b-9170-45f8c8c336ac.json.gz",
+        "row_count": 500,
+        "sha256": "4f12863b1c0e377e9ced4ecc12c4fa37091c7b804d7e8b03b36ac32954e5bc5c",
+        "source_table": "station_prices",
+        "verified_at": "2026-10-02T04:50:12.809344+00:00"
+      },
+      {
+        "archive_bytes": 84269,
+        "cutoff": "2026-09-02T04:48:59.276539+00:00",
+        "object_path": "legacy-station-prices/2026-10-02/e155c37b-23b7-48f4-9d9a-248d08b9a841.json.gz",
+        "row_count": 500,
+        "sha256": "97f1fbe2eb8dfe01eaaea55ea7be145987eabb1ef96169a2ee0149229a7ab2f5",
+        "source_table": "station_prices",
+        "verified_at": "2026-10-02T04:50:31.182701+00:00"
+      },
+      {
+        "archive_bytes": 83511,
+        "cutoff": "2026-09-02T04:48:59.276539+00:00",
+        "object_path": "legacy-station-prices/2026-10-02/6b5d3bb0-1659-4a59-9185-097d5b1ed39f.json.gz",
+        "row_count": 500,
+        "sha256": "6c3e1c37405932c8feed9289a096735a8afc6d32ca5bd740445903c10a1ad7af",
+        "source_table": "station_prices",
+        "verified_at": "2026-10-02T04:50:49.488203+00:00"
+      },
+      {
+        "archive_bytes": 83910,
+        "cutoff": "2026-09-02T04:48:59.276539+00:00",
+        "object_path": "legacy-station-prices/2026-10-02/1c15464e-02b7-4a7b-badc-8e610b7e0e44.json.gz",
+        "row_count": 500,
+        "sha256": "2c82b9d3f4300df8a4abb67616372829a87998c3815733598e4db5c117bf8442",
+        "source_table": "station_prices",
+        "verified_at": "2026-10-02T04:51:05.325519+00:00"
+      },
+      {
+        "archive_bytes": 84399,
+        "cutoff": "2026-09-02T04:48:59.276539+00:00",
+        "object_path": "legacy-station-prices/2026-10-02/720358f5-b85b-4de5-885d-3a68d0023dd6.json.gz",
+        "row_count": 500,
+        "sha256": "27728f9929614c6d9670666d189590b188dde22891f300d34c8c4217e862befc",
+        "source_table": "station_prices",
+        "verified_at": "2026-10-02T04:51:19.875965+00:00"
+      },
+      {
+        "archive_bytes": 84223,
+        "cutoff": "2026-09-02T04:48:59.276539+00:00",
+        "object_path": "legacy-station-prices/2026-10-02/745940fe-f520-4edf-b24d-bee7aadb1062.json.gz",
+        "row_count": 500,
+        "sha256": "f77432ae41afa4790da66ce101fc928cef144652e466360be87c22851759c926",
+        "source_table": "station_prices",
+        "verified_at": "2026-10-02T04:51:34.964041+00:00"
+      },
+      {
+        "archive_bytes": 82820,
+        "cutoff": "2026-09-02T04:48:59.276539+00:00",
+        "object_path": "legacy-station-prices/2026-10-02/423d5c57-11a9-43b5-884c-4ba59d8fc09d.json.gz",
+        "row_count": 500,
+        "sha256": "580180feab7af1066ef0b48ef4e9d92ff26642f483350acd2d5f0ffabd267c7e",
+        "source_table": "station_prices",
+        "verified_at": "2026-10-02T04:51:49.263166+00:00"
+      },
+      {
+        "archive_bytes": 83314,
+        "cutoff": "2026-09-02T04:48:59.276539+00:00",
+        "object_path": "legacy-station-prices/2026-10-02/cf01f11d-d879-4784-a4f8-a048ffdef2f8.json.gz",
+        "row_count": 500,
+        "sha256": "3c3670db542a46233651d837b2d5d92aa2a18395d94826c8438c9bbfc2c488f6",
+        "source_table": "station_prices",
+        "verified_at": "2026-10-02T04:52:03.214114+00:00"
+      },
+      {
+        "archive_bytes": 84332,
+        "cutoff": "2026-09-02T04:48:59.276539+00:00",
+        "object_path": "legacy-station-prices/2026-10-02/a1b41747-b244-4d3b-9d20-d927468690bb.json.gz",
+        "row_count": 500,
+        "sha256": "6ed8ba193a103f4515988f6d6f7b69dbad87c76e81c1c1def2fcc53307cc1021",
+        "source_table": "station_prices",
+        "verified_at": "2026-10-02T04:52:16.32255+00:00"
+      },
+      {
+        "archive_bytes": 69656,
+        "cutoff": "2026-09-02T04:48:59.276539+00:00",
+        "object_path": "legacy-station-prices/2026-10-02/77b4513b-8ee6-46d2-baa8-cd42d1c536ca.json.gz",
+        "row_count": 409,
+        "sha256": "844d8f2e7849913a24cb96f675a9449345cf47252fc6ddecddd5fef0e2f9d2a2",
+        "source_table": "station_prices",
+        "verified_at": "2026-10-02T04:52:30.249159+00:00"
+      }
+    ],
+    "autovacuum": [
+      {
+        "name": "fuel_station_latest",
+        "options": [
+          "autovacuum_vacuum_scale_factor=0.02",
+          "autovacuum_analyze_scale_factor=0.05"
+        ]
+      },
+      {
+        "name": "fuel_station_price_lookup",
+        "options": [
+          "autovacuum_vacuum_scale_factor=0.02",
+          "autovacuum_analyze_scale_factor=0.05"
+        ]
+      }
+    ],
+    "buckets": [
+      {
+        "bytes": 93977290,
+        "id": "fuel-national",
+        "objects": 1702,
+        "public": false
+      },
+      {
+        "bytes": 4274948,
+        "id": "fuel-cold",
+        "objects": 15,
+        "public": false
+      }
+    ],
+    "database_bytes": 294382739,
+    "expired_cache_rows": 0,
+    "invalid_indexes": 0,
+    "latest_station_count": 141660,
+    "legacy_oldest": "2026-09-28T15:30:45.678008+00:00",
+    "legacy_rows": 2806,
+    "national_enabled": true,
+    "national_latest": {
+      "archive_bytes": 3704173,
+      "completed_at": "2026-10-02T04:14:36.541093+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 1254,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 95141,
+      "slot_at": "2026-10-02T04:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    "observed_at": "2026-10-02T04:53:02.186347+00:00",
+    "price_lookup_count": 321248,
+    "tables": [
+      {
+        "bytes": 32768,
+        "name": "fuel_cold_archives"
+      },
+      {
+        "bytes": 16384,
+        "name": "fuel_query_cache"
+      },
+      {
+        "bytes": 183607296,
+        "name": "fuel_station_latest"
+      },
+      {
+        "bytes": 63692800,
+        "name": "fuel_station_price_lookup"
+      },
+      {
+        "bytes": 2416640,
+        "name": "station_prices"
+      }
+    ],
+    "tampa_nearby_count": 105,
+    "trends_scopes": 10
+  }
+}

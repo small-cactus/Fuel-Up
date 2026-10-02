@@ -3,6 +3,8 @@ const sql = `select jsonb_build_object(
  'config',(select to_jsonb(c) from public.fuel_national_config c),
  'trends_cache',(select jsonb_build_object('scopes',count(*),'run_id',min(run_id),'published_at',min(published_at)) from public.fuel_national_trends_cache),
  'accounted_archive_bytes',public.fuel_national_archive_bytes(),
+ 'database_bytes',pg_database_size(current_database()),
+ 'storage_bytes',(select coalesce(sum((metadata->>'size')::bigint),0) from storage.objects),
  'regions',(select jsonb_agg(r) from public.fuel_national_regions r),
  'regional_hours',(select jsonb_agg(h) from (select * from public.fuel_national_regional_health order by slot_at desc limit 72) h),
  'cron',(select jsonb_agg(jsonb_build_object('name',jobname,'active',active,'schedule',schedule)) from cron.job where jobname in ('fuel-national-dispatch','fuel-national-watchdog','fuel-national-trends-cache')),

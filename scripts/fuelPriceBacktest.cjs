@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const { readFileSync } = require('node:fs');
 
 const app = require('../app.json');
 const {
@@ -280,7 +281,22 @@ async function main() {
         app.expo.extra.supabase.key
     );
     const rows = await fetchAllStationPriceRows(supabase);
+    const archiveOption = process.argv.indexOf('--archive-ndjson');
+    let archivedRows = 0;
+    if (archiveOption !== -1) {
+        const path = process.argv[archiveOption + 1];
+        if (!path || path.startsWith('--')) throw Error('--archive-ndjson requires a verified export file');
+        const history = readFileSync(path, 'utf8').split('\n').filter(Boolean).map(line => JSON.parse(line));
+        rows.push(...history);
+        archivedRows = history.length;
+    } else {
+        console.error('Database-only replay: older archived history is excluded. Supply --archive-ndjson from scripts/storage/exportColdData.mjs for full retained history.');
+    }
     const events = buildUniqueSourceEvents(rows);
+    if (process.argv.includes('--validate-input')) {
+        console.log(JSON.stringify({ storedRows: rows.length, archivedRows, uniqueSourceEvents: events.length }, null, 2));
+        return;
+    }
     const evaluation = evaluateReplayBacktest(events);
     const replayRows = evaluation.replayRows;
     const lowReplayRegularChanged = replayRows.filter(row => (
@@ -293,6 +309,7 @@ async function main() {
     const output = {
         totals: {
             storedRows: rows.length,
+            archivedRows,
             uniqueSourceEvents: events.length,
             replayEvaluations: replayRows.length,
         },
