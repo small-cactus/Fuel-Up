@@ -5,30 +5,51 @@ struct OnboardingLocationPage: View {
   @ObservedObject var model: OnboardingModel
 
   var body: some View {
-    ScrollView {
-      VStack(alignment: .leading, spacing: 28) {
-        OnboardingHeading(title: "Your next great stop", subtitle: "Good gas prices are closer than you think.")
-        OnboardingLocationIllustration()
-          .frame(height: 280)
-          .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
-          .accessibilityLabel("Illustration of gas stations on a map")
-        VStack(alignment: .leading, spacing: 12) {
-          Text("Find the savings around you").font(.title3.weight(.semibold))
-          Text("Fuel Up uses your location to find nearby stations, compare reported prices, and show how far away they are.")
-            .font(.body).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+    GeometryReader { geometry in
+      ScrollView {
+        VStack(spacing: 24) {
+          OnboardingLocationIllustration()
+            .frame(height: min(320, max(250, geometry.size.width * 0.72)))
+          VStack(spacing: 12) {
+            Text("Gas near you")
+              .font(.system(.largeTitle, design: .rounded).bold())
+              .accessibilityAddTraits(.isHeader)
+            Text("Use your location to discover nearby stations and find a better price at your next stop.")
+              .font(.body).fixedSize(horizontal: false, vertical: true)
+          }.multilineTextAlignment(.center).padding(.horizontal, 28)
+
+          VStack(alignment: .leading, spacing: 22) {
+            benefit("Find nearby gas", detail: "See stations around you and how far away they are.", icon: "location.fill", color: .blue)
+            benefit("Find a better price", detail: "Compare reported prices for the fuel you use.", icon: "fuelpump.fill", color: .purple)
+            benefit("You’re in control", detail: "Change location access any time in Settings.", icon: "hand.raised.fill", color: .green)
+          }.frame(maxWidth: 440, alignment: .leading).padding(.horizontal, 32)
+
           if model.locationBlocked {
-            Text("Location access is off. You can change it in Settings to find nearby gas.")
-              .font(.subheadline).foregroundStyle(.secondary)
+            status("Location access is off. Open Settings to find nearby gas.")
           } else if let error = model.locationError {
-            Text(error).font(.subheadline).foregroundStyle(.secondary)
+            status(error)
           } else if model.locationRequested && model.hasLocationAccess && !model.locationReady {
             HStack(spacing: 10) { ProgressView(); Text("Finding your location…").font(.subheadline) }
-          } else if !model.hasLocationAccess {
-            Text("Continue opens Apple’s location permission prompt.")
-              .font(.footnote).foregroundStyle(.secondary)
           }
-        }
-      }.padding(24)
+        }.padding(.bottom, 24)
+      }.ignoresSafeArea(.container, edges: .top)
     }
+  }
+
+  private func benefit(_ title: String, detail: String, icon: String, color: Color) -> some View {
+    HStack(alignment: .top, spacing: 20) {
+      Image(systemName: icon).font(.system(size: 30, weight: .semibold))
+        .foregroundStyle(color).frame(width: 42, height: 44).accessibilityHidden(true)
+      VStack(alignment: .leading, spacing: 4) {
+        Text(title).font(.headline)
+        Text(detail).font(.subheadline).foregroundStyle(.secondary)
+          .fixedSize(horizontal: false, vertical: true)
+      }
+    }
+  }
+
+  private func status(_ text: String) -> some View {
+    Text(text).font(.subheadline).foregroundStyle(.secondary)
+      .multilineTextAlignment(.center).padding(.horizontal, 28)
   }
 }

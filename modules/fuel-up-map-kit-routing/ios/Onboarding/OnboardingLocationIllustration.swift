@@ -1,8 +1,48 @@
 import SwiftUI
 import MapKit
 
-// An illustrative neighborhood, never presented as the user's location or live prices.
-struct OnboardingLocationIllustration: UIViewRepresentable {
+// Decorative sample map: no live position or fabricated price observations.
+struct OnboardingLocationIllustration: View {
+  var body: some View {
+    GeometryReader { geometry in
+      ZStack {
+        LocationInvitationMap()
+          .mask(LinearGradient(stops: [.init(color: .black, location: 0),
+                                      .init(color: .black, location: 0.7),
+                                      .init(color: .clear, location: 1)],
+                               startPoint: .top, endPoint: .bottom))
+        symbol("location.fill", color: .blue, prominent: true)
+          .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.48)
+        symbol("fuelpump.fill", color: .green)
+          .position(x: geometry.size.width * 0.22, y: geometry.size.height * 0.30)
+        symbol("dollarsign", color: .blue)
+          .position(x: geometry.size.width * 0.79, y: geometry.size.height * 0.27)
+        symbol("star.fill", color: .purple)
+          .position(x: geometry.size.width * 0.76, y: geometry.size.height * 0.68)
+      }
+    }.accessibilityElement(children: .ignore)
+      .accessibilityLabel("Illustration of nearby gas and savings on a map")
+  }
+
+  private func symbol(_ name: String, color: Color, prominent: Bool = false) -> some View {
+    Image(systemName: name)
+      .font(.system(size: prominent ? 36 : 24, weight: .semibold))
+      .foregroundStyle(prominent ? .white : color)
+      .frame(width: prominent ? 76 : 56, height: prominent ? 76 : 56)
+      .modifier(InvitationSymbolSurface(prominent: prominent))
+  }
+}
+
+private struct InvitationSymbolSurface: ViewModifier {
+  let prominent: Bool
+  func body(content: Content) -> some View {
+    if prominent { content.background(.blue, in: Circle()) }
+    else if #available(iOS 26.0, *) { content.glassEffect(.regular, in: .circle) }
+    else { content.background(.regularMaterial, in: Circle()) }
+  }
+}
+
+private struct LocationInvitationMap: UIViewRepresentable {
   func makeCoordinator() -> Coordinator { Coordinator() }
   func makeUIView(context: Context) -> MKMapView {
     let map = MKMapView()
@@ -11,28 +51,19 @@ struct OnboardingLocationIllustration: UIViewRepresentable {
     map.isRotateEnabled = false; map.isPitchEnabled = false
     map.showsCompass = false
     map.pointOfInterestFilter = .excludingAll
+    map.layoutMargins = UIEdgeInsets(top: 0, left: 12, bottom: 80, right: 12)
     let center = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-    map.setRegion(MKCoordinateRegion(center: center, span: .init(latitudeDelta: 0.028, longitudeDelta: 0.035)), animated: false)
-    let points = [(37.7749, -122.4194), (37.7802, -122.427), (37.769, -122.410)]
-    map.addAnnotations(points.enumerated().map { index, point in
-      let pin = MKPointAnnotation()
-      pin.coordinate = .init(latitude: point.0, longitude: point.1)
-      pin.title = index == 0 ? "A better stop" : "Gas station"
-      return pin
-    })
+    map.setCamera(MKMapCamera(lookingAtCenter: center, fromDistance: 2200, pitch: 45, heading: 25), animated: false)
+    map.addOverlay(MKCircle(center: center, radius: 330))
     return map
   }
   func updateUIView(_ view: MKMapView, context: Context) {}
   final class Coordinator: NSObject, MKMapViewDelegate {
-    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-      let pin = mapView.dequeueReusableAnnotationView(withIdentifier: "location-preview") as? MKMarkerAnnotationView
-        ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: "location-preview")
-      pin.annotation = annotation
-      pin.glyphImage = UIImage(systemName: "fuelpump.fill")
-      pin.markerTintColor = annotation.title == "A better stop" ? .systemGreen : .systemBlue
-      pin.titleVisibility = .visible
-      pin.displayPriority = .required
-      return pin
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+      guard let circle = overlay as? MKCircle else { return MKOverlayRenderer(overlay: overlay) }
+      let renderer = MKCircleRenderer(circle: circle)
+      renderer.fillColor = UIColor.systemBlue.withAlphaComponent(0.16)
+      return renderer
     }
   }
 }

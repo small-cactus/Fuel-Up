@@ -105,7 +105,7 @@ private struct OnboardingPage: View {
   @ViewBuilder private var page: some View {
     switch index {
     case 0: OnboardingWelcomePage()
-    case 1: OnboardingLocationPage(model: model).padding(.top, 24)
+    case 1: OnboardingLocationPage(model: model)
     case 2: OnboardingFuelPage(model: model).padding(.top, 24)
     default: OnboardingBrandsPage(model: model)
     }
