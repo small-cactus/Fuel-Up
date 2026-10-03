@@ -9,7 +9,8 @@ struct OnboardingMapScrim: View {
     ZStack {
       PureProgressiveBlur(direction: .top).frame(height: topHeight)
         .frame(maxHeight: .infinity, alignment: .top)
-      PureProgressiveBlur(direction: .bottom).frame(height: bottomHeight)
+      PureProgressiveBlur(radius: 12, direction: .bottom)
+        .frame(height: bottomHeight)
         .frame(maxHeight: .infinity, alignment: .bottom)
     }.ignoresSafeArea().allowsHitTesting(false).accessibilityHidden(true)
   }

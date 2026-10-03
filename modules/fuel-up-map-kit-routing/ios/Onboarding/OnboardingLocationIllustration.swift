@@ -13,7 +13,7 @@ struct OnboardingLocationIllustration: View {
   var body: some View {
     GeometryReader { geometry in
       let topBlurHeight = min(geometry.size.height, heroHeight * 0.36)
-      let bottomBlurHeight = max(0, geometry.size.height - heroHeight * 0.18)
+      let bottomBlurHeight = max(0, geometry.size.height - heroHeight * 0.36)
       LocationInvitationMap { liveMapReady = true }
         .overlay {
           if !liveMapReady, let image = preview.image {
@@ -39,8 +39,8 @@ struct OnboardingLocationIllustration: View {
             PureProgressiveBlur(direction: .top)
               .frame(height: topBlurHeight)
               .frame(maxHeight: .infinity, alignment: .top)
-            // Begin gently within the map and spread the ramp under all the text.
-            PureProgressiveBlur(direction: .bottom)
+            // Preserve the clear hero and ease into blur beneath the text.
+            PureProgressiveBlur(radius: 12, direction: .bottom)
               .frame(height: bottomBlurHeight)
               .frame(maxHeight: .infinity, alignment: .bottom)
           }.allowsHitTesting(false)
