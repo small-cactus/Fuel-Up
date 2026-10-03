@@ -2,7 +2,7 @@ import { WelcomeStep } from './onboarding/WelcomeStep.js';
 import { LocationStep } from './onboarding/LocationStep.js';
 import { NotificationStep } from './onboarding/NotificationStep.js';
 import { hasPredictiveLocationAccess, getLocationActionLabel } from './onboarding/locationCopy.js';
-import { SCREEN_WIDTH, DEMO_REGION, LIGHT_SCREEN_BACKGROUND, LIGHT_SCREEN_BACKGROUND_85, LIGHT_SCREEN_BACKGROUND_0 } from './onboarding/presentation.js';
+import { SCREEN_WIDTH, DEMO_REGION } from './onboarding/presentation.js';
 import RadiusStep from './onboarding/RadiusStep';
 import FuelGradeStep from './onboarding/FuelGradeStep';
 import BrandStep from './onboarding/BrandStep';
@@ -13,7 +13,7 @@ import GlassActionButton from '../components/native/GlassActionButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
 
-import { LinearGradient } from 'expo-linear-gradient';
+import BottomCanopy from '../components/BottomCanopy';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
 import Animated, { useSharedValue, useAnimatedStyle, useAnimatedProps, withTiming, withDelay, cancelAnimation, Easing } from 'react-native-reanimated';
@@ -275,12 +275,7 @@ export default function OnboardingScreen() {
 
             {/* Progress dots + continue (Stay solid) */}
             {isTranslucentStep && (
-                <LinearGradient
-                    colors={[isDark ? 'rgba(0,0,0,0)' : LIGHT_SCREEN_BACKGROUND_0, isDark ? 'rgba(0,0,0,0.85)' : LIGHT_SCREEN_BACKGROUND_85, isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND]}
-                    locations={[0, 0.4, 1]}
-                    style={[styles.footerGradient, { paddingBottom: insets.bottom + 20 }]}
-                    pointerEvents="none"
-                />
+                <BottomCanopy height={insets.bottom + 160} />
             )}
 
             <View style={[styles.footer, isTranslucentStep && styles.footerAbsolute, { paddingBottom: insets.bottom + 20 }]}>
@@ -358,13 +353,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0
-  },
-  footerGradient: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 200
   },
   dotsRow: {
     flexDirection: 'row',

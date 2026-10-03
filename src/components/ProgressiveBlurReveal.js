@@ -78,22 +78,6 @@ function getFarthestCornerDistance(originX, originY, width, height) {
     );
 }
 
-function resolveNativeBlurType(tint, isDark) {
-    if (tint === 'dark') {
-        return 'systemMaterialDark';
-    }
-
-    if (tint === 'light' || tint === 'extraLight') {
-        return 'systemMaterialLight';
-    }
-
-    if (tint === 'prominent') {
-        return isDark ? 'systemChromeMaterialDark' : 'systemChromeMaterialLight';
-    }
-
-    return isDark ? 'systemMaterialDark' : 'systemMaterialLight';
-}
-
 export default function ProgressiveBlurReveal({
     shouldReveal = false,
     isBlurred = false,
@@ -103,7 +87,6 @@ export default function ProgressiveBlurReveal({
     delay = DEFAULT_DELAY,
     layerIntensities = DEFAULT_LAYER_INTENSITIES,
     intensity,
-    tint,
     bottomExclusionHeight,
     excludeTabs = true,
     startRadius = DEFAULT_START_RADIUS,
@@ -133,7 +116,6 @@ export default function ProgressiveBlurReveal({
         []
     );
 
-    const resolvedTint = tint || (isDark ? 'dark' : 'light');
     const chromeHeight = Platform.OS === 'ios' ? DEFAULT_IOS_TAB_BAR_HEIGHT : DEFAULT_ANDROID_TAB_BAR_HEIGHT;
     const resolvedBottomExclusion = bottomExclusionHeight ?? (
         excludeTabs
@@ -174,10 +156,6 @@ export default function ProgressiveBlurReveal({
         return DEFAULT_LAYER_INTENSITIES;
     }, [intensity, layerIntensities]);
     const hasNativeProgressiveBlurView = Boolean(NativeProgressiveBlurView);
-    const resolvedNativeBlurType = useMemo(
-        () => resolveNativeBlurType(resolvedTint, isDark),
-        [isDark, resolvedTint]
-    );
     const resolvedOriginXFraction = safeWidth > 0 ? resolvedOriginX / safeWidth : 0.5;
     const resolvedOriginYFraction = safeHeight > 0 ? resolvedOriginY / safeHeight : 0.5;
 
@@ -288,7 +266,7 @@ export default function ProgressiveBlurReveal({
                 <NativeProgressiveBlurView
                     key={`${instanceId}-native-${index}`}
                     blurAmount={layerIntensity}
-                    blurType={resolvedNativeBlurType}
+                    blurType="regular"
                     radial
                     radialCenterX={resolvedOriginXFraction}
                     radialCenterY={resolvedOriginYFraction}

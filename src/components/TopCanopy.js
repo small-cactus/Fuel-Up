@@ -9,7 +9,7 @@ const TOP_CANOPY_BLUR_STRENGTH = 0.8; // 0 = no blur, 1 = default, >1 = stronger
 const TOP_CANOPY_BLUR_SPREAD = 1.4; // 1 = default height, >1 = spreads further down
 const BASE_PROGRESSIVE_BLUR_AMOUNT = 5;
 
-export function TopCanopy({ height, isDark }) {
+export function TopCanopy({ height }) {
     const canopyHeight = Math.max(0, height * Math.max(0, TOP_CANOPY_BLUR_SPREAD));
     const progressiveBlurAmount = Math.max(0, BASE_PROGRESSIVE_BLUR_AMOUNT * TOP_CANOPY_BLUR_STRENGTH);
 
@@ -20,7 +20,7 @@ export function TopCanopy({ height, isDark }) {
     return (
         <View pointerEvents="none" style={[styles.shell, { height: canopyHeight }]}>
             <ProgressiveBlurView
-                blurType={isDark ? 'dark' : 'light'}
+                blurType="regular"
                 blurAmount={progressiveBlurAmount}
                 direction="blurredTopClearBottom"
                 startOffset={0.0}

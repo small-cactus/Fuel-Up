@@ -20,6 +20,7 @@ Pod::Spec.new do |s|
 
   s.dependency 'ExpoModulesCore'
   s.dependency 'LiquidGlass'
+  s.dependency 'ReactNativeBlur'
 
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',

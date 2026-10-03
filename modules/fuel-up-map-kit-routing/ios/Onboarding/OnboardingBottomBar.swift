@@ -12,10 +12,10 @@ struct OnboardingBottomBar: ViewModifier {
       content.overlay(alignment: .bottom) { footer }
     } else if #available(iOS 26.0, *) {
       content
-        .safeAreaBar(edge: .bottom, spacing: 0) { footer }
-        .scrollEdgeEffectStyle(.soft, for: .all)
+        .safeAreaInset(edge: .bottom, spacing: 0) { footer }
+        .scrollEdgeEffectHidden(true, for: .all)
     } else {
-      content.safeAreaInset(edge: .bottom, spacing: 0) { footer.background(.ultraThinMaterial) }
+      content.safeAreaInset(edge: .bottom, spacing: 0) { footer }
     }
   }
 

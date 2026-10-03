@@ -1,10 +1,9 @@
 import { useState, useMemo } from 'react';
 import { View, Image, Text, StyleSheet } from 'react-native';
 import MapView, { PROVIDER_APPLE, Marker } from 'react-native-maps';
-import { SCREEN_WIDTH, SCREEN_HEIGHT, LIGHT_SCREEN_BACKGROUND_42, LIGHT_SCREEN_BACKGROUND, LIGHT_SCREEN_BACKGROUND_85, LIGHT_SCREEN_BACKGROUND_0, DEMO_REGION } from './presentation.js';
+import { SCREEN_WIDTH, SCREEN_HEIGHT, DEMO_REGION } from './presentation.js';
 import TopCanopy from '../../components/TopCanopy';
 import BottomCanopy from '../../components/BottomCanopy';
-import { LinearGradient } from 'expo-linear-gradient';
 import FuelUpHeaderLogo from '../../components/FuelUpHeaderLogo';
 import ExamplePricePill from './ExamplePricePill';
 
@@ -68,24 +67,8 @@ export function WelcomeStep({ isDark, themeColors, insets, mapRegion }) {
                 }) : null}
             </MapView>
 
-            {/* Blur canopies — extend further than gradients */}
-            <TopCanopy edgeColor={isDark ? 'rgba(255,255,255,0.08)' : LIGHT_SCREEN_BACKGROUND_42} height={insets.top + 300} isDark={isDark} topInset={insets.top} />
-            <BottomCanopy height={270} isDark={isDark} />
-
-            {/* White gradients — shorter, sit inside the blur */}
-            <LinearGradient
-                colors={[isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND, isDark ? 'rgba(0,0,0,0.85)' : LIGHT_SCREEN_BACKGROUND_85, isDark ? 'rgba(0,0,0,0)' : LIGHT_SCREEN_BACKGROUND_0]}
-                locations={[0, 0.5, 1]}
-                style={[styles.topGradient, { height: insets.top + 220 }]}
-                pointerEvents="none"
-            />
-
-            <LinearGradient
-                colors={[isDark ? 'rgba(0,0,0,0)' : LIGHT_SCREEN_BACKGROUND_0, isDark ? 'rgba(0,0,0,0.85)' : LIGHT_SCREEN_BACKGROUND_85, isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND]}
-                locations={[0, 0.8, 1.2]}
-                style={[styles.footerGradient, { height: 280 }]}
-                pointerEvents="none"
-            />
+            <TopCanopy height={insets.top + 300} />
+            <BottomCanopy height={270} />
 
             {/* Floating content over map */}
             <View style={[styles.welcomeOverlay, { paddingTop: insets.top + 40 }]} pointerEvents="none">
@@ -145,19 +128,5 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     textAlign: 'center',
     maxWidth: 280
-  },
-
-  footerGradient: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 200
-  },
-  topGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0
   }
 });

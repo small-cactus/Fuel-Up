@@ -10,14 +10,8 @@ struct OnboardingFlow: View {
         .ignoresSafeArea(.container, edges: .vertical)
       OnboardingFooter(model: model)
         .background {
-          // A continuous native-material fade protects the stationary controls
-          // while the pages and their scrolling content move underneath.
-          Rectangle().fill(.ultraThinMaterial)
-            .mask(LinearGradient(stops: [
-              .init(color: .clear, location: 0),
-              .init(color: .black.opacity(0.65), location: 0.35),
-              .init(color: .black, location: 0.65)
-            ], startPoint: .top, endPoint: .bottom))
+          // Shared, tint-free blur behind the stationary controls.
+          PureProgressiveBlur(radius: 16, direction: .bottom)
             .padding(.top, -40)
             .ignoresSafeArea(.container, edges: .bottom)
             .allowsHitTesting(false)
