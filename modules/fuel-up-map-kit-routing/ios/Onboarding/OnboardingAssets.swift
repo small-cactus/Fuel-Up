@@ -30,6 +30,20 @@ enum OnboardingAssets {
   }
 }
 
+struct OnboardingWordmark: View {
+  @Environment(\.colorScheme) private var scheme
+
+  var body: some View {
+    if let logo = OnboardingAssets.image(scheme == .dark ? "FuelUp-text-logo-dark.png" : "FuelUp-text-logo-light.png") {
+      Image(uiImage: logo).resizable().scaledToFit()
+        .frame(width: 132, height: 38)
+        .frame(maxWidth: .infinity)
+        .accessibilityLabel("Fuel Up")
+        .accessibilityIdentifier("onboarding-wordmark")
+    }
+  }
+}
+
 struct OnboardingRowIcon: View {
   @Environment(\.colorScheme) private var scheme
   let fuel: String?

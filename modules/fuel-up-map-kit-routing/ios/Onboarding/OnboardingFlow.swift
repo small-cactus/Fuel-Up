@@ -44,7 +44,6 @@ struct OnboardingFlow: View {
         if ready && model.step == 1 { model.selectStep(2) }
       }
       .tint(.blue)
-      .background(Color(uiColor: .systemGroupedBackground))
   }
 }
 

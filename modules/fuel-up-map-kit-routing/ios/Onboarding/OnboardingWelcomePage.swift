@@ -4,22 +4,22 @@ import MapKit
 // Native port of the existing welcome artwork, in the same pager as setup.
 // The map creates its annotations with the view, not a one-shot loading event.
 struct OnboardingWelcomePage: View {
-  @Environment(\.colorScheme) private var scheme
   var body: some View {
     GeometryReader { geometry in
       ZStack(alignment: .top) {
         OnboardingWelcomeMap().ignoresSafeArea()
         OnboardingMapScrim(topHeight: 330, bottomHeight: 270)
-        VStack(spacing: 12) {
-          if let icon = OnboardingAssets.image("fuelup-icon.png") {
-            Image(uiImage: icon).resizable().frame(width: 64, height: 64).clipShape(RoundedRectangle(cornerRadius: 14))
-          }
-          if let logo = OnboardingAssets.image(scheme == .dark ? "FuelUp-text-logo-dark.png" : "FuelUp-text-logo-light.png") {
-            Image(uiImage: logo).resizable().scaledToFit().frame(width: 132, height: 38).accessibilityLabel("Fuel Up")
-          }
-          Text("Find the cheapest gas near you, instantly.")
-            .font(.body).foregroundStyle(.primary).multilineTextAlignment(.center).frame(maxWidth: 280)
-        }.padding(.top, 40).padding(.horizontal, 24)
+        ScrollView {
+          VStack(spacing: 12) {
+            if let icon = OnboardingAssets.image("fuelup-icon.png") {
+              Image(uiImage: icon).resizable().frame(width: 64, height: 64).clipShape(RoundedRectangle(cornerRadius: 14))
+            }
+            OnboardingWordmark()
+            Text("Find the cheapest gas near you, instantly.")
+              .font(.body).foregroundStyle(.primary).multilineTextAlignment(.center).frame(maxWidth: 280)
+          }.padding(.top, 40).padding(.horizontal, 24)
+            .frame(maxWidth: .infinity, minHeight: geometry.size.height, alignment: .top)
+        }
       }
     }
   }

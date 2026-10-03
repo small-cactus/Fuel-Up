@@ -27,6 +27,7 @@ struct OnboardingBrandsPage: View {
   private var sections: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 26) {
+        OnboardingWordmark()
         heading
         if !model.membershipOptions.isEmpty {
           VStack(alignment: .leading, spacing: 12) {
@@ -78,7 +79,7 @@ struct OnboardingBrandsPage: View {
           if model.error != nil { retry("Nearby brands couldn’t load.") }
         }
         Text("Optional. You can change these in Settings.").font(.footnote).foregroundStyle(.secondary)
-      }.padding(.horizontal, 24).padding(.top, 48).padding(.bottom, 24)
+      }.padding(.horizontal, 24).padding(.bottom, 24)
     }.scrollDismissesKeyboard(.interactively)
   }
 

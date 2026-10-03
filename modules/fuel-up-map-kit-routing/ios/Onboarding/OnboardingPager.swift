@@ -99,14 +99,16 @@ private struct OnboardingPage: View {
     page
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .modifier(OnboardingBottomBar(model: model, overlaysMap: index == 0))
-      .background(Color(uiColor: .systemGroupedBackground))
+      .background {
+        if index >= 2 { OnboardingMapBackground() }
+      }
   }
 
   @ViewBuilder private var page: some View {
     switch index {
     case 0: OnboardingWelcomePage()
     case 1: OnboardingLocationPage(model: model)
-    case 2: OnboardingFuelPage(model: model).padding(.top, 24)
+    case 2: OnboardingFuelPage(model: model)
     default: OnboardingBrandsPage(model: model)
     }
   }

@@ -7,6 +7,7 @@ struct OnboardingFuelPage: View {
   var body: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 26) {
+        OnboardingWordmark()
         OnboardingHeading(title: "Choose your fuel", subtitle: "Use the grade recommended for your car.")
         VStack(spacing: 0) {
           ForEach(grades, id: \.0) { grade in
@@ -24,7 +25,7 @@ struct OnboardingFuelPage: View {
             .accessibilityIdentifier("onboarding-requires-e85")
             .onChange(of: model.requiresE85) { _ in model.changed() }
         }
-      }.padding(24)
+      }.padding(.horizontal, 24).padding(.bottom, 24)
     }
   }
 }

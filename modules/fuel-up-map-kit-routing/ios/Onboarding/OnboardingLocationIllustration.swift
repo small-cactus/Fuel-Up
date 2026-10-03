@@ -5,40 +5,54 @@ import MapKit
 @available(iOS 16.0, *)
 struct OnboardingLocationIllustration: View {
   let isActive: Bool
+  let heroHeight: CGFloat
 
   var body: some View {
-    LocationInvitationMap()
-      .overlay(alignment: .top) {
-        GeometryReader { geometry in
-          OnboardingPricePills(isActive: isActive)
-            .frame(height: geometry.size.height * 0.70)
-            .clipped()
+    GeometryReader { geometry in
+      let heroFraction = min(1, heroHeight / max(1, geometry.size.height))
+      LocationInvitationMap()
+        .overlay(alignment: .top) {
+          ZStack(alignment: .top) {
+            OnboardingPricePills(isActive: isActive)
+              .frame(height: heroHeight * 0.50)
+              .clipped()
+              .offset(y: heroHeight * 0.25)
+            Text("Sample prices")
+              .font(.caption2).foregroundStyle(.secondary)
+              .position(x: geometry.size.width * 0.50, y: heroHeight * 0.70 - 8)
+          }
+          .frame(height: heroHeight)
         }
-      }
-      .overlay {
-        // Native backdrop blur is strongest at the edges, fading gently
-        // into the sharp map rather than ending at a material boundary.
-        Rectangle().fill(.ultraThinMaterial)
-          .mask(LinearGradient(stops: [
-            .init(color: .black, location: 0),
-            .init(color: .black.opacity(0.55), location: 0.12),
-            .init(color: .clear, location: 0.34),
-            .init(color: .clear, location: 0.50),
-            .init(color: .black.opacity(0.35), location: 0.72),
-            .init(color: .black, location: 1)
-          ], startPoint: .top, endPoint: .bottom))
-          .allowsHitTesting(false)
-      }
-      .mask(LinearGradient(stops: [
-        .init(color: .black.opacity(0.35), location: 0),
-        .init(color: .black, location: 0.24),
-        .init(color: .black, location: 0.52),
-        .init(color: .black.opacity(0.85), location: 0.68),
-        .init(color: .black.opacity(0.35), location: 0.86),
-        .init(color: .clear, location: 1)
-      ], startPoint: .top, endPoint: .bottom))
-      .accessibilityElement(children: .ignore)
-      .accessibilityLabel("Map illustration of Mission Creek in San Francisco with sample gas prices")
+        .overlay {
+          // Native backdrop blur is strongest at the edges, fading gently
+          // into the sharp map rather than ending at a material boundary.
+          Rectangle().fill(.ultraThinMaterial)
+            .mask(LinearGradient(stops: [
+              .init(color: .black, location: 0),
+              .init(color: .black.opacity(0.55), location: 0.12 * heroFraction),
+              .init(color: .clear, location: 0.34 * heroFraction),
+              .init(color: .clear, location: 0.50 * heroFraction),
+              .init(color: .black.opacity(0.35), location: 0.72 * heroFraction),
+              .init(color: .black, location: heroFraction),
+              .init(color: .black, location: 1)
+            ], startPoint: .top, endPoint: .bottom))
+            .allowsHitTesting(false)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Map illustration of Mission Creek in San Francisco with sample gas prices")
+    }
+  }
+}
+
+// Reuse the welcome page's native material for the other setup backgrounds.
+@available(iOS 16.0, *)
+struct OnboardingMapBackground: View {
+  var body: some View {
+    LocationInvitationMap()
+      .overlay { Rectangle().fill(.ultraThinMaterial) }
+      .ignoresSafeArea()
+      .allowsHitTesting(false)
+      .accessibilityHidden(true)
   }
 }
 

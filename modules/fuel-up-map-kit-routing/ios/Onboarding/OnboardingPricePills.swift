@@ -21,12 +21,9 @@ struct OnboardingPricePills: View {
           SamplePricePill(price: sample.price)
             .scaleEffect(scales[sample.id])
             .position(x: geometry.size.width * sample.x,
-                      // Leave room for the spring overshoot and sample caption.
-                      y: 90 + max(0, geometry.size.height - 130) * sample.y)
+                      // Symmetric insets keep the spring overshoot in the band.
+                      y: 26 + max(0, geometry.size.height - 52) * sample.y)
         }
-        Text("Sample prices")
-          .font(.caption2).foregroundStyle(.secondary)
-          .position(x: geometry.size.width * 0.74, y: geometry.size.height - 8)
       }
     }
     .allowsHitTesting(false)
@@ -76,7 +73,8 @@ struct OnboardingPricePills: View {
       self.id = id
       self.cell = cell
       price = ["$3.89", "$4.49", "$4.59", "$4.65", "$4.72"].randomElement()!
-      x = (cell.isMultiple(of: 2) ? 0.27 : 0.73) + CGFloat.random(in: -0.025...0.025)
+      // Keep the middle corridor clear for the sample-price caption.
+      x = (cell.isMultiple(of: 2) ? 0.25 : 0.75) + CGFloat.random(in: -0.02...0.02)
       y = min(1, max(0, CGFloat(cell / 2) * 0.5 + CGFloat.random(in: -0.025...0.025)))
     }
   }

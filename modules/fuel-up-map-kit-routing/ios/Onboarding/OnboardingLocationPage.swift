@@ -7,40 +7,45 @@ struct OnboardingLocationPage: View {
   var body: some View {
     GeometryReader { geometry in
       let mapHeight = min(440, max(340, geometry.size.width * 1.02))
-      ScrollView {
-        VStack(spacing: 18) {
-          VStack(spacing: 10) {
-            Text("Location permission")
-              .font(.system(.largeTitle, design: .rounded).bold())
-              .accessibilityAddTraits(.isHeader)
-            Text("Use your location to discover nearby stations and find a better price at your next stop.")
-              .font(.body).fixedSize(horizontal: false, vertical: true)
-          }.multilineTextAlignment(.center).padding(.horizontal, 28)
+      // Use the spare height on larger phones; compact phones keep short gaps
+      // and scroll naturally instead of squeezing text behind the footer.
+      let benefitSpacing = 16 + min(30, max(0, (geometry.size.height - 650) * 0.30))
+      ZStack(alignment: .top) {
+        OnboardingLocationIllustration(isActive: model.step == 1, heroHeight: mapHeight + 100)
+          .ignoresSafeArea()
+        ScrollView {
+          VStack(spacing: 18) {
+            VStack(spacing: 10) {
+              Text("Location permission")
+                .font(.system(.largeTitle, design: .rounded).bold())
+                .accessibilityAddTraits(.isHeader)
+              Text("Use your location to discover nearby stations and find a better price at your next stop.")
+                .font(.body).fixedSize(horizontal: false, vertical: true)
+            }.multilineTextAlignment(.center).padding(.horizontal, 28)
 
-          VStack(alignment: .leading, spacing: 16) {
-            benefit("Find nearby gas", detail: "See stations around you and how far away they are.", icon: "location.fill", color: .blue)
-            benefit("Find a better price", detail: "Compare reported prices for the fuel you use.", icon: "fuelpump.fill", color: .purple)
-            benefit("You’re in control", detail: "Change location access any time in Settings.", icon: "hand.raised.fill", color: .green)
-          }.frame(maxWidth: 440, alignment: .leading).padding(.horizontal, 32)
+            VStack(alignment: .leading, spacing: benefitSpacing) {
+              benefit("Find nearby gas", detail: "See stations around you and how far away they are.", icon: "location.fill", color: .blue)
+              benefit("Find a better price", detail: "Compare reported prices for the fuel you use.", icon: "fuelpump.fill", color: .purple)
+              benefit("You’re in control", detail: "Change location access any time in Settings.", icon: "hand.raised.fill", color: .green)
+            }.frame(maxWidth: 440, alignment: .leading).padding(.horizontal, 32)
 
-          if model.locationBlocked {
-            status("Location access is off. Open Settings to find nearby gas.")
-          } else if let error = model.locationError {
-            status(error)
-          } else if model.locationRequested && model.hasLocationAccess && !model.locationReady {
-            HStack(spacing: 10) { ProgressView(); Text("Finding your location…").font(.subheadline) }
+            if model.locationBlocked {
+              status("Location access is off. Open Settings to find nearby gas.")
+            } else if let error = model.locationError {
+              status(error)
+            } else if model.locationRequested && model.hasLocationAccess && !model.locationReady {
+              HStack(spacing: 10) { ProgressView(); Text("Finding your location…").font(.subheadline) }
+            }
           }
-        }
-        .padding(.top, mapHeight - 50)
-        .padding(.bottom, 24)
-        .frame(maxWidth: .infinity)
-        .background(alignment: .top) {
-          // Extend the artwork behind the content without moving the heading
-          // or the stationary footer. Pills stay above the text overlap.
-          OnboardingLocationIllustration(isActive: model.step == 1)
-            .frame(height: mapHeight + 100)
-        }
-      }.ignoresSafeArea(.container, edges: .top)
+          .padding(.top, mapHeight - 25)
+          .padding(.bottom, 24)
+          .frame(maxWidth: .infinity)
+          .overlay(alignment: .top) {
+            // Attached to the scroll content, so the mark scrolls with the page.
+            OnboardingWordmark().padding(.top, geometry.safeAreaInsets.top)
+          }
+        }.ignoresSafeArea(.container, edges: .top)
+      }
     }
   }
 
