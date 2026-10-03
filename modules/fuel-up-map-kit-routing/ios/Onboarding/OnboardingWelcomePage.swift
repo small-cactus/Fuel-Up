@@ -9,7 +9,7 @@ struct OnboardingWelcomePage: View {
     GeometryReader { geometry in
       ZStack(alignment: .top) {
         OnboardingWelcomeMap(onMapReady: onMapReady).ignoresSafeArea()
-        OnboardingMapScrim(topHeight: 330, bottomHeight: 320)
+        OnboardingMapScrim(topHeight: 330, bottomHeight: 320, bottomOffset: 40)
         ScrollView {
           VStack(spacing: 12) {
             if let icon = OnboardingAssets.image("fuelup-icon.png") {

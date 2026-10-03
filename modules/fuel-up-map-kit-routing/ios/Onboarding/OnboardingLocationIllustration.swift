@@ -38,10 +38,12 @@ struct OnboardingLocationIllustration: View {
           ZStack {
             PureProgressiveBlur(direction: .top)
               .frame(height: topBlurHeight)
+              .offset(y: -40)
               .frame(maxHeight: .infinity, alignment: .top)
             // Preserve the clear hero and ease into blur beneath the text.
             PureProgressiveBlur(radius: 12, direction: .bottom)
               .frame(height: bottomBlurHeight)
+              .offset(y: 40)
               .frame(maxHeight: .infinity, alignment: .bottom)
           }.allowsHitTesting(false)
         }
