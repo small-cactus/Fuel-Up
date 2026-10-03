@@ -41,7 +41,7 @@ test('Home publishes local data then refreshes DB on focus and foreground; clean
     }).default;
     hook(true);cleanup=effect();
     await new Promise(setImmediate);
-    assert.equal(calls,1);assert.deepEqual(results[0].stations,['cached']);
+    assert.equal(calls,1);assert.deepEqual(results.find(value=>value.stations).stations,['cached']);
     resolveRefresh({snapshot:{topStations:['fresh']}});await new Promise(setImmediate);
     assert.deepEqual(results.at(-1).stations,['fresh']);
     foreground('active');await new Promise(setImmediate);assert.equal(calls,2);
@@ -124,4 +124,28 @@ test('cached station distances are recalculated from the current search center b
     assert.equal(results.at(-1).stations.length,2);
     assert.equal(results.at(-1).stations[0].distanceMiles,0);
     assert.equal(stale.distanceMiles,15);
+});
+
+test('Home publishes map origin before an unresolved price-cache read', async t => {
+    let effect, readStarted = false, stateIndex = 0;
+    const updates = [[], []], values = [null, null];
+    const origin = {latitude:27.95, longitude:-82.45};
+    const hook = load('src/screens/cluster-lab/useClusterLabStations.js', {
+        react: {useEffect: fn=>{effect=fn;}, useMemo: fn=>fn(), useState:()=>{const index=stateIndex++; return [values[index],value=>{values[index]=value;updates[index].push(value);}];}},
+        'react-native': {AppState:{currentState:'active',addEventListener:()=>({remove(){}})}},
+        'expo-location':{},
+        '../../AppStateContext':{useAppState:()=>({resolvedFuelSearchContext:origin})},
+        '../../PreferencesContext':{usePreferences:()=>({preferences:{preferredOctane:'regular',searchRadiusMiles:6}})},
+        '../../lib/deviceLocationCache':{},
+        '../../services/fuel':{getCachedFuelPriceSnapshot:()=>{readStarted=true;return new Promise(()=>{});}},
+        './stationCardModel':{buildLabStations:()=>[]},
+    }).default;
+    hook(true); t.after(effect());
+    await new Promise(setImmediate);
+    assert.equal(readStarted,true);
+    assert.equal(updates[0].length,0,'no invented or prematurely published prices');
+    assert.equal(updates[1][0].latitude,origin.latitude);
+    assert.equal(updates[1][0].longitude,origin.longitude);
+    stateIndex=0;
+    assert.deepEqual(hook(true).origin,origin,'native map receives only numeric coordinates, not the scope key');
 });

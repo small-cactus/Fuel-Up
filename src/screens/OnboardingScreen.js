@@ -1,4 +1,5 @@
 import React from 'react';
+import { finishLaunch } from '../lib/launchReadiness';
 import { Platform } from 'react-native';
 import { usePreferences } from '../PreferencesContext';
 import { useTheme } from '../ThemeContext';
@@ -12,6 +13,6 @@ export default function OnboardingScreen() {
     const { preferences, completeOnboarding } = usePreferences();
     const { isDark } = useTheme();
     return NativeOnboarding
-        ? <NativeOnboarding preferences={preferences} isDark={isDark} visible onComplete={completeOnboarding} />
+        ? <NativeOnboarding preferences={preferences} isDark={isDark} visible onMapReady={finishLaunch} onComplete={completeOnboarding} />
         : <LegacyOnboarding />;
 }

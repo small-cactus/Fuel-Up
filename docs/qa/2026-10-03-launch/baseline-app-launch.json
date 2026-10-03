@@ -1,0 +1,9 @@
+{
+  "windowSeconds": 3,
+  "sampleWindowOrigin": "first sampled process activity",
+  "mainThreadCpuMs": 1071.0,
+  "jsThreadCpuMs": 106.0,
+  "legacyBlurCpuMs": 811.0,
+  "totalCpuMs": 1760.0,
+  "firstMapKitSampleMs": 134.0
+}

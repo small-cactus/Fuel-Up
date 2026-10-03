@@ -7,6 +7,7 @@ import { useTheme } from '../../ThemeContext';
 import { usePreferences } from '../../PreferencesContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { openStationNavigation } from '../../lib/openNavigation';
+import { finishLaunch } from '../../lib/launchReadiness';
 import useClusterLabStations from './useClusterLabStations';
 import useHomeDeviceLocation from './useHomeDeviceLocation';
 import StationCardCarousel from './StationCardCarousel';
@@ -81,6 +82,7 @@ export default function HomeScreen() {
             isDark={isDark}
             active={active}
             overlayBottomInset={stations.length ? overlayHeight + 8 : 0}
+            onMapReady={finishLaunch}
             onStationSelect={mapSelected}
             onOverviewChange={overviewChanged}
             probeToken={__DEV__ && typeof clusterLabProbe === 'string' ? clusterLabProbe : null}

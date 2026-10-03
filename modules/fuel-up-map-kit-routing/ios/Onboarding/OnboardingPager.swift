@@ -28,8 +28,7 @@ final class OnboardingPagerController: UIPageViewController, UIPageViewControlle
     locationReady = model.locationReady
     super.init(transitionStyle: .scroll, navigationOrientation: .horizontal)
     pages = (0..<4).map { index in
-      let host = UIHostingController(rootView: OnboardingPage(index: index, model: model))
-      host.view.backgroundColor = .clear
+      let host = OnboardingPageHost(rootView: OnboardingPage(index: index, model: model))
       return host
     }
     dataSource = self
@@ -106,10 +105,19 @@ private struct OnboardingPage: View {
 
   @ViewBuilder private var page: some View {
     switch index {
-    case 0: OnboardingWelcomePage()
+    case 0: OnboardingWelcomePage(onMapReady: { model.emit?(["type": "mapReady"]) })
     case 1: OnboardingLocationPage(model: model)
     case 2: OnboardingFuelPage(model: model)
     default: OnboardingBrandsPage(model: model)
     }
+  }
+}
+
+// Accessing every host.view in the pager initializer eagerly created all four
+// maps. Let UIKit mount adjacent pages when needed, retaining their state after.
+private final class OnboardingPageHost: UIHostingController<OnboardingPage> {
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    view.backgroundColor = .clear
   }
 }

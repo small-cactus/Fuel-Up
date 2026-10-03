@@ -4,10 +4,11 @@ import MapKit
 // Native port of the existing welcome artwork, in the same pager as setup.
 // The map creates its annotations with the view, not a one-shot loading event.
 struct OnboardingWelcomePage: View {
+  var onMapReady: () -> Void = {}
   var body: some View {
     GeometryReader { geometry in
       ZStack(alignment: .top) {
-        OnboardingWelcomeMap().ignoresSafeArea()
+        OnboardingWelcomeMap(onMapReady: onMapReady).ignoresSafeArea()
         OnboardingMapScrim(topHeight: 330, bottomHeight: 270)
         ScrollView {
           VStack(spacing: 12) {
@@ -26,7 +27,8 @@ struct OnboardingWelcomePage: View {
 }
 
 struct OnboardingWelcomeMap: UIViewRepresentable {
-  func makeCoordinator() -> Coordinator { Coordinator() }
+  var onMapReady: () -> Void
+  func makeCoordinator() -> Coordinator { Coordinator(onMapReady) }
   func makeUIView(context: Context) -> MKMapView {
     let map = MKMapView()
     map.delegate = context.coordinator
@@ -41,8 +43,16 @@ struct OnboardingWelcomeMap: UIViewRepresentable {
     })
     return map
   }
-  func updateUIView(_ view: MKMapView, context: Context) {}
+  func updateUIView(_ view: MKMapView, context: Context) { context.coordinator.onMapReady = onMapReady }
   final class Coordinator: NSObject, MKMapViewDelegate {
+    var onMapReady: () -> Void
+    private var reported = false
+    init(_ onMapReady: @escaping () -> Void) { self.onMapReady = onMapReady }
+    func mapViewDidFinishRenderingMap(_ mapView: MKMapView, fullyRendered: Bool) {
+      guard fullyRendered, !reported else { return }
+      reported = true
+      DispatchQueue.main.async { self.onMapReady() }
+    }
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
       guard annotation is MKPointAnnotation else { return nil }
       let view = mapView.dequeueReusableAnnotationView(withIdentifier: "welcome") as? WelcomePillView

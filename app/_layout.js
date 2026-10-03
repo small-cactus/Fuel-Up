@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { AppStateProvider, useAppState } from '../src/AppStateContext';
 import { ThemeProvider, useTheme } from '../src/ThemeContext';
 import { PreferencesProvider, usePreferences } from '../src/PreferencesContext';
@@ -10,12 +10,8 @@ import * as FileSystem from 'expo-file-system/legacy';
 import OnboardingScreen from '../src/screens/OnboardingScreen';
 import ProgressiveBlurReveal from '../src/components/ProgressiveBlurReveal';
 import '../src/lib/predictiveLocation';
-import { runPredictiveSystemProbeAsync } from '../src/lib/predictiveSystemProbe';
-import { runPredictiveDebugQueryAsync } from '../src/lib/predictiveDebugQuery';
-import {
-    disablePredictiveFuelingInfrastructureAsync,
-} from '../src/lib/predictiveFuelingBackend';
-import { createPredictiveFuelingDriveGate } from '../src/lib/predictiveFuelingDriveGate';
+import LaunchSplash, { useLaunchReady } from '../src/components/LaunchSplash';
+import { finishLaunch } from '../src/lib/launchReadiness';
 import {
     resetLocationProbeLaunchOverrides,
     setLocationProbeLaunchOverrides,
@@ -86,6 +82,7 @@ async function writeClusterProbeQueueMarker(payload) {
 
 function AppGate() {
     const pathname = usePathname();
+    const launchReady = useLaunchReady();
     const { preferences, isLoading } = usePreferences();
     const {
         clusterProbeRequest,
@@ -117,6 +114,7 @@ function AppGate() {
     useEffect(() => {
         if (pathname && pathname !== '/' && preferences.hasCompletedOnboarding) {
             hideRootReveal();
+            finishLaunch();
         }
     }, [pathname, preferences.hasCompletedOnboarding, hideRootReveal]);
 
@@ -171,7 +169,7 @@ function AppGate() {
             ) {
                 lastPredictiveSystemProbeUrlRef.current = url;
                 setHasPendingPredictiveSystemProbe(true);
-                void runPredictiveSystemProbeAsync({
+                void require('../src/lib/predictiveSystemProbe').runPredictiveSystemProbeAsync({
                     token: getFirstRouteParamValue(queryParams.predictiveSystemProbeToken) || 'default',
                 }).finally(() => {
                     if (!isCancelled) {
@@ -181,7 +179,7 @@ function AppGate() {
             }
 
             if (isTruthyRouteParam(queryParams.predictiveDebugQuery)) {
-                void runPredictiveDebugQueryAsync({
+                void require('../src/lib/predictiveDebugQuery').runPredictiveDebugQueryAsync({
                     token: getFirstRouteParamValue(queryParams.predictiveDebugToken) || 'default',
                     query: getFirstRouteParamValue(queryParams.predictiveDebugKind) || 'all',
                 }).catch(error => {
@@ -300,7 +298,7 @@ function AppGate() {
                 const rawRequest = await FileSystem.readAsStringAsync(requestFileUri);
                 const parsedRequest = rawRequest ? JSON.parse(rawRequest) : {};
                 await FileSystem.deleteAsync(requestFileUri, { idempotent: true });
-                await runPredictiveDebugQueryAsync({
+                await require('../src/lib/predictiveDebugQuery').runPredictiveDebugQueryAsync({
                     token: (
                         getFirstRouteParamValue(parsedRequest?.token) ||
                         getFirstRouteParamValue(parsedRequest?.predictiveDebugToken) ||
@@ -351,17 +349,18 @@ function AppGate() {
     ]);
 
     useEffect(() => {
+        if (isLoading || !launchReady) return undefined;
         if (!preferences.hasCompletedOnboarding) {
             if (predictiveDriveGateRef.current) {
                 void predictiveDriveGateRef.current.stop();
                 predictiveDriveGateRef.current = null;
             }
-            void disablePredictiveFuelingInfrastructureAsync();
+            void require('../src/lib/predictiveFuelingBackend').disablePredictiveFuelingInfrastructureAsync();
             return undefined;
         }
 
         if (!predictiveDriveGateRef.current) {
-            predictiveDriveGateRef.current = createPredictiveFuelingDriveGate();
+            predictiveDriveGateRef.current = require('../src/lib/predictiveFuelingDriveGate').createPredictiveFuelingDriveGate();
         }
 
         // Permission prompts are initiated by the onboarding/settings buttons.
@@ -373,7 +372,7 @@ function AppGate() {
         });
 
         return undefined;
-    }, [preferences.hasCompletedOnboarding, predictiveBackendPreferences]);
+    }, [isLoading, launchReady, preferences.hasCompletedOnboarding, predictiveBackendPreferences]);
 
     useEffect(() => {
         return () => {
@@ -419,7 +418,7 @@ function AppGate() {
                     }}
                 />
             </Stack>
-            {pathname === '/' && <ProgressiveBlurReveal
+            {pathname === '/' && (Platform.OS !== 'ios' || (__DEV__ && isClusterProbeSessionActive)) && <ProgressiveBlurReveal
                 key={`root-reveal-${rootRevealVersion}`}
                 isBlurred={rootRevealPhase === 'blurred'}
                 shouldReveal={rootRevealPhase === 'revealing'}
@@ -435,7 +434,10 @@ export default function RootLayout() {
         <AppStateProvider>
             <ThemeProvider>
                 <PreferencesProvider>
-                    <AppGate />
+                    <View style={{ flex: 1 }}>
+                        <AppGate />
+                        <LaunchSplash />
+                    </View>
                 </PreferencesProvider>
             </ThemeProvider>
         </AppStateProvider>

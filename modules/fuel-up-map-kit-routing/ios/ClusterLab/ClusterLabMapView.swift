@@ -4,6 +4,8 @@ import MapKit
 final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   let map = MKMapView()
   let renderer = ClusterLabRenderer()
+  let onMapReady = EventDispatcher()
+  private var reportedMapReady = false
   let onStationSelect = EventDispatcher()
   let onOverviewChange = EventDispatcher()
   private var overview = true
@@ -143,6 +145,12 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     cameraMoving = true
     renderer.cameraBegan()
     refresh()
+  }
+
+  func mapViewDidFinishRenderingMap(_ mapView: MKMapView, fullyRendered: Bool) {
+    guard fullyRendered, origin != nil, !reportedMapReady else { return }
+    reportedMapReady = true
+    onMapReady([:])
   }
 
   func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) { refresh() }

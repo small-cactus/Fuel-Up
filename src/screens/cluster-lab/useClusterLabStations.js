@@ -16,6 +16,7 @@ export default function useClusterLabStations(active) {
     const { resolvedFuelSearchContext, manualLocationOverride, fuelResetToken, setResolvedFuelSearchContext } = useAppState();
     const { preferences, fuelSearchCriteriaSignature } = usePreferences();
     const [result, setResult] = useState(null);
+    const [mapOrigin, setMapOrigin] = useState(null);
     const latitude = manualLocationOverride?.latitude ?? resolvedFuelSearchContext?.latitude;
     const longitude = manualLocationOverride?.longitude ?? resolvedFuelSearchContext?.longitude;
     const fuelType = preferences.preferredOctane;
@@ -68,6 +69,8 @@ export default function useClusterLabStations(active) {
                         preferredProvider, minimumRating, preferredBrands: preferences.preferredBrands, fuelMemberships: preferences.fuelMemberships, requiresE85,
                     }));
                 }
+                // Start MapKit tiles immediately, independently of price storage/network.
+                setMapOrigin({ scope, latitude: origin.latitude, longitude: origin.longitude });
                 const query = { latitude: origin.latitude, longitude: origin.longitude, fuelType, radiusMiles, preferredProvider, requiresE85 };
                 const cached = await getCachedFuelPriceSnapshot(query);
                 if (cancelled) return;
@@ -84,5 +87,7 @@ export default function useClusterLabStations(active) {
         return () => { cancelled = true; clearInterval(timer); clearTimeout(expiryTimer); subscription.remove(); };
     }, [active, scope, latitude, longitude, fuelType, radiusMiles, minimumRating, preferredProvider, requiresE85, setResolvedFuelSearchContext, preferences.preferredBrands, preferences.fuelMemberships]);
 
-    return useMemo(() => result?.scope === scope ? result : { origin: null, stations: [] }, [result, scope]);
+    return useMemo(() => result?.scope === scope ? result : {
+        origin: mapOrigin?.scope === scope ? { latitude: mapOrigin.latitude, longitude: mapOrigin.longitude } : null, stations: [],
+    }, [result, mapOrigin, scope]);
 }

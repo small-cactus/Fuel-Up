@@ -1,0 +1,181 @@
+TAP version 13
+# (node:63879) ExperimentalWarning: CommonJS module /Users/anthonyh/Desktop/Fuel Up/src/screens/cluster-lab/useClusterLabStations.js is loading ES Module /Users/anthonyh/Desktop/Fuel Up/src/lib/fuelSearchState.js using require().
+# Support for loading ES Module in require() is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:63879) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelMemberships.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# Subtest: Home shares its fallback GPS origin so Trends searches the same radius center
+ok 1 - Home shares its fallback GPS origin so Trends searches the same radius center
+  ---
+  duration_ms: 159.353834
+  ...
+# (node:63879) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# Subtest: Home publishes local data then refreshes DB on focus and foreground; cleanup prevents old query results
+ok 2 - Home publishes local data then refreshes DB on focus and foreground; cleanup prevents old query results
+  ---
+  duration_ms: 32.268375
+  ...
+# Subtest: Home removes a quote immediately after its 24-hour expiry without a network request
+ok 3 - Home removes a quote immediately after its 24-hour expiry without a network request
+  ---
+  duration_ms: 15.112917
+  ...
+# Subtest: live Home location updates the shared search context and launch cache using current preferences
+ok 4 - live Home location updates the shared search context and launch cache using current preferences
+  ---
+  duration_ms: 5.939584
+  ...
+# Subtest: live GPS does not override an explicit manual location or run on an unfocused Home
+ok 5 - live GPS does not override an explicit manual location or run on an unfocused Home
+  ---
+  duration_ms: 8.887417
+  ...
+# Subtest: cached station distances are recalculated from the current search center before filtering
+ok 6 - cached station distances are recalculated from the current search center before filtering
+  ---
+  duration_ms: 11.163959
+  ...
+# Subtest: Home publishes map origin before an unresolved price-cache read
+ok 7 - Home publishes map origin before an unresolved price-cache read
+  ---
+  duration_ms: 7.405292
+  ...
+# (node:63880) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/homeDeviceLocation.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: replaces an existing saved origin and follows foreground movement, ignoring GPS drift
+ok 8 - replaces an existing saved origin and follows foreground movement, ignoring GPS drift
+  ---
+  duration_ms: 13.818125
+  ...
+# Subtest: background stops watching, foreground obtains a fresh fix and restarts movement updates
+ok 9 - background stops watching, foreground obtains a fresh fix and restarts movement updates
+  ---
+  duration_ms: 10.04275
+  ...
+# Subtest: late one-shot and stale or invalid fixes cannot roll back a newer watched location
+ok 10 - late one-shot and stale or invalid fixes cannot roll back a newer watched location
+  ---
+  duration_ms: 7.239917
+  ...
+# Subtest: unmount removes a subscription whose async setup completed after cleanup
+ok 11 - unmount removes a subscription whose async setup completed after cleanup
+  ---
+  duration_ms: 4.190166
+  ...
+# Subtest: denied permission makes no location requests
+ok 12 - denied permission makes no location requests
+  ---
+  duration_ms: 3.515583
+  ...
+# (node:63881) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/homeLaunch.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: first uncached launch defers the home reveal until visual bootstrap finishes
+ok 13 - first uncached launch defers the home reveal until visual bootstrap finishes
+  ---
+  duration_ms: 0.901916
+  ...
+# Subtest: cached or manual launches keep the fast home reveal path
+ok 14 - cached or manual launches keep the fast home reveal path
+  ---
+  duration_ms: 0.104458
+  ...
+# Subtest: home reveal only starts after the launch visual state is ready
+ok 15 - home reveal only starts after the launch visual state is ready
+  ---
+  duration_ms: 0.066292
+  ...
+# Subtest: first uncached launch can reveal during the initial animated fit instead of after a pop
+ok 16 - first uncached launch can reveal during the initial animated fit instead of after a pop
+  ---
+  duration_ms: 0.12075
+  ...
+# Subtest: prebuild keeps iOS 26 as the app and widget minimum
+ok 17 - prebuild keeps iOS 26 as the app and widget minimum
+  ---
+  duration_ms: 123.196583
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# (node:63883) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: map-ready releases one launch only and unsubscribed listeners stay silent
+ok 18 - map-ready releases one launch only and unsubscribed listeners stay silent
+  ---
+  duration_ms: 4.382875
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: splash releases on rendered map without delay
+ok 19 - splash releases on rendered map without delay
+  ---
+  duration_ms: 34.512416
+  ...
+# Subtest: splash releases on deadline when map is offline
+ok 20 - splash releases on deadline when map is offline
+  ---
+  duration_ms: 27.858875
+  ...
+# (node:63884) ExperimentalWarning: CommonJS module /Users/anthonyh/Desktop/Fuel Up/tests/nativeOnboarding.test.cjs is loading ES Module /Users/anthonyh/Desktop/Fuel Up/src/lib/preferencesStore.js using require().
+# Support for loading ES Module in require() is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:63884) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelSearchState.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: the iOS-only native flow does not depend on parsing the OS version
+ok 21 - the iOS-only native flow does not depend on parsing the OS version
+  ---
+  duration_ms: 183.601833
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: native completion saves exactly the final draft, including membership and E85 choices
+ok 22 - native completion saves exactly the final draft, including membership and E85 choices
+  ---
+  duration_ms: 22.172334
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: onboarding prefetch uses max radius; radius changes reuse inventory and filter brands locally
+ok 23 - onboarding prefetch uses max radius; radius changes reuse inventory and filter brands locally
+  ---
+  duration_ms: 12.627459
+  ...
+# Subtest: membership prefetch recovers a transient location lookup and uses the normalized state
+ok 24 - membership prefetch recovers a transient location lookup and uses the normalized state
+  ---
+  duration_ms: 1115.421916
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: a delayed cached location cannot replace a fresh fix or restart the radius camera
+ok 25 - a delayed cached location cannot replace a fresh fix or restart the radius camera
+  ---
+  duration_ms: 147.18575
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: designer accepts an unfinished decimal without replacing typed text
+ok 26 - designer accepts an unfinished decimal without replacing typed text
+  ---
+  duration_ms: 64.879208
+  ...
+# Subtest: the radius preview does not animate while its onboarding page is offscreen
+ok 27 - the radius preview does not animate while its onboarding page is offscreen
+  ---
+  duration_ms: 12.240583
+  ...
+1..27
+# tests 27
+# suites 0
+# pass 27
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1624.518
