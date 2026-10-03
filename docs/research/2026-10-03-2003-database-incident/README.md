@@ -23,3 +23,14 @@ All 71 expected nationwide slots are counted, including hours without a run row:
 Validation: protected health/coverage queries; successful post-restart scheduled dispatch; all six provider-free worker health/routing checks; immutable three-region archive read-back; JSON parsing and whitespace checks. One restart was used. No executable code changed or deployment was required. Long-term infrastructure stability is not established by this recovery.
 
 Texas/DC coverage assumptions and Texas's one-ID aggregate discrepancy remain unchanged. Archived provider observations and missing prices are not verified pump truth. The reserved final two days remain untouched.
+## 21:04 UTC follow-up: complete recovery hour verified
+
+Run 3467 (20:00) completed at 20:27:14 UTC, before its original 21:00 deadline, with all 72 batches and all 141,660 fixed-inventory IDs. The committed `auditHour.mjs` read back every immutable archive and verified hashes, exact IDs, price schema, timestamps, and regional provenance (`full-recovery-hour-readback.json`). There were 92,774 stations with reported prices and 48,886 without prices. The regional totals remain Virginia 117,700, Northern California 17,747, and Oregon 6,213. This is archived provider evidence, not verified pump truth.
+
+All 72 expected nationwide slots are accounted for, including absent run rows: 57 complete, nine historical partial hours, five historical expired unstarted hours, and the current 21:00 hour running. The current sweep had 21/72 successful batches with zero misses at the snapshot, still before its 22:00 deadline. No new expired gap was found. The prior 19:00 gap remains unchanged.
+
+City collection completed another 24 city observations: 1,746 successful city-hour jobs, the same 54 historical misses, 34,920 station observations, zero due backlog, and zero expired pending jobs. Both collectors and their main/watchdog schedules remain active. Protected health queries succeed; every recorded scheduled execution after the restart interruption succeeds, with the latest failures still the preserved 20:08 startup timeouts. All six provider-free worker health/routing checks pass; wrong-region jobs remain zero. Shared cooldown is expired and no newer provider access denial is recorded.
+
+Accounted archives are 235,117,492 of the unchanged 900,000,000-byte budget; object storage is 239,392,440 bytes and the database is 356,387,987 bytes. The last optional metadata timeout at 20:22 did not prevent complete raw collection. The existing Trends cache is still the previously observed 18:16 publication and is not used as proof of raw collection health. No additional repair, provider collection, deadline change, or reserved evaluation-data use was initiated by this follow-up.
+
+Validation: full 72-batch immutable archive audit, protected city/national/expected-slot health queries, six provider-free regional checks, JSON parsing, credential-pattern scan, and whitespace checks.

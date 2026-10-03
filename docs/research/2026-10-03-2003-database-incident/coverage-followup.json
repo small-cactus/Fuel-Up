@@ -1,0 +1,180 @@
+{
+  "city_expired": 0,
+  "coverage": [
+    {
+      "count": 9,
+      "state": "partial"
+    },
+    {
+      "count": 5,
+      "state": "expired_unstarted"
+    },
+    {
+      "count": 1,
+      "state": "running"
+    },
+    {
+      "count": 57,
+      "state": "complete"
+    }
+  ],
+  "cron_errors": [
+    {
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:08:00.000347+00:00"
+    },
+    {
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:08:00.000347+00:00"
+    },
+    {
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:08:00.000347+00:00"
+    },
+    {
+      "jobname": "fuel-national-trends-cache",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:08:00.000347+00:00"
+    },
+    {
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:07:00.00106+00:00"
+    },
+    {
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:07:00.00106+00:00"
+    },
+    {
+      "jobname": "fuel-national-trends-cache",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:07:00.00106+00:00"
+    },
+    {
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:07:00.00106+00:00"
+    },
+    {
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:06:00.000372+00:00"
+    },
+    {
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:06:00.000372+00:00"
+    }
+  ],
+  "cron_recent": [
+    {
+      "count": 3,
+      "jobname": "fuel-national-discovery",
+      "last_end": "2026-10-03T20:08:10.2354+00:00",
+      "status": "failed"
+    },
+    {
+      "count": 54,
+      "jobname": "fuel-national-discovery",
+      "last_end": "2026-10-03T21:04:00.330229+00:00",
+      "status": "succeeded"
+    },
+    {
+      "count": 3,
+      "jobname": "fuel-national-dispatch",
+      "last_end": "2026-10-03T20:08:10.183398+00:00",
+      "status": "failed"
+    },
+    {
+      "count": 54,
+      "jobname": "fuel-national-dispatch",
+      "last_end": "2026-10-03T21:04:00.421206+00:00",
+      "status": "succeeded"
+    },
+    {
+      "count": 3,
+      "jobname": "fuel-national-trends-cache",
+      "last_end": "2026-10-03T20:08:10.191445+00:00",
+      "status": "failed"
+    },
+    {
+      "count": 54,
+      "jobname": "fuel-national-trends-cache",
+      "last_end": "2026-10-03T21:04:00.367043+00:00",
+      "status": "succeeded"
+    },
+    {
+      "count": 11,
+      "jobname": "fuel-national-watchdog",
+      "last_end": "2026-10-03T21:00:00.07387+00:00",
+      "status": "succeeded"
+    },
+    {
+      "count": 3,
+      "jobname": "fuel-research-dispatch",
+      "last_end": "2026-10-03T20:08:10.227502+00:00",
+      "status": "failed"
+    },
+    {
+      "count": 54,
+      "jobname": "fuel-research-dispatch",
+      "last_end": "2026-10-03T21:04:00.396303+00:00",
+      "status": "succeeded"
+    },
+    {
+      "count": 11,
+      "jobname": "fuel-research-watchdog",
+      "last_end": "2026-10-03T21:00:00.066911+00:00",
+      "status": "succeeded"
+    }
+  ],
+  "current": {
+    "archive_bytes": 1118366,
+    "completed_at": null,
+    "expected_batches": 72,
+    "expected_stations": 141660,
+    "id": 3521,
+    "missed_batches": 0,
+    "observed_stations": 39960,
+    "priced_stations": 26783,
+    "slot_at": "2026-10-03T21:00:00+00:00",
+    "status": "running",
+    "succeeded_batches": 21
+  },
+  "missing_slots": [
+    {
+      "slot_at": "2026-10-01T08:00:00+00:00",
+      "state": "expired_unstarted"
+    },
+    {
+      "slot_at": "2026-10-01T09:00:00+00:00",
+      "state": "expired_unstarted"
+    },
+    {
+      "slot_at": "2026-10-01T10:00:00+00:00",
+      "state": "expired_unstarted"
+    },
+    {
+      "slot_at": "2026-10-01T11:00:00+00:00",
+      "state": "expired_unstarted"
+    },
+    {
+      "slot_at": "2026-10-01T12:00:00+00:00",
+      "state": "expired_unstarted"
+    }
+  ],
+  "now": "2026-10-03T21:04:31.165159+00:00",
+  "provider_events": [
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-03T20:22:53.624824+00:00",
+      "job_id": 247848,
+      "retry_after_seconds": 0
+    }
+  ],
+  "wrong_region": 0
+}
