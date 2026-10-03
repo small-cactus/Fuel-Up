@@ -5,10 +5,12 @@ struct OnboardingMapScrim: View {
   var bottomHeight: CGFloat = 220
 
   var body: some View {
-    VStack(spacing: 0) {
+    // Independent edge layers preserve the top ramp on compact screens too.
+    ZStack {
       PureProgressiveBlur(direction: .top).frame(height: topHeight)
-      Spacer(minLength: 0)
+        .frame(maxHeight: .infinity, alignment: .top)
       PureProgressiveBlur(direction: .bottom).frame(height: bottomHeight)
+        .frame(maxHeight: .infinity, alignment: .bottom)
     }.ignoresSafeArea().allowsHitTesting(false).accessibilityHidden(true)
   }
 }

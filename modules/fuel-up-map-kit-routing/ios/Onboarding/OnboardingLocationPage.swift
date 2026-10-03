@@ -21,13 +21,13 @@ struct OnboardingLocationPage: View {
                 .accessibilityAddTraits(.isHeader)
               Text("Use your location to discover nearby stations and find a better price at your next stop.")
                 .font(.body).fixedSize(horizontal: false, vertical: true)
-            }.multilineTextAlignment(.center).padding(.horizontal, 16)
+            }.multilineTextAlignment(.center).padding(.horizontal, 28)
 
             VStack(alignment: .leading, spacing: benefitSpacing) {
               benefit("Find nearby gas", detail: "See stations around you and how far away they are.", icon: "location.fill", color: .blue)
               benefit("Find a better price", detail: "Compare reported prices for the fuel you use.", icon: "fuelpump.fill", color: .purple)
               benefit("You’re in control", detail: "Change location access any time in Settings.", icon: "hand.raised.fill", color: .green)
-            }.frame(maxWidth: 440, alignment: .leading).padding(.horizontal, 20)
+            }.frame(maxWidth: 440, alignment: .leading).padding(.horizontal, 32)
 
             if model.locationBlocked {
               status("Location access is off. Open Settings to find nearby gas.")
@@ -37,12 +37,7 @@ struct OnboardingLocationPage: View {
               HStack(spacing: 10) { ProgressView(); Text("Finding your location…").font(.subheadline) }
             }
           }
-          .padding(.vertical, 20)
-          .frame(maxWidth: .infinity)
-          .modifier(OnboardingGlass())
-          .padding(.horizontal, 12)
-          // The card grows around the existing text position, not into the map spacer.
-          .padding(.top, mapHeight - 45)
+          .padding(.top, mapHeight - 25)
           .padding(.bottom, 24)
           .frame(maxWidth: .infinity)
           .overlay(alignment: .top) {
@@ -68,6 +63,6 @@ struct OnboardingLocationPage: View {
 
   private func status(_ text: String) -> some View {
     Text(text).font(.subheadline).foregroundStyle(.secondary)
-      .multilineTextAlignment(.center).padding(.horizontal, 16)
+      .multilineTextAlignment(.center).padding(.horizontal, 28)
   }
 }

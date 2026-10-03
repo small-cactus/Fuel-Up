@@ -12,7 +12,8 @@ struct OnboardingLocationIllustration: View {
 
   var body: some View {
     GeometryReader { geometry in
-      let clearMapEnd = min(geometry.size.height, heroHeight * 0.36)
+      let topBlurHeight = min(geometry.size.height, heroHeight * 0.36)
+      let bottomBlurHeight = max(0, geometry.size.height - heroHeight * 0.18)
       LocationInvitationMap { liveMapReady = true }
         .overlay {
           if !liveMapReady, let image = preview.image {
@@ -34,12 +35,14 @@ struct OnboardingLocationIllustration: View {
           .frame(height: heroHeight)
         }
         .overlay {
-          VStack(spacing: 0) {
+          ZStack {
             PureProgressiveBlur(direction: .top)
-              .frame(height: clearMapEnd)
-            // A long radius ramp carries the map continuously under the card.
+              .frame(height: topBlurHeight)
+              .frame(maxHeight: .infinity, alignment: .top)
+            // Begin gently within the map and spread the ramp under all the text.
             PureProgressiveBlur(direction: .bottom)
-              .frame(height: max(0, geometry.size.height - clearMapEnd))
+              .frame(height: bottomBlurHeight)
+              .frame(maxHeight: .infinity, alignment: .bottom)
           }.allowsHitTesting(false)
         }
         .accessibilityElement(children: .ignore)
