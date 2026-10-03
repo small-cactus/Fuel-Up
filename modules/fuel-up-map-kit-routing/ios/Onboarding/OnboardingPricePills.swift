@@ -21,7 +21,8 @@ struct OnboardingPricePills: View {
           SamplePricePill(price: sample.price)
             .scaleEffect(scales[sample.id])
             .position(x: geometry.size.width * sample.x,
-                      y: 90 + max(0, geometry.size.height - 125) * sample.y)
+                      // Leave room for the spring overshoot and sample caption.
+                      y: 90 + max(0, geometry.size.height - 130) * sample.y)
         }
         Text("Sample prices")
           .font(.caption2).foregroundStyle(.secondary)
@@ -54,7 +55,7 @@ struct OnboardingPricePills: View {
           let nextCell = (0..<6).filter { !occupied.contains($0) }.randomElement()!
           samples[index] = Sample(id: index, cell: nextCell)
           try await Task.sleep(nanoseconds: 50_000_000)
-          withAnimation(.easeOut(duration: 0.45)) { scales[index] = 1 }
+          withAnimation(.spring(response: 0.48, dampingFraction: 0.62)) { scales[index] = 1 }
           // Stagger three lifetimes: each holds still for several seconds
           // while the others appear, before shrinking and moving elsewhere.
           try await Task.sleep(nanoseconds: 1_600_000_000)
@@ -76,7 +77,7 @@ struct OnboardingPricePills: View {
       self.cell = cell
       price = ["$3.89", "$4.49", "$4.59", "$4.65", "$4.72"].randomElement()!
       x = (cell.isMultiple(of: 2) ? 0.27 : 0.73) + CGFloat.random(in: -0.025...0.025)
-      y = CGFloat(cell / 2) * 0.45 + CGFloat.random(in: -0.025...0.025)
+      y = min(1, max(0, CGFloat(cell / 2) * 0.5 + CGFloat.random(in: -0.025...0.025)))
     }
   }
 }

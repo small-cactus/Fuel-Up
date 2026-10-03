@@ -37,7 +37,7 @@ struct OnboardingLocationPage: View {
         .background(alignment: .top) {
           // Extend the artwork behind the content without moving the heading
           // or the stationary footer. Pills stay above the text overlap.
-          OnboardingLocationIllustration(isActive: model.step == 1, priceAreaHeight: mapHeight - 95)
+          OnboardingLocationIllustration(isActive: model.step == 1)
             .frame(height: mapHeight + 100)
         }
       }.ignoresSafeArea(.container, edges: .top)

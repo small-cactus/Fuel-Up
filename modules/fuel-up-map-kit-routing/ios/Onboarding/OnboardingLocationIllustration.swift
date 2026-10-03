@@ -5,13 +5,15 @@ import MapKit
 @available(iOS 16.0, *)
 struct OnboardingLocationIllustration: View {
   let isActive: Bool
-  let priceAreaHeight: CGFloat
 
   var body: some View {
     LocationInvitationMap()
       .overlay(alignment: .top) {
-        OnboardingPricePills(isActive: isActive)
-          .frame(height: priceAreaHeight)
+        GeometryReader { geometry in
+          OnboardingPricePills(isActive: isActive)
+            .frame(height: geometry.size.height * 0.70)
+            .clipped()
+        }
       }
       .overlay {
         // Native backdrop blur is strongest at the edges, fading gently
