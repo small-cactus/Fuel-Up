@@ -1,0 +1,636 @@
+{
+  "activity": [
+    {
+      "backend_type": "client backend",
+      "count": 1,
+      "state": "active",
+      "wait_event": null,
+      "wait_event_type": null
+    },
+    {
+      "backend_type": "client backend",
+      "count": 6,
+      "state": "idle",
+      "wait_event": "ClientRead",
+      "wait_event_type": "Client"
+    },
+    {
+      "backend_type": "pg_cron launcher",
+      "count": 1,
+      "state": null,
+      "wait_event": "Extension",
+      "wait_event_type": "Extension"
+    },
+    {
+      "backend_type": "pg_net 0.19.5 worker",
+      "count": 1,
+      "state": null,
+      "wait_event": null,
+      "wait_event_type": null
+    }
+  ],
+  "affected_runs": [
+    {
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "completed_at": "2026-10-03T20:00:06.961164+00:00",
+      "created_at": "2026-10-03T19:00:00.067235+00:00",
+      "deadline_at": "2026-10-03T20:00:00+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 3428,
+      "slot_at": "2026-10-03T19:00:00+00:00",
+      "status": "partial"
+    },
+    {
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "completed_at": null,
+      "created_at": "2026-10-03T20:00:06.961164+00:00",
+      "deadline_at": "2026-10-03T21:00:00+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 3467,
+      "slot_at": "2026-10-03T20:00:00+00:00",
+      "status": "running"
+    }
+  ],
+  "cron_failures": [
+    {
+      "end_time": "2026-10-03T20:08:10.191445+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:08:00.000347+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:08:10.183398+00:00",
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:08:00.000347+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:08:10.227502+00:00",
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:08:00.000347+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:08:10.2354+00:00",
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:08:00.000347+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:07:53.303316+00:00",
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:07:00.00106+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:07:53.311315+00:00",
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:07:00.00106+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:07:53.295457+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:07:00.00106+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:07:16.307619+00:00",
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:07:00.00106+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:06:17.234931+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:06:00.000372+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:06:17.282875+00:00",
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:06:00.000372+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:06:17.12014+00:00",
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:06:00.000372+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:06:17.243012+00:00",
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:06:00.000372+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:04:10.002825+00:00",
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:04:00.000919+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:02:10.053656+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:02:00.00035+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:02:10.125666+00:00",
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:02:00.00035+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:02:10.117724+00:00",
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:02:00.00035+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T20:00:10.002657+00:00",
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T20:00:00.000713+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:58:12.780572+00:00",
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:58:00.000117+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:58:12.860614+00:00",
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:58:00.000117+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:58:12.844653+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:58:00.000117+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:58:12.852667+00:00",
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:58:00.000117+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:56:10.835949+00:00",
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:56:00.000528+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:56:10.95602+00:00",
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:56:00.000528+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:56:10.919981+00:00",
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:56:00.000528+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:56:10.872087+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:56:00.000528+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:54:10.043567+00:00",
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:54:00.00045+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:54:10.035493+00:00",
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:54:00.00045+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:54:10.001973+00:00",
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:54:00.00045+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:54:10.007499+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:54:00.00045+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:53:10.001636+00:00",
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:53:00.000085+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:49:10.001407+00:00",
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:49:00.000033+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:46:12.661464+00:00",
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:46:00.000558+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:46:12.669466+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:46:00.000558+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:46:12.677446+00:00",
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:46:00.000558+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:46:12.685459+00:00",
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:46:00.000558+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:43:15.245117+00:00",
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:43:00.000991+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:43:15.213055+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:43:00.000991+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:43:10.003323+00:00",
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:43:00.000991+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:43:19.425192+00:00",
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:43:00.000991+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:42:14.616741+00:00",
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:42:00.001015+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:42:14.600807+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:42:00.001015+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:42:14.608815+00:00",
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:42:00.001015+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:42:10.002396+00:00",
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:42:00.001015+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:39:10.003138+00:00",
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:39:00.001068+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:39:10.016525+00:00",
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:39:00.001068+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:39:10.00862+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:39:00.001068+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:38:10.237433+00:00",
+      "jobname": "fuel-national-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:38:00.000445+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:38:10.244345+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:38:00.000445+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:38:16.384259+00:00",
+      "jobname": "fuel-national-discovery",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:38:00.000445+00:00",
+      "status": "failed"
+    },
+    {
+      "end_time": "2026-10-03T19:38:16.376377+00:00",
+      "jobname": "fuel-research-dispatch",
+      "return_message": "job startup timeout",
+      "start_time": "2026-10-03T19:38:00.000445+00:00",
+      "status": "failed"
+    }
+  ],
+  "events": [
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-03T20:03:00.933911+00:00",
+      "job_id": 247813,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-03T20:02:25.642407+00:00",
+      "job_id": 247812,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-03T19:52:32.511378+00:00",
+      "job_id": 245058,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-03T19:52:12.186116+00:00",
+      "job_id": 245057,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-03T19:41:09.668575+00:00",
+      "job_id": 245055,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-03T19:37:13.104014+00:00",
+      "job_id": 245054,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-03T19:34:25.989374+00:00",
+      "job_id": 245056,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "DATABASE_FINISH_FUEL_NATIONAL_JOB_FAILED",
+      "created_at": "2026-10-03T19:33:47.379057+00:00",
+      "job_id": 245055,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-03T19:33:21.542865+00:00",
+      "job_id": 245055,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "ARCHIVE_WRITE_FAILED",
+      "created_at": "2026-10-03T19:32:23.778309+00:00",
+      "job_id": 245054,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-03T19:31:45.946612+00:00",
+      "job_id": 245054,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-03T19:27:30.076409+00:00",
+      "job_id": 245054,
+      "retry_after_seconds": 0
+    },
+    {
+      "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+      "created_at": "2026-10-03T19:27:09.628533+00:00",
+      "job_id": 245053,
+      "retry_after_seconds": 0
+    }
+  ],
+  "missed_jobs": [
+    {
+      "attempts": 1,
+      "completed_at": null,
+      "execution_region": "us-east-1",
+      "id": 245058,
+      "last_error": "HOUR_DEADLINE_MISSED",
+      "next_attempt_at": "2026-10-03T19:00:00.067235+00:00",
+      "ordinal": 54,
+      "run_id": 3428,
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "completed_at": null,
+      "execution_region": null,
+      "id": 245059,
+      "last_error": "HOUR_DEADLINE_MISSED",
+      "next_attempt_at": "2026-10-03T19:00:00.067235+00:00",
+      "ordinal": 55,
+      "run_id": 3428,
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "completed_at": null,
+      "execution_region": null,
+      "id": 245060,
+      "last_error": "HOUR_DEADLINE_MISSED",
+      "next_attempt_at": "2026-10-03T19:00:00.067235+00:00",
+      "ordinal": 56,
+      "run_id": 3428,
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "completed_at": null,
+      "execution_region": null,
+      "id": 245061,
+      "last_error": "HOUR_DEADLINE_MISSED",
+      "next_attempt_at": "2026-10-03T19:00:00.067235+00:00",
+      "ordinal": 57,
+      "run_id": 3428,
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "completed_at": null,
+      "execution_region": null,
+      "id": 245062,
+      "last_error": "HOUR_DEADLINE_MISSED",
+      "next_attempt_at": "2026-10-03T19:00:00.067235+00:00",
+      "ordinal": 58,
+      "run_id": 3428,
+      "status": "missed"
+    }
+  ],
+  "now": "2026-10-03T20:13:03.87556+00:00",
+  "recent_jobs": [
+    {
+      "attempts": 1,
+      "completed_at": "2026-10-03T20:03:06.530486+00:00",
+      "execution_region": "us-east-1",
+      "id": 247813,
+      "last_error": null,
+      "object_path": "3467/247813/158e915b-e422-4767-add2-f6594baa2dc4.json.gz",
+      "observed_at": "2026-10-03T20:03:03.273+00:00",
+      "run_id": 3467,
+      "status": "succeeded"
+    },
+    {
+      "attempts": 1,
+      "completed_at": "2026-10-03T20:02:41.697864+00:00",
+      "execution_region": "us-east-1",
+      "id": 247812,
+      "last_error": null,
+      "object_path": "3467/247812/26ba2d72-c69f-4da8-8893-1e6f44c7035a.json.gz",
+      "observed_at": "2026-10-03T20:02:28.543+00:00",
+      "run_id": 3467,
+      "status": "succeeded"
+    },
+    {
+      "attempts": 0,
+      "completed_at": null,
+      "execution_region": null,
+      "id": 247817,
+      "last_error": null,
+      "object_path": null,
+      "observed_at": null,
+      "run_id": 3467,
+      "status": "queued"
+    },
+    {
+      "attempts": 0,
+      "completed_at": null,
+      "execution_region": null,
+      "id": 247816,
+      "last_error": null,
+      "object_path": null,
+      "observed_at": null,
+      "run_id": 3467,
+      "status": "queued"
+    },
+    {
+      "attempts": 0,
+      "completed_at": null,
+      "execution_region": null,
+      "id": 247819,
+      "last_error": null,
+      "object_path": null,
+      "observed_at": null,
+      "run_id": 3467,
+      "status": "queued"
+    },
+    {
+      "attempts": 0,
+      "completed_at": null,
+      "execution_region": null,
+      "id": 247818,
+      "last_error": null,
+      "object_path": null,
+      "observed_at": null,
+      "run_id": 3467,
+      "status": "queued"
+    },
+    {
+      "attempts": 0,
+      "completed_at": null,
+      "execution_region": null,
+      "id": 247815,
+      "last_error": null,
+      "object_path": null,
+      "observed_at": null,
+      "run_id": 3467,
+      "status": "queued"
+    },
+    {
+      "attempts": 0,
+      "completed_at": null,
+      "execution_region": null,
+      "id": 247814,
+      "last_error": null,
+      "object_path": null,
+      "observed_at": null,
+      "run_id": 3467,
+      "status": "queued"
+    }
+  ]
+}

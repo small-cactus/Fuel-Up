@@ -1,0 +1,569 @@
+Initialising login role...
+unexpected status 524: <!DOCTYPE html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en-US"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en-US"> <!--<![endif]-->
+<head>
+
+<title>supabase.com | 524: A timeout occurred</title>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="stylesheet" id="cf_styles-css" href="/cdn-cgi/styles/main.css" />
+</head>
+<body>
+<div id="cf-wrapper">
+    <div id="cf-error-details" class="p-0">
+        <header class="mx-auto pt-10 lg:pt-6 lg:px-8 w-240 lg:w-full mb-8">
+            <h1 class="inline-block sm:block sm:mb-2 font-light text-60 lg:text-4xl text-black-dark leading-tight mr-2">
+                <span class="inline-block">A timeout occurred</span>
+                <span class="code-label">Error code 524</span>
+            </h1>
+            <div>
+                Visit <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&utm_campaign=api.supabase.com" target="_blank" rel="noopener noreferrer">cloudflare.com</a> for more information.
+            </div>
+            <div class="mt-3">2026-10-03 20:07:49 UTC</div>
+        </header>
+        <div class="my-8 bg-gradient-gray">
+            <div class="w-240 lg:w-full mx-auto">
+                <div class="clearfix md:px-8">
+                    <div id="cf-browser-status" class=" relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">
+  <div class="relative mb-10 md:m-0">
+
+    <span class="cf-icon-browser block md:hidden h-20 bg-center bg-no-repeat"></span>
+    <span class="cf-icon-ok w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>
+
+  </div>
+  <span class="md:block w-full truncate">You</span>
+  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">
+
+    Browser
+
+  </h3>
+
+  <span class="leading-1.3 text-2xl text-green-success">Working</span>
+
+</div>
+                    <div id="cf-cloudflare-status" class=" relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">
+  <div class="relative mb-10 md:m-0">
+    <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&#38;utm_campaign=api.supabase.com" target="_blank" rel="noopener noreferrer">
+    <span class="cf-icon-cloud block md:hidden h-20 bg-center bg-no-repeat"></span>
+    <span class="cf-icon-ok w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>
+    </a>
+  </div>
+  <span class="md:block w-full truncate">Miami</span>
+  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">
+  <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&utm_campaign=api.supabase.com" target="_blank" rel="noopener noreferrer">
+    Cloudflare
+  </a>
+  </h3>
+
+  <span class="leading-1.3 text-2xl text-green-success">Working</span>
+
+</div>
+                    <div id="cf-host-status" class="cf-error-source relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">
+  <div class="relative mb-10 md:m-0">
+
+    <span class="cf-icon-server block md:hidden h-20 bg-center bg-no-repeat"></span>
+    <span class="cf-icon-error w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>
+
+  </div>
+  <span class="md:block w-full truncate">api.supabase.com</span>
+  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">
+
+    Host
+
+  </h3>
+
+  <span class="leading-1.3 text-2xl text-red-error">Error</span>
+
+</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-240 lg:w-full mx-auto mb-8 lg:px-8">
+            <div class="clearfix">
+                <div class="w-1/2 md:w-full float-left pr-6 md:pb-10 md:pr-0 leading-relaxed">
+                    <h2 class="text-3xl font-normal leading-1.3 mb-4">What happened?</h2>
+                    <p class="mb-2">The origin web server timed out responding to this request.</p><p>The likely cause is an overloaded background task, database or application, stressing the resources on the host web server.</p>
+                </div>
+                <div class="w-1/2 md:w-full float-left leading-relaxed">
+                    <h2 class="text-3xl font-normal leading-1.3 mb-4">What can I do?</h2>
+
+              <h3 class="text-15 font-semibold mb-2">If you're a visitor of this website:</h3>
+              <p class="mb-6">Please try again in a few minutes.</p>
+
+              <h3 class="text-15 font-semibold mb-2">If you're the owner of this website:</h3>
+              <p>Please refer to the <a rel="noopener noreferrer" href="https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/">Error 524</a> article:</p>
+              <ul class="ml-4">
+                <li>Contact your hosting provider; check for long-running processes or an overloaded web server.</li>
+                <li>Use status polling of large HTTP processes to avoid this error.</li>
+                <li>Run the long-running scripts on a <a rel="noopener noreferrer" href="https://developers.cloudflare.com/dns/proxy-status/#dns-only-records">grey-clouded subdomain</a>.</li>
+                <li>Enterprise customers can <a rel="noopener noreferrer" href="https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/#resolution-on-cloudflare">increase the timeout setting</a> globally or for specific requests using Cache Rules.</li>
+              </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="cf-error-footer cf-wrapper w-240 lg:w-full py-10 sm:py-4 sm:px-8 mx-auto text-center sm:text-left border-solid border-0 border-t border-gray-300">
+    <p class="text-13">
+      <span class="cf-footer-item sm:block sm:mb-1">Cloudflare Ray ID: <strong class="font-semibold">a44e90378f0c4ae2</strong></span>
+      <span class="cf-footer-separator sm:hidden">&bull;</span>
+      <span id="cf-footer-item-ip" class="cf-footer-item hidden sm:block sm:mb-1">
+        Your IP:
+        <button type="button" id="cf-footer-ip-reveal" class="cf-footer-ip-reveal-btn">Click to reveal</button>
+        <span class="hidden" id="cf-footer-ip">2603:9000:d800:195d:a99c:1b1:73a:cc9c</span>
+        <span class="cf-footer-separator sm:hidden">&bull;</span>
+      </span>
+      <span class="cf-footer-item sm:block sm:mb-1"><span>Performance &amp; security by</span> <a rel="noopener noreferrer" href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&#38;utm_campaign=api.supabase.com" id="brand_link" target="_blank">Cloudflare</a></span>
+
+    </p>
+    <script>(function(){function d(){var b=a.getElementById("cf-footer-item-ip"),c=a.getElementById("cf-footer-ip-reveal");b&&"classList"in b&&(b.classList.remove("hidden"),c.addEventListener("click",function(){c.classList.add("hidden");a.getElementById("cf-footer-ip").classList.remove("hidden")}))}var a=document;document.addEventListener&&a.addEventListener("DOMContentLoaded",d)})();</script>
+  </div><!-- /.error-footer -->
+
+    </div>
+</div>
+</body>
+</html>
+Try rerunning the command with --debug to troubleshoot the error.
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: npx --no-install supabase@2.118.0 db query --linked --project-ref vjindchxfebaltbslqwc with slots as (
+ select s as slot_at, least(s+interval '1 hour',c.ends_at) as deadline_at
+ from fuel_national_config c, lateral generate_series(c.starts_at,least(date_trunc('hour',now()),c.ends_at-interval '1 second'),interval '1 hour') s
+), classified as (
+ select s.slot_at,case when r.id is null then case when s.deadline_at<=now() then 'expired_unstarted' else 'current_unstarted' end
+ when r.status='running' and s.deadline_at<=now() then 'expired_running' else r.status end as state
+ from slots s left join fuel_national_runs r using(slot_at)
+)
+select jsonb_build_object('now',now(),
+'coverage',(select jsonb_agg(c) from (select state,count(*) from classified group by state) c),
+'missing_slots',(select jsonb_agg(c) from classified c where state like '%unstarted' or state='expired_running'),
+'city_expired',(select count(*) from fuel_research_jobs where campaign_id='hourly-24-cities-20260930-v1' and status in ('queued','running') and deadline_at<=now()),
+'wrong_region',(select coalesce(sum(wrong_region_jobs),0) from fuel_national_regional_health),
+'cron_recent',(select jsonb_agg(c) from (select j.jobname,d.status,count(*),max(d.end_time) last_end from cron.job_run_details d join cron.job j using(jobid) where j.jobname like 'fuel-%' and d.start_time>now()-interval '1 hour' group by j.jobname,d.status) c),
+'cron_errors',(select jsonb_agg(c) from (select j.jobname,d.start_time,d.return_message from cron.job_run_details d join cron.job j using(jobid) where j.jobname like 'fuel-%' and d.status='failed' and d.start_time>now()-interval '1 hour' order by d.start_time desc limit 10) c),
+'provider_events',(select jsonb_agg(e) from (select created_at,job_id,code,retry_after_seconds from fuel_national_events where created_at>now()-interval '1 hour' and code not like 'SERVING_%' order by created_at desc limit 10) e),
+'current',(select to_jsonb(h) from fuel_national_health h order by slot_at desc limit 1)) as health --output json
+Initialising login role...
+unexpected status 524: <!DOCTYPE html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en-US"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en-US"> <!--<![endif]-->
+<head>
+
+<title>supabase.com | 524: A timeout occurred</title>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="stylesheet" id="cf_styles-css" href="/cdn-cgi/styles/main.css" />
+</head>
+<body>
+<div id="cf-wrapper">
+    <div id="cf-error-details" class="p-0">
+        <header class="mx-auto pt-10 lg:pt-6 lg:px-8 w-240 lg:w-full mb-8">
+            <h1 class="inline-block sm:block sm:mb-2 font-light text-60 lg:text-4xl text-black-dark leading-tight mr-2">
+                <span class="inline-block">A timeout occurred</span>
+                <span class="code-label">Error code 524</span>
+            </h1>
+            <div>
+                Visit <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&utm_campaign=api.supabase.com" target="_blank" rel="noopener noreferrer">cloudflare.com</a> for more information.
+            </div>
+            <div class="mt-3">2026-10-03 20:07:49 UTC</div>
+        </header>
+        <div class="my-8 bg-gradient-gray">
+            <div class="w-240 lg:w-full mx-auto">
+                <div class="clearfix md:px-8">
+                    <div id="cf-browser-status" class=" relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">
+  <div class="relative mb-10 md:m-0">
+
+    <span class="cf-icon-browser block md:hidden h-20 bg-center bg-no-repeat"></span>
+    <span class="cf-icon-ok w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>
+
+  </div>
+  <span class="md:block w-full truncate">You</span>
+  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">
+
+    Browser
+
+  </h3>
+
+  <span class="leading-1.3 text-2xl text-green-success">Working</span>
+
+</div>
+                    <div id="cf-cloudflare-status" class=" relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">
+  <div class="relative mb-10 md:m-0">
+    <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&#38;utm_campaign=api.supabase.com" target="_blank" rel="noopener noreferrer">
+    <span class="cf-icon-cloud block md:hidden h-20 bg-center bg-no-repeat"></span>
+    <span class="cf-icon-ok w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>
+    </a>
+  </div>
+  <span class="md:block w-full truncate">Miami</span>
+  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">
+  <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&utm_campaign=api.supabase.com" target="_blank" rel="noopener noreferrer">
+    Cloudflare
+  </a>
+  </h3>
+
+  <span class="leading-1.3 text-2xl text-green-success">Working</span>
+
+</div>
+                    <div id="cf-host-status" class="cf-error-source relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">
+  <div class="relative mb-10 md:m-0">
+
+    <span class="cf-icon-server block md:hidden h-20 bg-center bg-no-repeat"></span>
+    <span class="cf-icon-error w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>
+
+  </div>
+  <span class="md:block w-full truncate">api.supabase.com</span>
+  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">
+
+    Host
+
+  </h3>
+
+  <span class="leading-1.3 text-2xl text-red-error">Error</span>
+
+</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-240 lg:w-full mx-auto mb-8 lg:px-8">
+            <div class="clearfix">
+                <div class="w-1/2 md:w-full float-left pr-6 md:pb-10 md:pr-0 leading-relaxed">
+                    <h2 class="text-3xl font-normal leading-1.3 mb-4">What happened?</h2>
+                    <p class="mb-2">The origin web server timed out responding to this request.</p><p>The likely cause is an overloaded background task, database or application, stressing the resources on the host web server.</p>
+                </div>
+                <div class="w-1/2 md:w-full float-left leading-relaxed">
+                    <h2 class="text-3xl font-normal leading-1.3 mb-4">What can I do?</h2>
+
+              <h3 class="text-15 font-semibold mb-2">If you're a visitor of this website:</h3>
+              <p class="mb-6">Please try again in a few minutes.</p>
+
+              <h3 class="text-15 font-semibold mb-2">If you're the owner of this website:</h3>
+              <p>Please refer to the <a rel="noopener noreferrer" href="https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/">Error 524</a> article:</p>
+              <ul class="ml-4">
+                <li>Contact your hosting provider; check for long-running processes or an overloaded web server.</li>
+                <li>Use status polling of large HTTP processes to avoid this error.</li>
+                <li>Run the long-running scripts on a <a rel="noopener noreferrer" href="https://developers.cloudflare.com/dns/proxy-status/#dns-only-records">grey-clouded subdomain</a>.</li>
+                <li>Enterprise customers can <a rel="noopener noreferrer" href="https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/#resolution-on-cloudflare">increase the timeout setting</a> globally or for specific requests using Cache Rules.</li>
+              </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="cf-error-footer cf-wrapper w-240 lg:w-full py-10 sm:py-4 sm:px-8 mx-auto text-center sm:text-left border-solid border-0 border-t border-gray-300">
+    <p class="text-13">
+      <span class="cf-footer-item sm:block sm:mb-1">Cloudflare Ray ID: <strong class="font-semibold">a44e90378f0c4ae2</strong></span>
+      <span class="cf-footer-separator sm:hidden">&bull;</span>
+      <span id="cf-footer-item-ip" class="cf-footer-item hidden sm:block sm:mb-1">
+        Your IP:
+        <button type="button" id="cf-footer-ip-reveal" class="cf-footer-ip-reveal-btn">Click to reveal</button>
+        <span class="hidden" id="cf-footer-ip">2603:9000:d800:195d:a99c:1b1:73a:cc9c</span>
+        <span class="cf-footer-separator sm:hidden">&bull;</span>
+      </span>
+      <span class="cf-footer-item sm:block sm:mb-1"><span>Performance &amp; security by</span> <a rel="noopener noreferrer" href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&#38;utm_campaign=api.supabase.com" id="brand_link" target="_blank">Cloudflare</a></span>
+
+    </p>
+    <script>(function(){function d(){var b=a.getElementById("cf-footer-item-ip"),c=a.getElementById("cf-footer-ip-reveal");b&&"classList"in b&&(b.classList.remove("hidden"),c.addEventListener("click",function(){c.classList.add("hidden");a.getElementById("cf-footer-ip").classList.remove("hidden")}))}var a=document;document.addEventListener&&a.addEventListener("DOMContentLoaded",d)})();</script>
+  </div><!-- /.error-footer -->
+
+    </div>
+</div>
+</body>
+</html>
+Try rerunning the command with --debug to troubleshoot the error.
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at checkExecSyncError (node:child_process:882:11)
+    at execFileSync (node:child_process:918:15)
+    at file:///private/tmp/fuel-health-extra-1500.mjs:19:13
+    at ModuleJob.run (node:internal/modules/esm/module_job:271:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5) {
+  status: 1,
+  signal: null,
+  output: [
+    null,
+    '',
+    'Initialising login role...\n' +
+      'unexpected status 524: <!DOCTYPE html>\n' +
+      '<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->\n' +
+      '<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->\n' +
+      '<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en-US"> <![endif]-->\n' +
+      '<!--[if gt IE 8]><!--> <html class="no-js" lang="en-US"> <!--<![endif]-->\n' +
+      '<head>\n' +
+      '\n' +
+      '<title>supabase.com | 524: A timeout occurred</title>\n' +
+      '<meta charset="UTF-8" />\n' +
+      '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />\n' +
+      '<meta http-equiv="X-UA-Compatible" content="IE=Edge" />\n' +
+      '<meta name="robots" content="noindex, nofollow" />\n' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1" />\n' +
+      '<link rel="stylesheet" id="cf_styles-css" href="/cdn-cgi/styles/main.css" />\n' +
+      '</head>\n' +
+      '<body>\n' +
+      '<div id="cf-wrapper">\n' +
+      '    <div id="cf-error-details" class="p-0">\n' +
+      '        <header class="mx-auto pt-10 lg:pt-6 lg:px-8 w-240 lg:w-full mb-8">\n' +
+      '            <h1 class="inline-block sm:block sm:mb-2 font-light text-60 lg:text-4xl text-black-dark leading-tight mr-2">\n' +
+      '                <span class="inline-block">A timeout occurred</span>\n' +
+      '                <span class="code-label">Error code 524</span>\n' +
+      '            </h1>\n' +
+      '            <div>\n' +
+      '                Visit <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&utm_campaign=api.supabase.com" target="_blank" rel="noopener noreferrer">cloudflare.com</a> for more information.\n' +
+      '            </div>\n' +
+      '            <div class="mt-3">2026-10-03 20:07:49 UTC</div>\n' +
+      '        </header>\n' +
+      '        <div class="my-8 bg-gradient-gray">\n' +
+      '            <div class="w-240 lg:w-full mx-auto">\n' +
+      '                <div class="clearfix md:px-8">\n' +
+      '                    <div id="cf-browser-status" class=" relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">\n' +
+      '  <div class="relative mb-10 md:m-0">\n' +
+      '    \n' +
+      '    <span class="cf-icon-browser block md:hidden h-20 bg-center bg-no-repeat"></span>\n' +
+      '    <span class="cf-icon-ok w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>\n' +
+      '    \n' +
+      '  </div>\n' +
+      '  <span class="md:block w-full truncate">You</span>\n' +
+      '  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">\n' +
+      '  \n' +
+      '    Browser\n' +
+      '  \n' +
+      '  </h3>\n' +
+      '  \n' +
+      '  <span class="leading-1.3 text-2xl text-green-success">Working</span>\n' +
+      '  \n' +
+      '</div>\n' +
+      '                    <div id="cf-cloudflare-status" class=" relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">\n' +
+      '  <div class="relative mb-10 md:m-0">\n' +
+      '    <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&#38;utm_campaign=api.supabase.com" target="_blank" rel="noopener noreferrer">\n' +
+      '    <span class="cf-icon-cloud block md:hidden h-20 bg-center bg-no-repeat"></span>\n' +
+      '    <span class="cf-icon-ok w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>\n' +
+      '    </a>\n' +
+      '  </div>\n' +
+      '  <span class="md:block w-full truncate">Miami</span>\n' +
+      '  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">\n' +
+      '  <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&utm_campaign=api.supabase.com" target="_blank" rel="noopener noreferrer">\n' +
+      '    Cloudflare\n' +
+      '  </a>\n' +
+      '  </h3>\n' +
+      '  \n' +
+      '  <span class="leading-1.3 text-2xl text-green-success">Working</span>\n' +
+      '  \n' +
+      '</div>\n' +
+      '                    <div id="cf-host-status" class="cf-error-source relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">\n' +
+      '  <div class="relative mb-10 md:m-0">\n' +
+      '    \n' +
+      '    <span class="cf-icon-server block md:hidden h-20 bg-center bg-no-repeat"></span>\n' +
+      '    <span class="cf-icon-error w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>\n' +
+      '    \n' +
+      '  </div>\n' +
+      '  <span class="md:block w-full truncate">api.supabase.com</span>\n' +
+      '  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">\n' +
+      '  \n' +
+      '    Host\n' +
+      '  \n' +
+      '  </h3>\n' +
+      '  \n' +
+      '  <span class="leading-1.3 text-2xl text-red-error">Error</span>\n' +
+      '  \n' +
+      '</div>\n' +
+      '                </div>\n' +
+      '            </div>\n' +
+      '        </div>\n' +
+      '\n' +
+      '        <div class="w-240 lg:w-full mx-auto mb-8 lg:px-8">\n' +
+      '            <div class="clearfix">\n' +
+      '                <div class="w-1/2 md:w-full float-left pr-6 md:pb-10 md:pr-0 leading-relaxed">\n' +
+      '                    <h2 class="text-3xl font-normal leading-1.3 mb-4">What happened?</h2>\n' +
+      '                    <p class="mb-2">The origin web server timed out responding to this request.</p><p>The likely cause is an overloaded background task, database or application, stressing the resources on the host web server.</p>\n' +
+      '                </div>\n' +
+      '                <div class="w-1/2 md:w-full float-left leading-relaxed">\n' +
+      '                    <h2 class="text-3xl font-normal leading-1.3 mb-4">What can I do?</h2>\n' +
+      '                    \n' +
+      `              <h3 class="text-15 font-semibold mb-2">If you're a visitor of this website:</h3>\n` +
+      '              <p class="mb-6">Please try again in a few minutes.</p>\n' +
+      '\n' +
+      `              <h3 class="text-15 font-semibold mb-2">If you're the owner of this website:</h3>\n` +
+      '              <p>Please refer to the <a rel="noopener noreferrer" href="https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/">Error 524</a> article:</p>\n' +
+      '              <ul class="ml-4">\n' +
+      '                <li>Contact your hosting provider; check for long-running processes or an overloaded web server.</li>\n' +
+      '                <li>Use status polling of large HTTP processes to avoid this error.</li>\n' +
+      '                <li>Run the long-running scripts on a <a rel="noopener noreferrer" href="https://developers.cloudflare.com/dns/proxy-status/#dns-only-records">grey-clouded subdomain</a>.</li>\n' +
+      '                <li>Enterprise customers can <a rel="noopener noreferrer" href="https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/#resolution-on-cloudflare">increase the timeout setting</a> globally or for specific requests using Cache Rules.</li>\n' +
+      '              </ul>\n' +
+      '                </div>\n' +
+      '            </div>\n' +
+      '        </div>\n' +
+      '\n' +
+      '        <div class="cf-error-footer cf-wrapper w-240 lg:w-full py-10 sm:py-4 sm:px-8 mx-auto text-center sm:text-left border-solid border-0 border-t border-gray-300">\n' +
+      '    <p class="text-13">\n' +
+      '      <span class="cf-footer-item sm:block sm:mb-1">Cloudflare Ray ID: <strong class="font-semibold">a44e90378f0c4ae2</strong></span>\n' +
+      '      <span class="cf-footer-separator sm:hidden">&bull;</span>\n' +
+      '      <span id="cf-footer-item-ip" class="cf-footer-item hidden sm:block sm:mb-1">\n' +
+      '        Your IP:\n' +
+      '        <button type="button" id="cf-footer-ip-reveal" class="cf-footer-ip-reveal-btn">Click to reveal</button>\n' +
+      '        <span class="hidden" id="cf-footer-ip">2603:9000:d800:195d:a99c:1b1:73a:cc9c</span>\n' +
+      '        <span class="cf-footer-separator sm:hidden">&bull;</span>\n' +
+      '      </span>\n' +
+      '      <span class="cf-footer-item sm:block sm:mb-1"><span>Performance &amp; security by</span> <a rel="noopener noreferrer" href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&#38;utm_campaign=api.supabase.com" id="brand_link" target="_blank">Cloudflare</a></span>\n' +
+      '      \n' +
+      '    </p>\n' +
+      '    <script>(function(){function d(){var b=a.getElementById("cf-footer-item-ip"),c=a.getElementById("cf-footer-ip-reveal");b&&"classList"in b&&(b.classList.remove("hidden"),c.addEventListener("click",function(){c.classList.add("hidden");a.getElementById("cf-footer-ip").classList.remove("hidden")}))}var a=document;document.addEventListener&&a.addEventListener("DOMContentLoaded",d)})();</script>\n' +
+      '  </div><!-- /.error-footer -->\n' +
+      '\n' +
+      '    </div>\n' +
+      '</div>\n' +
+      '</body>\n' +
+      '</html>\n' +
+      'Try rerunning the command with --debug to troubleshoot the error.\n'
+  ],
+  pid: 20185,
+  stdout: '',
+  stderr: 'Initialising login role...\n' +
+    'unexpected status 524: <!DOCTYPE html>\n' +
+    '<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->\n' +
+    '<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->\n' +
+    '<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en-US"> <![endif]-->\n' +
+    '<!--[if gt IE 8]><!--> <html class="no-js" lang="en-US"> <!--<![endif]-->\n' +
+    '<head>\n' +
+    '\n' +
+    '<title>supabase.com | 524: A timeout occurred</title>\n' +
+    '<meta charset="UTF-8" />\n' +
+    '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />\n' +
+    '<meta http-equiv="X-UA-Compatible" content="IE=Edge" />\n' +
+    '<meta name="robots" content="noindex, nofollow" />\n' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1" />\n' +
+    '<link rel="stylesheet" id="cf_styles-css" href="/cdn-cgi/styles/main.css" />\n' +
+    '</head>\n' +
+    '<body>\n' +
+    '<div id="cf-wrapper">\n' +
+    '    <div id="cf-error-details" class="p-0">\n' +
+    '        <header class="mx-auto pt-10 lg:pt-6 lg:px-8 w-240 lg:w-full mb-8">\n' +
+    '            <h1 class="inline-block sm:block sm:mb-2 font-light text-60 lg:text-4xl text-black-dark leading-tight mr-2">\n' +
+    '                <span class="inline-block">A timeout occurred</span>\n' +
+    '                <span class="code-label">Error code 524</span>\n' +
+    '            </h1>\n' +
+    '            <div>\n' +
+    '                Visit <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&utm_campaign=api.supabase.com" target="_blank" rel="noopener noreferrer">cloudflare.com</a> for more information.\n' +
+    '            </div>\n' +
+    '            <div class="mt-3">2026-10-03 20:07:49 UTC</div>\n' +
+    '        </header>\n' +
+    '        <div class="my-8 bg-gradient-gray">\n' +
+    '            <div class="w-240 lg:w-full mx-auto">\n' +
+    '                <div class="clearfix md:px-8">\n' +
+    '                    <div id="cf-browser-status" class=" relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">\n' +
+    '  <div class="relative mb-10 md:m-0">\n' +
+    '    \n' +
+    '    <span class="cf-icon-browser block md:hidden h-20 bg-center bg-no-repeat"></span>\n' +
+    '    <span class="cf-icon-ok w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>\n' +
+    '    \n' +
+    '  </div>\n' +
+    '  <span class="md:block w-full truncate">You</span>\n' +
+    '  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">\n' +
+    '  \n' +
+    '    Browser\n' +
+    '  \n' +
+    '  </h3>\n' +
+    '  \n' +
+    '  <span class="leading-1.3 text-2xl text-green-success">Working</span>\n' +
+    '  \n' +
+    '</div>\n' +
+    '                    <div id="cf-cloudflare-status" class=" relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">\n' +
+    '  <div class="relative mb-10 md:m-0">\n' +
+    '    <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&#38;utm_campaign=api.supabase.com" target="_blank" rel="noopener noreferrer">\n' +
+    '    <span class="cf-icon-cloud block md:hidden h-20 bg-center bg-no-repeat"></span>\n' +
+    '    <span class="cf-icon-ok w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>\n' +
+    '    </a>\n' +
+    '  </div>\n' +
+    '  <span class="md:block w-full truncate">Miami</span>\n' +
+    '  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">\n' +
+    '  <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&utm_campaign=api.supabase.com" target="_blank" rel="noopener noreferrer">\n' +
+    '    Cloudflare\n' +
+    '  </a>\n' +
+    '  </h3>\n' +
+    '  \n' +
+    '  <span class="leading-1.3 text-2xl text-green-success">Working</span>\n' +
+    '  \n' +
+    '</div>\n' +
+    '                    <div id="cf-host-status" class="cf-error-source relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">\n' +
+    '  <div class="relative mb-10 md:m-0">\n' +
+    '    \n' +
+    '    <span class="cf-icon-server block md:hidden h-20 bg-center bg-no-repeat"></span>\n' +
+    '    <span class="cf-icon-error w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>\n' +
+    '    \n' +
+    '  </div>\n' +
+    '  <span class="md:block w-full truncate">api.supabase.com</span>\n' +
+    '  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">\n' +
+    '  \n' +
+    '    Host\n' +
+    '  \n' +
+    '  </h3>\n' +
+    '  \n' +
+    '  <span class="leading-1.3 text-2xl text-red-error">Error</span>\n' +
+    '  \n' +
+    '</div>\n' +
+    '                </div>\n' +
+    '            </div>\n' +
+    '        </div>\n' +
+    '\n' +
+    '        <div class="w-240 lg:w-full mx-auto mb-8 lg:px-8">\n' +
+    '            <div class="clearfix">\n' +
+    '                <div class="w-1/2 md:w-full float-left pr-6 md:pb-10 md:pr-0 leading-relaxed">\n' +
+    '                    <h2 class="text-3xl font-normal leading-1.3 mb-4">What happened?</h2>\n' +
+    '                    <p class="mb-2">The origin web server timed out responding to this request.</p><p>The likely cause is an overloaded background task, database or application, stressing the resources on the host web server.</p>\n' +
+    '                </div>\n' +
+    '                <div class="w-1/2 md:w-full float-left leading-relaxed">\n' +
+    '                    <h2 class="text-3xl font-normal leading-1.3 mb-4">What can I do?</h2>\n' +
+    '                    \n' +
+    `              <h3 class="text-15 font-semibold mb-2">If you're a visitor of this website:</h3>\n` +
+    '              <p class="mb-6">Please try again in a few minutes.</p>\n' +
+    '\n' +
+    `              <h3 class="text-15 font-semibold mb-2">If you're the owner of this website:</h3>\n` +
+    '              <p>Please refer to the <a rel="noopener noreferrer" href="https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/">Error 524</a> article:</p>\n' +
+    '              <ul class="ml-4">\n' +
+    '                <li>Contact your hosting provider; check for long-running processes or an overloaded web server.</li>\n' +
+    '                <li>Use status polling of large HTTP processes to avoid this error.</li>\n' +
+    '                <li>Run the long-running scripts on a <a rel="noopener noreferrer" href="https://developers.cloudflare.com/dns/proxy-status/#dns-only-records">grey-clouded subdomain</a>.</li>\n' +
+    '                <li>Enterprise customers can <a rel="noopener noreferrer" href="https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/#resolution-on-cloudflare">increase the timeout setting</a> globally or for specific requests using Cache Rules.</li>\n' +
+    '              </ul>\n' +
+    '                </div>\n' +
+    '            </div>\n' +
+    '        </div>\n' +
+    '\n' +
+    '        <div class="cf-error-footer cf-wrapper w-240 lg:w-full py-10 sm:py-4 sm:px-8 mx-auto text-center sm:text-left border-solid border-0 border-t border-gray-300">\n' +
+    '    <p class="text-13">\n' +
+    '      <span class="cf-footer-item sm:block sm:mb-1">Cloudflare Ray ID: <strong class="font-semibold">a44e90378f0c4ae2</strong></span>\n' +
+    '      <span class="cf-footer-separator sm:hidden">&bull;</span>\n' +
+    '      <span id="cf-footer-item-ip" class="cf-footer-item hidden sm:block sm:mb-1">\n' +
+    '        Your IP:\n' +
+    '        <button type="button" id="cf-footer-ip-reveal" class="cf-footer-ip-reveal-btn">Click to reveal</button>\n' +
+    '        <span class="hidden" id="cf-footer-ip">2603:9000:d800:195d:a99c:1b1:73a:cc9c</span>\n' +
+    '        <span class="cf-footer-separator sm:hidden">&bull;</span>\n' +
+    '      </span>\n' +
+    '      <span class="cf-footer-item sm:block sm:mb-1"><span>Performance &amp; security by</span> <a rel="noopener noreferrer" href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_524&#38;utm_campaign=api.supabase.com" id="brand_link" target="_blank">Cloudflare</a></span>\n' +
+    '      \n' +
+    '    </p>\n' +
+    '    <script>(function(){function d(){var b=a.getElementById("cf-footer-item-ip"),c=a.getElementById("cf-footer-ip-reveal");b&&"classList"in b&&(b.classList.remove("hidden"),c.addEventListener("click",function(){c.classList.add("hidden");a.getElementById("cf-footer-ip").classList.remove("hidden")}))}var a=document;document.addEventListener&&a.addEventListener("DOMContentLoaded",d)})();</script>\n' +
+    '  </div><!-- /.error-footer -->\n' +
+    '\n' +
+    '    </div>\n' +
+    '</div>\n' +
+    '</body>\n' +
+    '</html>\n' +
+    'Try rerunning the command with --debug to troubleshoot the error.\n'
+}
+
+Node.js v22.12.0

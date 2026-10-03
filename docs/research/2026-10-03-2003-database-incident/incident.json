@@ -1,0 +1,56 @@
+{
+  "detectedAt": "2026-10-03T20:03:43Z",
+  "projectRef": "vjindchxfebaltbslqwc",
+  "initialFailures": {
+    "nationalStatus": "HTTP 544: Failed to create login role: Connection terminated due to connection timeout",
+    "coverageQuery": "HTTP 544: Failed to create login role: Connection terminated due to connection timeout"
+  },
+  "dashboardObservedAt": "2026-10-03T20:06Z",
+  "dashboardStatus": "Unhealthy",
+  "services": {
+    "Database": "Healthy",
+    "PostgREST": "Unhealthy",
+    "Auth": "Unhealthy",
+    "Storage": "Unhealthy",
+    "Realtime": "Healthy",
+    "Edge Functions": "Healthy"
+  },
+  "databaseMetrics": {
+    "cpuPercent": 33,
+    "diskPercent": 9,
+    "ramPercent": 67,
+    "connections": 9,
+    "maxConnections": 60
+  },
+  "newGap": {
+    "slotAt": "2026-10-03T19:00:00Z",
+    "runId": 3428,
+    "succeededBatches": 67,
+    "missedBatches": 5,
+    "missingStationObservations": 9700
+  },
+  "recoveryAttempts": 1,
+  "plannedRepair": "Restart existing project; preserve enabled collectors, schedules, raw archives, budgets, fixed regional routing and original deadlines. No manual provider collection.",
+  "rootCause": "Intermittent database connectivity and unhealthy dependent services; underlying infrastructure cause unconfirmed.",
+  "restartConfirmedAt": "2026-10-03T20:06:40Z",
+  "recoveryStatus": "Verified: dashboard healthy, protected queries and scheduled dispatch resumed, immutable regional archive read-back passed",
+  "dashboardRecoveredAt": "2026-10-03T20:13Z",
+  "recoveredServices": [
+    "Database",
+    "PostgREST",
+    "Auth",
+    "Realtime",
+    "Storage",
+    "Edge Functions"
+  ],
+  "originalCronError": "job startup timeout",
+  "verifiedAt": "2026-10-03T20:15:14.759Z",
+  "currentRun": {
+    "id": 3467,
+    "succeededBatches": 11,
+    "missedBatches": 0,
+    "deadlineAt": "2026-10-03T21:00:00Z",
+    "status": "running"
+  },
+  "readback": "One batch per fixed region; new California/Oregon observations and earlier same-hour Virginia observation"
+}
