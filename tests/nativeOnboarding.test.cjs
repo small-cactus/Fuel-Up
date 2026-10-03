@@ -6,13 +6,12 @@ const load = require('./helpers/loadComponent.cjs');
 const { createPreferencesStore } = require('../src/lib/preferencesStore.js');
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
-test('onboarding selects the native flow on supported iOS patch releases', async () => {
+test('the iOS-only native flow does not depend on parsing the OS version', async () => {
     for (const [OS, Version, expected] of [
         ['ios', '27.0.1', 'NativeFlow'],
         ['ios', '26.5', 'NativeFlow'],
-        ['ios', '16.0.3', 'NativeFlow'],
-        ['ios', 16, 'NativeFlow'],
-        ['ios', '15.8.4', 'LegacyFlow'],
+        ['ios', 26, 'NativeFlow'],
+        ['ios', undefined, 'NativeFlow'],
         ['android', 35, 'LegacyFlow'],
     ]) {
         const loaded = [];

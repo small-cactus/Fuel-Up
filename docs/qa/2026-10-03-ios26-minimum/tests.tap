@@ -1,0 +1,67 @@
+TAP version 13
+# Subtest: prebuild keeps iOS 26 as the app and widget minimum
+ok 1 - prebuild keeps iOS 26 as the app and widget minimum
+  ---
+  duration_ms: 87.622208
+  ...
+# (node:16505) ExperimentalWarning: CommonJS module /Users/anthonyh/Desktop/Fuel Up/tests/nativeOnboarding.test.cjs is loading ES Module /Users/anthonyh/Desktop/Fuel Up/src/lib/preferencesStore.js using require().
+# Support for loading ES Module in require() is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:16505) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelSearchState.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: the iOS-only native flow does not depend on parsing the OS version
+ok 2 - the iOS-only native flow does not depend on parsing the OS version
+  ---
+  duration_ms: 128.407792
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: native completion saves exactly the final draft, including membership and E85 choices
+ok 3 - native completion saves exactly the final draft, including membership and E85 choices
+  ---
+  duration_ms: 16.407667
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: onboarding prefetch uses max radius; radius changes reuse inventory and filter brands locally
+ok 4 - onboarding prefetch uses max radius; radius changes reuse inventory and filter brands locally
+  ---
+  duration_ms: 8.002417
+  ...
+# Subtest: membership prefetch recovers a transient location lookup and uses the normalized state
+ok 5 - membership prefetch recovers a transient location lookup and uses the normalized state
+  ---
+  duration_ms: 1112.665542
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: a delayed cached location cannot replace a fresh fix or restart the radius camera
+ok 6 - a delayed cached location cannot replace a fresh fix or restart the radius camera
+  ---
+  duration_ms: 107.703917
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: designer accepts an unfinished decimal without replacing typed text
+ok 7 - designer accepts an unfinished decimal without replacing typed text
+  ---
+  duration_ms: 50.710625
+  ...
+# Subtest: the radius preview does not animate while its onboarding page is offscreen
+ok 8 - the radius preview does not animate while its onboarding page is offscreen
+  ---
+  duration_ms: 10.55875
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1520.789708

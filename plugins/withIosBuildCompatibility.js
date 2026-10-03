@@ -26,6 +26,11 @@ const floor = `    # Xcode 27 no longer accepts the old resource-bundle deployme
 module.exports = function withIosBuildCompatibility(config) {
     config = withXcodeProject(config, next => {
         next.modResults = quoteBundleCommand(next.modResults);
+        // Apply the app's support floor to its widget target too: expo-widgets
+        // otherwise regenerates that target with its own older default.
+        for (const configuration of Object.values(next.modResults.hash.project.objects.XCBuildConfiguration || {})) {
+            if (configuration.buildSettings) configuration.buildSettings.IPHONEOS_DEPLOYMENT_TARGET = '26.0';
+        }
         return next;
     });
     return withDangerousMod(config, ['ios', async next => {

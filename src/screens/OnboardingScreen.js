@@ -3,8 +3,8 @@ import { Platform } from 'react-native';
 import { usePreferences } from '../PreferencesContext';
 import { useTheme } from '../ThemeContext';
 
-// iOS reports dotted strings such as "27.0.1", which Number() cannot parse.
-const NativeOnboarding = Platform.OS === 'ios' && Number.parseInt(String(Platform.Version), 10) >= 16
+// The iOS app requires iOS 26+. Only other platforms use the React flow.
+const NativeOnboarding = Platform.OS === 'ios'
     ? require('./onboarding/NativeOnboarding').default : null;
 const LegacyOnboarding = !NativeOnboarding ? require('./OnboardingScreen.legacy').default : null;
 
