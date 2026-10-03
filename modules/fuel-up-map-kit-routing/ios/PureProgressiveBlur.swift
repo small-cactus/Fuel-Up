@@ -7,6 +7,7 @@ struct PureProgressiveBlur: UIViewRepresentable {
   enum Direction { case top, bottom, uniform }
   var radius: CGFloat = 20
   var direction: Direction = .bottom
+  var linearTransition = false
 
   func makeUIView(context: Context) -> VariableBlurView {
     let view = VariableBlurView(maxBlurRadius: radius, blurStyle: .regular)
@@ -29,7 +30,8 @@ struct PureProgressiveBlur: UIViewRepresentable {
       radial: direction == .uniform,
       radialCenterX: 0.5, radialCenterY: 0.5,
       radialClearRadius: 0, radialFeather: 0,
-      blurStyle: .regular
+      blurStyle: .regular,
+      linearTransition: linearTransition
     )
   }
 }

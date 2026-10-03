@@ -36,12 +36,12 @@ struct OnboardingLocationIllustration: View {
         }
         .overlay {
           ZStack {
-            PureProgressiveBlur(direction: .top)
+            PureProgressiveBlur(direction: .top, linearTransition: true)
               .frame(height: topBlurHeight)
               .offset(y: -40)
               .frame(maxHeight: .infinity, alignment: .top)
             // Preserve the clear hero and ease into blur beneath the text.
-            PureProgressiveBlur(radius: 12, direction: .bottom)
+            PureProgressiveBlur(radius: 12, direction: .bottom, linearTransition: true)
               .frame(height: bottomBlurHeight)
               .offset(y: 40)
               .frame(maxHeight: .infinity, alignment: .bottom)

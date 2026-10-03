@@ -10,7 +10,7 @@ struct OnboardingMapScrim: View {
     ZStack {
       PureProgressiveBlur(direction: .top).frame(height: topHeight)
         .frame(maxHeight: .infinity, alignment: .top)
-      PureProgressiveBlur(radius: 12, direction: .bottom)
+      PureProgressiveBlur(radius: 12, direction: .bottom, linearTransition: true)
         .frame(height: bottomHeight)
         .offset(y: bottomOffset)
         .frame(maxHeight: .infinity, alignment: .bottom)
