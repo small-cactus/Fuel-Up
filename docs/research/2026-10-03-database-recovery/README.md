@@ -26,3 +26,11 @@ All expected-slot counts remain unchanged: 41 complete, eight partial, five expi
 Validation: successful protected health queries and post-restart Cron executions; all six provider-free regional health checks; immutable archive read-back; evidence JSON parsing and whitespace checks. No executable code changed or deployment was necessary. One recovery attempt was used.
 
 Texas/DC geographic coverage assumptions and Texas's one-ID aggregate discrepancy remain unchanged. Archived observations and missing prices do not establish verified pump truth. Reserved final evaluation days remain untouched.
+
+## 05:42 UTC follow-up: sustained recovery, no new gaps
+
+The affected 04:00 sweep completed at 04:55:03 UTC with all 72 batches, before its original deadline. `full-recovery-hour-readback.json` verifies every immutable archive using the committed `auditHour.mjs`: hashes, exact fixed-inventory IDs, timestamps, schema, and regional provenance. The subsequent 05:00 sweep also completed, at 05:14:37, with all 141,660 IDs and 95,104 stations with reported prices (46,556 without prices).
+
+All 56 expected nationwide slots, including hours without run rows, are accounted for: 43 complete, eight historical partial, and five historical expired unstarted hours. The current 05:00 hour is already complete. City successes reached 1,386; historical misses remain 54, with zero due backlog or expired pending jobs. No new gap resulted from this outage.
+
+Both collectors and their main/watchdog schedules remain active. Every scheduled execution in the last ten minutes succeeded. The shared cooldown is expired, no newer provider denial exists, all six regional health/routing checks passed, and regional mismatches remain zero. Accounted archives are 178,451,380 of 900,000,000 bytes; database size is 348,564,627 bytes and total object storage 182,726,328 bytes. Optional serving projection timeouts and the older Trends cache remain separately visible; raw collection is complete. No additional repair or provider request was initiated by this follow-up.
