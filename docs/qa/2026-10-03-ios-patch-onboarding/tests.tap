@@ -1,0 +1,177 @@
+TAP version 13
+# (node:14443) ExperimentalWarning: CommonJS module /Users/anthonyh/Desktop/Fuel Up/tests/nativeOnboarding.test.cjs is loading ES Module /Users/anthonyh/Desktop/Fuel Up/src/lib/preferencesStore.js using require().
+# Support for loading ES Module in require() is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:14443) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelSearchState.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: onboarding selects the native flow on supported iOS patch releases
+ok 1 - onboarding selects the native flow on supported iOS patch releases
+  ---
+  duration_ms: 162.622375
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: native completion saves exactly the final draft, including membership and E85 choices
+ok 2 - native completion saves exactly the final draft, including membership and E85 choices
+  ---
+  duration_ms: 14.752958
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: onboarding prefetch uses max radius; radius changes reuse inventory and filter brands locally
+ok 3 - onboarding prefetch uses max radius; radius changes reuse inventory and filter brands locally
+  ---
+  duration_ms: 8.974
+  ...
+# Subtest: membership prefetch recovers a transient location lookup and uses the normalized state
+ok 4 - membership prefetch recovers a transient location lookup and uses the normalized state
+  ---
+  duration_ms: 1119.20175
+  ...
+# Subtest: bundled logos are exact 64px assets with provenance, matching hashes, and offline membership coverage
+ok 5 - bundled logos are exact 64px assets with provenance, matching hashes, and offline membership coverage
+  ---
+  duration_ms: 27.00525
+  ...
+# Subtest: native radius gesture snapping stays inside the same whole-mile settings range
+ok 6 - native radius gesture snapping stays inside the same whole-mile settings range
+  ---
+  duration_ms: 595.932958
+  ...
+# Subtest: dark fuel artwork preserves labels and changes only the silhouette for contrast
+ok 7 - dark fuel artwork preserves labels and changes only the silhouette for contrast
+  ---
+  duration_ms: 1.171667
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: a delayed cached location cannot replace a fresh fix or restart the radius camera
+ok 8 - a delayed cached location cannot replace a fresh fix or restart the radius camera
+  ---
+  duration_ms: 124.301458
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: designer accepts an unfinished decimal without replacing typed text
+ok 9 - designer accepts an unfinished decimal without replacing typed text
+  ---
+  duration_ms: 62.0255
+  ...
+# Subtest: the radius preview does not animate while its onboarding page is offscreen
+ok 10 - the radius preview does not animate while its onboarding page is offscreen
+  ---
+  duration_ms: 13.877834
+  ...
+# (node:14446) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/preferencesStore.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: clean setup persists regular and 2 miles together across relaunch
+ok 11 - clean setup persists regular and 2 miles together across relaunch
+  ---
+  duration_ms: 0.972084
+  ...
+# Subtest: clean setup persists regular and 7 miles together across relaunch
+ok 12 - clean setup persists regular and 7 miles together across relaunch
+  ---
+  duration_ms: 0.114875
+  ...
+# Subtest: clean setup persists regular and 15 miles together across relaunch
+ok 13 - clean setup persists regular and 15 miles together across relaunch
+  ---
+  duration_ms: 0.1365
+  ...
+# Subtest: clean setup persists midgrade and 2 miles together across relaunch
+ok 14 - clean setup persists midgrade and 2 miles together across relaunch
+  ---
+  duration_ms: 0.072416
+  ...
+# Subtest: clean setup persists midgrade and 7 miles together across relaunch
+ok 15 - clean setup persists midgrade and 7 miles together across relaunch
+  ---
+  duration_ms: 0.214583
+  ...
+# Subtest: clean setup persists midgrade and 15 miles together across relaunch
+ok 16 - clean setup persists midgrade and 15 miles together across relaunch
+  ---
+  duration_ms: 0.732667
+  ...
+# Subtest: clean setup persists premium and 2 miles together across relaunch
+ok 17 - clean setup persists premium and 2 miles together across relaunch
+  ---
+  duration_ms: 0.349459
+  ...
+# Subtest: clean setup persists premium and 7 miles together across relaunch
+ok 18 - clean setup persists premium and 7 miles together across relaunch
+  ---
+  duration_ms: 0.190375
+  ...
+# Subtest: clean setup persists premium and 15 miles together across relaunch
+ok 19 - clean setup persists premium and 15 miles together across relaunch
+  ---
+  duration_ms: 0.696292
+  ...
+# Subtest: clean setup persists diesel and 2 miles together across relaunch
+ok 20 - clean setup persists diesel and 2 miles together across relaunch
+  ---
+  duration_ms: 1.004875
+  ...
+# Subtest: clean setup persists diesel and 7 miles together across relaunch
+ok 21 - clean setup persists diesel and 7 miles together across relaunch
+  ---
+  duration_ms: 0.3205
+  ...
+# Subtest: clean setup persists diesel and 15 miles together across relaunch
+ok 22 - clean setup persists diesel and 15 miles together across relaunch
+  ---
+  duration_ms: 0.092459
+  ...
+# Subtest: rapid changes serialize writes so old requests cannot overwrite the latest preference
+ok 23 - rapid changes serialize writes so old requests cannot overwrite the latest preference
+  ---
+  duration_ms: 20.145041
+  ...
+# Subtest: edits during hydration retain stored settings and apply once loading finishes
+ok 24 - edits during hydration retain stored settings and apply once loading finishes
+  ---
+  duration_ms: 0.161708
+  ...
+# Subtest: a failed write does not poison future writes; replay preserves choices
+ok 25 - a failed write does not poison future writes; replay preserves choices
+  ---
+  duration_ms: 0.125541
+  ...
+# Subtest: corrupt preferences recover to clean onboarding: not json
+ok 26 - corrupt preferences recover to clean onboarding: not json
+  ---
+  duration_ms: 0.058041
+  ...
+# Subtest: corrupt preferences recover to clean onboarding: null
+ok 27 - corrupt preferences recover to clean onboarding: null
+  ---
+  duration_ms: 0.03275
+  ...
+# Subtest: corrupt preferences recover to clean onboarding: []
+ok 28 - corrupt preferences recover to clean onboarding: []
+  ---
+  duration_ms: 0.027125
+  ...
+# Subtest: corrupt preferences recover to clean onboarding: {"hasCompletedOnboarding":"false"}
+ok 29 - corrupt preferences recover to clean onboarding: {"hasCompletedOnboarding":"false"}
+  ---
+  duration_ms: 0.029375
+  ...
+1..29
+# tests 29
+# suites 0
+# pass 29
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1467.878541

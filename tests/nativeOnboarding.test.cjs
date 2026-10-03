@@ -6,6 +6,31 @@ const load = require('./helpers/loadComponent.cjs');
 const { createPreferencesStore } = require('../src/lib/preferencesStore.js');
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
+test('onboarding selects the native flow on supported iOS patch releases', async () => {
+    for (const [OS, Version, expected] of [
+        ['ios', '27.0.1', 'NativeFlow'],
+        ['ios', '26.5', 'NativeFlow'],
+        ['ios', '16.0.3', 'NativeFlow'],
+        ['ios', 16, 'NativeFlow'],
+        ['ios', '15.8.4', 'LegacyFlow'],
+        ['android', 35, 'LegacyFlow'],
+    ]) {
+        const loaded = [];
+        const Screen = load('src/screens/OnboardingScreen.js', {
+            'react-native': { Platform: { OS, Version } },
+            '../PreferencesContext': { usePreferences: () => ({ preferences: {}, completeOnboarding() {} }) },
+            '../ThemeContext': { useTheme: () => ({ isDark: false }) },
+            './onboarding/NativeOnboarding': { default: () => { loaded.push('NativeFlow'); return React.createElement('NativeFlow'); } },
+            './OnboardingScreen.legacy': { default: () => { loaded.push('LegacyFlow'); return React.createElement('LegacyFlow'); } },
+        }).default;
+        let view;
+        await act(async () => { view = create(React.createElement(Screen)); });
+        assert.equal(view.toJSON().type, expected, `${OS} ${Version}`);
+        assert.deepEqual(loaded, [expected]);
+        await act(async () => view.unmount());
+    }
+});
+
 test('native completion saves exactly the final draft, including membership and E85 choices', async () => {
     let saved;
     const store = createPreferencesStore({ getItem: async () => null, setItem: async (_, value) => { saved = value; } });
