@@ -1,0 +1,30 @@
+{
+  "observedAt": "2026-10-03T04:46:00Z",
+  "projectRef": "vjindchxfebaltbslqwc",
+  "dashboardStatus": "Unhealthy",
+  "dashboardHealthIssue": "Database not usable",
+  "dashboardError": "Connection failed at the TCP layer (CONNECT_TIMEOUT) after 5002ms: timeout expired.",
+  "managementApiError": "HTTP 544: Failed to create login role: Connection terminated due to connection timeout",
+  "nationalSlot": "2026-10-03T04:00:00Z",
+  "nationalBatchesAtInitialCheck": 55,
+  "expectedBatches": 72,
+  "lastExpiredCompleteHour": "2026-10-03T03:00:00Z",
+  "nationalCoverage": {
+    "complete": 41,
+    "partial": 8,
+    "expiredUnstarted": 5,
+    "currentRunning": 1
+  },
+  "cityHistoricalMisses": 54,
+  "expiredPendingCityJobs": 0,
+  "wrongRegionJobs": 0,
+  "repair": {
+    "attempt": 1,
+    "action": "Restart project through existing logged-in Supabase dashboard",
+    "submittedApproximately": "2026-10-03T04:46:45Z",
+    "resultAtSubmission": "Restarting",
+    "authorization": "Existing proactive repair/recovery authorization; same recovery validated during October 2 outage"
+  },
+  "providerRequestsByMonitor": 0,
+  "scope": "No data edits, schedule changes, collector re-enabling, budgets or collection-window changes."
+}
