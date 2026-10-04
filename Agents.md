@@ -135,6 +135,56 @@ The split/merge behavior must follow this exact model:
 
 ---
 
+# Physical iPhone Build and Installation
+
+Prefer the CLI for builds and installation. Opening Xcode or Device Hub is not
+required. An already paired iPhone on the same Wi-Fi network can be installed to
+wirelessly; USB is a fallback for pairing or connection problems, not a routine
+deployment requirement. Argent's USB-only phone interaction requirement does not
+apply to CLI installation. Keep the phone unlocked and awake if connection fails.
+
+Discover the current physical target with `xcrun devicectl list devices` before
+building. The iPhone 18 Pro Max used successfully on 2026-10-04 has identifier
+`00008160-001E206E02A0000A`. Verify it is still the intended connected device;
+do not select the older iPhone 17 Pro Max or a simulator by default.
+
+From the repository root, build a signed Release app and install it in place:
+
+```sh
+xcrun devicectl list devices
+npm run ios:device -- 00008160-001E206E02A0000A --install
+```
+
+The script uses `xcodebuild` with `ios/FuelUp.xcworkspace`, scheme `FuelUp`,
+Release configuration, and `-destination id=<device-identifier>`. It reuses
+`/tmp/FuelUpGlassDevice`, builds independent targets in parallel, disables compiler
+index storage for CLI builds, and prints build timings. Override with
+`FUELUP_DERIVED_DATA`, `FUELUP_BUILD_JOBS`, or `FUELUP_TEAM_ID` when necessary.
+Keep the same DerivedData directory between runs. Do not routinely clean it,
+reinstall dependencies, or run `pod install`: this project's Podfile regenerates
+native code, invalidating incremental work. Run those steps when inputs actually
+change. Keep Release JS bundling enabled so source changes are included; Release
+installs run without Metro. Do not run simultaneous builds against the same cache.
+
+The underlying installation and verification commands are:
+
+```sh
+xcrun devicectl device install app \
+  --device 00008160-001E206E02A0000A \
+  /tmp/FuelUpGlassDevice/Build/Products/Release-iphoneos/FuelUp.app --timeout 120
+xcrun devicectl device info apps \
+  --device 00008160-001E206E02A0000A \
+  --bundle-id com.anthonyh.fuelup --timeout 30
+```
+
+Use a freshly successful, signature-verified build. Install over the existing app
+to preserve data; do not uninstall or use a reinstall tool that clears data unless
+explicitly requested. Report installation separately from launch or visual QA.
+During storage cleanup, preserve the active device and simulator build caches;
+remove only verified obsolete, regenerable outputs, not source or QA evidence.
+
+---
+
 # Commit and Push Changes
 
 The user frequently deletes local project folders. Work that has not been pushed may be permanently lost.
