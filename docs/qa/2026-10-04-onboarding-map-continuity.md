@@ -29,8 +29,11 @@ more of the map while preserving blur beneath the explanation and footer.
   dismissed during visual validation.
 - Home clustering was untouched; the live cluster probe was not run. Compact
   devices, live VoiceOver, and Reduce Motion were not exercised in this run.
-- Phone installation is pending a reachable physical device; the signed build
-  is at `/tmp/FuelUpGlassDevice/Build/Products/Release-iphoneos/FuelUp.app`.
+- Signed Release build installed successfully on the iPhone 18 Pro Max over
+  the wireless connection using `xcrun devicectl device install app`, targeting
+  its device identifier. A subsequent `device info apps --bundle-id
+  com.anthonyh.fuelup` confirmed the installation. This was an in-place update,
+  with no uninstall or data reset. Physical-phone interaction QA is not claimed.
 
 [Location, dark](evidence/2026-10-04-onboarding-map-continuity/location-dark.png)
 
