@@ -1,8 +1,8 @@
 import SwiftUI
 
 // Decorative prices have no connection to live station observations. Each
-// neutral capsule grows, holds, and disappears before its slot moves to a free
-// area. The single best-price capsule stays visible and never changes in place.
+// capsule grows, holds, and disappears before its slot moves to a free area.
+// The best-price identity stays green through the same cycle as the other chips.
 @available(iOS 16.0, *)
 struct OnboardingPricePills: View {
   let isActive: Bool
@@ -60,20 +60,22 @@ struct OnboardingPricePills: View {
           withAnimation(.spring(response: 0.48, dampingFraction: 0.62)) { scales[id] = 1 }
         }
         try await Task.sleep(nanoseconds: 1_600_000_000)
-        var index = 1
+        var index = 0
         while !Task.isCancelled {
           withAnimation(.easeIn(duration: 0.32)) { scales[index] = 0 }
           try await Task.sleep(nanoseconds: 380_000_000)
           // Reserve the other capsules' cells and avoid the previous location.
           let occupied = Set(samples.map(\.cell))
           let nextCell = (0..<6).filter { !occupied.contains($0) }.randomElement()!
-          withoutAnimation { samples[index] = Sample(id: index, cell: nextCell) }
+          withoutAnimation {
+            samples[index] = Sample(id: index, cell: nextCell, isBest: index == bestID)
+          }
           try await Task.sleep(nanoseconds: 50_000_000)
           withAnimation(.spring(response: 0.48, dampingFraction: 0.62)) { scales[index] = 1 }
-          // Only neutral chips cycle. Keeping the green chip unchanged avoids
-          // either a gap in the best-price highlight or two greens at once.
+          // Every chip takes a turn, including green. Price and position only
+          // change at zero scale; the green identity never transfers or duplicates.
           try await Task.sleep(nanoseconds: 1_600_000_000)
-          index = index == 1 ? 2 : 1
+          index = (index + 1) % samples.count
         }
       } catch { /* Leaving the page or backgrounding cancels the sequence. */ }
     }

@@ -1,0 +1,28 @@
+{
+  "fps": 30.0,
+  "frames": 982,
+  "checkedFromSeconds": 3,
+  "greenComponentCounts": {
+    "1": 851,
+    "0": 41
+  },
+  "roundedGreenCenters": [
+    [
+      90,
+      210
+    ],
+    [
+      240,
+      90
+    ],
+    [
+      240,
+      150
+    ],
+    [
+      240,
+      210
+    ]
+  ],
+  "method": "Light-mode recorded-pixel heuristic at 330x717; zero detections include small/fully shrunk phases. Supporting visual evidence, not semantic UI assertions."
+}
