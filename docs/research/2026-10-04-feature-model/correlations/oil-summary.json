@@ -1,0 +1,244 @@
+{
+  "models": {
+    "gas_history": {
+      "alpha": 1000,
+      "mae_cents": 5.232206587234994,
+      "p95_cents": 13.685035658973437,
+      "n": 91,
+      "train_rows": 1190,
+      "selection_rows": 53,
+      "features": [
+        "gas_lag1w",
+        "gas_lag2w",
+        "gas_lag3w",
+        "gas_lag4w",
+        "season_sin",
+        "season_cos"
+      ],
+      "standardized_coefficients": {
+        "gas_lag1w": 0.015295116235607021,
+        "gas_lag2w": 0.004367032944239119,
+        "gas_lag3w": 0.0036752438024881084,
+        "gas_lag4w": 0.0008461979402866254,
+        "season_sin": 0.00562801966157653,
+        "season_cos": 0.0004873371576580452
+      },
+      "saved_model_replay_exact": true,
+      "mae_delta_vs_gas_history_cents": 0.0,
+      "block8_interval95": [
+        0.0,
+        0.0
+      ]
+    },
+    "oil_30d": {
+      "alpha": 1000,
+      "mae_cents": 5.190753788082753,
+      "p95_cents": 13.795117561084622,
+      "n": 91,
+      "train_rows": 1190,
+      "selection_rows": 53,
+      "features": [
+        "gas_lag1w",
+        "gas_lag2w",
+        "gas_lag3w",
+        "gas_lag4w",
+        "season_sin",
+        "season_cos",
+        "DCOILWTICO_30d",
+        "DCOILBRENTEU_30d"
+      ],
+      "standardized_coefficients": {
+        "gas_lag1w": 0.01524155600060665,
+        "gas_lag2w": 0.004307726598957017,
+        "gas_lag3w": 0.003293788074802532,
+        "gas_lag4w": 0.0004117675462017406,
+        "season_sin": 0.005671276313964052,
+        "season_cos": 0.00048016836218525043,
+        "DCOILWTICO_30d": 0.0015178071080383848,
+        "DCOILBRENTEU_30d": 0.0007760708204425465
+      },
+      "saved_model_replay_exact": true,
+      "mae_delta_vs_gas_history_cents": -0.04145279915224258,
+      "block8_interval95": [
+        -0.11168498204666717,
+        0.018516690798591764
+      ]
+    },
+    "oil_lags": {
+      "alpha": 1000,
+      "mae_cents": 4.887163267142309,
+      "p95_cents": 13.303719008183982,
+      "n": 91,
+      "train_rows": 1190,
+      "selection_rows": 53,
+      "features": [
+        "gas_lag1w",
+        "gas_lag2w",
+        "gas_lag3w",
+        "gas_lag4w",
+        "season_sin",
+        "season_cos",
+        "DCOILWTICO_8d",
+        "DCOILWTICO_14d",
+        "DCOILWTICO_21d",
+        "DCOILWTICO_28d",
+        "DCOILWTICO_30d",
+        "DCOILWTICO_42d",
+        "DCOILWTICO_60d",
+        "DCOILBRENTEU_8d",
+        "DCOILBRENTEU_14d",
+        "DCOILBRENTEU_21d",
+        "DCOILBRENTEU_28d",
+        "DCOILBRENTEU_30d",
+        "DCOILBRENTEU_42d",
+        "DCOILBRENTEU_60d"
+      ],
+      "standardized_coefficients": {
+        "gas_lag1w": 0.01057216854018327,
+        "gas_lag2w": 0.0037461285449364714,
+        "gas_lag3w": 0.0022363759483915524,
+        "gas_lag4w": 0.00023415866378272417,
+        "season_sin": 0.00566925516240807,
+        "season_cos": 0.0005484242323880786,
+        "DCOILWTICO_8d": 0.0064473120715975675,
+        "DCOILWTICO_14d": 0.0014251888540004138,
+        "DCOILWTICO_21d": 0.0009035703724567387,
+        "DCOILWTICO_28d": 0.0007735198608551173,
+        "DCOILWTICO_30d": 0.0010324578285796204,
+        "DCOILWTICO_42d": 0.0010574600404390298,
+        "DCOILWTICO_60d": 0.0005179840749232181,
+        "DCOILBRENTEU_8d": 0.0076711102403632875,
+        "DCOILBRENTEU_14d": 0.0019883640065310976,
+        "DCOILBRENTEU_21d": 0.002818154887266296,
+        "DCOILBRENTEU_28d": 0.0008858581409804416,
+        "DCOILBRENTEU_30d": 0.0005804926845492921,
+        "DCOILBRENTEU_42d": 0.00028518291611125617,
+        "DCOILBRENTEU_60d": 0.0006675161585612285
+      },
+      "saved_model_replay_exact": true,
+      "mae_delta_vs_gas_history_cents": -0.3450433200926861,
+      "block8_interval95": [
+        -0.678695882453817,
+        -0.039625241857523856
+      ]
+    },
+    "oil_and_wholesale_lags": {
+      "alpha": 1000,
+      "mae_cents": 4.706455988918219,
+      "p95_cents": 12.975320595357054,
+      "n": 91,
+      "train_rows": 1190,
+      "selection_rows": 53,
+      "features": [
+        "gas_lag1w",
+        "gas_lag2w",
+        "gas_lag3w",
+        "gas_lag4w",
+        "season_sin",
+        "season_cos",
+        "DCOILWTICO_8d",
+        "DCOILWTICO_14d",
+        "DCOILWTICO_21d",
+        "DCOILWTICO_28d",
+        "DCOILWTICO_30d",
+        "DCOILWTICO_42d",
+        "DCOILWTICO_60d",
+        "DCOILBRENTEU_8d",
+        "DCOILBRENTEU_14d",
+        "DCOILBRENTEU_21d",
+        "DCOILBRENTEU_28d",
+        "DCOILBRENTEU_30d",
+        "DCOILBRENTEU_42d",
+        "DCOILBRENTEU_60d",
+        "DGASNYH_8d",
+        "DGASNYH_14d",
+        "DGASNYH_21d",
+        "DGASNYH_28d",
+        "DGASNYH_30d",
+        "DGASNYH_42d",
+        "DGASNYH_60d",
+        "DGASUSGULF_8d",
+        "DGASUSGULF_14d",
+        "DGASUSGULF_21d",
+        "DGASUSGULF_28d",
+        "DGASUSGULF_30d",
+        "DGASUSGULF_42d",
+        "DGASUSGULF_60d"
+      ],
+      "standardized_coefficients": {
+        "gas_lag1w": 0.00689287676786637,
+        "gas_lag2w": 0.0032592677019771675,
+        "gas_lag3w": 0.0010911327214833645,
+        "gas_lag4w": 0.00029512639069555327,
+        "season_sin": 0.005287031948970184,
+        "season_cos": 0.00050393696356532,
+        "DCOILWTICO_8d": 0.0040614968388416085,
+        "DCOILWTICO_14d": 0.0009978129445489022,
+        "DCOILWTICO_21d": 8.204008119623926e-05,
+        "DCOILWTICO_28d": 0.0005915673414477041,
+        "DCOILWTICO_30d": 0.0006140849097691641,
+        "DCOILWTICO_42d": 0.0011728656991868826,
+        "DCOILWTICO_60d": 0.0005383727483025533,
+        "DCOILBRENTEU_8d": 0.005363995516642861,
+        "DCOILBRENTEU_14d": 0.0019535757657733947,
+        "DCOILBRENTEU_21d": 0.0016394306808316772,
+        "DCOILBRENTEU_28d": 0.0005106899312256819,
+        "DCOILBRENTEU_30d": 9.955736154929706e-05,
+        "DCOILBRENTEU_42d": 0.0006785094888661487,
+        "DCOILBRENTEU_60d": 0.0005453906974796346,
+        "DGASNYH_8d": 0.007187688854269847,
+        "DGASNYH_14d": 0.00023906657773307472,
+        "DGASNYH_21d": 0.0025748415296261134,
+        "DGASNYH_28d": 0.001928573038121407,
+        "DGASNYH_30d": 0.0009378592619892674,
+        "DGASNYH_42d": -0.0003989144631031743,
+        "DGASNYH_60d": 0.0006222276492641017,
+        "DGASUSGULF_8d": 0.004647858393411588,
+        "DGASUSGULF_14d": 0.0028824495762130114,
+        "DGASUSGULF_21d": 0.0035946414384327146,
+        "DGASUSGULF_28d": 0.0007849842141304394,
+        "DGASUSGULF_30d": 0.0003988589325404498,
+        "DGASUSGULF_42d": 0.0004137321722226781,
+        "DGASUSGULF_60d": -0.0003376073896386232
+      },
+      "saved_model_replay_exact": true,
+      "mae_delta_vs_gas_history_cents": -0.5257505983167753,
+      "block8_interval95": [
+        -0.8466625601787319,
+        -0.21602587090960199
+      ]
+    }
+  },
+  "last_price_mae_cents": 5.656043956043958,
+  "split": "Train 2001-2023; select ridge strength 2024; historical benchmark 2025-2026 (previously viewed, not fresh confirmation)",
+  "six_hour_effect": "Not identifiable from daily crude and weekly retail series. No interpolated intraday pseudo-observations.",
+  "lag_interpretation": "30 days means oil seven-day change ending 30 days before retail observation, not an asserted causal delay.",
+  "availability": "Predictive external features lagged at least eight days; current-vintage observations, not complete real-time release vintages.",
+  "sources": {
+    "DCOILWTICO": {
+      "url": "https://fred.stlouisfed.org/series/DCOILWTICO",
+      "sha256": "7b40f3e16ed0d971e97bb42da7e6f07613ec193be84b0070861955d8d3c5550b",
+      "last_observation": "2026-09-29"
+    },
+    "DCOILBRENTEU": {
+      "url": "https://fred.stlouisfed.org/series/DCOILBRENTEU",
+      "sha256": "71a280aec76b33f42dad5023cc99b228615517b9a0c0e97dcae45e10f0994778",
+      "last_observation": "2026-09-29"
+    },
+    "GASREGW": {
+      "url": "https://fred.stlouisfed.org/series/GASREGW",
+      "sha256": "f78d819d05984f585a86a36972ebc465fd8a618a764fa2902bea84cf342790e0",
+      "last_observation": "2026-09-28"
+    },
+    "DGASNYH": {
+      "url": "https://fred.stlouisfed.org/series/DGASNYH",
+      "sha256": "ff8986b4aa6f5914b060e224ba7c22a75726ade5b4edefa6ff6ca7883cbd8f88",
+      "last_observation": "2026-09-29"
+    },
+    "DGASUSGULF": {
+      "url": "https://fred.stlouisfed.org/series/DGASUSGULF",
+      "sha256": "1dec29b5755ca91b669b02e9f04890a5e61b6856f74ab8b3d29bc606e254bc9b",
+      "last_observation": "2026-09-29"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "method": "Matched-station hourly changes averaged within observed UTC day, paired with daily oil changes at each lag. Not a complete daily gasoline return.",
+  "distinct_dates": 4,
+  "days": [
+    {
+      "date": "2026-09-30",
+      "gas_mean_hourly_move": -0.0007859044250854599,
+      "observed_hours": 1
+    },
+    {
+      "date": "2026-10-01",
+      "gas_mean_hourly_move": -0.0005839413895759641,
+      "observed_hours": 16
+    },
+    {
+      "date": "2026-10-02",
+      "gas_mean_hourly_move": -0.0005506164497153846,
+      "observed_hours": 21
+    },
+    {
+      "date": "2026-10-03",
+      "gas_mean_hourly_move": -0.0004067249343343603,
+      "observed_hours": 19
+    }
+  ],
+  "warning": "A numerical correlation can be computed at 30 days. With only four dates, incomplete days, shared daily oil values, and many candidate lags, it is not reliable lag identification. Neither the 141660 stations nor hourly replication adds independent oil-change dates.",
+  "current_oil": "Carry-forward source dates disclosed in CSV; no claim of live intraday oil prices."
+}

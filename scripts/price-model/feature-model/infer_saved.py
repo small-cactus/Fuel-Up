@@ -37,7 +37,15 @@ def main(dataset,context,models,out,cache,replay):
     contexts=np.load(context);out.mkdir(exist_ok=True,parents=True);report={}
     for folder in models.iterdir():
         if not folder.is_dir():continue
-        if (folder/'spec.json').exists() and (folder/'best.pt').exists():
+        if (folder/'signed-spec.json').exists():
+            from train_signed import signed_predict
+            predictions,prob=signed_predict(folder,X)
+            for name,pred in predictions.items():
+                np.save(out/(folder.name+'_'+name+'-predictions.npy'),pred)
+                if replay:
+                    old=np.load(folder/(name+'-predictions.npy'));err=float(np.max(abs(old-pred)))
+                    report[name]={'max_abs_delta':err,'exact':bool(np.array_equal(old,pred))};assert err<1e-6
+        elif (folder/'spec.json').exists() and (folder/'best.pt').exists():
             pred,prob=neural_predict(folder,X,m,contexts,cache)
             np.save(out/(folder.name+'-predictions.npy'),pred);np.save(out/(folder.name+'-probabilities.npy'),prob)
             if replay:

@@ -32,8 +32,10 @@ class QwenPrice(nn.Module):
     def __init__(self,features,states,model_name,revision,cache,adapter=None):
         super().__init__()
         from transformers import AutoModel
+        from transformers.utils import logging
         from peft import LoraConfig,get_peft_model,PeftModel
-        base=AutoModel.from_pretrained(model_name,revision=revision,cache_dir=cache,torch_dtype=torch.bfloat16,attn_implementation='sdpa')
+        logging.disable_progress_bar()
+        base=AutoModel.from_pretrained(model_name,revision=revision,cache_dir=cache,dtype=torch.bfloat16,attn_implementation='sdpa')
         width=base.config.hidden_size
         self.backbone=PeftModel.from_pretrained(base,adapter) if adapter else get_peft_model(base,LoraConfig(r=16,lora_alpha=32,lora_dropout=.05,target_modules=['q_proj','v_proj','k_proj','o_proj'],bias='none'))
         self.backbone.config.use_cache=False
