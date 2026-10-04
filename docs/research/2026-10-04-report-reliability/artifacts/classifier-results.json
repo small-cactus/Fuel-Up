@@ -1,0 +1,3431 @@
+{
+  "data": {
+    "features": [
+      "raw_price",
+      "report_age",
+      "observed_hour_sin",
+      "observed_hour_cos",
+      "day_sin",
+      "day_cos",
+      "state",
+      "grade",
+      "payment",
+      "latitude",
+      "longitude",
+      "history_reports",
+      "hours_since_first",
+      "history_price_mean_delta",
+      "history_price_std",
+      "history_change_rate",
+      "hours_since_last_change",
+      "state_median_delta",
+      "state_move_6h",
+      "state_move_24h",
+      "local_median_delta",
+      "local_peer_count",
+      "local_move_6h",
+      "local_move_24h",
+      "prior_quote_missing",
+      "event_delta_1",
+      "event_elapsed_1",
+      "event_delta_2",
+      "event_elapsed_2",
+      "event_delta_3",
+      "event_elapsed_3",
+      "event_delta_4",
+      "event_elapsed_4",
+      "event_delta_6",
+      "event_elapsed_6",
+      "event_delta_8",
+      "event_elapsed_8",
+      "hour_delta_1",
+      "hour_present_1",
+      "hour_delta_3",
+      "hour_present_3",
+      "hour_delta_6",
+      "hour_present_6",
+      "hour_delta_12",
+      "hour_present_12",
+      "hour_delta_24",
+      "hour_present_24",
+      "price_cents_ending",
+      "price_quarter_position",
+      "own_median_6_residual",
+      "own_mad_6",
+      "own_min_6_residual",
+      "own_max_6_residual",
+      "own_median_24_residual",
+      "own_mad_24",
+      "own_min_24_residual",
+      "own_max_24_residual",
+      "own_median_48_residual",
+      "own_mad_48",
+      "own_min_48_residual",
+      "own_max_48_residual",
+      "product_0_spread_residual",
+      "product_0_spread_mad",
+      "product_0_spread_count",
+      "product_0_report_newer_hours",
+      "product_0_age",
+      "product_1_spread_residual",
+      "product_1_spread_mad",
+      "product_1_spread_count",
+      "product_1_report_newer_hours",
+      "product_1_age",
+      "product_2_spread_residual",
+      "product_2_spread_mad",
+      "product_2_spread_count",
+      "product_2_report_newer_hours",
+      "product_2_age",
+      "product_3_spread_residual",
+      "product_3_spread_mad",
+      "product_3_spread_count",
+      "product_3_report_newer_hours",
+      "product_3_age",
+      "product_4_spread_residual",
+      "product_4_spread_mad",
+      "product_4_spread_count",
+      "product_4_report_newer_hours",
+      "product_4_age",
+      "product_5_spread_residual",
+      "product_5_spread_mad",
+      "product_5_spread_count",
+      "product_5_report_newer_hours",
+      "product_5_age",
+      "product_6_spread_residual",
+      "product_6_spread_mad",
+      "product_6_spread_count",
+      "product_6_report_newer_hours",
+      "product_6_age",
+      "product_7_spread_residual",
+      "product_7_spread_mad",
+      "product_7_spread_count",
+      "product_7_report_newer_hours",
+      "product_7_age",
+      "last_actual_change",
+      "previous_actual_change",
+      "hours_since_actual_change",
+      "actual_change_count",
+      "historical_reversal_rate",
+      "typical_actual_change",
+      "peer_mean_change_6",
+      "peer_fraction_up_6",
+      "peer_fraction_down_6",
+      "peer_offset_adjusted_6",
+      "peer_mean_change_24",
+      "peer_fraction_up_24",
+      "peer_fraction_down_24",
+      "peer_offset_adjusted_24",
+      "peer_fresh_median_residual",
+      "refresh_count_6",
+      "unchanged_refresh_count_6",
+      "unchanged_refresh_fraction_6",
+      "source_rollback_count_6",
+      "refresh_count_24",
+      "unchanged_refresh_count_24",
+      "unchanged_refresh_fraction_24",
+      "source_rollback_count_24",
+      "refresh_count_48",
+      "unchanged_refresh_count_48",
+      "unchanged_refresh_fraction_48",
+      "source_rollback_count_48",
+      "report_interval_mean",
+      "report_interval_cv",
+      "observed_history_hours",
+      "archive_observation_count",
+      "recent_large_refresh_count",
+      "rapid_timestamp_advances",
+      "cross_product_agreement_count",
+      "cross_product_conflict",
+      "signed_cross_product_deviation",
+      "peer_and_product_agree",
+      "isolated_jump_size",
+      "peer_deviation_scaled"
+    ],
+    "base_features": 116,
+    "stats": {
+      "input_rows": 902777,
+      "no_confirmation": 448263,
+      "ambiguous": 50037,
+      "boundary_purged": 106988
+    },
+    "input_hash": "1c7169e4d772a910a072c2ede8d347c8d6e2be5eb2dbfc5d064beb16af03f7a6",
+    "array_manifest": "a85caa070501bc02b6a74d2efc3f4a301c9f98839bff42cc5ce352bf938dbb19",
+    "cutoff": "2026-10-04T06:00:00.000Z"
+  },
+  "splits": {
+    "train": {
+      "rows": 189170,
+      "positives": 9414,
+      "stations": 33625
+    },
+    "calibration": {
+      "rows": 33537,
+      "positives": 549,
+      "stations": 9180
+    },
+    "later_development": {
+      "rows": 74782,
+      "positives": 1708,
+      "stations": 16477
+    }
+  },
+  "models": {
+    "age_only": {
+      "seconds": 4.684428374981508,
+      "trees": 242,
+      "params": {
+        "iterations": 300,
+        "learning_rate": 0.05,
+        "depth": 3,
+        "l2_leaf_reg": 10,
+        "loss_function": "Logloss",
+        "thread_count": 8,
+        "random_seed": 104,
+        "verbose": 100,
+        "eval_metric": "Logloss",
+        "allow_writing_files": false,
+        "task_type": "CPU",
+        "early_stopping_rounds": 80
+      },
+      "columns": [
+        "report_age"
+      ],
+      "sha256": "18fe570adefdc6cfb176b4c744489c088231cbef32cc19c1f6756a9029181a1e",
+      "saved_replay_max_difference": 1.721696096801395e-08,
+      "calibration": {
+        "rows": 33537,
+        "positive": 549,
+        "prevalence": 0.01636997942570892,
+        "average_precision": 0.16451814460488065,
+        "roc_auc": 0.7927542454583584,
+        "brier": 0.014805455692112446,
+        "selected_threshold": null,
+        "selected": {
+          "flags": 0,
+          "true_positives": 0,
+          "false_positives": 0,
+          "precision": null,
+          "recall": 0.0
+        },
+        "at_probability": {
+          "0.1": {
+            "flags": 1081,
+            "true_positives": 197,
+            "false_positives": 884,
+            "precision": 0.1822386679000925,
+            "recall": 0.3588342440801457
+          },
+          "0.25": {
+            "flags": 268,
+            "true_positives": 84,
+            "false_positives": 184,
+            "precision": 0.31343283582089554,
+            "recall": 0.15300546448087432
+          },
+          "0.5": {
+            "flags": 61,
+            "true_positives": 34,
+            "false_positives": 27,
+            "precision": 0.5573770491803278,
+            "recall": 0.061930783242258654
+          },
+          "0.75": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "0.9": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          }
+        }
+      },
+      "later_development": {
+        "rows": 74782,
+        "positive": 1708,
+        "prevalence": 0.02283972078842502,
+        "average_precision": 0.1684215558839342,
+        "roc_auc": 0.8306811823810313,
+        "brier": 0.020916393026709557,
+        "selected_threshold": null,
+        "selected": {
+          "flags": 0,
+          "true_positives": 0,
+          "false_positives": 0,
+          "precision": null,
+          "recall": 0.0
+        },
+        "at_probability": {
+          "0.1": {
+            "flags": 4420,
+            "true_positives": 736,
+            "false_positives": 3684,
+            "precision": 0.1665158371040724,
+            "recall": 0.4309133489461358
+          },
+          "0.25": {
+            "flags": 1665,
+            "true_positives": 421,
+            "false_positives": 1244,
+            "precision": 0.25285285285285286,
+            "recall": 0.2464871194379391
+          },
+          "0.5": {
+            "flags": 243,
+            "true_positives": 101,
+            "false_positives": 142,
+            "precision": 0.4156378600823045,
+            "recall": 0.05913348946135832
+          },
+          "0.75": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "0.9": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          }
+        }
+      },
+      "station_bootstrap_95": {
+        "precision": [
+          null,
+          null
+        ],
+        "recall": [
+          0.0,
+          0.0
+        ]
+      },
+      "top_features": [
+        [
+          "report_age",
+          100.0
+        ]
+      ],
+      "flagged_stations": 0,
+      "age_slices": {
+        "0-1": {
+          "rows": 34340,
+          "positive": 217,
+          "prevalence": 0.006319161327897496,
+          "average_precision": 0.009584088277112178,
+          "roc_auc": 0.5506312822506705,
+          "brier": 0.006291147321462631,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.25": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.5": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "1-6": {
+          "rows": 24641,
+          "positive": 247,
+          "prevalence": 0.010023943833448318,
+          "average_precision": 0.028968939207677867,
+          "roc_auc": 0.7354293997428849,
+          "brier": 0.009840499609708786,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.25": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.5": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "6-24": {
+          "rows": 13087,
+          "positive": 687,
+          "prevalence": 0.052494842209826545,
+          "average_precision": 0.07602370232970279,
+          "roc_auc": 0.6132285650561111,
+          "brier": 0.04990477114915848,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 1706,
+              "true_positives": 179,
+              "false_positives": 1527,
+              "precision": 0.10492379835873387,
+              "recall": 0.26055312954876275
+            },
+            "0.25": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.5": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "24-10000": {
+          "rows": 2714,
+          "positive": 557,
+          "prevalence": 0.20523212969786292,
+          "average_precision": 0.31547182959640674,
+          "roc_auc": 0.6493775432831522,
+          "brier": 0.1667458415031433,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 2714,
+              "true_positives": 557,
+              "false_positives": 2157,
+              "precision": 0.20523212969786292,
+              "recall": 1.0
+            },
+            "0.25": {
+              "flags": 1665,
+              "true_positives": 421,
+              "false_positives": 1244,
+              "precision": 0.25285285285285286,
+              "recall": 0.755834829443447
+            },
+            "0.5": {
+              "flags": 243,
+              "true_positives": 101,
+              "false_positives": 142,
+              "precision": 0.4156378600823045,
+              "recall": 0.1813285457809695
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        }
+      },
+      "fuel_slices": {
+        "0.0": {
+          "rows": 21232,
+          "positive": 638,
+          "prevalence": 0.03004898266767144,
+          "average_precision": 0.2235791672747504,
+          "roc_auc": 0.8512361926031959,
+          "brier": 0.026024580001831055,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 1486,
+              "true_positives": 297,
+              "false_positives": 1189,
+              "precision": 0.19986541049798115,
+              "recall": 0.46551724137931033
+            },
+            "0.25": {
+              "flags": 575,
+              "true_positives": 171,
+              "false_positives": 404,
+              "precision": 0.29739130434782607,
+              "recall": 0.26802507836990597
+            },
+            "0.5": {
+              "flags": 50,
+              "true_positives": 32,
+              "false_positives": 18,
+              "precision": 0.64,
+              "recall": 0.050156739811912224
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "1.0": {
+          "rows": 14662,
+          "positive": 345,
+          "prevalence": 0.023530214159050607,
+          "average_precision": 0.1585133042298396,
+          "roc_auc": 0.8050400203264996,
+          "brier": 0.021901259198784828,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 911,
+              "true_positives": 149,
+              "false_positives": 762,
+              "precision": 0.16355653128430298,
+              "recall": 0.4318840579710145
+            },
+            "0.25": {
+              "flags": 344,
+              "true_positives": 85,
+              "false_positives": 259,
+              "precision": 0.24709302325581395,
+              "recall": 0.2463768115942029
+            },
+            "0.5": {
+              "flags": 69,
+              "true_positives": 25,
+              "false_positives": 44,
+              "precision": 0.36231884057971014,
+              "recall": 0.07246376811594203
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "2.0": {
+          "rows": 17638,
+          "positive": 336,
+          "prevalence": 0.019049778886495068,
+          "average_precision": 0.1258043864170885,
+          "roc_auc": 0.8079558996757876,
+          "brier": 0.01864570751786232,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 994,
+              "true_positives": 141,
+              "false_positives": 853,
+              "precision": 0.14185110663983905,
+              "recall": 0.41964285714285715
+            },
+            "0.25": {
+              "flags": 357,
+              "true_positives": 67,
+              "false_positives": 290,
+              "precision": 0.1876750700280112,
+              "recall": 0.19940476190476192
+            },
+            "0.5": {
+              "flags": 64,
+              "true_positives": 20,
+              "false_positives": 44,
+              "precision": 0.3125,
+              "recall": 0.05952380952380952
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "3.0": {
+          "rows": 16531,
+          "positive": 355,
+          "prevalence": 0.021474804911983544,
+          "average_precision": 0.16743817195173202,
+          "roc_auc": 0.8437291031052786,
+          "brier": 0.019712120294570923,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 964,
+              "true_positives": 145,
+              "false_positives": 819,
+              "precision": 0.1504149377593361,
+              "recall": 0.4084507042253521
+            },
+            "0.25": {
+              "flags": 372,
+              "true_positives": 96,
+              "false_positives": 276,
+              "precision": 0.25806451612903225,
+              "recall": 0.2704225352112676
+            },
+            "0.5": {
+              "flags": 57,
+              "true_positives": 24,
+              "false_positives": 33,
+              "precision": 0.42105263157894735,
+              "recall": 0.0676056338028169
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "4.0": {
+          "rows": 2656,
+          "positive": 25,
+          "prevalence": 0.00941265060240964,
+          "average_precision": 0.04420770647942473,
+          "roc_auc": 0.6415659445077917,
+          "brier": 0.009732844308018684,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 49,
+              "true_positives": 3,
+              "false_positives": 46,
+              "precision": 0.061224489795918366,
+              "recall": 0.12
+            },
+            "0.25": {
+              "flags": 14,
+              "true_positives": 2,
+              "false_positives": 12,
+              "precision": 0.14285714285714285,
+              "recall": 0.08
+            },
+            "0.5": {
+              "flags": 2,
+              "true_positives": 0,
+              "false_positives": 2,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "5.0": {
+          "rows": 2063,
+          "positive": 9,
+          "prevalence": 0.004362578768783325,
+          "average_precision": 0.022507139240790185,
+          "roc_auc": 0.4715189873417721,
+          "brier": 0.004806122742593288,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 16,
+              "true_positives": 1,
+              "false_positives": 15,
+              "precision": 0.0625,
+              "recall": 0.1111111111111111
+            },
+            "0.25": {
+              "flags": 3,
+              "true_positives": 0,
+              "false_positives": 3,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "0.5": {
+              "flags": 1,
+              "true_positives": 0,
+              "false_positives": 1,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        }
+      }
+    },
+    "existing": {
+      "seconds": 48.42600324994419,
+      "trees": 481,
+      "params": {
+        "iterations": 700,
+        "learning_rate": 0.05,
+        "depth": 7,
+        "l2_leaf_reg": 10,
+        "loss_function": "Logloss",
+        "thread_count": 8,
+        "random_seed": 104,
+        "verbose": 100,
+        "eval_metric": "Logloss",
+        "allow_writing_files": false,
+        "task_type": "CPU",
+        "early_stopping_rounds": 80
+      },
+      "columns": [
+        "raw_price",
+        "report_age",
+        "observed_hour_sin",
+        "observed_hour_cos",
+        "day_sin",
+        "day_cos",
+        "state",
+        "grade",
+        "payment",
+        "latitude",
+        "longitude",
+        "history_reports",
+        "hours_since_first",
+        "history_price_mean_delta",
+        "history_price_std",
+        "history_change_rate",
+        "hours_since_last_change",
+        "state_median_delta",
+        "state_move_6h",
+        "state_move_24h",
+        "local_median_delta",
+        "local_peer_count",
+        "local_move_6h",
+        "local_move_24h",
+        "prior_quote_missing",
+        "event_delta_1",
+        "event_elapsed_1",
+        "event_delta_2",
+        "event_elapsed_2",
+        "event_delta_3",
+        "event_elapsed_3",
+        "event_delta_4",
+        "event_elapsed_4",
+        "event_delta_6",
+        "event_elapsed_6",
+        "event_delta_8",
+        "event_elapsed_8",
+        "hour_delta_1",
+        "hour_present_1",
+        "hour_delta_3",
+        "hour_present_3",
+        "hour_delta_6",
+        "hour_present_6",
+        "hour_delta_12",
+        "hour_present_12",
+        "hour_delta_24",
+        "hour_present_24",
+        "price_cents_ending",
+        "price_quarter_position",
+        "own_median_6_residual",
+        "own_mad_6",
+        "own_min_6_residual",
+        "own_max_6_residual",
+        "own_median_24_residual",
+        "own_mad_24",
+        "own_min_24_residual",
+        "own_max_24_residual",
+        "own_median_48_residual",
+        "own_mad_48",
+        "own_min_48_residual",
+        "own_max_48_residual",
+        "product_0_spread_residual",
+        "product_0_spread_mad",
+        "product_0_spread_count",
+        "product_0_report_newer_hours",
+        "product_0_age",
+        "product_1_spread_residual",
+        "product_1_spread_mad",
+        "product_1_spread_count",
+        "product_1_report_newer_hours",
+        "product_1_age",
+        "product_2_spread_residual",
+        "product_2_spread_mad",
+        "product_2_spread_count",
+        "product_2_report_newer_hours",
+        "product_2_age",
+        "product_3_spread_residual",
+        "product_3_spread_mad",
+        "product_3_spread_count",
+        "product_3_report_newer_hours",
+        "product_3_age",
+        "product_4_spread_residual",
+        "product_4_spread_mad",
+        "product_4_spread_count",
+        "product_4_report_newer_hours",
+        "product_4_age",
+        "product_5_spread_residual",
+        "product_5_spread_mad",
+        "product_5_spread_count",
+        "product_5_report_newer_hours",
+        "product_5_age",
+        "product_6_spread_residual",
+        "product_6_spread_mad",
+        "product_6_spread_count",
+        "product_6_report_newer_hours",
+        "product_6_age",
+        "product_7_spread_residual",
+        "product_7_spread_mad",
+        "product_7_spread_count",
+        "product_7_report_newer_hours",
+        "product_7_age",
+        "last_actual_change",
+        "previous_actual_change",
+        "hours_since_actual_change",
+        "actual_change_count",
+        "historical_reversal_rate",
+        "typical_actual_change",
+        "peer_mean_change_6",
+        "peer_fraction_up_6",
+        "peer_fraction_down_6",
+        "peer_offset_adjusted_6",
+        "peer_mean_change_24",
+        "peer_fraction_up_24",
+        "peer_fraction_down_24",
+        "peer_offset_adjusted_24",
+        "peer_fresh_median_residual"
+      ],
+      "sha256": "97ceaeb86ebf8c466068bae30784b67de03415fe82f3c1910c52453358fa062e",
+      "saved_replay_max_difference": 2.9786929034436582e-08,
+      "calibration": {
+        "rows": 33537,
+        "positive": 549,
+        "prevalence": 0.01636997942570892,
+        "average_precision": 0.25613385148558143,
+        "roc_auc": 0.8858930984010746,
+        "brier": 0.013834063895046711,
+        "selected_threshold": 0.6088374853134155,
+        "selected": {
+          "flags": 57,
+          "true_positives": 40,
+          "false_positives": 17,
+          "precision": 0.7017543859649122,
+          "recall": 0.07285974499089254
+        },
+        "at_probability": {
+          "0.1": {
+            "flags": 928,
+            "true_positives": 201,
+            "false_positives": 727,
+            "precision": 0.2165948275862069,
+            "recall": 0.366120218579235
+          },
+          "0.25": {
+            "flags": 258,
+            "true_positives": 116,
+            "false_positives": 142,
+            "precision": 0.4496124031007752,
+            "recall": 0.21129326047358835
+          },
+          "0.5": {
+            "flags": 82,
+            "true_positives": 54,
+            "false_positives": 28,
+            "precision": 0.6585365853658537,
+            "recall": 0.09836065573770492
+          },
+          "0.75": {
+            "flags": 28,
+            "true_positives": 20,
+            "false_positives": 8,
+            "precision": 0.7142857142857143,
+            "recall": 0.03642987249544627
+          },
+          "0.9": {
+            "flags": 6,
+            "true_positives": 6,
+            "false_positives": 0,
+            "precision": 1.0,
+            "recall": 0.01092896174863388
+          }
+        }
+      },
+      "later_development": {
+        "rows": 74782,
+        "positive": 1708,
+        "prevalence": 0.02283972078842502,
+        "average_precision": 0.270310430782678,
+        "roc_auc": 0.8854824123939936,
+        "brier": 0.019139068201184273,
+        "selected_threshold": 0.6088374853134155,
+        "selected": {
+          "flags": 213,
+          "true_positives": 143,
+          "false_positives": 70,
+          "precision": 0.6713615023474179,
+          "recall": 0.08372365339578454
+        },
+        "at_probability": {
+          "0.1": {
+            "flags": 3505,
+            "true_positives": 745,
+            "false_positives": 2760,
+            "precision": 0.21255349500713266,
+            "recall": 0.43618266978922715
+          },
+          "0.25": {
+            "flags": 1152,
+            "true_positives": 434,
+            "false_positives": 718,
+            "precision": 0.3767361111111111,
+            "recall": 0.2540983606557377
+          },
+          "0.5": {
+            "flags": 343,
+            "true_positives": 210,
+            "false_positives": 133,
+            "precision": 0.6122448979591837,
+            "recall": 0.12295081967213115
+          },
+          "0.75": {
+            "flags": 89,
+            "true_positives": 68,
+            "false_positives": 21,
+            "precision": 0.7640449438202247,
+            "recall": 0.03981264637002342
+          },
+          "0.9": {
+            "flags": 19,
+            "true_positives": 17,
+            "false_positives": 2,
+            "precision": 0.8947368421052632,
+            "recall": 0.009953161592505855
+          }
+        }
+      },
+      "station_bootstrap_95": {
+        "precision": [
+          0.5978474341991591,
+          0.741817336452182
+        ],
+        "recall": [
+          0.0671845731829209,
+          0.09865172056755055
+        ]
+      },
+      "top_features": [
+        [
+          "report_age",
+          12.283353375874725
+        ],
+        [
+          "longitude",
+          12.185457289373145
+        ],
+        [
+          "latitude",
+          5.68154755393008
+        ],
+        [
+          "state",
+          4.199803975135623
+        ],
+        [
+          "peer_fresh_median_residual",
+          3.7735358920309903
+        ],
+        [
+          "product_1_age",
+          3.211692753388531
+        ],
+        [
+          "event_elapsed_1",
+          3.170133694850304
+        ],
+        [
+          "history_reports",
+          2.478606338889732
+        ],
+        [
+          "state_median_delta",
+          2.2982868798899414
+        ],
+        [
+          "event_delta_6",
+          2.274052533608838
+        ],
+        [
+          "event_elapsed_3",
+          1.9769469982400898
+        ],
+        [
+          "event_delta_1",
+          1.914929261339375
+        ],
+        [
+          "raw_price",
+          1.8280558386934456
+        ],
+        [
+          "observed_hour_sin",
+          1.7057649025817088
+        ],
+        [
+          "product_5_age",
+          1.6332787859476834
+        ],
+        [
+          "event_delta_2",
+          1.6302777551107346
+        ],
+        [
+          "product_3_age",
+          1.6155748872545048
+        ],
+        [
+          "event_delta_3",
+          1.5591835222615091
+        ],
+        [
+          "event_elapsed_4",
+          1.5344702843642843
+        ],
+        [
+          "peer_fraction_down_24",
+          1.3290132263034657
+        ],
+        [
+          "price_cents_ending",
+          1.2310391551798603
+        ],
+        [
+          "event_elapsed_8",
+          1.205901826062631
+        ],
+        [
+          "peer_mean_change_24",
+          1.1948066657149863
+        ],
+        [
+          "local_median_delta",
+          1.1663021851127922
+        ],
+        [
+          "product_7_age",
+          1.0966764368368593
+        ]
+      ],
+      "flagged_stations": 172,
+      "age_slices": {
+        "0-1": {
+          "rows": 34340,
+          "positive": 217,
+          "prevalence": 0.006319161327897496,
+          "average_precision": 0.15890604152630902,
+          "roc_auc": 0.8216473854209447,
+          "brier": 0.005711953155696392,
+          "selected_threshold": 0.6088374853134155,
+          "selected": {
+            "flags": 11,
+            "true_positives": 11,
+            "false_positives": 0,
+            "precision": 1.0,
+            "recall": 0.05069124423963134
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 120,
+              "true_positives": 34,
+              "false_positives": 86,
+              "precision": 0.2833333333333333,
+              "recall": 0.15668202764976957
+            },
+            "0.25": {
+              "flags": 38,
+              "true_positives": 26,
+              "false_positives": 12,
+              "precision": 0.6842105263157895,
+              "recall": 0.11981566820276497
+            },
+            "0.5": {
+              "flags": 18,
+              "true_positives": 18,
+              "false_positives": 0,
+              "precision": 1.0,
+              "recall": 0.08294930875576037
+            },
+            "0.75": {
+              "flags": 3,
+              "true_positives": 3,
+              "false_positives": 0,
+              "precision": 1.0,
+              "recall": 0.013824884792626729
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "1-6": {
+          "rows": 24641,
+          "positive": 247,
+          "prevalence": 0.010023943833448318,
+          "average_precision": 0.07855253068197289,
+          "roc_auc": 0.8398904422969875,
+          "brier": 0.009598045609891415,
+          "selected_threshold": 0.6088374853134155,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 101,
+              "true_positives": 14,
+              "false_positives": 87,
+              "precision": 0.13861386138613863,
+              "recall": 0.05668016194331984
+            },
+            "0.25": {
+              "flags": 13,
+              "true_positives": 1,
+              "false_positives": 12,
+              "precision": 0.07692307692307693,
+              "recall": 0.004048582995951417
+            },
+            "0.5": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "6-24": {
+          "rows": 13087,
+          "positive": 687,
+          "prevalence": 0.052494842209826545,
+          "average_precision": 0.15276910099969962,
+          "roc_auc": 0.7070160116448326,
+          "brier": 0.04758460074663162,
+          "selected_threshold": 0.6088374853134155,
+          "selected": {
+            "flags": 7,
+            "true_positives": 5,
+            "false_positives": 2,
+            "precision": 0.7142857142857143,
+            "recall": 0.00727802037845706
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 1476,
+              "true_positives": 216,
+              "false_positives": 1260,
+              "precision": 0.14634146341463414,
+              "recall": 0.314410480349345
+            },
+            "0.25": {
+              "flags": 202,
+              "true_positives": 59,
+              "false_positives": 143,
+              "precision": 0.29207920792079206,
+              "recall": 0.0858806404657933
+            },
+            "0.5": {
+              "flags": 22,
+              "true_positives": 14,
+              "false_positives": 8,
+              "precision": 0.6363636363636364,
+              "recall": 0.020378457059679767
+            },
+            "0.75": {
+              "flags": 1,
+              "true_positives": 0,
+              "false_positives": 1,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "24-10000": {
+          "rows": 2714,
+          "positive": 557,
+          "prevalence": 0.20523212969786292,
+          "average_precision": 0.4910388306489144,
+          "roc_auc": 0.7483430424429168,
+          "brier": 0.13849087059497833,
+          "selected_threshold": 0.6088374853134155,
+          "selected": {
+            "flags": 195,
+            "true_positives": 127,
+            "false_positives": 68,
+            "precision": 0.6512820512820513,
+            "recall": 0.22800718132854578
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 1808,
+              "true_positives": 481,
+              "false_positives": 1327,
+              "precision": 0.26603982300884954,
+              "recall": 0.8635547576301615
+            },
+            "0.25": {
+              "flags": 899,
+              "true_positives": 348,
+              "false_positives": 551,
+              "precision": 0.3870967741935484,
+              "recall": 0.6247755834829444
+            },
+            "0.5": {
+              "flags": 303,
+              "true_positives": 178,
+              "false_positives": 125,
+              "precision": 0.5874587458745875,
+              "recall": 0.31956912028725315
+            },
+            "0.75": {
+              "flags": 85,
+              "true_positives": 65,
+              "false_positives": 20,
+              "precision": 0.7647058823529411,
+              "recall": 0.11669658886894076
+            },
+            "0.9": {
+              "flags": 19,
+              "true_positives": 17,
+              "false_positives": 2,
+              "precision": 0.8947368421052632,
+              "recall": 0.03052064631956912
+            }
+          }
+        }
+      },
+      "fuel_slices": {
+        "0.0": {
+          "rows": 21232,
+          "positive": 638,
+          "prevalence": 0.03004898266767144,
+          "average_precision": 0.35830468083546735,
+          "roc_auc": 0.9002982881765788,
+          "brier": 0.02332768216729164,
+          "selected_threshold": 0.6088374853134155,
+          "selected": {
+            "flags": 108,
+            "true_positives": 80,
+            "false_positives": 28,
+            "precision": 0.7407407407407407,
+            "recall": 0.12539184952978055
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 1345,
+              "true_positives": 334,
+              "false_positives": 1011,
+              "precision": 0.2483271375464684,
+              "recall": 0.5235109717868338
+            },
+            "0.25": {
+              "flags": 456,
+              "true_positives": 198,
+              "false_positives": 258,
+              "precision": 0.4342105263157895,
+              "recall": 0.3103448275862069
+            },
+            "0.5": {
+              "flags": 152,
+              "true_positives": 104,
+              "false_positives": 48,
+              "precision": 0.6842105263157895,
+              "recall": 0.16300940438871472
+            },
+            "0.75": {
+              "flags": 54,
+              "true_positives": 47,
+              "false_positives": 7,
+              "precision": 0.8703703703703703,
+              "recall": 0.07366771159874608
+            },
+            "0.9": {
+              "flags": 15,
+              "true_positives": 13,
+              "false_positives": 2,
+              "precision": 0.8666666666666667,
+              "recall": 0.02037617554858934
+            }
+          }
+        },
+        "1.0": {
+          "rows": 14662,
+          "positive": 345,
+          "prevalence": 0.023530214159050607,
+          "average_precision": 0.25679381701259496,
+          "roc_auc": 0.8778672967071679,
+          "brier": 0.019920114427804947,
+          "selected_threshold": 0.6088374853134155,
+          "selected": {
+            "flags": 47,
+            "true_positives": 30,
+            "false_positives": 17,
+            "precision": 0.6382978723404256,
+            "recall": 0.08695652173913043
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 681,
+              "true_positives": 142,
+              "false_positives": 539,
+              "precision": 0.20851688693098386,
+              "recall": 0.4115942028985507
+            },
+            "0.25": {
+              "flags": 235,
+              "true_positives": 91,
+              "false_positives": 144,
+              "precision": 0.3872340425531915,
+              "recall": 0.263768115942029
+            },
+            "0.5": {
+              "flags": 81,
+              "true_positives": 47,
+              "false_positives": 34,
+              "precision": 0.5802469135802469,
+              "recall": 0.13623188405797101
+            },
+            "0.75": {
+              "flags": 14,
+              "true_positives": 9,
+              "false_positives": 5,
+              "precision": 0.6428571428571429,
+              "recall": 0.02608695652173913
+            },
+            "0.9": {
+              "flags": 2,
+              "true_positives": 2,
+              "false_positives": 0,
+              "precision": 1.0,
+              "recall": 0.005797101449275362
+            }
+          }
+        },
+        "2.0": {
+          "rows": 17638,
+          "positive": 336,
+          "prevalence": 0.019049778886495068,
+          "average_precision": 0.18126743289895839,
+          "roc_auc": 0.8603304531268062,
+          "brier": 0.017306724563241005,
+          "selected_threshold": 0.6088374853134155,
+          "selected": {
+            "flags": 32,
+            "true_positives": 16,
+            "false_positives": 16,
+            "precision": 0.5,
+            "recall": 0.047619047619047616
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 733,
+              "true_positives": 124,
+              "false_positives": 609,
+              "precision": 0.16916780354706684,
+              "recall": 0.36904761904761907
+            },
+            "0.25": {
+              "flags": 213,
+              "true_positives": 61,
+              "false_positives": 152,
+              "precision": 0.2863849765258216,
+              "recall": 0.18154761904761904
+            },
+            "0.5": {
+              "flags": 59,
+              "true_positives": 27,
+              "false_positives": 32,
+              "precision": 0.4576271186440678,
+              "recall": 0.08035714285714286
+            },
+            "0.75": {
+              "flags": 13,
+              "true_positives": 8,
+              "false_positives": 5,
+              "precision": 0.6153846153846154,
+              "recall": 0.023809523809523808
+            },
+            "0.9": {
+              "flags": 2,
+              "true_positives": 2,
+              "false_positives": 0,
+              "precision": 1.0,
+              "recall": 0.005952380952380952
+            }
+          }
+        },
+        "3.0": {
+          "rows": 16531,
+          "positive": 355,
+          "prevalence": 0.021474804911983544,
+          "average_precision": 0.23842455694443015,
+          "roc_auc": 0.8810863947284101,
+          "brier": 0.018382130190730095,
+          "selected_threshold": 0.6088374853134155,
+          "selected": {
+            "flags": 25,
+            "true_positives": 17,
+            "false_positives": 8,
+            "precision": 0.68,
+            "recall": 0.04788732394366197
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 704,
+              "true_positives": 140,
+              "false_positives": 564,
+              "precision": 0.19886363636363635,
+              "recall": 0.39436619718309857
+            },
+            "0.25": {
+              "flags": 230,
+              "true_positives": 82,
+              "false_positives": 148,
+              "precision": 0.3565217391304348,
+              "recall": 0.23098591549295774
+            },
+            "0.5": {
+              "flags": 48,
+              "true_positives": 32,
+              "false_positives": 16,
+              "precision": 0.6666666666666666,
+              "recall": 0.09014084507042254
+            },
+            "0.75": {
+              "flags": 7,
+              "true_positives": 4,
+              "false_positives": 3,
+              "precision": 0.5714285714285714,
+              "recall": 0.011267605633802818
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "4.0": {
+          "rows": 2656,
+          "positive": 25,
+          "prevalence": 0.00941265060240964,
+          "average_precision": 0.08207479421958151,
+          "roc_auc": 0.8936221968833143,
+          "brier": 0.009586190804839134,
+          "selected_threshold": 0.6088374853134155,
+          "selected": {
+            "flags": 1,
+            "true_positives": 0,
+            "false_positives": 1,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 32,
+              "true_positives": 4,
+              "false_positives": 28,
+              "precision": 0.125,
+              "recall": 0.16
+            },
+            "0.25": {
+              "flags": 14,
+              "true_positives": 1,
+              "false_positives": 13,
+              "precision": 0.07142857142857142,
+              "recall": 0.04
+            },
+            "0.5": {
+              "flags": 2,
+              "true_positives": 0,
+              "false_positives": 2,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 1,
+              "true_positives": 0,
+              "false_positives": 1,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "5.0": {
+          "rows": 2063,
+          "positive": 9,
+          "prevalence": 0.004362578768783325,
+          "average_precision": 0.049527742745410865,
+          "roc_auc": 0.8357135129287028,
+          "brier": 0.00450985599309206,
+          "selected_threshold": 0.6088374853134155,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 10,
+              "true_positives": 1,
+              "false_positives": 9,
+              "precision": 0.1,
+              "recall": 0.1111111111111111
+            },
+            "0.25": {
+              "flags": 4,
+              "true_positives": 1,
+              "false_positives": 3,
+              "precision": 0.25,
+              "recall": 0.1111111111111111
+            },
+            "0.5": {
+              "flags": 1,
+              "true_positives": 0,
+              "false_positives": 1,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        }
+      }
+    },
+    "extended": {
+      "seconds": 70.43409541598521,
+      "trees": 594,
+      "params": {
+        "iterations": 700,
+        "learning_rate": 0.05,
+        "depth": 7,
+        "l2_leaf_reg": 10,
+        "loss_function": "Logloss",
+        "thread_count": 8,
+        "random_seed": 104,
+        "verbose": 100,
+        "eval_metric": "Logloss",
+        "allow_writing_files": false,
+        "task_type": "CPU",
+        "early_stopping_rounds": 80
+      },
+      "columns": [
+        "raw_price",
+        "report_age",
+        "observed_hour_sin",
+        "observed_hour_cos",
+        "day_sin",
+        "day_cos",
+        "state",
+        "grade",
+        "payment",
+        "latitude",
+        "longitude",
+        "history_reports",
+        "hours_since_first",
+        "history_price_mean_delta",
+        "history_price_std",
+        "history_change_rate",
+        "hours_since_last_change",
+        "state_median_delta",
+        "state_move_6h",
+        "state_move_24h",
+        "local_median_delta",
+        "local_peer_count",
+        "local_move_6h",
+        "local_move_24h",
+        "prior_quote_missing",
+        "event_delta_1",
+        "event_elapsed_1",
+        "event_delta_2",
+        "event_elapsed_2",
+        "event_delta_3",
+        "event_elapsed_3",
+        "event_delta_4",
+        "event_elapsed_4",
+        "event_delta_6",
+        "event_elapsed_6",
+        "event_delta_8",
+        "event_elapsed_8",
+        "hour_delta_1",
+        "hour_present_1",
+        "hour_delta_3",
+        "hour_present_3",
+        "hour_delta_6",
+        "hour_present_6",
+        "hour_delta_12",
+        "hour_present_12",
+        "hour_delta_24",
+        "hour_present_24",
+        "price_cents_ending",
+        "price_quarter_position",
+        "own_median_6_residual",
+        "own_mad_6",
+        "own_min_6_residual",
+        "own_max_6_residual",
+        "own_median_24_residual",
+        "own_mad_24",
+        "own_min_24_residual",
+        "own_max_24_residual",
+        "own_median_48_residual",
+        "own_mad_48",
+        "own_min_48_residual",
+        "own_max_48_residual",
+        "product_0_spread_residual",
+        "product_0_spread_mad",
+        "product_0_spread_count",
+        "product_0_report_newer_hours",
+        "product_0_age",
+        "product_1_spread_residual",
+        "product_1_spread_mad",
+        "product_1_spread_count",
+        "product_1_report_newer_hours",
+        "product_1_age",
+        "product_2_spread_residual",
+        "product_2_spread_mad",
+        "product_2_spread_count",
+        "product_2_report_newer_hours",
+        "product_2_age",
+        "product_3_spread_residual",
+        "product_3_spread_mad",
+        "product_3_spread_count",
+        "product_3_report_newer_hours",
+        "product_3_age",
+        "product_4_spread_residual",
+        "product_4_spread_mad",
+        "product_4_spread_count",
+        "product_4_report_newer_hours",
+        "product_4_age",
+        "product_5_spread_residual",
+        "product_5_spread_mad",
+        "product_5_spread_count",
+        "product_5_report_newer_hours",
+        "product_5_age",
+        "product_6_spread_residual",
+        "product_6_spread_mad",
+        "product_6_spread_count",
+        "product_6_report_newer_hours",
+        "product_6_age",
+        "product_7_spread_residual",
+        "product_7_spread_mad",
+        "product_7_spread_count",
+        "product_7_report_newer_hours",
+        "product_7_age",
+        "last_actual_change",
+        "previous_actual_change",
+        "hours_since_actual_change",
+        "actual_change_count",
+        "historical_reversal_rate",
+        "typical_actual_change",
+        "peer_mean_change_6",
+        "peer_fraction_up_6",
+        "peer_fraction_down_6",
+        "peer_offset_adjusted_6",
+        "peer_mean_change_24",
+        "peer_fraction_up_24",
+        "peer_fraction_down_24",
+        "peer_offset_adjusted_24",
+        "peer_fresh_median_residual",
+        "refresh_count_6",
+        "unchanged_refresh_count_6",
+        "unchanged_refresh_fraction_6",
+        "source_rollback_count_6",
+        "refresh_count_24",
+        "unchanged_refresh_count_24",
+        "unchanged_refresh_fraction_24",
+        "source_rollback_count_24",
+        "refresh_count_48",
+        "unchanged_refresh_count_48",
+        "unchanged_refresh_fraction_48",
+        "source_rollback_count_48",
+        "report_interval_mean",
+        "report_interval_cv",
+        "observed_history_hours",
+        "archive_observation_count",
+        "recent_large_refresh_count",
+        "rapid_timestamp_advances",
+        "cross_product_agreement_count",
+        "cross_product_conflict",
+        "signed_cross_product_deviation",
+        "peer_and_product_agree",
+        "isolated_jump_size",
+        "peer_deviation_scaled"
+      ],
+      "sha256": "6ec680ca7b4467fa3d74e8723622525b25cba4d5a210f1682c56481b97dfddf1",
+      "saved_replay_max_difference": 2.9733719819624582e-08,
+      "calibration": {
+        "rows": 33537,
+        "positive": 549,
+        "prevalence": 0.01636997942570892,
+        "average_precision": 0.2566232882103173,
+        "roc_auc": 0.882037581475231,
+        "brier": 0.01384846493601799,
+        "selected_threshold": 0.5112583637237549,
+        "selected": {
+          "flags": 78,
+          "true_positives": 55,
+          "false_positives": 23,
+          "precision": 0.7051282051282052,
+          "recall": 0.10018214936247723
+        },
+        "at_probability": {
+          "0.1": {
+            "flags": 1031,
+            "true_positives": 216,
+            "false_positives": 815,
+            "precision": 0.20950533462657614,
+            "recall": 0.39344262295081966
+          },
+          "0.25": {
+            "flags": 253,
+            "true_positives": 114,
+            "false_positives": 139,
+            "precision": 0.4505928853754941,
+            "recall": 0.20765027322404372
+          },
+          "0.5": {
+            "flags": 79,
+            "true_positives": 55,
+            "false_positives": 24,
+            "precision": 0.6962025316455697,
+            "recall": 0.10018214936247723
+          },
+          "0.75": {
+            "flags": 29,
+            "true_positives": 21,
+            "false_positives": 8,
+            "precision": 0.7241379310344828,
+            "recall": 0.03825136612021858
+          },
+          "0.9": {
+            "flags": 8,
+            "true_positives": 8,
+            "false_positives": 0,
+            "precision": 1.0,
+            "recall": 0.014571948998178506
+          }
+        }
+      },
+      "later_development": {
+        "rows": 74782,
+        "positive": 1708,
+        "prevalence": 0.02283972078842502,
+        "average_precision": 0.2725004143970692,
+        "roc_auc": 0.8851306828681382,
+        "brier": 0.019171420484781265,
+        "selected_threshold": 0.5112583637237549,
+        "selected": {
+          "flags": 354,
+          "true_positives": 206,
+          "false_positives": 148,
+          "precision": 0.5819209039548022,
+          "recall": 0.12060889929742388
+        },
+        "at_probability": {
+          "0.1": {
+            "flags": 3875,
+            "true_positives": 794,
+            "false_positives": 3081,
+            "precision": 0.20490322580645162,
+            "recall": 0.4648711943793911
+          },
+          "0.25": {
+            "flags": 1174,
+            "true_positives": 440,
+            "false_positives": 734,
+            "precision": 0.3747870528109029,
+            "recall": 0.2576112412177986
+          },
+          "0.5": {
+            "flags": 370,
+            "true_positives": 214,
+            "false_positives": 156,
+            "precision": 0.5783783783783784,
+            "recall": 0.1252927400468384
+          },
+          "0.75": {
+            "flags": 110,
+            "true_positives": 87,
+            "false_positives": 23,
+            "precision": 0.7909090909090909,
+            "recall": 0.050936768149882905
+          },
+          "0.9": {
+            "flags": 32,
+            "true_positives": 28,
+            "false_positives": 4,
+            "precision": 0.875,
+            "recall": 0.01639344262295082
+          }
+        }
+      },
+      "station_bootstrap_95": {
+        "precision": [
+          0.5153611026583335,
+          0.6454695462638914
+        ],
+        "recall": [
+          0.1011034059311638,
+          0.14028095118494768
+        ]
+      },
+      "top_features": [
+        [
+          "report_age",
+          11.417393279461384
+        ],
+        [
+          "longitude",
+          11.126317236147617
+        ],
+        [
+          "latitude",
+          5.5627786927740015
+        ],
+        [
+          "state",
+          3.817686692090949
+        ],
+        [
+          "peer_fresh_median_residual",
+          3.7237491492867245
+        ],
+        [
+          "product_1_age",
+          2.2751020795434838
+        ],
+        [
+          "unchanged_refresh_count_6",
+          2.157444999630273
+        ],
+        [
+          "observed_hour_sin",
+          1.989970247259234
+        ],
+        [
+          "event_elapsed_1",
+          1.932089146709737
+        ],
+        [
+          "raw_price",
+          1.8350687333641769
+        ],
+        [
+          "state_median_delta",
+          1.8271220413787679
+        ],
+        [
+          "report_interval_mean",
+          1.7996389243240163
+        ],
+        [
+          "history_reports",
+          1.7637859215106806
+        ],
+        [
+          "unchanged_refresh_fraction_6",
+          1.6916163119564027
+        ],
+        [
+          "unchanged_refresh_count_24",
+          1.4911865677701295
+        ],
+        [
+          "product_3_age",
+          1.4855158670471995
+        ],
+        [
+          "event_delta_6",
+          1.465860114508605
+        ],
+        [
+          "unchanged_refresh_fraction_24",
+          1.2648264045542943
+        ],
+        [
+          "peer_fraction_down_24",
+          1.2640278596532601
+        ],
+        [
+          "day_sin",
+          1.2555418689213131
+        ],
+        [
+          "peer_mean_change_24",
+          1.230961716562498
+        ],
+        [
+          "price_cents_ending",
+          1.1518751434387755
+        ],
+        [
+          "own_max_24_residual",
+          1.139538699481212
+        ],
+        [
+          "event_elapsed_2",
+          1.1011852056437161
+        ],
+        [
+          "local_median_delta",
+          1.0875436432513248
+        ]
+      ],
+      "flagged_stations": 274,
+      "age_slices": {
+        "0-1": {
+          "rows": 34340,
+          "positive": 217,
+          "prevalence": 0.006319161327897496,
+          "average_precision": 0.15726900024358995,
+          "roc_auc": 0.8222152011474888,
+          "brier": 0.005721682216972113,
+          "selected_threshold": 0.5112583637237549,
+          "selected": {
+            "flags": 14,
+            "true_positives": 14,
+            "false_positives": 0,
+            "precision": 1.0,
+            "recall": 0.06451612903225806
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 118,
+              "true_positives": 32,
+              "false_positives": 86,
+              "precision": 0.2711864406779661,
+              "recall": 0.14746543778801843
+            },
+            "0.25": {
+              "flags": 33,
+              "true_positives": 24,
+              "false_positives": 9,
+              "precision": 0.7272727272727273,
+              "recall": 0.11059907834101383
+            },
+            "0.5": {
+              "flags": 14,
+              "true_positives": 14,
+              "false_positives": 0,
+              "precision": 1.0,
+              "recall": 0.06451612903225806
+            },
+            "0.75": {
+              "flags": 6,
+              "true_positives": 6,
+              "false_positives": 0,
+              "precision": 1.0,
+              "recall": 0.027649769585253458
+            },
+            "0.9": {
+              "flags": 4,
+              "true_positives": 4,
+              "false_positives": 0,
+              "precision": 1.0,
+              "recall": 0.018433179723502304
+            }
+          }
+        },
+        "1-6": {
+          "rows": 24641,
+          "positive": 247,
+          "prevalence": 0.010023943833448318,
+          "average_precision": 0.08093922317746559,
+          "roc_auc": 0.8349277996613623,
+          "brier": 0.009564623236656189,
+          "selected_threshold": 0.5112583637237549,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 153,
+              "true_positives": 25,
+              "false_positives": 128,
+              "precision": 0.16339869281045752,
+              "recall": 0.10121457489878542
+            },
+            "0.25": {
+              "flags": 15,
+              "true_positives": 1,
+              "false_positives": 14,
+              "precision": 0.06666666666666667,
+              "recall": 0.004048582995951417
+            },
+            "0.5": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "6-24": {
+          "rows": 13087,
+          "positive": 687,
+          "prevalence": 0.052494842209826545,
+          "average_precision": 0.1521590152809718,
+          "roc_auc": 0.7035039559562379,
+          "brier": 0.047638677060604095,
+          "selected_threshold": 0.5112583637237549,
+          "selected": {
+            "flags": 19,
+            "true_positives": 11,
+            "false_positives": 8,
+            "precision": 0.5789473684210527,
+            "recall": 0.01601164483260553
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 1804,
+              "true_positives": 247,
+              "false_positives": 1557,
+              "precision": 0.1369179600886918,
+              "recall": 0.35953420669577874
+            },
+            "0.25": {
+              "flags": 227,
+              "true_positives": 70,
+              "false_positives": 157,
+              "precision": 0.30837004405286345,
+              "recall": 0.10189228529839883
+            },
+            "0.5": {
+              "flags": 20,
+              "true_positives": 12,
+              "false_positives": 8,
+              "precision": 0.6,
+              "recall": 0.017467248908296942
+            },
+            "0.75": {
+              "flags": 3,
+              "true_positives": 2,
+              "false_positives": 1,
+              "precision": 0.6666666666666666,
+              "recall": 0.002911208151382824
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "24-10000": {
+          "rows": 2714,
+          "positive": 557,
+          "prevalence": 0.20523212969786292,
+          "average_precision": 0.4960358833453677,
+          "roc_auc": 0.7516282422308396,
+          "brier": 0.1393018662929535,
+          "selected_threshold": 0.5112583637237549,
+          "selected": {
+            "flags": 321,
+            "true_positives": 181,
+            "false_positives": 140,
+            "precision": 0.5638629283489096,
+            "recall": 0.3249551166965889
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 1800,
+              "true_positives": 490,
+              "false_positives": 1310,
+              "precision": 0.2722222222222222,
+              "recall": 0.8797127468581688
+            },
+            "0.25": {
+              "flags": 899,
+              "true_positives": 345,
+              "false_positives": 554,
+              "precision": 0.38375973303670746,
+              "recall": 0.6193895870736086
+            },
+            "0.5": {
+              "flags": 336,
+              "true_positives": 188,
+              "false_positives": 148,
+              "precision": 0.5595238095238095,
+              "recall": 0.3375224416517056
+            },
+            "0.75": {
+              "flags": 101,
+              "true_positives": 79,
+              "false_positives": 22,
+              "precision": 0.7821782178217822,
+              "recall": 0.14183123877917414
+            },
+            "0.9": {
+              "flags": 28,
+              "true_positives": 24,
+              "false_positives": 4,
+              "precision": 0.8571428571428571,
+              "recall": 0.04308797127468582
+            }
+          }
+        }
+      },
+      "fuel_slices": {
+        "0.0": {
+          "rows": 21232,
+          "positive": 638,
+          "prevalence": 0.03004898266767144,
+          "average_precision": 0.3632958299743784,
+          "roc_auc": 0.9006104891615568,
+          "brier": 0.023216431960463524,
+          "selected_threshold": 0.5112583637237549,
+          "selected": {
+            "flags": 151,
+            "true_positives": 103,
+            "false_positives": 48,
+            "precision": 0.6821192052980133,
+            "recall": 0.1614420062695925
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 1485,
+              "true_positives": 353,
+              "false_positives": 1132,
+              "precision": 0.2377104377104377,
+              "recall": 0.5532915360501567
+            },
+            "0.25": {
+              "flags": 467,
+              "true_positives": 204,
+              "false_positives": 263,
+              "precision": 0.43683083511777304,
+              "recall": 0.31974921630094044
+            },
+            "0.5": {
+              "flags": 156,
+              "true_positives": 107,
+              "false_positives": 49,
+              "precision": 0.6858974358974359,
+              "recall": 0.1677115987460815
+            },
+            "0.75": {
+              "flags": 64,
+              "true_positives": 55,
+              "false_positives": 9,
+              "precision": 0.859375,
+              "recall": 0.08620689655172414
+            },
+            "0.9": {
+              "flags": 22,
+              "true_positives": 19,
+              "false_positives": 3,
+              "precision": 0.8636363636363636,
+              "recall": 0.029780564263322883
+            }
+          }
+        },
+        "1.0": {
+          "rows": 14662,
+          "positive": 345,
+          "prevalence": 0.023530214159050607,
+          "average_precision": 0.26216865082914137,
+          "roc_auc": 0.8782515566272182,
+          "brier": 0.020098844543099403,
+          "selected_threshold": 0.5112583637237549,
+          "selected": {
+            "flags": 83,
+            "true_positives": 44,
+            "false_positives": 39,
+            "precision": 0.5301204819277109,
+            "recall": 0.12753623188405797
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 771,
+              "true_positives": 154,
+              "false_positives": 617,
+              "precision": 0.19974059662775617,
+              "recall": 0.4463768115942029
+            },
+            "0.25": {
+              "flags": 245,
+              "true_positives": 90,
+              "false_positives": 155,
+              "precision": 0.3673469387755102,
+              "recall": 0.2608695652173913
+            },
+            "0.5": {
+              "flags": 86,
+              "true_positives": 44,
+              "false_positives": 42,
+              "precision": 0.5116279069767442,
+              "recall": 0.12753623188405797
+            },
+            "0.75": {
+              "flags": 20,
+              "true_positives": 16,
+              "false_positives": 4,
+              "precision": 0.8,
+              "recall": 0.0463768115942029
+            },
+            "0.9": {
+              "flags": 6,
+              "true_positives": 6,
+              "false_positives": 0,
+              "precision": 1.0,
+              "recall": 0.017391304347826087
+            }
+          }
+        },
+        "2.0": {
+          "rows": 17638,
+          "positive": 336,
+          "prevalence": 0.019049778886495068,
+          "average_precision": 0.1816266230606305,
+          "roc_auc": 0.861099012775842,
+          "brier": 0.017466584220528603,
+          "selected_threshold": 0.5112583637237549,
+          "selected": {
+            "flags": 62,
+            "true_positives": 24,
+            "false_positives": 38,
+            "precision": 0.3870967741935484,
+            "recall": 0.07142857142857142
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 818,
+              "true_positives": 132,
+              "false_positives": 686,
+              "precision": 0.16136919315403422,
+              "recall": 0.39285714285714285
+            },
+            "0.25": {
+              "flags": 231,
+              "true_positives": 67,
+              "false_positives": 164,
+              "precision": 0.29004329004329005,
+              "recall": 0.19940476190476192
+            },
+            "0.5": {
+              "flags": 66,
+              "true_positives": 26,
+              "false_positives": 40,
+              "precision": 0.3939393939393939,
+              "recall": 0.07738095238095238
+            },
+            "0.75": {
+              "flags": 17,
+              "true_positives": 11,
+              "false_positives": 6,
+              "precision": 0.6470588235294118,
+              "recall": 0.03273809523809524
+            },
+            "0.9": {
+              "flags": 4,
+              "true_positives": 3,
+              "false_positives": 1,
+              "precision": 0.75,
+              "recall": 0.008928571428571428
+            }
+          }
+        },
+        "3.0": {
+          "rows": 16531,
+          "positive": 355,
+          "prevalence": 0.021474804911983544,
+          "average_precision": 0.23941165550812168,
+          "roc_auc": 0.8811184366336496,
+          "brier": 0.018389109522104263,
+          "selected_threshold": 0.5112583637237549,
+          "selected": {
+            "flags": 54,
+            "true_positives": 34,
+            "false_positives": 20,
+            "precision": 0.6296296296296297,
+            "recall": 0.09577464788732394
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 762,
+              "true_positives": 151,
+              "false_positives": 611,
+              "precision": 0.19816272965879264,
+              "recall": 0.4253521126760563
+            },
+            "0.25": {
+              "flags": 218,
+              "true_positives": 77,
+              "false_positives": 141,
+              "precision": 0.3532110091743119,
+              "recall": 0.21690140845070421
+            },
+            "0.5": {
+              "flags": 58,
+              "true_positives": 36,
+              "false_positives": 22,
+              "precision": 0.6206896551724138,
+              "recall": 0.10140845070422536
+            },
+            "0.75": {
+              "flags": 8,
+              "true_positives": 5,
+              "false_positives": 3,
+              "precision": 0.625,
+              "recall": 0.014084507042253521
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "4.0": {
+          "rows": 2656,
+          "positive": 25,
+          "prevalence": 0.00941265060240964,
+          "average_precision": 0.08868830105240766,
+          "roc_auc": 0.8722310908399847,
+          "brier": 0.009367598220705986,
+          "selected_threshold": 0.5112583637237549,
+          "selected": {
+            "flags": 2,
+            "true_positives": 0,
+            "false_positives": 2,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 29,
+              "true_positives": 3,
+              "false_positives": 26,
+              "precision": 0.10344827586206896,
+              "recall": 0.12
+            },
+            "0.25": {
+              "flags": 9,
+              "true_positives": 1,
+              "false_positives": 8,
+              "precision": 0.1111111111111111,
+              "recall": 0.04
+            },
+            "0.5": {
+              "flags": 2,
+              "true_positives": 0,
+              "false_positives": 2,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 1,
+              "true_positives": 0,
+              "false_positives": 1,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "5.0": {
+          "rows": 2063,
+          "positive": 9,
+          "prevalence": 0.004362578768783325,
+          "average_precision": 0.06551498851211492,
+          "roc_auc": 0.7136752136752136,
+          "brier": 0.004416043404489756,
+          "selected_threshold": 0.5112583637237549,
+          "selected": {
+            "flags": 2,
+            "true_positives": 1,
+            "false_positives": 1,
+            "precision": 0.5,
+            "recall": 0.1111111111111111
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 10,
+              "true_positives": 1,
+              "false_positives": 9,
+              "precision": 0.1,
+              "recall": 0.1111111111111111
+            },
+            "0.25": {
+              "flags": 4,
+              "true_positives": 1,
+              "false_positives": 3,
+              "precision": 0.25,
+              "recall": 0.1111111111111111
+            },
+            "0.5": {
+              "flags": 2,
+              "true_positives": 1,
+              "false_positives": 1,
+              "precision": 0.5,
+              "recall": 0.1111111111111111
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        }
+      }
+    },
+    "refresh_only": {
+      "seconds": 4.806468666996807,
+      "trees": 70,
+      "params": {
+        "iterations": 700,
+        "learning_rate": 0.05,
+        "depth": 7,
+        "l2_leaf_reg": 10,
+        "loss_function": "Logloss",
+        "thread_count": 8,
+        "random_seed": 104,
+        "verbose": 100,
+        "eval_metric": "Logloss",
+        "allow_writing_files": false,
+        "task_type": "CPU",
+        "early_stopping_rounds": 80
+      },
+      "columns": [
+        "report_age",
+        "refresh_count_6",
+        "unchanged_refresh_count_6",
+        "unchanged_refresh_fraction_6",
+        "source_rollback_count_6",
+        "refresh_count_24",
+        "unchanged_refresh_count_24",
+        "unchanged_refresh_fraction_24",
+        "source_rollback_count_24",
+        "refresh_count_48",
+        "unchanged_refresh_count_48",
+        "unchanged_refresh_fraction_48",
+        "source_rollback_count_48",
+        "report_interval_mean",
+        "report_interval_cv",
+        "observed_history_hours",
+        "archive_observation_count",
+        "recent_large_refresh_count",
+        "rapid_timestamp_advances"
+      ],
+      "sha256": "cb3b35624d1bc4aa776c1d047b49745dcfda668ec3347af4ce5b3853cf913861",
+      "saved_replay_max_difference": 2.8045058386716448e-08,
+      "calibration": {
+        "rows": 33537,
+        "positive": 549,
+        "prevalence": 0.01636997942570892,
+        "average_precision": 0.18346235104718017,
+        "roc_auc": 0.8249043975366215,
+        "brier": 0.01447868999093771,
+        "selected_threshold": null,
+        "selected": {
+          "flags": 0,
+          "true_positives": 0,
+          "false_positives": 0,
+          "precision": null,
+          "recall": 0.0
+        },
+        "at_probability": {
+          "0.1": {
+            "flags": 754,
+            "true_positives": 167,
+            "false_positives": 587,
+            "precision": 0.22148541114058357,
+            "recall": 0.30418943533697634
+          },
+          "0.25": {
+            "flags": 154,
+            "true_positives": 75,
+            "false_positives": 79,
+            "precision": 0.487012987012987,
+            "recall": 0.1366120218579235
+          },
+          "0.5": {
+            "flags": 61,
+            "true_positives": 34,
+            "false_positives": 27,
+            "precision": 0.5573770491803278,
+            "recall": 0.061930783242258654
+          },
+          "0.75": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "0.9": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          }
+        }
+      },
+      "later_development": {
+        "rows": 74782,
+        "positive": 1708,
+        "prevalence": 0.02283972078842502,
+        "average_precision": 0.18434224413708392,
+        "roc_auc": 0.8611437539592055,
+        "brier": 0.020326759666204453,
+        "selected_threshold": null,
+        "selected": {
+          "flags": 0,
+          "true_positives": 0,
+          "false_positives": 0,
+          "precision": null,
+          "recall": 0.0
+        },
+        "at_probability": {
+          "0.1": {
+            "flags": 3398,
+            "true_positives": 645,
+            "false_positives": 2753,
+            "precision": 0.1898175397292525,
+            "recall": 0.37763466042154564
+          },
+          "0.25": {
+            "flags": 830,
+            "true_positives": 269,
+            "false_positives": 561,
+            "precision": 0.3240963855421687,
+            "recall": 0.15749414519906324
+          },
+          "0.5": {
+            "flags": 243,
+            "true_positives": 101,
+            "false_positives": 142,
+            "precision": 0.4156378600823045,
+            "recall": 0.05913348946135832
+          },
+          "0.75": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "0.9": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          }
+        }
+      },
+      "station_bootstrap_95": {
+        "precision": [
+          null,
+          null
+        ],
+        "recall": [
+          0.0,
+          0.0
+        ]
+      },
+      "top_features": [
+        [
+          "report_age",
+          19.371588629909628
+        ],
+        [
+          "observed_history_hours",
+          12.432023408190377
+        ],
+        [
+          "refresh_count_24",
+          11.662994722828774
+        ],
+        [
+          "refresh_count_48",
+          7.728464395320259
+        ],
+        [
+          "report_interval_mean",
+          6.526297589923922
+        ],
+        [
+          "unchanged_refresh_count_6",
+          6.245348824172469
+        ],
+        [
+          "unchanged_refresh_count_48",
+          6.239898925914447
+        ],
+        [
+          "unchanged_refresh_count_24",
+          5.762687074741635
+        ],
+        [
+          "archive_observation_count",
+          5.238852077980999
+        ],
+        [
+          "unchanged_refresh_fraction_6",
+          4.445440928231105
+        ],
+        [
+          "unchanged_refresh_fraction_48",
+          3.345934145042003
+        ],
+        [
+          "unchanged_refresh_fraction_24",
+          3.1012775981702294
+        ],
+        [
+          "report_interval_cv",
+          2.466786974364276
+        ],
+        [
+          "refresh_count_6",
+          2.29233975809711
+        ],
+        [
+          "recent_large_refresh_count",
+          2.0209344204120065
+        ],
+        [
+          "rapid_timestamp_advances",
+          1.1191305267007696
+        ],
+        [
+          "source_rollback_count_6",
+          0.0
+        ],
+        [
+          "source_rollback_count_24",
+          0.0
+        ],
+        [
+          "source_rollback_count_48",
+          0.0
+        ]
+      ],
+      "flagged_stations": 0,
+      "age_slices": {
+        "0-1": {
+          "rows": 34340,
+          "positive": 217,
+          "prevalence": 0.006319161327897496,
+          "average_precision": 0.1377971557885383,
+          "roc_auc": 0.716520176196414,
+          "brier": 0.00593349477276206,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 27,
+              "true_positives": 22,
+              "false_positives": 5,
+              "precision": 0.8148148148148148,
+              "recall": 0.10138248847926268
+            },
+            "0.25": {
+              "flags": 20,
+              "true_positives": 18,
+              "false_positives": 2,
+              "precision": 0.9,
+              "recall": 0.08294930875576037
+            },
+            "0.5": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "1-6": {
+          "rows": 24641,
+          "positive": 247,
+          "prevalence": 0.010023943833448318,
+          "average_precision": 0.05003640684140562,
+          "roc_auc": 0.8101237146321572,
+          "brier": 0.009729797951877117,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 3,
+              "true_positives": 0,
+              "false_positives": 3,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "0.25": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.5": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "6-24": {
+          "rows": 13087,
+          "positive": 687,
+          "prevalence": 0.052494842209826545,
+          "average_precision": 0.08657045713713646,
+          "roc_auc": 0.6311056134666855,
+          "brier": 0.049316760152578354,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 764,
+              "true_positives": 77,
+              "false_positives": 687,
+              "precision": 0.10078534031413612,
+              "recall": 0.11208151382823872
+            },
+            "0.25": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.5": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "24-10000": {
+          "rows": 2714,
+          "positive": 557,
+          "prevalence": 0.20523212969786292,
+          "average_precision": 0.32185192523119643,
+          "roc_auc": 0.6524921157702075,
+          "brier": 0.1588647961616516,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 2604,
+              "true_positives": 546,
+              "false_positives": 2058,
+              "precision": 0.20967741935483872,
+              "recall": 0.9802513464991023
+            },
+            "0.25": {
+              "flags": 810,
+              "true_positives": 251,
+              "false_positives": 559,
+              "precision": 0.30987654320987656,
+              "recall": 0.4506283662477558
+            },
+            "0.5": {
+              "flags": 243,
+              "true_positives": 101,
+              "false_positives": 142,
+              "precision": 0.4156378600823045,
+              "recall": 0.1813285457809695
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        }
+      },
+      "fuel_slices": {
+        "0.0": {
+          "rows": 21232,
+          "positive": 638,
+          "prevalence": 0.03004898266767144,
+          "average_precision": 0.23337573083312335,
+          "roc_auc": 0.8664113904801685,
+          "brier": 0.025723783299326897,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 1177,
+              "true_positives": 251,
+              "false_positives": 926,
+              "precision": 0.21325403568394222,
+              "recall": 0.3934169278996865
+            },
+            "0.25": {
+              "flags": 275,
+              "true_positives": 105,
+              "false_positives": 170,
+              "precision": 0.38181818181818183,
+              "recall": 0.164576802507837
+            },
+            "0.5": {
+              "flags": 50,
+              "true_positives": 32,
+              "false_positives": 18,
+              "precision": 0.64,
+              "recall": 0.050156739811912224
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "1.0": {
+          "rows": 14662,
+          "positive": 345,
+          "prevalence": 0.023530214159050607,
+          "average_precision": 0.20129876709781416,
+          "roc_auc": 0.8679833338900851,
+          "brier": 0.020755814388394356,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 725,
+              "true_positives": 147,
+              "false_positives": 578,
+              "precision": 0.20275862068965517,
+              "recall": 0.4260869565217391
+            },
+            "0.25": {
+              "flags": 189,
+              "true_positives": 65,
+              "false_positives": 124,
+              "precision": 0.3439153439153439,
+              "recall": 0.18840579710144928
+            },
+            "0.5": {
+              "flags": 69,
+              "true_positives": 25,
+              "false_positives": 44,
+              "precision": 0.36231884057971014,
+              "recall": 0.07246376811594203
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "2.0": {
+          "rows": 17638,
+          "positive": 336,
+          "prevalence": 0.019049778886495068,
+          "average_precision": 0.1329846326395932,
+          "roc_auc": 0.8424336609860682,
+          "brier": 0.017987843602895737,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 739,
+              "true_positives": 112,
+              "false_positives": 627,
+              "precision": 0.15155615696887687,
+              "recall": 0.3333333333333333
+            },
+            "0.25": {
+              "flags": 176,
+              "true_positives": 43,
+              "false_positives": 133,
+              "precision": 0.24431818181818182,
+              "recall": 0.12797619047619047
+            },
+            "0.5": {
+              "flags": 64,
+              "true_positives": 20,
+              "false_positives": 44,
+              "precision": 0.3125,
+              "recall": 0.05952380952380952
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "3.0": {
+          "rows": 16531,
+          "positive": 355,
+          "prevalence": 0.021474804911983544,
+          "average_precision": 0.17559634512971775,
+          "roc_auc": 0.8513748415318816,
+          "brier": 0.01923028938472271,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 722,
+              "true_positives": 131,
+              "false_positives": 591,
+              "precision": 0.1814404432132964,
+              "recall": 0.36901408450704226
+            },
+            "0.25": {
+              "flags": 184,
+              "true_positives": 56,
+              "false_positives": 128,
+              "precision": 0.30434782608695654,
+              "recall": 0.15774647887323945
+            },
+            "0.5": {
+              "flags": 57,
+              "true_positives": 24,
+              "false_positives": 33,
+              "precision": 0.42105263157894735,
+              "recall": 0.0676056338028169
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "4.0": {
+          "rows": 2656,
+          "positive": 25,
+          "prevalence": 0.00941265060240964,
+          "average_precision": 0.06815925640086275,
+          "roc_auc": 0.8350437096161155,
+          "brier": 0.009364346042275429,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 25,
+              "true_positives": 3,
+              "false_positives": 22,
+              "precision": 0.12,
+              "recall": 0.12
+            },
+            "0.25": {
+              "flags": 5,
+              "true_positives": 0,
+              "false_positives": 5,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "0.5": {
+              "flags": 2,
+              "true_positives": 0,
+              "false_positives": 2,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        },
+        "5.0": {
+          "rows": 2063,
+          "positive": 9,
+          "prevalence": 0.004362578768783325,
+          "average_precision": 0.03705330703228581,
+          "roc_auc": 0.7540571243102889,
+          "brier": 0.00462884409353137,
+          "selected_threshold": null,
+          "selected": {
+            "flags": 0,
+            "true_positives": 0,
+            "false_positives": 0,
+            "precision": null,
+            "recall": 0.0
+          },
+          "at_probability": {
+            "0.1": {
+              "flags": 10,
+              "true_positives": 1,
+              "false_positives": 9,
+              "precision": 0.1,
+              "recall": 0.1111111111111111
+            },
+            "0.25": {
+              "flags": 1,
+              "true_positives": 0,
+              "false_positives": 1,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "0.5": {
+              "flags": 1,
+              "true_positives": 0,
+              "false_positives": 1,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "0.75": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            },
+            "0.9": {
+              "flags": 0,
+              "true_positives": 0,
+              "false_positives": 0,
+              "precision": null,
+              "recall": 0.0
+            }
+          }
+        }
+      }
+    }
+  }
+}

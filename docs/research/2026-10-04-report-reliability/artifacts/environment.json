@@ -1,0 +1,11 @@
+{
+  "python": "3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 16.0.0 (clang-1600.0.26.6)]",
+  "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "numpy": "2.5.3",
+  "catboost": "1.2.10",
+  "sklearn": "1.9.1",
+  "device": "CPU",
+  "seed": 104,
+  "tests_passed": 9,
+  "archive_checks": 4
+}

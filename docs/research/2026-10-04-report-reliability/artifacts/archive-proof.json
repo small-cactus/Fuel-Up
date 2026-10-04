@@ -1,0 +1,150 @@
+[
+  {
+    "slot": "2026-10-03T02:00:00+00:00",
+    "object_path": "2429/173085/b69a3b3c-c973-479e-ac08-266c3cd2e892.json.gz",
+    "sha256": "408775a6a9ed1f01eace6454c2b7e890c1606c11611810881e9ada099c19a8fd",
+    "execution_region": "us-east-1",
+    "observed_at": "2026-10-03T02:06:48.962Z",
+    "station": {
+      "id": "13053",
+      "prices": [
+        {
+          "fuelProduct": "regular_gas",
+          "cash": null,
+          "credit": {
+            "price": 4.19,
+            "postedTime": "2026-10-03T01:33:05.712Z"
+          }
+        },
+        {
+          "fuelProduct": "midgrade_gas",
+          "cash": null,
+          "credit": {
+            "price": 3.22,
+            "postedTime": "2026-10-03T01:48:06.242Z"
+          }
+        },
+        {
+          "fuelProduct": "diesel",
+          "cash": null,
+          "credit": {
+            "price": 6.29,
+            "postedTime": "2026-10-03T01:33:05.758Z"
+          }
+        }
+      ]
+    },
+    "array_match": true
+  },
+  {
+    "slot": "2026-10-03T03:00:00+00:00",
+    "object_path": "2489/177405/5ce9d6bb-67f8-44a9-b6dd-5d7c01943028.json.gz",
+    "sha256": "620cd4f9bd8db6e5457b1a6af2e4013edb00fbffe313efb3468fdabbc16faf5c",
+    "execution_region": "us-east-1",
+    "observed_at": "2026-10-03T03:04:50.297Z",
+    "station": {
+      "id": "13053",
+      "prices": [
+        {
+          "fuelProduct": "regular_gas",
+          "cash": null,
+          "credit": {
+            "price": 4.19,
+            "postedTime": "2026-10-03T02:33:10.053Z"
+          }
+        },
+        {
+          "fuelProduct": "midgrade_gas",
+          "cash": null,
+          "credit": {
+            "price": 3.89,
+            "postedTime": "2026-10-03T02:48:08.595Z"
+          }
+        },
+        {
+          "fuelProduct": "diesel",
+          "cash": null,
+          "credit": {
+            "price": 6.29,
+            "postedTime": "2026-10-03T02:33:10.068Z"
+          }
+        }
+      ]
+    },
+    "array_match": true
+  },
+  {
+    "slot": "2026-10-03T04:00:00+00:00",
+    "object_path": "2549/181725/c978bb23-7860-4127-b181-076a8f62c645.json.gz",
+    "sha256": "7b8d11303065a65d92ccfc5330d634de967068b17e9fd860f9d545fe9c3b0fa5",
+    "execution_region": "us-east-1",
+    "observed_at": "2026-10-03T04:06:06.102Z",
+    "station": {
+      "id": "13053",
+      "prices": [
+        {
+          "fuelProduct": "regular_gas",
+          "cash": null,
+          "credit": {
+            "price": 4.19,
+            "postedTime": "2026-10-03T03:48:07.081Z"
+          }
+        },
+        {
+          "fuelProduct": "midgrade_gas",
+          "cash": null,
+          "credit": {
+            "price": 3.22,
+            "postedTime": "2026-10-03T03:48:05.369Z"
+          }
+        },
+        {
+          "fuelProduct": "diesel",
+          "cash": null,
+          "credit": {
+            "price": 6.29,
+            "postedTime": "2026-10-03T03:48:07.097Z"
+          }
+        }
+      ]
+    },
+    "array_match": true
+  },
+  {
+    "slot": "2026-10-03T05:00:00+00:00",
+    "object_path": "2588/184533/549f9f6e-8e99-4be8-9458-92f5f325f626.json.gz",
+    "sha256": "ce1377cb3d098e0128630a54fa12c82095d357caeafbfbf865170fbd7171181e",
+    "execution_region": "us-east-1",
+    "observed_at": "2026-10-03T05:04:47.869Z",
+    "station": {
+      "id": "13053",
+      "prices": [
+        {
+          "fuelProduct": "regular_gas",
+          "cash": null,
+          "credit": {
+            "price": 4.19,
+            "postedTime": "2026-10-03T03:48:07.081Z"
+          }
+        },
+        {
+          "fuelProduct": "midgrade_gas",
+          "cash": null,
+          "credit": {
+            "price": 3.89,
+            "postedTime": "2026-10-03T04:48:08.641Z"
+          }
+        },
+        {
+          "fuelProduct": "diesel",
+          "cash": null,
+          "credit": {
+            "price": 6.29,
+            "postedTime": "2026-10-03T03:48:07.097Z"
+          }
+        }
+      ]
+    },
+    "array_match": true
+  }
+]

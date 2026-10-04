@@ -1,0 +1,74 @@
+{
+  "definition": "Predict an observed >=10c jump returning within 3c of prior price within 6h. Eligible later rows have >=4 future observations and >=1 newer timestamp. This is report-pattern prediction, not wrong-price ground truth.",
+  "cutoff": "2026-10-04T06:00:00.000Z",
+  "later": {
+    "rows": 5388,
+    "stations": 2466,
+    "returns": 775,
+    "return_rate": 0.14383815887156645,
+    "confirmed_returns": 565
+  },
+  "unknown_later": 9236,
+  "rules": {
+    "station": {
+      "0": {
+        "rows": 4736,
+        "stations": 2380,
+        "returns": 261,
+        "return_rate": 0.0551097972972973,
+        "confirmed_returns": 108
+      },
+      "1": {
+        "rows": 652,
+        "stations": 89,
+        "returns": 514,
+        "return_rate": 0.7883435582822086,
+        "confirmed_returns": 457
+      },
+      "2": {
+        "rows": 532,
+        "stations": 49,
+        "returns": 488,
+        "return_rate": 0.9172932330827067,
+        "confirmed_returns": 444
+      },
+      "3": {
+        "rows": 517,
+        "stations": 46,
+        "returns": 483,
+        "return_rate": 0.9342359767891683,
+        "confirmed_returns": 442
+      }
+    },
+    "same_product": {
+      "0": {
+        "rows": 4808,
+        "stations": 2410,
+        "returns": 270,
+        "return_rate": 0.05615640599001664,
+        "confirmed_returns": 109
+      },
+      "1": {
+        "rows": 580,
+        "stations": 78,
+        "returns": 505,
+        "return_rate": 0.8706896551724138,
+        "confirmed_returns": 456
+      },
+      "2": {
+        "rows": 513,
+        "stations": 48,
+        "returns": 486,
+        "return_rate": 0.9473684210526315,
+        "confirmed_returns": 443
+      },
+      "3": {
+        "rows": 503,
+        "stations": 46,
+        "returns": 481,
+        "return_rate": 0.9562624254473161,
+        "confirmed_returns": 441
+      }
+    }
+  }
+}

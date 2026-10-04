@@ -1,0 +1,19 @@
+# Report reliability study
+
+Research only. No provider collection, production price changes, or attribution of intent.
+
+Reuse the verified nationwide arrays ending October 4 06:00 UTC and existing regular query examples. These examples are conditional on a later report being available; this study cannot estimate accuracy on all stations with missing follow-up. Preserve the sealed October 5 18:19–October 7 18:19 final period and existing frozen models.
+
+The stricter target requires two successively newer source timestamps observed after a query, at least one hour apart, both within 24 hours of the query. A positive requires their prices to agree within 3 cents and both differ from the query by at least 10 cents in the same direction. A negative requires both remain within 3 cents of the query. Other outcomes and missing confirmations are unknown, not negatives. Separate timestamps do not prove separate reporters. This is a confirmed report-disagreement proxy, not verified pump truth.
+
+Training queries and their entire label availability must precede hour 48 relative to September 30 18:19 UTC. Calibration queries start at hour 48 and their labels precede hour 60. Later development queries start at hour 60; no test outcome is used in training, early stopping or threshold selection. Boundary-crossing labels are purged. This later development period was previously inspected for other experiments and is not a pristine final test. Repeated station/product observations are dependent.
+
+Compare age alone, the existing 116 causal features, and those features plus report-refresh/cadence and agreement features. Hold model capacity and training procedure fixed for the latter two. Select the checkpoint on calibration log loss; select a threshold for at least 70% calibration precision and at least 30 flags, maximizing recall. Report held-later precision/recall, average precision, Brier score, age/fuel slices, station counts, and station-cluster bootstrap intervals. Preserve failed candidates. No claim of improvement from training accuracy or model size.
+
+New history inputs use observations through the query only, never labels. Peer inputs remain from the previous completed hour. Examine timestamp refreshes without price movement, source-time rollback, isolated jumps, rapid historical reversals, and agreement between local-offset and within-station grade/payment deviations. Test invariance to future price/timestamp perturbation and test strict label availability boundaries.
+
+## Additional exploratory recurrence audit
+
+After the broad classifier experiment, inspect observed jumps of at least 10 cents followed by a return within 3 cents of the prior quote within six hours. A further newer-timestamp report at least an hour after the return constitutes confirmation of that historical episode; this does not prove separate people reported it or that either price was physically correct. Count an episode as historical evidence only after its confirming observation is available, strictly before the next prediction. Same-time fuel/payment observations count once in station-wide history.
+
+Evaluate fixed history counts of one, two and three on later development jumps (query hour >=60); report all counts. A known outcome requires at least four valid subsequent hourly observations and one newer source timestamp within six hours. Everything else is unknown. Results are conditional on this follow-up availability. This target predicts an observed reversal, a different task from confirmed-disagreement classification. Diagnose repeated-station concentration, fuel/state concentration, first flag per station, and station/state bootstrap uncertainty. A strong reversal signal can justify investigating an unreliable feed but cannot identify which alternating price is correct or attribute fraud. Freeze the two-prior-confirmations rule as a separate research detector for future final-period assessment, not a price replacement.

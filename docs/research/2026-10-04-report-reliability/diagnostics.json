@@ -1,0 +1,184 @@
+{
+  "strict_rule": "at least two prior confirmed returns for this station/fuel/payment before the new >=10c jump",
+  "selected": {
+    "rows": 513,
+    "stations": 48,
+    "returns": 486,
+    "return_rate": 0.9473684210526315,
+    "confirmed_returns": 443
+  },
+  "recall_of_observed_returns": 0.6270967741935484,
+  "fresh_under_one_hour_flags": 513,
+  "first_flag_per_station": {
+    "rows": 48,
+    "stations": 48,
+    "returns": 44,
+    "return_rate": 0.9166666666666666,
+    "confirmed_returns": 41
+  },
+  "station_equal_weight_rate": 0.8607219169719169,
+  "station_bootstrap_95": [
+    0.9187482829670329,
+    0.9693459868927594
+  ],
+  "state_bootstrap_95": [
+    0.839195101381031,
+    0.96996996996997
+  ],
+  "non_midgrade": {
+    "rows": 61,
+    "stations": 14,
+    "returns": 43,
+    "return_rate": 0.7049180327868853,
+    "confirmed_returns": 30
+  },
+  "non_midwest_four_states": {
+    "rows": 53,
+    "stations": 10,
+    "returns": 36,
+    "return_rate": 0.6792452830188679,
+    "confirmed_returns": 27
+  },
+  "by_state": {
+    "AL": {
+      "rows": 3,
+      "stations": 1,
+      "returns": 2,
+      "return_rate": 0.6666666666666666,
+      "confirmed_returns": 1
+    },
+    "CA": {
+      "rows": 4,
+      "stations": 1,
+      "returns": 0,
+      "return_rate": 0.0,
+      "confirmed_returns": 0
+    },
+    "IL": {
+      "rows": 120,
+      "stations": 12,
+      "returns": 116,
+      "return_rate": 0.9666666666666667,
+      "confirmed_returns": 105
+    },
+    "IN": {
+      "rows": 183,
+      "stations": 14,
+      "returns": 179,
+      "return_rate": 0.9781420765027322,
+      "confirmed_returns": 167
+    },
+    "KY": {
+      "rows": 81,
+      "stations": 6,
+      "returns": 79,
+      "return_rate": 0.9753086419753086,
+      "confirmed_returns": 73
+    },
+    "MO": {
+      "rows": 76,
+      "stations": 6,
+      "returns": 76,
+      "return_rate": 1.0,
+      "confirmed_returns": 71
+    },
+    "NC": {
+      "rows": 7,
+      "stations": 1,
+      "returns": 5,
+      "return_rate": 0.7142857142857143,
+      "confirmed_returns": 3
+    },
+    "ND": {
+      "rows": 4,
+      "stations": 1,
+      "returns": 3,
+      "return_rate": 0.75,
+      "confirmed_returns": 2
+    },
+    "NJ": {
+      "rows": 14,
+      "stations": 2,
+      "returns": 9,
+      "return_rate": 0.6428571428571429,
+      "confirmed_returns": 6
+    },
+    "OH": {
+      "rows": 1,
+      "stations": 1,
+      "returns": 0,
+      "return_rate": 0.0,
+      "confirmed_returns": 0
+    },
+    "SD": {
+      "rows": 6,
+      "stations": 1,
+      "returns": 5,
+      "return_rate": 0.8333333333333334,
+      "confirmed_returns": 5
+    },
+    "TN": {
+      "rows": 13,
+      "stations": 1,
+      "returns": 12,
+      "return_rate": 0.9230769230769231,
+      "confirmed_returns": 10
+    },
+    "TX": {
+      "rows": 1,
+      "stations": 1,
+      "returns": 0,
+      "return_rate": 0.0,
+      "confirmed_returns": 0
+    }
+  },
+  "by_product": {
+    "0": {
+      "rows": 1,
+      "stations": 1,
+      "returns": 0,
+      "return_rate": 0.0,
+      "confirmed_returns": 0
+    },
+    "1": {
+      "rows": 34,
+      "stations": 8,
+      "returns": 25,
+      "return_rate": 0.7352941176470589,
+      "confirmed_returns": 20
+    },
+    "3": {
+      "rows": 452,
+      "stations": 34,
+      "returns": 443,
+      "return_rate": 0.9800884955752213,
+      "confirmed_returns": 413
+    },
+    "5": {
+      "rows": 20,
+      "stations": 7,
+      "returns": 15,
+      "return_rate": 0.75,
+      "confirmed_returns": 8
+    },
+    "7": {
+      "rows": 5,
+      "stations": 2,
+      "returns": 3,
+      "return_rate": 0.6,
+      "confirmed_returns": 2
+    },
+    "9": {
+      "rows": 1,
+      "stations": 1,
+      "returns": 0,
+      "return_rate": 0.0,
+      "confirmed_returns": 0
+    }
+  },
+  "station_hours": 505,
+  "extended_minus_existing_ap_station_bootstrap_95": [
+    -0.00486504643416073,
+    0.008395756256001204
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "frozen_at": "2026-10-04T15:45:37Z",
+  "status": "research only, no production price or ranking change",
+  "rule": {
+    "scope": "same station, fuel product and payment type",
+    "new_jump_min_dollars": 0.1,
+    "jump_requires_newer_source_minutes": 5,
+    "preceding_observation_max_gap_hours": 2,
+    "prior_confirmed_episodes_min": 2,
+    "return_tolerance_dollars": 0.03,
+    "return_window_hours": 6,
+    "confirmation_min_observed_gap_hours": 1,
+    "confirmation_requires_newer_source_minutes": 5,
+    "history_available_strictly_before_prediction": true
+  },
+  "assessment": {
+    "known_followup_min_hourly_observations": 4,
+    "known_followup_min_newer_source_observations": 1,
+    "prediction_target": "observed return, not pump truth or intent",
+    "final_period_start": "2026-10-05T18:19:00Z",
+    "final_period_end": "2026-10-07T18:19:00Z"
+  },
+  "source_hashes": {
+    "build.py": "2e717eccad00ea0eb1c81acd413b47c24dd61f06818c0a7c7d3832ed0ae40f5d",
+    "reversal_audit.py": "f9bef0de03c4913e4c603db17f1769c36e4494a1ae1ff2f841876c94d0d216b6",
+    "signals.py": "03e357e01bd37e0a92610a46464ae0dc21fc9ebacbfbac5d94edfb1076475398",
+    "test_signals.py": "eb0ffac79bf976dcea87f1e0cd005ca23dc487d4d8a35b705ebb8e60a00e0374",
+    "verify_evidence.py": "f144578b9d52591a832c4cbe1da739e7d32be6ae78fe6992ddaaf7e65cbf48a0",
+    "diagnostics.py": "d5341a20c58a53dc376932c630408c74c25a12ae144fa15ae4c8e252238705fd",
+    "recurrence.py": "5487c0c607420fc9fbf09b0558a698a4e924b47a66df398766e2217a7394fa34",
+    "train.py": "0e04eb52cbd5bf059b39959e5ecd815cf8427f9cf14a1ce555875ea50316373b"
+  }
+}

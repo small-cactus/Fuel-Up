@@ -1,0 +1,21 @@
+{
+  "signals.png": "ccf82168f837dc07bbc5f86e788295bea62fbf2b1ea28785a914119292bef792",
+  "diagnostics.json": "5f8dc3bff9da7ca65e999b73cf9d4fce84983a162e8d9beef37bad75fe1f5d42",
+  "FROZEN_RELIABILITY_RULE.json": "91116bc2bb275a75ad99d44a46ec4d38badedfa08ee235d93fb2a1543130147d",
+  "RESULTS.md": "84c43e80d9dcdf5d98d769fa2dcfa8618673d7f7a260bfb75e8991621fbfa1f2",
+  "PROTOCOL.md": "ea41548b56a7061b05e70fbd90fffcdd8f348eeae1ac6bafec282a202c0e14be",
+  "artifacts/dataset-metadata.json": "24ded23cac0c10793463ee40d6123b85c2b2fcdbc5ea2520937815cddd81329f",
+  "artifacts/reversal-events.json.gz": "5f10051ee2267428a96ba1621f3ffc0acbce68d819b51071597d313298ab5781",
+  "artifacts/reversal-audit.json": "aed0c0c62a93587fc0f4301d72670ae473da3968f1b877c86452fcebf85b23a4",
+  "artifacts/archive-proof.json": "e3e467d137d291f0c5654853f519c2ae06b91d963c802082adb11030da9b7027",
+  "artifacts/recurrence.json": "84a3fbad9199510dd9581e1bf87807c2029a2aa5d8f269a4270454ae13ca008e",
+  "artifacts/classifier-predictions.npz": "2387d04e247cb8396d45a1f4c4211363f0e7faaec7d3e85f9a141d78be0cbfca",
+  "artifacts/classifier-results.json": "55ba5329ae81dcaf8b7cddcad3487e456414d129ad1e1abb96de33e613a6f07b",
+  "artifacts/environment.json": "cec65ea99029fed46ad8e91d287b04306c4e510d8626f0b76d7ee2c1e662df4e",
+  "artifacts/freeze.json": "4c55794a2cde0fa8b8d28749a8adc24f0ece3be712cb12422d11a0ff4974dccd",
+  "artifacts/recurrence-events.npz": "b248dc0d51b0b69b43c8be6dd9e5de0b7266e0a597889df59bd7e53e0a4fc7b0",
+  "models/extended.cbm": "6ec680ca7b4467fa3d74e8723622525b25cba4d5a210f1682c56481b97dfddf1",
+  "models/existing.cbm": "97ceaeb86ebf8c466068bae30784b67de03415fe82f3c1910c52453358fa062e",
+  "models/age_only.cbm": "18fe570adefdc6cfb176b4c744489c088231cbef32cc19c1f6756a9029181a1e",
+  "models/refresh_only.cbm": "cb3b35624d1bc4aa776c1d047b49745dcfda668ec3347af4ce5b3853cf913861"
+}
