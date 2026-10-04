@@ -6,6 +6,8 @@ struct OnboardingFlow: View {
 
   var body: some View {
     ZStack(alignment: .bottom) {
+      OnboardingMapBackdrop(presentation: model.mapPresentation, onMapReady: { model.emit?(["type": "mapReady"]) })
+        .ignoresSafeArea()
       OnboardingPager(model: model)
         .ignoresSafeArea(.container, edges: .vertical)
       OnboardingFooter(model: model)

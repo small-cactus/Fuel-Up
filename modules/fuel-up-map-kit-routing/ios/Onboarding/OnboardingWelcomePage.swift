@@ -4,11 +4,9 @@ import MapKit
 // Native port of the existing welcome artwork, in the same pager as setup.
 // The map creates its annotations with the view, not a one-shot loading event.
 struct OnboardingWelcomePage: View {
-  var onMapReady: () -> Void = {}
   var body: some View {
     GeometryReader { geometry in
       ZStack(alignment: .top) {
-        OnboardingWelcomeMap(onMapReady: onMapReady).ignoresSafeArea()
         OnboardingMapScrim(topHeight: 330, bottomHeight: 320, bottomOffset: 40)
         ScrollView {
           VStack(spacing: 12) {

@@ -1,0 +1,50 @@
+{
+  "device": "iPhone 17 Pro Max simulator",
+  "runtime": "iOS 26.5",
+  "before": [
+    {
+      "pointer": "0x109d41c00",
+      "className": "MKMapView",
+      "frame": {
+        "y": 0,
+        "x": 0,
+        "width": 440,
+        "height": 956
+      }
+    },
+    {
+      "pointer": "0x109d42300",
+      "className": "MKMapView",
+      "frame": {
+        "y": 0,
+        "x": 0,
+        "width": 440,
+        "height": 956
+      }
+    }
+  ],
+  "after": [
+    {
+      "pointer": "0x109d41c00",
+      "className": "MKMapView",
+      "frame": {
+        "y": 0,
+        "x": 0,
+        "width": 440,
+        "height": 956
+      }
+    },
+    {
+      "pointer": "0x109d42300",
+      "className": "MKMapView",
+      "frame": {
+        "y": 0,
+        "x": 0,
+        "width": 440,
+        "height": 956
+      }
+    }
+  ],
+  "sameMapInstances": true,
+  "swipes": 9
+}

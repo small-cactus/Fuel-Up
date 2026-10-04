@@ -13,7 +13,7 @@ struct OnboardingBrand: Identifiable {
 
 // Draft choices live in Swift throughout navigation. Only completion persists them.
 final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelegate {
-  let mapPreview = OnboardingMapPreview()
+  let mapPresentation = OnboardingMapPresentation()
   @Published var step = 0
   @Published var searchFocused = false
   @Published var footerHeight: CGFloat = 134

@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-// Keep every page (and its map/scroll state) alive. UIKit owns both button-driven
+// Keep every page and its scroll state alive. UIKit owns both button-driven
 // and interactive sliding; changing permission state never rebuilds the page list.
 @available(iOS 16.0, *)
 struct OnboardingPager: UIViewControllerRepresentable {
@@ -20,12 +20,15 @@ final class OnboardingPagerController: UIPageViewController, UIPageViewControlle
   private let model: OnboardingModel
   private var pages: [UIHostingController<OnboardingPage>] = []
   private var transitioning = false
+  private var scrollObservation: NSKeyValueObservation?
+  private var transitionPages: (from: Int, to: Int)?
   private var gestureStartStep = 0
   private var locationReady: Bool
 
   init(model: OnboardingModel) {
     self.model = model
     locationReady = model.locationReady
+    model.mapPresentation.position = CGFloat(model.step)
     super.init(transitionStyle: .scroll, navigationOrientation: .horizontal)
     pages = (0..<4).map { index in
       let host = OnboardingPageHost(rootView: OnboardingPage(index: index, model: model))
@@ -36,6 +39,20 @@ final class OnboardingPagerController: UIPageViewController, UIPageViewControlle
     setViewControllers([pages[model.step]], direction: .forward, animated: false)
   }
   required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    view.backgroundColor = .clear
+    // Observe UIKit's native paging position without taking over its delegate.
+    // This also follows cancelled swipes and button/page-dot transitions.
+    if let scroll = view.subviews.compactMap({ $0 as? UIScrollView }).first {
+      scrollObservation = scroll.observe(\.contentOffset, options: [.new]) { [weak self] scroll, _ in
+        guard let self, let pages = self.transitionPages, scroll.bounds.width > 0 else { return }
+        let fraction = min(1, abs(scroll.contentOffset.x - scroll.bounds.width) / scroll.bounds.width)
+        self.model.mapPresentation.position = CGFloat(pages.from) + CGFloat(pages.to - pages.from) * fraction
+      }
+    }
+  }
 
   func update() { showRequestedPage() }
 
@@ -55,10 +72,13 @@ final class OnboardingPagerController: UIPageViewController, UIPageViewControlle
     let target = model.locationReady ? model.step : min(model.step, 1)
     guard target != current else { return }
     transitioning = true
+    transitionPages = (current, target)
     setViewControllers([pages[target]], direction: target > current ? .forward : .reverse,
                        animated: !UIAccessibility.isReduceMotionEnabled) { [weak self] _ in
       guard let self else { return }
       self.transitioning = false
+      self.transitionPages = nil
+      self.model.mapPresentation.position = CGFloat(target)
       // Serialize rapid taps and changes in permission during a gesture.
       self.showRequestedPage()
     }
@@ -78,10 +98,17 @@ final class OnboardingPagerController: UIPageViewController, UIPageViewControlle
                           willTransitionTo pendingViewControllers: [UIViewController]) {
     transitioning = true
     gestureStartStep = model.step
+    if let target = index(of: pendingViewControllers.first) {
+      transitionPages = (gestureStartStep, target)
+    }
   }
   func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool,
                           previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
     transitioning = false
+    transitionPages = nil
+    if let visible = index(of: viewControllers?.first) {
+      model.mapPresentation.position = CGFloat(visible)
+    }
     if completed, model.step == gestureStartStep, let visible = index(of: viewControllers?.first) {
       model.selectStep(visible)
     }
@@ -99,13 +126,16 @@ private struct OnboardingPage: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .modifier(OnboardingBottomBar(model: model, overlaysMap: index == 0))
       .background {
-        if index >= 2 { OnboardingMapBackground() }
+        if index >= 2 {
+          PureProgressiveBlur(direction: .uniform)
+            .ignoresSafeArea().allowsHitTesting(false).accessibilityHidden(true)
+        }
       }
   }
 
   @ViewBuilder private var page: some View {
     switch index {
-    case 0: OnboardingWelcomePage(onMapReady: { model.emit?(["type": "mapReady"]) })
+    case 0: OnboardingWelcomePage()
     case 1: OnboardingLocationPage(model: model)
     case 2: OnboardingFuelPage(model: model)
     default: OnboardingBrandsPage(model: model)
@@ -113,8 +143,7 @@ private struct OnboardingPage: View {
   }
 }
 
-// Accessing every host.view in the pager initializer eagerly created all four
-// maps. Let UIKit mount adjacent pages when needed, retaining their state after.
+// Page hosts contain only content and blur; MapKit stays in the shared backdrop.
 private final class OnboardingPageHost: UIHostingController<OnboardingPage> {
   override func viewDidLoad() {
     super.viewDidLoad()
