@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AppState, Alert, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppState } from '../../src/AppStateContext';
@@ -10,7 +11,6 @@ import { useTheme } from '../../src/ThemeContext';
 import TopCanopy from '../../src/components/TopCanopy';
 import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
 import NativeSettingsForm from '../../src/components/settings/NativeSettingsForm';
-import BrandPreferencesSheet from '../../src/components/settings/BrandPreferencesSheet';
 import {
     enablePredictiveTrackingAsync,
     getPredictiveTrackingPermissionStateAsync,
@@ -25,16 +25,11 @@ function noThrow(promise) {
 
 export default function SettingsScreen() {
     const insets = useSafeAreaInsets();
+    const router = useRouter();
     const { isDark, themeMode, setThemeMode, themeColors } = useTheme();
-    const { requestFuelReset, setFuelDebugState, manualLocationOverride, resolvedFuelSearchContext } = useAppState();
+    const { requestFuelReset, setFuelDebugState } = useAppState();
     const { preferences, updatePreference, resetOnboarding } = usePreferences();
     const [trackingPermissionState, setTrackingPermissionState] = useState(null);
-    const [brandsPresented, setBrandsPresented] = useState(false);
-    const brandCoordinate = useMemo(() => {
-        const origin = manualLocationOverride || resolvedFuelSearchContext;
-        return Number.isFinite(origin?.latitude) && Number.isFinite(origin?.longitude)
-            ? { latitude: origin.latitude, longitude: origin.longitude } : null;
-    }, [manualLocationOverride, resolvedFuelSearchContext]);
     const mountedRef = useRef(false);
     const permissionRevisionRef = useRef(0);
     const reviewingPermissionsRef = useRef(false);
@@ -78,11 +73,6 @@ export default function SettingsScreen() {
         updatePreference('searchRadiusMiles', Number(nextValue));
     };
 
-    const handleOctaneChange = (nextValue) => {
-        fireTapHaptic();
-        updatePreference('preferredOctane', nextValue);
-    };
-
     const handleThemeModeChange = (nextValue) => {
         fireTapHaptic();
         setThemeMode(nextValue);
@@ -101,9 +91,9 @@ export default function SettingsScreen() {
             clearTrendDataCache();
             setFuelDebugState(null);
             requestFuelReset();
-            if (mountedRef.current) Alert.alert('Fuel Cache Cleared', 'Your next map refresh will pull fresh prices.');
+            if (mountedRef.current) Alert.alert('Prices Refreshed', 'The map will check for the latest gas prices.');
         } catch (error) {
-            if (mountedRef.current) Alert.alert('Reset Failed', 'Unable to clear the fuel cache right now. Please try again.');
+            if (mountedRef.current) Alert.alert('Reset Failed', 'We couldn’t refresh gas prices. Please try again.');
         } finally {
             resettingFuelRef.current = false;
         }
@@ -112,12 +102,12 @@ export default function SettingsScreen() {
     const handleConfirmFuelReset = () => {
         fireTapHaptic();
         Alert.alert(
-            'Reset Fuel Cache',
-            'Clear saved gas prices and force a fresh fetch?',
+            'Refresh Gas Prices',
+            'Check for the latest prices near you?',
             [
                 { text: 'Cancel', style: 'cancel' },
                 {
-                    text: 'Reset',
+                    text: 'Refresh',
                     style: 'destructive',
                     onPress: () => {
                         noThrow(Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium));
@@ -131,12 +121,12 @@ export default function SettingsScreen() {
     const handleResetOnboarding = () => {
         fireTapHaptic();
         Alert.alert(
-            'Replay Onboarding',
-            'This will show the setup flow again the next time you open the app.',
+            'Show Setup Again',
+            'Go through setup again? Your current preferences will be kept unless you change them.',
             [
                 { text: 'Cancel', style: 'cancel' },
                 {
-                    text: 'Replay',
+                    text: 'Continue',
                     style: 'destructive',
                     onPress: () => {
                         noThrow(Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium));
@@ -161,7 +151,7 @@ export default function SettingsScreen() {
             if (nextPermissionState.isReady) {
                 Alert.alert(
                     'Predictive Tracking Enabled',
-                    'Always-on precise location and Motion & Fitness access are enabled. Fuel Up will wait for Apple to classify you as driving before starting predictive fueling.'
+                    'Fuel Up can now look for fuel stops while you drive.'
                 );
                 return;
             }
@@ -185,7 +175,7 @@ export default function SettingsScreen() {
             if (!mountedRef.current || revision !== permissionRevisionRef.current) return;
             Alert.alert(
                 'Unable To Review Permissions',
-                'Background tracking permissions can only be configured from a development or production build.'
+                'We couldn’t open tracking settings. Please try again.'
             );
         } finally {
             reviewingPermissionsRef.current = false;
@@ -193,23 +183,12 @@ export default function SettingsScreen() {
     };
 
     const trackingReady = Boolean(trackingPermissionState?.isReady);
-    const trackingFooterCopy = useMemo(() => {
-        if (trackingReady) {
-            return 'Always-on location and Motion & Fitness are enabled. Fuel Up waits for Apple to classify you as driving before it starts predictive fueling.';
-        }
-        return 'Fuel Up needs Always Allow, Precise Location, and Motion & Fitness access. Predictive fueling will only start after Apple marks you as driving.';
-    }, [trackingReady]);
-
-    const onboardingFooterCopy = 'Resets only affect this device. You can always restart onboarding to change your grade or octane preferences.';
+    const trackingFooterCopy = trackingReady
+        ? 'Find fuel stops along your drive.'
+        : 'Allow location and motion access to find fuel stops along your drive.';
 
     return (
         <View style={styles.container}>
-            <BrandPreferencesSheet visible={brandsPresented} onClose={() => setBrandsPresented(false)}
-                isDark={isDark} themeColors={themeColors} coordinate={brandCoordinate}
-                radiusMiles={preferences.searchRadiusMiles} fuelGrade={preferences.preferredOctane}
-                requiresE85={preferences.requiresE85} selectedBrands={preferences.preferredBrands || []}
-                fuelMemberships={preferences.fuelMemberships || []} onMembershipsChange={value => updatePreference('fuelMemberships', value)}
-                onChange={brands => updatePreference('preferredBrands', brands)} />
             <View style={[styles.baseBackground, { backgroundColor: themeColors.background }]} />
             <View style={styles.foregroundLayer}>
                 <View
@@ -226,12 +205,11 @@ export default function SettingsScreen() {
                         searchRadiusMiles={preferences.searchRadiusMiles}
                         preferredOctane={preferences.preferredOctane}
                         onRadiusChange={handleRadiusChange}
-                        onOctaneChange={handleOctaneChange}
+                        onEditFuel={() => router.push('/fuel-preferences')}
                         requiresE85={preferences.requiresE85}
-                        onRequiresE85Change={value => updatePreference('requiresE85', value)}
                         fuelMemberships={preferences.fuelMemberships}
                         preferredBrands={preferences.preferredBrands}
-                        onEditPreferredBrands={() => setBrandsPresented(true)}
+                        onEditPreferredBrands={() => router.push('/station-brands')}
                         navigationApp={preferences.navigationApp}
                         onNavigationAppChange={handleNavigationAppChange}
                         themeMode={themeMode}
@@ -241,7 +219,6 @@ export default function SettingsScreen() {
                         onResetFuelCache={handleConfirmFuelReset}
                         onResetOnboarding={handleResetOnboarding}
                         trackingFooterCopy={trackingFooterCopy}
-                        onboardingFooterCopy={onboardingFooterCopy}
                     />
                 </View>
 

@@ -119,3 +119,27 @@ test('membership prefetch recovers a transient location lookup and uses the norm
     assert.equal(result.loading, false);
     await act(async () => view.unmount());
 });
+
+test('membership loading state reaches both native pages without dropping saved memberships', async () => {
+    let membershipResult = { loading: true, ids: [] };
+    const hook = load('src/screens/onboarding/useNativeOnboardingData.js', {
+        '../../components/brands/useNearbyBrands': { __esModule: true, default: () => ({ quotes: [], loading: false, retry() {} }) },
+        '../../components/memberships/useMembershipOptions': { __esModule: true, default: () => ({ ...membershipResult, retry() {} }) },
+    }).default;
+    let result;
+    function Harness() {
+        result = hook({ latitude: 28, longitude: -82 }, {
+            preferredOctane: 'premium', searchRadiusMiles: 12, fuelMemberships: ['costco'],
+        });
+        return null;
+    }
+    let view;
+    await act(async () => { view = create(React.createElement(Harness)); });
+    assert.equal(result.data.membershipLoading, true);
+    assert.deepEqual(result.data.memberships.map(item => item.id), ['costco']);
+    membershipResult = { loading: false, ids: ['sams'] };
+    await act(async () => view.update(React.createElement(Harness)));
+    assert.equal(result.data.membershipLoading, false);
+    assert.deepEqual(new Set(result.data.memberships.map(item => item.id)), new Set(['costco', 'sams']));
+    await act(async () => view.unmount());
+});

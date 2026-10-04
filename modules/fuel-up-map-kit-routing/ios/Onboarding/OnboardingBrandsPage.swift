@@ -3,6 +3,7 @@ import SwiftUI
 @available(iOS 16.0, *)
 struct OnboardingBrandsPage: View {
   @ObservedObject var model: OnboardingModel
+  var isSettings = false
   @State private var brandSearch = ""
   @State private var membershipSearch = ""
   @ScaledMetric(relativeTo: .body) private var searchHeight = 56.0
@@ -27,9 +28,13 @@ struct OnboardingBrandsPage: View {
   private var sections: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 26) {
-        OnboardingWordmark()
-        heading
-        if !model.membershipOptions.isEmpty {
+        if !isSettings {
+          OnboardingWordmark()
+          heading
+        }
+        if model.membershipLoading {
+          OnboardingMembershipSkeleton()
+        } else if !model.membershipOptions.isEmpty {
           VStack(alignment: .leading, spacing: 12) {
             sectionTitle("Memberships")
             if model.membershipOptions.count > 10 {
@@ -51,7 +56,7 @@ struct OnboardingBrandsPage: View {
               }.modifier(OnboardingGlass())
             }
           }
-        } else if model.membershipLoading { ProgressView("Finding memberships…") }
+        }
         if model.membershipError != nil { retry("Memberships couldn’t load.") }
 
         VStack(alignment: .leading, spacing: 12) {
@@ -71,14 +76,16 @@ struct OnboardingBrandsPage: View {
                 if item.id != brands.last?.id { Divider().padding(.horizontal, 20) }
               }
             }.modifier(OnboardingGlass())
-          } else if model.loading { ProgressView("Finding nearby stations…") }
+          } else if model.loading { ProgressView("Finding nearby stations…").tint(.primary) }
           else {
             Text(allBrands.count > 10 && !brandSearch.isEmpty ? "No matching stations." : "No nearby brands for this fuel.")
               .foregroundStyle(.secondary)
           }
           if model.error != nil { retry("Nearby brands couldn’t load.") }
         }
-        Text("Optional. You can change these in Settings.").font(.footnote).foregroundStyle(.secondary)
+        if !isSettings {
+          Text("Optional. You can change these in Settings.").font(.footnote).foregroundStyle(.secondary)
+        }
       }.padding(.horizontal, 24).padding(.bottom, 24)
     }.scrollDismissesKeyboard(.interactively)
   }

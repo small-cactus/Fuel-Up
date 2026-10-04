@@ -2,13 +2,16 @@ import SwiftUI
 
 struct OnboardingFuelPage: View {
   @ObservedObject var model: OnboardingModel
+  var isSettings = false
   private let grades = [("regular", "Regular", "87"), ("midgrade", "Midgrade", "89"),
                         ("premium", "Premium", "91–93"), ("diesel", "Diesel", ""), ("e85", "E85", "Flex fuel")]
   var body: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 26) {
-        OnboardingWordmark()
-        OnboardingHeading(title: "Choose your fuel", subtitle: "Use the grade recommended for your car.")
+        if !isSettings {
+          OnboardingWordmark()
+          OnboardingHeading(title: "Choose your fuel", subtitle: "Use the grade recommended for your car.")
+        }
         VStack(spacing: 0) {
           ForEach(grades, id: \.0) { grade in
             OnboardingSelectionRow(title: grade.1, subtitle: grade.2.isEmpty ? nil : grade.2,

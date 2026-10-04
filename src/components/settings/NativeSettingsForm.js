@@ -19,28 +19,24 @@ import React from 'react';
 import {
     Button,
     Host,
+    HStack,
+    Image,
     Label,
     LabeledContent,
     Picker,
     Slider,
     Text,
-    Toggle,
 } from '@expo/ui/swift-ui';
 import {
     font,
     foregroundStyle,
     tag,
 } from '@expo/ui/swift-ui/modifiers';
-import { FUEL_GRADE_ORDER, getFuelGradeMeta } from '../../lib/fuelGrade';
+import { getFuelGradeMeta } from '../../lib/fuelGrade';
 import {
     MAX_SEARCH_RADIUS_MILES,
     MIN_SEARCH_RADIUS_MILES,
 } from '../../lib/fuelSearchState';
-
-const OCTANE_OPTIONS = FUEL_GRADE_ORDER.map(fuelGrade => {
-    const meta = getFuelGradeMeta(fuelGrade);
-    return { key: meta.key, label: meta.label };
-});
 
 const APPEARANCE_OPTIONS = [
     { key: 'light', label: 'Light' },
@@ -63,9 +59,8 @@ export default function NativeSettingsForm({
     searchRadiusMiles,
     preferredOctane,
     onRadiusChange,
-    onOctaneChange,
+    onEditFuel,
     requiresE85,
-    onRequiresE85Change,
     preferredBrands = [],
     fuelMemberships = [],
     onEditPreferredBrands,
@@ -82,7 +77,6 @@ export default function NativeSettingsForm({
     onResetFuelCache,
     onResetOnboarding,
     // Header info shown in the first section
-    onboardingFooterCopy,
     trackingFooterCopy,
 }) {
     return (
@@ -93,19 +87,7 @@ export default function NativeSettingsForm({
             ignoreSafeArea="all"
         >
             <Form>
-                <Section
-                    title="Fuel Preferences"
-                    footer={
-                        <Text
-                            modifiers={[
-                                font({ size: 12 }),
-                                foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
-                            ]}
-                        >
-                            Regular 85–88 · Midgrade 89–90 · Premium 91–94+ · Diesel · E85. Require E85 shows stations that offer E85, even without a recent E85 price. Preferred brands get a 20¢/gal ranking advantage. Pump prices stay unchanged.
-                        </Text>
-                    }
-                >
+                <Section title="Fuel Preferences">
                     <LabeledContent
                         label={(
                             <Label title="Search Radius" systemImage="location.magnifyingglass" />
@@ -154,46 +136,15 @@ export default function NativeSettingsForm({
                         }}
                     />
 
-                    <Picker
-                        label="Fuel Type"
-                        systemImage="gauge.with.dots.needle.33percent"
-                        selection={preferredOctane}
-                        onSelectionChange={selection => {
-                            if (typeof onOctaneChange === 'function') {
-                                onOctaneChange(selection);
-                            }
-                        }}
-                    >
-                        {OCTANE_OPTIONS.map(option => (
-                            <Text key={option.key} modifiers={[tag(option.key)]}>
-                                {option.label}
-                            </Text>
-                        ))}
-                    </Picker>
-                    <Toggle label="Require E85" systemImage="leaf.fill" isOn={Boolean(requiresE85)}
-                        onIsOnChange={onRequiresE85Change} testID="settings-requires-e85" />
-                    <Button onPress={onEditPreferredBrands} testID="settings-preferred-brands">
-                        <LabeledContent label={<Label title="Station Brands" systemImage="heart" />}>
-                            <Text modifiers={[foregroundStyle({ type: 'hierarchical', style: 'secondary' })]}>
-                                {`${fuelMemberships.length + preferredBrands.length} selected`}
-                            </Text>
-                        </LabeledContent>
-                    </Button>
+                    <SettingsLink title="Fuel Type" systemImage="gauge.with.dots.needle.33percent"
+                        value={`${getFuelGradeMeta(preferredOctane).label}${requiresE85 && preferredOctane !== 'e85' ? ' + E85' : ''}`}
+                        onPress={onEditFuel} testID="settings-fuel-type" />
+                    <SettingsLink title="Station Brands" systemImage="heart"
+                        value={fuelMemberships.length + preferredBrands.length ? `${fuelMemberships.length + preferredBrands.length} selected` : undefined}
+                        onPress={onEditPreferredBrands} testID="settings-preferred-brands" />
                 </Section>
 
-                <Section
-                    title="Navigation"
-                    footer={
-                        <Text
-                            modifiers={[
-                                font({ size: 12 }),
-                                foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
-                            ]}
-                        >
-                            Tapping the navigate button on a station card will open driving directions in your chosen map app.
-                        </Text>
-                    }
-                >
+                <Section title="Navigation">
                     <Picker
                         label="Map App"
                         systemImage="map.fill"
@@ -255,19 +206,7 @@ export default function NativeSettingsForm({
                     />
                 </Section>
 
-                <Section
-                    title="Data"
-                    footer={
-                        <Text
-                            modifiers={[
-                                font({ size: 12 }),
-                                foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
-                            ]}
-                        >
-                            {onboardingFooterCopy}
-                        </Text>
-                    }
-                >
+                <Section title="Data">
                     <Button
                         role="destructive"
                         systemImage="arrow.counterclockwise"
@@ -276,7 +215,7 @@ export default function NativeSettingsForm({
                                 onResetFuelCache();
                             }
                         }}
-                        label="Reset Fuel Cache"
+                        label="Refresh Gas Prices"
                     />
                     <Button
                         systemImage="arrow.uturn.backward"
@@ -285,10 +224,23 @@ export default function NativeSettingsForm({
                                 onResetOnboarding();
                             }
                         }}
-                        label="Replay Onboarding"
+                        label="Show Setup Again"
                     />
                 </Section>
             </Form>
         </Host>
     );
+}
+
+// A native row opens an Expo Router native-stack page.
+function SettingsLink({ title, systemImage, value, onPress, testID }) {
+    return <Button onPress={onPress} testID={testID}>
+        <LabeledContent label={<Label title={title} systemImage={systemImage} />}>
+            <HStack spacing={8}>
+                {value ? <Text modifiers={[foregroundStyle({ type: 'hierarchical', style: 'secondary' })]}>{value}</Text> : null}
+                <Image systemName="chevron.right" size={13}
+                    modifiers={[foregroundStyle({ type: 'hierarchical', style: 'tertiary' })]} />
+            </HStack>
+        </LabeledContent>
+    </Button>;
 }

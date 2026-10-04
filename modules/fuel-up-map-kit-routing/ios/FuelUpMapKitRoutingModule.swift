@@ -53,6 +53,15 @@ public final class FuelUpMapKitRoutingModule: Module {
       Events("onAction")
     }
 
+    View(NativePreferenceView.self) {
+      ViewName("NativePreferenceView")
+      Prop("page") { (view, page: String) in view.configure(page: page) }
+      Prop("initialChoices") { (view, choices: [String: Any]) in view.model.configure(choices) }
+      Prop("data") { (view, data: [String: Any]) in view.model.applyData(data) }
+      Prop("isDark") { (view, dark: Bool) in view.setDark(dark) }
+      Events("onAction")
+    }
+
     View(ClusterLabPageControl.self) {
       ViewName("ClusterLabPageControl")
       Prop("pageCount") { (view, count: Int) in view.pageCount = count }

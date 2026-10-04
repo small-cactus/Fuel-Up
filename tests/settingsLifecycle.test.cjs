@@ -8,10 +8,11 @@ const deferred = () => { let resolve; const promise = new Promise(r => { resolve
 
 async function setup() {
     const read = deferred(); const review = deferred(); const alerts = [];
-    let form; let sheet; let foreground; let reviewCalls = 0; const updates = [];
+    let form; const routes = []; let foreground; let reviewCalls = 0; const updates = [];
     const Screen = load('app/(tabs)/settings.js', {
         'react-native': { View: 'View', StyleSheet: { create: value => value }, Alert: { alert: (...args) => alerts.push(args) },
             AppState: { addEventListener: (_, callback) => { foreground = callback; return { remove() {} }; } } },
+        'expo-router': { useRouter: () => ({ push: route => routes.push(route) }) },
         'expo-haptics': { impactAsync: async () => {}, selectionAsync: async () => {}, ImpactFeedbackStyle: { Light: 1, Medium: 2 } },
         'react-native-safe-area-context': { useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) },
         '../../src/AppStateContext': { useAppState: () => ({ requestFuelReset() {}, setFuelDebugState() {} }) },
@@ -21,13 +22,12 @@ async function setup() {
         '../../src/services/fuel/trends': { clearTrendDataCache() {} },
         '../../src/components/TopCanopy': () => null,
         '../../src/components/FuelUpHeaderLogo': () => null,
-        '../../src/components/settings/BrandPreferencesSheet': props => { sheet = props; return null; },
         '../../src/components/settings/NativeSettingsForm': props => { form = props; return null; },
         '../../src/lib/predictiveTrackingAccess': { getPredictiveTrackingPermissionStateAsync: () => read.promise,
             enablePredictiveTrackingAsync: () => { reviewCalls++; return review.promise; }, openPredictiveTrackingSettingsAsync: async () => {} },
     }).default;
     let renderer; await act(async () => { renderer = create(React.createElement(Screen)); });
-    return { read, review, alerts, foreground, updates, get sheet() { return sheet; }, get form() { return form; }, get reviewCalls() { return reviewCalls; },
+    return { read, review, alerts, foreground, updates, routes, get form() { return form; }, get reviewCalls() { return reviewCalls; },
         unmount: async () => act(async () => renderer.unmount()) };
 }
 
@@ -58,14 +58,11 @@ test('permission completion after leaving Settings cannot display an orphan aler
     assert.deepEqual(state.alerts, []);
 });
 
- test('Settings persists E85 and multiple brand choices through the native controls', async () => {
+test('Settings links open dedicated fuel and station brand pages', async () => {
     const state = await setup();
-    assert.equal(state.sheet.visible, false);
     assert.deepEqual(state.form.preferredBrands, ['shell']);
-    await act(async () => { state.form.onRequiresE85Change(true); state.form.onEditPreferredBrands(); });
-    assert.equal(state.sheet.visible, true);
-    await act(async () => { state.sheet.onChange(['shell', 'costco']); state.sheet.onClose(); });
-    assert.deepEqual(state.updates, [['requiresE85', true], ['preferredBrands', ['shell', 'costco']]]);
-    assert.equal(state.sheet.visible, false);
+    await act(async () => { state.form.onEditFuel(); state.form.onEditPreferredBrands(); });
+    assert.deepEqual(state.routes, ['/fuel-preferences', '/station-brands']);
+    assert.deepEqual(state.updates, [], 'opening a preference page does not change saved settings');
     await state.unmount();
 });

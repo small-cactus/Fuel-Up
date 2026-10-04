@@ -9,6 +9,7 @@ const PreferencesContext = createContext({
     normalizedFuelSearchPreferences: normalizeFuelSearchPreferences(DEFAULT_PREFERENCES),
     preferenceRevision: 0,
     updatePreference: () => {},
+    updatePreferences: () => {},
     resetOnboarding: () => {},
     completeOnboarding: () => {},
     isLoading: true,
@@ -19,6 +20,7 @@ export function PreferencesProvider({ children }) {
     const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
     useEffect(() => { void store.load(); }, [store]);
     const updatePreference = useCallback((key, value) => store.update({ [key]: value }), [store]);
+    const updatePreferences = useCallback(changes => store.update(changes), [store]);
     const completeOnboarding = useCallback((choices = {}) => store.update({
         ...choices,
         hasCompletedOnboarding: true,
@@ -32,9 +34,10 @@ export function PreferencesProvider({ children }) {
         normalizedFuelSearchPreferences,
         fuelSearchCriteriaSignature: buildFuelSearchCriteriaSignature(normalizedFuelSearchPreferences),
         updatePreference,
+        updatePreferences,
         resetOnboarding,
         completeOnboarding,
-    }), [snapshot, normalizedFuelSearchPreferences, updatePreference, resetOnboarding, completeOnboarding]);
+    }), [snapshot, normalizedFuelSearchPreferences, updatePreference, updatePreferences, resetOnboarding, completeOnboarding]);
     return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;
 }
 

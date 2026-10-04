@@ -36,13 +36,15 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
   @Published var completing = false
   var emit: (([String: Any]) -> Void)?
   private let location = CLLocationManager()
+  private let tracksLocation: Bool
   private var initialized = false
   private var initialMemberships = Set<String>()
   private var initialFavorites = Set<String>()
   @Published var locationRequested = false
   var locationReady: Bool { locationRequested && hasLocationAccess && coordinate != nil }
 
-  override init() {
+  init(tracksLocation: Bool = true) {
+    self.tracksLocation = tracksLocation
     super.init()
     location.delegate = self
     location.desiredAccuracy = kCLLocationAccuracyHundredMeters
@@ -92,6 +94,7 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
   }
   func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
     permission = manager.authorizationStatus
+    guard tracksLocation else { return }
     if hasLocationAccess {
       location.startUpdatingLocation()
     } else {
