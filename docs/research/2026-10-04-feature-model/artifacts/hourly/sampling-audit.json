@@ -1,0 +1,51 @@
+{
+  "stats": {
+    "source_events": 2877668,
+    "conflicting_sources": 0,
+    "no_target": 791316,
+    "purged": 84418,
+    "train": 858713,
+    "validation": 31410,
+    "train_changes_10c": 80890,
+    "validation_changes_10c": 1041,
+    "query_candidates": 1765857
+  },
+  "development_age_slices": [
+    {
+      "age": [
+        0,
+        1
+      ],
+      "n": 12033,
+      "mae_cents": 0.21299760043621063,
+      "changes10": 64
+    },
+    {
+      "age": [
+        1,
+        6
+      ],
+      "n": 10582,
+      "mae_cents": 0.41305992007255554,
+      "changes10": 173
+    },
+    {
+      "age": [
+        6,
+        24
+      ],
+      "n": 5281,
+      "mae_cents": 1.4915735721588135,
+      "changes10": 353
+    },
+    {
+      "age": [
+        24,
+        168
+      ],
+      "n": 3514,
+      "mae_cents": 3.143141508102417,
+      "changes10": 451
+    }
+  ]
+}

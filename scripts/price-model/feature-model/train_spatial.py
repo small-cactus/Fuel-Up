@@ -12,14 +12,19 @@ from common import load,normalizer,record_predictions,summarize,policies
 from spatial_network import NationalPrice,QwenPrice
 
 
-def main(root,context_path,out,kind,epochs):
+def main(root,context_path,out,kind,epochs,init=None):
     assert torch.cuda.is_available()
     torch.set_num_threads(8);torch.set_float32_matmul_precision('high')
     random.seed(104);np.random.seed(104);torch.manual_seed(104)
     out.mkdir(exist_ok=True,parents=True)
     d=load(root);X,y,m=d['X'],d['y'],d['meta'];tr=np.flatnonzero(m[:,5]==0);ev=np.flatnonzero(m[:,5]!=0);va=np.flatnonzero(m[:,5]==1)
     assert (m[tr,4]<72).all() and (m[:,3]<120).all()
-    feature,norm=normalizer(X,tr);np.savez(out/'normalization.npz',**norm)
+    if init:
+        norm=dict(np.load(init/'normalization.npz'));assert len(norm['median'])==X.shape[1]
+        finite=np.isfinite(X);fill=np.where(finite,X,norm['median'])
+        feature=np.concatenate([np.clip((fill-norm['mean'])/norm['std'],-20,20),~finite],axis=1).astype('float32')
+    else:feature,norm=normalizer(X,tr)
+    np.savez(out/'normalization.npz',**norm)
     contexts=np.load(context_path);valid=np.isfinite(contexts)
     # Fixed physical units, not statistics fitted on future national windows.
     scale=np.array([90,180,5,5,5,5,10,168,1,.1,.1,.1],dtype='float32')
@@ -28,9 +33,17 @@ def main(root,context_path,out,kind,epochs):
     xx=torch.from_numpy(feature);tt=torch.from_numpy(m[:,2].astype('int64'));cc=torch.from_numpy(m[:,1].astype('int64'));yy=torch.from_numpy(np.nan_to_num(y))
     revision=None
     if kind=='qwen':
-        source=json.loads((out.parent/'qwen-source.json').read_text())
+        resource_root=context_path.parent
+        source=json.loads((resource_root/'qwen-source.json').read_text())
         model_name=source['model'];revision=source['revision']
-        model=QwenPrice(feature.shape[1],contexts.shape[2],model_name,revision,str(out.parent/'hf-cache')).cuda()
+        model=QwenPrice(feature.shape[1],contexts.shape[2],model_name,revision,str(resource_root/'hf-cache'),str(init/'adapter') if init else None).cuda()
+        if init:
+            # Inference loader freezes adapters; explicitly train them for this continuation.
+            for name,param in model.backbone.named_parameters():
+                if 'lora_' in name:param.requires_grad_(True)
+            checkpoint=torch.load(init/'best.pt',weights_only=False,map_location='cuda')
+            missing,unexpected=model.load_state_dict(checkpoint['state_dict'],strict=False)
+            assert not unexpected and all(k.startswith('backbone.') for k in missing)
         batch=256;lr=1e-4
     else:
         width=256 if kind=='spatial256' else 512
@@ -38,6 +51,7 @@ def main(root,context_path,out,kind,epochs):
     trainable=sum(p.numel() for p in model.parameters() if p.requires_grad);total=sum(p.numel() for p in model.parameters())
     optimizer=torch.optim.AdamW([p for p in model.parameters() if p.requires_grad],lr=lr,weight_decay=.02)
     spec={'kind':kind,'parameters':total,'trainable_parameters':trainable,'features':feature.shape[1],'national_states':contexts.shape[2],'batch':batch,'learning_rate':lr,'max_epochs':epochs,'revision':revision,'model_name':'Qwen/Qwen3-0.6B-Base' if kind=='qwen' else None,'train_rows':len(tr),'validation_rows':len(va),'tokenization':'9 learned numeric soft tokens, no text tokenizer' if kind=='qwen' else 'one station query and all state summary tokens','compile':False,'device':torch.cuda.get_device_name(),'context_sha256':hashlib.sha256(context_path.read_bytes()).hexdigest(),'fairness':'Different architectures and compute budgets; predictive-system comparison, not parameter-matched architectural superiority.'}
+    spec['initial_checkpoint']=str(init) if init else None
     (out/'spec.json').write_text(json.dumps(spec,indent=2));print(json.dumps(spec),flush=True)
     def predict(indices):
         model.eval();pp=[];pr=[]
@@ -80,4 +94,4 @@ def main(root,context_path,out,kind,epochs):
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('dataset',type=Path);p.add_argument('context',type=Path);p.add_argument('out',type=Path);p.add_argument('--kind',choices=['spatial256','spatial512','qwen'],default='spatial256');p.add_argument('--epochs',type=int,default=12);a=p.parse_args();main(a.dataset,a.context,a.out,a.kind,a.epochs)
+    p=argparse.ArgumentParser();p.add_argument('dataset',type=Path);p.add_argument('context',type=Path);p.add_argument('out',type=Path);p.add_argument('--kind',choices=['spatial256','spatial512','qwen'],default='spatial256');p.add_argument('--epochs',type=int,default=12);p.add_argument('--init',type=Path);a=p.parse_args();main(a.dataset,a.context,a.out,a.kind,a.epochs,a.init)

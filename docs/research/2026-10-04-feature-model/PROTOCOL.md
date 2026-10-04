@@ -19,3 +19,9 @@ The stale-price classifier predicts whether the next newer source report changes
 Fine-tune the public Apache-2.0 Qwen3-0.6B-Base checkpoint, pinned by revision. Use LoRA on its attention projections and learned numeric input/output projections: six station-feature tokens, two tokens containing all flattened national summaries, and a prediction token. This is a pretrained-backbone numerical adaptation, not text instruction tuning. Train on all eligible national examples, with a residual-regression and change-classification objective. Report actual total/trainable parameters, rows and numeric tokens seen, runtime and saved adapters. Do not claim architecture or parameter-efficiency superiority: these systems have different parameter counts and compute budgets.
 
 Development selection considers raw price as a valid winner and restricts promoted experimental policies to a 20-cent cap with no increase in the combined rate of errors exceeding 10 cents or mean error on large changes. Larger caps remain sensitivity diagnostics only. All these are development guards, not production guarantees.
+
+## Sampling audit and separate aging-quote task
+
+An audit found 142,739/145,644 original development examples had source age under one hour, 2,905 had age 1–6 hours, and none had age over six hours. That source-event benchmark cannot establish stale-quote correction quality.
+
+Add a separately reported query-time cohort: every 12 hours, with a deterministic station-index offset, sample the then-visible quote even if its source timestamp has not advanced. Labels still require an independently newer report within 24 hours, and missing labels remain unknown. Use the same train/development/final boundaries, causal features, raw baseline and error guards. Report ages, missing-target counts, right-censoring and repeated-quote dependence. Never compare MAE across different cohorts as if it were a model improvement. The original source-event results remain preserved.

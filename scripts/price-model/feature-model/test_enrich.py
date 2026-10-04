@@ -5,9 +5,16 @@ import numpy as np
 from enrich import station_features,peer_features
 from enrich import past_windows
 from national_context import build as build_context
+from hourly_features import query_pairs
 
 
 class CausalFeatures(unittest.TestCase):
+    def test_query_sampling_includes_aging_quotes_and_unknown_outcomes(self):
+        p=np.array([3.,3.,3.,3.,3.2,3.2,3.2]);s=np.array([0.,0.,0.,0.,4.,4.,4.]);o=np.arange(7)+.1
+        rows=list(query_pairs([0,4],s,o,p,0,period=2))
+        self.assertIn((0,2,4),rows)
+        self.assertIn((1,6,None),rows)
+
     def test_history_windows_exclude_current_and_keep_missing(self):
         x=np.array([[1.],[np.nan],[3.],[4.]])
         w=past_windows(x,2)

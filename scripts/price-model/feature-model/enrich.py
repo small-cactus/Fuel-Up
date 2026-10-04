@@ -137,7 +137,7 @@ def peer_features(own, peers, sources, observed):
     return names,np.stack(values,axis=-1).astype('float32')
 
 
-def build(root, out, shard=0, shards=1):
+def build(root, out, shard=0, shards=1,reuse=None):
     a=root/'arrays'
     meta=json.loads((a/'metadata.json').read_text())
     assert meta['start_hour']+meta['shape'][0] <= 121
@@ -166,7 +166,18 @@ def build(root, out, shard=0, shards=1):
             continue
         d=np.load(part);m=d['meta']
         extra=None
-        for i in np.unique(m[:,0]).astype(int):
+        copied=np.zeros(len(m),dtype=bool)
+        if reuse is not None and (reuse/part.name).exists():
+            ref=np.load(reuse/part.name);refmeta=json.loads((reuse/'metadata.json').read_text())
+            names=refmeta['features'][len(oldmeta['features']):len(oldmeta['features'])+refmeta['station_feature_count']]
+            peer_names=refmeta['features'][-refmeta['peer_feature_count']:]
+            extra=np.full((len(m),len(names)+len(peer_names)),np.nan,dtype='float32')
+            keys={tuple(v[:3].astype(int)):j for j,v in enumerate(ref['meta'])}
+            for row,v in enumerate(m):
+                j=keys.get(tuple(v[:3].astype(int)))
+                if j is not None and np.allclose(d['X'][row],ref['X'][j,:len(oldmeta['features'])],equal_nan=True):
+                    extra[row]=ref['X'][j,len(oldmeta['features']):];copied[row]=True
+        for i in np.unique(m[~copied,0]).astype(int):
             names,own_features=station_features(np.array(p[:,i]),np.array(s[:,i]),np.array(o[:,i]))
             ng=neighbors.get(i,[])
             if len(ng):
@@ -193,5 +204,6 @@ if __name__=='__main__':
     parser.add_argument('out',type=Path)
     parser.add_argument('--shard',type=int,default=0)
     parser.add_argument('--shards',type=int,default=1)
+    parser.add_argument('--reuse',type=Path)
     args=parser.parse_args()
-    build(args.root,args.out,args.shard,args.shards)
+    build(args.root,args.out,args.shard,args.shards,args.reuse)
