@@ -1,0 +1,7 @@
+{
+  "source_repository": "https://github.com/google-research/timesfm",
+  "commit": "e51928e27119cb17bebc005be2696b75e0a9e688",
+  "checkpoint": "google/timesfm-3.0-pytorch",
+  "revision": "43046b85ec22d584a13f8098c2ed39c889e129c2",
+  "license": "TimesFM Non-Commercial License v1.0; isolated research benchmark only; never a shipping artifact"
+}

@@ -36,11 +36,12 @@ def compare(out):
     result={'development_only':True,'selection':best,'score_definition':'MAE + 0.1 worst-five-percent MAE; ordinary MAE <= 1.01 raw; selected on development data',
       'candidate_metrics':{n:price_metrics(y[va],p[va]) for n,p in predictions.items()},
       'ranking':{n:ranking_metrics(X[ranking,0],y[ranking],p[ranking],meta[ranking]) for n,p in predictions.items()},
+      'validation_population':{'stations':int(len(np.unique(meta[va,0]))),'input_hour_range': [float(meta[va,3].min()),float(meta[va,3].max())],'target_hour_range':[float(meta[va,4].min()),float(meta[va,4].max())],'target_delay_hours_quantiles':np.quantile(meta[va,4]-meta[va,3],[0,.25,.5,.75,1]).tolist()},
       'selected_station_interval':grouped_mae_interval(y[va],selected[va],meta[va,0]),
       'slices':{n:{'raw':price_metrics(y[ix],predictions['raw'][ix]),'selected':price_metrics(y[ix],selected[ix])} for n,ix in slices.items() if ix.any()},
       'selection_trials':selection_rows,'versions':{'python':platform.python_version(),**{n:importlib.metadata.version(n) for n in ['numpy','catboost','torch','scikit-learn']}},
       'artifact_sha256':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in out.iterdir() if p.suffix in ('.cbm','.pt','.npz','.npy')},
-      'limitations':['Next independently newer provider report, not verified pump truth.','Development selection is optimistic; final two-day holdout is still reserved.','Only several development hours and correlated station/grade/payment examples.','Price-only local panels omit membership eligibility, preferences and travel cost.']}
+      'limitations':['Next independently newer provider report, not verified pump truth.','Development selection is optimistic; final two-day holdout is still reserved.','Only several development hours and correlated station/grade/payment examples.','Development targets are right-censored by the export cutoff; a full 24-hour outcome window has not elapsed for these inputs. Shorter observed update delays are overrepresented.','Price-only local panels omit membership eligibility, preferences and travel cost.']}
     (out/'comparison.json').write_text(json.dumps(result,indent=2));print(json.dumps({'selection':best,'raw':raw,'selected':result['candidate_metrics']['final_selected'],'interval':result['selected_station_interval']}),flush=True)
 
 if __name__=='__main__':

@@ -1,0 +1,14 @@
+{
+  "examples": 145644,
+  "stations": 14081,
+  "context_length_quantiles": [
+    1.0,
+    33.0,
+    39.0,
+    52.0,
+    67.0
+  ],
+  "sha256": "ff7ef8f7b633e1f1e8aa976fd11267fd5a74e002bd2edc8a011efcdf64c7ece3",
+  "task": "One next source-report event, not one clock hour. Irregular intervals disclosed; past-only interval and report-age covariates benchmarked separately. No target time supplied to model.",
+  "weights_license": "TimesFM 3 Non-Commercial License v1.0; isolated research benchmark only; never mixed into production or distilled into shipping model."
+}
