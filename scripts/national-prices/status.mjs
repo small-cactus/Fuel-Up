@@ -1,13 +1,19 @@
 import { execFileSync } from 'node:child_process';
 const sql = `select jsonb_build_object(
  'config',(select to_jsonb(c) from public.fuel_national_config c),
- 'trends_cache',(select jsonb_build_object('scopes',count(*),'run_id',min(run_id),'published_at',min(published_at)) from public.fuel_national_trends_cache),
+ 'trends_cache',(select jsonb_build_object('scopes',count(*),'run_id',min(run_id),'published_at',min(published_at),
+   'age_minutes',extract(epoch from now()-min(published_at))/60,
+   'behind_latest_complete',min(run_id) is distinct from (select id from fuel_national_runs where status='complete' order by slot_at desc limit 1)) from public.fuel_national_trends_cache),
+ 'projection_backlog',(select jsonb_build_object('run_id',r.id,'slot_at',r.slot_at,'completed_at',r.completed_at,
+   'missing_batches',(select count(*) from fuel_national_jobs j left join fuel_national_trend_batches b on b.job_id=j.id and b.source_sha256=j.sha256 where j.run_id=r.id and j.status='succeeded' and b.job_id is null))
+   from fuel_national_runs r where status='complete' order by slot_at desc limit 1),
+ 'projection_repairs',(select jsonb_agg(p) from (select job_id,attempts,last_error,lease_until,next_attempt_at,completed_at from fuel_projection_repairs order by job_id desc limit 10)p),
  'accounted_archive_bytes',public.fuel_national_archive_bytes(),
  'database_bytes',pg_database_size(current_database()),
  'storage_bytes',(select coalesce(sum((metadata->>'size')::bigint),0) from storage.objects),
  'regions',(select jsonb_agg(r) from public.fuel_national_regions r),
  'regional_hours',(select jsonb_agg(h) from (select * from public.fuel_national_regional_health order by slot_at desc limit 72) h),
- 'cron',(select jsonb_agg(jsonb_build_object('name',jobname,'active',active,'schedule',schedule)) from cron.job where jobname in ('fuel-national-dispatch','fuel-national-watchdog','fuel-national-trends-cache')),
+ 'cron',(select jsonb_agg(jsonb_build_object('name',jobname,'active',active,'schedule',schedule)) from cron.job where jobname in ('fuel-national-dispatch','fuel-national-watchdog','fuel-national-trends-cache','fuel-national-projection-repair')),
  'hours',(select jsonb_agg(h) from (select * from public.fuel_national_health order by slot_at desc limit 24) h),
  'events',(select jsonb_agg(e) from (select created_at,job_id,code,retry_after_seconds from public.fuel_national_events order by id desc limit 20) e)
 ) as status;`;

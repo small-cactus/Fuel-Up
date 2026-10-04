@@ -1,0 +1,31 @@
+[
+  {
+    "status": 200,
+    "result": {
+      "status": "published",
+      "jobId": 357903,
+      "runId": 4996,
+      "stations": 2000,
+      "error": null,
+      "providerRequests": 0
+    }
+  },
+  {
+    "status": 200,
+    "result": {
+      "status": "published",
+      "jobId": 357938,
+      "runId": 4996,
+      "stations": 2000,
+      "error": null,
+      "providerRequests": 0
+    }
+  },
+  {
+    "status": 200,
+    "result": {
+      "status": "idle",
+      "providerRequests": 0
+    }
+  }
+]

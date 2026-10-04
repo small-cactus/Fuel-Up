@@ -1,0 +1,75 @@
+TAP version 13
+# Subtest: read-back audit verifies real bytes, exact IDs, region, window, and unpriced coverage
+ok 1 - read-back audit verifies real bytes, exact IDs, region, window, and unpriced coverage
+  ---
+  duration_ms: 1.493
+  ...
+# Subtest: validly hashed stale or wrong-region snapshots still fail the audit
+ok 2 - validly hashed stale or wrong-region snapshots still fail the audit
+  ---
+  duration_ms: 0.877416
+  ...
+# Subtest: national serving uses only the protected cache RPC and preserves fresh reported values
+ok 3 - national serving uses only the protected cache RPC and preserves fresh reported values
+  ---
+  duration_ms: 3.288375
+  ...
+# Subtest: national requests reject invalid grades and filters before reading the database
+ok 4 - national requests reject invalid grades and filters before reading the database
+  ---
+  duration_ms: 0.545208
+  ...
+# Subtest: national empty data stays empty and failures do not use a provider fallback
+ok 5 - national empty data stays empty and failures do not use a provider fallback
+  ---
+  duration_ms: 0.144416
+  ...
+# Subtest: history failures preserve the fresh leaderboard without inventing a chart
+ok 6 - history failures preserve the fresh leaderboard without inventing a chart
+  ---
+  duration_ms: 0.181667
+  ...
+# Subtest: metadata hanging RPC aborts before the research lease expires
+ok 7 - metadata hanging RPC aborts before the research lease expires
+  ---
+  duration_ms: 7.2195
+  ...
+# Subtest: serving hanging RPC aborts before the research lease expires
+ok 8 - serving hanging RPC aborts before the research lease expires
+  ---
+  duration_ms: 6.33525
+  ...
+# Subtest: replay preserves original prices and timestamps
+ok 9 - replay preserves original prices and timestamps
+  ---
+  duration_ms: 9.826
+  ...
+# Subtest: corrupt or swapped archive is rejected before publishing
+ok 10 - corrupt or swapped archive is rejected before publishing
+  ---
+  duration_ms: 5.23625
+  ...
+# Subtest: only Storage and serving RPCs are used; original research job is never recollected
+ok 11 - only Storage and serving RPCs are used; original research job is never recollected
+  ---
+  duration_ms: 1.899917
+  ...
+# Subtest: failed archive verification records a bounded retry, never publishes
+ok 12 - failed archive verification records a bounded retry, never publishes
+  ---
+  duration_ms: 1.436166
+  ...
+# Subtest: public app credentials cannot start repair
+ok 13 - public app credentials cannot start repair
+  ---
+  duration_ms: 9.542708
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 115.552083

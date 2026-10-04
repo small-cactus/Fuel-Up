@@ -1,0 +1,101 @@
+{
+  "verifiedAt": "2026-10-04T22:34:10.071Z",
+  "providerRequests": 0,
+  "checks": [
+    {
+      "fuelType": "regular",
+      "milliseconds": 692,
+      "exactIdsPricesAndTimestamps": true,
+      "prices": [
+        2.49,
+        2.99,
+        3.13,
+        3.16,
+        3.18
+      ],
+      "stationIds": [
+        "116561",
+        "194653",
+        "214508",
+        "114148",
+        "210121"
+      ]
+    },
+    {
+      "fuelType": "midgrade",
+      "milliseconds": 1101,
+      "exactIdsPricesAndTimestamps": true,
+      "prices": [
+        3.22,
+        3.31,
+        3.35,
+        3.63,
+        3.64
+      ],
+      "stationIds": [
+        "13053",
+        "73191",
+        "48141",
+        "214508",
+        "71174"
+      ]
+    },
+    {
+      "fuelType": "premium",
+      "milliseconds": 349,
+      "exactIdsPricesAndTimestamps": true,
+      "prices": [
+        3.44,
+        3.56,
+        3.58,
+        3.67,
+        3.69
+      ],
+      "stationIds": [
+        "198526",
+        "93796",
+        "199174",
+        "72489",
+        "176435"
+      ]
+    },
+    {
+      "fuelType": "diesel",
+      "milliseconds": 288,
+      "exactIdsPricesAndTimestamps": true,
+      "prices": [
+        4.61,
+        4.69,
+        4.97,
+        4.97,
+        4.99
+      ],
+      "stationIds": [
+        "1329",
+        "106720",
+        "33806",
+        "69644",
+        "130588"
+      ]
+    },
+    {
+      "fuelType": "e85",
+      "milliseconds": 343,
+      "exactIdsPricesAndTimestamps": true,
+      "prices": [
+        1.69,
+        1.69,
+        1.87,
+        1.87,
+        1.89
+      ],
+      "stationIds": [
+        "54250",
+        "54252",
+        "211840",
+        "32151",
+        "113713"
+      ]
+    }
+  ]
+}

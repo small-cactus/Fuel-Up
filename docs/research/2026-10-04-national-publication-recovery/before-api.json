@@ -1,0 +1,1110 @@
+[
+  {
+    "fuelType": "regular",
+    "status": 200,
+    "version": 1,
+    "scanId": 4121,
+    "completedAt": "2026-10-04T07:16:38.839594+00:00",
+    "refreshAfter": "2026-10-04T22:25:52.500763+00:00",
+    "history": [
+      {
+        "date": "2026-09-30T22:00:00+00:00",
+        "price": 4.414633266592073,
+        "stationCount": 67924
+      },
+      {
+        "date": "2026-09-30T23:00:00+00:00",
+        "price": 4.41372363209623,
+        "stationCount": 68170
+      },
+      {
+        "date": "2026-10-01T00:00:00+00:00",
+        "price": 4.411681318358227,
+        "stationCount": 68024
+      },
+      {
+        "date": "2026-10-01T01:00:00+00:00",
+        "price": 4.410877092258093,
+        "stationCount": 67929
+      },
+      {
+        "date": "2026-10-01T02:00:00+00:00",
+        "price": 4.409389007664674,
+        "stationCount": 68757
+      },
+      {
+        "date": "2026-10-01T03:00:00+00:00",
+        "price": 4.403057781169189,
+        "stationCount": 70767
+      },
+      {
+        "date": "2026-10-01T04:00:00+00:00",
+        "price": 4.405005005287276,
+        "stationCount": 70925
+      },
+      {
+        "date": "2026-10-01T05:00:00+00:00",
+        "price": 4.406799667263525,
+        "stationCount": 70927
+      },
+      {
+        "date": "2026-10-01T06:00:00+00:00",
+        "price": 4.407798409610016,
+        "stationCount": 70926
+      },
+      {
+        "date": "2026-10-01T16:00:00+00:00",
+        "price": 4.400491045804156,
+        "stationCount": 69688
+      },
+      {
+        "date": "2026-10-01T17:00:00+00:00",
+        "price": 4.398984536973048,
+        "stationCount": 69456
+      },
+      {
+        "date": "2026-10-01T18:00:00+00:00",
+        "price": 4.39286717956162,
+        "stationCount": 68890
+      },
+      {
+        "date": "2026-10-01T19:00:00+00:00",
+        "price": 4.393839166132883,
+        "stationCount": 68692
+      },
+      {
+        "date": "2026-10-01T20:00:00+00:00",
+        "price": 4.384765182466588,
+        "stationCount": 72205
+      },
+      {
+        "date": "2026-10-01T21:00:00+00:00",
+        "price": 4.385277208251392,
+        "stationCount": 71697
+      },
+      {
+        "date": "2026-10-01T22:00:00+00:00",
+        "price": 4.387205979459657,
+        "stationCount": 71177
+      },
+      {
+        "date": "2026-10-01T23:00:00+00:00",
+        "price": 4.383446608138199,
+        "stationCount": 70507
+      },
+      {
+        "date": "2026-10-02T00:00:00+00:00",
+        "price": 4.3840960443938535,
+        "stationCount": 70280
+      },
+      {
+        "date": "2026-10-02T01:00:00+00:00",
+        "price": 4.383973134072955,
+        "stationCount": 70126
+      },
+      {
+        "date": "2026-10-02T02:00:00+00:00",
+        "price": 4.3822849561540425,
+        "stationCount": 70474
+      },
+      {
+        "date": "2026-10-02T03:00:00+00:00",
+        "price": 4.378528005131137,
+        "stationCount": 71719
+      },
+      {
+        "date": "2026-10-02T04:00:00+00:00",
+        "price": 4.381109393496275,
+        "stationCount": 71805
+      },
+      {
+        "date": "2026-10-02T05:00:00+00:00",
+        "price": 4.380312565350137,
+        "stationCount": 71729
+      },
+      {
+        "date": "2026-10-02T06:00:00+00:00",
+        "price": 4.3822029623643175,
+        "stationCount": 71767
+      },
+      {
+        "date": "2026-10-02T07:00:00+00:00",
+        "price": 4.381909741101677,
+        "stationCount": 71727
+      },
+      {
+        "date": "2026-10-02T08:00:00+00:00",
+        "price": 4.381521023408945,
+        "stationCount": 71682
+      },
+      {
+        "date": "2026-10-02T09:00:00+00:00",
+        "price": 4.381077919539909,
+        "stationCount": 71638
+      },
+      {
+        "date": "2026-10-02T14:00:00+00:00",
+        "price": 4.3793904745651835,
+        "stationCount": 70317
+      },
+      {
+        "date": "2026-10-02T15:00:00+00:00",
+        "price": 4.376503058796874,
+        "stationCount": 70616
+      },
+      {
+        "date": "2026-10-02T16:00:00+00:00",
+        "price": 4.369966358866446,
+        "stationCount": 72233
+      },
+      {
+        "date": "2026-10-03T01:00:00+00:00",
+        "price": 4.371375910965482,
+        "stationCount": 70804
+      },
+      {
+        "date": "2026-10-03T06:00:00+00:00",
+        "price": 4.37019839224264,
+        "stationCount": 71777
+      },
+      {
+        "date": "2026-10-03T18:00:00+00:00",
+        "price": 4.364218116619894,
+        "stationCount": 64140
+      },
+      {
+        "date": "2026-10-04T02:00:00+00:00",
+        "price": 4.352573447378208,
+        "stationCount": 61847
+      },
+      {
+        "date": "2026-10-04T07:00:00+00:00",
+        "price": 4.346944205216535,
+        "stationCount": 65024
+      }
+    ],
+    "historyError": null,
+    "source": "national-cache",
+    "scope": "national",
+    "quotes": [
+      {
+        "stationId": "194653",
+        "stationName": "Tobacco Road",
+        "address": "601 Old Wheatland Rd, Vincennes, IN, 47591",
+        "price": 2.99,
+        "fuelType": "regular",
+        "updatedAt": "2026-10-03T23:34:56.563Z",
+        "providerTier": "station",
+        "providerId": "gasbuddy",
+        "paymentType": "credit"
+      },
+      {
+        "stationId": "208619",
+        "stationName": "Costco",
+        "address": "4741 N Airport WayE, Denver, CO, 80249",
+        "price": 3.18,
+        "fuelType": "regular",
+        "updatedAt": "2026-10-04T05:04:50.602Z",
+        "providerTier": "station",
+        "providerId": "gasbuddy",
+        "paymentType": "credit"
+      },
+      {
+        "stationId": "210121",
+        "stationName": "Sam's Club",
+        "address": "579 Troy-Schenectady Rd, Latham, NY, 12110",
+        "price": 3.21,
+        "fuelType": "regular",
+        "updatedAt": "2026-10-03T23:53:24.750Z",
+        "providerTier": "station",
+        "providerId": "gasbuddy",
+        "paymentType": "credit"
+      }
+    ],
+    "summary": {
+      "pricePolicy": "reported-last-24-hours"
+    }
+  },
+  {
+    "fuelType": "midgrade",
+    "status": 200,
+    "version": 1,
+    "scanId": 4121,
+    "completedAt": "2026-10-04T07:16:38.839594+00:00",
+    "refreshAfter": "2026-10-04T22:25:52.877978+00:00",
+    "history": [
+      {
+        "date": "2026-09-30T22:00:00+00:00",
+        "price": 4.91536212325686,
+        "stationCount": 42237
+      },
+      {
+        "date": "2026-09-30T23:00:00+00:00",
+        "price": 4.912468364831553,
+        "stationCount": 42595
+      },
+      {
+        "date": "2026-10-01T00:00:00+00:00",
+        "price": 4.91016772524112,
+        "stationCount": 42510
+      },
+      {
+        "date": "2026-10-01T01:00:00+00:00",
+        "price": 4.91040259923718,
+        "stationCount": 42474
+      },
+      {
+        "date": "2026-10-01T02:00:00+00:00",
+        "price": 4.910687604316039,
+        "stationCount": 42539
+      },
+      {
+        "date": "2026-10-01T03:00:00+00:00",
+        "price": 4.900174695364993,
+        "stationCount": 43905
+      },
+      {
+        "date": "2026-10-01T04:00:00+00:00",
+        "price": 4.902651720139158,
+        "stationCount": 43979
+      },
+      {
+        "date": "2026-10-01T05:00:00+00:00",
+        "price": 4.90300536876109,
+        "stationCount": 43958
+      },
+      {
+        "date": "2026-10-01T06:00:00+00:00",
+        "price": 4.9026052332195675,
+        "stationCount": 43950
+      },
+      {
+        "date": "2026-10-01T16:00:00+00:00",
+        "price": 4.896986470145338,
+        "stationCount": 43829
+      },
+      {
+        "date": "2026-10-01T17:00:00+00:00",
+        "price": 4.896210068649886,
+        "stationCount": 43700
+      },
+      {
+        "date": "2026-10-01T18:00:00+00:00",
+        "price": 4.890831688168587,
+        "stationCount": 43562
+      },
+      {
+        "date": "2026-10-01T19:00:00+00:00",
+        "price": 4.895428768382353,
+        "stationCount": 43520
+      },
+      {
+        "date": "2026-10-01T20:00:00+00:00",
+        "price": 4.894746283017572,
+        "stationCount": 43651
+      },
+      {
+        "date": "2026-10-01T21:00:00+00:00",
+        "price": 4.893276734021374,
+        "stationCount": 43699
+      },
+      {
+        "date": "2026-10-01T22:00:00+00:00",
+        "price": 4.891409194188795,
+        "stationCount": 43571
+      },
+      {
+        "date": "2026-10-01T23:00:00+00:00",
+        "price": 4.892402875037556,
+        "stationCount": 43269
+      },
+      {
+        "date": "2026-10-02T00:00:00+00:00",
+        "price": 4.8939192922984045,
+        "stationCount": 43069
+      },
+      {
+        "date": "2026-10-02T01:00:00+00:00",
+        "price": 4.894101209865053,
+        "stationCount": 42980
+      },
+      {
+        "date": "2026-10-02T02:00:00+00:00",
+        "price": 4.893706757984486,
+        "stationCount": 42927
+      },
+      {
+        "date": "2026-10-02T03:00:00+00:00",
+        "price": 4.88902072337606,
+        "stationCount": 43767
+      },
+      {
+        "date": "2026-10-02T04:00:00+00:00",
+        "price": 4.890782398320171,
+        "stationCount": 43814
+      },
+      {
+        "date": "2026-10-02T05:00:00+00:00",
+        "price": 4.890523590071181,
+        "stationCount": 43832
+      },
+      {
+        "date": "2026-10-02T06:00:00+00:00",
+        "price": 4.890492323860002,
+        "stationCount": 43772
+      },
+      {
+        "date": "2026-10-02T07:00:00+00:00",
+        "price": 4.890601086658752,
+        "stationCount": 43804
+      },
+      {
+        "date": "2026-10-02T08:00:00+00:00",
+        "price": 4.890408014072602,
+        "stationCount": 43773
+      },
+      {
+        "date": "2026-10-02T09:00:00+00:00",
+        "price": 4.8902204688393365,
+        "stationCount": 43725
+      },
+      {
+        "date": "2026-10-02T14:00:00+00:00",
+        "price": 4.886233438923443,
+        "stationCount": 43249
+      },
+      {
+        "date": "2026-10-02T15:00:00+00:00",
+        "price": 4.882927185140581,
+        "stationCount": 43178
+      },
+      {
+        "date": "2026-10-02T16:00:00+00:00",
+        "price": 4.876246730893891,
+        "stationCount": 44737
+      },
+      {
+        "date": "2026-10-03T01:00:00+00:00",
+        "price": 4.865206761041397,
+        "stationCount": 44786
+      },
+      {
+        "date": "2026-10-03T06:00:00+00:00",
+        "price": 4.863668977393147,
+        "stationCount": 45296
+      },
+      {
+        "date": "2026-10-03T18:00:00+00:00",
+        "price": 4.853641952539038,
+        "stationCount": 40665
+      },
+      {
+        "date": "2026-10-04T02:00:00+00:00",
+        "price": 4.831119240656515,
+        "stationCount": 40456
+      },
+      {
+        "date": "2026-10-04T07:00:00+00:00",
+        "price": 4.828049867899604,
+        "stationCount": 42392
+      }
+    ],
+    "historyError": null,
+    "source": "national-cache",
+    "scope": "national",
+    "quotes": [
+      {
+        "stationId": "13053",
+        "stationName": "Huck's",
+        "address": "353 S Kingshighway St, Cape Girardeau, MO, 63703",
+        "price": 3.22,
+        "fuelType": "midgrade",
+        "updatedAt": "2026-10-04T06:48:05.401Z",
+        "providerTier": "station",
+        "providerId": "gasbuddy",
+        "paymentType": "credit"
+      },
+      {
+        "stationId": "73191",
+        "stationName": "Huck's",
+        "address": "1200 N Main St, Benton, IL, 62812",
+        "price": 3.31,
+        "fuelType": "midgrade",
+        "updatedAt": "2026-10-04T05:49:26.928Z",
+        "providerTier": "station",
+        "providerId": "gasbuddy",
+        "paymentType": "credit"
+      }
+    ],
+    "summary": {
+      "pricePolicy": "reported-last-24-hours"
+    }
+  },
+  {
+    "fuelType": "premium",
+    "status": 200,
+    "version": 1,
+    "scanId": 4121,
+    "completedAt": "2026-10-04T07:16:38.839594+00:00",
+    "refreshAfter": "2026-10-04T22:25:53.22054+00:00",
+    "history": [
+      {
+        "date": "2026-09-30T22:00:00+00:00",
+        "price": 5.300585652173913,
+        "stationCount": 46000
+      },
+      {
+        "date": "2026-09-30T23:00:00+00:00",
+        "price": 5.297508196014149,
+        "stationCount": 46364
+      },
+      {
+        "date": "2026-10-01T00:00:00+00:00",
+        "price": 5.295188968555633,
+        "stationCount": 46304
+      },
+      {
+        "date": "2026-10-01T01:00:00+00:00",
+        "price": 5.295458453960161,
+        "stationCount": 46286
+      },
+      {
+        "date": "2026-10-01T02:00:00+00:00",
+        "price": 5.295547613408831,
+        "stationCount": 46447
+      },
+      {
+        "date": "2026-10-01T03:00:00+00:00",
+        "price": 5.28900144596492,
+        "stationCount": 47719
+      },
+      {
+        "date": "2026-10-01T04:00:00+00:00",
+        "price": 5.290870019868242,
+        "stationCount": 47815
+      },
+      {
+        "date": "2026-10-01T05:00:00+00:00",
+        "price": 5.291583289817233,
+        "stationCount": 47875
+      },
+      {
+        "date": "2026-10-01T06:00:00+00:00",
+        "price": 5.291097120424315,
+        "stationCount": 47889
+      },
+      {
+        "date": "2026-10-01T16:00:00+00:00",
+        "price": 5.28436063337192,
+        "stationCount": 48376
+      },
+      {
+        "date": "2026-10-01T17:00:00+00:00",
+        "price": 5.283755156188462,
+        "stationCount": 48243
+      },
+      {
+        "date": "2026-10-01T18:00:00+00:00",
+        "price": 5.279368855519143,
+        "stationCount": 48214
+      },
+      {
+        "date": "2026-10-01T19:00:00+00:00",
+        "price": 5.282590240156091,
+        "stationCount": 48177
+      },
+      {
+        "date": "2026-10-01T20:00:00+00:00",
+        "price": 5.281909575787646,
+        "stationCount": 48372
+      },
+      {
+        "date": "2026-10-01T21:00:00+00:00",
+        "price": 5.279969484536083,
+        "stationCount": 48500
+      },
+      {
+        "date": "2026-10-01T22:00:00+00:00",
+        "price": 5.2789606451879045,
+        "stationCount": 48482
+      },
+      {
+        "date": "2026-10-01T23:00:00+00:00",
+        "price": 5.280078312753791,
+        "stationCount": 48268
+      },
+      {
+        "date": "2026-10-02T00:00:00+00:00",
+        "price": 5.281925283771985,
+        "stationCount": 48102
+      },
+      {
+        "date": "2026-10-02T01:00:00+00:00",
+        "price": 5.282436070826658,
+        "stationCount": 48061
+      },
+      {
+        "date": "2026-10-02T02:00:00+00:00",
+        "price": 5.281554488179153,
+        "stationCount": 48093
+      },
+      {
+        "date": "2026-10-02T03:00:00+00:00",
+        "price": 5.277464866298162,
+        "stationCount": 49027
+      },
+      {
+        "date": "2026-10-02T04:00:00+00:00",
+        "price": 5.278526131196346,
+        "stationCount": 49041
+      },
+      {
+        "date": "2026-10-02T05:00:00+00:00",
+        "price": 5.278810776635667,
+        "stationCount": 49032
+      },
+      {
+        "date": "2026-10-02T06:00:00+00:00",
+        "price": 5.279444308345582,
+        "stationCount": 48984
+      },
+      {
+        "date": "2026-10-02T07:00:00+00:00",
+        "price": 5.279530328688307,
+        "stationCount": 49013
+      },
+      {
+        "date": "2026-10-02T08:00:00+00:00",
+        "price": 5.279254478236892,
+        "stationCount": 48959
+      },
+      {
+        "date": "2026-10-02T09:00:00+00:00",
+        "price": 5.279034441853806,
+        "stationCount": 48894
+      },
+      {
+        "date": "2026-10-02T14:00:00+00:00",
+        "price": 5.275866949311054,
+        "stationCount": 48117
+      },
+      {
+        "date": "2026-10-02T15:00:00+00:00",
+        "price": 5.272379920849823,
+        "stationCount": 48010
+      },
+      {
+        "date": "2026-10-02T16:00:00+00:00",
+        "price": 5.26911842503786,
+        "stationCount": 49525
+      },
+      {
+        "date": "2026-10-03T01:00:00+00:00",
+        "price": 5.255379467895843,
+        "stationCount": 49464
+      },
+      {
+        "date": "2026-10-03T06:00:00+00:00",
+        "price": 5.255078834687263,
+        "stationCount": 49978
+      },
+      {
+        "date": "2026-10-03T18:00:00+00:00",
+        "price": 5.240936514283176,
+        "stationCount": 45018
+      },
+      {
+        "date": "2026-10-04T02:00:00+00:00",
+        "price": 5.218215637528276,
+        "stationCount": 44649
+      },
+      {
+        "date": "2026-10-04T07:00:00+00:00",
+        "price": 5.219795157095962,
+        "stationCount": 46914
+      }
+    ],
+    "historyError": null,
+    "source": "national-cache",
+    "scope": "national",
+    "quotes": [
+      {
+        "stationId": "198526",
+        "stationName": "Weigel's",
+        "address": "2865 Winfield Dunn Pkwy, Kodak, TN, 37764",
+        "price": 3.44,
+        "fuelType": "premium",
+        "updatedAt": "2026-10-04T05:48:49.826Z",
+        "providerTier": "station",
+        "providerId": "gasbuddy",
+        "paymentType": "credit"
+      },
+      {
+        "stationId": "199174",
+        "stationName": "Jump Start",
+        "address": "1608 E 1st St, Newton, KS, 67114",
+        "price": 3.58,
+        "fuelType": "premium",
+        "updatedAt": "2026-10-04T04:46:44.747Z",
+        "providerTier": "station",
+        "providerId": "gasbuddy",
+        "paymentType": "credit"
+      }
+    ],
+    "summary": {
+      "pricePolicy": "reported-last-24-hours"
+    }
+  },
+  {
+    "fuelType": "diesel",
+    "status": 200,
+    "version": 1,
+    "scanId": 4121,
+    "completedAt": "2026-10-04T07:16:38.839594+00:00",
+    "refreshAfter": "2026-10-04T22:25:53.594851+00:00",
+    "history": [
+      {
+        "date": "2026-09-30T22:00:00+00:00",
+        "price": 6.397721241517618,
+        "stationCount": 42883
+      },
+      {
+        "date": "2026-09-30T23:00:00+00:00",
+        "price": 6.395102770745756,
+        "stationCount": 43057
+      },
+      {
+        "date": "2026-10-01T00:00:00+00:00",
+        "price": 6.393506541882013,
+        "stationCount": 42954
+      },
+      {
+        "date": "2026-10-01T01:00:00+00:00",
+        "price": 6.394034482758621,
+        "stationCount": 42920
+      },
+      {
+        "date": "2026-10-01T02:00:00+00:00",
+        "price": 6.393427328876449,
+        "stationCount": 43229
+      },
+      {
+        "date": "2026-10-01T03:00:00+00:00",
+        "price": 6.38706415604916,
+        "stationCount": 44345
+      },
+      {
+        "date": "2026-10-01T04:00:00+00:00",
+        "price": 6.386867005944874,
+        "stationCount": 44408
+      },
+      {
+        "date": "2026-10-01T05:00:00+00:00",
+        "price": 6.3870750703432755,
+        "stationCount": 44425
+      },
+      {
+        "date": "2026-10-01T06:00:00+00:00",
+        "price": 6.387075,
+        "stationCount": 44400
+      },
+      {
+        "date": "2026-10-01T16:00:00+00:00",
+        "price": 6.3802375652963885,
+        "stationCount": 44030
+      },
+      {
+        "date": "2026-10-01T17:00:00+00:00",
+        "price": 6.37882040769844,
+        "stationCount": 43905
+      },
+      {
+        "date": "2026-10-01T18:00:00+00:00",
+        "price": 6.372724766215565,
+        "stationCount": 43523
+      },
+      {
+        "date": "2026-10-01T19:00:00+00:00",
+        "price": 6.37377858807782,
+        "stationCount": 43331
+      },
+      {
+        "date": "2026-10-01T20:00:00+00:00",
+        "price": 6.368977801075759,
+        "stationCount": 43876
+      },
+      {
+        "date": "2026-10-01T21:00:00+00:00",
+        "price": 6.3686370691622916,
+        "stationCount": 43810
+      },
+      {
+        "date": "2026-10-01T22:00:00+00:00",
+        "price": 6.369171030666148,
+        "stationCount": 43729
+      },
+      {
+        "date": "2026-10-01T23:00:00+00:00",
+        "price": 6.370600639271506,
+        "stationCount": 43487
+      },
+      {
+        "date": "2026-10-02T00:00:00+00:00",
+        "price": 6.372294669834168,
+        "stationCount": 43357
+      },
+      {
+        "date": "2026-10-02T01:00:00+00:00",
+        "price": 6.3726150545571985,
+        "stationCount": 43349
+      },
+      {
+        "date": "2026-10-02T02:00:00+00:00",
+        "price": 6.370491377328121,
+        "stationCount": 43490
+      },
+      {
+        "date": "2026-10-02T03:00:00+00:00",
+        "price": 6.367776070500509,
+        "stationCount": 44255
+      },
+      {
+        "date": "2026-10-02T04:00:00+00:00",
+        "price": 6.369707117694879,
+        "stationCount": 44284
+      },
+      {
+        "date": "2026-10-02T05:00:00+00:00",
+        "price": 6.369629060331381,
+        "stationCount": 44239
+      },
+      {
+        "date": "2026-10-02T06:00:00+00:00",
+        "price": 6.369839556460738,
+        "stationCount": 44190
+      },
+      {
+        "date": "2026-10-02T07:00:00+00:00",
+        "price": 6.370280877260485,
+        "stationCount": 44183
+      },
+      {
+        "date": "2026-10-02T08:00:00+00:00",
+        "price": 6.369988898957861,
+        "stationCount": 44140
+      },
+      {
+        "date": "2026-10-02T09:00:00+00:00",
+        "price": 6.369498390679541,
+        "stationCount": 44118
+      },
+      {
+        "date": "2026-10-02T14:00:00+00:00",
+        "price": 6.366898394490129,
+        "stationCount": 43413
+      },
+      {
+        "date": "2026-10-02T15:00:00+00:00",
+        "price": 6.364275695005191,
+        "stationCount": 43345
+      },
+      {
+        "date": "2026-10-02T16:00:00+00:00",
+        "price": 6.3586682264015115,
+        "stationCount": 44452
+      },
+      {
+        "date": "2026-10-03T01:00:00+00:00",
+        "price": 6.352883167245344,
+        "stationCount": 44354
+      },
+      {
+        "date": "2026-10-03T06:00:00+00:00",
+        "price": 6.351085425119265,
+        "stationCount": 44858
+      },
+      {
+        "date": "2026-10-03T18:00:00+00:00",
+        "price": 6.346932157800358,
+        "stationCount": 40152
+      },
+      {
+        "date": "2026-10-04T02:00:00+00:00",
+        "price": 6.3219444017816,
+        "stationCount": 39066
+      },
+      {
+        "date": "2026-10-04T07:00:00+00:00",
+        "price": 6.314839197224975,
+        "stationCount": 40360
+      }
+    ],
+    "historyError": null,
+    "source": "national-cache",
+    "scope": "national",
+    "quotes": [
+      {
+        "stationId": "106720",
+        "stationName": "Sheetz",
+        "address": "299 Bryan St, Petersburg, WV, 26847",
+        "price": 4.69,
+        "fuelType": "diesel",
+        "updatedAt": "2026-10-04T05:03:06.898Z",
+        "providerTier": "station",
+        "providerId": "gasbuddy",
+        "paymentType": "credit"
+      },
+      {
+        "stationId": "47745",
+        "stationName": "Valero",
+        "address": "7802 Westheimer Rd, Houston, TX, 77063",
+        "price": 4.87,
+        "fuelType": "diesel",
+        "updatedAt": "2026-10-04T05:22:30.082Z",
+        "providerTier": "station",
+        "providerId": "gasbuddy",
+        "paymentType": "credit"
+      }
+    ],
+    "summary": {
+      "pricePolicy": "reported-last-24-hours"
+    }
+  },
+  {
+    "fuelType": "e85",
+    "status": 200,
+    "version": 1,
+    "scanId": 4121,
+    "completedAt": "2026-10-04T07:16:38.839594+00:00",
+    "refreshAfter": "2026-10-04T22:25:53.960008+00:00",
+    "history": [
+      {
+        "date": "2026-09-30T22:00:00+00:00",
+        "price": 3.367819284802043,
+        "stationCount": 3132
+      },
+      {
+        "date": "2026-09-30T23:00:00+00:00",
+        "price": 3.367234726688103,
+        "stationCount": 3110
+      },
+      {
+        "date": "2026-10-01T00:00:00+00:00",
+        "price": 3.3694074311338884,
+        "stationCount": 3122
+      },
+      {
+        "date": "2026-10-01T01:00:00+00:00",
+        "price": 3.3683958934873277,
+        "stationCount": 3117
+      },
+      {
+        "date": "2026-10-01T02:00:00+00:00",
+        "price": 3.3692475884244373,
+        "stationCount": 3110
+      },
+      {
+        "date": "2026-10-01T03:00:00+00:00",
+        "price": 3.367038226790877,
+        "stationCount": 3113
+      },
+      {
+        "date": "2026-10-01T04:00:00+00:00",
+        "price": 3.3665521669341896,
+        "stationCount": 3115
+      },
+      {
+        "date": "2026-10-01T05:00:00+00:00",
+        "price": 3.366601412066752,
+        "stationCount": 3116
+      },
+      {
+        "date": "2026-10-01T06:00:00+00:00",
+        "price": 3.3668257527226135,
+        "stationCount": 3122
+      },
+      {
+        "date": "2026-10-01T16:00:00+00:00",
+        "price": 3.360829330771694,
+        "stationCount": 3123
+      },
+      {
+        "date": "2026-10-01T17:00:00+00:00",
+        "price": 3.3605703300224286,
+        "stationCount": 3121
+      },
+      {
+        "date": "2026-10-01T18:00:00+00:00",
+        "price": 3.369204357873886,
+        "stationCount": 3029
+      },
+      {
+        "date": "2026-10-01T19:00:00+00:00",
+        "price": 3.3583098139833227,
+        "stationCount": 3118
+      },
+      {
+        "date": "2026-10-01T20:00:00+00:00",
+        "price": 3.3543002221516978,
+        "stationCount": 3151
+      },
+      {
+        "date": "2026-10-01T21:00:00+00:00",
+        "price": 3.3529984101748807,
+        "stationCount": 3145
+      },
+      {
+        "date": "2026-10-01T22:00:00+00:00",
+        "price": 3.3517927527018436,
+        "stationCount": 3146
+      },
+      {
+        "date": "2026-10-01T23:00:00+00:00",
+        "price": 3.3490380952380954,
+        "stationCount": 3150
+      },
+      {
+        "date": "2026-10-02T00:00:00+00:00",
+        "price": 3.3474880611270295,
+        "stationCount": 3141
+      },
+      {
+        "date": "2026-10-02T01:00:00+00:00",
+        "price": 3.3468662420382165,
+        "stationCount": 3140
+      },
+      {
+        "date": "2026-10-02T02:00:00+00:00",
+        "price": 3.348687898089172,
+        "stationCount": 3140
+      },
+      {
+        "date": "2026-10-02T03:00:00+00:00",
+        "price": 3.3485786481364497,
+        "stationCount": 3166
+      },
+      {
+        "date": "2026-10-02T04:00:00+00:00",
+        "price": 3.3483906595140422,
+        "stationCount": 3169
+      },
+      {
+        "date": "2026-10-02T05:00:00+00:00",
+        "price": 3.3480385344283006,
+        "stationCount": 3166
+      },
+      {
+        "date": "2026-10-02T06:00:00+00:00",
+        "price": 3.346820626384056,
+        "stationCount": 3161
+      },
+      {
+        "date": "2026-10-02T07:00:00+00:00",
+        "price": 3.3475007908889594,
+        "stationCount": 3161
+      },
+      {
+        "date": "2026-10-02T08:00:00+00:00",
+        "price": 3.3463872192344195,
+        "stationCount": 3161
+      },
+      {
+        "date": "2026-10-02T09:00:00+00:00",
+        "price": 3.3461772151898734,
+        "stationCount": 3160
+      },
+      {
+        "date": "2026-10-02T14:00:00+00:00",
+        "price": 3.345451950523311,
+        "stationCount": 3153
+      },
+      {
+        "date": "2026-10-02T15:00:00+00:00",
+        "price": 3.3502045381911154,
+        "stationCount": 3129
+      },
+      {
+        "date": "2026-10-02T16:00:00+00:00",
+        "price": 3.346769911504425,
+        "stationCount": 3164
+      },
+      {
+        "date": "2026-10-03T01:00:00+00:00",
+        "price": 3.3355732484076435,
+        "stationCount": 3140
+      },
+      {
+        "date": "2026-10-03T06:00:00+00:00",
+        "price": 3.326957898069009,
+        "stationCount": 3159
+      },
+      {
+        "date": "2026-10-03T18:00:00+00:00",
+        "price": 3.3217731891183218,
+        "stationCount": 3051
+      },
+      {
+        "date": "2026-10-04T02:00:00+00:00",
+        "price": 3.308627385336458,
+        "stationCount": 2987
+      },
+      {
+        "date": "2026-10-04T07:00:00+00:00",
+        "price": 3.3057721687147126,
+        "stationCount": 3011
+      }
+    ],
+    "historyError": null,
+    "source": "national-cache",
+    "scope": "national",
+    "quotes": [
+      {
+        "stationId": "54250",
+        "stationName": "Cenex",
+        "address": "202 W 8th St, Gothenburg, NE, 69138",
+        "price": 1.69,
+        "fuelType": "e85",
+        "updatedAt": "2026-10-04T03:40:58.092Z",
+        "providerTier": "station",
+        "providerId": "gasbuddy",
+        "paymentType": "credit"
+      },
+      {
+        "stationId": "54252",
+        "stationName": "Blue Heron",
+        "address": "1102 S Lake Ave, Gothenburg, NE, 69138",
+        "price": 1.69,
+        "fuelType": "e85",
+        "updatedAt": "2026-10-04T03:40:35.344Z",
+        "providerTier": "station",
+        "providerId": "gasbuddy",
+        "paymentType": "credit"
+      },
+      {
+        "stationId": "32151",
+        "stationName": "FUEL UP! | TOP TIER™ GASOLINE",
+        "address": "16090 Arrow Blvd, Fontana, CA, 92335",
+        "price": 1.85,
+        "fuelType": "e85",
+        "updatedAt": "2026-10-04T04:22:52.641Z",
+        "providerTier": "station",
+        "providerId": "gasbuddy",
+        "paymentType": "credit"
+      },
+      {
+        "stationId": "211840",
+        "stationName": "Conserv Fuel",
+        "address": "8907 Citrus Ave, Fontana, CA, 92335",
+        "price": 1.87,
+        "fuelType": "e85",
+        "updatedAt": "2026-10-04T04:14:15.705Z",
+        "providerTier": "station",
+        "providerId": "gasbuddy",
+        "paymentType": "credit"
+      }
+    ],
+    "summary": {
+      "pricePolicy": "reported-last-24-hours"
+    }
+  }
+]
