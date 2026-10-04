@@ -29,3 +29,15 @@ Validation: nine regional unit checks, six provider-free live health/routing che
 ## 10:57 UTC continuation
 
 A second scheduled invocation after the earlier worker lease expired advanced the sweep to 36/72 batches, or 69,960 IDs, confirming continued progress beyond the initial restart. The last dispatch is 10:57:00. The hour is still incomplete and before its deadline. No second restart or code repair was needed. The next monitor must report any newly expired gap and verify continued scheduled collection.
+
+## 11:45 UTC follow-up: one confirmed partial hour, subsequent sweep complete
+
+Run 4301 expired at its original 11:00 deadline with 50/72 batches and 97,960 observed fixed-catalog IDs. The outage therefore left 22 missing batches (43,700 IDs) in the 10:00 hour. These missing historical observations are preserved, without backfilling or extending the campaign.
+
+The next scheduled sweep, run 4336 at 11:00, completed at 11:17:24 with all 72 batches and 141,660 IDs: 91,397 had reported prices and 50,263 did not. City collection reached 2,106 successful city-hours and 42,120 observations, with 54 unchanged historical misses and zero due/expired backlog. All 86 expected national slots, including absent run rows, now comprise 71 complete, ten partial and five historical unstarted hours. No regional mismatch was found.
+
+All main/watchdog schedules remain enabled and their latest executions succeeded; the last recorded startup failures were during the restart at 10:49. Transient HTTP 503 and GraphQL jobs 310440 and 310408 both succeeded on attempt two with their original errors retained. Shared cooldown expired at 11:10:35. Database size is 360,705,171 bytes, accounted archives 287,987,718/900,000,000 bytes and total object storage 292,262,666 bytes. No further repair or provider collection was initiated.
+
+The first full-hour read-back download through the CLI management gateway returned HTTP 502. This is a read-back transport failure, not proof of missing or corrupt archives. Retried via authenticated Storage using bounded backoff, preserved local files and per-file size/hash validation; credentials remain in process memory. The canonical audit runs against that saved manifest and immutable local files.
+
+At 11:48 UTC, `auditHour.mjs` verified **all 72 immutable archives** for run 4336: SHA-256, exact IDs, schema, timestamps and regional provenance. The full read-back accounts for 3,664,679 bytes and all 141,660 IDs across Virginia (117,700), Northern California (17,747) and Oregon (6,213). This confirms sustained scheduled recovery for the subsequent full hour. It does not repair the prior 22-batch gap or verify pump truth. Follow-up evidence JSON parses and whitespace checks pass; no executable project code changed.

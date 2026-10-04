@@ -1,0 +1,17 @@
+{
+  "jobs": [
+    {
+      "id": 310408,
+      "status": "succeeded",
+      "attempts": 2,
+      "last_error": "UPSTREAM_TRANSIENT_GRAPHQL"
+    },
+    {
+      "id": 310440,
+      "status": "succeeded",
+      "attempts": 2,
+      "last_error": "UPSTREAM_HTTP_503"
+    }
+  ],
+  "recordedAt": "2026-10-04T11:46:32.438026+00:00"
+}

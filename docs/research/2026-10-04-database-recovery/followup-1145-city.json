@@ -1,0 +1,263 @@
+{
+  "cities": [
+    {
+      "city_id": "atlanta",
+      "last_success": "2026-10-04T11:40:01.690484+00:00",
+      "missed": 4,
+      "succeeded": 86
+    },
+    {
+      "city_id": "austin",
+      "last_success": "2026-10-04T11:28:01.074939+00:00",
+      "missed": 1,
+      "succeeded": 89
+    },
+    {
+      "city_id": "boston",
+      "last_success": "2026-10-04T11:37:01.659664+00:00",
+      "missed": 4,
+      "succeeded": 86
+    },
+    {
+      "city_id": "charlotte",
+      "last_success": "2026-10-04T11:33:01.492816+00:00",
+      "missed": 4,
+      "succeeded": 86
+    },
+    {
+      "city_id": "chicago",
+      "last_success": "2026-10-04T11:21:01.27797+00:00",
+      "missed": 0,
+      "succeeded": 90
+    },
+    {
+      "city_id": "columbus",
+      "last_success": "2026-10-04T11:32:01.962553+00:00",
+      "missed": 3,
+      "succeeded": 87
+    },
+    {
+      "city_id": "dallas",
+      "last_success": "2026-10-04T11:27:00.907376+00:00",
+      "missed": 1,
+      "succeeded": 89
+    },
+    {
+      "city_id": "denver",
+      "last_success": "2026-10-04T11:36:01.155417+00:00",
+      "missed": 4,
+      "succeeded": 86
+    },
+    {
+      "city_id": "fort-worth",
+      "last_success": "2026-10-04T11:31:02.051769+00:00",
+      "missed": 3,
+      "succeeded": 87
+    },
+    {
+      "city_id": "houston",
+      "last_success": "2026-10-04T11:22:02.520048+00:00",
+      "missed": 0,
+      "succeeded": 90
+    },
+    {
+      "city_id": "indianapolis",
+      "last_success": "2026-10-04T11:34:01.139846+00:00",
+      "missed": 4,
+      "succeeded": 86
+    },
+    {
+      "city_id": "jacksonville",
+      "last_success": "2026-10-04T11:29:01.099822+00:00",
+      "missed": 2,
+      "succeeded": 88
+    },
+    {
+      "city_id": "las-vegas",
+      "last_success": "2026-10-04T11:41:01.614549+00:00",
+      "missed": 4,
+      "succeeded": 86
+    },
+    {
+      "city_id": "los-angeles",
+      "last_success": "2026-10-04T11:20:02.056548+00:00",
+      "missed": 0,
+      "succeeded": 90
+    },
+    {
+      "city_id": "miami",
+      "last_success": "2026-10-04T11:39:01.482365+00:00",
+      "missed": 4,
+      "succeeded": 86
+    },
+    {
+      "city_id": "new-york",
+      "last_success": "2026-10-04T11:19:01.941549+00:00",
+      "missed": 0,
+      "succeeded": 90
+    },
+    {
+      "city_id": "philadelphia",
+      "last_success": "2026-10-04T11:24:01.384308+00:00",
+      "missed": 0,
+      "succeeded": 90
+    },
+    {
+      "city_id": "phoenix",
+      "last_success": "2026-10-04T11:23:01.649555+00:00",
+      "missed": 0,
+      "succeeded": 90
+    },
+    {
+      "city_id": "san-antonio",
+      "last_success": "2026-10-04T11:25:01.629529+00:00",
+      "missed": 1,
+      "succeeded": 89
+    },
+    {
+      "city_id": "san-diego",
+      "last_success": "2026-10-04T11:26:01.358624+00:00",
+      "missed": 1,
+      "succeeded": 89
+    },
+    {
+      "city_id": "san-jose",
+      "last_success": "2026-10-04T11:30:02.506432+00:00",
+      "missed": 2,
+      "succeeded": 88
+    },
+    {
+      "city_id": "seattle",
+      "last_success": "2026-10-04T11:35:01.295041+00:00",
+      "missed": 4,
+      "succeeded": 86
+    },
+    {
+      "city_id": "tampa",
+      "last_success": "2026-10-04T11:42:01.110244+00:00",
+      "missed": 4,
+      "succeeded": 86
+    },
+    {
+      "city_id": "washington-dc",
+      "last_success": "2026-10-04T11:38:01.070623+00:00",
+      "missed": 4,
+      "succeeded": 86
+    }
+  ],
+  "cron": [
+    {
+      "active": true,
+      "name": "fuel-research-dispatch",
+      "schedule": "* * * * *"
+    },
+    {
+      "active": true,
+      "name": "fuel-research-watchdog",
+      "schedule": "*/5 * * * *"
+    }
+  ],
+  "database_bytes": 360705171,
+  "health": {
+    "cities_observed": 24,
+    "ends_at": "2026-10-07T18:19:00+00:00",
+    "id": "hourly-24-cities-20260930-v1",
+    "last_dispatch_at": "2026-10-04T11:45:00.17585+00:00",
+    "last_success_at": "2026-10-04T11:42:01.110244+00:00",
+    "missed": 54,
+    "planned_city_hours": 4032,
+    "provider_backoff_until": "2026-10-04T11:10:35.978372+00:00",
+    "queued_due": 0,
+    "running": 0,
+    "starts_at": "2026-09-30T18:19:00+00:00",
+    "station_observations": 42120,
+    "status": "active",
+    "succeeded": 2106
+  },
+  "recent_errors": [
+    {
+      "attempts": 0,
+      "city_id": "tampa",
+      "due_at": "2026-10-02T18:42:00+00:00",
+      "last_error": "DEADLINE_MISSED",
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "city_id": "las-vegas",
+      "due_at": "2026-10-02T18:41:00+00:00",
+      "last_error": "DEADLINE_MISSED",
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "city_id": "atlanta",
+      "due_at": "2026-10-02T18:40:00+00:00",
+      "last_error": "DEADLINE_MISSED",
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "city_id": "miami",
+      "due_at": "2026-10-02T18:39:00+00:00",
+      "last_error": "DEADLINE_MISSED",
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "city_id": "washington-dc",
+      "due_at": "2026-10-02T18:38:00+00:00",
+      "last_error": "DEADLINE_MISSED",
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "city_id": "boston",
+      "due_at": "2026-10-02T18:37:00+00:00",
+      "last_error": "DEADLINE_MISSED",
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "city_id": "denver",
+      "due_at": "2026-10-02T18:36:00+00:00",
+      "last_error": "DEADLINE_MISSED",
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "city_id": "seattle",
+      "due_at": "2026-10-02T18:35:00+00:00",
+      "last_error": "DEADLINE_MISSED",
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "city_id": "indianapolis",
+      "due_at": "2026-10-02T18:34:00+00:00",
+      "last_error": "DEADLINE_MISSED",
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "city_id": "charlotte",
+      "due_at": "2026-10-02T18:33:00+00:00",
+      "last_error": "DEADLINE_MISSED",
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "city_id": "columbus",
+      "due_at": "2026-10-02T18:32:00+00:00",
+      "last_error": "DEADLINE_MISSED",
+      "status": "missed"
+    },
+    {
+      "attempts": 0,
+      "city_id": "fort-worth",
+      "due_at": "2026-10-02T18:31:00+00:00",
+      "last_error": "DEADLINE_MISSED",
+      "status": "missed"
+    }
+  ]
+}
