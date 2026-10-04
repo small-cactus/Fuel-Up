@@ -9,3 +9,13 @@ Add causal same-station fuel/payment relationships, historical spread-adjusted e
 Train absolute-error and squared-error boosted trees at multiple capacities and compare raw, sparse, and bounded corrections. Preserve every trial, model, parameters, input hashes and prediction. Select using development MAE with tail and harmful-correction diagnostics; do not claim parameter count or training accuracy as a win. Use feature ablations to identify useful signal. Keep the prior ±20-cent correction cap as a conservative comparator.
 
 After choosing a candidate, freeze it before downloading additional development outcomes (hours after the first export). Evaluate that later slice once and report it separately, even if the candidate fails. This is a short sequential development check, not a replacement for the final two-day test. Audit causal invariance by perturbing future data and verify saved-model prediction replay. All prices remain provider-report proxies rather than verified pump truth.
+
+## User-directed national and Qwen extensions
+
+The nationwide-context network attends over all 51 state/DC tokens. Each token summarizes every available valid price of the target fuel/payment in that region: coordinates, quantiles, mean, count, report age/freshness, and past 1/6/24-hour movements. It receives the target's coordinates and station features. These are compressed national summaries, not a literal 141,660-record attention sequence. Each context is shifted to the previous completed hour.
+
+The stale-price classifier predicts whether the next newer source report changes by at least 10 cents within 24 hours. Its labels cannot prove current physical pump staleness. Report average precision, prevalence, calibration and false alarms.
+
+Fine-tune the public Apache-2.0 Qwen3-0.6B-Base checkpoint, pinned by revision. Use LoRA on its attention projections and learned numeric input/output projections: six station-feature tokens, two tokens containing all flattened national summaries, and a prediction token. This is a pretrained-backbone numerical adaptation, not text instruction tuning. Train on all eligible national examples, with a residual-regression and change-classification objective. Report actual total/trainable parameters, rows and numeric tokens seen, runtime and saved adapters. Do not claim architecture or parameter-efficiency superiority: these systems have different parameter counts and compute budgets.
+
+Development selection considers raw price as a valid winner and restricts promoted experimental policies to a 20-cent cap with no increase in the combined rate of errors exceeding 10 cents or mean error on large changes. Larger caps remain sensitivity diagnostics only. All these are development guards, not production guarantees.

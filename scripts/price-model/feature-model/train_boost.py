@@ -7,7 +7,7 @@ from sklearn.metrics import average_precision_score,roc_auc_score,brier_score_lo
 from common import load,record_predictions,summarize
 
 
-def main(root,out):
+def main(root,out,device='GPU'):
     d=load(root);X,y,m=d['X'],d['y'],d['meta'];tr=m[:,5]==0;ev=~tr;va=m[:,5]==1
     assert (m[tr,4]<72).all() and (m[:,3]<120).all()
     out.mkdir(exist_ok=True,parents=True);np.savez_compressed(out/'evaluation.npz',X=X[ev],y=y[ev],meta=m[ev])
@@ -19,7 +19,7 @@ def main(root,out):
     report={'raw':summarize(y[ev],np.zeros(ev.sum()),m[ev]),'models':{}}
     for name,loss,depth,cols in settings:
         start=time.monotonic()
-        model=CatBoostRegressor(iterations=2000,depth=depth,learning_rate=.04,l2_leaf_reg=10,loss_function=loss,eval_metric='MAE',task_type='GPU',devices='0',random_seed=104,early_stopping_rounds=150,verbose=200,allow_writing_files=False,thread_count=8)
+        model=CatBoostRegressor(iterations=2000,depth=depth,learning_rate=.04,l2_leaf_reg=10,loss_function=loss,eval_metric='MAE',task_type=device,random_seed=104,early_stopping_rounds=150,verbose=200,allow_writing_files=False,thread_count=8)
         model.fit(Pool(X[tr,:cols],y[tr]),eval_set=Pool(X[va,:cols],y[va]));model.save_model(str(out/(name+'.cbm')))
         pred=model.predict(X[ev,:cols]).astype('float32')
         result=record_predictions(out,name,y[ev],pred,m[ev])
@@ -27,7 +27,7 @@ def main(root,out):
         report['models'][name]=result;(out/'results.json').write_text(json.dumps(report,indent=2));print(json.dumps({'name':name,'seconds':result['seconds'],'trees':result['trees'],**result['unbounded']}),flush=True)
     # No target-derived sampling weights: probability should reflect the actual next-report rate.
     change=abs(y)>=.09999;start=time.monotonic()
-    classifier=CatBoostClassifier(iterations=2000,depth=8,learning_rate=.04,l2_leaf_reg=10,loss_function='Logloss',eval_metric='Logloss',task_type='GPU',devices='0',random_seed=104,early_stopping_rounds=150,verbose=200,allow_writing_files=False,thread_count=8)
+    classifier=CatBoostClassifier(iterations=2000,depth=8,learning_rate=.04,l2_leaf_reg=10,loss_function='Logloss',eval_metric='Logloss',task_type=device,random_seed=104,early_stopping_rounds=150,verbose=200,allow_writing_files=False,thread_count=8)
     classifier.fit(Pool(X[tr],change[tr]),eval_set=Pool(X[va],change[va]));classifier.save_model(str(out/'stale-proxy.cbm'))
     prob=classifier.predict_proba(X[ev])[:,1].astype('float32');np.save(out/'stale-probabilities.npy',prob)
     vv=m[ev,5]==1
@@ -42,4 +42,4 @@ def main(root,out):
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('dataset',type=Path);p.add_argument('out',type=Path);a=p.parse_args();main(a.dataset,a.out)
+    p=argparse.ArgumentParser();p.add_argument('dataset',type=Path);p.add_argument('out',type=Path);p.add_argument('--device',choices=['CPU','GPU'],default='GPU');a=p.parse_args();main(a.dataset,a.out,a.device)

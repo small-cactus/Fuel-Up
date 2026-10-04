@@ -29,13 +29,13 @@ class QwenPrice(nn.Module):
     Six station feature tokens plus two full national context tokens and a query token.
     All state summaries are retained by flattening (no target-based selection).
     """
-    def __init__(self,features,states,model_name,revision,cache):
+    def __init__(self,features,states,model_name,revision,cache,adapter=None):
         super().__init__()
         from transformers import AutoModel
-        from peft import LoraConfig,get_peft_model
+        from peft import LoraConfig,get_peft_model,PeftModel
         base=AutoModel.from_pretrained(model_name,revision=revision,cache_dir=cache,torch_dtype=torch.bfloat16,attn_implementation='sdpa')
         width=base.config.hidden_size
-        self.backbone=get_peft_model(base,LoraConfig(r=16,lora_alpha=32,lora_dropout=.05,target_modules=['q_proj','v_proj','k_proj','o_proj'],bias='none'))
+        self.backbone=PeftModel.from_pretrained(base,adapter) if adapter else get_peft_model(base,LoraConfig(r=16,lora_alpha=32,lora_dropout=.05,target_modules=['q_proj','v_proj','k_proj','o_proj'],bias='none'))
         self.backbone.config.use_cache=False
         self.features=features;self.chunk=(features+5)//6
         self.station=nn.Linear(self.chunk,width)

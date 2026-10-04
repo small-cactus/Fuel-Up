@@ -1,9 +1,19 @@
 import unittest
+import json,tempfile,contextlib,io
+from pathlib import Path
 import numpy as np
 from enrich import station_features,peer_features
+from enrich import past_windows
+from national_context import build as build_context
 
 
 class CausalFeatures(unittest.TestCase):
+    def test_history_windows_exclude_current_and_keep_missing(self):
+        x=np.array([[1.],[np.nan],[3.],[4.]])
+        w=past_windows(x,2)
+        np.testing.assert_allclose(w[:,:,0].ravel(),[np.nan,np.nan,1,np.nan],equal_nan=True)
+        np.testing.assert_allclose(w[:,:,1].ravel(),[np.nan,1,np.nan,3],equal_nan=True)
+
     def test_future_station_changes_do_not_affect_past_features(self):
         rng=np.random.default_rng(4)
         p=3+rng.normal(0,.05,(12,14));s=np.broadcast_to(np.arange(12)[:,None],p.shape).copy();o=np.arange(12)+.2
@@ -30,6 +40,24 @@ class CausalFeatures(unittest.TestCase):
         p[6,4]=3.8
         _,b=station_features(p,s,o)
         self.assertAlmostEqual(float(b[6,0,k]),.2,places=5)
+
+    def test_national_context_uses_all_states_and_only_previous_hours(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);(root/'arrays').mkdir()
+            metadata={'ids':['a','b','c'],'states':['AA','AA','BB'],'shape':[6,3,2],'start_hour':0,'manifest_sha256':'test'}
+            (root/'arrays/metadata.json').write_text(json.dumps(metadata))
+            (root/'geography.json').write_text(json.dumps([{'station_id':i,'latitude':30+k,'longitude':-90+k} for k,i in enumerate(metadata['ids'])]))
+            p=np.ones((6,3,2))*3;p[:,2]=4
+            s=np.broadcast_to(np.arange(6)[:,None,None],p.shape).copy();o=np.broadcast_to(np.arange(6)[:,None]+.2,(6,3))
+            for name,value in [('prices',p),('sources',s),('observed',o)]:np.save(root/'arrays'/f'{name}.npy',value)
+            with contextlib.redirect_stdout(io.StringIO()):build_context(root,root/'one')
+            a=np.load(root/'one/national-context.npy')
+            self.assertEqual(a.shape,(6,2,2,12));self.assertEqual(a[3,0,1,3],4)
+            p[3:,2]=9;np.save(root/'arrays/prices.npy',p)
+            with contextlib.redirect_stdout(io.StringIO()):build_context(root,root/'two')
+            b=np.load(root/'two/national-context.npy')
+            np.testing.assert_allclose(a[:4],b[:4],equal_nan=True)
+            self.assertEqual(b[4,0,1,3],9)
 
 
 if __name__=='__main__':unittest.main()

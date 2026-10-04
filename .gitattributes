@@ -1,3 +1,5 @@
 # Preserve exact bytes and hashes of captured Windows research outputs.
 docs/research/2026-10-04-prospective-model/artifacts/** -text whitespace=cr-at-eol
 docs/research/2026-10-04-prospective-model/logs/** -text whitespace=cr-at-eol
+docs/research/2026-10-04-feature-model/artifacts/** -text whitespace=cr-at-eol
+docs/research/2026-10-04-feature-model/logs/** -text whitespace=cr-at-eol
