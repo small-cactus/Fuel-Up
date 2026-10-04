@@ -1,15 +1,23 @@
 import ExpoModulesCore
 import SwiftUI
 
+final class DrivingResearchInsets: ObservableObject {
+  @Published var top: CGFloat = 0
+  @Published var bottom: CGFloat = 0
+}
+
 final class DrivingResearchView: ExpoView {
   private var host:UIHostingController<DrivingResearchScreen>?
+  private let contentInsets = DrivingResearchInsets()
   required init(appContext:AppContext?=nil) {
     super.init(appContext:appContext)
-    let controller=UIHostingController(rootView:DrivingResearchScreen())
+    let controller=UIHostingController(rootView:DrivingResearchScreen(contentInsets: contentInsets))
     if #available(iOS 16.4,*) {controller.safeAreaRegions=[]}
     controller.view.backgroundColor = .clear;host=controller;addSubview(controller.view)
   }
   func setDark(_ dark:Bool) {host?.overrideUserInterfaceStyle=dark ? .dark : .light}
+  func setTopInset(_ value: Double) {contentInsets.top = max(0, value)}
+  func setBottomInset(_ value: Double) {contentInsets.bottom = max(0, value)}
   override func layoutSubviews() {super.layoutSubviews();host?.view.frame=bounds}
   override func didMoveToWindow() {
     super.didMoveToWindow();guard let host else{return}
@@ -25,8 +33,10 @@ final class DrivingResearchView: ExpoView {
 }
 
 struct DrivingResearchScreen: View {
+  @ObservedObject var contentInsets: DrivingResearchInsets
   @ObservedObject private var collector = DrivingResearchCollector.shared
   @Environment(\.scenePhase) private var scenePhase
+  @Environment(\.dynamicTypeSize) private var typeSize
   @State private var confirmDelete = false
   @State private var showConsent = false
   @State private var selectedVisit: ResearchVisit?
@@ -119,8 +129,9 @@ struct DrivingResearchScreen: View {
             .frame(maxWidth: .infinity).frame(minHeight: 44).disabled(collector.busy)
         }
       }
-      .padding(.horizontal, 20).padding(.top, 16).padding(.bottom, 28)
+      .padding(.horizontal, 20).padding(.top, contentInsets.top + 16).padding(.bottom, contentInsets.bottom + 28)
     }
+    .scrollEdgeEffectHidden()
     .tint(.blue)
     .task {collector.prepare();collector.resume(reason: "debug_screen")}
     .onChange(of: scenePhase) {if scenePhase == .active {collector.resume(reason: "foreground")}}
@@ -168,10 +179,19 @@ struct DrivingResearchScreen: View {
       .glassEffect(.regular, in: .rect(cornerRadius: 26))
   }
   private func row(_ title: String, _ value: String, icon: String) -> some View {
-    LabeledContent {
-      Text(value).foregroundStyle(.secondary).multilineTextAlignment(.trailing)
-    } label: {
-      Label(title, systemImage: icon)
+    Group {
+      if typeSize.isAccessibilitySize {
+        VStack(alignment: .leading, spacing: 8) {
+          Label(title, systemImage: icon)
+          Text(value).foregroundStyle(.secondary)
+        }.frame(maxWidth: .infinity, alignment: .leading)
+      } else {
+        LabeledContent {
+          Text(value).foregroundStyle(.secondary).multilineTextAlignment(.trailing)
+        } label: {
+          Label(title, systemImage: icon)
+        }
+      }
     }.frame(minHeight: 36)
   }
   private func time(_ seconds: Double) -> String {

@@ -65,7 +65,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   var locationPermission:String {
     switch manager.authorizationStatus {
     case .authorizedAlways:return "Always"
-    case .authorizedWhenInUse:return "While Using — change to Always"
+    case .authorizedWhenInUse:return "While Using"
     case .denied:return "Denied"
     case .restricted:return "Restricted"
     default:return "Not requested"
@@ -191,6 +191,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       try store?.erase();try ResearchIdentity.erase()
       for key in [Self.consentKey,"research.visits","research.stations","research.catalogCenter","research.lastCatalog","research.detector","research.lastUpload","research.lastUploadAttempt"] {UserDefaults.standard.removeObject(forKey:key)}
       identity=nil;participant="Not enrolled";visits=[];stations=[];stationCount=0;lastUpload=nil;lastUploadAttempt=nil;issue=nil;refreshCounts()
+      catalogCenter=nil;lastCatalog=nil;lastFix=nil;motion="Unknown";lastDrive = .distantPast
       status="Research data deleted"
     } catch {issue="Deletion did not finish. Collection is paused; reconnect and try again. Local data is retained until deletion succeeds."}
   }

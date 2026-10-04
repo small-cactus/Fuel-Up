@@ -20,10 +20,15 @@
   },
   "databaseTests": "Passed in a rolled-back transaction: private access, enrollment, immutable retry, revocation, deletion",
   "deployment": "Supabase migration and driving-research function deployed",
-  "phoneBuild": "Signed Release build succeeded; installed in place on paired iPhone 18 Pro Max over Wi-Fi",
+  "phoneBuild": "Final signed Release build succeeded; redesigned screen, batching, accessibility layout, and transparent scrolling header installed in place on paired iPhone 18 Pro Max over Wi-Fi",
   "phoneCollection": "Not enabled by automation; requires explicit participant setup",
   "realDriveVerification": "Pending: locked-screen delivery, background relaunch, station approach coverage, battery use, system indicator behavior",
   "testFlightDistribution": "Not uploaded by this task",
   "nativeTransferTests": "Passed: 2400 rapid callbacks cannot bypass cellular batching; Wi-Fi interval, offline, Low Data Mode, manual override, cached coverage thresholds",
-  "redesignVerification": "Native Swift compile passed; updated phone build and simulator visual review pending"
+  "redesignVerification": "Passed on iPhone 13 mini simulator: Settings navigation, native Liquid Glass, wordmark, light/dark, scrolling beneath a blur-only header, consent opening/cancel, and accessibility-large text with stacked permission rows.",
+  "screenshots": [
+    "light-header-scroll.png",
+    "dark-header-scroll.png",
+    "accessibility-large.png"
+  ]
 }

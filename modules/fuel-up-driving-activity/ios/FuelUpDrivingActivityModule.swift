@@ -34,6 +34,8 @@ public final class FuelUpDrivingActivityModule: Module {
     }
     View(DrivingResearchView.self) {
       Prop("isDark") { (view, dark: Bool) in view.setDark(dark) }
+      Prop("topInset") { (view, value: Double) in view.setTopInset(value) }
+      Prop("bottomInset") { (view, value: Double) in view.setBottomInset(value) }
     }
 
 

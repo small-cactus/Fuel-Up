@@ -16,9 +16,8 @@ export default function DrivingResearchPage() {
         <Stack.Screen options={{ headerShown: true, headerTransparent: true, headerTitle,
             title: '', headerBackButtonDisplayMode: 'minimal', headerShadowVisible: false,
             headerStyle: { backgroundColor: 'transparent' }, headerTintColor: themeColors.text }} />
-        <View style={[styles.fill, { paddingTop: canopyHeight, paddingBottom: insets.bottom }]}>
-            <ResearchView style={styles.fill} isDark={isDark} testID="driving-research-screen" />
-        </View>
+        <ResearchView style={styles.fill} isDark={isDark} topInset={canopyHeight} bottomInset={insets.bottom}
+            testID="driving-research-screen" />
         <TopCanopy height={canopyHeight} />
     </View>;
 }
