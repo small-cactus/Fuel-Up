@@ -19,6 +19,11 @@ final class NativePreferenceView: ExpoView {
     if let host = host as? UIHostingController<PreferencePage> { host.rootView = PreferencePage(model: model, page: page) }
     else {
       let controller = UIHostingController(rootView: PreferencePage(model: model, page: page))
+      // React Native already positions this host inside the screen's safe area.
+      // UIKit updates the navigation-bar safe area after a push completes; letting
+      // SwiftUI apply it again moves both pages down at the end of the animation.
+      // Keep only keyboard avoidance so station search still scrolls above it.
+      if #available(iOS 16.4, *) { controller.safeAreaRegions = .keyboard }
       controller.view.backgroundColor = .clear
       controller.overrideUserInterfaceStyle = dark ? .dark : .light
       host = controller

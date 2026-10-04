@@ -45,8 +45,8 @@ export default function PreferencePage({ page }) {
 
     const layout = useMemo(() => ({
         container: [styles.container, { backgroundColor: themeColors.background }],
-        content: [styles.container, { paddingTop: canopyHeight }],
-    }), [themeColors.background, canopyHeight]);
+        content: [styles.container, { paddingTop: canopyHeight, paddingBottom: insets.bottom }],
+    }), [themeColors.background, canopyHeight, insets.bottom]);
 
     return <View style={layout.container}>
         <Stack.Screen options={options} />
