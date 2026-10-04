@@ -13,4 +13,3 @@ class TemporalPrice(nn.Module):
     def forward(self,x,sequence):
         h=self.temporal(self.project(sequence)+self.position)[:,-1]
         return self.head(torch.cat([h,self.tabular(x)],dim=-1)).squeeze(-1)*.1
-

@@ -72,7 +72,7 @@
     "normalization.npz": "2696f70a8ae285c23c4582698f2b3745d20e599d7f6ff59738fdc6582d66c509"
   },
   "code_sha256": {
-    "network.py": "3c8613d95ec6b73c5906b46bd74d563a8e09076395df4e2227cbfef5b05afefd",
+    "network.py": "db458d94be6bb1c022d4b419a64c389e5cd7938dd26817e9eb806b5ecd2400df",
     "features.py": "09558c91cb474a22022b1f989796aeffe12ff2c65e0218af3e739b90725af504",
     "ingest.py": "afcd1e0767cf957d255d1c4e0e5ab924af4eb90aff9a7296e54d6b239c65efcf",
     "train_neural.py": "fd983bff67da9a390380a02e4c6d92f9bfe528db6d3ca3e2ac100ede04cd82cf",
