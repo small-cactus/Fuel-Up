@@ -1,0 +1,55 @@
+TAP version 13
+# Subtest: all 50 states plus DC have exactly one fixed regional owner
+ok 1 - all 50 states plus DC have exactly one fixed regional owner
+  ---
+  duration_ms: 2.229584
+  ...
+# Subtest: regional batches never mix owners and counts reconcile across the US
+ok 2 - regional batches never mix owners and counts reconcile across the US
+  ---
+  duration_ms: 2.47175
+  ...
+# Subtest: ambiguous cross-region station identity stops catalog publishing
+ok 3 - ambiguous cross-region station identity stops catalog publishing
+  ---
+  duration_ms: 0.461833
+  ...
+# Subtest: same-region cross-state duplicates deduplicate, without double charging provider work
+ok 4 - same-region cross-state duplicates deduplicate, without double charging provider work
+  ---
+  duration_ms: 0.31975
+  ...
+# Subtest: every wrong or missing execution region is rejected before collection
+ok 5 - every wrong or missing execution region is rejected before collection
+  ---
+  duration_ms: 20.337375
+  ...
+# Subtest: unauthorized regional invocation never touches database or provider
+ok 6 - unauthorized regional invocation never touches database or provider
+  ---
+  duration_ms: 0.265
+  ...
+# Subtest: health verifies runtime geography without claiming jobs; collect passes only the verified runtime region
+ok 7 - health verifies runtime geography without claiming jobs; collect passes only the verified runtime region
+  ---
+  duration_ms: 2.093667
+  ...
+# Subtest: worker rejects a wrong-region job before making any provider request
+ok 8 - worker rejects a wrong-region job before making any provider request
+  ---
+  duration_ms: 0.325166
+  ...
+# Subtest: generic worker cannot run without a known execution region
+ok 9 - generic worker cannot run without a known execution region
+  ---
+  duration_ms: 0.310583
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 112.996166

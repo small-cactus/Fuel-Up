@@ -1,0 +1,23 @@
+{
+  "recorded_at": "2026-10-04T10:48:55.728605+00:00",
+  "project_ref": "vjindchxfebaltbslqwc",
+  "run_id": 4301,
+  "slot_at": "2026-10-04T10:00:00Z",
+  "before": {
+    "batches": 26,
+    "expected_batches": 72,
+    "station_ids": 49960,
+    "last_request_at": "2026-10-04T10:09:07.446215Z",
+    "city_successes": 2082,
+    "city_missed": 54,
+    "expired_national_partials": 9,
+    "expired_unstarted": 5
+  },
+  "diagnosis": "Database connectivity outage; underlying infrastructure cause unconfirmed. Cron job startup timeouts, login-role HTTP 544 connection timeout, refreshed dashboard Unhealthy. No active provider cooldown or capacity stop.",
+  "database_error": {
+    "http_status": 544,
+    "message": "Failed to create login role: Connection terminated due to connection timeout"
+  },
+  "attempt": 1,
+  "action": "Restart project through logged-in Supabase project settings; UI confirmed Restarting. No manual provider collection, configuration changes or job resets."
+}

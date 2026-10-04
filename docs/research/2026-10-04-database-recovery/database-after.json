@@ -1,0 +1,80 @@
+{
+  "activity": null,
+  "connections": [
+    {
+      "count": 5,
+      "state": null,
+      "usename": null
+    },
+    {
+      "count": 3,
+      "state": null,
+      "usename": "supabase_admin"
+    },
+    {
+      "count": 2,
+      "state": "idle",
+      "usename": "authenticator"
+    },
+    {
+      "count": 1,
+      "state": "active",
+      "usename": "postgres"
+    },
+    {
+      "count": 1,
+      "state": "idle",
+      "usename": "supabase_storage_admin"
+    },
+    {
+      "count": 2,
+      "state": "idle",
+      "usename": "supabase_admin"
+    },
+    {
+      "count": 1,
+      "state": "idle",
+      "usename": "supabase_auth_admin"
+    },
+    {
+      "count": 2,
+      "state": "idle",
+      "usename": "pgbouncer"
+    }
+  ],
+  "http": [
+    {
+      "content": "{\"error\":\"DATABASE_FAIL_FUEL_NATIONAL_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+      "created": "2026-10-04T10:53:02.047403+00:00",
+      "error_msg": null,
+      "id": 1,
+      "status_code": 503,
+      "timed_out": false
+    }
+  ],
+  "http_queue": 0,
+  "jobs": [
+    {
+      "attempts": 0,
+      "count": 41,
+      "last_error": null,
+      "lease_until": null,
+      "status": "queued"
+    },
+    {
+      "attempts": 1,
+      "count": 1,
+      "last_error": null,
+      "lease_until": "2026-10-04T10:55:07.51394+00:00",
+      "status": "running"
+    },
+    {
+      "attempts": 1,
+      "count": 30,
+      "last_error": null,
+      "lease_until": null,
+      "status": "succeeded"
+    }
+  ],
+  "locks": 0
+}
