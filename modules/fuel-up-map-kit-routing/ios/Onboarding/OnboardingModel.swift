@@ -37,6 +37,8 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
   var emit: (([String: Any]) -> Void)?
   private let location = CLLocationManager()
   private var initialized = false
+  private var initialMemberships = Set<String>()
+  private var initialFavorites = Set<String>()
   @Published var locationRequested = false
   var locationReady: Bool { locationRequested && hasLocationAccess && coordinate != nil }
 
@@ -57,6 +59,8 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
     requiresE85 = value["requiresE85"] as? Bool ?? false
     memberships = Set(value["fuelMemberships"] as? [String] ?? [])
     favorites = Set(value["preferredBrands"] as? [String] ?? [])
+    initialMemberships = memberships
+    initialFavorites = favorites
   }
   func applyData(_ value: [String: Any]) {
     stations = (value["stations"] as? [[String: Any]] ?? []).compactMap(OnboardingStation.init)
@@ -105,9 +109,16 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
     guard locationRequested, !locationReady else { return }
     locationError = "Your location isn’t available yet. Tap Continue to try again."
   }
-  func finish() {
+  func finish(skippingPreferences: Bool = false) {
     guard !completing, locationReady else { return }
     completing = true
-    emit?(["type": "complete", "choices": choices])
+    var savedChoices = choices
+    if skippingPreferences {
+      // Skip discards only this optional page's edits. Preserve any preferences
+      // already saved before onboarding, plus the current fuel/location choices.
+      savedChoices["fuelMemberships"] = initialMemberships.sorted()
+      savedChoices["preferredBrands"] = initialFavorites.sorted()
+    }
+    emit?(["type": "complete", "choices": savedChoices])
   }
 }

@@ -2,44 +2,28 @@ import { useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 import { supabase } from '../../lib/supabase';
 import { normalizeUSState } from '../../lib/usStates';
+import { createMembershipRequestCache, membershipCoordinateKey } from './membershipRequestCache';
 
-const stateCache = new Map();
+const requests = createMembershipRequestCache({
+    reverseGeocode: coordinate => Location.reverseGeocodeAsync(coordinate),
+    fetchMembershipIDs: state => supabase.rpc('fuel_memberships_for_state', { p_state: state }),
+    normalizeState: normalizeUSState,
+});
 export default function useMembershipOptions(coordinate, active) {
     const latitude = coordinate?.latitude;
     const longitude = coordinate?.longitude;
-    // Avoid reverse-geocoding every small GPS adjustment during onboarding.
-    const key = Number.isFinite(latitude) && Number.isFinite(longitude) ? `${latitude.toFixed(2)}:${longitude.toFixed(2)}` : '';
-    const [result, setResult] = useState(null);
+    const key = membershipCoordinateKey(coordinate);
+    const [result, setResult] = useState(() => active ? requests.peek(coordinate) : null);
     const [attempt, setAttempt] = useState(0);
     useEffect(() => {
         if (!active || !key) return;
         let cancelled = false;
-        void (async () => {
-            // A first Core Location lookup can fail transiently during permission
-            // setup. Retry once while earlier onboarding pages are still visible.
-            for (let retry = 0; retry < 2 && !cancelled; retry++) {
-                try {
-                    const [address] = await Location.reverseGeocodeAsync({ latitude: Number(key.split(':')[0]), longitude: Number(key.split(':')[1]) });
-                    const state = address?.isoCountryCode === 'US' ? normalizeUSState(address.region) : null;
-                    if (!state) throw new Error('Your US state could not be found. You can choose memberships later in Settings.');
-                    let ids = stateCache.get(state);
-                    if (!ids) {
-                        const { data, error } = await supabase.rpc('fuel_memberships_for_state', { p_state: state });
-                        if (error || !Array.isArray(data)) throw new Error('Could not load memberships. Try again or choose them later in Settings.');
-                        ids = data;
-                        stateCache.set(state, ids);
-                    }
-                    if (!cancelled) setResult({ key, state, ids });
-                    return;
-                } catch (error) {
-                    if (cancelled) return;
-                    if (retry === 0) await new Promise(resolve => setTimeout(resolve, 1000));
-                    else setResult({ key, error: error.message, ids: [] });
-                }
-            }
-        })();
+        void requests.load({ latitude, longitude }).then(
+            value => { if (!cancelled) setResult(value); },
+            error => { if (!cancelled) setResult({ key, error: error.message, ids: [] }); },
+        );
         return () => { cancelled = true; };
-    }, [key, active, attempt]);
+    }, [key, latitude, longitude, active, attempt]);
     return { ...(result?.key === key ? result : {}), hasLocation: Boolean(key), loading: Boolean(key && result?.key !== key),
         retry: () => { setResult(null); setAttempt(value => value + 1); } };
 }
