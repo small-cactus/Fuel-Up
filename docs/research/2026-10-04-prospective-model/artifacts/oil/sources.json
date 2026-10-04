@@ -1,0 +1,17 @@
+{
+  "DCOILWTICO": {
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILWTICO&cosd=2000-01-01&coed=2026-10-03",
+    "sha256": "7b40f3e16ed0d971e97bb42da7e6f07613ec193be84b0070861955d8d3c5550b",
+    "bytes": 115936
+  },
+  "DCOILBRENTEU": {
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU&cosd=2000-01-01&coed=2026-10-03",
+    "sha256": "71a280aec76b33f42dad5023cc99b228615517b9a0c0e97dcae45e10f0994778",
+    "bytes": 117299
+  },
+  "GASREGW": {
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=GASREGW&cosd=2000-01-01&coed=2026-10-03",
+    "sha256": "f78d819d05984f585a86a36972ebc465fd8a618a764fa2902bea84cf342790e0",
+    "bytes": 23757
+  }
+}

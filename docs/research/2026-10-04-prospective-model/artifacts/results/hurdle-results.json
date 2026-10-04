@@ -1,0 +1,214 @@
+{
+  "station_balanced_training": true,
+  "change_threshold_dollars": 0.01,
+  "classifier_trees": 759,
+  "classifier_validation": {
+    "roc_auc": 0.7110284666278146,
+    "average_precision": 0.13649705877005344,
+    "prevalence": 0.03199582543736783,
+    "brier": 0.029588785634313622
+  },
+  "models": {
+    "hurdle_conditional_rmse_expected": {
+      "regression_trees": 368,
+      "metrics": {
+        "n": 145644,
+        "mae_cents": 0.3736525474358135,
+        "rmse_cents": 2.0177366041959672,
+        "worst5_mean_cents": 4.621323698651763,
+        "p95_cents": 0.8652485914966531,
+        "within5": 0.9877578204388784,
+        "within10": 0.9958460355387109,
+        "under10": 0.001970558347752053,
+        "over10": 0.002183406113537118,
+        "changed_n": 959,
+        "changed_mae_cents": 17.828922539827328,
+        "unchanged_mae_cents": 0.25795566163076494
+      },
+      "station_interval": {
+        "station_groups": 14081,
+        "mean_delta_cents": 0.22294823915379366,
+        "interval95_cents": [
+          0.21342963577264032,
+          0.2323619689412417
+        ]
+      }
+    },
+    "hurdle_conditional_rmse_gate_0.25": {
+      "regression_trees": 368,
+      "metrics": {
+        "n": 145644,
+        "mae_cents": 0.2160186771300645,
+        "rmse_cents": 1.9891270364732605,
+        "worst5_mean_cents": 4.3198989718428,
+        "p95_cents": 0.0,
+        "within5": 0.9875724369009365,
+        "within10": 0.9960726154184175,
+        "under10": 0.001682183955398094,
+        "over10": 0.002245200626184395,
+        "changed_n": 959,
+        "changed_mae_cents": 16.62294114219745,
+        "unchanged_mae_cents": 0.10727044031215234
+      },
+      "station_interval": {
+        "station_groups": 14081,
+        "mean_delta_cents": 0.06265339198457974,
+        "interval95_cents": [
+          0.045664368461145646,
+          0.07879304676010439
+        ]
+      }
+    },
+    "hurdle_conditional_rmse_gate_0.5": {
+      "regression_trees": 368,
+      "metrics": {
+        "n": 145644,
+        "mae_cents": 0.20562324948470928,
+        "rmse_cents": 2.053022802141479,
+        "worst5_mean_cents": 4.112013256618289,
+        "p95_cents": 0.0,
+        "within5": 0.988595479388097,
+        "within10": 0.9965669715195957,
+        "under10": 0.0015105325313778803,
+        "over10": 0.001922495949026393,
+        "changed_n": 959,
+        "changed_mae_cents": 17.80611743166112,
+        "unchanged_mae_cents": 0.08896378982609107
+      },
+      "station_interval": {
+        "station_groups": 14081,
+        "mean_delta_cents": -0.0012559867658024527,
+        "interval95_cents": [
+          -0.010675354348428786,
+          0.008216944759100744
+        ]
+      }
+    },
+    "hurdle_conditional_rmse_gate_0.75": {
+      "regression_trees": 368,
+      "metrics": {
+        "n": 145644,
+        "mae_cents": 0.21881437636237633,
+        "rmse_cents": 2.3098217470356017,
+        "worst5_mean_cents": 4.375806814626107,
+        "p95_cents": 0.0,
+        "within5": 0.9885268188184889,
+        "within10": 0.9963884540386148,
+        "under10": 0.0015585949301035401,
+        "over10": 0.0020529510312817553,
+        "changed_n": 959,
+        "changed_mae_cents": 20.438998434168205,
+        "unchanged_mae_cents": 0.08479110849469279
+      },
+      "station_interval": {
+        "station_groups": 14081,
+        "mean_delta_cents": 0.0,
+        "interval95_cents": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "hurdle_conditional_mae_expected": {
+      "regression_trees": 63,
+      "metrics": {
+        "n": 145644,
+        "mae_cents": 0.3529834248537452,
+        "rmse_cents": 2.1848174453827984,
+        "worst5_mean_cents": 4.532097374762515,
+        "p95_cents": 0.6420910148687,
+        "within5": 0.9882041141413309,
+        "within10": 0.99583916948175,
+        "under10": 0.0020392189173601386,
+        "over10": 0.002121611600889841,
+        "changed_n": 959,
+        "changed_mae_cents": 19.13897769704208,
+        "unchanged_mae_cents": 0.22846624265083124
+      },
+      "station_interval": {
+        "station_groups": 14081,
+        "mean_delta_cents": 0.19758886683735608,
+        "interval95_cents": [
+          0.19098886032733303,
+          0.20367426310863296
+        ]
+      }
+    },
+    "hurdle_conditional_mae_gate_0.25": {
+      "regression_trees": 63,
+      "metrics": {
+        "n": 145644,
+        "mae_cents": 0.22149026086511922,
+        "rmse_cents": 2.1459427911320503,
+        "worst5_mean_cents": 4.429318626038642,
+        "p95_cents": 0.0,
+        "within5": 0.9876342314135838,
+        "within10": 0.9960932135892999,
+        "under10": 0.0018401032654966907,
+        "over10": 0.0020666831452033725,
+        "changed_n": 959,
+        "changed_mae_cents": 18.570966228604576,
+        "unchanged_mae_cents": 0.09986640591773603
+      },
+      "station_interval": {
+        "station_groups": 14081,
+        "mean_delta_cents": 0.048240803372929346,
+        "interval95_cents": [
+          0.03660987045796221,
+          0.059278759245889386
+        ]
+      }
+    },
+    "hurdle_conditional_mae_gate_0.5": {
+      "regression_trees": 63,
+      "metrics": {
+        "n": 145644,
+        "mae_cents": 0.21266429884181995,
+        "rmse_cents": 2.180343764781147,
+        "worst5_mean_cents": 4.252818775301115,
+        "p95_cents": 0.0,
+        "within5": 0.9885474169893713,
+        "within10": 0.9963815879816539,
+        "under10": 0.0016272554997116256,
+        "over10": 0.0019911565186344787,
+        "changed_n": 959,
+        "changed_mae_cents": 19.174213030314686,
+        "unchanged_mae_cents": 0.08698350792719522
+      },
+      "station_interval": {
+        "station_groups": 14081,
+        "mean_delta_cents": 0.0005231705741278293,
+        "interval95_cents": [
+          -0.00469416691947562,
+          0.0066249486425983975
+        ]
+      }
+    },
+    "hurdle_conditional_mae_gate_0.75": {
+      "regression_trees": 63,
+      "metrics": {
+        "n": 145644,
+        "mae_cents": 0.21881437636237633,
+        "rmse_cents": 2.3098217470356017,
+        "worst5_mean_cents": 4.375806814626107,
+        "p95_cents": 0.0,
+        "within5": 0.9885268188184889,
+        "within10": 0.9963884540386148,
+        "under10": 0.0015585949301035401,
+        "over10": 0.0020529510312817553,
+        "changed_n": 959,
+        "changed_mae_cents": 20.438998434168205,
+        "unchanged_mae_cents": 0.08479110849469279
+      },
+      "station_interval": {
+        "station_groups": 14081,
+        "mean_delta_cents": 0.0,
+        "interval95_cents": [
+          0.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "seconds": 17.313000000081956
+}

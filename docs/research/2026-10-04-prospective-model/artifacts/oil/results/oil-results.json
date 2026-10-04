@@ -1,0 +1,311 @@
+{
+  "task": "Next weekly U.S. regular-gasoline change. This is not station-level pump-price estimation.",
+  "data_as_of": "2026-10-04",
+  "train": "2001-2023",
+  "development": "2024",
+  "test": "2025 through 2026-09-28",
+  "rows": {
+    "train": 1200,
+    "development": 53,
+    "test": 91
+  },
+  "correlations_train_only": {
+    "DCOILWTICO_lag_0d": {
+      "training_change_correlation": 0.257988064490797,
+      "n": 1250,
+      "predictive_feature": false
+    },
+    "DCOILWTICO_lag_1d": {
+      "training_change_correlation": 0.4350075133893997,
+      "n": 1250,
+      "predictive_feature": false
+    },
+    "DCOILWTICO_lag_3d": {
+      "training_change_correlation": 0.4350075133893997,
+      "n": 1250,
+      "predictive_feature": false
+    },
+    "DCOILWTICO_lag_7d": {
+      "training_change_correlation": 0.39264384415414877,
+      "n": 1249,
+      "predictive_feature": false
+    },
+    "DCOILWTICO_lag_8d": {
+      "training_change_correlation": 0.41453971996164024,
+      "n": 1249,
+      "predictive_feature": true
+    },
+    "DCOILWTICO_lag_14d": {
+      "training_change_correlation": 0.21355421865421115,
+      "n": 1248,
+      "predictive_feature": true
+    },
+    "DCOILWTICO_lag_21d": {
+      "training_change_correlation": 0.12680307621509102,
+      "n": 1247,
+      "predictive_feature": true
+    },
+    "DCOILWTICO_lag_28d": {
+      "training_change_correlation": 0.1297368572643499,
+      "n": 1246,
+      "predictive_feature": true
+    },
+    "DCOILWTICO_lag_30d": {
+      "training_change_correlation": 0.14849744383618213,
+      "n": 1246,
+      "predictive_feature": true
+    },
+    "DCOILWTICO_lag_35d": {
+      "training_change_correlation": 0.07895157041107535,
+      "n": 1245,
+      "predictive_feature": true
+    },
+    "DCOILWTICO_lag_42d": {
+      "training_change_correlation": 0.06191731915349019,
+      "n": 1244,
+      "predictive_feature": true
+    },
+    "DCOILWTICO_lag_49d": {
+      "training_change_correlation": 0.04228348858172051,
+      "n": 1243,
+      "predictive_feature": true
+    },
+    "DCOILWTICO_lag_56d": {
+      "training_change_correlation": 0.024521151000795487,
+      "n": 1242,
+      "predictive_feature": true
+    },
+    "DCOILWTICO_lag_60d": {
+      "training_change_correlation": 0.051875615496230425,
+      "n": 1242,
+      "predictive_feature": true
+    },
+    "DCOILBRENTEU_lag_0d": {
+      "training_change_correlation": 0.36872105095094354,
+      "n": 1250,
+      "predictive_feature": false
+    },
+    "DCOILBRENTEU_lag_1d": {
+      "training_change_correlation": 0.48444127764937644,
+      "n": 1250,
+      "predictive_feature": false
+    },
+    "DCOILBRENTEU_lag_3d": {
+      "training_change_correlation": 0.48444127764937644,
+      "n": 1250,
+      "predictive_feature": false
+    },
+    "DCOILBRENTEU_lag_7d": {
+      "training_change_correlation": 0.4789823675021849,
+      "n": 1249,
+      "predictive_feature": false
+    },
+    "DCOILBRENTEU_lag_8d": {
+      "training_change_correlation": 0.4504921759013581,
+      "n": 1249,
+      "predictive_feature": true
+    },
+    "DCOILBRENTEU_lag_14d": {
+      "training_change_correlation": 0.25917486667674805,
+      "n": 1248,
+      "predictive_feature": true
+    },
+    "DCOILBRENTEU_lag_21d": {
+      "training_change_correlation": 0.1859483324664978,
+      "n": 1247,
+      "predictive_feature": true
+    },
+    "DCOILBRENTEU_lag_28d": {
+      "training_change_correlation": 0.1595751673144085,
+      "n": 1246,
+      "predictive_feature": true
+    },
+    "DCOILBRENTEU_lag_30d": {
+      "training_change_correlation": 0.14467947206888043,
+      "n": 1246,
+      "predictive_feature": true
+    },
+    "DCOILBRENTEU_lag_35d": {
+      "training_change_correlation": 0.09752295507936283,
+      "n": 1245,
+      "predictive_feature": true
+    },
+    "DCOILBRENTEU_lag_42d": {
+      "training_change_correlation": 0.06345561701931847,
+      "n": 1244,
+      "predictive_feature": true
+    },
+    "DCOILBRENTEU_lag_49d": {
+      "training_change_correlation": 0.05349186049789201,
+      "n": 1243,
+      "predictive_feature": true
+    },
+    "DCOILBRENTEU_lag_56d": {
+      "training_change_correlation": 0.03533745775495008,
+      "n": 1242,
+      "predictive_feature": true
+    },
+    "DCOILBRENTEU_lag_60d": {
+      "training_change_correlation": 0.06010603308913364,
+      "n": 1242,
+      "predictive_feature": true
+    }
+  },
+  "models": {
+    "gas_history": {
+      "alpha": 100.0,
+      "development_trials": [
+        {
+          "alpha": 0.01,
+          "n": 53,
+          "mae_cents": 2.7730461031401172,
+          "rmse_cents": 3.527984249269926,
+          "p95_cents": 6.575814150873702
+        },
+        {
+          "alpha": 0.1,
+          "n": 53,
+          "mae_cents": 2.7729904941313124,
+          "rmse_cents": 3.527875500131225,
+          "p95_cents": 6.575608812836656
+        },
+        {
+          "alpha": 1.0,
+          "n": 53,
+          "mae_cents": 2.772435719493557,
+          "rmse_cents": 3.5267914004651453,
+          "p95_cents": 6.573558759846573
+        },
+        {
+          "alpha": 10.0,
+          "n": 53,
+          "mae_cents": 2.7670163461553288,
+          "rmse_cents": 3.516280158811728,
+          "p95_cents": 6.553385855343773
+        },
+        {
+          "alpha": 100.0,
+          "n": 53,
+          "mae_cents": 2.72440745794744,
+          "rmse_cents": 3.4368362348040056,
+          "p95_cents": 6.379988885460871
+        }
+      ],
+      "test": {
+        "n": 91,
+        "mae_cents": 5.095429474978408,
+        "rmse_cents": 7.963681643317708,
+        "p95_cents": 12.935712651872759
+      },
+      "coefficients": {
+        "gas_change_lag_1w": 0.02710384981600028,
+        "gas_change_lag_2w": 0.0008514170444001429,
+        "gas_change_lag_3w": 0.005262184232182423,
+        "gas_change_lag_4w": -0.0014173927953240158,
+        "previous_gas": -0.003498928162476931,
+        "season_sin": 0.007322926452519947,
+        "season_cos": 0.00034904612016720604
+      }
+    },
+    "gas_history_and_oil": {
+      "alpha": 100.0,
+      "development_trials": [
+        {
+          "alpha": 0.01,
+          "n": 53,
+          "mae_cents": 2.4379165545408163,
+          "rmse_cents": 3.184593585662862,
+          "p95_cents": 6.577812023943289
+        },
+        {
+          "alpha": 0.1,
+          "n": 53,
+          "mae_cents": 2.437852482956618,
+          "rmse_cents": 3.1845097855327342,
+          "p95_cents": 6.577870226916962
+        },
+        {
+          "alpha": 1.0,
+          "n": 53,
+          "mae_cents": 2.4372152621183014,
+          "rmse_cents": 3.183676607376161,
+          "p95_cents": 6.578445945544331
+        },
+        {
+          "alpha": 10.0,
+          "n": 53,
+          "mae_cents": 2.4311649439475884,
+          "rmse_cents": 3.1757900491105104,
+          "p95_cents": 6.573416956309472
+        },
+        {
+          "alpha": 100.0,
+          "n": 53,
+          "mae_cents": 2.3926214483166257,
+          "rmse_cents": 3.123146574229851,
+          "p95_cents": 6.453357537415407
+        }
+      ],
+      "test": {
+        "n": 91,
+        "mae_cents": 4.89549638234217,
+        "rmse_cents": 7.742904998693246,
+        "p95_cents": 13.101028475039188
+      },
+      "coefficients": {
+        "gas_change_lag_1w": 0.01766173120037557,
+        "gas_change_lag_2w": 0.0029310182886940154,
+        "gas_change_lag_3w": 0.0019594232631410043,
+        "gas_change_lag_4w": -0.0024039323425467784,
+        "previous_gas": -0.0030713450349664135,
+        "season_sin": 0.008270883674774597,
+        "season_cos": 0.00040356177009390334,
+        "DCOILWTICO_change_lag_8d": 0.006119664256388121,
+        "DCOILWTICO_change_lag_14d": -0.000397712905783808,
+        "DCOILWTICO_change_lag_21d": -0.0008800245881051025,
+        "DCOILWTICO_change_lag_28d": 0.0006799592644182608,
+        "DCOILWTICO_change_lag_30d": 0.001349371716093391,
+        "DCOILWTICO_change_lag_35d": 0.0015123804137076597,
+        "DCOILWTICO_change_lag_42d": 0.0024876498661082023,
+        "DCOILWTICO_change_lag_49d": -0.0002762205476511514,
+        "DCOILWTICO_change_lag_56d": 0.0002631446900447067,
+        "DCOILWTICO_change_lag_60d": 0.00018790636737765377,
+        "DCOILBRENTEU_change_lag_8d": 0.010476033995106208,
+        "DCOILBRENTEU_change_lag_14d": 0.0011796439182986018,
+        "DCOILBRENTEU_change_lag_21d": 0.00471616505454657,
+        "DCOILBRENTEU_change_lag_28d": 0.001290114008830372,
+        "DCOILBRENTEU_change_lag_30d": 0.00015093356442018964,
+        "DCOILBRENTEU_change_lag_35d": 0.00048564020043092323,
+        "DCOILBRENTEU_change_lag_42d": -1.543883323689006e-05,
+        "DCOILBRENTEU_change_lag_49d": 0.0002339980545678949,
+        "DCOILBRENTEU_change_lag_56d": -0.0007035124087337258,
+        "DCOILBRENTEU_change_lag_60d": 0.0016048992072373704
+      }
+    }
+  },
+  "persistence_test": {
+    "n": 91,
+    "mae_cents": 5.656043956043958,
+    "rmse_cents": 9.171485912661797,
+    "p95_cents": 16.599999999999994
+  },
+  "oil_vs_gas_history": {
+    "mean_error_delta_cents": -0.19993309263623818,
+    "eight_week_block_interval95_cents": [
+      -0.622147781937172,
+      0.22331741297607685
+    ]
+  },
+  "availability": "Gas history is at least one week old at each forecast origin; predictive crude features are at least eight calendar days old. Lag 0/1/3/7 correlations are descriptive only.",
+  "limitations": [
+    "Current-vintage EIA/FRED observations, not a complete historical release-vintage archive; revisions cannot be excluded.",
+    "Eight-day crude embargo is a conservative publication-delay assumption, not a per-observation release-time audit.",
+    "Aggregate lag evidence does not establish a 30-day station-specific causal response.",
+    "Station dataset covers only days; it cannot identify a month-long lag by itself."
+  ],
+  "source_sha256": {
+    "DCOILBRENTEU.csv": "71a280aec76b33f42dad5023cc99b228615517b9a0c0e97dcae45e10f0994778",
+    "DCOILWTICO.csv": "7b40f3e16ed0d971e97bb42da7e6f07613ec193be84b0070861955d8d3c5550b",
+    "GASREGW.csv": "f78d819d05984f585a86a36972ebc465fd8a618a764fa2902bea84cf342790e0"
+  }
+}

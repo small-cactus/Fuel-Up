@@ -8,7 +8,7 @@ def main(out):
     d=np.load(out/'evaluation-inputs.npz');X,y,m=d['X'],d['y'],d['meta'];v=m[:,5]==1;r=m[:,5]==2
     raw=price_metrics(y[v],np.zeros(v.sum()));best_score=raw['mae_cents']+.1*raw['worst5_mean_cents'];best=np.zeros(len(y),dtype='float32');rule={'model':'raw','min_absolute_correction':0,'min_report_age_hours':0};trials=[]
     for f in sorted(out.glob('*-predictions.npy')):
-        if f.stem.startswith(('selected-','final-selected-','sparse-')):continue
+        if f.stem.startswith(('selected-','final-selected-','sparse-','bounded-')):continue
         p=np.load(f);assert p.shape==y.shape and np.isfinite(p).all()
         for threshold in [.025,.05,.1,.2,.4]:
             for age in [0,6,24,72]:

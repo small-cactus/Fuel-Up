@@ -1,0 +1,146 @@
+[
+  {
+    "cap_dollars": 0.1,
+    "n": 145644,
+    "mae_cents": 0.21279968321323395,
+    "rmse_cents": 2.1660537719726562,
+    "worst5_mean_cents": 4.255527019500732,
+    "p95_cents": 0.0,
+    "within5": 0.9883345692235863,
+    "within10": 0.9965532394056741,
+    "under10": 0.0014762022465738375,
+    "over10": 0.001970558347752053,
+    "changed_n": 959,
+    "changed_mae_cents": 19.052139282226562,
+    "unchanged_mae_cents": 0.08792895823717117,
+    "maximum_worsening_cents": 10.0,
+    "station_interval": {
+      "station_groups": 14081,
+      "mean_delta_cents": -0.003593128662830491,
+      "interval95_cents": [
+        -0.005223993745804463,
+        -0.0018512176045087608
+      ]
+    }
+  },
+  {
+    "cap_dollars": 0.2,
+    "n": 145644,
+    "mae_cents": 0.20801785588264465,
+    "rmse_cents": 2.0692403316497803,
+    "worst5_mean_cents": 4.159900665283203,
+    "p95_cents": 0.0,
+    "within5": 0.9884444261349592,
+    "within10": 0.9963541237538107,
+    "under10": 0.0016478536705940513,
+    "over10": 0.001998022575595287,
+    "changed_n": 959,
+    "changed_mae_cents": 17.991592407226562,
+    "unchanged_mae_cents": 0.09014490991830826,
+    "maximum_worsening_cents": 20.0,
+    "station_interval": {
+      "station_groups": 14081,
+      "mean_delta_cents": -0.006477404803161621,
+      "interval95_cents": [
+        -0.009779008864368607,
+        -0.0034034488189920538
+      ]
+    }
+  },
+  {
+    "cap_dollars": 0.3,
+    "n": 145644,
+    "mae_cents": 0.2049911469221115,
+    "rmse_cents": 2.0072531700134277,
+    "worst5_mean_cents": 4.099372863769531,
+    "p95_cents": 0.0,
+    "within5": 0.9885062206476065,
+    "within10": 0.996484578836066,
+    "under10": 0.0015791931009859657,
+    "over10": 0.0019362280629480102,
+    "changed_n": 959,
+    "changed_mae_cents": 17.34318733215332,
+    "unchanged_mae_cents": 0.09139588475227356,
+    "maximum_worsening_cents": 30.000001907348633,
+    "station_interval": {
+      "station_groups": 14081,
+      "mean_delta_cents": -0.008260527694837868,
+      "interval95_cents": [
+        -0.012417556743848417,
+        -0.004120947670134297
+      ]
+    }
+  },
+  {
+    "cap_dollars": 0.5,
+    "n": 145644,
+    "mae_cents": 0.2010864019393921,
+    "rmse_cents": 1.9343600273132324,
+    "worst5_mean_cents": 4.0212860107421875,
+    "p95_cents": 0.0,
+    "within5": 0.9886092115020186,
+    "within10": 0.9965807036335174,
+    "under10": 0.001531130702260306,
+    "over10": 0.0018881656642223503,
+    "changed_n": 959,
+    "changed_mae_cents": 16.601335525512695,
+    "unchanged_mae_cents": 0.09238239377737045,
+    "maximum_worsening_cents": 50.0,
+    "station_interval": {
+      "station_groups": 14081,
+      "mean_delta_cents": -0.010539228978343626,
+      "interval95_cents": [
+        -0.016432132263972027,
+        -0.005175225892797815
+      ]
+    }
+  },
+  {
+    "cap_dollars": 0.75,
+    "n": 145644,
+    "mae_cents": 0.1997019350528717,
+    "rmse_cents": 1.8982186317443848,
+    "worst5_mean_cents": 3.9935994148254395,
+    "p95_cents": 0.0,
+    "within5": 0.9886366757298618,
+    "within10": 0.9966081678613605,
+    "under10": 0.0015173985883386888,
+    "over10": 0.0018744335503007334,
+    "changed_n": 959,
+    "changed_mae_cents": 16.307165145874023,
+    "unchanged_mae_cents": 0.09293855726718903,
+    "maximum_worsening_cents": 75.0,
+    "station_interval": {
+      "station_groups": 14081,
+      "mean_delta_cents": -0.011404091764825996,
+      "interval95_cents": [
+        -0.01819710171835258,
+        -0.005462814147699235
+      ]
+    }
+  },
+  {
+    "cap_dollars": 1.0,
+    "n": 145644,
+    "mae_cents": 0.19877126812934875,
+    "rmse_cents": 1.878553032875061,
+    "worst5_mean_cents": 3.974987506866455,
+    "p95_cents": 0.0,
+    "within5": 0.9886366757298618,
+    "within10": 0.9966081678613605,
+    "under10": 0.0015173985883386888,
+    "over10": 0.0018744335503007334,
+    "changed_n": 959,
+    "changed_mae_cents": 16.12916374206543,
+    "unchanged_mae_cents": 0.0931815430521965,
+    "maximum_worsening_cents": 100.0,
+    "station_interval": {
+      "station_groups": 14081,
+      "mean_delta_cents": -0.012023426906855726,
+      "interval95_cents": [
+        -0.019147179363376735,
+        -0.0061390097643858246
+      ]
+    }
+  }
+]

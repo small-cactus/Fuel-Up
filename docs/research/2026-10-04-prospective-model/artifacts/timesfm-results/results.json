@@ -1,0 +1,75 @@
+{
+  "revision": "43046b85ec22d584a13f8098c2ed39c889e129c2",
+  "parameters": 330710976,
+  "examples": 145644,
+  "raw": {
+    "n": 145644,
+    "mae_cents": 0.21881437636237633,
+    "rmse_cents": 2.3098217470356017,
+    "worst5_mean_cents": 4.375806814626107,
+    "p95_cents": 0.0,
+    "within5": 0.9885268188184889,
+    "within10": 0.9963884540386148,
+    "under10": 0.0015585949301035401,
+    "over10": 0.0020529510312817553,
+    "changed_n": 959,
+    "changed_mae_cents": 20.438998434168205,
+    "unchanged_mae_cents": 0.08479110849469279
+  },
+  "task": "Predict one next report-indexed observation; past report intervals are irregular. Actual future report time is not provided.",
+  "license": "TimesFM Non-Commercial License v1.0. Isolated research benchmark, no production use or distillation.",
+  "variants": {
+    "event_series": {
+      "unique_contexts": 103906,
+      "seconds": 231.09299999999348,
+      "metrics": {
+        "n": 145644,
+        "mae_cents": 0.4192604720592499,
+        "rmse_cents": 2.6743509769439697,
+        "worst5_mean_cents": 6.93595552444458,
+        "p95_cents": 1.438126564025879,
+        "within5": 0.979951113674439,
+        "within10": 0.9925365960836011,
+        "under10": 0.004689516904232237,
+        "over10": 0.0027738870121666527,
+        "changed_n": 959,
+        "changed_mae_cents": 16.55086326599121,
+        "unchanged_mae_cents": 0.31233710050582886
+      },
+      "station_interval": {
+        "station_groups": 14081,
+        "mean_delta_cents": 0.6933406286125346,
+        "interval95_cents": [
+          0.631895584350756,
+          0.7601805450877679
+        ]
+      }
+    },
+    "event_series_with_timing": {
+      "unique_contexts": 145642,
+      "seconds": 351.14000000001397,
+      "metrics": {
+        "n": 145644,
+        "mae_cents": 0.4310125410556793,
+        "rmse_cents": 2.7090213298797607,
+        "worst5_mean_cents": 7.3068461418151855,
+        "p95_cents": 1.6199588775634766,
+        "within5": 0.9778844305292357,
+        "within10": 0.9916234105078136,
+        "under10": 0.004778775644722749,
+        "over10": 0.0035978138474636787,
+        "changed_n": 959,
+        "changed_mae_cents": 16.13323402404785,
+        "unchanged_mae_cents": 0.32693520188331604
+      },
+      "station_interval": {
+        "station_groups": 14081,
+        "mean_delta_cents": 0.7540467900896421,
+        "interval95_cents": [
+          0.6898037251008311,
+          0.8197019286312932
+        ]
+      }
+    }
+  }
+}

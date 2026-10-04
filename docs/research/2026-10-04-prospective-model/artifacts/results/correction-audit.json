@@ -1,0 +1,11 @@
+{
+  "adjusted": 181,
+  "adjusted_truly_unchanged_next_reports": 45,
+  "adjusted_large_changes": 135,
+  "better": 134,
+  "worse": 47,
+  "same": 145463,
+  "maximum_worsening_cents": 106.25,
+  "maximum_improvement_cents": 128.125,
+  "max_absolute_correction_cents": 128.125
+}

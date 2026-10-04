@@ -10,7 +10,7 @@ def compare(out):
     assert (meta[va,3]>=72).all() and (meta[va,4]<120).all()
     predictions={'raw':np.zeros(len(y),dtype='float32')}
     for p in out.glob('*-predictions.npy'):
-        if p.stem in ('selected-predictions','final-selected-predictions'):continue
+        if p.stem in ('selected-predictions','final-selected-predictions','sparse-predictions','bounded-predictions'):continue
         a=np.load(p);assert a.shape==y.shape and np.isfinite(a).all(),p
         predictions[p.stem.removesuffix('-predictions')]=a
     base=['rmse_d8','mae_d8','rmse_d10','mae_d10','huber_d8']
