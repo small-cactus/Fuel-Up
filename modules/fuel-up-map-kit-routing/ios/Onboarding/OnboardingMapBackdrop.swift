@@ -15,30 +15,76 @@ enum OnboardingMapScene {
   }
 }
 
-// Separate from the draft model: interactive paging only updates the backdrop,
-// not every form and list. Both MapKit views live for the entire flow.
-final class OnboardingMapPresentation: ObservableObject {
-  @Published var position: CGFloat = 0
+// Keep MapKit renderers alive independently of UIKit's adjacent-page cache.
+// The pager supplies the actual page origins, including bounce/cancelled swipes.
+// Apply transforms synchronously in UIKit so maps and content move in one frame.
+final class OnboardingMapPresentation {
+  var pageOffsets: [CGFloat?] = [0, nil, nil, nil] {
+    didSet { applyOffsets?(pageOffsets) }
+  }
+  var applyOffsets: (([CGFloat?]) -> Void)?
 }
 
 @available(iOS 16.0, *)
-struct OnboardingMapBackdrop: View {
-  @ObservedObject var presentation: OnboardingMapPresentation
+struct OnboardingMapBackdrop: UIViewControllerRepresentable {
+  let presentation: OnboardingMapPresentation
   let onMapReady: () -> Void
 
-  var body: some View {
-    GeometryReader { geometry in
-      ZStack {
-        // Mounted at full size from the welcome screen, so later slides reuse
-        // the already rendered map without snapshots or per-page map loading.
-        LocationInvitationMap()
-        OnboardingWelcomeMap(onMapReady: onMapReady)
-          .offset(x: -min(1, max(0, presentation.position)) * geometry.size.width)
-      }
-      .clipped()
+  func makeUIViewController(context: Context) -> OnboardingMapBackdropController {
+    OnboardingMapBackdropController(presentation: presentation, onMapReady: onMapReady)
+  }
+  func updateUIViewController(_ controller: OnboardingMapBackdropController, context: Context) {}
+}
+
+@available(iOS 16.0, *)
+final class OnboardingMapBackdropController: UIViewController {
+  private let presentation: OnboardingMapPresentation
+  private let maps: [UIHostingController<AnyView>]
+
+  init(presentation: OnboardingMapPresentation, onMapReady: @escaping () -> Void) {
+    self.presentation = presentation
+    // One full-size, retained map per slide. All start loading with the flow;
+    // entering or revisiting a slide never constructs another MKMapView.
+    maps = (0..<4).map { index in
+      let map = index == 0
+        ? AnyView(OnboardingWelcomeMap(onMapReady: onMapReady).ignoresSafeArea())
+        : AnyView(LocationInvitationMap().ignoresSafeArea())
+      return UIHostingController(rootView: map)
     }
-    .allowsHitTesting(false)
-    .accessibilityHidden(true)
+    super.init(nibName: nil, bundle: nil)
+    presentation.applyOffsets = { [weak self] _ in self?.updateOffsets() }
+  }
+  required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    view.isUserInteractionEnabled = false
+    view.accessibilityElementsHidden = true
+    view.clipsToBounds = true
+    for host in maps {
+      addChild(host)
+      view.addSubview(host.view)
+      host.view.backgroundColor = .clear
+      host.didMove(toParent: self)
+    }
+  }
+
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    updateOffsets()
+  }
+
+  private func updateOffsets() {
+    guard isViewLoaded else { return }
+    UIView.performWithoutAnimation {
+      for (index, host) in maps.enumerated() {
+        host.view.bounds = CGRect(origin: .zero, size: view.bounds.size)
+        // Detached pages stay mounted just outside the viewport to preload.
+        let offset = presentation.pageOffsets[index] ?? 2
+        host.view.center = CGPoint(x: view.bounds.midX + offset * view.bounds.width,
+                                   y: view.bounds.midY)
+      }
+    }
   }
 }
 
