@@ -27,3 +27,6 @@ verify_jwt = false
 
 [functions.fuel-national-projector]
 verify_jwt = false
+
+[functions.driving-research]
+verify_jwt = false

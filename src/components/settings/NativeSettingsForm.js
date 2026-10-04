@@ -16,6 +16,7 @@
 
 import { GlassForm as Form, GlassSection as Section } from '../../../modules/fuel-up-glass';
 import React from 'react';
+import { nativeResearchOwnsTracking } from '../../lib/drivingResearchPolicy';
 import {
     Button,
     Host,
@@ -73,6 +74,7 @@ export default function NativeSettingsForm({
     // Tracking
     trackingReady,
     onReviewTracking,
+    onDrivingResearch,
     // Data actions
     onResetFuelCache,
     onResetOnboarding,
@@ -182,7 +184,7 @@ export default function NativeSettingsForm({
                     </Picker>
                 </Section>
 
-                <Section
+                {!nativeResearchOwnsTracking() && <Section
                     title="Predictive Tracking"
                     footer={
                         <Text
@@ -204,6 +206,11 @@ export default function NativeSettingsForm({
                         }}
                         label={trackingReady ? 'Review Tracking Permissions' : 'Enable Predictive Tracking'}
                     />
+                </Section>}
+
+                <Section title="Research & Debug">
+                    <SettingsLink title="Driving Research" systemImage="car.side"
+                        onPress={onDrivingResearch} testID="settings-driving-research" />
                 </Section>
 
                 <Section title="Data">

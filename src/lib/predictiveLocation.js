@@ -1,3 +1,4 @@
+import { nativeResearchOwnsTracking } from './drivingResearchPolicy';
 import { isTransientLocationUnavailable } from './locationErrors';
 import { Linking, Platform } from 'react-native';
 import * as Location from 'expo-location';
@@ -178,6 +179,7 @@ async function appendQueuedPredictiveTaskEventAsync(event) {
 }
 
 async function dispatchPredictiveTaskPayloadAsync(kind, payload) {
+    if (nativeResearchOwnsTracking()) return;
     const listeners = kind === 'location'
         ? backgroundLocationListeners
         : geofencingListeners;
@@ -633,6 +635,7 @@ export async function ensurePredictiveLocationTrackingActiveAsync({
     mode = 'monitoring',
     options = {},
 } = {}) {
+    if (nativeResearchOwnsTracking()) return { started: false, reason: 'native-research-owner' };
     const permissionState = await getPredictiveLocationPermissionStateAsync();
 
     if (!permissionState.isReady) {
@@ -793,6 +796,7 @@ function normalizeRegions(regions) {
 }
 
 export async function syncPredictiveGeofencesAsync(regions) {
+    if (nativeResearchOwnsTracking()) return;
     const permissionState = await getPredictiveLocationPermissionStateAsync();
 
     if (!permissionState.isReady) {
@@ -853,6 +857,7 @@ export async function stopPredictiveLocationUpdatesAsync() {
 }
 
 export async function stopPredictiveGeofencingAsync() {
+    if (nativeResearchOwnsTracking()) return;
     let hasStarted = false;
     try {
         hasStarted = await Location.hasStartedGeofencingAsync(PREDICTIVE_GEOFENCING_TASK_NAME);

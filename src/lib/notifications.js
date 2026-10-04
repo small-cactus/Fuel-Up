@@ -1,3 +1,4 @@
+import { DRIVING_ALERTS_ENABLED, LIVE_ACTIVITIES_ENABLED } from './drivingResearchPolicy';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
@@ -218,6 +219,7 @@ export async function schedulePredictiveRecommendationNotification({
     recommendation,
     navigationApp,
 }) {
+    if (!DRIVING_ALERTS_ENABLED) return null;
     await ensurePredictiveNotificationCategoryAsync();
 
     if (
@@ -481,6 +483,7 @@ export async function endAllLiveActivities() {
  *   module couldn't load.
  */
 export function startPredictiveLiveActivity(props) {
+    if (!LIVE_ACTIVITIES_ENABLED) return Promise.resolve(undefined);
     const next = pendingStartPromise.then(() => startPredictiveLiveActivityInternal(props));
     // Swallow rejections on the chained tail so the next queued start
     // is never skipped by an earlier failure. The caller still sees
@@ -523,6 +526,7 @@ async function startPredictiveLiveActivityInternal(props) {
  * @param {object} props — Complete predictive props with real values.
  */
 export function updatePredictiveLiveActivity(instance, props) {
+    if (!LIVE_ACTIVITIES_ENABLED) return false;
     if (Platform.OS !== 'ios' || !instance) return false;
 
     const fullProps = buildPredictiveProps(props || {});
@@ -565,6 +569,7 @@ export function updateTrackedLiveActivity(props) {
  * @returns {Promise<object|undefined>}
  */
 export function startLiveActivity(stationName, price) {
+    if (!LIVE_ACTIVITIES_ENABLED) return undefined;
     return startPredictiveLiveActivity({
         stationName,
         price,
@@ -585,6 +590,7 @@ export function startLiveActivity(stationName, price) {
  * @param {string} newPrice
  */
 export function updateLiveActivity(instance, newPrice) {
+    if (!LIVE_ACTIVITIES_ENABLED) return false;
     updatePredictiveLiveActivity(instance, {
         stationName: 'Wawa - Route 73',
         subtitle: 'FuelUp alert',

@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.author           = package['author']
   s.homepage         = 'https://fuelup.local'
   s.platforms        = {
-    :ios => '15.1',
+    :ios => '26.0',
     :tvos => '15.1'
   }
   s.swift_version    = '5.9'
@@ -19,7 +19,8 @@ Pod::Spec.new do |s|
   s.source           = { :path => '.' }
 
   s.dependency 'ExpoModulesCore'
-  s.frameworks = 'CoreMotion'
+  s.frameworks = 'CoreMotion', 'CoreLocation', 'Security'
+  s.libraries = 'sqlite3'
 
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',

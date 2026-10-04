@@ -216,6 +216,7 @@ export default function SettingsScreen() {
                         onThemeModeChange={handleThemeModeChange}
                         trackingReady={trackingReady}
                         onReviewTracking={handleReviewTrackingPermissions}
+                        onDrivingResearch={() => router.push('/driving-research')}
                         onResetFuelCache={handleConfirmFuelReset}
                         onResetOnboarding={handleResetOnboarding}
                         trackingFooterCopy={trackingFooterCopy}

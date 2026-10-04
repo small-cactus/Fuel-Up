@@ -1,8 +1,15 @@
 {
-  "platforms": ["apple"],
+  "platforms": [
+    "apple"
+  ],
   "apple": {
-    "modules": ["FuelUpDrivingActivityModule"],
+    "modules": [
+      "FuelUpDrivingActivityModule"
+    ],
     "podspecPath": "ios/FuelUpDrivingActivity.podspec",
-    "swiftModuleName": "FuelUpDrivingActivity"
+    "swiftModuleName": "FuelUpDrivingActivity",
+    "appDelegateSubscribers": [
+      "DrivingResearchLifecycle"
+    ]
   }
 }

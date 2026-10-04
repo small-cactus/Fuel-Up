@@ -1,3 +1,4 @@
+import { migrateToNativeResearchAsync } from '../src/lib/drivingResearch';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, View } from 'react-native';
 import { AppStateProvider, useAppState } from '../src/AppStateContext';
@@ -430,6 +431,9 @@ function AppGate() {
 }
 
 export default function RootLayout() {
+    useEffect(() => {
+        void migrateToNativeResearchAsync().catch(error => console.warn('Native research migration pending:', error.message));
+    }, []);
     return (
         <AppStateProvider>
             <ThemeProvider>

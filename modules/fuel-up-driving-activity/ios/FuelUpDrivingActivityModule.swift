@@ -28,6 +28,15 @@ public final class FuelUpDrivingActivityModule: Module {
 
     Events("onActivityUpdate")
 
+    Function("ownsBackgroundTracking") { true }
+    AsyncFunction("resumeResearchAsync") {
+      await MainActor.run { DrivingResearchCollector.shared.resume(reason: "bridge_ready") }
+    }
+    View(DrivingResearchView.self) {
+      Prop("isDark") { (view, dark: Bool) in view.setDark(dark) }
+    }
+
+
     AsyncFunction("getAuthorizationStatusAsync") {
       return authorizationStatusLabel()
     }
