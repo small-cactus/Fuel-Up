@@ -1,0 +1,22 @@
+{
+  "fps": 30.0,
+  "frames": 907,
+  "steadyLocationFramesFromSeconds": 2.5,
+  "greenComponentCounts": {
+    "1": 832
+  },
+  "failures": [],
+  "greenBoundsMin": [
+    44,
+    8,
+    71,
+    26
+  ],
+  "greenBoundsMax": [
+    44,
+    8,
+    71,
+    26
+  ],
+  "method": "Light-mode recorded-pixel heuristic. Bounds are on a 330x717 downsample with an 80-pixel vertical crop offset; this is supporting visual evidence, not a semantic UI assertion."
+}

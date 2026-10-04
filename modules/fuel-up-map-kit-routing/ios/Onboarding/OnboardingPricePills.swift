@@ -1,7 +1,8 @@
 import SwiftUI
 
 // Decorative prices have no connection to live station observations. Each
-// capsule grows, holds, and disappears before its slot moves to a free area.
+// neutral capsule grows, holds, and disappears before its slot moves to a free
+// area. The single best-price capsule stays visible and never changes in place.
 @available(iOS 16.0, *)
 struct OnboardingPricePills: View {
   let isActive: Bool
@@ -9,8 +10,14 @@ struct OnboardingPricePills: View {
   // This is embedded in a UIKit pager, not a SwiftUI Scene. Use the owning
   // application's lifecycle rather than an unprovided scenePhase environment.
   @State private var appActive = UIApplication.shared.applicationState == .active
-  @State private var samples = [Sample(id: 0, cell: 0), Sample(id: 1, cell: 3), Sample(id: 2, cell: 4)]
-  @State private var scales: [CGFloat] = [0, 0, 0]
+  @State private var samples = [
+    Sample(id: 0, cell: 0, isBest: true),
+    Sample(id: 1, cell: 3),
+    Sample(id: 2, cell: 4)
+  ]
+  private let bestID = 0
+  // The best price is already visible when a page swipe reveals this view.
+  @State private var scales: [CGFloat] = [1, 0, 0]
 
   private var animates: Bool { isActive && !reduceMotion && appActive }
 
@@ -18,7 +25,7 @@ struct OnboardingPricePills: View {
     GeometryReader { geometry in
       ZStack {
         ForEach(samples) { sample in
-          SamplePricePill(price: sample.price)
+          SamplePricePill(price: sample.price, isBest: sample.id == bestID)
             .scaleEffect(scales[sample.id])
             .position(x: geometry.size.width * sample.x,
                       // Symmetric insets keep the spring overshoot in the band.
@@ -36,43 +43,62 @@ struct OnboardingPricePills: View {
       appActive = false
     }
     .task(id: animates) {
-      withTransaction(Transaction(animation: nil)) {
-        scales = reduceMotion ? [1, 1, 1] : [0, 0, 0]
+      withoutAnimation {
+        // Never blank the green chip during entry, backgrounding, or Reduce Motion.
+        let showAll = reduceMotion || (isActive && !appActive)
+        scales = samples.map { showAll || $0.id == bestID ? 1 : 0 }
       }
       guard animates else { return }
-      var index = 0
       do {
+        // A small opening pulse keeps the green chip visible throughout its pop.
+        withoutAnimation { scales[bestID] = 0.86 }
+        await Task.yield()
+        try Task.checkCancellation()
+        withAnimation(.spring(response: 0.48, dampingFraction: 0.62)) { scales[bestID] = 1 }
+        for id in samples.map(\.id) where id != bestID {
+          try await Task.sleep(nanoseconds: 120_000_000)
+          withAnimation(.spring(response: 0.48, dampingFraction: 0.62)) { scales[id] = 1 }
+        }
+        try await Task.sleep(nanoseconds: 1_600_000_000)
+        var index = 1
         while !Task.isCancelled {
-          if scales[index] > 0 {
-            withAnimation(.easeIn(duration: 0.32)) { scales[index] = 0 }
-            try await Task.sleep(nanoseconds: 380_000_000)
-          }
+          withAnimation(.easeIn(duration: 0.32)) { scales[index] = 0 }
+          try await Task.sleep(nanoseconds: 380_000_000)
           // Reserve the other capsules' cells and avoid the previous location.
           let occupied = Set(samples.map(\.cell))
           let nextCell = (0..<6).filter { !occupied.contains($0) }.randomElement()!
-          samples[index] = Sample(id: index, cell: nextCell)
+          withoutAnimation { samples[index] = Sample(id: index, cell: nextCell) }
           try await Task.sleep(nanoseconds: 50_000_000)
           withAnimation(.spring(response: 0.48, dampingFraction: 0.62)) { scales[index] = 1 }
-          // Stagger three lifetimes: each holds still for several seconds
-          // while the others appear, before shrinking and moving elsewhere.
+          // Only neutral chips cycle. Keeping the green chip unchanged avoids
+          // either a gap in the best-price highlight or two greens at once.
           try await Task.sleep(nanoseconds: 1_600_000_000)
-          index = (index + 1) % samples.count
+          index = index == 1 ? 2 : 1
         }
       } catch { /* Leaving the page or backgrounding cancels the sequence. */ }
     }
   }
 
+  private func withoutAnimation(_ update: () -> Void) {
+    var transaction = Transaction(animation: nil)
+    transaction.disablesAnimations = true
+    withTransaction(transaction, update)
+  }
+
   private struct Sample: Identifiable {
     let id: Int
     let cell: Int
-    let price: String
+    private let cents: Int
+    var price: String { String(format: "$%.2f", Double(cents) / 100) }
     let x: CGFloat
     let y: CGFloat
 
-    init(id: Int, cell: Int) {
+    init(id: Int, cell: Int, isBest: Bool = false) {
       self.id = id
       self.cell = cell
-      price = ["$3.89", "$4.49", "$4.59", "$4.65", "$4.72"].randomElement()!
+      // Retain the existing illustrative $3.89–$4.72 window, with disjoint
+      // ranges so the sole green price is strictly cheaper on every frame.
+      cents = Int.random(in: isBest ? 389...419 : 420...472)
       // Keep the middle corridor clear for the sample-price caption.
       x = (cell.isMultiple(of: 2) ? 0.25 : 0.75) + CGFloat.random(in: -0.02...0.02)
       y = min(1, max(0, CGFloat(cell / 2) * 0.5 + CGFloat.random(in: -0.025...0.025)))
@@ -82,12 +108,13 @@ struct OnboardingPricePills: View {
 
 private struct SamplePricePill: View {
   let price: String
+  let isBest: Bool
 
   @ViewBuilder var body: some View {
     if #available(iOS 26.0, *) {
-      label.glassEffect(.regular.tint(price == "$3.89" ? .green.opacity(0.3) : .clear), in: .capsule)
+      label.glassEffect(.regular.tint(isBest ? .green.opacity(0.3) : .clear), in: .capsule)
     } else {
-      label.background(Color(uiColor: .secondarySystemGroupedBackground), in: Capsule())
+      label.background(isBest ? Color.green.opacity(0.3) : Color(uiColor: .secondarySystemGroupedBackground), in: Capsule())
     }
   }
 

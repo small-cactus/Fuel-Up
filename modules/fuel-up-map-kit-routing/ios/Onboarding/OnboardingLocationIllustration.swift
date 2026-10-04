@@ -16,10 +16,10 @@ struct OnboardingLocationIllustration: View {
         .overlay(alignment: .top) {
           ZStack(alignment: .top) {
             OnboardingPricePills(isActive: isActive)
-              // Confine the full animated capsules to the centered 40% band.
+              // A 40% band shifted up ten percentage points: 20% through 60%.
               .frame(height: heroHeight * 0.40)
               .clipped()
-              .offset(y: heroHeight * 0.30)
+              .offset(y: heroHeight * 0.20)
             Text("Sample prices")
               .font(.caption2).foregroundStyle(.secondary)
               .position(x: geometry.size.width * 0.50, y: heroHeight * 0.70 - 8)
