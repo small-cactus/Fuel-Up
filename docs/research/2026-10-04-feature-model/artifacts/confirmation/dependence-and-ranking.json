@@ -1,0 +1,553 @@
+{
+  "event": {
+    "row_weighted_mae_delta_cents": -0.024210670962929726,
+    "state_block_interval95_cents": [
+      -0.057173363215102295,
+      0.0026124061624587043
+    ],
+    "state_slices": [
+      {
+        "state": "AK",
+        "n": 19,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "AL",
+        "n": 959,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "AR",
+        "n": 1374,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "AZ",
+        "n": 768,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "CA",
+        "n": 3857,
+        "mae_delta_cents": 0.004554691171287594
+      },
+      {
+        "state": "CO",
+        "n": 2369,
+        "mae_delta_cents": 0.0032102070361967076
+      },
+      {
+        "state": "CT",
+        "n": 1022,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "DC",
+        "n": 2,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "DE",
+        "n": 15,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "FL",
+        "n": 1065,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "GA",
+        "n": 751,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "HI",
+        "n": 22,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "IA",
+        "n": 2336,
+        "mae_delta_cents": 0.009406102846746575
+      },
+      {
+        "state": "ID",
+        "n": 1004,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "IL",
+        "n": 2986,
+        "mae_delta_cents": -0.16560228990374679
+      },
+      {
+        "state": "IN",
+        "n": 3038,
+        "mae_delta_cents": -0.21915435414317408
+      },
+      {
+        "state": "KS",
+        "n": 1072,
+        "mae_delta_cents": 0.022068308360541043
+      },
+      {
+        "state": "KY",
+        "n": 1116,
+        "mae_delta_cents": -0.27231305303539427
+      },
+      {
+        "state": "LA",
+        "n": 782,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "MA",
+        "n": 264,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "MD",
+        "n": 415,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "ME",
+        "n": 211,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "MI",
+        "n": 597,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "MN",
+        "n": 937,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "MO",
+        "n": 2401,
+        "mae_delta_cents": -0.08909453297098295
+      },
+      {
+        "state": "MS",
+        "n": 636,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "MT",
+        "n": 67,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "NC",
+        "n": 1771,
+        "mae_delta_cents": 0.015208816743718238
+      },
+      {
+        "state": "ND",
+        "n": 251,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "NE",
+        "n": 759,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "NH",
+        "n": 91,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "NJ",
+        "n": 827,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "NM",
+        "n": 774,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "NV",
+        "n": 838,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "NY",
+        "n": 960,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "OH",
+        "n": 2816,
+        "mae_delta_cents": 0.08181348510763863
+      },
+      {
+        "state": "OK",
+        "n": 2097,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "OR",
+        "n": 241,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "PA",
+        "n": 3426,
+        "mae_delta_cents": 0.0016015938548963806
+      },
+      {
+        "state": "RI",
+        "n": 36,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "SC",
+        "n": 870,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "SD",
+        "n": 247,
+        "mae_delta_cents": -0.0009687323319284539
+      },
+      {
+        "state": "TN",
+        "n": 1564,
+        "mae_delta_cents": -0.03836317135549872
+      },
+      {
+        "state": "TX",
+        "n": 4510,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "UT",
+        "n": 2432,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "VA",
+        "n": 1248,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "VT",
+        "n": 2,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "WA",
+        "n": 428,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "WI",
+        "n": 387,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "WV",
+        "n": 478,
+        "mae_delta_cents": 0.011594125915271966
+      },
+      {
+        "state": "WY",
+        "n": 654,
+        "mae_delta_cents": 0.0
+      }
+    ],
+    "price_only_choices": {
+      "panels": 644,
+      "changed_choices": 40,
+      "known_changed_choices": 1,
+      "unknown_changed_choices": 39,
+      "cheaper_choices": 0,
+      "dearer_choices": 1,
+      "mean_chosen_price_delta_cents": 5.000019073486328
+    },
+    "limitations": [
+      "State bootstrap keeps nearby stations together but cannot eliminate nationwide shared shocks. Four overnight hours, not a complete independent market regime.",
+      "Choose stations using all contemporaneously available candidates before examining labels. Compare later reports only when both chosen labels exist within two hours. Most changed choices may be unknown.",
+      "Price-only selection omits distance, membership and preferences, and source reports are not pump truth."
+    ]
+  },
+  "query": {
+    "row_weighted_mae_delta_cents": -0.01883143000304699,
+    "state_block_interval95_cents": [
+      -0.04164313538304566,
+      -0.0018000396759584615
+    ],
+    "state_slices": [
+      {
+        "state": "AK",
+        "n": 25,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "AL",
+        "n": 241,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "AR",
+        "n": 261,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "AZ",
+        "n": 222,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "CA",
+        "n": 1023,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "CO",
+        "n": 354,
+        "mae_delta_cents": 0.04142604439945544
+      },
+      {
+        "state": "CT",
+        "n": 131,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "DE",
+        "n": 14,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "FL",
+        "n": 439,
+        "mae_delta_cents": -0.29024532878588977
+      },
+      {
+        "state": "GA",
+        "n": 251,
+        "mae_delta_cents": 0.05148135523397134
+      },
+      {
+        "state": "HI",
+        "n": 17,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "IA",
+        "n": 395,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "ID",
+        "n": 121,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "IL",
+        "n": 624,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "IN",
+        "n": 571,
+        "mae_delta_cents": -0.06366843976824171
+      },
+      {
+        "state": "KS",
+        "n": 190,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "KY",
+        "n": 239,
+        "mae_delta_cents": -0.08368200836820083
+      },
+      {
+        "state": "LA",
+        "n": 190,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "MA",
+        "n": 68,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "MD",
+        "n": 154,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "ME",
+        "n": 40,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "MI",
+        "n": 317,
+        "mae_delta_cents": -0.06309148264984227
+      },
+      {
+        "state": "MN",
+        "n": 195,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "MO",
+        "n": 437,
+        "mae_delta_cents": -0.04576659038901602
+      },
+      {
+        "state": "MS",
+        "n": 162,
+        "mae_delta_cents": -0.04961083847799419
+      },
+      {
+        "state": "MT",
+        "n": 3,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "NC",
+        "n": 440,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "ND",
+        "n": 28,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "NE",
+        "n": 161,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "NH",
+        "n": 12,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "NJ",
+        "n": 208,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "NM",
+        "n": 148,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "NV",
+        "n": 141,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "NY",
+        "n": 260,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "OH",
+        "n": 535,
+        "mae_delta_cents": -0.0302822184339862
+      },
+      {
+        "state": "OK",
+        "n": 369,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "OR",
+        "n": 103,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "PA",
+        "n": 639,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "RI",
+        "n": 4,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "SC",
+        "n": 205,
+        "mae_delta_cents": 0.05633807298613758
+      },
+      {
+        "state": "SD",
+        "n": 46,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "TN",
+        "n": 389,
+        "mae_delta_cents": -0.04552842167165408
+      },
+      {
+        "state": "TX",
+        "n": 1052,
+        "mae_delta_cents": -0.011129250544558914
+      },
+      {
+        "state": "UT",
+        "n": 293,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "VA",
+        "n": 378,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "VT",
+        "n": 4,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "WA",
+        "n": 189,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "WI",
+        "n": 158,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "WV",
+        "n": 133,
+        "mae_delta_cents": 0.0
+      },
+      {
+        "state": "WY",
+        "n": 75,
+        "mae_delta_cents": 0.0
+      }
+    ],
+    "price_only_choices": {
+      "panels": 644,
+      "changed_choices": 0,
+      "known_changed_choices": 0,
+      "unknown_changed_choices": 0,
+      "cheaper_choices": 0,
+      "dearer_choices": 0,
+      "mean_chosen_price_delta_cents": null
+    },
+    "limitations": [
+      "State bootstrap keeps nearby stations together but cannot eliminate nationwide shared shocks. Four overnight hours, not a complete independent market regime.",
+      "Choose stations using all contemporaneously available candidates before examining labels. Compare later reports only when both chosen labels exist within two hours. Most changed choices may be unknown.",
+      "Price-only selection omits distance, membership and preferences, and source reports are not pump truth."
+    ]
+  }
+}

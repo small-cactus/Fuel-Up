@@ -1,0 +1,161 @@
+{
+  "kind": "source_event",
+  "replay": true,
+  "prediction_replay_max_delta": 0.0,
+  "freeze_sha256": "4301fefd4f14ee94570d0a09e9d4331b2d67fa71537c1ef51c69fba9dcac7d1f",
+  "policy": "spatial_ensemble:min0.05_cap0.2",
+  "raw": {
+    "n": 145644,
+    "mae_cents": 0.21881437636237633,
+    "rmse_cents": 2.3098217470356017,
+    "worst5_mean_cents": 4.375806814626107,
+    "p95_cents": 0.0,
+    "within5": 0.9885268188184889,
+    "within10": 0.9963884540386148,
+    "under10": 0.0015585949301035401,
+    "over10": 0.0020529510312817553,
+    "changed_n": 959,
+    "changed_mae_cents": 20.438998434168205,
+    "unchanged_mae_cents": 0.08479110849469279,
+    "adjustments": 0,
+    "better": 0,
+    "worse": 0,
+    "max_worsening_cents": 0.0,
+    "adjusted_station_count": 0
+  },
+  "frozen": {
+    "n": 145644,
+    "mae_cents": 0.20630894601345062,
+    "rmse_cents": 2.060431718826294,
+    "worst5_mean_cents": 4.125725746154785,
+    "p95_cents": 0.0,
+    "within5": 0.9885130867045673,
+    "within10": 0.9964571146082228,
+    "under10": 0.0015791931009859657,
+    "over10": 0.0019636922907912443,
+    "changed_n": 959,
+    "changed_mae_cents": 17.453079223632812,
+    "unchanged_mae_cents": 0.09199405461549759,
+    "adjustments": 272,
+    "better": 191,
+    "worse": 81,
+    "max_worsening_cents": 20.0,
+    "adjusted_station_count": 76
+  },
+  "station_interval": {
+    "station_groups": 14081,
+    "mean_delta_cents": -0.009282956375844593,
+    "interval95_cents": [
+      -0.014031743514738926,
+      -0.005258628018246841
+    ]
+  },
+  "ages": {
+    "0-1h": {
+      "raw": {
+        "n": 142739,
+        "mae_cents": 0.21853173012676302,
+        "rmse_cents": 2.3235464120940756,
+        "worst5_mean_cents": 4.370603982985012,
+        "p95_cents": 0.0,
+        "within5": 0.9885945677074941,
+        "within10": 0.9963920161973953,
+        "under10": 0.001576303603079747,
+        "over10": 0.0020316801995250073,
+        "changed_n": 936,
+        "changed_mae_cents": 20.617520911061867,
+        "unchanged_mae_cents": 0.08388398731909846,
+        "adjustments": 0,
+        "better": 0,
+        "worse": 0,
+        "max_worsening_cents": 0.0,
+        "adjusted_station_count": 0
+      },
+      "frozen": {
+        "n": 142739,
+        "mae_cents": 0.2057354599237442,
+        "rmse_cents": 2.07041072845459,
+        "worst5_mean_cents": 4.114680290222168,
+        "p95_cents": 0.0,
+        "within5": 0.9885875619137027,
+        "within10": 0.9964620741353098,
+        "under10": 0.0015973209844541436,
+        "over10": 0.0019406048802359552,
+        "changed_n": 936,
+        "changed_mae_cents": 17.558231353759766,
+        "unchanged_mae_cents": 0.09119673073291779,
+        "adjustments": 271,
+        "better": 191,
+        "worse": 80,
+        "max_worsening_cents": 20.0,
+        "adjusted_station_count": 75
+      }
+    },
+    "1-6h": {
+      "raw": {
+        "n": 2905,
+        "mae_cents": 0.23270237671528748,
+        "rmse_cents": 1.4868328194316345,
+        "worst5_mean_cents": 4.630139755876097,
+        "p95_cents": 0.0,
+        "within5": 0.985197934595525,
+        "within10": 0.9962134251290877,
+        "under10": 0.0006884681583476765,
+        "over10": 0.003098106712564544,
+        "changed_n": 23,
+        "changed_mae_cents": 13.173909809278406,
+        "unchanged_mae_cents": 0.12942417721877406,
+        "adjustments": 0,
+        "better": 0,
+        "worse": 0,
+        "max_worsening_cents": 0.0,
+        "adjusted_station_count": 0
+      },
+      "frozen": {
+        "n": 2905,
+        "mae_cents": 0.23448826372623444,
+        "rmse_cents": 1.4899451732635498,
+        "worst5_mean_cents": 4.665673732757568,
+        "p95_cents": 0.0,
+        "within5": 0.9848537005163511,
+        "within10": 0.9962134251290877,
+        "under10": 0.0006884681583476765,
+        "over10": 0.003098106712564544,
+        "changed_n": 23,
+        "changed_mae_cents": 13.173909187316895,
+        "unchanged_mae_cents": 0.13122431933879852,
+        "adjustments": 1,
+        "better": 0,
+        "worse": 1,
+        "max_worsening_cents": 5.18798828125,
+        "adjusted_station_count": 1
+      }
+    }
+  },
+  "ranking": {
+    "raw": {
+      "panels": 1123,
+      "known_panels": 181,
+      "unknown_panels": 942,
+      "candidate_count": 57586,
+      "labeled_candidates": 5275,
+      "mean_regret_cents": 0.29834252036078857,
+      "worst5_regret_cents": 5.399999618530273,
+      "regret10_count": 0,
+      "false_cheap_count": 0,
+      "limitation": "Later-report price-only lower-bound regret; not simultaneous pump truth or actual membership/distance/preferences ranking. Policy label denominators may differ."
+    },
+    "frozen": {
+      "panels": 1123,
+      "known_panels": 182,
+      "unknown_panels": 941,
+      "candidate_count": 57586,
+      "labeled_candidates": 5275,
+      "mean_regret_cents": 0.2967032757434216,
+      "worst5_regret_cents": 5.399999618530273,
+      "regret10_count": 0,
+      "false_cheap_count": 0,
+      "limitation": "Later-report price-only lower-bound regret; not simultaneous pump truth or actual membership/distance/preferences ranking. Policy label denominators may differ."
+    }
+  }
+}

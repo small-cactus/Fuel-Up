@@ -1,0 +1,93 @@
+{
+  "ages": [
+    {
+      "age_hours": "0\u20131",
+      "n": 12033,
+      "raw_mae_cents": 0.21299760043621063,
+      "frozen_mae_cents": 0.199127197265625,
+      "better": 11,
+      "worse": 3,
+      "changes10": 64
+    },
+    {
+      "age_hours": "1\u20136",
+      "n": 10582,
+      "raw_mae_cents": 0.41305992007255554,
+      "frozen_mae_cents": 0.41305992007255554,
+      "better": 0,
+      "worse": 0,
+      "changes10": 173
+    },
+    {
+      "age_hours": "6\u201324",
+      "n": 5281,
+      "raw_mae_cents": 1.4915735721588135,
+      "frozen_mae_cents": 1.4877861738204956,
+      "better": 1,
+      "worse": 0,
+      "changes10": 353
+    },
+    {
+      "age_hours": "24\u2013168",
+      "n": 3514,
+      "raw_mae_cents": 3.143141508102417,
+      "frozen_mae_cents": 3.1121833324432373,
+      "better": 14,
+      "worse": 8,
+      "changes10": 451
+    }
+  ],
+  "calibration": [
+    {
+      "n": 3141,
+      "predicted": 0.0013539157807826996,
+      "observed": 0.0
+    },
+    {
+      "n": 3141,
+      "predicted": 0.002158289309591055,
+      "observed": 0.0003183699458771092
+    },
+    {
+      "n": 3141,
+      "predicted": 0.003015167312696576,
+      "observed": 0.0028653295128939827
+    },
+    {
+      "n": 3141,
+      "predicted": 0.0042589264921844006,
+      "observed": 0.0003183699458771092
+    },
+    {
+      "n": 3141,
+      "predicted": 0.0064337900839746,
+      "observed": 0.0028653295128939827
+    },
+    {
+      "n": 3141,
+      "predicted": 0.011634224094450474,
+      "observed": 0.009551098376313277
+    },
+    {
+      "n": 3141,
+      "predicted": 0.0218183770775795,
+      "observed": 0.017828716969118114
+    },
+    {
+      "n": 3141,
+      "predicted": 0.03844388201832771,
+      "observed": 0.04807386182744349
+    },
+    {
+      "n": 3141,
+      "predicted": 0.06693737208843231,
+      "observed": 0.07354345749761222
+    },
+    {
+      "n": 3141,
+      "predicted": 0.20722296833992004,
+      "observed": 0.17605858007004138
+    }
+  ],
+  "caveat": "Next newer provider report within 24h, not verified current pump price. Missing targets excluded. This is selection data, not independent confirmation."
+}

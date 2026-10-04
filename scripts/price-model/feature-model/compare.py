@@ -17,7 +17,8 @@ def classification(y,p):
 
 
 def main(root,prior):
-    folders=[d for d in root.iterdir() if d.is_dir() and (d/'evaluation.npz').exists()]
+    folders=[d for d in root.iterdir() if d.is_dir() and (d/'evaluation.npz').exists()
+             and any((d/name).exists() for name in ['spec.json','features.json','signed-spec.json'])]
     if not folders:raise ValueError('No completed experiments')
     first=np.load(folders[0]/'evaluation.npz');y=first['y'];m=first['meta'];raw=first['raw'] if 'raw' in first else first['X'][:,0]
     v=m[:,5]==1;r=m[:,5]==2

@@ -1,0 +1,1367 @@
+{
+  "caveat": "Training split-based importance, not causal contribution or independent ablation evidence",
+  "models": {
+    "station_rmse8": [
+      {
+        "feature": "report_age",
+        "training_split_importance": 17.862364843717117
+      },
+      {
+        "feature": "longitude",
+        "training_split_importance": 16.18798021855034
+      },
+      {
+        "feature": "state",
+        "training_split_importance": 13.042273329692138
+      },
+      {
+        "feature": "state_median_delta",
+        "training_split_importance": 8.21103126356044
+      },
+      {
+        "feature": "latitude",
+        "training_split_importance": 6.532204118099101
+      },
+      {
+        "feature": "local_median_delta",
+        "training_split_importance": 5.103350836180848
+      },
+      {
+        "feature": "raw_price",
+        "training_split_importance": 3.4288506648149166
+      },
+      {
+        "feature": "local_peer_count",
+        "training_split_importance": 2.294413843645943
+      },
+      {
+        "feature": "product_7_report_newer_hours",
+        "training_split_importance": 1.8359015712965903
+      },
+      {
+        "feature": "event_delta_1",
+        "training_split_importance": 1.7467273981885973
+      },
+      {
+        "feature": "product_3_report_newer_hours",
+        "training_split_importance": 1.5963285112253274
+      },
+      {
+        "feature": "product_5_report_newer_hours",
+        "training_split_importance": 1.3240393811637436
+      },
+      {
+        "feature": "day_cos",
+        "training_split_importance": 1.229309474138711
+      },
+      {
+        "feature": "event_elapsed_1",
+        "training_split_importance": 1.057041141779417
+      },
+      {
+        "feature": "product_1_age",
+        "training_split_importance": 1.0366333902552831
+      },
+      {
+        "feature": "product_1_report_newer_hours",
+        "training_split_importance": 0.993627356758801
+      },
+      {
+        "feature": "history_price_mean_delta",
+        "training_split_importance": 0.9772671225975551
+      },
+      {
+        "feature": "history_change_rate",
+        "training_split_importance": 0.873139082876165
+      },
+      {
+        "feature": "product_1_spread_residual",
+        "training_split_importance": 0.8669632924017193
+      },
+      {
+        "feature": "product_5_age",
+        "training_split_importance": 0.6538158964849389
+      },
+      {
+        "feature": "product_6_report_newer_hours",
+        "training_split_importance": 0.5922871426080711
+      },
+      {
+        "feature": "price_cents_ending",
+        "training_split_importance": 0.5740932001840703
+      },
+      {
+        "feature": "product_3_spread_count",
+        "training_split_importance": 0.5730019782990468
+      },
+      {
+        "feature": "product_0_report_newer_hours",
+        "training_split_importance": 0.559156581805871
+      },
+      {
+        "feature": "product_3_age",
+        "training_split_importance": 0.5446505278456862
+      },
+      {
+        "feature": "product_7_age",
+        "training_split_importance": 0.5361265498495321
+      },
+      {
+        "feature": "actual_change_count",
+        "training_split_importance": 0.5265514543103111
+      },
+      {
+        "feature": "own_max_48_residual",
+        "training_split_importance": 0.48797358552718473
+      },
+      {
+        "feature": "last_actual_change",
+        "training_split_importance": 0.4844154372630074
+      },
+      {
+        "feature": "grade",
+        "training_split_importance": 0.453211385025897
+      },
+      {
+        "feature": "state_move_24h",
+        "training_split_importance": 0.4283554503622887
+      },
+      {
+        "feature": "product_2_age",
+        "training_split_importance": 0.39400293521319485
+      },
+      {
+        "feature": "event_delta_2",
+        "training_split_importance": 0.3749641104021479
+      },
+      {
+        "feature": "typical_actual_change",
+        "training_split_importance": 0.3496348268335613
+      },
+      {
+        "feature": "day_sin",
+        "training_split_importance": 0.3464069463799287
+      },
+      {
+        "feature": "product_7_spread_residual",
+        "training_split_importance": 0.3305301920763517
+      },
+      {
+        "feature": "hour_delta_1",
+        "training_split_importance": 0.32813636448394023
+      },
+      {
+        "feature": "local_move_24h",
+        "training_split_importance": 0.2995215122553263
+      },
+      {
+        "feature": "history_reports",
+        "training_split_importance": 0.2607548866815982
+      },
+      {
+        "feature": "history_price_std",
+        "training_split_importance": 0.2544412874179884
+      },
+      {
+        "feature": "product_5_spread_residual",
+        "training_split_importance": 0.2392210539127982
+      },
+      {
+        "feature": "own_min_48_residual",
+        "training_split_importance": 0.22930332953461768
+      },
+      {
+        "feature": "observed_hour_sin",
+        "training_split_importance": 0.22169289325645106
+      },
+      {
+        "feature": "event_elapsed_2",
+        "training_split_importance": 0.20377366988609447
+      },
+      {
+        "feature": "hours_since_first",
+        "training_split_importance": 0.19949372303996368
+      },
+      {
+        "feature": "product_0_age",
+        "training_split_importance": 0.1947806704201901
+      },
+      {
+        "feature": "event_delta_3",
+        "training_split_importance": 0.19400812622064187
+      },
+      {
+        "feature": "previous_actual_change",
+        "training_split_importance": 0.1899580310319683
+      },
+      {
+        "feature": "product_6_age",
+        "training_split_importance": 0.18714880621427252
+      },
+      {
+        "feature": "state_move_6h",
+        "training_split_importance": 0.169258203344887
+      },
+      {
+        "feature": "product_2_report_newer_hours",
+        "training_split_importance": 0.1647529297430157
+      },
+      {
+        "feature": "product_4_age",
+        "training_split_importance": 0.1361123089103192
+      },
+      {
+        "feature": "product_4_report_newer_hours",
+        "training_split_importance": 0.13305904467645296
+      },
+      {
+        "feature": "price_quarter_position",
+        "training_split_importance": 0.13199767769782011
+      },
+      {
+        "feature": "product_5_spread_count",
+        "training_split_importance": 0.12853121487834518
+      },
+      {
+        "feature": "observed_hour_cos",
+        "training_split_importance": 0.11543600388640347
+      },
+      {
+        "feature": "local_move_6h",
+        "training_split_importance": 0.11458315031454971
+      },
+      {
+        "feature": "product_3_spread_residual",
+        "training_split_importance": 0.11320512931869822
+      },
+      {
+        "feature": "product_1_spread_count",
+        "training_split_importance": 0.09861860805917937
+      },
+      {
+        "feature": "product_0_spread_count",
+        "training_split_importance": 0.09124464974070154
+      },
+      {
+        "feature": "product_6_spread_count",
+        "training_split_importance": 0.088398013322286
+      },
+      {
+        "feature": "hours_since_last_change",
+        "training_split_importance": 0.08784964982410202
+      },
+      {
+        "feature": "hours_since_actual_change",
+        "training_split_importance": 0.08082347765196712
+      },
+      {
+        "feature": "event_elapsed_4",
+        "training_split_importance": 0.07577647911803387
+      },
+      {
+        "feature": "event_elapsed_3",
+        "training_split_importance": 0.07397887324717409
+      },
+      {
+        "feature": "product_0_spread_mad",
+        "training_split_importance": 0.06294253732285496
+      },
+      {
+        "feature": "product_7_spread_count",
+        "training_split_importance": 0.054752194442583356
+      },
+      {
+        "feature": "event_delta_4",
+        "training_split_importance": 0.05094008975020742
+      },
+      {
+        "feature": "product_2_spread_mad",
+        "training_split_importance": 0.047263192115721046
+      },
+      {
+        "feature": "historical_reversal_rate",
+        "training_split_importance": 0.04471034454636528
+      },
+      {
+        "feature": "product_1_spread_mad",
+        "training_split_importance": 0.04453306830665073
+      },
+      {
+        "feature": "product_0_spread_residual",
+        "training_split_importance": 0.041822963138078
+      },
+      {
+        "feature": "event_elapsed_8",
+        "training_split_importance": 0.03713762432043606
+      },
+      {
+        "feature": "event_delta_8",
+        "training_split_importance": 0.036119022639070734
+      },
+      {
+        "feature": "product_2_spread_count",
+        "training_split_importance": 0.03472311005876623
+      },
+      {
+        "feature": "own_median_48_residual",
+        "training_split_importance": 0.031761168387359526
+      },
+      {
+        "feature": "own_mad_6",
+        "training_split_importance": 0.031539503390760046
+      },
+      {
+        "feature": "event_elapsed_6",
+        "training_split_importance": 0.03140017709299493
+      },
+      {
+        "feature": "product_7_spread_mad",
+        "training_split_importance": 0.029662473502425388
+      },
+      {
+        "feature": "hour_present_1",
+        "training_split_importance": 0.02760290559704961
+      },
+      {
+        "feature": "hour_present_12",
+        "training_split_importance": 0.027107489721859016
+      },
+      {
+        "feature": "product_4_spread_mad",
+        "training_split_importance": 0.021012218655961222
+      },
+      {
+        "feature": "product_4_spread_count",
+        "training_split_importance": 0.017640005813080586
+      },
+      {
+        "feature": "payment",
+        "training_split_importance": 0.015455838151284824
+      },
+      {
+        "feature": "own_median_6_residual",
+        "training_split_importance": 0.012960404604805912
+      },
+      {
+        "feature": "own_median_24_residual",
+        "training_split_importance": 0.012934140777361497
+      },
+      {
+        "feature": "own_min_24_residual",
+        "training_split_importance": 0.012642972975036502
+      },
+      {
+        "feature": "product_5_spread_mad",
+        "training_split_importance": 0.011847548411286633
+      },
+      {
+        "feature": "hour_delta_12",
+        "training_split_importance": 0.011160821955778309
+      },
+      {
+        "feature": "hour_delta_3",
+        "training_split_importance": 0.011052046130780533
+      },
+      {
+        "feature": "own_max_24_residual",
+        "training_split_importance": 0.00572663630656874
+      },
+      {
+        "feature": "hour_delta_6",
+        "training_split_importance": 0.005220787930207797
+      },
+      {
+        "feature": "own_max_6_residual",
+        "training_split_importance": 0.004627517188596146
+      },
+      {
+        "feature": "own_mad_24",
+        "training_split_importance": 0.003200777237743757
+      },
+      {
+        "feature": "hour_present_24",
+        "training_split_importance": 0.002099587728926725
+      },
+      {
+        "feature": "product_4_spread_residual",
+        "training_split_importance": 0.0012368916897299708
+      },
+      {
+        "feature": "own_mad_48",
+        "training_split_importance": 0.0006932451585211825
+      },
+      {
+        "feature": "hour_present_6",
+        "training_split_importance": 0.0005536553787515976
+      },
+      {
+        "feature": "product_6_spread_residual",
+        "training_split_importance": 0.0004609342841676474
+      },
+      {
+        "feature": "event_delta_6",
+        "training_split_importance": 0.0003567027346446176
+      },
+      {
+        "feature": "own_min_6_residual",
+        "training_split_importance": 0.000276023885233989
+      },
+      {
+        "feature": "hour_delta_24",
+        "training_split_importance": 0.0002577670738712444
+      },
+      {
+        "feature": "product_3_spread_mad",
+        "training_split_importance": 7.371324281047572e-05
+      },
+      {
+        "feature": "product_6_spread_mad",
+        "training_split_importance": 4.936647739730257e-06
+      },
+      {
+        "feature": "product_2_spread_residual",
+        "training_split_importance": 2.1522002634673306e-06
+      },
+      {
+        "feature": "prior_quote_missing",
+        "training_split_importance": 0.0
+      },
+      {
+        "feature": "hour_present_3",
+        "training_split_importance": 0.0
+      }
+    ],
+    "full_rmse8": [
+      {
+        "feature": "report_age",
+        "training_split_importance": 19.972095779681595
+      },
+      {
+        "feature": "longitude",
+        "training_split_importance": 16.990360657694165
+      },
+      {
+        "feature": "state",
+        "training_split_importance": 13.184863143335992
+      },
+      {
+        "feature": "peer_fresh_median_residual",
+        "training_split_importance": 9.142218136997734
+      },
+      {
+        "feature": "state_median_delta",
+        "training_split_importance": 6.281550129564337
+      },
+      {
+        "feature": "latitude",
+        "training_split_importance": 4.66109527307406
+      },
+      {
+        "feature": "raw_price",
+        "training_split_importance": 2.5520666298913595
+      },
+      {
+        "feature": "peer_fraction_down_24",
+        "training_split_importance": 2.117343890465412
+      },
+      {
+        "feature": "event_delta_1",
+        "training_split_importance": 2.00725345682187
+      },
+      {
+        "feature": "product_7_report_newer_hours",
+        "training_split_importance": 1.5763959090525579
+      },
+      {
+        "feature": "product_3_report_newer_hours",
+        "training_split_importance": 1.5574339034460205
+      },
+      {
+        "feature": "peer_mean_change_24",
+        "training_split_importance": 1.4270246944860465
+      },
+      {
+        "feature": "history_price_mean_delta",
+        "training_split_importance": 1.2514911682663195
+      },
+      {
+        "feature": "product_5_report_newer_hours",
+        "training_split_importance": 1.1974229423320282
+      },
+      {
+        "feature": "history_change_rate",
+        "training_split_importance": 0.8602463566923522
+      },
+      {
+        "feature": "local_median_delta",
+        "training_split_importance": 0.7856878901433201
+      },
+      {
+        "feature": "product_1_spread_residual",
+        "training_split_importance": 0.7104749013095015
+      },
+      {
+        "feature": "event_elapsed_1",
+        "training_split_importance": 0.6775830329376643
+      },
+      {
+        "feature": "product_1_report_newer_hours",
+        "training_split_importance": 0.641460410044705
+      },
+      {
+        "feature": "peer_mean_change_6",
+        "training_split_importance": 0.613803381143697
+      },
+      {
+        "feature": "actual_change_count",
+        "training_split_importance": 0.600232829141926
+      },
+      {
+        "feature": "state_move_24h",
+        "training_split_importance": 0.5944200789926576
+      },
+      {
+        "feature": "day_cos",
+        "training_split_importance": 0.591286112015753
+      },
+      {
+        "feature": "product_1_age",
+        "training_split_importance": 0.5703064795462995
+      },
+      {
+        "feature": "product_5_age",
+        "training_split_importance": 0.568278024793893
+      },
+      {
+        "feature": "local_peer_count",
+        "training_split_importance": 0.5299159866981902
+      },
+      {
+        "feature": "price_cents_ending",
+        "training_split_importance": 0.4874319694534261
+      },
+      {
+        "feature": "own_max_48_residual",
+        "training_split_importance": 0.440707204971143
+      },
+      {
+        "feature": "last_actual_change",
+        "training_split_importance": 0.4397381423231132
+      },
+      {
+        "feature": "typical_actual_change",
+        "training_split_importance": 0.3979099596810374
+      },
+      {
+        "feature": "peer_fraction_down_6",
+        "training_split_importance": 0.3609495703429033
+      },
+      {
+        "feature": "event_elapsed_2",
+        "training_split_importance": 0.3538216886685199
+      },
+      {
+        "feature": "product_3_age",
+        "training_split_importance": 0.33168566695788426
+      },
+      {
+        "feature": "event_delta_3",
+        "training_split_importance": 0.3199592592632342
+      },
+      {
+        "feature": "product_0_report_newer_hours",
+        "training_split_importance": 0.31057400858655526
+      },
+      {
+        "feature": "history_reports",
+        "training_split_importance": 0.30400316733279564
+      },
+      {
+        "feature": "day_sin",
+        "training_split_importance": 0.2941229670049935
+      },
+      {
+        "feature": "product_6_report_newer_hours",
+        "training_split_importance": 0.255492891347041
+      },
+      {
+        "feature": "history_price_std",
+        "training_split_importance": 0.22998873426839822
+      },
+      {
+        "feature": "own_min_48_residual",
+        "training_split_importance": 0.21737830751751597
+      },
+      {
+        "feature": "hour_delta_1",
+        "training_split_importance": 0.2069673311159737
+      },
+      {
+        "feature": "grade",
+        "training_split_importance": 0.2009542690496076
+      },
+      {
+        "feature": "product_7_age",
+        "training_split_importance": 0.17719191271908272
+      },
+      {
+        "feature": "product_3_spread_count",
+        "training_split_importance": 0.16026817160598092
+      },
+      {
+        "feature": "previous_actual_change",
+        "training_split_importance": 0.15885281198648585
+      },
+      {
+        "feature": "event_delta_4",
+        "training_split_importance": 0.15354910029238114
+      },
+      {
+        "feature": "product_2_age",
+        "training_split_importance": 0.1447406360259369
+      },
+      {
+        "feature": "peer_offset_adjusted_24",
+        "training_split_importance": 0.13175433280776858
+      },
+      {
+        "feature": "state_move_6h",
+        "training_split_importance": 0.13112921144041467
+      },
+      {
+        "feature": "event_delta_2",
+        "training_split_importance": 0.13003107336115946
+      },
+      {
+        "feature": "product_7_spread_residual",
+        "training_split_importance": 0.1295526018370136
+      },
+      {
+        "feature": "product_7_spread_count",
+        "training_split_importance": 0.11690265718772651
+      },
+      {
+        "feature": "event_elapsed_4",
+        "training_split_importance": 0.10189851746190894
+      },
+      {
+        "feature": "product_4_age",
+        "training_split_importance": 0.10121171492880318
+      },
+      {
+        "feature": "hours_since_first",
+        "training_split_importance": 0.10090039015507182
+      },
+      {
+        "feature": "hours_since_last_change",
+        "training_split_importance": 0.09677422727475657
+      },
+      {
+        "feature": "product_5_spread_count",
+        "training_split_importance": 0.09338187472410799
+      },
+      {
+        "feature": "product_0_age",
+        "training_split_importance": 0.08329614509374342
+      },
+      {
+        "feature": "product_5_spread_residual",
+        "training_split_importance": 0.08020434662268841
+      },
+      {
+        "feature": "price_quarter_position",
+        "training_split_importance": 0.08000421630821102
+      },
+      {
+        "feature": "product_6_age",
+        "training_split_importance": 0.07619772470824722
+      },
+      {
+        "feature": "product_4_report_newer_hours",
+        "training_split_importance": 0.07566171906643289
+      },
+      {
+        "feature": "product_2_spread_mad",
+        "training_split_importance": 0.07496367595870394
+      },
+      {
+        "feature": "product_0_spread_residual",
+        "training_split_importance": 0.057684676057881606
+      },
+      {
+        "feature": "peer_offset_adjusted_6",
+        "training_split_importance": 0.05390129982738192
+      },
+      {
+        "feature": "product_2_report_newer_hours",
+        "training_split_importance": 0.0522525981029635
+      },
+      {
+        "feature": "product_3_spread_residual",
+        "training_split_importance": 0.049375627766693124
+      },
+      {
+        "feature": "hour_present_1",
+        "training_split_importance": 0.04542792114101284
+      },
+      {
+        "feature": "product_0_spread_mad",
+        "training_split_importance": 0.04089695284178411
+      },
+      {
+        "feature": "event_delta_6",
+        "training_split_importance": 0.03839878457609954
+      },
+      {
+        "feature": "own_median_48_residual",
+        "training_split_importance": 0.030520167693100574
+      },
+      {
+        "feature": "peer_fraction_up_24",
+        "training_split_importance": 0.030121166681801835
+      },
+      {
+        "feature": "product_1_spread_count",
+        "training_split_importance": 0.02950052046795506
+      },
+      {
+        "feature": "product_5_spread_mad",
+        "training_split_importance": 0.029464224113724895
+      },
+      {
+        "feature": "product_4_spread_count",
+        "training_split_importance": 0.028275560215621526
+      },
+      {
+        "feature": "local_move_24h",
+        "training_split_importance": 0.02798062646420319
+      },
+      {
+        "feature": "peer_fraction_up_6",
+        "training_split_importance": 0.02610039208428425
+      },
+      {
+        "feature": "product_4_spread_mad",
+        "training_split_importance": 0.025068277817611614
+      },
+      {
+        "feature": "product_3_spread_mad",
+        "training_split_importance": 0.02206361250153906
+      },
+      {
+        "feature": "own_median_24_residual",
+        "training_split_importance": 0.021300814790968705
+      },
+      {
+        "feature": "product_1_spread_mad",
+        "training_split_importance": 0.0188071823567779
+      },
+      {
+        "feature": "event_elapsed_8",
+        "training_split_importance": 0.015875062915331768
+      },
+      {
+        "feature": "hour_delta_3",
+        "training_split_importance": 0.014987858770146282
+      },
+      {
+        "feature": "hour_present_12",
+        "training_split_importance": 0.014823059644417843
+      },
+      {
+        "feature": "own_min_24_residual",
+        "training_split_importance": 0.013645990764081583
+      },
+      {
+        "feature": "own_mad_6",
+        "training_split_importance": 0.012157519434792673
+      },
+      {
+        "feature": "product_2_spread_count",
+        "training_split_importance": 0.012087968012763201
+      },
+      {
+        "feature": "product_6_spread_count",
+        "training_split_importance": 0.010924923474281983
+      },
+      {
+        "feature": "historical_reversal_rate",
+        "training_split_importance": 0.010476468651562054
+      },
+      {
+        "feature": "own_median_6_residual",
+        "training_split_importance": 0.010463771277519728
+      },
+      {
+        "feature": "hours_since_actual_change",
+        "training_split_importance": 0.009146269529797822
+      },
+      {
+        "feature": "observed_hour_cos",
+        "training_split_importance": 0.006972850638918146
+      },
+      {
+        "feature": "product_0_spread_count",
+        "training_split_importance": 0.005624513015560967
+      },
+      {
+        "feature": "own_max_6_residual",
+        "training_split_importance": 0.0037728800698741826
+      },
+      {
+        "feature": "product_7_spread_mad",
+        "training_split_importance": 0.003256750410868842
+      },
+      {
+        "feature": "event_delta_8",
+        "training_split_importance": 0.0032314026816342
+      },
+      {
+        "feature": "product_6_spread_residual",
+        "training_split_importance": 0.0028135912587716936
+      },
+      {
+        "feature": "own_min_6_residual",
+        "training_split_importance": 0.002589168251704718
+      },
+      {
+        "feature": "own_max_24_residual",
+        "training_split_importance": 0.002309066114002078
+      },
+      {
+        "feature": "hour_delta_6",
+        "training_split_importance": 0.001513962152321169
+      },
+      {
+        "feature": "own_mad_24",
+        "training_split_importance": 0.0012125837941737788
+      },
+      {
+        "feature": "own_mad_48",
+        "training_split_importance": 0.0010702643195532372
+      },
+      {
+        "feature": "hour_delta_24",
+        "training_split_importance": 0.0008193217158767662
+      },
+      {
+        "feature": "local_move_6h",
+        "training_split_importance": 0.00018634361773428568
+      },
+      {
+        "feature": "product_2_spread_residual",
+        "training_split_importance": 0.00013265763823994787
+      },
+      {
+        "feature": "hour_delta_12",
+        "training_split_importance": 0.00010288903635386936
+      },
+      {
+        "feature": "product_4_spread_residual",
+        "training_split_importance": 7.82400540857184e-05
+      },
+      {
+        "feature": "hour_present_3",
+        "training_split_importance": 5.4446258936323934e-05
+      },
+      {
+        "feature": "observed_hour_sin",
+        "training_split_importance": 3.7291924858136106e-05
+      },
+      {
+        "feature": "event_elapsed_6",
+        "training_split_importance": 1.6974552991198104e-05
+      },
+      {
+        "feature": "product_6_spread_mad",
+        "training_split_importance": 7.037995669995577e-06
+      },
+      {
+        "feature": "event_elapsed_3",
+        "training_split_importance": 5.068501593893136e-06
+      },
+      {
+        "feature": "payment",
+        "training_split_importance": 0.0
+      },
+      {
+        "feature": "prior_quote_missing",
+        "training_split_importance": 0.0
+      },
+      {
+        "feature": "hour_present_6",
+        "training_split_importance": 0.0
+      },
+      {
+        "feature": "hour_present_24",
+        "training_split_importance": 0.0
+      }
+    ],
+    "stale-proxy": [
+      {
+        "feature": "report_age",
+        "training_split_importance": 12.12857214572316
+      },
+      {
+        "feature": "longitude",
+        "training_split_importance": 12.044821393521808
+      },
+      {
+        "feature": "latitude",
+        "training_split_importance": 7.4162127582444715
+      },
+      {
+        "feature": "state",
+        "training_split_importance": 5.383383064124295
+      },
+      {
+        "feature": "peer_fresh_median_residual",
+        "training_split_importance": 4.1260132418635065
+      },
+      {
+        "feature": "state_median_delta",
+        "training_split_importance": 3.3963597789151
+      },
+      {
+        "feature": "history_reports",
+        "training_split_importance": 3.389509001280684
+      },
+      {
+        "feature": "event_elapsed_1",
+        "training_split_importance": 3.3762692957546214
+      },
+      {
+        "feature": "event_delta_4",
+        "training_split_importance": 2.924358408901422
+      },
+      {
+        "feature": "raw_price",
+        "training_split_importance": 2.4163839034800754
+      },
+      {
+        "feature": "price_cents_ending",
+        "training_split_importance": 2.1171531166653237
+      },
+      {
+        "feature": "event_delta_1",
+        "training_split_importance": 2.1118695599577415
+      },
+      {
+        "feature": "event_delta_2",
+        "training_split_importance": 1.871052846257333
+      },
+      {
+        "feature": "event_delta_8",
+        "training_split_importance": 1.572124110521596
+      },
+      {
+        "feature": "peer_mean_change_24",
+        "training_split_importance": 1.4189903504358992
+      },
+      {
+        "feature": "peer_fraction_down_24",
+        "training_split_importance": 1.3841232417261535
+      },
+      {
+        "feature": "day_cos",
+        "training_split_importance": 1.379698024219792
+      },
+      {
+        "feature": "product_1_age",
+        "training_split_importance": 1.201846240799064
+      },
+      {
+        "feature": "local_median_delta",
+        "training_split_importance": 1.1974329483101807
+      },
+      {
+        "feature": "product_5_age",
+        "training_split_importance": 1.1577210364539618
+      },
+      {
+        "feature": "event_delta_3",
+        "training_split_importance": 1.1457870584130472
+      },
+      {
+        "feature": "typical_actual_change",
+        "training_split_importance": 1.0470353268048753
+      },
+      {
+        "feature": "product_7_report_newer_hours",
+        "training_split_importance": 0.9633375412230939
+      },
+      {
+        "feature": "event_delta_6",
+        "training_split_importance": 0.9619028020086127
+      },
+      {
+        "feature": "history_price_mean_delta",
+        "training_split_importance": 0.8900653495114291
+      },
+      {
+        "feature": "product_1_spread_residual",
+        "training_split_importance": 0.8425659194545031
+      },
+      {
+        "feature": "event_elapsed_8",
+        "training_split_importance": 0.8350320866538845
+      },
+      {
+        "feature": "product_5_report_newer_hours",
+        "training_split_importance": 0.7946261266221958
+      },
+      {
+        "feature": "product_3_age",
+        "training_split_importance": 0.7589978129005456
+      },
+      {
+        "feature": "grade",
+        "training_split_importance": 0.7587072142636657
+      },
+      {
+        "feature": "product_1_report_newer_hours",
+        "training_split_importance": 0.7449746148356868
+      },
+      {
+        "feature": "event_elapsed_2",
+        "training_split_importance": 0.7270472050609449
+      },
+      {
+        "feature": "observed_hour_cos",
+        "training_split_importance": 0.6473669853078209
+      },
+      {
+        "feature": "hours_since_last_change",
+        "training_split_importance": 0.6266950484938544
+      },
+      {
+        "feature": "observed_hour_sin",
+        "training_split_importance": 0.6129829733999255
+      },
+      {
+        "feature": "product_4_age",
+        "training_split_importance": 0.5395122520888582
+      },
+      {
+        "feature": "product_3_report_newer_hours",
+        "training_split_importance": 0.5389990941645977
+      },
+      {
+        "feature": "history_price_std",
+        "training_split_importance": 0.5301220162248761
+      },
+      {
+        "feature": "local_peer_count",
+        "training_split_importance": 0.5116142528600123
+      },
+      {
+        "feature": "history_change_rate",
+        "training_split_importance": 0.49244544453650263
+      },
+      {
+        "feature": "product_0_age",
+        "training_split_importance": 0.4643716748571707
+      },
+      {
+        "feature": "price_quarter_position",
+        "training_split_importance": 0.45927557667644087
+      },
+      {
+        "feature": "last_actual_change",
+        "training_split_importance": 0.45564867187115016
+      },
+      {
+        "feature": "product_6_age",
+        "training_split_importance": 0.4531301567600244
+      },
+      {
+        "feature": "product_0_report_newer_hours",
+        "training_split_importance": 0.45222365787206337
+      },
+      {
+        "feature": "hours_since_first",
+        "training_split_importance": 0.45205204699358303
+      },
+      {
+        "feature": "product_7_age",
+        "training_split_importance": 0.4487260858393635
+      },
+      {
+        "feature": "actual_change_count",
+        "training_split_importance": 0.40482222358967423
+      },
+      {
+        "feature": "product_2_age",
+        "training_split_importance": 0.3879854220846001
+      },
+      {
+        "feature": "day_sin",
+        "training_split_importance": 0.385708783174746
+      },
+      {
+        "feature": "historical_reversal_rate",
+        "training_split_importance": 0.3802617682305336
+      },
+      {
+        "feature": "product_4_report_newer_hours",
+        "training_split_importance": 0.3754025415312113
+      },
+      {
+        "feature": "product_2_report_newer_hours",
+        "training_split_importance": 0.3701946681087143
+      },
+      {
+        "feature": "own_max_24_residual",
+        "training_split_importance": 0.3668802132436159
+      },
+      {
+        "feature": "event_elapsed_4",
+        "training_split_importance": 0.3494749409330946
+      },
+      {
+        "feature": "peer_mean_change_6",
+        "training_split_importance": 0.345208886725001
+      },
+      {
+        "feature": "own_max_48_residual",
+        "training_split_importance": 0.32293604631992584
+      },
+      {
+        "feature": "event_elapsed_3",
+        "training_split_importance": 0.3194923298760993
+      },
+      {
+        "feature": "hours_since_actual_change",
+        "training_split_importance": 0.29467386137356844
+      },
+      {
+        "feature": "product_7_spread_residual",
+        "training_split_importance": 0.2810129403386027
+      },
+      {
+        "feature": "product_0_spread_count",
+        "training_split_importance": 0.27636223547920147
+      },
+      {
+        "feature": "product_5_spread_count",
+        "training_split_importance": 0.24028374792888496
+      },
+      {
+        "feature": "state_move_24h",
+        "training_split_importance": 0.2356016559580736
+      },
+      {
+        "feature": "product_3_spread_count",
+        "training_split_importance": 0.23049879611615953
+      },
+      {
+        "feature": "peer_fraction_up_24",
+        "training_split_importance": 0.22683961568352992
+      },
+      {
+        "feature": "product_0_spread_residual",
+        "training_split_importance": 0.22361159400777056
+      },
+      {
+        "feature": "peer_fraction_down_6",
+        "training_split_importance": 0.22100865142760448
+      },
+      {
+        "feature": "product_6_report_newer_hours",
+        "training_split_importance": 0.21836992993773008
+      },
+      {
+        "feature": "product_1_spread_count",
+        "training_split_importance": 0.2067923104174054
+      },
+      {
+        "feature": "product_7_spread_count",
+        "training_split_importance": 0.20469096555480498
+      },
+      {
+        "feature": "event_elapsed_6",
+        "training_split_importance": 0.1930412094538171
+      },
+      {
+        "feature": "product_3_spread_residual",
+        "training_split_importance": 0.19300257410378457
+      },
+      {
+        "feature": "local_move_6h",
+        "training_split_importance": 0.1904209921686611
+      },
+      {
+        "feature": "product_4_spread_count",
+        "training_split_importance": 0.18333318040933577
+      },
+      {
+        "feature": "product_6_spread_count",
+        "training_split_importance": 0.17779562642544422
+      },
+      {
+        "feature": "product_5_spread_residual",
+        "training_split_importance": 0.17027494156065295
+      },
+      {
+        "feature": "product_2_spread_count",
+        "training_split_importance": 0.16652883360007859
+      },
+      {
+        "feature": "previous_actual_change",
+        "training_split_importance": 0.12798019677391345
+      },
+      {
+        "feature": "hour_delta_12",
+        "training_split_importance": 0.11563848735280707
+      },
+      {
+        "feature": "local_move_24h",
+        "training_split_importance": 0.1055554939137195
+      },
+      {
+        "feature": "own_min_48_residual",
+        "training_split_importance": 0.10485778302059774
+      },
+      {
+        "feature": "product_7_spread_mad",
+        "training_split_importance": 0.09604902086365995
+      },
+      {
+        "feature": "own_median_24_residual",
+        "training_split_importance": 0.08939326326551922
+      },
+      {
+        "feature": "own_median_48_residual",
+        "training_split_importance": 0.07712330175323225
+      },
+      {
+        "feature": "state_move_6h",
+        "training_split_importance": 0.07646714844527061
+      },
+      {
+        "feature": "peer_offset_adjusted_24",
+        "training_split_importance": 0.07193460500028008
+      },
+      {
+        "feature": "hour_delta_24",
+        "training_split_importance": 0.06365933675325873
+      },
+      {
+        "feature": "hour_delta_3",
+        "training_split_importance": 0.06209229304742709
+      },
+      {
+        "feature": "product_5_spread_mad",
+        "training_split_importance": 0.06120065256744164
+      },
+      {
+        "feature": "peer_offset_adjusted_6",
+        "training_split_importance": 0.06038950143803572
+      },
+      {
+        "feature": "product_6_spread_residual",
+        "training_split_importance": 0.0550019217552719
+      },
+      {
+        "feature": "product_1_spread_mad",
+        "training_split_importance": 0.04629186474020028
+      },
+      {
+        "feature": "own_mad_6",
+        "training_split_importance": 0.04541149676122485
+      },
+      {
+        "feature": "product_2_spread_residual",
+        "training_split_importance": 0.03959616384299221
+      },
+      {
+        "feature": "own_min_24_residual",
+        "training_split_importance": 0.03794692946269273
+      },
+      {
+        "feature": "own_min_6_residual",
+        "training_split_importance": 0.03749322343923326
+      },
+      {
+        "feature": "peer_fraction_up_6",
+        "training_split_importance": 0.03723922796512397
+      },
+      {
+        "feature": "product_2_spread_mad",
+        "training_split_importance": 0.03241837075615953
+      },
+      {
+        "feature": "product_0_spread_mad",
+        "training_split_importance": 0.03123358891082264
+      },
+      {
+        "feature": "hour_present_24",
+        "training_split_importance": 0.02777544346944097
+      },
+      {
+        "feature": "own_median_6_residual",
+        "training_split_importance": 0.02747671627713475
+      },
+      {
+        "feature": "hour_delta_6",
+        "training_split_importance": 0.025852442218567986
+      },
+      {
+        "feature": "product_4_spread_mad",
+        "training_split_importance": 0.024226098240539652
+      },
+      {
+        "feature": "product_6_spread_mad",
+        "training_split_importance": 0.023567814547114818
+      },
+      {
+        "feature": "own_max_6_residual",
+        "training_split_importance": 0.022566400602569207
+      },
+      {
+        "feature": "product_3_spread_mad",
+        "training_split_importance": 0.02207920028109604
+      },
+      {
+        "feature": "hour_delta_1",
+        "training_split_importance": 0.020038304100459658
+      },
+      {
+        "feature": "own_mad_48",
+        "training_split_importance": 0.009058330254505925
+      },
+      {
+        "feature": "own_mad_24",
+        "training_split_importance": 0.004486399868325899
+      },
+      {
+        "feature": "product_4_spread_residual",
+        "training_split_importance": 0.003519703542145555
+      },
+      {
+        "feature": "payment",
+        "training_split_importance": 0.002728326151923328
+      },
+      {
+        "feature": "prior_quote_missing",
+        "training_split_importance": 0.0
+      },
+      {
+        "feature": "hour_present_1",
+        "training_split_importance": 0.0
+      },
+      {
+        "feature": "hour_present_3",
+        "training_split_importance": 0.0
+      },
+      {
+        "feature": "hour_present_6",
+        "training_split_importance": 0.0
+      },
+      {
+        "feature": "hour_present_12",
+        "training_split_importance": 0.0
+      }
+    ]
+  }
+}

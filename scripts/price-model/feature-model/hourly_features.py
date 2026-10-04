@@ -54,7 +54,7 @@ def query_pairs(events,source,observed,price,station,period=12):
         yield len(hist)-1,t,future[0] if future else None
 
 
-def build(root,shard=0,shards=1,from_hour=None):
+def build(root,shard=0,shards=1,from_hour=None,sampling='query'):
     a=root/'arrays'; m=json.loads((a/'metadata.json').read_text())
     assert float(m['start_hour'])+m['shape'][0]<=HOLDOUT_START+1
     p=np.load(a/'prices.npy',mmap_mode='r');s=np.load(a/'sources.npy',mmap_mode='r');o=np.load(a/'observed.npy',mmap_mode='r')
@@ -90,9 +90,11 @@ def build(root,shard=0,shards=1,from_hour=None):
             for c in range(C):
                 price=np.array(p[:,i,c]);source=np.array(s[:,i,c]);events,conflicts=source_events(price,source,at)
                 stats['source_events']+=len(events);stats['conflicting_sources']+=conflicts
-                query=list(query_pairs(events,source,at,price,i))
+                query=list(query_pairs(events,source,at,price,i)) if sampling=='query' else list(label_pairs(events,source,at))
+                if from_hour is not None:query=[v for v in query if at[v[1]]>=from_hour]
                 stats['query_candidates']+=len(query)
                 stats['no_target']+=sum(u is None for _,_,u in query)
+                if sampling=='events':stats['no_target']+=int(sum(from_hour is None or at[t]>=from_hour for t in events))-len(query)
                 pairs=[(k,t,u,False) for k,t,u in query if u is not None]
                 if i in panel:
                     for t in np.flatnonzero((at>=TRAIN_END)&(at<HOLDOUT_START)&np.isfinite(price)&np.isfinite(source)&(source<=at+5/60)):
@@ -130,12 +132,12 @@ def build(root,shard=0,shards=1,from_hour=None):
         if rows:
             np.savez_compressed(out/f'part-{lo:06d}.npz',X=np.array(rows,dtype='float32'),sequence=np.array(seqs,dtype='float16'),y=np.array(ys,dtype='float32'),meta=np.array(meta,dtype='float64'))
         if lo%8192==0: print(json.dumps({'stations_done':hi,**stats}),flush=True)
-    info={'features':FEATURES,'states':states,'fuels':m['fuels'],'stats':stats,'manifest_sha256':m['manifest_sha256'],'geography_coverage':int(len(validgeo)),
+    info={'features':FEATURES,'states':states,'fuels':m['fuels'],'stats':stats,'sampling':sampling,'from_hour':from_hour,'manifest_sha256':m['manifest_sha256'],'geography_coverage':int(len(validgeo)),
      'geography_note':'Current station coordinates used as static geographic metadata; no current prices/names imported. Historical location changes cannot be ruled out.',
-     'limits':'Next-newer-report proxy at regular query times, every 12 hours with fixed station-index phase. Chronological development validation only; absent future labels excluded and counted. No station IDs as features. Repeated station overlap is expected.'}
+     'limits':('Regular query times every 12 hours with fixed station-index phase. ' if sampling=='query' else 'Source-event observations. ')+'Next-newer-report proxy. Chronological development validation only; absent future labels excluded and counted. No station IDs as features. Repeated station overlap is expected.'}
     (out/f'metadata-shard-{shard}.json').write_text(json.dumps(info,indent=2));print(json.dumps(info),flush=True)
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('root',type=Path);p.add_argument('--shard',type=int,default=0);p.add_argument('--shards',type=int,default=1);p.add_argument('--from-hour',type=float);args=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('root',type=Path);p.add_argument('--shard',type=int,default=0);p.add_argument('--shards',type=int,default=1);p.add_argument('--from-hour',type=float);p.add_argument('--sampling',choices=['query','events'],default='query');args=p.parse_args()
     if args.from_hour is not None:assert TRAIN_END<=args.from_hour<HOLDOUT_START
-    build(args.root,args.shard,args.shards,args.from_hour)
+    build(args.root,args.shard,args.shards,args.from_hour,args.sampling)

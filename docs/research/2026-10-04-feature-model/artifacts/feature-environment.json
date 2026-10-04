@@ -1,0 +1,25 @@
+{
+  "python": "3.12.2",
+  "libraries": {
+    "torch": "2.11.0+cu128",
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scikit-learn": "1.9.1",
+    "catboost": "1.2.10",
+    "transformers": "5.18.0",
+    "peft": "0.21.2",
+    "accelerate": "1.15.0",
+    "huggingface_hub": "1.33.0"
+  },
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 5080",
+  "training_sources": {
+    "train_spatial.py": "027572fc4f18e41cc8c875ec39376020cde5841a6eb96281a46cacbc3015b166",
+    "train_boost.py": "34629f245bd3b2d800053317f6828d8ebe501267a86f3f53eea3ae9daba8596b",
+    "train_signed.py": "216a1d0ef0a98fab0b165c1eebec801f9d3e2d29eeb3a8703bd9056f9241202c",
+    "spatial_network.py": "89b2831e4676c88d840b9f0c1b97dd6023e2902db4be1472fdce403cd14bedeb",
+    "common.py": "c704055a29ea04d6d070e0a2ca68504c80d4d504ef55b75149f487cdfcbbaa1f",
+    "evaluate.py": "816b3c88025f730d1aefdb3fd55566691f4a7aa6f7cf90482ec0b0f4a8c549f7"
+  },
+  "runtime_note": "CPU tree and GPU neural training overlap; elapsed runtimes are not controlled architecture-speed comparisons."
+}

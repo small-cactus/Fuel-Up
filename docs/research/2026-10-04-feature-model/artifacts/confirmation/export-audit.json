@@ -1,0 +1,19 @@
+{
+  "cutoff": "2026-10-04T06:00:00.000Z",
+  "manifest_sha256": "a85caa070501bc02b6a74d2efc3f4a301c9f98839bff42cc5ce352bf938dbb19",
+  "shape": [
+    80,
+    141660,
+    14
+  ],
+  "runs": 75,
+  "archives": 5046,
+  "archive_bytes": 265953907,
+  "new_slots": [
+    "2026-10-04T02:00:00+00:00",
+    "2026-10-04T03:00:00+00:00",
+    "2026-10-04T04:00:00+00:00",
+    "2026-10-04T05:00:00+00:00"
+  ],
+  "archive_integrity": "Every included object verified for byte count, SHA256, exact catalog IDs, fixed execution region and collection timestamps by ingest.py. Missing cells remain NaN."
+}

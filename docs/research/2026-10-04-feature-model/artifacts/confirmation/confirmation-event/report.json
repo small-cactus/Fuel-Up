@@ -1,0 +1,161 @@
+{
+  "kind": "source_event",
+  "replay": false,
+  "prediction_replay_max_delta": null,
+  "freeze_sha256": "4301fefd4f14ee94570d0a09e9d4331b2d67fa71537c1ef51c69fba9dcac7d1f",
+  "policy": "spatial_ensemble:min0.05_cap0.2",
+  "raw": {
+    "n": 57792,
+    "mae_cents": 0.18634070639198405,
+    "rmse_cents": 2.783611815002145,
+    "worst5_mean_cents": 3.7262983058150665,
+    "p95_cents": 0.0,
+    "within5": 0.9946705426356589,
+    "within10": 0.996297065337763,
+    "under10": 0.001315060908084164,
+    "over10": 0.002387873754152824,
+    "changed_n": 264,
+    "changed_mae_cents": 33.196968291745044,
+    "unchanged_mae_cents": 0.03485263653846563,
+    "adjustments": 0,
+    "better": 0,
+    "worse": 0,
+    "max_worsening_cents": 0.0,
+    "adjusted_station_count": 0
+  },
+  "frozen": {
+    "n": 57792,
+    "mae_cents": 0.16213002800941467,
+    "rmse_cents": 2.391921281814575,
+    "worst5_mean_cents": 3.242152214050293,
+    "p95_cents": 0.0,
+    "within5": 0.9944282945736435,
+    "within10": 0.9966604374307863,
+    "under10": 0.0012285437430786268,
+    "over10": 0.0021110188261351053,
+    "changed_n": 264,
+    "changed_mae_cents": 25.894716262817383,
+    "unchanged_mae_cents": 0.04404139518737793,
+    "adjustments": 184,
+    "better": 118,
+    "worse": 66,
+    "max_worsening_cents": 17.96875,
+    "adjusted_station_count": 77
+  },
+  "station_interval": {
+    "station_groups": 9586,
+    "mean_delta_cents": -0.014498661313026745,
+    "interval95_cents": [
+      -0.023359543579200826,
+      -0.00707677367296954
+    ]
+  },
+  "ages": {
+    "0-1h": {
+      "raw": {
+        "n": 57616,
+        "mae_cents": 0.18690992265699705,
+        "rmse_cents": 2.787860132418961,
+        "worst5_mean_cents": 3.73793894613174,
+        "p95_cents": 0.0,
+        "within5": 0.9946542627048042,
+        "within10": 0.9962857539572341,
+        "under10": 0.001319078033879478,
+        "over10": 0.0023951680088864203,
+        "changed_n": 264,
+        "changed_mae_cents": 33.196968291745044,
+        "unchanged_mae_cents": 0.03495959120492487,
+        "adjustments": 0,
+        "better": 0,
+        "worse": 0,
+        "max_worsening_cents": 0.0,
+        "adjusted_station_count": 0
+      },
+      "frozen": {
+        "n": 57616,
+        "mae_cents": 0.1626252830028534,
+        "rmse_cents": 2.395571708679199,
+        "worst5_mean_cents": 3.2522804737091064,
+        "p95_cents": 0.0,
+        "within5": 0.9944112746459317,
+        "within10": 0.9966502360455429,
+        "under10": 0.0012322965842821438,
+        "over10": 0.0021174673701749515,
+        "changed_n": 264,
+        "changed_mae_cents": 25.894716262817383,
+        "unchanged_mae_cents": 0.04417654871940613,
+        "adjustments": 184,
+        "better": 118,
+        "worse": 66,
+        "max_worsening_cents": 17.96875,
+        "adjusted_station_count": 77
+      }
+    },
+    "1-6h": {
+      "raw": {
+        "n": 176,
+        "mae_cents": 0.0,
+        "rmse_cents": 0.0,
+        "worst5_mean_cents": 0.0,
+        "p95_cents": 0.0,
+        "within5": 1.0,
+        "within10": 1.0,
+        "under10": 0.0,
+        "over10": 0.0,
+        "changed_n": 0,
+        "changed_mae_cents": null,
+        "unchanged_mae_cents": 0.0,
+        "adjustments": 0,
+        "better": 0,
+        "worse": 0,
+        "max_worsening_cents": 0.0,
+        "adjusted_station_count": 0
+      },
+      "frozen": {
+        "n": 176,
+        "mae_cents": 0.0,
+        "rmse_cents": 0.0,
+        "worst5_mean_cents": 0.0,
+        "p95_cents": 0.0,
+        "within5": 1.0,
+        "within10": 1.0,
+        "under10": 0.0,
+        "over10": 0.0,
+        "changed_n": 0,
+        "changed_mae_cents": null,
+        "unchanged_mae_cents": 0.0,
+        "adjustments": 0,
+        "better": 0,
+        "worse": 0,
+        "max_worsening_cents": 0.0,
+        "adjusted_station_count": 0
+      }
+    }
+  },
+  "ranking": {
+    "raw": {
+      "panels": 644,
+      "known_panels": 68,
+      "unknown_panels": 576,
+      "candidate_count": 32713,
+      "labeled_candidates": 2911,
+      "mean_regret_cents": 0.8529407136580524,
+      "worst5_regret_cents": 14.49999213218689,
+      "regret10_count": 2,
+      "false_cheap_count": 2,
+      "limitation": "Later-report price-only lower-bound regret; not simultaneous pump truth or actual membership/distance/preferences ranking. Policy label denominators may differ."
+    },
+    "frozen": {
+      "panels": 644,
+      "known_panels": 66,
+      "unknown_panels": 578,
+      "candidate_count": 32713,
+      "labeled_candidates": 2911,
+      "mean_regret_cents": 0.9545452667005134,
+      "worst5_regret_cents": 15.749996900558472,
+      "regret10_count": 2,
+      "false_cheap_count": 2,
+      "limitation": "Later-report price-only lower-bound regret; not simultaneous pump truth or actual membership/distance/preferences ranking. Policy label denominators may differ."
+    }
+  }
+}

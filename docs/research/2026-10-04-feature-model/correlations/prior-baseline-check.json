@@ -1,0 +1,11 @@
+{
+  "paired_weeks": 91,
+  "previous_gas_history_mae_cents": 5.095429474978405,
+  "new_oil_wholesale_mae_cents": 4.697562866788026,
+  "improvement_percent": 7.808303699308206,
+  "delta_interval95": [
+    -0.7650606932280443,
+    -0.051613401435849464
+  ],
+  "note": "Same 91 targets; previous gas-history baseline is stronger on this already-viewed benchmark."
+}
