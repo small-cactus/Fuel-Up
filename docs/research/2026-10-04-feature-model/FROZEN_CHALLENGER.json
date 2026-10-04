@@ -1,0 +1,30 @@
+{
+  "frozen_at": "2026-10-04T06:40:05.942096+00:00",
+  "selection": "signed/directional_p0.75:min0_cap0.2",
+  "development_metrics": {
+    "n": 31410,
+    "mae_cents": 0.8009394407272339,
+    "rmse_cents": 3.928144931793213,
+    "worst5_mean_cents": 13.19278621673584,
+    "p95_cents": 5.065317630767822,
+    "within5": 0.9499522445081184,
+    "within10": 0.9833810888252149,
+    "under10": 0.006335561922954473,
+    "over10": 0.010283349251830626,
+    "changed_n": 1041,
+    "changed_mae_cents": 16.187009811401367,
+    "unchanged_mae_cents": 0.27352991700172424,
+    "adjustments": 294,
+    "better": 189,
+    "worse": 105,
+    "max_worsening_cents": 20.0,
+    "adjusted_station_count": 220
+  },
+  "development_predictions_sha256": "7d49e4a0d46ba8f81b95a351e1719dd5c92a558628bf518a1af9b2045e1da8d1",
+  "checkpoints": {
+    "artifacts/hourly/signed/magnitude1.cbm": "33768feb6386659dbbf55e082cd8ce1fa99535c53fcba168305799bc4ad6d9cc",
+    "artifacts/hourly/signed/direction.cbm": "b46f0521b0c5b655752bd404b4b48a69bca6da21bd0c89551d24b7f051bd1c77",
+    "artifacts/hourly/signed/magnitude-1.cbm": "db2336ab5f99934831288ef43325fa1ccb888192cc279fd19b2f8047b74530df"
+  },
+  "status": "Development-only challenger; not evaluated on the exposed later slice. Freeze before the still-unread Oct5-Oct7 final period. Does not replace FROZEN_CONFIRMATION.json."
+}

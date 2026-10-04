@@ -1,0 +1,7 @@
+{
+  "model": "Qwen/Qwen3-0.6B-Base",
+  "revision": "da87bfb608c14b7cf20ba1ce41287e8de496c0cd",
+  "cache_path": "D:\\fuel-prospective-v1\\hf-cache\\models--Qwen--Qwen3-0.6B-Base\\snapshots\\da87bfb608c14b7cf20ba1ce41287e8de496c0cd",
+  "license": "Apache-2.0",
+  "source": "https://huggingface.co/Qwen/Qwen3-0.6B-Base"
+}

@@ -69,7 +69,11 @@ Training split importance emphasizes quote age, geography, regional disagreement
 
 The source-event Qwen checkpoint's sparse 3¢-threshold/20¢-cap rule reached 0.2090¢ MAE, about 4.5% below last price, but did not beat the frozen national ensemble. Larger parameter count did not guarantee a better result.
 
-The query-time Qwen continuation and directional mixture were still running when the primary policies were frozen. Their final development results are recorded separately; neither may replace or retune a primary policy using the now-examined later slice. Any promising challenger requires the still-unread final evaluation.
+The query-time Qwen continuation completed **two full passes**, 1,717,426 additional examples / 15,456,834 numeric tokens in 2,022 seconds. Including its one completed source-event pass, the retained training lineage has 3,780,182 examples / 34,021,638 numeric tokens. Its selected sparse rule reached **0.8200¢ MAE**, only **0.39%** better than last price and worse than the simpler frozen rule. Continuous unbounded Qwen corrections reached 1.0723¢ MAE, worse than the 0.8232¢ raw baseline. Its ≥10¢-change classifier average precision was 0.187, below the tree classifier's 0.237.
+
+The directional mixture trained a 1,562-tree three-class classifier and separate down/up magnitude regressors (1,372 and 342 trees), taking 1,681 seconds. Its fixed 0.75 direction-confidence threshold achieved **0.8009¢ MAE, 2.7% below last price**, the best result among 241 query-time development policies. It made 294 corrections: **189 helped, 105 hurt**, across 220 stations; maximum worsening remained 20¢. Large-change MAE fell from 16.93¢ to 16.19¢, and the >10¢ error rate fell from 1.716% to 1.662%. The 0.5 threshold worsened MAE to 0.8429¢, showing why indiscriminate corrections are harmful. Its change-classification AP of 0.433 uses a **1¢** event definition, so it is not directly comparable to the ≥10¢ classifiers.
+
+[Freeze this challenger for future evaluation](FROZEN_CHALLENGER.json). It has **not** been tested against the later slice already exposed for the primary rules. The query-time Qwen continuation and directional mixture were still running when the primary policies were frozen. Their final development results are recorded separately; neither may replace or retune a primary policy using the now-examined later slice. Any promising challenger requires the still-unread final evaluation.
 
 ## Oil, geography and what to use
 
@@ -84,7 +88,7 @@ The defensible research candidates are selective corrections, report-refresh pri
 ## Verification and artifacts
 
 - Fifteen focused tests cover feature causality, future-data perturbations, missing labels, lag direction and constant/missing correlation inputs.
-- Both frozen station policies replay exactly from saved weights; historical oil models also replay exactly after reload.
+- Both frozen station policies replay exactly from saved weights; all thirteen query-time regression/policy outputs, including Qwen and the four directional rules, also replay exactly. Historical oil models replay exactly after reload.
 - All **5,046** included immutable archives were checked for bytes, SHA-256, exact catalog IDs, fixed regional provenance and timestamps; missing cells remain NaN. The later export adds 288 objects, not new provider calls.
 - Input schemas and shard hashes, checkpoints/adapters, predictions, classifiers, numerical matrices, plots and source snapshots are preserved. Raw nationwide history remains in the immutable research archive.
 - Texas/DC geographic assumptions and the Texas one-ID aggregate discrepancy remain catalog limitations. Missing targets and missing prices are not invented observations.

@@ -1,0 +1,20 @@
+{
+  "kind": "qwen",
+  "parameters": 601294850,
+  "trainable_parameters": 5244930,
+  "features": 94,
+  "national_states": 51,
+  "batch": 256,
+  "learning_rate": 0.0001,
+  "max_epochs": 2,
+  "revision": "da87bfb608c14b7cf20ba1ce41287e8de496c0cd",
+  "model_name": "Qwen/Qwen3-0.6B-Base",
+  "train_rows": 858713,
+  "validation_rows": 31410,
+  "tokenization": "9 learned numeric soft tokens, no text tokenizer",
+  "compile": false,
+  "device": "NVIDIA GeForce RTX 5080",
+  "context_sha256": "b37586ca5b01d914d20b8ba302a49996ef1d7338012a1fd75edfc584ccf590d3",
+  "fairness": "Different architectures and compute budgets; predictive-system comparison, not parameter-matched architectural superiority.",
+  "initial_checkpoint": "D:\\fuel-prospective-v1\\qwen-original"
+}

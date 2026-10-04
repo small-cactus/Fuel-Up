@@ -1,0 +1,11 @@
+{
+  "python": "3.13.3",
+  "libraries": {
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scikit-learn": "1.9.1",
+    "matplotlib": "3.11.2",
+    "joblib": "1.6.0"
+  },
+  "analysis": "Correlation matrices, rolling historical forecasts, statistical diagnostics and CPU feature construction"
+}

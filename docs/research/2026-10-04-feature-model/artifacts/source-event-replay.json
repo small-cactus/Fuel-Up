@@ -1,0 +1,34 @@
+{
+  "qwen-original": {
+    "max_abs_delta": 0.0,
+    "exact": true
+  },
+  "spatial-original": {
+    "max_abs_delta": 0.0,
+    "exact": true
+  },
+  "full_rmse8": {
+    "max_abs_delta": 0.0,
+    "exact": true
+  },
+  "full_mae8": {
+    "max_abs_delta": 0.0,
+    "exact": true
+  },
+  "full_huber8": {
+    "max_abs_delta": 0.0,
+    "exact": true
+  },
+  "full_rmse10": {
+    "max_abs_delta": 0.0,
+    "exact": true
+  },
+  "station_rmse8": {
+    "max_abs_delta": 0.0,
+    "exact": true
+  },
+  "original_rmse8": {
+    "max_abs_delta": 0.0,
+    "exact": true
+  }
+}
