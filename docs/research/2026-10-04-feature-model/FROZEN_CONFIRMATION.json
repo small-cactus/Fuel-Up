@@ -1,0 +1,79 @@
+{
+  "frozen_at": "2026-10-04T06:13:19.536645+00:00",
+  "policies": {
+    "source_event": {
+      "selection": "spatial_ensemble:min0.05_cap0.2",
+      "metrics": {
+        "n": 145644,
+        "mae_cents": 0.20630894601345062,
+        "rmse_cents": 2.060431718826294,
+        "worst5_mean_cents": 4.125725746154785,
+        "p95_cents": 0.0,
+        "within5": 0.9885130867045673,
+        "within10": 0.9964571146082228,
+        "under10": 0.0015791931009859657,
+        "over10": 0.0019636922907912443,
+        "changed_n": 959,
+        "changed_mae_cents": 17.453079223632812,
+        "unchanged_mae_cents": 0.09199405461549759,
+        "adjustments": 272,
+        "better": 191,
+        "worse": 81,
+        "max_worsening_cents": 20.0,
+        "adjusted_station_count": 76
+      },
+      "development_predictions_sha256": "1e9081d90d152f164dab40549660944dcf476370b08ceffb63fab00fc5860aa6"
+    },
+    "query_time": {
+      "selection": "trees/station_rmse8:gate_trees_0.75",
+      "metrics": {
+        "n": 31410,
+        "mae_cents": 0.8137633800506592,
+        "rmse_cents": 3.9320132732391357,
+        "worst5_mean_cents": 13.342981338500977,
+        "p95_cents": 5.999994277954102,
+        "within5": 0.9488697866921363,
+        "within10": 0.9828716969118115,
+        "under10": 0.006144539955428208,
+        "over10": 0.010983763132760267,
+        "changed_n": 1041,
+        "changed_mae_cents": 16.494482040405273,
+        "unchanged_mae_cents": 0.2762538492679596,
+        "adjustments": 37,
+        "better": 26,
+        "worse": 11,
+        "max_worsening_cents": 20.0,
+        "adjusted_station_count": 35
+      },
+      "development_predictions_sha256": "28a4b1f072fb8a281a77eed7095c04a4a5860e7a841217e849e4af4ee2008e10"
+    }
+  },
+  "files": {
+    "artifacts/spatial-enriched/spec.json": "57c10f17112956b7d33cb8183584a71840eaab086355052cb6330a61a4f2eed9",
+    "artifacts/spatial-enriched/evaluation.npz": "d9b5a8a4eb439cd34a31b526e738ec837b170b2d17bb9964ec3b6a0a5bc61ac4",
+    "artifacts/spatial-enriched/best.pt": "f08db56ab194a190158453d5abecb6d720ccb8508dbc6092f23b7d362bcedb45",
+    "artifacts/spatial-enriched/results.json": "3f258a5efa0dbc3fa0d6e365ebac76e23f6ac8eecda9a91e72ff69088d73d6c5",
+    "artifacts/spatial-enriched/history.json": "26efd407a025e20458dbbe805243c4606cd6848cd6fefa11bcbb33edd366f18c",
+    "artifacts/spatial-enriched/normalization.npz": "ccdfefd6eb322feace6aa79fbe86cea82cb06b30c7c3b9a983d3d651005f64d4",
+    "artifacts/spatial-large/spec.json": "42734dd1d79c503caa4c615fd8ac1c68443de2a93e595e94468bd50964ad369f",
+    "artifacts/spatial-large/evaluation.npz": "d9b5a8a4eb439cd34a31b526e738ec837b170b2d17bb9964ec3b6a0a5bc61ac4",
+    "artifacts/spatial-large/best.pt": "7c7e283b92b950132600b96af25a81474e59ca23c856e1fd872a4f4875f7eeda",
+    "artifacts/spatial-large/results.json": "0e6b68c5ac29364fd640028a8f43a7ee47d336977f7ca3fccc02faeedbe59148",
+    "artifacts/spatial-large/history.json": "b1dd13a78f50e013381e8b041ed0b8e41fde6276c6e066af0ec77106f13c2516",
+    "artifacts/spatial-large/normalization.npz": "ccdfefd6eb322feace6aa79fbe86cea82cb06b30c7c3b9a983d3d651005f64d4",
+    "artifacts/hourly/trees/full_rmse10.cbm": "06afd39b93bc8956d218dfb0e54c5a377409a4a79887d3643731cb08b4ca2d89",
+    "artifacts/hourly/trees/full_rmse8.cbm": "097c3223a0f21510bbbea7257c097194c01a6622fed9e93391aaeb0e957ac4fd",
+    "artifacts/hourly/trees/full_mae8.cbm": "57b0b63f6fdcb127cabac4cf4b09c630091a5f8b232f476a1f557db75caf75fa",
+    "artifacts/hourly/trees/evaluation.npz": "caac556907f8e5694b8d716a1c2fa1ec3b156157ab43e3df73963076f0a74749",
+    "artifacts/hourly/trees/full_huber8.cbm": "5d20362e3883d3c25ea35030c3c996523aeeccfd458b2569a7e9208d80d451c2",
+    "artifacts/hourly/trees/features.json": "80cc54c92c84b501de9dfd6ffae9997ae420f27d80450ca01ad773227fbf2947",
+    "artifacts/hourly/trees/stale-proxy.cbm": "ff8c8e5e559b51d388a067d5a32bdc80f2f4c08a5c044f4ccc2f6ac4b0dbd473",
+    "artifacts/hourly/trees/original_rmse8.cbm": "d83e7f46ca99780167a90bf034d6f0dfd4ebd57d3aea132d265f73c4ddbd14f6",
+    "artifacts/hourly/trees/results.json": "8c1601c371ded2e42ff81b8cec822f2fda1e0ea8bad87ec57e7f969453fc11cf",
+    "artifacts/hourly/trees/station_rmse8.cbm": "0e331e284ae76c36baed0d4e131ab89a00e0763a7efc4df533c2c123dd94b754"
+  },
+  "later_cutoff": "2026-10-04T06:00:00Z",
+  "later_query_from_hour": 79.68333333333334,
+  "selection_closed": true,
+  "ongoing_models": "The ongoing Qwen query-time continuation and directional model remain development-only challengers. This later confirmation evaluates only these already-frozen primary policies, and will not select or tune them. Final Oct5-7 remains untouched."
+}

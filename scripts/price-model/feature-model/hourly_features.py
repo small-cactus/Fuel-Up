@@ -54,7 +54,7 @@ def query_pairs(events,source,observed,price,station,period=12):
         yield len(hist)-1,t,future[0] if future else None
 
 
-def build(root,shard=0,shards=1):
+def build(root,shard=0,shards=1,from_hour=None):
     a=root/'arrays'; m=json.loads((a/'metadata.json').read_text())
     assert float(m['start_hour'])+m['shape'][0]<=HOLDOUT_START+1
     p=np.load(a/'prices.npy',mmap_mode='r');s=np.load(a/'sources.npy',mmap_mode='r');o=np.load(a/'observed.npy',mmap_mode='r')
@@ -101,6 +101,7 @@ def build(root,shard=0,shards=1):
                         future=[v for v in events if v>t and at[v]-at[t]<=24 and source[v]>source[t]+5/60]
                         pairs.append((len(hist)-1,int(t),future[0] if future else None,True))
                 for k,t,u,ranking in pairs:
+                    if from_hour is not None and at[t]<from_hour:continue
                     split=2 if ranking else split_for(float(at[t]),float(at[u]))
                     if split<0: stats['purged']+=1;continue
                     raw=float(price[t]);hist=events[:k+1];old=events[:k]
@@ -135,4 +136,6 @@ def build(root,shard=0,shards=1):
     (out/f'metadata-shard-{shard}.json').write_text(json.dumps(info,indent=2));print(json.dumps(info),flush=True)
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('root',type=Path);p.add_argument('--shard',type=int,default=0);p.add_argument('--shards',type=int,default=1);args=p.parse_args();build(args.root,args.shard,args.shards)
+    p=argparse.ArgumentParser();p.add_argument('root',type=Path);p.add_argument('--shard',type=int,default=0);p.add_argument('--shards',type=int,default=1);p.add_argument('--from-hour',type=float);args=p.parse_args()
+    if args.from_hour is not None:assert TRAIN_END<=args.from_hour<HOLDOUT_START
+    build(args.root,args.shard,args.shards,args.from_hour)

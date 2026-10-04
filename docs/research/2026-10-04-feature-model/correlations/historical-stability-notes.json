@@ -1,0 +1,247 @@
+{
+  "selection": "For each era, choose ridge strength on the preceding year and fit using earlier observations only. Fixed feature families from exploratory analysis.",
+  "limitation": "Retrospective stability checks with current-vintage data; not newly sealed out-of-sample research. Block intervals are individual comparisons, not familywise guarantees.",
+  "daily_market_lags": "Counts common observed market dates, not calendar days or hours. Complete-case holidays can create longer gaps. Spot prices are not physical retail pump prices.",
+  "results": [
+    {
+      "era": "2008-2011",
+      "model": "gas_history",
+      "alpha": 0.01,
+      "n": 208,
+      "mae_cents": 3.9579478836807813,
+      "delta_vs_gas_history_cents": 0.0,
+      "block8_interval95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "era": "2008-2011",
+      "model": "oil_30d",
+      "alpha": 10,
+      "n": 208,
+      "mae_cents": 4.0625380296608995,
+      "delta_vs_gas_history_cents": 0.1045901459801182,
+      "block8_interval95": [
+        -0.04532130775864003,
+        0.26978412936770957
+      ]
+    },
+    {
+      "era": "2008-2011",
+      "model": "oil_lags",
+      "alpha": 100,
+      "n": 208,
+      "mae_cents": 4.031366693332671,
+      "delta_vs_gas_history_cents": 0.07341880965188906,
+      "block8_interval95": [
+        -0.32005240080849184,
+        0.45048847344564763
+      ]
+    },
+    {
+      "era": "2008-2011",
+      "model": "oil_and_wholesale",
+      "alpha": 100,
+      "n": 208,
+      "mae_cents": 4.255131335686204,
+      "delta_vs_gas_history_cents": 0.2971834520054232,
+      "block8_interval95": [
+        -0.14631368657293328,
+        0.8027982804515076
+      ]
+    },
+    {
+      "era": "2012-2015",
+      "model": "gas_history",
+      "alpha": 10,
+      "n": 209,
+      "mae_cents": 3.271325830628322,
+      "delta_vs_gas_history_cents": 0.0,
+      "block8_interval95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "era": "2012-2015",
+      "model": "oil_30d",
+      "alpha": 0.01,
+      "n": 209,
+      "mae_cents": 3.2730555963307473,
+      "delta_vs_gas_history_cents": 0.0017297657024255447,
+      "block8_interval95": [
+        -0.028368563719253666,
+        0.03140033001440709
+      ]
+    },
+    {
+      "era": "2012-2015",
+      "model": "oil_lags",
+      "alpha": 1000,
+      "n": 209,
+      "mae_cents": 3.326980474820398,
+      "delta_vs_gas_history_cents": 0.055654644192075754,
+      "block8_interval95": [
+        -0.11155636010970581,
+        0.23966951888196683
+      ]
+    },
+    {
+      "era": "2012-2015",
+      "model": "oil_and_wholesale",
+      "alpha": 1000,
+      "n": 209,
+      "mae_cents": 3.1730952843846074,
+      "delta_vs_gas_history_cents": -0.09823054624371474,
+      "block8_interval95": [
+        -0.26157432551749593,
+        0.07145342733262862
+      ]
+    },
+    {
+      "era": "2016-2019",
+      "model": "gas_history",
+      "alpha": 0.01,
+      "n": 209,
+      "mae_cents": 2.6905091544294595,
+      "delta_vs_gas_history_cents": 0.0,
+      "block8_interval95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "era": "2016-2019",
+      "model": "oil_30d",
+      "alpha": 0.01,
+      "n": 209,
+      "mae_cents": 2.7022454032659367,
+      "delta_vs_gas_history_cents": 0.011736248836477623,
+      "block8_interval95": [
+        -0.006952792590664556,
+        0.030460133863866562
+      ]
+    },
+    {
+      "era": "2016-2019",
+      "model": "oil_lags",
+      "alpha": 100,
+      "n": 209,
+      "mae_cents": 2.503062626496875,
+      "delta_vs_gas_history_cents": -0.18744652793258343,
+      "block8_interval95": [
+        -0.33701351641669997,
+        -0.042629871832250435
+      ]
+    },
+    {
+      "era": "2016-2019",
+      "model": "oil_and_wholesale",
+      "alpha": 100,
+      "n": 209,
+      "mae_cents": 2.3682439374080384,
+      "delta_vs_gas_history_cents": -0.32226521702142047,
+      "block8_interval95": [
+        -0.47516243978829137,
+        -0.16422560153796495
+      ]
+    },
+    {
+      "era": "2020-2023",
+      "model": "gas_history",
+      "alpha": 100,
+      "n": 208,
+      "mae_cents": 3.8610604751617426,
+      "delta_vs_gas_history_cents": 0.0,
+      "block8_interval95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "era": "2020-2023",
+      "model": "oil_30d",
+      "alpha": 10,
+      "n": 208,
+      "mae_cents": 3.7981736599530103,
+      "delta_vs_gas_history_cents": -0.0628868152087322,
+      "block8_interval95": [
+        -0.12368517309216709,
+        -0.012534091616905345
+      ]
+    },
+    {
+      "era": "2020-2023",
+      "model": "oil_lags",
+      "alpha": 1000,
+      "n": 208,
+      "mae_cents": 3.825141575443633,
+      "delta_vs_gas_history_cents": -0.03591889971810984,
+      "block8_interval95": [
+        -0.2751006517436399,
+        0.21966052076885523
+      ]
+    },
+    {
+      "era": "2020-2023",
+      "model": "oil_and_wholesale",
+      "alpha": 100,
+      "n": 208,
+      "mae_cents": 3.70637254202286,
+      "delta_vs_gas_history_cents": -0.1546879331388822,
+      "block8_interval95": [
+        -0.4902982297540248,
+        0.19248216841981008
+      ]
+    },
+    {
+      "era": "2024-2026",
+      "model": "gas_history",
+      "alpha": 10,
+      "n": 144,
+      "mae_cents": 4.268306635589506,
+      "delta_vs_gas_history_cents": 0.0,
+      "block8_interval95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "era": "2024-2026",
+      "model": "oil_30d",
+      "alpha": 10,
+      "n": 144,
+      "mae_cents": 4.243292099003729,
+      "delta_vs_gas_history_cents": -0.02501453658577683,
+      "block8_interval95": [
+        -0.09927077624126927,
+        0.038833255240409134
+      ]
+    },
+    {
+      "era": "2024-2026",
+      "model": "oil_lags",
+      "alpha": 10,
+      "n": 144,
+      "mae_cents": 3.9903801308475977,
+      "delta_vs_gas_history_cents": -0.2779265047419081,
+      "block8_interval95": [
+        -0.5329621601369569,
+        0.009863268527119235
+      ]
+    },
+    {
+      "era": "2024-2026",
+      "model": "oil_and_wholesale",
+      "alpha": 10,
+      "n": 144,
+      "mae_cents": 3.8075953931755837,
+      "delta_vs_gas_history_cents": -0.4607112424139228,
+      "block8_interval95": [
+        -0.7939400523636163,
+        -0.14334947070743462
+      ]
+    }
+  ]
+}

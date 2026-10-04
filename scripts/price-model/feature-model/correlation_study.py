@@ -35,6 +35,11 @@ def save_matrix(frame,out,name,title):
     im=ax.imshow(frame.to_numpy(),cmap='RdBu_r',vmin=-1,vmax=1,aspect='auto')
     ax.set_xticks(range(len(frame.columns)),frame.columns,rotation=90,fontsize=7)
     ax.set_yticks(range(len(frame)),frame.index,fontsize=7);ax.set_title(title,fontsize=11)
+    if frame.size<=100:
+        for i in range(len(frame)):
+            for j in range(len(frame.columns)):
+                v=frame.iloc[i,j]
+                ax.text(j,i,f'{v:.2f}' if np.isfinite(v) else '—',ha='center',va='center',fontsize=8,color='white' if abs(v)>.65 else 'black')
     fig.colorbar(im,ax=ax,label='Pearson r');fig.tight_layout();fig.savefig(out/(name+'.png'),dpi=160);plt.close(fig)
 
 
@@ -149,7 +154,7 @@ def oil(root,out):
             save_matrix(f,out,f'{name}-{regime}',f'{name}: earlier 7-day change vs retail weekly change ({regime})')
     # Fixed experiments, settings selected on 2024 only. 2025+ is a previously
     # viewed historical benchmark, explicitly not a new untouched final test.
-    base=pd.DataFrame({f'gas_lag{k}w':target.shift(k) for k in [1,2,3,4]});base['season_sin']=np.sin(dates.dayofyear*2*np.pi/365.25);base['season_cos']=np.cos(dates.dayofyear*2*np.pi/365.25)
+    base=pd.DataFrame({f'gas_lag{k}w':target.shift(k) for k in [1,2,3,4]});base['previous_gas']=gas.shift(1);base['season_sin']=np.sin(dates.dayofyear*2*np.pi/365.25);base['season_cos']=np.cos(dates.dayofyear*2*np.pi/365.25)
     sets={'gas_history':[], 'oil_30d':[k for k in changes if k.startswith('DCOIL') and k.endswith('_30d')], 'oil_lags':[k for k in changes if k.startswith('DCOIL') and int(k.rsplit('_',1)[1][:-1])>=8], 'oil_and_wholesale_lags':[k for k in changes if int(k.rsplit('_',1)[1][:-1])>=8]}
     full=pd.concat([base,pd.DataFrame(changes)],axis=1);valid=full.notna().all(axis=1)&target.notna()&(dates.year>=2001);tr=valid&(dates.year<2024);dv=valid&(dates.year==2024);te=valid&(dates.year>=2025)
     predictions={};reports={}

@@ -1,0 +1,20 @@
+{
+  "kind": "spatial512",
+  "parameters": 7754242,
+  "trainable_parameters": 7754242,
+  "features": 232,
+  "national_states": 51,
+  "batch": 1024,
+  "learning_rate": 0.0002,
+  "max_epochs": 12,
+  "revision": null,
+  "model_name": null,
+  "train_rows": 858713,
+  "validation_rows": 31410,
+  "tokenization": "one station query and all state summary tokens",
+  "compile": false,
+  "device": "NVIDIA GeForce RTX 5080",
+  "context_sha256": "b37586ca5b01d914d20b8ba302a49996ef1d7338012a1fd75edfc584ccf590d3",
+  "fairness": "Different architectures and compute budgets; predictive-system comparison, not parameter-matched architectural superiority.",
+  "initial_checkpoint": null
+}

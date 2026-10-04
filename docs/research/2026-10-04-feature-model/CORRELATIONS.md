@@ -38,12 +38,18 @@ Predict the next weekly US regular-gasoline change. Train on 2001–2023, choose
 | Inputs | MAE, cents/gal | 95th-percentile error |
 |---|---:|---:|
 | Keep last weekly gas price | 5.656 | — |
-| Gas history and season | 5.232 | 13.685 |
-| Above + only 30-day crude changes | 5.191 | 13.795 |
-| Above + multiple crude lags | 4.887 | 13.304 |
-| Above + crude and wholesale lags | **4.706** | **12.975** |
+| Gas history and season | 5.205 | 13.973 |
+| Above + only 30-day crude changes | 5.164 | 14.107 |
+| Above + multiple crude lags | 4.877 | 13.560 |
+| Above + crude and wholesale lags | **4.698** | **12.687** |
 
-Only-30-day inputs improve mean error by **0.041 cents**, with an eight-week-block 95% interval of **−0.112 to +0.019 cents** for model-minus-baseline error: inconclusive, with slightly worse tail error. Multiple crude lags improve mean error by 0.345 cents; adding wholesale lags improves it by **0.526 cents (10.0%)** over gas history, or **16.8%** over last price. The latter model-minus-gas-history interval is **−0.847 to −0.216 cents**. These intervals account for short-range temporal dependence, not repeated research selection or vintage uncertainty.
+Only-30-day inputs improve mean error by **0.042 cents**, with an eight-week-block 95% interval of **−0.112 to +0.018 cents** for model-minus-baseline error: inconclusive, with slightly worse tail error. Multiple crude lags improve mean error by 0.328 cents; adding wholesale lags improves it by **0.508 cents (9.8%)** over gas history, or **16.9%** over last price. The latter model-minus-gas-history interval is **−0.823 to −0.205 cents**. These intervals account for short-range temporal dependence, not repeated research selection or vintage uncertainty.
+
+A second stability check reselects regularization using the year before each forecast era. Oil plus wholesale inputs improve over gas history in four of five eras: −0.098 cents in 2012–2015, −0.322 in 2016–2019, −0.155 in 2020–2023 and −0.461 in 2024–2026. They worsen error by +0.297 cents in 2008–2011. Thirty-day-only features help only two of five eras. These are retrospective chronological checks, not newly sealed tests.
+
+![Historical forecast stability](correlations/historical-stability.png)
+
+[Rolling-era scores](correlations/rolling-historical-scores.csv) · [Daily crude and wholesale lead matrices](correlations/daily-market-leads.csv)
 
 The useful candidate is a **distributed history of oil and wholesale changes**, not a hardcoded 30-day rule. This is an aggregate weekly predictor; it has not demonstrated the same improvement for individual stations. Models and exact reloaded predictions are saved.
 
@@ -52,6 +58,8 @@ The useful candidate is a **distributed history of oil and wholesale changes**, 
 ## Nationwide hourly transmission
 
 Use all 141,660 inventory IDs, 51 states/DC, and 14 fuel/payment products in the existing immutable export. Discovery uses only the first 69 snapshot hours before the original training boundary. Missing collection remains missing. A state movement is the mean change among stations priced at **both adjacent snapshots**, rather than the difference between two changing populations.
+
+Grade/payment matrices show strong same-hour co-movement (midgrade-credit versus premium-credit r=0.993) but weak broad six-hour lead relationships. Simultaneous grade updates can reflect shared reporting, so this supports testing grade-spread features without claiming one grade reliably leads another. Cheap versus expensive initial station groups have a six-hour correlation of 0.285; the short series and overlapping groups make this exploratory.
 
 Generate state matrices at 0, 1, 3, 6, 12 and 24 hours; repeat after subtracting other states' contemporaneous average movement; separately analyze source-report refresh rates. Additional matrices cover grades/payment methods and fixed initial cheap/expensive and fresh/aged quote cohorts.
 
