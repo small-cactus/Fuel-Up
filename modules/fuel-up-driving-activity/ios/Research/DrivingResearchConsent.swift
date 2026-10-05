@@ -26,7 +26,10 @@ struct DrivingResearchConsent: View {
               .frame(minHeight: 44)
           }.buttonStyle(.plain)
         }
-        .padding(.horizontal, 24).padding(.top, 4)
+        // Align the header inside the corner's tangent, using the same measured
+        // radius as the sheet instead of a device-specific or fixed edge inset.
+        .padding(.horizontal, max(24, sheetCornerRadius ?? 24))
+        .padding(.top, 4)
 
         ScrollView {
           VStack(spacing: 24) {
