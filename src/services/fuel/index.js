@@ -2,6 +2,7 @@ const { buildCacheKey, calculateDistanceMiles, getFuelFailureMessage, isCacheEnt
 const { getFuelServiceConfig } = require('./config');
 const {
     clearCachedEntries,
+    flushCachedEntry,
     getCachedEntry,
     listSpatialCacheEntries,
     removeCachedEntry,
@@ -777,6 +778,7 @@ async function clearFuelPriceCache() {
 }
 
 module.exports = {
+    flushCachedEntry,
     buildLatestFuelStationQuotesFromRows: buildLatestQuotesFromRows,
     clearFuelPriceCache,
     findUsableCachedFuelSnapshot,

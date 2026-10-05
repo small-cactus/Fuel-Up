@@ -42,11 +42,15 @@ struct OnboardingFooter: View {
   @ViewBuilder var body: some View {
     if !model.searchFocused {
       VStack(spacing: 12) {
+        if let error = model.saveError {
+          Text(error).font(.footnote).foregroundStyle(.secondary)
+            .multilineTextAlignment(.center).accessibilityIdentifier("onboarding-save-error")
+        }
         OnboardingPageControl(selection: Binding(get: { model.step }, set: { model.selectStep($0) }), count: 4)
           .frame(width: 130, height: 28)
         actions
           .disabled(model.completing || (model.step == 1 && model.locationRequested && model.hasLocationAccess && !model.locationReady && model.locationError == nil))
-      }.padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 16)
+      }.disabled(model.completing).padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 16)
     }
   }
 
@@ -84,8 +88,14 @@ struct OnboardingFooter: View {
   private func actionButton(_ title: String, id: String, prominent: Bool,
                             action: @escaping () -> Void) -> some View {
     Button(action: action) {
-      Text(title).font(.headline)
-        .foregroundStyle(prominent ? Color.white : Color.primary)
+      HStack(spacing: 8) {
+        if model.completing && ((id == "onboarding-save" && !model.completingWithoutPreferences)
+            || (id == "onboarding-skip" && model.completingWithoutPreferences)) {
+          ProgressView().tint(prominent ? .white : .primary)
+            .accessibilityLabel("Preparing Home")
+        }
+        Text(title).font(.headline)
+      }.foregroundStyle(prominent ? Color.white : Color.primary)
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, minHeight: 66)
         .contentShape(Capsule())

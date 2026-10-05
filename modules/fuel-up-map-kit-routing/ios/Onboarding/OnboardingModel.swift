@@ -15,6 +15,7 @@ struct OnboardingBrand: Identifiable {
 final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelegate {
   let mapPresentation = OnboardingMapPresentation()
   @Published var step = 0
+  @Published var settledStep = 0
   @Published var searchFocused = false
   @Published var footerHeight: CGFloat = 134
   @Published var radius = 6.0
@@ -34,6 +35,8 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
   @Published var membershipError: String?
   @Published var locationError: String?
   @Published var completing = false
+  @Published var saveError: String?
+  @Published var completingWithoutPreferences = false
   var emit: (([String: Any]) -> Void)?
   private let location = CLLocationManager()
   private let tracksLocation: Bool
@@ -89,6 +92,7 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
     } else { location.requestWhenInUseAuthorization() }
   }
   func selectStep(_ target: Int) {
+    guard !completing else { return }
     let bounded = min(3, max(0, target))
     step = locationReady ? bounded : min(bounded, 1)
   }
@@ -115,6 +119,8 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
   func finish(skippingPreferences: Bool = false) {
     guard !completing, locationReady else { return }
     completing = true
+    completingWithoutPreferences = skippingPreferences
+    saveError = nil
     var savedChoices = choices
     if skippingPreferences {
       // Skip discards only this optional page's edits. Preserve any preferences

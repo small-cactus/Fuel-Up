@@ -154,3 +154,32 @@ test('Home publishes map origin before an unresolved price-cache read', async t 
     stateIndex=0;
     assert.deepEqual(hook(true).origin,origin,'native map receives only numeric coordinates, not the scope key');
 });
+
+for (const cachedFresh of [true, false]) {
+    test(`onboarding Home waits for durable cache (cached fresh: ${cachedFresh})`, async t => {
+        let effect, finishWrite;
+        const results = [], writes = [];
+        const hook = load('src/screens/cluster-lab/useClusterLabStations.js', {
+            '../../lib/onboardingHandoff': { onboardingHandoff: { getSnapshot: () => 'preparing' } },
+            '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ connected: true }) },
+            react: { useEffect: fn => { effect = fn; }, useMemo: fn => fn(), useState: () => [null, v => results.push(v)] },
+            'react-native': { AppState: { currentState: 'active', addEventListener: () => ({ remove() {} }) } },
+            'expo-location': {},
+            '../../AppStateContext': { useAppState: () => ({ resolvedFuelSearchContext: { latitude: 27, longitude: -82 } }) },
+            '../../PreferencesContext': { usePreferences: () => ({ preferences: { preferredOctane: 'regular', searchRadiusMiles: 6 } }) },
+            '../../lib/deviceLocationCache': {},
+            '../../services/fuel': {
+                getCachedFuelPriceSnapshot: async () => ({ isFresh: cachedFresh, cacheKey: 'cached', topStations: ['cached'] }),
+                refreshFuelPriceSnapshot: async () => ({ snapshot: { cacheKey: 'fresh', topStations: ['fresh'] } }),
+                flushCachedEntry: key => { writes.push(key); return new Promise(resolve => { finishWrite = resolve; }); },
+            },
+            './stationCardModel': { buildLabStations: s => s.topStations },
+        }).default;
+        hook(true); t.after(effect()); await new Promise(setImmediate);
+        assert.equal(results.some(v => v.loaded), false);
+        assert.deepEqual(writes, [cachedFresh ? 'cached' : 'fresh']);
+        finishWrite(); await new Promise(setImmediate);
+        assert.deepEqual(results.find(v => v.loaded).stations, [cachedFresh ? 'cached' : 'fresh']);
+        if (cachedFresh) { finishWrite(); await new Promise(setImmediate); }
+    });
+}

@@ -11,7 +11,7 @@ struct OnboardingLocationPage: View {
       // and scroll naturally instead of squeezing text behind the footer.
       let benefitSpacing = 16 + min(30, max(0, (geometry.size.height - 650) * 0.30))
       ZStack(alignment: .top) {
-        OnboardingLocationIllustration(isActive: model.step == 1, heroHeight: mapHeight + 100)
+        OnboardingLocationIllustration(isActive: model.step == 1 && model.settledStep == 1, heroHeight: mapHeight + 100)
           .ignoresSafeArea()
         ScrollView {
           VStack(spacing: 18) {

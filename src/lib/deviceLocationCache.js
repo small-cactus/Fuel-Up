@@ -106,7 +106,7 @@ export async function getLastDeviceLocationSnapshot() {
     }
 }
 
-export async function persistLastDeviceLocationRegion(nextRegion, meta = null) {
+export async function persistLastDeviceLocationRegion(nextRegion, meta = null, { requirePersistence = false } = {}) {
     if (!nextRegion) {
         return;
     }
@@ -129,6 +129,7 @@ export async function persistLastDeviceLocationRegion(nextRegion, meta = null) {
             })
         );
     } catch (error) {
+        if (requirePersistence) throw error;
         // Best-effort cache write for faster next launch.
     }
 }

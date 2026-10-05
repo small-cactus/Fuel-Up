@@ -151,6 +151,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
       setOverview(false)
     }
     cameraMoving = true
+    if !reportedMapReady { hasRenderedMap = false }
     renderer.cameraBegan()
     refresh()
   }

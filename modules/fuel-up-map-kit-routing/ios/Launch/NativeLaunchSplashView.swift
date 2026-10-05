@@ -1,14 +1,14 @@
 import ExpoModulesCore
 import SwiftUI
+import ReactNativeBlur
 
-/// The white artwork clears ahead of a separately masked, live UIKit map blur.
+/// Artwork clears ahead of a radial, progressively stronger live backdrop blur.
 final class NativeLaunchSplashView: ExpoView {
   let onArtworkReady = EventDispatcher()
   let onExitComplete = EventDispatcher()
+  var onFinished: (() -> Void)?
   private let model = LaunchSplashModel()
-  private let backdrop = UIVisualEffectView()
-  private let blurMaskView = LaunchBlurMaskView()
-  private var blurMask: CAGradientLayer { blurMaskView.gradient }
+  private let backdrop = VariableBlurView(maxBlurRadius: 28, blurStyle: .regular)
   private var host: UIHostingController<LaunchSplashArtwork>!
   private var reportedReady = false
   private var capturedSystemAppearance = false
@@ -20,16 +20,22 @@ final class NativeLaunchSplashView: ExpoView {
     super.init(appContext: appContext)
     backgroundColor = .clear
     backdrop.isUserInteractionEnabled = false
-    blurMask.type = .radial
-    blurMask.colors = [UIColor.clear.cgColor, UIColor.black.cgColor]
-    blurMask.startPoint = CGPoint(x: 0.5, y: 0.5)
-    blurMask.endPoint = CGPoint(x: 1, y: 1)
-    backdrop.mask = blurMaskView
+    backdrop.isHidden = true
     addSubview(backdrop)
     host = UIHostingController(rootView: LaunchSplashArtwork(model: model))
     host.safeAreaRegions = []
     host.view.backgroundColor = .clear
     addSubview(host.view)
+  }
+
+  // Onboarding supplies a native snapshot of its current screen; the same
+  // Metal reveal and live backdrop then expose the already-rendered Home below.
+  func setArtwork(_ image: UIImage, dark: Bool) {
+    capturedSystemAppearance = true
+    model.artwork = image
+    model.dark = dark
+    overrideUserInterfaceStyle = dark ? .dark : .light
+    host.overrideUserInterfaceStyle = dark ? .dark : .light
   }
 
   private func captureSystemAppearance() {
@@ -47,7 +53,7 @@ final class NativeLaunchSplashView: ExpoView {
   func setExiting(_ exiting: Bool) {
     guard exiting, startedAt == nil, !finished else { return }
     model.reduceMotion = UIAccessibility.isReduceMotionEnabled
-    if !model.reduceMotion { backdrop.effect = UIBlurEffect(style: .regular) }
+    backdrop.isHidden = model.reduceMotion
     startedAt = CACurrentMediaTime()
     let link = CADisplayLink(target: self, selector: #selector(tick))
     displayLink = link
@@ -62,41 +68,42 @@ final class NativeLaunchSplashView: ExpoView {
       displayLink?.invalidate()
       displayLink = nil
       finished = true
+      onFinished?()
       onExitComplete([:])
       return
     }
-    let duration = model.reduceMotion ? 0.18 : 0.90
+    let duration = model.reduceMotion ? 0.18 : 1.55
     model.progress = min(1, (CACurrentMediaTime() - startedAt) / duration)
     updateBlurMask()
   }
 
   private func updateBlurMask() {
-    // The clear-map front follows the faster white-fade front in the shader.
-    // A wide transparent-to-opaque ramp gradually removes the live native blur.
+    guard !model.reduceMotion, bounds.width > 0, bounds.height > 0 else { return }
     let t = min(1, max(0, model.progress))
-    let front = -0.24 + 1.52 * t * t * (3 - 2 * t)
-    // The mask extends to 1.5 screen radii, so the entire fade ramp can travel
-    // beyond the corners. Clamping it at the screen radius pinned opaque blur
-    // to the edge and required a visible, binary cutoff at the end.
-    let inner = max(0, (front - 0.22) / 1.5)
-    let outer = max(inner, (front + 0.10) / 1.5)
-    CATransaction.begin()
-    CATransaction.setDisableActions(true)
-    blurMask.locations = [NSNumber(value: inner), NSNumber(value: outer)]
-    // UIKit copies masks onto its effect subviews. Reassign the public mask
-    // after changing it so the live backdrop receives the current ramp too.
-    backdrop.mask = blurMaskView
-    CATransaction.commit()
+    // Scale the whole blur profile, not just its clear center. Its inner 58%
+    // stays clear and its outer 42% ramps to full blur at every frame, so the
+    // progressive band widens with the bubble instead of sliding as a fixed rim.
+    // Ease the shared scale for a quick opening and a soft landing at the edges.
+    let eased = 1 - pow(1 - t, 2.4)
+    let cornerRadius = hypot(bounds.width, bounds.height) / 2
+    let clearFraction = 0.58
+    let bubbleRadius = (cornerRadius + 2) * eased / clearFraction
+    backdrop.updateBlur(
+      maxBlurRadius: 28,
+      direction: .blurredBottomClearTop,
+      startOffset: 0,
+      radial: true,
+      radialCenterX: 0.5, radialCenterY: 0.5,
+      radialClearRadius: bubbleRadius * clearFraction,
+      radialFeather: bubbleRadius * (1 - clearFraction),
+      blurStyle: .regular
+    )
   }
 
   override func layoutSubviews() {
     super.layoutSubviews()
     backdrop.frame = bounds
     host.view.frame = bounds
-    let radius = hypot(bounds.width, bounds.height) / 2 * 1.5
-    // A square radial mask keeps the wave circular on every screen aspect ratio.
-    blurMaskView.frame = CGRect(x: bounds.midX - radius, y: bounds.midY - radius,
-                            width: radius * 2, height: radius * 2)
     updateBlurMask()
     guard window != nil, bounds.width > 0, bounds.height > 0, !reportedReady else { return }
     reportedReady = true
@@ -129,6 +136,7 @@ final class NativeLaunchSplashView: ExpoView {
 }
 
 private final class LaunchSplashModel: ObservableObject {
+  @Published var artwork: UIImage?
   @Published var dark = false
   @Published var progress = 0.0
   @Published var reduceMotion = false
@@ -137,16 +145,21 @@ private final class LaunchSplashModel: ObservableObject {
 private struct LaunchSplashArtwork: View {
   @ObservedObject var model: LaunchSplashModel
 
+  private var artwork: Image {
+    if let image = model.artwork { return Image(uiImage: image) }
+    return Image("SplashScreenLegacy", bundle: .main)
+  }
+
   var body: some View {
     GeometryReader { geometry in
-      Image("SplashScreenLegacy", bundle: .main)
+      artwork
         .resizable()
         .scaledToFit()
         .frame(width: geometry.size.width, height: geometry.size.height)
         .background(model.dark ? Color.black : Color.white)
         .environment(\.colorScheme, model.dark ? .dark : .light)
         .layerEffect(
-          ShaderLibrary.default.fuelUpLaunchBubble(.float2(geometry.size), .float(model.progress)),
+          ShaderLibrary.default.fuelUpLaunchBubble(.float2(geometry.size), .float(min(1, model.progress * (1.55 / 0.90)))),
           maxSampleOffset: CGSize(width: 44, height: 44),
           isEnabled: !model.reduceMotion
         )
@@ -155,10 +168,4 @@ private struct LaunchSplashArtwork: View {
     .ignoresSafeArea()
     .accessibilityHidden(true)
   }
-}
-
-/// A view mask lets UIVisualEffectView propagate the mask to its effect layers.
-private final class LaunchBlurMaskView: UIView {
-  override class var layerClass: AnyClass { CAGradientLayer.self }
-  var gradient: CAGradientLayer { layer as! CAGradientLayer }
 }

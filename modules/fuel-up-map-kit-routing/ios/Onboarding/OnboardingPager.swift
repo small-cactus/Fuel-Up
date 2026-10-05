@@ -41,6 +41,9 @@ final class OnboardingPagerController: UIPageViewController, UIPageViewControlle
   override func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = .clear
+    // Build the adjacent page while Welcome is first laid out, not on its first
+    // Continue tap. Retain UIKit's pager and the existing live map renderers.
+    pages[1].loadViewIfNeeded()
     // Read each page's real origin rather than estimating transition progress.
     // This covers edge bounce, cancellation, and nonadjacent page-dot jumps.
     if let scroll = view.subviews.compactMap({ $0 as? UIScrollView }).first {
@@ -52,6 +55,10 @@ final class OnboardingPagerController: UIPageViewController, UIPageViewControlle
 
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
+    if let next = pages[1].viewIfLoaded, !next.isDescendant(of: view), next.bounds.size != view.bounds.size {
+      next.frame = view.bounds
+      next.layoutIfNeeded()
+    }
     updateMapOffsets()
   }
 
@@ -85,6 +92,7 @@ final class OnboardingPagerController: UIPageViewController, UIPageViewControlle
                        animated: !UIAccessibility.isReduceMotionEnabled) { [weak self] _ in
       guard let self else { return }
       self.transitioning = false
+      self.model.settledStep = target
       self.updateMapOffsets()
       // Serialize rapid taps and changes in permission during a gesture.
       self.showRequestedPage()
@@ -114,6 +122,7 @@ final class OnboardingPagerController: UIPageViewController, UIPageViewControlle
     if completed, model.step == gestureStartStep, let visible = index(of: viewControllers?.first) {
       model.selectStep(visible)
     }
+    model.settledStep = index(of: viewControllers?.first) ?? model.step
     showRequestedPage()
   }
 }

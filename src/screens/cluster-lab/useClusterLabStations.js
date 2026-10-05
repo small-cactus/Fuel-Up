@@ -1,3 +1,4 @@
+import { onboardingHandoff } from '../../lib/onboardingHandoff';
 import useNetworkStatus from '../../lib/useNetworkStatus';
 import { useEffect, useMemo, useState } from 'react';
 import * as Location from 'expo-location';
@@ -5,7 +6,7 @@ import { AppState } from 'react-native';
 import { useAppState } from '../../AppStateContext';
 import { usePreferences } from '../../PreferencesContext';
 import { getLastDeviceLocationRegion } from '../../lib/deviceLocationCache';
-import { getCachedFuelPriceSnapshot, refreshFuelPriceSnapshot } from '../../services/fuel';
+import { flushCachedEntry, getCachedFuelPriceSnapshot, refreshFuelPriceSnapshot } from '../../services/fuel';
 import { buildLabStations } from './stationCardModel';
 import { buildResolvedFuelSearchContext } from '../../lib/fuelSearchState';
 import { REPORTED_PRICE_MAX_AGE_MS } from '../../services/fuel/reportedPrices';
@@ -76,14 +77,19 @@ export default function useClusterLabStations(active) {
                 const query = { latitude: origin.latitude, longitude: origin.longitude, fuelType, radiusMiles, preferredProvider, requiresE85 };
                 const cached = await getCachedFuelPriceSnapshot(query);
                 if (cancelled) return;
-                if (cached) publish(origin, cached);
+                if (cached && (onboardingHandoff.getSnapshot() === 'idle' || cached.isFresh === true)) {
+                    if (onboardingHandoff.getSnapshot() === 'preparing') await flushCachedEntry(cached.cacheKey);
+                    publish(origin, cached);
+                }
                 const fresh = await refreshFuelPriceSnapshot(query);
+                if (cancelled) return;
+                if (onboardingHandoff.getSnapshot() === 'preparing') await flushCachedEntry(fresh.snapshot.cacheKey);
                 publish(origin, fresh.snapshot);
             } catch (error) {
                 if (!cancelled) {
                     console.warn('[Home] Station load failed:', error.message);
                     setResult(previous => previous?.scope === scope ? previous : {
-                        scope, origin: null, stations: [], loaded: true,
+                        scope, origin: null, stations: [], loaded: false, error: error.message || 'Station load failed',
                     });
                 }
             } finally { refreshing = false; }

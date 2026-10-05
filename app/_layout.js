@@ -1,5 +1,5 @@
 import { migrateToNativeResearchAsync } from '../src/lib/drivingResearch';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Platform, View } from 'react-native';
 import { AppStateProvider, useAppState } from '../src/AppStateContext';
 import { ThemeProvider, useTheme } from '../src/ThemeContext';
@@ -9,6 +9,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import * as FileSystem from 'expo-file-system/legacy';
 import OnboardingScreen from '../src/screens/OnboardingScreen';
+import { onboardingHandoff } from '../src/lib/onboardingHandoff';
 import ProgressiveBlurReveal from '../src/components/ProgressiveBlurReveal';
 import '../src/lib/predictiveLocation';
 import LaunchSplash, { useLaunchReady } from '../src/components/LaunchSplash';
@@ -83,6 +84,7 @@ async function writeClusterProbeQueueMarker(payload) {
 
 function AppGate() {
     const pathname = usePathname();
+    const onboardingPhase = useSyncExternalStore(onboardingHandoff.subscribe, onboardingHandoff.getSnapshot, onboardingHandoff.getSnapshot);
     const launchReady = useLaunchReady();
     const { preferences, isLoading } = usePreferences();
     const {
@@ -388,14 +390,13 @@ function AppGate() {
         return <View style={{ flex: 1, backgroundColor: themeColors.background }} />;
     }
 
-    if (!preferences.hasCompletedOnboarding && !shouldBypassOnboardingForClusterProbe) {
-        return <OnboardingScreen />;
-    }
+    const showOnboarding = (!preferences.hasCompletedOnboarding && !shouldBypassOnboardingForClusterProbe) || onboardingPhase !== 'idle';
+    const mountHome = !showOnboarding || onboardingPhase !== 'idle';
 
     return (
         <>
             <StatusBar style={isDark ? 'light' : 'dark'} />
-            <Stack screenOptions={{
+            {mountHome && <Stack screenOptions={{
                 headerShown: false,
                 headerStyle: { backgroundColor: themeColors.background },
                 headerTintColor: themeColors.text,
@@ -418,8 +419,11 @@ function AppGate() {
                         presentation: 'card',
                     }}
                 />
-            </Stack>
-            {pathname === '/' && (Platform.OS !== 'ios' || (__DEV__ && isClusterProbeSessionActive)) && <ProgressiveBlurReveal
+            </Stack>}
+            {showOnboarding && <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 }} accessibilityViewIsModal>
+                <OnboardingScreen />
+            </View>}
+            {pathname === '/' && !showOnboarding && (Platform.OS !== 'ios' || (__DEV__ && isClusterProbeSessionActive)) && <ProgressiveBlurReveal
                 key={`root-reveal-${rootRevealVersion}`}
                 isBlurred={rootRevealPhase === 'blurred'}
                 shouldReveal={rootRevealPhase === 'revealing'}

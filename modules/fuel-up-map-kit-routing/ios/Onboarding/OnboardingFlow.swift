@@ -9,17 +9,17 @@ struct OnboardingFlow: View {
       OnboardingMapBackdrop(presentation: model.mapPresentation, onMapReady: { model.emit?(["type": "mapReady"]) })
         .ignoresSafeArea()
       OnboardingPager(model: model)
+        .allowsHitTesting(!model.completing)
         .ignoresSafeArea(.container, edges: .vertical)
       OnboardingFooter(model: model)
         .background {
           // Welcome already blurs beneath these controls. A second backdrop
           // there made its gradual transition become an opaque-looking band.
-          if model.step != 0 {
-            PureProgressiveBlur(radius: model.step == 1 ? 8 : 16, direction: .bottom)
+          PureProgressiveBlur(radius: model.step <= 1 ? 8 : 16, direction: .bottom)
               .padding(.top, -40)
               .ignoresSafeArea(.container, edges: .bottom)
               .allowsHitTesting(false)
-          }
+              .opacity(model.step == 0 ? 0 : 1)
         }
         .background {
           GeometryReader { geometry in

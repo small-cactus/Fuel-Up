@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { useEffect, useSyncExternalStore } from 'react';
+import { useNavigation } from 'expo-router';
+import { onboardingHandoff } from '../../src/lib/onboardingHandoff';
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { DynamicColorIOS } from 'react-native';
 
 export default function TabLayout() {
+    const navigation = useNavigation();
+    const phase = useSyncExternalStore(onboardingHandoff.subscribe, onboardingHandoff.getSnapshot, onboardingHandoff.getSnapshot);
+    useEffect(() => {
+        // Select Home explicitly after this navigator mounts under setup. A URL
+        // replacement can preserve the previously selected native Settings tab.
+        if (phase !== 'preparing') return;
+        const frame = requestAnimationFrame(() => navigation.navigate('(tabs)', { screen: 'index' }));
+        return () => cancelAnimationFrame(frame);
+    }, [phase, navigation]);
     return (
         <NativeTabs
             labelStyle={{

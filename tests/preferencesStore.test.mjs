@@ -74,3 +74,27 @@ for (const corrupt of ['not json', 'null', '[]', '{"hasCompletedOnboarding":"fal
         assert.equal(store.getSnapshot().preferences.hasCompletedOnboarding, false);
     });
 }
+
+test('onboarding completion is not published until storage confirms the save', async () => {
+    let finish;
+    const store = createPreferencesStore({ getItem: async () => null,
+        setItem: () => new Promise(resolve => { finish = resolve; }) });
+    await store.load();
+    const saving = store.update({ hasCompletedOnboarding: true }, { requirePersistence: true });
+    await Promise.resolve();
+    assert.equal(store.getSnapshot().preferences.hasCompletedOnboarding, false);
+    finish(); await saving;
+    assert.equal(store.getSnapshot().preferences.hasCompletedOnboarding, true);
+});
+
+test('failed durable saves reject, preserve onboarding, and can be retried', async () => {
+    let fail = true;
+    const store = createPreferencesStore({ getItem: async () => null,
+        setItem: async () => { if (fail) throw Error('disk full'); } }, () => {});
+    await store.load();
+    await assert.rejects(store.update({ hasCompletedOnboarding: true }, { requirePersistence: true }), /disk full/);
+    assert.equal(store.getSnapshot().preferences.hasCompletedOnboarding, false);
+    fail = false;
+    await store.update({ hasCompletedOnboarding: true }, { requirePersistence: true });
+    assert.equal(store.getSnapshot().preferences.hasCompletedOnboarding, true);
+});

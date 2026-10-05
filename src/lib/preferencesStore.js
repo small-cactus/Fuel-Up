@@ -52,15 +52,20 @@ export function createPreferencesStore(storage, onError = console.warn) {
         }
         return loading;
     };
-    const update = async changes => {
+    const update = async (changes, { requirePersistence = false } = {}) => {
         if (snapshot.isLoading) await load();
         const preferences = normalizePreferences({ ...snapshot.preferences, ...changes });
-        if (JSON.stringify(preferences) === JSON.stringify(snapshot.preferences)) return writes;
-        publish({ preferences, preferenceRevision: snapshot.preferenceRevision + 1, isLoading: false });
+        if (!requirePersistence && JSON.stringify(preferences) === JSON.stringify(snapshot.preferences)) return writes;
+        if (!requirePersistence) publish({ preferences, preferenceRevision: snapshot.preferenceRevision + 1, isLoading: false });
         const serialized = JSON.stringify(preferences);
-        writes = writes.then(() => storage.setItem(PREFERENCES_STORAGE_KEY, serialized)).catch(error => {
+        const write = writes.then(() => storage.setItem(PREFERENCES_STORAGE_KEY, serialized));
+        writes = write.catch(error => {
             onError('Failed to save preferences:', error);
         });
+        if (requirePersistence) {
+            await write;
+            publish({ preferences, preferenceRevision: snapshot.preferenceRevision + 1, isLoading: false });
+        }
         return writes;
     };
     return {

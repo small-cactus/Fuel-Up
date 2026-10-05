@@ -56,6 +56,8 @@ public final class FuelUpMapKitRoutingModule: Module {
     View(NativeOnboardingView.self) {
       ViewName("NativeOnboardingView")
       Prop("initialChoices") { (view, choices: [String: Any]) in view.model.configure(choices) }
+      Prop("revealing") { (view, ready: Bool) in view.setRevealing(ready) }
+      Prop("saveError") { (view, message: String?) in view.setSaveError(message) }
       Prop("data") { (view, data: [String: Any]) in view.model.applyData(data) }
       Prop("isDark") { (view, dark: Bool) in view.setDark(dark) }
       Events("onAction")

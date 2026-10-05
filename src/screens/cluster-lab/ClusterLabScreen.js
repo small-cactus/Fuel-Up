@@ -7,6 +7,7 @@ import { useTheme } from '../../ThemeContext';
 import { usePreferences } from '../../PreferencesContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { openStationNavigation } from '../../lib/openNavigation';
+import { onboardingHandoff } from '../../lib/onboardingHandoff';
 import { finishLaunch } from '../../lib/launchReadiness';
 import { useLaunchReady } from '../../components/LaunchSplash';
 import useClusterLabStations from './useClusterLabStations';
@@ -30,7 +31,9 @@ export default function HomeScreen() {
     const { preferences } = usePreferences();
     const insets = useSafeAreaInsets();
     const headerStyle = useMemo(() => [styles.header, { paddingTop: insets.top }], [insets.top]);
-    const { origin, stations, loaded } = useClusterLabStations(active);
+    const { origin, stations, loaded, error } = useClusterLabStations(active);
+    useEffect(() => { if (error) onboardingHandoff.fail(new Error('Could not load nearby prices. Check your connection and try Save again.')); }, [error]);
+    const mapReady = useCallback(() => { finishLaunch(); onboardingHandoff.mapReady(); }, []);
     const { clusterLabProbe } = useLocalSearchParams();
     const map = useRef(null);
     const carousel = useRef(null);
@@ -93,7 +96,7 @@ export default function HomeScreen() {
             overlayBottomInset={stations.length ? overlayHeight + 8 : 0}
             contentReady={loaded && (!stations.length || overlayHeight > 0)}
             revealed={revealed}
-            onMapReady={finishLaunch}
+            onMapReady={mapReady}
             onStationSelect={mapSelected}
             onOverviewChange={overviewChanged}
             probeToken={__DEV__ && typeof clusterLabProbe === 'string' ? clusterLabProbe : null}

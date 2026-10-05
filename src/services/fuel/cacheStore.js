@@ -88,6 +88,13 @@ async function setCachedEntry(key, value, spatialMetadata = null) {
     return augmentedValue;
 }
 
+// Onboarding only: do not report ready if the selected snapshot cannot be saved.
+async function flushCachedEntry(key) {
+    const value = await getCachedEntry(key);
+    if (!value) throw new Error('The price cache is not ready.');
+    await AsyncStorage.setItem(key, JSON.stringify(value));
+}
+
 async function removeCachedEntry(key) {
     memoryCache.delete(key);
     spatialCacheIndex.delete(key);
@@ -176,6 +183,7 @@ function clearSpatialCacheIndex() {
 }
 
 module.exports = {
+    flushCachedEntry,
     clearCachedEntries,
     clearSpatialCacheIndex,
     getCachedEntry,

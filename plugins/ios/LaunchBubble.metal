@@ -16,7 +16,9 @@ using namespace metal;
 
     // Inflate first; the white-fade rim leads the live UIKit blur-clearing rim.
     float swell = sin(M_PI_F * smoothstep(0.0, 0.68, progress));
-    float front = mix(-0.24, 1.28, smoothstep(0.0, 0.76, progress));
+    // The artwork uses the same fast-start, slow-finish shape, on its faster
+    // clock, so its clear front stays ahead of the spatial backdrop blur.
+    float front = mix(-0.10, 1.36, 1.0 - pow(1.0 - progress, 3.0));
     float rim = exp(-pow((d - front) / 0.16, 2.0));
     float displacement = 22.0 * swell * exp(-d * d * 3.0)
                        + 12.0 * rim * sin(M_PI_F * progress);

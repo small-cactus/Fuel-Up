@@ -20,11 +20,11 @@ export function PreferencesProvider({ children }) {
     const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
     useEffect(() => { void store.load(); }, [store]);
     const updatePreference = useCallback((key, value) => store.update({ [key]: value }), [store]);
-    const updatePreferences = useCallback(changes => store.update(changes), [store]);
+    const updatePreferences = useCallback((changes, options) => store.update(changes, options), [store]);
     const completeOnboarding = useCallback((choices = {}) => store.update({
         ...choices,
         hasCompletedOnboarding: true,
-    }), [store]);
+    }, { requirePersistence: true }), [store]);
     const resetOnboarding = useCallback(() => store.update({ hasCompletedOnboarding: false }), [store]);
     const normalizedFuelSearchPreferences = useMemo(() => (
         normalizeFuelSearchPreferences(snapshot.preferences)
