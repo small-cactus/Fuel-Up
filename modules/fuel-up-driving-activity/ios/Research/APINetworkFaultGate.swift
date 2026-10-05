@@ -4,7 +4,8 @@ import Foundation
 // request's ordinary deadline/cancellation still releases every continuation.
 @MainActor final class APINetworkFaultGate {
   static let shared = APINetworkFaultGate()
-  private var enabled = false
+  nonisolated static let preferenceKey = "fuelup.dev.networkFaultsEnabled"
+  private var enabled = UserDefaults.standard.bool(forKey: preferenceKey)
   private var waiting: [UUID: CheckedContinuation<Void, Error>] = [:]
   func setEnabled(_ value: Bool) {
     enabled = value

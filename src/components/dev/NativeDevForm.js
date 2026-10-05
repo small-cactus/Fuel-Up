@@ -281,7 +281,7 @@ export default function NativeDevForm({
             ignoreSafeArea="all"
         >
             <Form>
-                <Section title="Network" footer={<Footer>Drop API responses so normal timeouts and fallbacks run. Resets when the app restarts.</Footer>}>
+                <Section title="Network" footer={<Footer>Drop API responses so normal timeouts and fallbacks run. Stays on until you turn it off.</Footer>}>
                     <Toggle label="Network Faults" systemImage="wifi.exclamationmark" isOn={faultsEnabled} onIsOnChange={setNetworkFaultsEnabled} />
                 </Section>
 

@@ -33,7 +33,11 @@ public final class FuelUpDrivingActivityModule: Module {
       }
     }
     Function("setNetworkFaultsEnabled") { (enabled: Bool) in
+      UserDefaults.standard.set(enabled, forKey: APINetworkFaultGate.preferenceKey)
       Task { @MainActor in APINetworkFaultGate.shared.setEnabled(enabled) }
+    }
+    Function("getNetworkFaultsEnabled") {
+      UserDefaults.standard.bool(forKey: APINetworkFaultGate.preferenceKey)
     }
     AsyncFunction("getNetworkStatusAsync") {
       await MainActor.run { () -> [String: Any] in

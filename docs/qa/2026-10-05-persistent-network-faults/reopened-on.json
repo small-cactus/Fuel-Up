@@ -1,0 +1,47 @@
+{
+  "afterChecks": {
+    "connected": true,
+    "recoveryGeneration": 0,
+    "services": [
+      {
+        "id": "prices",
+        "name": "Fuel prices",
+        "pending": null,
+        "status": "unresponsive"
+      },
+      {
+        "id": "history",
+        "name": "Price history",
+        "pending": null,
+        "status": "unresponsive"
+      },
+      {
+        "id": "memberships",
+        "name": "Memberships",
+        "pending": null,
+        "status": "unresponsive"
+      },
+      {
+        "id": "notifications",
+        "name": "Notifications",
+        "pending": null,
+        "status": "unresponsive"
+      },
+      {
+        "id": "research",
+        "name": "Driving research",
+        "pending": null,
+        "status": "unresponsive"
+      },
+      {
+        "id": "account",
+        "name": "Account services",
+        "pending": null,
+        "status": "unresponsive"
+      }
+    ]
+  },
+  "at": 1791219376088,
+  "gate": true,
+  "saved": true
+}

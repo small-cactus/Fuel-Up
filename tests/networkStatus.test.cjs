@@ -128,3 +128,25 @@ test('reconnection retries are real requests and never overlap an active request
     assert.equal(priceStatus(store).pending, null);
     assert.equal(priceStatus(store).status, 'responding');
 });
+
+test('saved fault setting gates the first request after restart and persists both toggle values', async () => {
+    let saved = false;
+    let calls = 0;
+    const launch = () => createAPITransport(async () => { calls++; return { status: 200 }; }, {
+        initialEnabled: saved, onEnabledChange: value => { saved = value; },
+    });
+    const first = launch();
+    first.setEnabled(true);
+    assert.equal(saved, true);
+    const reopened = launch();
+    assert.equal(reopened.getSnapshot(), true);
+    const store = createNetworkStatus({ timeoutMs: 5 });
+    await assert.rejects(store.fetch(pricesURL, {}, reopened.fetch), { name: 'TimeoutError' });
+    assert.equal(calls, 0, 'no request escapes before saved faults are restored');
+    reopened.setEnabled(false);
+    assert.equal(saved, false);
+    const reopenedAgain = launch();
+    assert.equal(reopenedAgain.getSnapshot(), false);
+    await store.fetch(pricesURL, {}, reopenedAgain.fetch);
+    assert.equal(calls, 1);
+});
