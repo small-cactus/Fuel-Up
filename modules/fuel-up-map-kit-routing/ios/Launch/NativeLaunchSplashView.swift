@@ -11,6 +11,7 @@ final class NativeLaunchSplashView: ExpoView {
   private var blurMask: CAGradientLayer { blurMaskView.gradient }
   private var host: UIHostingController<LaunchSplashArtwork>!
   private var reportedReady = false
+  private var capturedSystemAppearance = false
   private var displayLink: CADisplayLink?
   private var startedAt: CFTimeInterval?
   private var finished = false
@@ -31,9 +32,16 @@ final class NativeLaunchSplashView: ExpoView {
     addSubview(host.view)
   }
 
-  func setDark(_ dark: Bool) {
+  private func captureSystemAppearance() {
+    guard !capturedSystemAppearance, let scene = window?.windowScene else { return }
+    // React Native overrides the window for the in-app theme. The scene still
+    // carries the system appearance used by iOS's launch screen. Capture it once
+    // so restoring a saved app theme cannot recolor the splash mid-transition.
+    let dark = scene.traitCollection.userInterfaceStyle == .dark
+    capturedSystemAppearance = true
     model.dark = dark
     overrideUserInterfaceStyle = dark ? .dark : .light
+    host.overrideUserInterfaceStyle = dark ? .dark : .light
   }
 
   func setExiting(_ exiting: Bool) {
@@ -107,6 +115,7 @@ final class NativeLaunchSplashView: ExpoView {
       host.removeFromParent()
       return
     }
+    captureSystemAppearance()
     var responder: UIResponder? = self
     while let next = responder?.next {
       if let parent = next as? UIViewController {

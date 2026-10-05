@@ -45,7 +45,7 @@ export default function LaunchSplash() {
     }, [ready, nativeHidden, opacity, completeExit]);
     if (dismissed) return null;
     if (NativeSplash) {
-        return <NativeSplash testID="launch-splash" isDark={isDark} exiting={ready && nativeHidden}
+        return <NativeSplash testID="launch-splash" exiting={ready && nativeHidden}
             onArtworkReady={hideNative} onExitComplete={completeExit}
             pointerEvents={ready ? 'none' : 'auto'} style={styles.cover} />;
     }

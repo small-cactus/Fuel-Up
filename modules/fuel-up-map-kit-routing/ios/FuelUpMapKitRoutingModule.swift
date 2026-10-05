@@ -49,7 +49,6 @@ public final class FuelUpMapKitRoutingModule: Module {
 
     View(NativeLaunchSplashView.self) {
       ViewName("NativeLaunchSplashView")
-      Prop("isDark") { (view, dark: Bool) in view.setDark(dark) }
       Prop("exiting") { (view, exiting: Bool) in view.setExiting(exiting) }
       Events("onArtworkReady", "onExitComplete")
     }

@@ -35,6 +35,8 @@ for (const mapReady of [true, false]) {
         let view;
         await act(async () => { view = create(React.createElement(Splash)); });
         assert.equal(hidden, 0, 'keep OS artwork until native replacement is drawn');
+        assert.equal(view.root.findByType('NativeSplash').props.isDark, undefined,
+            'native splash follows system appearance, independent of the saved app theme');
         if (mapReady) await act(async () => state.finish());
         assert.equal(view.root.findByType('NativeSplash').props.exiting, false,
             'even an already-ready map waits for the OS handoff');
