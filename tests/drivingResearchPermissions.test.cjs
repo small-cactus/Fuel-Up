@@ -1,0 +1,115 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { execFileSync } = require('node:child_process');
+
+// Run the production permission methods against controllable system prompts.
+// This exercises interleaved screen/foreground/setup calls without changing
+// permission decisions on a tester's phone.
+test('research permission setup automatically requests notifications and serializes system prompts', () => {
+  const source = fs.readFileSync('modules/fuel-up-driving-activity/ios/Research/DrivingResearchCollector.swift', 'utf8');
+  const method = name => {
+    const start = source.indexOf(`  ${name}`);
+    assert.ok(start >= 0, name);
+    const open = source.indexOf('{', start);
+    let depth = 1, end = open + 1;
+    for (; depth && end < source.length; end++) {
+      if (source[end] === '{') depth++;
+      if (source[end] === '}') depth--;
+    }
+    return source.slice(start, end);
+  };
+  const methods = ['func requestPermissions()', 'private func continueLocationSetup()',
+    'func requestStopNotifications()', 'func researchScreenBecameActive()'].map(method).join('\n');
+  const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'fuel-research-permissions-'));
+  try {
+    fs.writeFileSync(path.join(folder, 'main.swift'), `
+import Foundation
+@MainActor final class UIApplication {
+  static let shared=UIApplication()
+  enum State {case active,inactive,background}
+  var applicationState=State.active
+}
+@MainActor final class DrivingResearchNotifications {
+  static let shared=DrivingResearchNotifications()
+  var value="Not requested", requests=0
+  var response:CheckedContinuation<Bool,Never>?
+  func permission() async -> String {value}
+  func requestPermission() async -> Bool {
+    requests+=1
+    return await withCheckedContinuation {response=$0}
+  }
+  func answer(_ allowed:Bool) {
+    value=allowed ? "On" : "Off"
+    response?.resume(returning:allowed);response=nil
+  }
+}
+@MainActor final class LocationManager {
+  enum Authorization {case notDetermined,authorizedWhenInUse,authorizedAlways,denied,restricted}
+  var authorizationStatus=Authorization.notDetermined
+  var requests=0
+  func requestWhenInUseAuthorization(){requests+=1}
+  func requestAlwaysAuthorization(){requests+=1}
+}
+@MainActor final class Collector {
+  var consented=false,permissionSetup=false,pendingLocationSetup=false
+  var notificationPermissionTask:Task<Void,Never>?
+  var notificationPermission="Checking",status=""
+  let manager=LocationManager()
+  var motionRequests=0
+  func requestMotion(){motionRequests+=1;permissionSetup=false}
+  func foreground(){continueLocationSetup()}
+${methods}
+}
+@main struct PermissionTests {
+  @MainActor static func settle() async {for _ in 0..<100 {await Task.yield()}}
+  @MainActor static func main() async {
+    let system=DrivingResearchNotifications.shared, app=UIApplication.shared
+    let c=Collector()
+    await c.researchScreenBecameActive()
+    c.requestPermissions();await settle()
+    assert(system.requests==0 && c.manager.requests==0,"No consent means no prompts")
+    c.consented=true;app.applicationState = .background
+    await c.researchScreenBecameActive();c.requestPermissions();await settle()
+    assert(system.requests==0,"Background callbacks cannot ask permission")
+    app.applicationState = .active
+    let screen=Task {await c.researchScreenBecameActive()}
+    await settle();assert(system.requests==1)
+    c.requestPermissions();c.requestPermissions();await settle()
+    assert(system.requests==1 && c.manager.requests==0,"Screen and setup share the same notification prompt")
+    app.applicationState = .inactive;system.answer(true)
+    await screen.value;await settle()
+    assert(c.manager.requests==0,"Location waits for alert dismissal")
+    app.applicationState = .active;c.foreground();await settle()
+    assert(c.manager.requests==1 && c.notificationPermission=="On")
+    c.foreground();assert(c.manager.requests==1,"Foreground cannot duplicate the location prompt")
+    let denied=Collector();denied.consented=true;system.value="Off"
+    await denied.researchScreenBecameActive();denied.requestPermissions();await settle()
+    assert(system.requests==1 && denied.manager.requests==1,"Denied notifications do not loop or block other setup")
+    let enrolled=Collector();enrolled.consented=true;system.value="Not requested"
+    let opening=Task {await enrolled.researchScreenBecameActive()}
+    await settle();assert(system.requests==2,"Existing participants are prompted on screen entry")
+    system.answer(false);await opening.value
+    await enrolled.researchScreenBecameActive()
+    assert(system.requests==2 && enrolled.notificationPermission=="Off")
+    print("PASS: consent, foreground, coalescing, sequential prompts, denial, existing participants")
+  }
+}
+`);
+    const binary = path.join(folder, 'permissions');
+    execFileSync('swiftc', ['-parse-as-library', path.join(folder, 'main.swift'), '-o', binary], { timeout: 60000 });
+    assert.match(execFileSync(binary, { encoding: 'utf8', timeout: 15000 }), /PASS:/);
+  } finally {
+    fs.rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+test('the research screen uses automatic setup after consent dismissal, with no separate notification button', () => {
+  const view = fs.readFileSync('modules/fuel-up-driving-activity/ios/Research/DrivingResearchView.swift', 'utf8');
+  assert.doesNotMatch(view, /Enable Stop Notifications|Button[^\n]*requestStopNotifications/);
+  assert.match(view, /if !collector\.consented && selectedVisit == nil && selectedTest == nil/);
+  assert.match(view, /if !showConsent \{await collector\.researchScreenBecameActive\(\)\}/);
+  assert.match(view, /onDismiss:[\s\S]*if shouldEnable \{await collector\.enable\(\)\}/);
+});

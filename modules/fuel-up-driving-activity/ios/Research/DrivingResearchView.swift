@@ -67,6 +67,7 @@ struct DrivingResearchScreen: View {
   @State private var confirmDelete = false
   @State private var confirmDeleteAgain = false
   @State private var showConsent = false
+  @State private var enableAfterConsent = false
   @State private var presentedIntroduction = false
   @State private var selectedVisit: ResearchVisit?
   @State private var selectedTest: String?
@@ -123,10 +124,6 @@ struct DrivingResearchScreen: View {
             if collector.motionPermission != "Allowed" {row("Motion & Fitness", collector.motionPermission, icon:"figure.walk")}
             if collector.notificationPermission != "On" && collector.notificationPermission != "Checking" {row("Stop Notifications",collector.notificationPermission,icon:"bell.badge")}
             if UIApplication.shared.backgroundRefreshStatus != .available {row("Background App Refresh","Off",icon:"arrow.clockwise")}
-            if collector.notificationPermission == "Not requested" {
-              Button("Enable Stop Notifications",systemImage:"bell") {Task {await collector.requestStopNotifications()}}
-                .frame(maxWidth:.infinity,alignment:.leading).frame(minHeight:44)
-            }
             if !collector.ready {
               Button("Finish Setup",systemImage:"checkmark.shield") {collector.requestPermissions()}
                 .frame(maxWidth:.infinity,alignment:.leading).frame(minHeight:44)
@@ -167,18 +164,33 @@ struct DrivingResearchScreen: View {
       collector.prepare();notificationTests.refresh();collector.resume(reason: "debug_screen");takeNotificationVisit()
       if !presentedIntroduction {
         presentedIntroduction = true
-        if selectedVisit == nil && selectedTest == nil { showConsent = true }
+        if !collector.consented && selectedVisit == nil && selectedTest == nil { showConsent = true }
       }
+      if !showConsent {await collector.researchScreenBecameActive()}
     }
     .onChange(of: collector.confirmationVisit?.id) {takeNotificationVisit()}
     .onChange(of: notificationTests.openTestID) {
       if let id=notificationTests.openTestID {selectedTest=id;notificationTests.openTestID=nil}
     }
-    .onChange(of: scenePhase) {if scenePhase == .active {collector.resume(reason: "foreground")}}
-    .sheet(isPresented: $showConsent) {
+    .onChange(of: scenePhase) {
+      if scenePhase == .active {
+        collector.resume(reason: "foreground")
+        if presentation.screenAppeared && !showConsent {
+          Task {await collector.researchScreenBecameActive()}
+        }
+      }
+    }
+    .sheet(isPresented: $showConsent, onDismiss: {
+      let shouldEnable=enableAfterConsent
+      enableAfterConsent=false
+      Task {
+        if shouldEnable {await collector.enable()}
+        else {await collector.researchScreenBecameActive()}
+      }
+    }) {
       DrivingResearchConsent(isConsented: collector.consented, onAgree: {
+        enableAfterConsent = !collector.consented
         showConsent = false
-        if !collector.consented { Task { await collector.enable() } }
       })
     }
     .confirmationDialog("Delete this phone’s research data?", isPresented: $confirmDelete, titleVisibility: .visible) {

@@ -53,6 +53,8 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   private var sessionID=UUID().uuidString.lowercased()
   private var lastQualityErrorAt=Date.distantPast
   private var permissionSetup=false
+  private var pendingLocationSetup=false
+  private var notificationPermissionTask:Task<Void,Never>?
   private let networkMonitor=NWPathMonitor()
   private var networkAvailable=false
   private var wifiNetwork=false
@@ -120,6 +122,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     } catch {issue=error.localizedDescription;status="Storage unavailable"}
   }
   func resume(reason:String) {
+    continueLocationSetup()
     permissionRevision+=1
     Task {notificationPermission=await DrivingResearchNotifications.shared.permission()}
     guard enabled,consented else {return}
@@ -156,17 +159,30 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       issue=nil;requestPermissions()
     } catch {issue="Could not enroll. Check your connection and try again."}
   }
-  // Explicit button only: prompts are never requested from a drive callback.
+  // One setup flow, entered from the research screen or consent action only.
   func requestPermissions() {
-    guard UIApplication.shared.applicationState == .active,consented else{return}
+    guard UIApplication.shared.applicationState == .active,consented,!permissionSetup else{return}
     permissionSetup=true
+    status="Finish permissions, then collection starts automatically"
+    Task {
+      await requestStopNotifications()
+      guard consented,permissionSetup else{return}
+      pendingLocationSetup=true
+      continueLocationSetup()
+    }
+  }
+  private func continueLocationSetup() {
+    // Authorization alerts can leave the app inactive until their dismissal
+    // completes. Foreground resume continues the sequence without another tap.
+    guard pendingLocationSetup,UIApplication.shared.applicationState == .active else{return}
+    pendingLocationSetup=false
+    guard consented,permissionSetup else{return}
     switch manager.authorizationStatus {
     case .notDetermined:manager.requestWhenInUseAuthorization()
     case .authorizedWhenInUse:manager.requestAlwaysAuthorization()
     case .authorizedAlways:requestMotion()
     default:permissionSetup=false
     }
-    status="Finish permissions, then collection starts automatically"
   }
   private func requestMotion() {
     permissionSetup=false
@@ -177,6 +193,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     } else {resume(reason:"permissions")}
   }
   func pause() {
+    permissionSetup=false;pendingLocationSetup=false
     record("consent",["version":1,"enabled":false])
     enabled=false;UserDefaults.standard.set(false,forKey:Self.enabledKey)
     DrivingResearchNotifications.shared.cancelAll()
@@ -219,7 +236,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   }
   func locationManagerDidChangeAuthorization(_ manager:CLLocationManager) {
     permissionRevision+=1
-    if permissionSetup,UIApplication.shared.applicationState == .active {
+    if permissionSetup,notificationPermissionTask == nil,!pendingLocationSetup,UIApplication.shared.applicationState == .active {
       if manager.authorizationStatus == .authorizedWhenInUse {manager.requestAlwaysAuthorization()}
       else if manager.authorizationStatus == .authorizedAlways {requestMotion()}
       else if manager.authorizationStatus == .denied || manager.authorizationStatus == .restricted {permissionSetup=false}
@@ -281,9 +298,24 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   }
   private func saveDetector() {UserDefaults.standard.set(try? JSONEncoder().encode(detector),forKey:"research.detector")}
   func requestStopNotifications() async {
+    if let task=notificationPermissionTask {await task.value;return}
     guard consented,UIApplication.shared.applicationState == .active else{return}
-    _=await DrivingResearchNotifications.shared.requestPermission()
-    notificationPermission=await DrivingResearchNotifications.shared.permission()
+    let task=Task { @MainActor in
+      let notifications=DrivingResearchNotifications.shared
+      notificationPermission=await notifications.permission()
+      guard consented,UIApplication.shared.applicationState == .active else{return}
+      if notificationPermission == "Not requested" {
+        _=await notifications.requestPermission()
+        notificationPermission=await notifications.permission()
+      }
+    }
+    notificationPermissionTask=task
+    await task.value
+    notificationPermissionTask=nil
+  }
+  func researchScreenBecameActive() async {
+    guard !permissionSetup else{return}
+    await requestStopNotifications()
   }
   func refreshConfirmations() {
     prepare()
