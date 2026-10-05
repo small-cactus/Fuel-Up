@@ -1,0 +1,63 @@
+{
+  "at": "2026-10-05T15:18:27.400Z",
+  "providerRequests": 0,
+  "runId": 5936,
+  "summarized": 72,
+  "batches": [
+    {
+      "jobId": 425645,
+      "objectPath": "5936/425645/48a0202d-225c-481f-aaff-0943f42c53df.json.gz",
+      "sha256": "648d1f3ec7c7033275177c234a6f1d153651fca031df88fa729f1b00969c657e",
+      "stations": 2000,
+      "priced": 1416,
+      "bytes": 60603,
+      "executionRegion": "us-west-1",
+      "startedAt": "2026-10-05T14:03:31.711Z",
+      "observedAt": "2026-10-05T14:03:33.615Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-10-05T14:03:33.186Z",
+        "elapsedMs": 1475,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a45cf8633bcc6bb4-SJC",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Mon, 05 Oct 2026 14:03:33 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 852340,
+        "fullElapsedMs": 1891
+      }
+    },
+    {
+      "jobId": 425647,
+      "objectPath": "5936/425647/804ad4bf-3271-4e87-9cfb-de2b51e8eafe.json.gz",
+      "sha256": "dd202241a3a96ecec3386a4eb4be801959e602df50e31603f0ae812a47db90b5",
+      "stations": 1747,
+      "priced": 1188,
+      "bytes": 55033,
+      "executionRegion": "us-west-1",
+      "startedAt": "2026-10-05T14:34:53.518Z",
+      "observedAt": "2026-10-05T14:34:55.875Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-10-05T14:34:55.411Z",
+        "elapsedMs": 1893,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a45d2654ab57ed3e-SJC",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Mon, 05 Oct 2026 14:34:55 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 771435,
+        "fullElapsedMs": 2345
+      }
+    }
+  ],
+  "scope": "Missing derived summaries only; immutable archives and serving station projection unchanged."
+}

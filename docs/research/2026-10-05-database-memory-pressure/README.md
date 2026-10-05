@@ -51,9 +51,9 @@ This mitigation is **not a complete capacity fix**. At 15:06:29, a subsequent 60
 
 ## Capacity option declined
 
-The live dashboard requires Pro to change compute. Recommended next step: Pro plus Small (2 GB RAM), approximately $30/month base before tax ($25 Pro + roughly $15 Small minus $10 compute credit), assuming the organization's one project and existing credits. The user chose to keep the current plan. No paid upgrade was purchased or applied. Configuration tuning on the existing server is being investigated instead. Small provides more headroom than Micro's 1 GB against the observed commitment, but improvement still needs verification after the resize.
+The live dashboard requires Pro to change compute. Recommended next step: Pro plus Small (2 GB RAM), approximately $30/month base before tax ($25 Pro + roughly $15 Small minus $10 compute credit), assuming the organization's one project and existing credits. The user chose to keep the current plan. No paid upgrade was purchased or applied. The existing server was tuned as described below. Small provides more headroom than Micro's 1 GB against the observed commitment, but improvement still needs verification after the resize.
 
-After approval/resize, verify the provisioned tier, database health, Home endpoint, scheduled ingestion, archive read-back and resource counters. Continue monitoring actual swap/IO pressure; a single successful request is insufficient. Do not extend the research windows.
+A future resize still needs explicit authorization. Continue monitoring actual swap/IO pressure; a single successful request is insufficient. Do not extend the research windows.
 
 Repeatable read-only diagnostic:
 
@@ -64,3 +64,32 @@ node scripts/operations/databasePressure.mjs 60
 It obtains the existing service credential in memory, calls only the authenticated Supabase resource-metrics endpoint, and outputs sanitized counters. It does not collect provider data. If counters do not advance, the result is explicitly inconclusive rather than idle/healthy.
 
 Sources: [Supabase memory/swap explanation](https://supabase.com/docs/guides/troubleshooting/memory-and-swap-usage-explained-aPNgm0), [compute sizes/pricing](https://supabase.com/docs/guides/platform/compute-and-disk), [billing credits](https://supabase.com/docs/guides/platform/billing-faq), plus authenticated project infrastructure and billing pages inspected during this investigation.
+
+
+## No-cost configuration mitigation after the user declined an upgrade
+
+Supabase generated `shared_buffers=224MB` (28,672 8 KiB pages) with no existing custom overrides. This reserves about 54.5% of the host's 411 MiB physical RAM for PostgreSQL's shared cache alone. PostgreSQL's documentation recommends leaving more room for the OS on machines below 1 GB. Given heavy system/swap IO and comparatively low database-disk utilization, we tested trading some database cache for process/OS headroom.
+
+Applied only `shared_buffers=96MB` through the supported Supabase CLI; all other settings and the Free/Nano plan remain unchanged. PostgreSQL restarted at 15:11:34. The running setting is 12,288 8 KiB pages with `pending_restart=false`; the 60-connection limit and 2,184 KiB work memory were unchanged. The first health query during shutdown failed normally; subsequent queries confirmed startup and the new setting. No extra restart was issued.
+
+At 15:12:20, scheduled collection had reached 55/72 batches; at 15:13:49 it reached 63/72, with zero missed batches. Home returned prices in 1,350 ms and 830 ms while collection continued. Archive read-back again verified all three fixed regions, with the east sample after this configuration restart; the western samples had already completed.
+
+The first advancing 61.3-second resource interval after the change measured 250 MB swap-in plus 214 MB swap-out, with 20.3% CPU IO wait, compared with 581 MB + 524 MB and 48.0% before the configuration change. This is an encouraging reduction, **not** a controlled causal benchmark: both restart effects and batch mix can influence it, and significant swapping remains. Do not claim the daily recurrence permanently fixed until subsequent collection cycles remain healthy.
+
+Repeat/rollback commands and safety boundaries are in `scripts/operations/README.md`. Review or remove this Nano-specific override if compute is resized later. No paid plan or compute change was made.
+
+Configuration references: [Supabase supported custom settings and restart behavior](https://supabase.com/docs/guides/database/custom-postgres-config), [PostgreSQL shared buffer sizing](https://www.postgresql.org/docs/current/runtime-config-resource.html).
+
+
+### Subsequent verification
+
+- A second advancing 61.0-second interval at 15:16:04 measured 254 MB swap-in plus 261 MB swap-out and 20.3% CPU IO wait. The observed reduction persisted into the end of the scheduled sweep, but substantial swapping remains.
+- Run 5982 completed all 72 batches / 141,660 IDs at 15:15:34 with zero missed batches. All matching derived summaries were present; the ten Trends scopes advanced to that run at 15:17:00. The latest saved serving timeout remained 15:10:11, before the configuration restart.
+- Regular, midgrade, premium and diesel returned successful validated responses. The generic all-grades probe stopped on E85 because it incorrectly requires every station to have a numeric price. A focused E85 check returned HTTP 200 with 13 stations, ten legitimately unpriced E85-capable stations and no invalid numeric prices. This is the existing availability policy, not evidence that all-grades probe passed. No assertion was weakened and no production price rule changed.
+- The 24-city campaign remained active, with no overdue work at 15:12, unchanged 54 historical missed slots and 55,080 observations. The next city-hour window starts at 15:19.
+
+Two missing 14:00 run summaries were subsequently recovered, after the 15:00 sweep completed, from SHA-verified immutable objects using the existing guarded `record_fuel_national_trend_batch` RPC. Run 5936 now has all 72 matching summaries. Only previously missing derived totals were inserted; no raw observations or serving-station rows were changed, and there were zero provider requests. See `recovered-history.json`.
+
+## Final status for this intervention
+
+Two tested mitigations are live: narrower trend aggregation and a smaller shared cache on the same Free/Nano server. The immediate checks improved and the scheduled sweep completed. Significant swap activity remains; a daily no-recurrence claim is not established. Keep monitoring later scheduled cycles under real load, especially the next full sweep. A paid upgrade remains declined, with no pending approval or purchase.

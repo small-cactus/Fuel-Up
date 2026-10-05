@@ -1,0 +1,41 @@
+[
+  {
+    "jsonb_build_object": {
+      "at": "2026-10-05T15:12:20.963911+00:00",
+      "postmaster_start": "2026-10-05T15:11:34.267038+00:00",
+      "run": {
+        "archive_bytes": 2702602,
+        "completed_at": null,
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 5982,
+        "missed_batches": 0,
+        "observed_stations": 107960,
+        "priced_stations": 65918,
+        "slot_at": "2026-10-05T15:00:00+00:00",
+        "status": "running",
+        "succeeded_batches": 55
+      },
+      "settings": [
+        {
+          "name": "max_connections",
+          "pending_restart": false,
+          "setting": "60",
+          "unit": null
+        },
+        {
+          "name": "shared_buffers",
+          "pending_restart": false,
+          "setting": "12288",
+          "unit": "8kB"
+        },
+        {
+          "name": "work_mem",
+          "pending_restart": false,
+          "setting": "2184",
+          "unit": "kB"
+        }
+      ]
+    }
+  }
+]

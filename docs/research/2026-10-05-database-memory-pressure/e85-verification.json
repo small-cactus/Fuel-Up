@@ -1,0 +1,39 @@
+{
+  "httpStatus": 200,
+  "milliseconds": 2152,
+  "stations": 13,
+  "unpriced": 10,
+  "unpricedSample": {
+    "providerId": "gasbuddy",
+    "providerTier": "station",
+    "stationId": "159110",
+    "stationName": "Thorntons",
+    "brandNames": [
+      "Thorntons"
+    ],
+    "address": "4103 Gunn Hwy, Carrollwood, FL, 33618",
+    "latitude": 28.040848217703,
+    "longitude": -82.508914171558,
+    "fuelType": "e85",
+    "price": null,
+    "allPrices": {},
+    "offersE85": true,
+    "currency": "USD",
+    "priceUnit": "gallon",
+    "distanceMiles": 6.99,
+    "fetchedAt": "2026-10-05T15:16:41.861Z",
+    "updatedAt": null,
+    "isEstimated": false,
+    "sourceLabel": "GasBuddy",
+    "rating": 4.6,
+    "userRatingCount": 277,
+    "observedAt": "2026-10-05T15:07:05.016+00:00",
+    "validation": null,
+    "validationByFuelType": {},
+    "availableFuelGrades": [
+      "e85"
+    ]
+  },
+  "invalidPrices": [],
+  "source": "national-cache"
+}
