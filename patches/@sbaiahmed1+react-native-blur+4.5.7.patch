@@ -361,7 +361,7 @@ diff -ruN /tmp/package/ios/Views/ProgressiveBlurView.swift node_modules/@sbaiahm
 diff --git a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift
 --- a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift
 +++ b/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurView.swift
-@@ -28,6 +28,33 @@
+@@ -28,6 +28,34 @@
    private var maxBlurRadius: CGFloat = 20
    private var direction: VariableBlurDirection = .blurredTopClearBottom
    private var startOffset: CGFloat = 0
@@ -371,6 +371,7 @@ diff --git a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurVi
 +  private var radialCenterY: CGFloat = 0.5
 +  private var radialClearRadius: CGFloat = 0
 +  private var radialFeather: CGFloat = 120
++  private var radialGradientExponent: CGFloat = 1
 +  private var currentBlurStyle: UIBlurEffect.Style = .regular
 +  private var appliedBlurStyle: UIBlurEffect.Style?
 +  private var variableBlurFilter: NSObject?
@@ -395,7 +396,7 @@ diff --git a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurVi
 
    public init(
      maxBlurRadius: CGFloat = 20,
-@@ -38,6 +65,9 @@
+@@ -38,6 +66,9 @@
      self.maxBlurRadius = maxBlurRadius
      self.direction = direction
      self.startOffset = startOffset
@@ -405,7 +406,7 @@ diff --git a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurVi
 
      super.init(effect: UIBlurEffect(style: blurStyle))
 
-@@ -53,27 +83,48 @@
+@@ -53,27 +84,54 @@
      maxBlurRadius: CGFloat,
      direction: VariableBlurDirection,
      startOffset: CGFloat,
@@ -416,7 +417,8 @@ diff --git a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurVi
 +    radialClearRadius: CGFloat,
 +    radialFeather: CGFloat,
 +    blurStyle: UIBlurEffect.Style = .regular,
-+    linearTransition: Bool = false
++    linearTransition: Bool = false,
++    radialGradientExponent: CGFloat = 1
    ) {
      self.maxBlurRadius = maxBlurRadius
      self.direction = direction
@@ -427,6 +429,11 @@ diff --git a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurVi
 +    self.radialCenterY = radialCenterY
 +    self.radialClearRadius = radialClearRadius
 +    self.radialFeather = radialFeather
++    let exponent = min(4, max(1, radialGradientExponent))
++    if self.radialGradientExponent != exponent {
++      self.radialGradientExponent = exponent
++      cachedRadialGradient = nil
++    }
 +    self.linearTransition = linearTransition
 +    self.currentBlurStyle = blurStyle
 +
@@ -462,7 +469,7 @@ diff --git a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurVi
        NSSelectorFromString(selName),
        with: "variableBlur"
      )?.takeUnretainedValue() as? NSObject else {
-@@ -81,7 +132,10 @@
+@@ -81,7 +139,10 @@
        return
      }
 
@@ -473,7 +480,7 @@ diff --git a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurVi
        startOffset: startOffset,
        direction: direction
      )
-@@ -90,27 +144,140 @@
+@@ -90,27 +151,140 @@
      variableBlur.setValue(gradientImage, forKey: "inputMaskImage")
      variableBlur.setValue(true, forKey: "inputNormalizeEdges")
 
@@ -629,7 +636,7 @@ diff --git a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurVi
    }
 
    open override func traitCollectionDidChange(
-@@ -120,8 +287,14 @@
+@@ -120,8 +294,14 @@
      // Re-setup blur if needed when trait collection changes
      if let previousTraitCollection = previousTraitCollection,
         traitCollection.userInterfaceStyle != previousTraitCollection.userInterfaceStyle {
@@ -646,7 +653,7 @@ diff --git a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurVi
    }
 
    private func makeGradientImage(
-@@ -130,6 +303,10 @@
+@@ -130,6 +310,10 @@
      startOffset: CGFloat,
      direction: VariableBlurDirection
    ) -> CGImage {
@@ -657,7 +664,7 @@ diff --git a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurVi
      switch direction {
      case .blurredCenterClearTopAndBottom:
        return makeCenterGradientImage(
-@@ -138,17 +315,23 @@
+@@ -138,17 +322,23 @@
          edgeOffset: startOffset
        )
      case .blurredTopClearBottom, .blurredBottomClearTop:
@@ -690,7 +697,7 @@ diff --git a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurVi
 
        guard let output = ciGradientFilter.outputImage else {
          return makeFallbackMask(width: width, height: height)
-@@ -163,6 +346,69 @@
+@@ -163,6 +353,69 @@
 
        return cg
      }
@@ -760,7 +767,7 @@ diff --git a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurVi
    }
 
    private func makeCenterGradientImage(
-@@ -270,4 +516,372 @@
+@@ -270,4 +523,373 @@
      context.fill(CGRect(x: 0, y: 0, width: width, height: height))
      return context.makeImage()!
    }
@@ -1068,11 +1075,12 @@ diff --git a/node_modules/@sbaiahmed1/react-native-blur/ios/Views/VariableBlurVi
 +    }
 +
 +    let colorSpace = CGColorSpaceCreateDeviceRGB()
-+    let colors = [
-+      UIColor.clear.cgColor,
-+      UIColor.black.cgColor
-+    ] as CFArray
-+    let locations: [CGFloat] = [0, 1]
++    // Bias toward low radii inside the same spatial band. Default 1 retains
++    // the original linear profile for all existing callers.
++    let locations: [CGFloat] = (0...32).map { CGFloat($0) / 32 }
++    let colors = locations.map {
++      UIColor.black.withAlphaComponent(pow($0, radialGradientExponent)).cgColor
++    } as CFArray
 +    let gradient = CGGradient(
 +      colorsSpace: colorSpace,
 +      colors: colors,

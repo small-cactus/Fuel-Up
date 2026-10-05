@@ -15,6 +15,8 @@ final class NativeLaunchSplashView: ExpoView {
   private var displayLink: CADisplayLink?
   private var startedAt: CFTimeInterval?
   private var finished = false
+  private var mapBubble: MapBubbleRevealView?
+  private var warmupFrames = 2
 
   required init(appContext: AppContext? = nil) {
     super.init(appContext: appContext)
@@ -51,43 +53,60 @@ final class NativeLaunchSplashView: ExpoView {
   }
 
   func setExiting(_ exiting: Bool) {
-    guard exiting, startedAt == nil, !finished else { return }
+    guard exiting, displayLink == nil, startedAt == nil, !finished else { return }
     model.reduceMotion = UIAccessibility.isReduceMotionEnabled
+    if !model.reduceMotion, let window,
+       let map = MapBubbleRevealView.findHomeMap(in: window) {
+      mapBubble = MapBubbleRevealView(map: map)
+      mapBubble?.layoutIfNeeded()
+    }
     backdrop.isHidden = model.reduceMotion
-    startedAt = CACurrentMediaTime()
     let link = CADisplayLink(target: self, selector: #selector(tick))
     displayLink = link
     link.add(to: .main, forMode: .common)
   }
 
   @objc private func tick() {
-    guard let startedAt else { return }
+    guard let startedAt else {
+      // Render the new Metal surface under the opaque artwork before starting
+      // the clock, so initial shader setup cannot skip the opening frames.
+      warmupFrames -= 1
+      if warmupFrames <= 0 { self.startedAt = CACurrentMediaTime() }
+      return
+    }
     // Give UIKit and SwiftUI a display interval to render the fully clear state
     // before React removes the native view. Completion must not reveal a new frame.
     if model.progress >= 1 {
       displayLink?.invalidate()
       displayLink = nil
       finished = true
+      mapBubble?.removeFromSuperview()
+      mapBubble = nil
       onFinished?()
       onExitComplete([:])
       return
     }
     let duration = model.reduceMotion ? 0.18 : 1.55
     model.progress = min(1, (CACurrentMediaTime() - startedAt) / duration)
+    mapBubble?.update(progress: model.progress)
     updateBlurMask()
   }
 
   private func updateBlurMask() {
     guard !model.reduceMotion, bounds.width > 0, bounds.height > 0 else { return }
     let t = min(1, max(0, model.progress))
-    // Scale the whole blur profile, not just its clear center. Its inner 58%
-    // stays clear and its outer 42% ramps to full blur at every frame, so the
+    // Scale the whole blur profile, not just its clear center. Its inner 54%
+    // stays clear and its outer 46% ramps to full blur at every frame, so the
     // progressive band widens with the bubble instead of sliding as a fixed rim.
     // Ease the shared scale for a quick opening and a soft landing at the edges.
     let eased = 1 - pow(1 - t, 2.4)
     let cornerRadius = hypot(bounds.width, bounds.height) / 2
-    let clearFraction = 0.58
+    let clearFraction = 0.54
     let bubbleRadius = (cornerRadius + 2) * eased / clearFraction
+    // Preserve those boundaries while increasingly favoring low blur within
+    // the band near the edges: alpha = distanceFraction ^ exponent.
+    let edgeProgress = min(1, max(0, (eased - 0.35) / 0.65))
+    let softening = edgeProgress * edgeProgress * (3 - 2 * edgeProgress)
     backdrop.updateBlur(
       maxBlurRadius: 28,
       direction: .blurredBottomClearTop,
@@ -96,7 +115,8 @@ final class NativeLaunchSplashView: ExpoView {
       radialCenterX: 0.5, radialCenterY: 0.5,
       radialClearRadius: bubbleRadius * clearFraction,
       radialFeather: bubbleRadius * (1 - clearFraction),
-      blurStyle: .regular
+      blurStyle: .regular,
+      radialGradientExponent: 1 + 1.2 * softening
     )
   }
 
@@ -116,6 +136,8 @@ final class NativeLaunchSplashView: ExpoView {
   override func didMoveToWindow() {
     super.didMoveToWindow()
     if window == nil {
+      mapBubble?.removeFromSuperview()
+      mapBubble = nil
       displayLink?.invalidate()
       displayLink = nil
       host.willMove(toParent: nil)

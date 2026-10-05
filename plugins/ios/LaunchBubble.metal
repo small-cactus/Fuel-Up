@@ -2,6 +2,22 @@
 #include <SwiftUI/SwiftUI_Metal.h>
 using namespace metal;
 
+// An outward refraction wave on a snapshot of the actual rendered Home map.
+// Shares the blur's eased radius; the crest sits just inside its clear front.
+[[ stitchable ]] half4 fuelUpMapBubble(float2 position, SwiftUI::Layer layer,
+                                      float2 size, float progress) {
+    if (progress <= 0.0 || progress >= 1.0) return layer.sample(position);
+    float2 delta = position - size * 0.5;
+    float distance = length(delta);
+    float radius = max(length(size * 0.5), 1.0);
+    float front = 1.0 - pow(1.0 - progress, 2.4);
+    float crest = exp(-pow((distance / radius - front + 0.07) / 0.20, 2.0));
+    float displacement = 24.0 * sin(M_PI_F * progress) * crest
+                       * (1.0 - exp(-distance / 70.0));
+    float2 samplePosition = position - delta / max(distance, 0.001) * displacement;
+    return layer.sample(clamp(samplePosition, float2(0.5), max(size - 0.5, float2(0.5))));
+}
+
 // One bounded sampling pass over the splash only. The real map stays untouched.
 [[ stitchable ]] half4 fuelUpLaunchBubble(float2 position, SwiftUI::Layer layer,
                                          float2 size, float progress) {
