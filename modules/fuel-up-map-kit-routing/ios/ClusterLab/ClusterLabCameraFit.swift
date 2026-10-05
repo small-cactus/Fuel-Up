@@ -5,6 +5,14 @@ import CoreGraphics
 // use exact contact intervals; dense searches use bounded layout sampling.
 // Count capsules are included in the width budget in both cases.
 enum ClusterLabCameraFit {
+  static func belowHeader(_ usable: CGRect) -> CGRect {
+    // Moving only the top edge 50pt lowers the framing center 25pt and keeps
+    // the bottom clear of the station card. Cap it in short landscape layouts.
+    let clearance = min(50, max(0, usable.height - 64))
+    return CGRect(x: usable.minX, y: usable.minY + clearance,
+                  width: usable.width, height: usable.height - clearance)
+  }
+
   static func rect(for stations: [LabProjectedStation], viewport: CGSize,
                    usable: CGRect, maximumScale: CGFloat, userLocation: CGPoint? = nil) -> CGRect? {
     guard !stations.isEmpty, usable.width > 120, usable.height > 32,

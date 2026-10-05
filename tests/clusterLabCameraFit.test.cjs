@@ -42,9 +42,28 @@ func random() -> CGFloat {
   return CGFloat((seed >> 32) % 10000) / 10
 }
 for _ in 0..<100 { fixtures.append((0..<15).map { point($0, random(), random()) }) }
+// Home's wordmark adds 50pt of top clearance: overview framing moves down
+// exactly 25pt without borrowing space from the bottom station card.
+for size in [CGSize(width: 320, height: 568), CGSize(width: 440, height: 956)] {
+  let previous = CGRect(x: 17, y: 76, width: size.width - 34, height: size.height - 178)
+  let current = ClusterLabCameraFit.belowHeader(previous)
+  let stations = [point(0, 0, 0), point(1, 1000, 0)]
+  let before = ClusterLabCameraFit.rect(for: stations, viewport: size, usable: previous, maximumScale: 2)!
+  let after = ClusterLabCameraFit.rect(for: stations, viewport: size, usable: current, maximumScale: 2)!
+  assert(abs(after.width - before.width) < 0.000001, "horizontal fit must retain zoom")
+  let scale = size.width / after.width
+  assert(abs((before.minY - after.minY) * scale - 25) < 0.000001, "overview must move down 25pt")
+  assert(current.maxY == previous.maxY, "station card clearance must stay unchanged")
+}
+for height: CGFloat in [47, 64, 80, 114] {
+  let previous = CGRect(x: 17, y: 37, width: 300, height: height)
+  let current = ClusterLabCameraFit.belowHeader(previous)
+  assert(current.height >= min(height, 64), "short layouts must remain usable")
+  assert(current.maxY == previous.maxY, "short layouts must retain bottom clearance")
+}
 for size in [CGSize(width: 320, height: 568), CGSize(width: 375, height: 812),
              CGSize(width: 440, height: 956), CGSize(width: 812, height: 375)] {
-  let usable = CGRect(x: 17, y: 76, width: size.width - 34, height: size.height - 178)
+  let usable = ClusterLabCameraFit.belowHeader(CGRect(x: 17, y: 76, width: size.width - 34, height: size.height - 178))
   assert(ClusterLabCameraFit.rect(for: [], viewport: size, usable: usable, maximumScale: 2) == nil)
   for stations in fixtures {
     let fit = ClusterLabCameraFit.rect(for: stations, viewport: size, usable: usable, maximumScale: 2)!

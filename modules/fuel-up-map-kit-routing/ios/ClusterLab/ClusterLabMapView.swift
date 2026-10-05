@@ -231,9 +231,10 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   var fitBounds: CGRect {
     // Points are the native iOS layout unit. The 2pt allowance also protects the
     // requested 15pt empty margin from projection rounding and glass refraction.
-    bounds.inset(by: UIEdgeInsets(top: safeAreaInsets.top + 17, left: safeAreaInsets.left + 17,
+    let usable = bounds.inset(by: UIEdgeInsets(top: safeAreaInsets.top + 17, left: safeAreaInsets.left + 17,
                                  bottom: max(safeAreaInsets.bottom + 17, min(overlayBottomInset, bounds.height - safeAreaInsets.top - 64)),
                                  right: safeAreaInsets.right + 17))
+    return ClusterLabCameraFit.belowHeader(usable)
   }
 
   func setOverlayBottomInset(_ value: CGFloat) {
