@@ -10,10 +10,11 @@ using namespace metal;
     float2 delta = position - size * 0.5;
     float distance = length(delta);
     float radius = max(length(size * 0.5), 1.0);
-    float front = 1.0 - pow(1.0 - progress, 2.4);
+    float front = 1.0 - pow(1.0 - progress, 3.0);
     float crest = exp(-pow((distance / radius - front + 0.07) / 0.20, 2.0));
+    float outwardDamping = 1.0 - 0.65 * smoothstep(0.15, 1.0, distance / radius);
     float displacement = 18.0 * sin(M_PI_F * progress) * crest
-                       * (1.0 - exp(-distance / 70.0));
+                       * (1.0 - exp(-distance / 70.0)) * outwardDamping;
     float2 samplePosition = position - delta / max(distance, 0.001) * displacement;
     return layer.sample(clamp(samplePosition, float2(0.5), max(size - 0.5, float2(0.5))));
 }

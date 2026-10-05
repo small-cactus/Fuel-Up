@@ -56,7 +56,7 @@ final class NativeLaunchSplashView: ExpoView {
     guard exiting, displayLink == nil, startedAt == nil, !finished else { return }
     model.reduceMotion = UIAccessibility.isReduceMotionEnabled
     if !model.reduceMotion, let window,
-       let map = MapBubbleRevealView.findHomeMap(in: window) {
+       let map = MapBubbleRevealView.findRevealMap(in: window) {
       mapBubble = MapBubbleRevealView(map: map)
       mapBubble?.layoutIfNeeded()
     }
@@ -86,7 +86,7 @@ final class NativeLaunchSplashView: ExpoView {
       onExitComplete([:])
       return
     }
-    let duration = model.reduceMotion ? 0.18 : 1.55
+    let duration = model.reduceMotion ? 0.18 : LaunchSplashModel.revealDuration
     model.progress = min(1, (CACurrentMediaTime() - startedAt) / duration)
     mapBubble?.update(progress: model.progress)
     updateBlurMask()
@@ -99,7 +99,7 @@ final class NativeLaunchSplashView: ExpoView {
     // stays clear and its outer 46% ramps to full blur at every frame, so the
     // progressive band widens with the bubble instead of sliding as a fixed rim.
     // Ease the shared scale for a quick opening and a soft landing at the edges.
-    let eased = 1 - pow(1 - t, 2.4)
+    let eased = 1 - pow(1 - t, 3)
     let cornerRadius = hypot(bounds.width, bounds.height) / 2
     let clearFraction = 0.54
     let bubbleRadius = (cornerRadius + 2) * eased / clearFraction
@@ -158,6 +158,7 @@ final class NativeLaunchSplashView: ExpoView {
 }
 
 private final class LaunchSplashModel: ObservableObject {
+  static let revealDuration = 1.85
   @Published var artwork: UIImage?
   @Published var dark = false
   @Published var progress = 0.0
@@ -181,7 +182,7 @@ private struct LaunchSplashArtwork: View {
         .background(model.dark ? Color.black : Color.white)
         .environment(\.colorScheme, model.dark ? .dark : .light)
         .layerEffect(
-          ShaderLibrary.default.fuelUpLaunchBubble(.float2(geometry.size), .float(min(1, model.progress * (1.55 / 0.90)))),
+          ShaderLibrary.default.fuelUpLaunchBubble(.float2(geometry.size), .float(min(1, model.progress * (LaunchSplashModel.revealDuration / 0.90)))),
           maxSampleOffset: CGSize(width: 44, height: 44),
           isEnabled: !model.reduceMotion
         )

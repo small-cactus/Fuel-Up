@@ -1,12 +1,12 @@
 import SwiftUI
 
-/// A short-lived Metal surface over the rendered map, below Home's controls.
+/// A short-lived Metal surface over the rendered Home or Welcome map.
 /// The map camera and cluster geometry stay in place throughout the reveal.
 final class MapBubbleRevealView: UIView {
   private let model: MapBubbleRevealModel
   private let host: UIHostingController<MapBubbleArtwork>
 
-  init?(map: ClusterLabMapView) {
+  init?(map: UIView) {
     guard map.bounds.width > 0, map.bounds.height > 0 else { return nil }
     let format = UIGraphicsImageRendererFormat()
     format.opaque = true
@@ -53,11 +53,11 @@ final class MapBubbleRevealView: UIView {
     }
   }
 
-  static func findHomeMap(in view: UIView) -> ClusterLabMapView? {
+  static func findRevealMap(in view: UIView) -> UIView? {
     guard !view.isHidden, view.alpha > 0 else { return nil }
-    if let map = view as? ClusterLabMapView { return map }
+    if view is ClusterLabMapView || view is OnboardingWelcomeMapView { return view }
     for child in view.subviews {
-      if let map = findHomeMap(in: child) { return map }
+      if let map = findRevealMap(in: child) { return map }
     }
     return nil
   }

@@ -24,11 +24,13 @@ struct OnboardingWelcomePage: View {
   }
 }
 
+final class OnboardingWelcomeMapView: MKMapView {}
+
 struct OnboardingWelcomeMap: UIViewRepresentable {
   var onMapReady: () -> Void
   func makeCoordinator() -> Coordinator { Coordinator(onMapReady) }
   func makeUIView(context: Context) -> MKMapView {
-    let map = MKMapView()
+    let map = OnboardingWelcomeMapView()
     map.delegate = context.coordinator
     map.isScrollEnabled = false; map.isZoomEnabled = false; map.isRotateEnabled = false; map.isPitchEnabled = false
     map.showsCompass = false
