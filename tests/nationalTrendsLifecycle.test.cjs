@@ -2,7 +2,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const React = require('react');
 const { act, create } = require('react-test-renderer');
-const load = require('./helpers/loadComponent.cjs');
+const loadComponent = require('./helpers/loadComponent.cjs');
+function load(file, mocks) {
+    const cache = loadComponent('src/services/fuel/nationalTrendsCache.js', {
+        './nationalLeaderboard': mocks['../../services/fuel/nationalLeaderboard'],
+    });
+    return loadComponent(file, { ...mocks, '../../services/fuel/nationalTrendsCache': cache });
+}
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
 test('switching national grades or leaving the screen cancels stale responses; initial loads do not pull the page down', async () => {

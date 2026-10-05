@@ -3,15 +3,10 @@ import { useFocusEffect } from 'expo-router';
 import { AppState } from 'react-native';
 import { fetchNationalTrends } from '../../services/fuel/nationalLeaderboard';
 import { isFreshReportedQuote, REPORTED_PRICE_MAX_AGE_MS } from '../../services/fuel/reportedPrices';
-const CACHE_TTL_MS = 60 * 60000;
-// Ten grade/filter combinations. Cache only successful responses, keyed by reset
-// generation too, so returning to a recently viewed scope needs no network wait.
-const cache = new Map();
-function remember(scope, result) {
-  cache.delete(scope);
-  cache.set(scope, result);
-  if (cache.size > 20) cache.delete(cache.keys().next().value);
-}
+import {
+  nationalTrendsScope, getCachedNationalTrends, getNationalTrendsPrefetch,
+  isNationalTrendsFresh, rememberNationalTrends as remember,
+} from '../../services/fuel/nationalTrendsCache';
 
 export default function useNationalLeaderboard({
   enabled,
@@ -19,7 +14,7 @@ export default function useNationalLeaderboard({
   requiresE85,
   resetToken
 }) {
-  const scope = JSON.stringify([fuelType, requiresE85, resetToken]);
+  const scope = nationalTrendsScope({ fuelType, requiresE85, resetToken });
   const current = useRef(scope);
   current.current = scope;
   const active = useRef(null);
@@ -29,8 +24,8 @@ export default function useNationalLeaderboard({
     refreshing: showRefresh = false, force = false
   } = {}) => {
     if (!enabled || active.current) return;
-    const cached = cache.get(scope);
-    if (!force && cached && Date.now() >= cached.loadedAt && Date.now() < Math.min(cached.loadedAt + CACHE_TTL_MS, Date.parse(cached.refreshAfter) || Infinity)) {
+    const cached = getCachedNationalTrends(scope);
+    if (!force && isNationalTrendsFresh(cached)) {
       setResult(cached);
       return;
     }
@@ -38,11 +33,11 @@ export default function useNationalLeaderboard({
     active.current = controller;
     setRefreshing(showRefresh);
     try {
-      const response = await fetchNationalTrends({
+      const response = await (getNationalTrendsPrefetch(scope) || fetchNationalTrends({
         fuelType,
         requiresE85,
         signal: controller.signal
-      });
+      }));
       if (!controller.signal.aborted && current.current === scope) {
         const next = { scope, ...response, loadedAt: Date.now(), error: null };
         if (!response.historyError) remember(scope, next);
@@ -50,8 +45,8 @@ export default function useNationalLeaderboard({
       }
     } catch (error) {
       if (current.current === scope && active.current === controller) {
-        setResult(previous => ({ ...(previous?.scope === scope ? previous : cache.get(scope)),
-          scope, quotes: (previous?.scope === scope ? previous.quotes : cache.get(scope)?.quotes) || [], error: error.message }));
+        setResult(previous => ({ ...(previous?.scope === scope ? previous : getCachedNationalTrends(scope)),
+          scope, quotes: (previous?.scope === scope ? previous.quotes : getCachedNationalTrends(scope)?.quotes) || [], error: error.message }));
       }
     } finally {
       if (active.current === controller) {
@@ -75,7 +70,7 @@ export default function useNationalLeaderboard({
       subscription.remove();
     };
   }, [enabled, load]));
-  const data = result?.scope === scope ? result : cache.get(scope) || null;
+  const data = result?.scope === scope ? result : getCachedNationalTrends(scope) || null;
   useEffect(() => {
     if (!enabled || !data?.quotes.length) return;
     const nextExpiry = Math.min(...data.quotes.map(q => Date.parse(q.updatedAt) + REPORTED_PRICE_MAX_AGE_MS));

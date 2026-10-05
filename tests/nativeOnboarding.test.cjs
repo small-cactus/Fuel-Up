@@ -19,6 +19,10 @@ test('the iOS-only native flow does not depend on parsing the OS version', async
             'react-native': { Platform: { OS, Version } },
             '../PreferencesContext': { usePreferences: () => ({ preferences: {}, completeOnboarding() {} }) },
             '../ThemeContext': { useTheme: () => ({ isDark: false }) },
+            '../AppStateContext': { useAppState: () => ({ setResolvedFuelSearchContext() {} }) },
+            '../lib/deviceLocationCache': { persistLastDeviceLocationRegion: async () => {} },
+            '../lib/onboardingHandoff': { onboardingHandoff: { subscribe: () => () => {}, getSnapshot: () => 'idle' } },
+            '../lib/launchReadiness': { finishLaunch() {} },
             './onboarding/NativeOnboarding': { default: () => { loaded.push('NativeFlow'); return React.createElement('NativeFlow'); } },
             './OnboardingScreen.legacy': { default: () => { loaded.push('LegacyFlow'); return React.createElement('LegacyFlow'); } },
         }).default;
@@ -35,9 +39,11 @@ test('native completion saves exactly the final draft, including membership and 
     const store = createPreferencesStore({ getItem: async () => null, setItem: async (_, value) => { saved = value; } });
     await store.load();
     const initial = store.getSnapshot().preferences;
-    let query, retries = 0, backs = 0;
+    let query, prefetched, retries = 0, backs = 0;
     const Native = load('src/screens/onboarding/NativeOnboarding.js', {
         'expo-modules-core': { requireNativeViewManager: () => 'NativeFlow' },
+        '../../AppStateContext': { useAppState: () => ({ fuelResetToken: 0 }) },
+        './useOnboardingTrendsPrefetch': { __esModule: true, default: coordinate => finalChoices => { prefetched = { coordinate, choices: finalChoices }; } },
         './useNativeOnboardingData': { __esModule: true, default: (coordinate, choices) => {
             query = { coordinate, choices }; return { data: {}, retry: () => retries++ };
         } },
@@ -61,6 +67,7 @@ test('native completion saves exactly the final draft, including membership and 
     await send({ type: 'retry' });
     assert.equal(backs, 1); assert.equal(retries, 1);
     await send({ type: 'complete', choices: draft });
+    assert.deepEqual(prefetched, { coordinate: { latitude: 27.98, longitude: -82.75 }, choices: draft });
     const result = JSON.parse(saved);
     for (const [key, value] of Object.entries(draft)) assert.deepEqual(result[key], value);
     assert.equal(result.hasCompletedOnboarding, true);
