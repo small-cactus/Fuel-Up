@@ -2,6 +2,14 @@ import Foundation
 
 @main struct ResearchTests {
   static func main() throws {
+    let notifiedID=UUID().uuidString.lowercased(),failedID=UUID().uuidString.lowercased()
+    let notificationRecords=[
+      try ResearchEvent(kind:"visit_prompt",payload:["visitId":notifiedID,"status":"scheduled"]),
+      try ResearchEvent(kind:"visit_prompt",payload:["visitId":failedID,"status":"permission_missing"]),
+      try ResearchEvent(kind:"visit_departure",payload:["visitId":notifiedID,"departedAt":1234.0],now:1250)]
+    let timeline=ResearchConfirmation.state(notificationRecords)
+    assert(timeline.notified==Set([notifiedID]),"Failed notification attempts stay out of the station timeline")
+    assert(timeline.departures[notifiedID]==1234,"Departure uses observed fix time rather than last time inside station")
     for count in 0..<500 {
       assert(!ResearchTransferPolicy.canUpload(online:true,wifi:true,pending:count))
     }

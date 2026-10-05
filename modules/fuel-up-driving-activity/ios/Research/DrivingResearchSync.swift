@@ -44,6 +44,7 @@ final class DrivingResearchSync: ObservableObject {
     mode="all";persist();nextAttempt = .distantPast
     DrivingResearchBackground.schedule()
     message=online ? "Syncing…" : "Sync queued · waiting for a connection"
+    checkControl(force:true)
     start()
   }
   func pause() {
@@ -130,6 +131,7 @@ final class DrivingResearchSync: ObservableObject {
         if completing==completionID {completionID=nil}
         if automatic,let id=response["syncRequestId"] as? String {remoteID=id;mode="all"}
         persist();start()
+        if let tests=response["notificationTests"] {try await DrivingResearchTestNotifications.shared.receive(tests)}
       } catch { /* Durable requests and the count timestamp retry on a later wake. */ }
     }
   }

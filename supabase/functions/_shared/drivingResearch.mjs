@@ -7,6 +7,7 @@ export function validateDrivingEvents(events, now = Date.now()/1000) {
     if (!uuid.test(e.id) || ids.has(e.id) || !kinds.has(e.kind) || !Number.isFinite(e.recordedAt) || e.recordedAt < 0 || e.recordedAt > now+300 || typeof e.payload !== 'string' || e.payload.length > 32000) throw Error('INVALID_EVENT');
     const p=JSON.parse(e.payload);
     if (!p || Array.isArray(p) || typeof p !== 'object') throw Error('INVALID_PAYLOAD');
+    if (p.testId!==undefined || p.isTest===true) throw Error('TEST_DATA_NOT_ALLOWED');
     if (e.kind==='location' && (!Number.isFinite(p.latitude) || Math.abs(p.latitude)>90 || !Number.isFinite(p.longitude) || Math.abs(p.longitude)>180 || !Number.isFinite(p.timestamp) || !Number.isFinite(p.accuracy))) throw Error('INVALID_LOCATION');
     if (e.kind==='visit_label' && (!uuid.test(p.visitId) || !['fueled','not_fueling','not_a_stop','wrong_station','unsure'].includes(p.label))) throw Error('INVALID_LABEL');
     if (e.kind==='visit_prompt' && (!uuid.test(p.visitId) || p.confirmationState!=='unconfirmed' || !['created','scheduled','permission_missing','schedule_failed','dismissed'].includes(p.status))) throw Error('INVALID_PROMPT');
@@ -23,7 +24,7 @@ export function createDrivingResearchHandler({db}) {
     try {
       const body=await request.text(); if (body.length>1_000_000) return reply({error:'TOO_LARGE'},413);
       const input=JSON.parse(body), {action,participantId}=input;
-      if (!uuid.test(participantId)||!['enroll','upload','stations','delete','control'].includes(action)) return reply({error:'INVALID_REQUEST'},400);
+      if (!uuid.test(participantId)||!['enroll','upload','stations','delete','control','testStatus'].includes(action)) return reply({error:'INVALID_REQUEST'},400);
       const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token))),v=>v.toString(16).padStart(2,'0')).join('');
       const auth={p_id:participantId,p_hash:hash};
       if (action==='enroll') {
@@ -46,6 +47,15 @@ export function createDrivingResearchHandler({db}) {
         if (input.completedRequestId!==undefined && !uuid.test(input.completedRequestId)) return reply({error:'INVALID_REQUEST'},400);
         const result=await db.rpc('driving_research_control',{...auth,p_total:hasCounts?input.total:null,p_pending:hasCounts?input.pending:null,p_completed:input.completedRequestId??null});
         return result.error?reply({error:'CONTROL_UNAVAILABLE'},503):reply(result.data);
+      }
+      if(action==='testStatus') {
+        const statuses=['preparing','scheduled','permission_missing','schedule_failed','dismissed','answered'];
+        const labels=['fueled','not_fueling','not_a_stop','wrong_station','unsure'];
+        if (!uuid.test(input.testId)||!statuses.includes(input.status)||
+            (input.status==='answered' ? !labels.includes(input.label) : input.label!==undefined)||
+            (['answered','dismissed'].includes(input.status) && (!Number.isFinite(input.responseAt)||input.responseAt<0||input.responseAt>Date.now()/1000+300))) return reply({error:'INVALID_TEST_RESPONSE'},400);
+        const result=await db.rpc('report_driving_research_notification_test',{...auth,p_test_id:input.testId,p_status:input.status,p_label:input.label??null,p_response_at:input.responseAt??null});
+        return result.error?reply({error:'TEST_UNAVAILABLE'},503):reply({saved:result.data});
       }
       if(action==='stations') {
         if (!Number.isFinite(input.latitude)||Math.abs(input.latitude)>90||!Number.isFinite(input.longitude)||Math.abs(input.longitude)>180) return reply({error:'INVALID_COORDINATE'},400);

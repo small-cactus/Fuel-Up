@@ -28,5 +28,6 @@ Pod::Spec.new do |s|
     'SWIFT_COMPILATION_MODE' => 'wholemodule'
   }
 
+  s.resource_bundles = {'FuelUpResearch' => ['Resources/*.png']}
   s.source_files = '**/*.{h,m,swift}'
 end

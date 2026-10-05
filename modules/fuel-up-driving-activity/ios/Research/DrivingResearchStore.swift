@@ -59,7 +59,7 @@ final class DrivingResearchStore {
   }
   func confirmationRecords() throws -> [ResearchEvent] {
     try queue.sync {
-      let s = try statement("SELECT body FROM events WHERE kind IN ('visit_label','visit_prompt') ORDER BY recorded ASC")
+      let s = try statement("SELECT body FROM events WHERE kind IN ('visit_label','visit_prompt','visit_departure') ORDER BY recorded ASC")
       defer { sqlite3_finalize(s) }; var result: [ResearchEvent] = []
       while sqlite3_step(s) == SQLITE_ROW {
         let data = Data(bytes: sqlite3_column_blob(s,0), count: Int(sqlite3_column_bytes(s,0)))

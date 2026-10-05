@@ -52,3 +52,7 @@ are yellow/black nationally; retailer nozzle colors vary. Sources:
 [OPW BP nozzle example](https://www.opwglobal.com/products/us/retail-fueling-products/standard-dispensing-equipment/automatic-nozzles-gas-station/14bp-nozzle-1).
 
 Check bundle integrity with `node --test tests/onboardingAssets.test.cjs`.
+
+### Mobil recovery (2026-10-05)
+
+Mobil (`Q109676002`) was absent because the original Wikimedia request returned HTTP 429 and the fallback favicon was unsupported by the raster converter; the original failure remains in `logo-manifest.json`. The official PNG at https://www.mobil.com/-/media/feature/wep/wep-navigation/mobil-logo.png is now bundled and registered for `mobil` and the catalog's `mobile` alias. `reviewed-sources.json` points future catalog builds to that PNG. This is a bundled asset, with no per-visit network request.

@@ -28,6 +28,8 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   @Published var participant="Not enrolled"
   @Published var notificationPermission="Checking"
   @Published var visitLabels:[String:String]=[:]
+  @Published var notifiedVisitIDs=Set<String>()
+  @Published var departureTimes:[String:Double]=[:]
   @Published var confirmationVisit:ResearchVisit?
   private var promptedVisitIDs=Set<String>()
   @Published var uploadSchedule="Checking connection"
@@ -195,9 +197,9 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
         let id=try identity ?? ResearchIdentity.load()
         _=try await transport.send("delete",identity:id)
       }
-      try store?.erase();try ResearchIdentity.erase();DrivingResearchSync.shared.erase()
+      try store?.erase();try DrivingResearchTestNotifications.shared.erase();try ResearchIdentity.erase();DrivingResearchSync.shared.erase()
       for key in [Self.consentKey,"research.visits","research.stations","research.catalogCenter","research.lastCatalog","research.detector","research.lastUpload","research.lastUploadAttempt"] {UserDefaults.standard.removeObject(forKey:key)}
-      identity=nil;participant="Not enrolled";visits=[];visitLabels=[:];promptedVisitIDs=[];confirmationVisit=nil;stations=[];stationCount=0;lastUpload=nil;lastUploadAttempt=nil;issue=nil;refreshCounts()
+      identity=nil;participant="Not enrolled";visits=[];visitLabels=[:];notifiedVisitIDs=[];departureTimes=[:];promptedVisitIDs=[];confirmationVisit=nil;stations=[];stationCount=0;lastUpload=nil;lastUploadAttempt=nil;issue=nil;refreshCounts()
       catalogCenter=nil;lastCatalog=nil;lastFix=nil;motion="Unknown";lastDrive = .distantPast
       status="Research data deleted"
     } catch {issue="Deletion did not finish. Collection is paused; reconnect and try again. Local data is retained until deletion succeeds."}
@@ -240,14 +242,18 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
         payload["quality"]=fix.rejection ?? "accepted";payload["mode"]=lastMode
         record("location",payload)
       }
-      for (kind,visit) in detector.process(fix,stations:stations) {
-        record(kind,visitPayload(visit))
+      let changes=detector.process(fix,stations:stations)
+      for (kind,visit) in changes {
+        var evidence=visitPayload(visit)
+        if kind == "visit_departure" {evidence["departedAt"]=fix.timestamp}
+        record(kind,evidence)
         if kind == "visit_candidate" || kind == "visit_departure" || kind == "visit_gap" {
           visits.removeAll{$0.id==visit.id};visits.insert(visit,at:0);visits=Array(visits.prefix(30))
           UserDefaults.standard.set(try? JSONEncoder().encode(visits),forKey:"research.visits")
         }
         if ResearchConfirmation.shouldPrompt(event:kind,visit:visit) {prompt(visit)}
       }
+      if !changes.isEmpty {refreshConfirmations()}
       saveDetector()
       if now-fix.timestamp<30,fix.accuracy>=0,fix.accuracy<150,!fix.simulated {
         refreshStations(around:fix);refreshFences(around:fix)
@@ -283,7 +289,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     prepare()
     do {
       let state=ResearchConfirmation.state(try store?.confirmationRecords() ?? [])
-      promptedVisitIDs=state.prompted;visitLabels=state.labels;refreshCounts()
+      promptedVisitIDs=state.prompted;visitLabels=state.labels;notifiedVisitIDs=state.notified;departureTimes=state.departures;refreshCounts()
     } catch {issue=error.localizedDescription}
   }
   func openConfirmation(_ visit:ResearchVisit) {
@@ -299,7 +305,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       guard enabled,consented,visitLabels[visit.id]==nil else{return}
       let result=await DrivingResearchNotifications.shared.schedule(visit)
       if !enabled || !consented || visitLabels[visit.id] != nil {DrivingResearchNotifications.shared.remove(visit.id);return}
-      var outcome=fields;outcome["status"]=result;record("visit_prompt",outcome)
+      var outcome=fields;outcome["status"]=result;record("visit_prompt",outcome);refreshConfirmations()
     }
   }
   @discardableResult func label(_ visit:ResearchVisit,_ label:String)->Bool {

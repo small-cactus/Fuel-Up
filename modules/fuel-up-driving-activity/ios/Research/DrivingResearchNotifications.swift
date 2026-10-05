@@ -21,7 +21,9 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
       let category = UNNotificationCategory(identifier: ResearchConfirmation.category, actions: actions,
         intentIdentifiers: [], hiddenPreviewsBodyPlaceholder: "Confirm your station stop",
         options: [.customDismissAction])
-      center.setNotificationCategories(Set(categories.filter { $0.identifier != ResearchConfirmation.category }).union([category]))
+      let testCategory = UNNotificationCategory(identifier: DrivingResearchTestNotifications.category, actions: actions,
+        intentIdentifiers: [], hiddenPreviewsBodyPlaceholder: "Confirm your station stop", options: [.customDismissAction])
+      center.setNotificationCategories(Set(categories.filter { $0.identifier != ResearchConfirmation.category && $0.identifier != DrivingResearchTestNotifications.category }).union([category,testCategory]))
     }
   }
   func requestPermission() async -> Bool {
@@ -69,7 +71,7 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
   }
   func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
                               withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-    guard notification.request.content.categoryIdentifier == ResearchConfirmation.category else {
+    guard [ResearchConfirmation.category,DrivingResearchTestNotifications.category].contains(notification.request.content.categoryIdentifier) else {
       if let forwarding, forwarding.responds(to: #selector(UNUserNotificationCenterDelegate.userNotificationCenter(_:willPresent:withCompletionHandler:))) {
         forwarding.userNotificationCenter?(center, willPresent: notification, withCompletionHandler: completionHandler)
       } else { completionHandler([]) }
@@ -79,6 +81,34 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
   }
   func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
                               withCompletionHandler completionHandler: @escaping () -> Void) {
+    if response.notification.request.content.categoryIdentifier == DrivingResearchTestNotifications.category {
+      defer {completionHandler()}
+      guard UserDefaults.standard.bool(forKey:DrivingResearchCollector.consentKey),
+            let id=response.notification.request.content.userInfo["testId"] as? String else{return}
+      do {
+        guard try DrivingResearchTestStore.shared.all().contains(where:{$0.id==id && $0.expiresAt>Date().timeIntervalSince1970}) else{return}
+        if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
+          Task { @MainActor in
+            DrivingResearchTestNotifications.shared.refresh()
+            DrivingResearchTestNotifications.shared.openTestID=id
+            if let url=URL(string:"fuelup:///driving-research") {UIApplication.shared.open(url)}
+          }
+        } else if let label=ResearchConfirmation.label(for:response.actionIdentifier) {
+          try DrivingResearchTestStore.shared.answer(id,label:label)
+          Task { @MainActor in
+            DrivingResearchTestNotifications.shared.removeNotification(id)
+            DrivingResearchTestNotifications.shared.refresh()
+            await DrivingResearchTestNotifications.shared.flush()
+          }
+        } else if response.actionIdentifier == UNNotificationDismissActionIdentifier {
+          try DrivingResearchTestStore.shared.answer(id,label:nil)
+          Task { @MainActor in await DrivingResearchTestNotifications.shared.flush() }
+        }
+      } catch {
+        Task { @MainActor in DrivingResearchCollector.shared.issue="Test answer wasn't saved. Try again in Test Notifications." }
+      }
+      return // A test can never fall through to the real research event store.
+    }
     guard response.notification.request.content.categoryIdentifier == ResearchConfirmation.category else {
       if let forwarding, forwarding.responds(to: #selector(UNUserNotificationCenterDelegate.userNotificationCenter(_:didReceive:withCompletionHandler:))) {
         forwarding.userNotificationCenter?(center, didReceive: response, withCompletionHandler: completionHandler)

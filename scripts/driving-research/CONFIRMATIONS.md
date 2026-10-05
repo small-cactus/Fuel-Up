@@ -40,3 +40,26 @@ node scripts/driving-research/verifySync.mjs
 This live test uses two temporary synthetic participants, verifies isolation and 1,201 immutable uploaded records (including retry of the first 1,000), then deletes the synthetic records, count reports and commands. The count reported to operators is a timestamped snapshot, not a live or lifetime counter. No personal routes belong in committed test evidence.
 
 Validation for the Wi-Fi policy update: the focused Swift policy/store suite and 11 Node tests passed. The database migration and endpoint were deployed without applying unrelated pending migrations. A signed Release build was installed on the paired physical phone. Its count report arrived and an operator request was acknowledged as complete after a native relaunch. This verifies connected delivery and queue completion, not an instantaneous wake or exact six-hour background timing. Text outside filled blue buttons uses neutral theme colors; the Tracking and Saved Data sections are removed, and only missing permissions appear. Station logos reuse the bundled brand catalog, with a native pump icon for unknown brands.
+
+## Isolated notification tests
+
+Operator commands:
+
+```sh
+node scripts/driving-research/notificationTest.mjs send PARTICIPANT_UUID Mobil fuel
+node scripts/driving-research/notificationTest.mjs send PARTICIPANT_UUID Mobil stop
+node scripts/driving-research/notificationTest.mjs status PARTICIPANT_UUID TEST_UUID
+node scripts/driving-research/notificationTest.mjs delete PARTICIPANT_UUID TEST_UUID
+```
+
+`send` prints the test UUID before the request; supply that UUID as the final send argument to safely retry an unknown outcome. The command targets one enrolled participant and is delivered on its next connected control check. Sync Data explicitly checks now, including while collection is paused. Ordinary control checks remain bounded to native wakes, at most once per 15 minutes. These are local actionable notifications after fetching a private server command, not an APNs wake guarantee.
+
+Notification titles, subtitle, hidden-preview text, sound, and answer actions match real stops. The blue Fuel Up logo is a native image attachment; iOS retains the app's standard small icon. No TEST prefix appears in notification copy. The Settings screen lists these fixtures separately under Test Notifications. A notification being scheduled is not proof that a banner was seen; an explicit answer is separately reported.
+
+Tests use their own notification category/thread, atomic local JSON outbox, and private `driving_research_notification_tests` table. They never create station visits or `ResearchEvent` records and are excluded from sample counts. Answers save synchronously before the notification callback completes, then attempt a small immediate upload on either connection. Offline answers retry with the next successful control check. Dismissal remains unconfirmed and cannot overwrite an explicit answer. Tests expire after 24 hours; up to 20 may be retained per participant until the operator deletes them.
+
+Deleting a test requires both its participant ID and test UUID. It hard-deletes only that test's server record. The next successful control response removes its local test entry, queued answer, and pending/delivered notification. Late responses cannot recreate deleted tests. Deleting all research data also removes every test for that participant. Real research data remains untouched by test-only deletion.
+
+Validation: focused Swift test-store tests cover durable answers, matching copy, acknowledgement races, stale server snapshots, expiration and deletion. Twelve Node tests pass. `verifyNotificationTests.mjs` passed against the deployed endpoint with two temporary participants: targeted creation, duplicate-send identity, cross-participant denial, answer retries, late-response protection, test deletion preserving an unrelated research record, and complete synthetic fixture cleanup. Native build and presentation checks are recorded separately when completed.
+
+Station Visits shows only stops with a successfully scheduled prompt (or an actual notification response). Created-only, permission-missing, and failed attempts are hidden. Newest stations appear first, with arrival and the preceding station's observed departure connected by continuous native SwiftUI lines and dots. Missing departures are not inferred from the last inside-station sample. Sync Data now sits beside Pause in the status card; accessibility text sizes stack the actions to avoid clipping.

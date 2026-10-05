@@ -72,3 +72,19 @@ test('bulk upload accepts 1000 unique records and still rejects oversized batche
  assert.equal(validateDrivingEvents(events.slice(0,1000)).length,1000);
  assert.throws(()=>validateDrivingEvents(events));
 });
+
+test('test answers use only the isolated endpoint and cannot enter training data',async()=>{
+ const calls=[];const handler=createDrivingResearchHandler({db:{rpc:async(name,args)=>{calls.push({name,args});return{data:true}}}});
+ const fields={testId:id,status:'answered',label:'fueled',responseAt:Date.now()/1000};
+ const r=await handler(request({action:'testStatus',participantId:id,...fields}));
+ assert.equal(r.status,200);assert.deepEqual(await r.json(),{saved:true});
+ assert.deepEqual(calls.map(c=>c.name),['access_driving_research','report_driving_research_notification_test']);
+ assert.equal(calls[1].args.p_id,id);assert.equal(calls[1].args.p_test_id,id);
+ for(const invalid of [{...fields,label:'fake'},{...fields,testId:'invalid'},{...fields,status:'scheduled'},{...fields,responseAt:Date.now()/1000+1000},{...fields,responseAt:null}]) {
+  assert.equal((await handler(request({action:'testStatus',participantId:id,...invalid}))).status,400);
+ }
+ for(const p of [{testId:id},{isTest:true}]) assert.throws(()=>validateDrivingEvents([{...event,kind:'diagnostic',payload:JSON.stringify(p)}]),/TEST_DATA_NOT_ALLOWED/);
+ assert.equal((await handler(request({action:'requestTest',participantId:id}))).status,400);
+ const denied=createDrivingResearchHandler({db:{rpc:async()=>({data:false})}});
+ assert.equal((await denied(request({action:'testStatus',participantId:id,...fields}))).status,403);
+});
