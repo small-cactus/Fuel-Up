@@ -10,7 +10,6 @@ import NationalTrendPrices from '../../src/screens/trends/NationalTrendPrices';
 import useNationalLeaderboard from '../../src/screens/trends/useNationalLeaderboard';
 import TrendLeaderboard from '../../src/screens/trends/TrendLeaderboard';
 import TrendLeaderboardSkeleton from '../../src/screens/trends/TrendLeaderboardSkeleton';
-import SkeletonReveal from '../../src/components/SkeletonReveal';
 import { getTrendDirectionFromData } from '../../src/screens/trends/trendDirection';
 import { buildTrendRequestKey } from '../../src/services/fuel/trends';
 import useTrendData from '../../src/screens/trends/useTrendData';
@@ -411,10 +410,7 @@ export default function TrendsScreen() {
                                 Reported {selectedFuelGradeMeta.label} {priceScope === 'national' ? 'National' : 'Local'} Average
                             </Text>
                             <View style={styles.heroPriceRow}>
-                                <SkeletonReveal loading={!hasHeroTrendData && chartLoading} style={styles.heroPriceValues} placeholder={<>
-                                    <View style={[styles.heroPricePlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }]} />
-                                    <View style={[styles.heroDeltaPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]} />
-                                </>}>
+                                <View style={styles.heroPriceValues}>
                                     {hasHeroTrendData ? <>
                                         <Text numberOfLines={1} adjustsFontSizeToFit maxFontSizeMultiplier={2} style={[styles.heroPrice, numericTextStyle, darkModeWeightStyle.heroPrice, { color: themeColors.text }]}>
                                             ${chartPoints.at(-1).price.toFixed(2)}
@@ -422,24 +418,16 @@ export default function TrendsScreen() {
                                         {heroDeltaLabel ? <Text maxFontSizeMultiplier={2} style={[styles.heroDelta, numericTextStyle, darkModeWeightStyle.heroDelta, { color: primaryTrendColor }]}>
                                             {heroDeltaLabel}
                                         </Text> : null}
+                                    </> : chartLoading ? <>
+                                        <View style={[styles.heroPricePlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }]} />
+                                        <View style={[styles.heroDeltaPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]} />
                                     </> : <Text style={[styles.heroPrice, numericTextStyle, { color: themeColors.textOpacity }]}>—</Text>}
-                                </SkeletonReveal>
+                                </View>
                                 <TrendScopeControl value={priceScope} onChange={setPriceScope} isDark={isDark} themeColors={themeColors} />
                             </View>
                         </View>
                             {/* Display-only carry-forward; raw observations remain unchanged. */}
-                            <SkeletonReveal loading={!hasHeroTrendData && chartLoading} placeholder={
-                                <View style={styles.heroGraphPlaceholderSection}>
-                                    <View style={styles.heroChartPlaceholderWrap}>
-                                        <View style={[styles.heroChartPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }]} />
-                                    </View>
-                                    <View style={styles.heroAxis}>
-                                        <View style={[styles.axisPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]} />
-                                        <View style={[styles.axisPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]} />
-                                    </View>
-                                </View>
-                            }>
-                                {hasHeroTrendData ? (
+                            {hasHeroTrendData ? (
                                 <View style={styles.heroGraphSection}>
                                     <ObservedPriceChart
                                         data={chartPoints}
@@ -467,16 +455,24 @@ export default function TrendsScreen() {
                                         </Text>
                                     </View>
                                 </View>
-                                ) : null}
-                            </SkeletonReveal>
+                            ) : chartLoading ? (
+                                <View style={styles.heroGraphPlaceholderSection}>
+                                    <View style={styles.heroChartPlaceholderWrap}>
+                                        <View style={[styles.heroChartPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }]} />
+                                    </View>
+                                    <View style={styles.heroAxis}>
+                                        <View style={[styles.axisPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]} />
+                                        <View style={[styles.axisPlaceholder, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]} />
+                                    </View>
+                                </View>
+                            ) : null}
 
                             {priceScope === 'national' ? <>
                                 {!chartLoading && !hasHeroTrendData && <Text style={[styles.emptyText, { color: themeColors.textOpacity }]}>{national.historyError || 'National price history will appear as reports arrive.'}</Text>}
                                 <NationalTrendPrices {...national} loading={national.loading} gradeLabel={selectedFuelGradeMeta.label} isDark={isDark} themeColors={themeColors} />
                             </> : <View style={styles.contentPad}>
                                 {/* 2. Leaderboard */}
-                                <SkeletonReveal loading={chartLoading} placeholder={<TrendLeaderboardSkeleton isDark={isDark} themeColors={themeColors} />}>
-                                {displayTrendData?.leaderboard?.length > 0 && (
+                                {chartLoading ? <TrendLeaderboardSkeleton isDark={isDark} themeColors={themeColors} /> : displayTrendData?.leaderboard?.length > 0 && (
                                     <TrendLeaderboard
                                         stations={displayTrendData.leaderboard}
                                         gradeLabel={selectedFuelGradeMeta.label}
@@ -485,8 +481,6 @@ export default function TrendsScreen() {
                                         themeColors={themeColors}
                                     />
                                 )}
-
-                                </SkeletonReveal>
 
                                 {/* Empty/No Data Fallback */}
                                 {!chartLoading && !displayTrendData?.averagePricesByDay?.length && !displayTrendData?.leaderboard?.length && (
