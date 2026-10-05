@@ -146,7 +146,7 @@ struct DrivingResearchScreen: View {
       DrivingResearchConsent(onAgree: {
         showConsent = false
         Task { await collector.enable() }
-      }, onDismiss: { showConsent = false })
+      })
     }
     .confirmationDialog("Delete this phone’s research data?", isPresented: $confirmDelete, titleVisibility: .visible) {
       Button("Continue", role: .destructive) {confirmDeleteAgain=true}
