@@ -45,13 +45,13 @@ export default function PreferencePage({ page }) {
 
     const layout = useMemo(() => ({
         container: [styles.container, { backgroundColor: themeColors.background }],
-        content: [styles.container, { paddingTop: canopyHeight, paddingBottom: insets.bottom }],
-    }), [themeColors.background, canopyHeight, insets.bottom]);
+        content: [styles.container, { paddingTop: canopyHeight }],
+    }), [themeColors.background, canopyHeight]);
 
     return <View style={layout.container}>
         <Stack.Screen options={options} />
         <View style={layout.content}>
-            <NativeView style={styles.container} page={page} initialChoices={initial} data={data} isDark={isDark}
+            <NativeView style={styles.container} page={page} bottomInset={insets.bottom} initialChoices={initial} data={data} isDark={isDark}
                 testID={`settings-${page}-page`} onAction={onAction} />
         </View>
         <TopCanopy height={canopyHeight} />

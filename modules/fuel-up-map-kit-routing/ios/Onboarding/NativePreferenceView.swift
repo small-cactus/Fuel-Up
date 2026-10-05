@@ -8,6 +8,8 @@ final class NativePreferenceView: ExpoView {
   let model = OnboardingModel(tracksLocation: false)
   private var host: UIViewController?
   private var dark = false
+  private var page = "fuel"
+  private var bottomInset: CGFloat = 0
 
   required init(appContext: AppContext? = nil) {
     super.init(appContext: appContext)
@@ -15,10 +17,11 @@ final class NativePreferenceView: ExpoView {
   }
 
   func configure(page: String) {
+    self.page = page
     guard #available(iOS 16.0, *) else { return }
-    if let host = host as? UIHostingController<PreferencePage> { host.rootView = PreferencePage(model: model, page: page) }
+    if let host = host as? UIHostingController<PreferencePage> { host.rootView = PreferencePage(model: model, page: page, bottomInset: bottomInset) }
     else {
-      let controller = UIHostingController(rootView: PreferencePage(model: model, page: page))
+      let controller = UIHostingController(rootView: PreferencePage(model: model, page: page, bottomInset: bottomInset))
       // React Native already positions this host inside the screen's safe area.
       // UIKit updates the navigation-bar safe area after a push completes; letting
       // SwiftUI apply it again moves both pages down at the end of the animation.
@@ -30,6 +33,11 @@ final class NativePreferenceView: ExpoView {
       addSubview(controller.view)
       attachHost()
     }
+  }
+
+  func setBottomInset(_ inset: CGFloat) {
+    bottomInset = max(0, inset)
+    configure(page: page)
   }
 
   func setDark(_ dark: Bool) {
@@ -67,12 +75,13 @@ final class NativePreferenceView: ExpoView {
 private struct PreferencePage: View {
   @ObservedObject var model: OnboardingModel
   let page: String
+  let bottomInset: CGFloat
   @Environment(\.colorScheme) private var scheme
 
   var body: some View {
     Group {
-      if page == "brands" { OnboardingBrandsPage(model: model, isSettings: true) }
-      else { OnboardingFuelPage(model: model, isSettings: true) }
+      if page == "brands" { OnboardingBrandsPage(model: model, isSettings: true, bottomInset: bottomInset) }
+      else { OnboardingFuelPage(model: model, isSettings: true, bottomInset: bottomInset) }
     }
     .padding(.top, 12)
     .background(background.ignoresSafeArea())

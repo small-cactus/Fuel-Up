@@ -3,6 +3,7 @@ import SwiftUI
 struct OnboardingFuelPage: View {
   @ObservedObject var model: OnboardingModel
   var isSettings = false
+  var bottomInset: CGFloat = 0
   private let grades = [("regular", "Regular", "87"), ("midgrade", "Midgrade", "89"),
                         ("premium", "Premium", "91–93"), ("diesel", "Diesel", ""), ("e85", "E85", "Flex fuel")]
   var body: some View {
@@ -28,7 +29,7 @@ struct OnboardingFuelPage: View {
             .accessibilityIdentifier("onboarding-requires-e85")
             .onChange(of: model.requiresE85) { _ in model.changed() }
         }
-      }.padding(.horizontal, 24).padding(.bottom, 24)
+      }.padding(.horizontal, 24).padding(.bottom, 24 + bottomInset)
     }
   }
 }

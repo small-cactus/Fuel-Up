@@ -66,6 +66,8 @@ public final class FuelUpMapKitRoutingModule: Module {
     View(NativePreferenceView.self) {
       ViewName("NativePreferenceView")
       Prop("page") { (view, page: String) in view.configure(page: page) }
+      // Keep the viewport edge-to-edge; reserve home-indicator room inside the list.
+      Prop("bottomInset") { (view, inset: Double) in view.setBottomInset(CGFloat(inset)) }
       Prop("initialChoices") { (view, choices: [String: Any]) in view.model.configure(choices) }
       Prop("data") { (view, data: [String: Any]) in view.model.applyData(data) }
       Prop("isDark") { (view, dark: Bool) in view.setDark(dark) }
