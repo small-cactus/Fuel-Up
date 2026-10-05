@@ -19,16 +19,21 @@ struct DrivingResearchConsent: View {
     NavigationStack {
       VStack(spacing: 0) {
         HStack {
-          Spacer(minLength: 0)
           Button(action: onDismiss) {
-            Text("Not Now").font(.body).foregroundStyle(.blue)
-              .lineLimit(1).fixedSize(horizontal: true, vertical: false)
-              .frame(minHeight: 44)
-          }.buttonStyle(.plain)
+            Image(systemName: "xmark")
+              .font(.system(size: 17, weight: .semibold))
+              .foregroundStyle(.secondary)
+              .frame(width: 44, height: 44)
+              .contentShape(Rectangle())
+          }
+          .buttonStyle(.plain)
+          .accessibilityLabel("Close")
+          .accessibilityIdentifier("research-consent-close")
+          Spacer(minLength: 0)
         }
-        // Use the sheet's measured radius on both axes. Center the 44-point
-        // dismiss target at the bottom of the corner's curve.
-        .padding(.horizontal, max(24, sheetCornerRadius ?? 24))
+        // Center the 44-point close target inside the sheet's measured corner
+        // on both axes, with a minimum margin for flatter presentations.
+        .padding(.horizontal, max(24, (sheetCornerRadius ?? 0) - 22))
         .padding(.top, max(4, (sheetCornerRadius ?? 0) - 22))
 
         ScrollView {
