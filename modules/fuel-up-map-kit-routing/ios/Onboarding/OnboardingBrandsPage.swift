@@ -59,6 +59,9 @@ struct OnboardingBrandsPage: View {
         }
         if model.membershipError != nil { retry("Memberships couldn’t load.") }
 
+        if model.loading {
+          OnboardingMembershipSkeleton(title: "Favorites", loadingLabel: "Loading station brands", identifier: "onboarding-brand-loading")
+        } else {
         VStack(alignment: .leading, spacing: 12) {
           sectionTitle("Favorites")
           if allBrands.count > 10 {
@@ -76,12 +79,12 @@ struct OnboardingBrandsPage: View {
                 if item.id != brands.last?.id { Divider().padding(.horizontal, 20) }
               }
             }.modifier(OnboardingGlass())
-          } else if model.loading { ProgressView("Finding nearby stations…").tint(.primary) }
-          else {
+          } else {
             Text(allBrands.count > 10 && !brandSearch.isEmpty ? "No matching stations." : "No nearby brands for this fuel.")
               .foregroundStyle(.secondary)
           }
           if model.error != nil { retry("Nearby brands couldn’t load.") }
+        }
         }
         if !isSettings {
           Text("Optional. You can change these in Settings.").font(.footnote).foregroundStyle(.secondary)

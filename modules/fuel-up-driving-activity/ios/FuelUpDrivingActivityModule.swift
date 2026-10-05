@@ -26,7 +26,21 @@ public final class FuelUpDrivingActivityModule: Module {
   public func definition() -> ModuleDefinition {
     Name("FuelUpDrivingActivity")
 
-    Events("onActivityUpdate")
+    Events("onActivityUpdate", "onNetworkStatus")
+    OnCreate {
+      Task { @MainActor [weak self] in
+        FuelUpNetworkStatus.shared.emit = { [weak self] event in self?.sendEvent("onNetworkStatus", event) }
+      }
+    }
+    Function("setNetworkFaultsEnabled") { (enabled: Bool) in
+      Task { @MainActor in FuelUpNetworkStatus.shared.setFaults(enabled) }
+    }
+    AsyncFunction("getNetworkStatusAsync") {
+      await MainActor.run { () -> [String: Any] in
+        if let connected = FuelUpNetworkStatus.shared.connected { return ["connected": connected] }
+        return [:]
+      }
+    }
 
     Function("ownsBackgroundTracking") { true }
     AsyncFunction("resumeResearchAsync") {

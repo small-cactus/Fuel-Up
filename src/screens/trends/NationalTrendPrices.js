@@ -1,6 +1,7 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import TrendLeaderboard from './TrendLeaderboard';
+import TrendLeaderboardSkeleton from './TrendLeaderboardSkeleton';
 export default function NationalTrendPrices({
   quotes,
   loading,
@@ -10,7 +11,7 @@ export default function NationalTrendPrices({
   themeColors
 }) {
   return <View style={styles.container}>
-        {loading ? <ActivityIndicator accessibilityLabel="Loading national prices" color={themeColors.text} style={styles.loading} /> : quotes.length ? <TrendLeaderboard national stations={quotes.map(q => ({
+        {loading ? <TrendLeaderboardSkeleton isDark={isDark} themeColors={themeColors} /> : quotes.length ? <TrendLeaderboard national stations={quotes.map(q => ({
       ...q,
       name: q.stationName,
       latestPrice: q.price

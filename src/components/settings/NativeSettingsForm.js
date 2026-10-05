@@ -209,7 +209,7 @@ export default function NativeSettingsForm({
                 </Section>}
 
                 <Section title="Research & Debug">
-                    <SettingsLink title="Driving Research" systemImage="car.side"
+                    <SettingsLink title="Driving Research" systemImage="person.2.fill"
                         onPress={onDrivingResearch} testID="settings-driving-research" />
                 </Section>
 

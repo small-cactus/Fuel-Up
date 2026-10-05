@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 import { supabase } from '../../lib/supabase';
 import { normalizeUSState } from '../../lib/usStates';
@@ -24,6 +24,7 @@ export default function useMembershipOptions(coordinate, active) {
         );
         return () => { cancelled = true; };
     }, [key, latitude, longitude, active, attempt]);
+    const retry = useCallback(() => { setResult(null); setAttempt(value => value + 1); }, []);
     return { ...(result?.key === key ? result : {}), hasLocation: Boolean(key), loading: Boolean(key && result?.key !== key),
-        retry: () => { setResult(null); setAttempt(value => value + 1); } };
+        retry };
 }

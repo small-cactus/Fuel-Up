@@ -14,12 +14,17 @@ import useHomeDeviceLocation from './useHomeDeviceLocation';
 import StationCardCarousel from './StationCardCarousel';
 import FuelUpHeaderLogo from '../../components/FuelUpHeaderLogo';
 import TopCanopy from '../../components/TopCanopy';
+import ConnectionOverlay from '../../components/ConnectionOverlay';
+import useNetworkStatus from '../../lib/useNetworkStatus';
 
 const NativeMap = Platform.OS === 'ios' ? requireNativeViewManager('FuelUpMapKitRouting') : null;
 const EMPTY_ORIGIN = {};
 
 export default function HomeScreen() {
     const active = useIsFocused();
+    const network = useNetworkStatus();
+    const unavailable = network.connected === false || network.services.some(service => service.status === 'unresponsive');
+    useEffect(() => { if (unavailable) finishLaunch(); }, [unavailable]);
     const revealed = useLaunchReady();
     useHomeDeviceLocation(active);
     const { isDark, themeColors } = useTheme();
@@ -102,6 +107,7 @@ export default function HomeScreen() {
         <View pointerEvents="none" style={headerStyle}>
             <FuelUpHeaderLogo isDark={isDark} />
         </View>
+        <ConnectionOverlay active={active} />
         </View>
     );
 }

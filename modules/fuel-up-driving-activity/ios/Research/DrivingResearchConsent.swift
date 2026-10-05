@@ -2,6 +2,7 @@ import SwiftUI
 
 /// Consent stays readable at larger text sizes; the illustration is decorative.
 struct DrivingResearchConsent: View {
+  var isConsented = false
   let onAgree: () -> Void
   @State private var showDetails = false
   @State private var sheetCornerRadius: CGFloat?
@@ -54,7 +55,7 @@ struct DrivingResearchConsent: View {
 
         VStack(spacing: 4) {
           Button(action: onAgree) {
-            Text("Agree & Enable").font(.headline)
+            Text(isConsented ? "Done" : "Agree & Enable").font(.headline)
               .frame(maxWidth: .infinity).frame(minHeight: 40)
           }
           .buttonStyle(.glassProminent).tint(.blue).controlSize(.large)

@@ -74,6 +74,7 @@ test('onboarding prefetch uses max radius; radius changes reuse inventory and fi
         { stationId: 'b', stationName: 'Far', latitude: 28.12, longitude: -82, price: 3, fuelType: 'regular', allPrices: { regular: 3 } },
     ];
     const hook = load('src/screens/onboarding/useNativeOnboardingData.js', {
+        '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ faultsEnabled: false, generation: 0, connected: null }) },
         '../../components/brands/useNearbyBrands': { __esModule: true, default: args => {
             requests.push(args); return { quotes, loading: false, retry() {} };
         } },
@@ -123,6 +124,7 @@ test('membership prefetch recovers a transient location lookup and uses the norm
 test('membership loading state reaches both native pages without dropping saved memberships', async () => {
     let membershipResult = { loading: true, ids: [] };
     const hook = load('src/screens/onboarding/useNativeOnboardingData.js', {
+        '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ faultsEnabled: false, generation: 0, connected: null }) },
         '../../components/brands/useNearbyBrands': { __esModule: true, default: () => ({ quotes: [], loading: false, retry() {} }) },
         '../../components/memberships/useMembershipOptions': { __esModule: true, default: () => ({ ...membershipResult, retry() {} }) },
     }).default;

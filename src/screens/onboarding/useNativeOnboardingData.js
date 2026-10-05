@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import useNetworkStatus from '../../lib/useNetworkStatus';
+import { useEffect, useMemo, useRef } from 'react';
 import useNearbyBrands from '../../components/brands/useNearbyBrands';
 import useMembershipOptions from '../../components/memberships/useMembershipOptions';
 import { FUEL_MEMBERSHIPS } from '../../lib/fuelMemberships';
@@ -8,9 +9,18 @@ import { MAX_SEARCH_RADIUS_MILES } from '../../lib/fuelSearchState';
 // Warm the largest selectable area once. Dragging the native radius slider never
 // requests data; the same inventory feeds the preview and the following page.
 export default function useNativeOnboardingData(coordinate, choices) {
+    const { faultsEnabled, generation } = useNetworkStatus();
     const nearby = useNearbyBrands({ coordinate, radiusMiles: MAX_SEARCH_RADIUS_MILES,
         fuelGrade: choices.preferredOctane, requiresE85: choices.requiresE85, isActive: Boolean(coordinate) });
     const memberships = useMembershipOptions(coordinate, Boolean(coordinate));
+    const previousGeneration = useRef(generation);
+    useEffect(() => {
+        if (previousGeneration.current === generation) return;
+        previousGeneration.current = generation;
+        if (faultsEnabled) return;
+        const timer = setTimeout(() => { nearby.retry(); memberships.retry(); }, 0);
+        return () => clearTimeout(timer);
+    }, [generation, faultsEnabled, nearby.retry, memberships.retry]);
     const data = useMemo(() => ({
         stations: nearby.quotes.map(quote => ({ id: String(quote.stationId), name: quote.stationName,
             latitude: quote.latitude, longitude: quote.longitude })),
@@ -18,9 +28,9 @@ export default function useNativeOnboardingData(coordinate, choices) {
             fuelGrade: choices.preferredOctane, requiresE85: choices.requiresE85 }),
         memberships: FUEL_MEMBERSHIPS.filter(item => memberships.ids?.includes(item.id)
             || choices.fuelMemberships?.includes(item.id)).map(({ id, label }) => ({ id, label })),
-        loading: nearby.loading, membershipLoading: memberships.loading,
+        loading: faultsEnabled || nearby.loading, membershipLoading: faultsEnabled || memberships.loading,
         error: nearby.error ?? null, membershipError: memberships.error ?? null,
-    }), [nearby.quotes, nearby.loading, nearby.error, coordinate, choices.searchRadiusMiles,
+    }), [faultsEnabled, nearby.quotes, nearby.loading, nearby.error, coordinate, choices.searchRadiusMiles,
         choices.preferredOctane, choices.requiresE85, choices.fuelMemberships, memberships.ids,
         memberships.loading, memberships.error]);
     return { data, retry: () => { nearby.retry(); memberships.retry(); } };

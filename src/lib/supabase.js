@@ -46,7 +46,10 @@ let supabase = null;
 
 if (hasSupabaseConfig) {
     try {
-        supabase = createClient(supabaseUrl, supabaseAnonKey);
+        const { networkStatus } = require('./networkStatus');
+        supabase = createClient(supabaseUrl, supabaseAnonKey, {
+            global: { fetch: (input, init) => networkStatus.fetch(input, init) },
+        });
     } catch (error) {
         console.error('Supabase client initialization failed:', error);
     }

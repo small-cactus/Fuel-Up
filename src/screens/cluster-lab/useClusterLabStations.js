@@ -1,3 +1,4 @@
+import useNetworkStatus from '../../lib/useNetworkStatus';
 import { useEffect, useMemo, useState } from 'react';
 import * as Location from 'expo-location';
 import { AppState } from 'react-native';
@@ -13,6 +14,7 @@ import { calculateDistanceMiles } from '../../lib/homeState';
 // Data crosses the bridge once per search. The Swift view owns all camera and
 // animation work. The five-minute DB refresh never drives animation frames.
 export default function useClusterLabStations(active) {
+    const { generation, recoveryGeneration, connected } = useNetworkStatus();
     const { resolvedFuelSearchContext, manualLocationOverride, fuelResetToken, setResolvedFuelSearchContext } = useAppState();
     const { preferences, fuelSearchCriteriaSignature } = usePreferences();
     const [result, setResult] = useState(null);
@@ -86,11 +88,12 @@ export default function useClusterLabStations(active) {
                 }
             } finally { refreshing = false; }
         };
-        refresh();
+        const start = generation > 0 ? setTimeout(refresh, 0) : null;
+        if (!generation) refresh();
         const timer = setInterval(refresh, 5 * 60_000);
         const subscription = AppState.addEventListener('change', state => { if (state === 'active') refresh(); });
-        return () => { cancelled = true; clearInterval(timer); clearTimeout(expiryTimer); subscription.remove(); };
-    }, [active, scope, latitude, longitude, fuelType, radiusMiles, minimumRating, preferredProvider, requiresE85, setResolvedFuelSearchContext, preferences.preferredBrands, preferences.fuelMemberships]);
+        return () => { cancelled = true; clearTimeout(start); clearInterval(timer); clearTimeout(expiryTimer); subscription.remove(); };
+    }, [generation, recoveryGeneration, connected, active, scope, latitude, longitude, fuelType, radiusMiles, minimumRating, preferredProvider, requiresE85, setResolvedFuelSearchContext, preferences.preferredBrands, preferences.fuelMemberships]);
 
     return useMemo(() => result?.scope === scope ? {
         ...result, origin: result.origin || (mapOrigin?.scope === scope ? mapOrigin : null),

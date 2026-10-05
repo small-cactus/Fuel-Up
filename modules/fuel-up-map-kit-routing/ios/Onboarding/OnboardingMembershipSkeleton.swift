@@ -2,10 +2,13 @@ import SwiftUI
 
 /// Shared by onboarding and Settings so discovery never leaves a blank section.
 struct OnboardingMembershipSkeleton: View {
+  var title = "Memberships"
+  var loadingLabel = "Loading memberships"
+  var identifier = "onboarding-membership-loading"
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
       HStack {
-        Text("Memberships").font(.headline)
+        Text(title).font(.headline)
         Spacer()
         ProgressView().tint(.primary)
       }
@@ -26,7 +29,7 @@ struct OnboardingMembershipSkeleton: View {
       .accessibilityHidden(true)
     }
     .accessibilityElement(children: .ignore)
-    .accessibilityLabel("Loading memberships")
-    .accessibilityIdentifier("onboarding-membership-loading")
+    .accessibilityLabel(loadingLabel)
+    .accessibilityIdentifier(identifier)
   }
 }

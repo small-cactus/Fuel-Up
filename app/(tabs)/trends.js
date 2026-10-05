@@ -9,6 +9,9 @@ import TrendScopeControl from '../../src/screens/trends/TrendScopeControl';
 import NationalTrendPrices from '../../src/screens/trends/NationalTrendPrices';
 import useNationalLeaderboard from '../../src/screens/trends/useNationalLeaderboard';
 import TrendLeaderboard from '../../src/screens/trends/TrendLeaderboard';
+import TrendLeaderboardSkeleton from '../../src/screens/trends/TrendLeaderboardSkeleton';
+import { getTrendDirectionFromData } from '../../src/screens/trends/trendDirection';
+import useNetworkStatus from '../../src/lib/useNetworkStatus';
 import { buildTrendRequestKey } from '../../src/services/fuel/trends';
 import useTrendData from '../../src/screens/trends/useTrendData';
 import { useAppState } from '../../src/AppStateContext';
@@ -113,26 +116,6 @@ function formatTrendAxisLabel(dateValue, rangeStartValue, rangeEndValue) {
     });
 }
 
-function getTrendDirectionFromData(data) {
-    const pricesByDay = data?.averagePricesByDay;
-    if (!pricesByDay || pricesByDay.length < 2) {
-        return null;
-    }
-
-    const todayPrice = pricesByDay[pricesByDay.length - 1].price;
-    const yesterdayPrice = pricesByDay[pricesByDay.length - 2].price;
-
-    if (todayPrice < yesterdayPrice) {
-        return 'lower';
-    }
-
-    if (todayPrice > yesterdayPrice) {
-        return 'higher';
-    }
-
-    return 'flat';
-}
-
 function buildTrendBackgroundGradientColors({ direction, isDark }) {
     if (direction === 'lower') {
         const hex = isDark ? COLORS.GRADIENT_GREEN_DARK : COLORS.GRADIENT_GREEN_LIGHT;
@@ -161,6 +144,7 @@ function areGradientColorSetsEqual(left, right) {
 
 export default function TrendsScreen() {
     const insets = useSafeAreaInsets();
+    const { faultsEnabled } = useNetworkStatus();
     const [priceScope, setPriceScope] = useState('local');
     const { isDark, themeColors } = useTheme();
     const {
@@ -282,13 +266,23 @@ export default function TrendsScreen() {
         commitOrigin: commitResolvedSearchOrigin,
     });
     const national = useNationalLeaderboard({ enabled: priceScope === 'national', fuelType: selectedFuelGrade, requiresE85, resetToken: fuelResetToken });
+    const wasFaulted = useRef(faultsEnabled);
+    const refreshAfterFault = useRef(null);
+    refreshAfterFault.current = priceScope === 'national' ? national.onRefresh : onPullToRefresh;
+    useEffect(() => {
+        const recovering = wasFaulted.current && !faultsEnabled;
+        wasFaulted.current = faultsEnabled;
+        if (!recovering) return;
+        const timer = setTimeout(() => refreshAfterFault.current?.(), 0);
+        return () => clearTimeout(timer);
+    }, [faultsEnabled]);
     const [activeGradientColors, setActiveGradientColors] = useState(() => buildTrendBackgroundGradientColors({
         direction: getTrendDirectionFromData(displayTrendData), isDark,
     }));
     const [incomingGradientColors, setIncomingGradientColors] = useState(null);
     const gradientFadeOpacity = useRef(new Animated.Value(1)).current;
-    const heroTrendData = priceScope === 'local' ? displayTrendData : national.trendData;
-    const chartLoading = priceScope === 'local' ? loading : national.loading;
+    const heroTrendData = faultsEnabled ? null : priceScope === 'local' ? displayTrendData : national.trendData;
+    const chartLoading = faultsEnabled || (priceScope === 'local' ? loading : national.loading);
     const chartPoints = useMemo(() => buildDisplayTrendSeries(
         heroTrendData?.averagePricesByDay, { latestObservedAverage: heroTrendData?.latestObservedAverage }
     ), [heroTrendData]);
@@ -487,10 +481,10 @@ export default function TrendsScreen() {
 
                             {priceScope === 'national' ? <>
                                 {!chartLoading && !hasHeroTrendData && <Text style={[styles.emptyText, { color: themeColors.textOpacity }]}>{national.historyError || 'National price history will appear as reports arrive.'}</Text>}
-                                <NationalTrendPrices {...national} gradeLabel={selectedFuelGradeMeta.label} isDark={isDark} themeColors={themeColors} />
+                                <NationalTrendPrices {...national} loading={faultsEnabled || national.loading} gradeLabel={selectedFuelGradeMeta.label} isDark={isDark} themeColors={themeColors} />
                             </> : <View style={styles.contentPad}>
                                 {/* 2. Leaderboard */}
-                                {displayTrendData?.leaderboard?.length > 0 && (
+                                {chartLoading ? <TrendLeaderboardSkeleton isDark={isDark} themeColors={themeColors} /> : displayTrendData?.leaderboard?.length > 0 && (
                                     <TrendLeaderboard
                                         stations={displayTrendData.leaderboard}
                                         gradeLabel={selectedFuelGradeMeta.label}
@@ -501,7 +495,7 @@ export default function TrendsScreen() {
                                 )}
 
                                 {/* Empty/No Data Fallback */}
-                                {!loading && !displayTrendData?.averagePricesByDay?.length && !displayTrendData?.leaderboard?.length && (
+                                {!chartLoading && !displayTrendData?.averagePricesByDay?.length && !displayTrendData?.leaderboard?.length && (
                                     <View style={styles.emptyState}>
                                         <Text style={[styles.emptyText, darkModeWeightStyle.emptyText, { color: themeColors.textOpacity }]}>{trendError || 'Not enough historical data collected yet to render trends. Check back soon.'}</Text>
                                     </View>

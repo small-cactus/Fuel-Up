@@ -9,7 +9,7 @@ test('a gradient target starts once and superseded/unmounted animation work is s
     const animations = [];
     const snapshot = prices => ({ trendSeriesMode: 'historical', averagePricesByDay: prices.map((price, index) => ({ price, date: new Date(1700000000000 + index * 3600000).toISOString() })) });
     let data = snapshot([3, 3]);
-    const nationalData = snapshot([3.1,3.8,3.4]);
+    const nationalData = snapshot([3.8,3.1,3.4]);
     const appState = {};
     const preferences = { normalizedFuelSearchPreferences: { preferredOctane: 'regular', searchRadiusMiles: 10 } };
     const Chart = load('src/screens/trends/ObservedPriceChart.js', {
@@ -18,6 +18,8 @@ test('a gradient target starts once and superseded/unmounted animation work is s
         'd3-shape': await import('d3-shape'), 'd3-scale': await import('d3-scale'),
     }).default;
     const Screen = load('app/(tabs)/trends.js', {
+        '../../src/lib/useNetworkStatus': { __esModule: true, default: () => ({ faultsEnabled: false }) },
+        '../../src/screens/trends/TrendLeaderboardSkeleton': () => null,
         '../../src/screens/trends/ObservedPriceChart': Chart,
         'react-native': { View: 'View', Text: 'Text', ScrollView: 'ScrollView', RefreshControl: 'RefreshControl',
             Dimensions: { get: () => ({ width: 440 }) }, StyleSheet: { create: value => value, absoluteFillObject: {}, absoluteFill: {} },
@@ -63,6 +65,8 @@ test('a gradient target starts once and superseded/unmounted animation work is s
     assert(renderer.root.findAllByType('Text').some(p => p.props.children?.includes?.('National')));
     const nationalLine = renderer.root.findAllByType('Path').find(p => p.props.stroke)?.props.d;
     assert(nationalLine);assert.notEqual(nationalLine,localLine);
+    assert.equal(renderer.root.findAllByType('Path').find(p => p.props.stroke)?.props.stroke, '#51CF66',
+        'the national decline must be green even when the last bucket rose');
     assert.equal(renderer.root.findAllByType('Circle').length,0);
     data = { averagePricesByDay: [], overallTrend: null,
         latestObservedAverage: { date: new Date().toISOString(), price: 3.25 } };

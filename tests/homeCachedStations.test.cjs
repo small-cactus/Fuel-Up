@@ -7,6 +7,7 @@ test('Home shares its fallback GPS origin so Trends searches the same radius cen
     const commits=[], queries=[];
     const origin={latitude:27.95,longitude:-82.45};
     const hook=load('src/screens/cluster-lab/useClusterLabStations.js',{
+        '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ faultsEnabled: false, generation: 0, connected: null }) },
         react:{useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,()=>{}]},
         'react-native':{AppState:{currentState:'active',addEventListener:()=>({remove(){}})}},
         'expo-location':{getForegroundPermissionsAsync:async()=>({status:'granted'}),getLastKnownPositionAsync:async()=>({coords:origin})},
@@ -31,6 +32,7 @@ test('Home publishes local data then refreshes DB on focus and foreground; clean
     let effect, cleanup, foreground, resolveRefresh, calls=0;
     const results=[];
     const hook=load('src/screens/cluster-lab/useClusterLabStations.js',{
+        '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ faultsEnabled: false, generation: 0, connected: null }) },
         react:{useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,value=>results.push(value)]},
         'react-native':{AppState:{currentState:'active',addEventListener:(_,fn)=>{foreground=fn;return {remove(){foreground=null;}};}}},
         'expo-location':{},'../../AppStateContext':{useAppState:()=>({resolvedFuelSearchContext:{latitude:27.95,longitude:-82.45}})},
@@ -58,6 +60,7 @@ test('Home removes a quote immediately after its 24-hour expiry without a networ
     const quote={providerTier:'station',price:3.10,updatedAt:new Date(now-86400000+1000).toISOString()};
     const {isFreshReportedQuote}=require('../src/services/fuel/reportedPrices');
     const hook=load('src/screens/cluster-lab/useClusterLabStations.js',{
+        '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ faultsEnabled: false, generation: 0, connected: null }) },
         react:{useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,value=>results.push(value)]},
         'react-native':{AppState:{currentState:'active',addEventListener:()=>({remove(){}})}},
         'expo-location':{},'../../AppStateContext':{useAppState:()=>({resolvedFuelSearchContext:{latitude:27.95,longitude:-82.45}})},
@@ -112,6 +115,7 @@ test('cached station distances are recalculated from the current search center b
     let effect;const results=[];
     const stale={latitude:28.01,longitude:-82.577,distanceMiles:15};
     const hook=load('src/screens/cluster-lab/useClusterLabStations.js',{
+        '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ faultsEnabled: false, generation: 0, connected: null }) },
         react:{useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,value=>results.push(value)]},
         'react-native':{AppState:{currentState:'active',addEventListener:()=>({remove(){}})}},
         'expo-location':{},'../../AppStateContext':{useAppState:()=>({resolvedFuelSearchContext:{latitude:28.01,longitude:-82.577}})},
@@ -131,6 +135,7 @@ test('Home publishes map origin before an unresolved price-cache read', async t 
     const updates = [[], []], values = [null, null];
     const origin = {latitude:27.95, longitude:-82.45};
     const hook = load('src/screens/cluster-lab/useClusterLabStations.js', {
+        '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ faultsEnabled: false, generation: 0, connected: null }) },
         react: {useEffect: fn=>{effect=fn;}, useMemo: fn=>fn(), useState:()=>{const index=stateIndex++; return [values[index],value=>{values[index]=value;updates[index].push(value);}];}},
         'react-native': {AppState:{currentState:'active',addEventListener:()=>({remove(){}})}},
         'expo-location':{},

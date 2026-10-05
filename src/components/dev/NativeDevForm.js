@@ -25,6 +25,7 @@
 
 import { GlassForm as Form, GlassSection as Section } from '../../../modules/fuel-up-glass';
 import React from 'react';
+import useNetworkStatus, { setNetworkFaultsEnabled } from '../../lib/useNetworkStatus';
 import {
     Button,
     Host,
@@ -252,6 +253,7 @@ export default function NativeDevForm({
     simulation,
     liveActivitySim,
 }) {
+    const { faultsEnabled } = useNetworkStatus();
     const batch = analysis.batchResults;
     const fetchStats = simulation.fetchStats;
     const progressValue = predictive.harnessTotal > 0
@@ -279,6 +281,9 @@ export default function NativeDevForm({
             ignoreSafeArea="all"
         >
             <Form>
+                <Section title="Network" footer={<Footer>Hold all API responses until this switch is turned off. Resets when the app restarts.</Footer>}>
+                    <Toggle label="Network Faults" systemImage="wifi.exclamationmark" isOn={faultsEnabled} onIsOnChange={setNetworkFaultsEnabled} />
+                </Section>
 
                 {/* ─────────── Predictive Backend ─────────── */}
                 <Section

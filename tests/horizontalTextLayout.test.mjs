@@ -310,8 +310,8 @@ test('NativeSettingsForm uses @expo/ui SwiftUI primitives, not RN Text rows', ()
         'NativeSettingsForm must import from @expo/ui/swift-ui so the rows are native SwiftUI'
     );
     assert.ok(
-        /<Picker[\s\S]*selection=\{preferredOctane\}/.test(source),
-        'NativeSettingsForm must hand preferredOctane to a native Picker'
+        /<SettingsLink[\s\S]*onPress=\{onEditFuel\}/.test(source),
+        'NativeSettingsForm must open the dedicated native fuel preferences page'
     );
     assert.ok(
         /<Picker[\s\S]*selection=\{themeMode\}/.test(source),

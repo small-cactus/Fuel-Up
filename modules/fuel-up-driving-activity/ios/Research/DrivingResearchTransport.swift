@@ -1,5 +1,6 @@
 import Foundation
 import Security
+import Network
 
 struct ResearchIdentity: Codable {
   let id: String
@@ -25,6 +26,37 @@ struct ResearchIdentity: Codable {
   }
 }
 
+
+// Shared reachability and a session-only fault gate for native API calls.
+@MainActor final class FuelUpNetworkStatus {
+  static let shared = FuelUpNetworkStatus()
+  private let monitor = NWPathMonitor()
+  private var waiting: [CheckedContinuation<Void, Never>] = []
+  private(set) var faultsEnabled = false
+  private(set) var connected: Bool?
+  var emit: (([String: Any]) -> Void)?
+  private init() {
+    monitor.pathUpdateHandler = { path in
+      let online = path.status == .satisfied
+      Task { @MainActor in
+        self.connected = online
+        self.emit?(["connected": online])
+      }
+    }
+    monitor.start(queue: DispatchQueue(label: "com.anthonyh.fuelup.reachability"))
+  }
+  func setFaults(_ enabled: Bool) {
+    faultsEnabled = enabled
+    if !enabled { let pending = waiting; waiting.removeAll(); pending.forEach { $0.resume() } }
+  }
+  func waitForRelease() async {
+    if faultsEnabled { await withCheckedContinuation { waiting.append($0) } }
+  }
+  func report(_ status: String) {
+    if !faultsEnabled { emit?(["service": "research", "status": status]) }
+  }
+}
+
 final class DrivingResearchTransport {
   private let endpoint=URL(string:"https://vjindchxfebaltbslqwc.supabase.co/functions/v1/driving-research")!
   private let session:URLSession = {
@@ -42,9 +74,30 @@ final class DrivingResearchTransport {
     request.allowsExpensiveNetworkAccess = true
     request.allowsConstrainedNetworkAccess = true
     request.httpBody=try JSONSerialization.data(withJSONObject:body)
-    let(data,response)=try await session.data(for:request)
-    guard let http=response as? HTTPURLResponse,http.statusCode==200 else {throw URLError(.badServerResponse)}
-    guard let result=try JSONSerialization.jsonObject(with:data) as? [String:Any] else {throw URLError(.cannotParseResponse)}
-    return result
+    await FuelUpNetworkStatus.shared.waitForRelease()
+    try Task.checkCancellation()
+    let watchdog = Task {
+      do { try await Task.sleep(nanoseconds: 12_000_000_000) }
+      catch { return }
+      await FuelUpNetworkStatus.shared.report("unresponsive")
+    }
+    defer { watchdog.cancel() }
+    var receivedResponse = false
+    do {
+      let(data,response)=try await session.data(for:request)
+      await FuelUpNetworkStatus.shared.waitForRelease()
+      receivedResponse = true
+      guard let http=response as? HTTPURLResponse else {throw URLError(.badServerResponse)}
+      await FuelUpNetworkStatus.shared.report(http.statusCode >= 500 || http.statusCode == 429 ? "unresponsive" : "responding")
+      guard http.statusCode==200 else {throw URLError(.badServerResponse)}
+      guard let result=try JSONSerialization.jsonObject(with:data) as? [String:Any] else {throw URLError(.cannotParseResponse)}
+      return result
+    } catch {
+      await FuelUpNetworkStatus.shared.waitForRelease()
+      if !receivedResponse && (error as? URLError)?.code != .cancelled && !(error is CancellationError) {
+        await FuelUpNetworkStatus.shared.report("unresponsive")
+      }
+      throw error
+    }
   }
 }

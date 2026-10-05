@@ -42,6 +42,7 @@ struct DrivingResearchScreen: View {
   @State private var confirmDelete = false
   @State private var confirmDeleteAgain = false
   @State private var showConsent = false
+  @State private var presentedIntroduction = false
   @State private var selectedVisit: ResearchVisit?
   @State private var selectedTest: String?
   @State private var labelMessage: String?
@@ -53,7 +54,7 @@ struct DrivingResearchScreen: View {
           .accessibilityAddTraits(.isHeader)
         glassCard {
           HStack(spacing: 14) {
-            Image(systemName: "car.side.fill").font(.title2).foregroundStyle(.secondary)
+            Image(systemName: "person.2.fill").font(.title2).foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 4) {
               Text(collector.enabled && collector.ready ? "Collecting" : collector.enabled ? "Finish setup" : "Paused")
                 .font(.headline)
@@ -136,16 +137,22 @@ struct DrivingResearchScreen: View {
     }
     .scrollEdgeEffectHidden()
     .tint(.primary)
-    .task {collector.prepare();notificationTests.refresh();collector.resume(reason: "debug_screen");takeNotificationVisit()}
+    .task {
+      collector.prepare();notificationTests.refresh();collector.resume(reason: "debug_screen");takeNotificationVisit()
+      if !presentedIntroduction {
+        presentedIntroduction = true
+        if selectedVisit == nil && selectedTest == nil { showConsent = true }
+      }
+    }
     .onChange(of: collector.confirmationVisit?.id) {takeNotificationVisit()}
     .onChange(of: notificationTests.openTestID) {
       if let id=notificationTests.openTestID {selectedTest=id;notificationTests.openTestID=nil}
     }
     .onChange(of: scenePhase) {if scenePhase == .active {collector.resume(reason: "foreground")}}
     .sheet(isPresented: $showConsent) {
-      DrivingResearchConsent(onAgree: {
+      DrivingResearchConsent(isConsented: collector.consented, onAgree: {
         showConsent = false
-        Task { await collector.enable() }
+        if !collector.consented { Task { await collector.enable() } }
       })
     }
     .confirmationDialog("Delete this phone’s research data?", isPresented: $confirmDelete, titleVisibility: .visible) {
