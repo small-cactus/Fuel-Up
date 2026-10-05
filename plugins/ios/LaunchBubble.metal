@@ -11,7 +11,8 @@ using namespace metal;
     float distance = length(delta);
     float radius = max(length(size * 0.5), 1.0);
     float front = 1.0 - pow(1.0 - progress, 3.0);
-    float crest = exp(-pow((distance / radius - front + 0.07) / 0.20, 2.0));
+    // Spread the same gentle displacement over a wider, softer wave.
+    float crest = exp(-pow((distance / radius - front + 0.07) / 0.28, 2.0));
     float outwardDamping = 1.0 - 0.65 * smoothstep(0.15, 1.0, distance / radius);
     float displacement = 18.0 * sin(M_PI_F * progress) * crest
                        * (1.0 - exp(-distance / 70.0)) * outwardDamping;
