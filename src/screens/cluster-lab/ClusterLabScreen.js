@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { requireNativeViewManager } from 'expo-modules-core';
 import { useLocalSearchParams } from 'expo-router';
@@ -12,6 +12,8 @@ import { useLaunchReady } from '../../components/LaunchSplash';
 import useClusterLabStations from './useClusterLabStations';
 import useHomeDeviceLocation from './useHomeDeviceLocation';
 import StationCardCarousel from './StationCardCarousel';
+import FuelUpHeaderLogo from '../../components/FuelUpHeaderLogo';
+import TopCanopy from '../../components/TopCanopy';
 
 const NativeMap = Platform.OS === 'ios' ? requireNativeViewManager('FuelUpMapKitRouting') : null;
 const EMPTY_ORIGIN = {};
@@ -23,6 +25,7 @@ export default function HomeScreen() {
     const { isDark, themeColors } = useTheme();
     const { preferences } = usePreferences();
     const insets = useSafeAreaInsets();
+    const headerStyle = useMemo(() => [styles.header, { paddingTop: insets.top }], [insets.top]);
     const { origin, stations, loaded } = useClusterLabStations(active);
     const { clusterLabProbe } = useLocalSearchParams();
     const map = useRef(null);
@@ -95,8 +98,18 @@ export default function HomeScreen() {
             active={active} bottom={insets.bottom + 12} fuelGrade={preferences.preferredOctane}
             isDark={isDark} themeColors={themeColors} onSelect={select} onNavigate={navigate}
             onHeight={setOverlayHeight} onShowAll={showAll} overview={overview} />}
+        <TopCanopy height={insets.top + 44} />
+        <View pointerEvents="none" style={headerStyle}>
+            <FuelUpHeaderLogo isDark={isDark} />
+        </View>
         </View>
     );
 }
 
-const styles = StyleSheet.create({ map: { flex: 1 } });
+const styles = StyleSheet.create({
+    map: { flex: 1 },
+    header: {
+        position: 'absolute', top: 0, left: 0, right: 0,
+        alignItems: 'center', paddingBottom: 10, zIndex: 10,
+    },
+});
