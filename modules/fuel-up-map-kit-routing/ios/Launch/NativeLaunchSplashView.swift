@@ -7,7 +7,8 @@ final class NativeLaunchSplashView: ExpoView {
   let onExitComplete = EventDispatcher()
   private let model = LaunchSplashModel()
   private let backdrop = UIVisualEffectView()
-  private let blurMask = CAGradientLayer()
+  private let blurMaskView = LaunchBlurMaskView()
+  private var blurMask: CAGradientLayer { blurMaskView.gradient }
   private var host: UIHostingController<LaunchSplashArtwork>!
   private var reportedReady = false
   private var displayLink: CADisplayLink?
@@ -22,7 +23,7 @@ final class NativeLaunchSplashView: ExpoView {
     blurMask.colors = [UIColor.clear.cgColor, UIColor.black.cgColor]
     blurMask.startPoint = CGPoint(x: 0.5, y: 0.5)
     blurMask.endPoint = CGPoint(x: 1, y: 1)
-    backdrop.layer.mask = blurMask
+    backdrop.mask = blurMaskView
     addSubview(backdrop)
     host = UIHostingController(rootView: LaunchSplashArtwork(model: model))
     host.safeAreaRegions = []
@@ -47,16 +48,18 @@ final class NativeLaunchSplashView: ExpoView {
 
   @objc private func tick() {
     guard let startedAt else { return }
-    let duration = model.reduceMotion ? 0.18 : 0.90
-    model.progress = min(1, (CACurrentMediaTime() - startedAt) / duration)
-    updateBlurMask()
+    // Give UIKit and SwiftUI a display interval to render the fully clear state
+    // before React removes the native view. Completion must not reveal a new frame.
     if model.progress >= 1 {
       displayLink?.invalidate()
       displayLink = nil
       finished = true
-      backdrop.effect = nil
       onExitComplete([:])
+      return
     }
+    let duration = model.reduceMotion ? 0.18 : 0.90
+    model.progress = min(1, (CACurrentMediaTime() - startedAt) / duration)
+    updateBlurMask()
   }
 
   private func updateBlurMask() {
@@ -64,12 +67,17 @@ final class NativeLaunchSplashView: ExpoView {
     // A wide transparent-to-opaque ramp gradually removes the live native blur.
     let t = min(1, max(0, model.progress))
     let front = -0.24 + 1.52 * t * t * (3 - 2 * t)
-    let inner = max(0, min(1, front - 0.22))
-    let outer = max(inner, min(1, front + 0.10))
+    // The mask extends to 1.5 screen radii, so the entire fade ramp can travel
+    // beyond the corners. Clamping it at the screen radius pinned opaque blur
+    // to the edge and required a visible, binary cutoff at the end.
+    let inner = max(0, (front - 0.22) / 1.5)
+    let outer = max(inner, (front + 0.10) / 1.5)
     CATransaction.begin()
     CATransaction.setDisableActions(true)
     blurMask.locations = [NSNumber(value: inner), NSNumber(value: outer)]
-    blurMask.opacity = front - 0.22 >= 1 ? 0 : 1
+    // UIKit copies masks onto its effect subviews. Reassign the public mask
+    // after changing it so the live backdrop receives the current ramp too.
+    backdrop.mask = blurMaskView
     CATransaction.commit()
   }
 
@@ -77,9 +85,9 @@ final class NativeLaunchSplashView: ExpoView {
     super.layoutSubviews()
     backdrop.frame = bounds
     host.view.frame = bounds
-    let radius = hypot(bounds.width, bounds.height) / 2
+    let radius = hypot(bounds.width, bounds.height) / 2 * 1.5
     // A square radial mask keeps the wave circular on every screen aspect ratio.
-    blurMask.frame = CGRect(x: bounds.midX - radius, y: bounds.midY - radius,
+    blurMaskView.frame = CGRect(x: bounds.midX - radius, y: bounds.midY - radius,
                             width: radius * 2, height: radius * 2)
     updateBlurMask()
     guard window != nil, bounds.width > 0, bounds.height > 0, !reportedReady else { return }
@@ -138,4 +146,10 @@ private struct LaunchSplashArtwork: View {
     .ignoresSafeArea()
     .accessibilityHidden(true)
   }
+}
+
+/// A view mask lets UIVisualEffectView propagate the mask to its effect layers.
+private final class LaunchBlurMaskView: UIView {
+  override class var layerClass: AnyClass { CAGradientLayer.self }
+  var gradient: CAGradientLayer { layer as! CAGradientLayer }
 }
