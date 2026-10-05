@@ -5,7 +5,6 @@ struct OnboardingBrandsPage: View {
   @ObservedObject var model: OnboardingModel
   var isSettings = false
   var bottomInset: CGFloat = 0
-  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var brandSearch = ""
   @State private var membershipSearch = ""
   @ScaledMetric(relativeTo: .body) private var searchHeight = 56.0
@@ -90,8 +89,6 @@ struct OnboardingBrandsPage: View {
           Text("Optional. You can change these in Settings.").font(.footnote).foregroundStyle(.secondary)
         }
       }.padding(.horizontal, 24).padding(.bottom, 24 + bottomInset)
-        .animation(reduceMotion ? .linear(duration: 0.18) : .smooth(duration: 1.05), value: model.loading)
-        .animation(reduceMotion ? .linear(duration: 0.18) : .smooth(duration: 1.05), value: model.membershipLoading)
     }.scrollDismissesKeyboard(.interactively)
   }
 

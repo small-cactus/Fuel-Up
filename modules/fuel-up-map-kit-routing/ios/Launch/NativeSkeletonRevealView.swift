@@ -112,7 +112,7 @@ final class NativeSkeletonRevealView: ExpoView {
     guard let model else { finish(); return }
     guard let startedAt else { self.startedAt = CACurrentMediaTime(); return }
     if model.progress >= 1 { finish(); return }
-    model.progress = min(1, (CACurrentMediaTime() - startedAt) / (model.reduceMotion ? 0.18 : 1.05))
+    model.progress = min(1, (CACurrentMediaTime() - startedAt) / (model.reduceMotion ? 0.18 : 0.46))
   }
 
   private func finish() {
@@ -138,22 +138,28 @@ private final class SkeletonRevealModel: ObservableObject {
 private struct SkeletonRevealArtwork: View {
   @ObservedObject var model: SkeletonRevealModel
   var body: some View {
-    GeometryReader { geometry in
-      let eased = model.progress * model.progress * (3 - 2 * model.progress)
+    GeometryReader { _ in
+      let progress = model.progress
+      let eased = model.reduceMotion ? progress : skeletonSpring(progress)
+      let width = model.from.size.width + (model.to.size.width - model.from.size.width) * eased
       let height = model.from.size.height + (model.to.size.height - model.from.size.height) * eased
-      ZStack(alignment: .topLeading) {
-        Image(uiImage: model.from).resizable()
-          .frame(width: geometry.size.width, height: height).opacity(1 - model.progress)
-        Image(uiImage: model.to).resizable()
-          .frame(width: geometry.size.width, height: height).opacity(model.progress)
-      }
-      .modifier(SkeletonLiquidEffect(progress: model.progress, reduceMotion: model.reduceMotion))
+      // One image owns the surface at a time. Crossfading entire snapshots
+      // doubles the glass background and leaves two card outlines visible.
+      Image(uiImage: progress < 0.28 ? model.from : model.to).resizable()
+        .frame(width: max(1, width), height: max(1, height))
+        .modifier(SkeletonLiquidEffect(progress: progress, reduceMotion: model.reduceMotion))
     }.ignoresSafeArea().accessibilityHidden(true)
   }
 }
 
-/// Composite the two silhouettes before deforming/softening them. The native
-/// glass stays outside this surface, and at rest the shader is fully detached.
+// Fast arrival with a small overshoot, then an exact, motionless endpoint.
+private func skeletonSpring(_ progress: Double) -> Double {
+  let t = min(1, max(0, progress)) - 1
+  return 1 + 2.1 * t * t * t + 1.1 * t * t
+}
+
+/// A single surface compresses, switches at peak blur, then rebounds into focus.
+/// Native glass stays outside the SwiftUI effect; no overlapping card layers.
 struct SkeletonLiquidEffect: ViewModifier, Animatable {
   var progress: Double
   var reduceMotion: Bool
@@ -163,20 +169,22 @@ struct SkeletonLiquidEffect: ViewModifier, Animatable {
     if reduceMotion || progress <= 0 || progress >= 1 {
       content
     } else {
-      let radius = 15 * pow(sin(.pi * progress), 1.3)
+      let blurPhase = progress < 0.28 ? progress / 0.28 : max(0, (0.84 - progress) / 0.56)
+      let radius = 14 * sin(.pi * 0.5 * blurPhase)
+      let rebound = 1 - 0.035 * sin(2 * .pi * progress) * sin(.pi * progress)
       content.drawingGroup().visualEffect { view, geometry in
         view.distortionEffect(ShaderLibrary.default.fuelUpSkeletonFlow(
-          .float2(geometry.size), .float(progress)), maxSampleOffset: CGSize(width: 10, height: 6))
+          .float2(geometry.size), .float(progress)), maxSampleOffset: CGSize(width: 12, height: 8))
           // SwiftUI's native Gaussian uses the full-resolution Metal surface
           // without the coarse sampling pattern of a small custom tap kernel.
           .blur(radius: radius)
-          .colorEffect(ShaderLibrary.default.fuelUpSkeletonInk(.float(progress)))
       }
+      .scaleEffect(rebound, anchor: .top)
     }
   }
 }
 
-/// SwiftUI lists use the same paired-image math with their actual row layers.
+/// SwiftUI lists switch their row surface under blur inside one native glass container.
 struct SkeletonLiquidSwap<Placeholder: View, Loaded: View>: View {
   let loading: Bool
   let placeholder: Placeholder
@@ -195,21 +203,23 @@ struct SkeletonLiquidSwap<Placeholder: View, Loaded: View>: View {
         placeholder
       } else if let startedAt {
         TimelineView(.animation) { timeline in
-          let progress = min(1, max(0, timeline.date.timeIntervalSince(startedAt) / (reduceMotion ? 0.18 : 1.05)))
-          let blend = progress * progress * (3 - 2 * progress)
-          ZStack(alignment: .topLeading) {
-            placeholder.opacity(1 - blend).accessibilityHidden(true)
-            loaded.opacity(blend)
+          let progress = min(1, max(0, timeline.date.timeIntervalSince(startedAt) / (reduceMotion ? 0.18 : 0.46)))
+          SkeletonSwapLayout(progress: progress, reduceMotion: reduceMotion) {
+            placeholder.opacity(progress < 0.28 ? 1 : 0).accessibilityHidden(true)
+            loaded.opacity(progress < 0.28 ? 0 : 1)
+              .allowsHitTesting(progress >= 0.28)
+              .accessibilityHidden(progress < 0.28)
           }
+          .clipped()
           .modifier(SkeletonLiquidEffect(progress: progress, reduceMotion: reduceMotion))
-          // The opacity, distortion and blur must use this same frame, rather
-          // than independent implicit animations on newly inserted row trees.
+          // No implicit insertion/removal crossfade may resurrect the old card.
           .transaction { $0.animation = nil }
         }
       } else {
         loaded
       }
     }
+    .transaction { $0.animation = nil }
     .onChange(of: loading) { _, nowLoading in
       cleanup?.cancel()
       if nowLoading {
@@ -217,12 +227,36 @@ struct SkeletonLiquidSwap<Placeholder: View, Loaded: View>: View {
       } else {
         startedAt = .now
         cleanup = Task { @MainActor in
-          try? await Task.sleep(for: .seconds(reduceMotion ? 0.22 : 1.1))
+          try? await Task.sleep(for: .seconds(reduceMotion ? 0.22 : 0.50))
           guard !Task.isCancelled else { return }
           startedAt = nil
         }
       }
     }
     .onDisappear { cleanup?.cancel(); startedAt = nil }
+  }
+}
+
+/// Reserve and animate one card's bounds while its two measured row trees
+/// alternate visibility. The hidden tree contributes layout, never a second card.
+private struct SkeletonSwapLayout: Layout {
+  let progress: Double
+  let reduceMotion: Bool
+
+  func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+    guard subviews.count == 2 else { return .zero }
+    let widthOnly = ProposedViewSize(width: proposal.width, height: nil)
+    let from = subviews[0].sizeThatFits(widthOnly)
+    let to = subviews[1].sizeThatFits(widthOnly)
+    let fraction = reduceMotion ? progress : skeletonSpring(progress)
+    return CGSize(width: proposal.width ?? max(from.width, to.width),
+                  height: max(0, from.height + (to.height - from.height) * fraction))
+  }
+
+  func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+    for view in subviews {
+      view.place(at: bounds.origin, anchor: .topLeading,
+                 proposal: ProposedViewSize(width: bounds.width, height: nil))
+    }
   }
 }
