@@ -42,18 +42,21 @@ struct DrivingResearchVisitTimeline: View {
     }
   }
   private func event(_ title:String,at time:Double,top:Bool,bottom:Bool)->some View {
-    HStack(spacing:10) {
-      GeometryReader {geometry in
-        Path {path in
-          let middle=geometry.size.height/2
-          if top {path.move(to:CGPoint(x:6,y:0));path.addLine(to:CGPoint(x:6,y:middle-5))}
-          if bottom {path.move(to:CGPoint(x:6,y:middle+5));path.addLine(to:CGPoint(x:6,y:geometry.size.height))}
-        }.stroke(.secondary.opacity(0.45),lineWidth:1.5)
-        Circle().stroke(.secondary,lineWidth:1.5).frame(width:10,height:10)
-          .position(x:6,y:geometry.size.height/2)
-      }.frame(width:12).accessibilityHidden(true)
-      Text("\(title) · \(Date(timeIntervalSince1970:time).formatted(date:.omitted,time:.shortened))")
-        .font(.caption).foregroundStyle(.secondary).frame(maxWidth:.infinity,alignment:.leading).padding(.vertical,8)
-    }.fixedSize(horizontal:false,vertical:true)
+    Text("\(title) · \(Date(timeIntervalSince1970:time).formatted(date:.omitted,time:.shortened))")
+      .font(.caption).foregroundStyle(.secondary)
+      .frame(maxWidth:.infinity,alignment:.leading)
+      .padding(.vertical,8).padding(.leading,22)
+      .overlay(alignment:.leading) {
+        GeometryReader {geometry in
+          Path {path in
+            let middle=geometry.size.height/2
+            if top {path.move(to:CGPoint(x:6,y:0));path.addLine(to:CGPoint(x:6,y:middle-5))}
+            if bottom {path.move(to:CGPoint(x:6,y:middle+5));path.addLine(to:CGPoint(x:6,y:geometry.size.height))}
+          }.stroke(.secondary.opacity(0.45),lineWidth:1.5)
+          Circle().stroke(.secondary,lineWidth:1.5).frame(width:10,height:10)
+            .position(x:6,y:geometry.size.height/2)
+        }.frame(width:12).accessibilityHidden(true)
+      }
+      .fixedSize(horizontal:false,vertical:true)
   }
 }

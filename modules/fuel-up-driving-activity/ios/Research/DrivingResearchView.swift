@@ -143,23 +143,10 @@ struct DrivingResearchScreen: View {
     }
     .onChange(of: scenePhase) {if scenePhase == .active {collector.resume(reason: "foreground")}}
     .sheet(isPresented: $showConsent) {
-      NavigationStack {
-        ScrollView {
-          VStack(alignment: .leading, spacing: 24) {
-            Image(systemName: "car.side.fill").font(.largeTitle).foregroundStyle(.secondary)
-            Text("Join Driving Research").font(.title.bold())
-            Text("Share precise locations, motion, timestamps, station stops, and your visit labels with Fuel Up to improve recommendations. Collection continues in the background.")
-            Text("Records use a random participant ID and are kept until you delete them. You can pause or delete your research data here anytime.")
-              .foregroundStyle(.secondary)
-            Button("Agree & Enable Collection") {
-              showConsent = false
-              Task {await collector.enable()}
-            }.buttonStyle(.glassProminent).tint(.blue)
-              .controlSize(.large).frame(maxWidth: .infinity)
-          }.padding(24)
-        }
-        .toolbar {ToolbarItem(placement: .cancellationAction) {Button("Cancel") {showConsent = false}}}
-      }.presentationDetents([.large])
+      DrivingResearchConsent(onAgree: {
+        showConsent = false
+        Task { await collector.enable() }
+      }, onDismiss: { showConsent = false })
     }
     .confirmationDialog("Delete this phone’s research data?", isPresented: $confirmDelete, titleVisibility: .visible) {
       Button("Continue", role: .destructive) {confirmDeleteAgain=true}

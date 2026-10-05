@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="240" viewBox="0 0 380 240">
+  <defs>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#CDEAC9"/><stop offset="1" stop-color="#A8D6A0"/></linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#F6F7F7"/><stop offset="1" stop-color="#E6E9E8"/></linearGradient>
+    <linearGradient id="pin" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#399EFF"/><stop offset="1" stop-color="#0870EF"/></linearGradient>
+    <linearGradient id="pump" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#83949C"/><stop offset="1" stop-color="#5B6B75"/></linearGradient>
+    <clipPath id="map"><path d="M22 76 93 48 167 81 237 57 314 87 355 116 355 231 276 201 208 229 135 201 93 188 22 210Z"/></clipPath>
+  </defs>
+  <!-- Four folded panels, drawn directly as vector geometry. -->
+  <path d="M22 76 93 48 93 188 22 210Z" fill="url(#green)"/>
+  <path d="M93 48 167 81 167 218 93 188Z" fill="url(#paper)"/>
+  <path d="M167 81 237 57 237 217 208 229 167 218Z" fill="#F0F2F0"/>
+  <path d="M237 57 314 87 314 217 276 201 237 217Z" fill="url(#paper)"/>
+  <path d="M314 87 355 116 355 231 314 217Z" fill="#EFF1F1"/>
+  <g clip-path="url(#map)">
+    <path d="M99 47 162 77 162 150 100 124Z" fill="#B5DEFA"/>
+    <path d="M171 79 190 73 190 155 171 162Z" fill="#AED7F2"/>
+    <path d="M194 73 235 58 235 94 194 109Z" fill="url(#green)"/>
+    <path d="M142 170 163 178 163 215 122 199Z" fill="url(#green)"/>
+    <path d="M99 134 121 143 135 170 121 194 99 186Z" fill="#E4E7E3"/>
+    <path d="M170 173 201 161 217 182 207 229 171 216Z" fill="#E8EBE7"/>
+    <g fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round">
+      <path d="M96 47V193M166 73V226M238 52V222"/>
+      <path d="M96 127 166 157 239 131 312 161M114 136 130 160 123 174M142 146 139 172 166 184 202 174 220 202M192 75V151M203 148 214 173 245 182"/>
+    </g>
+    <path d="M149 111V185H243" fill="none" stroke="#85918E" stroke-width="2.2" stroke-dasharray="7 6" stroke-linecap="round"/>
+  </g>
+  <!-- Two small roadside trees on the left map panel. -->
+  <path d="M59 138V180M78 136V174" stroke="#7E8059" stroke-width="4"/>
+  <path d="M59 124C52 120 44 144 43 151C40 164 52 173 61 166C70 172 77 159 71 148C67 139 65 125 59 124Z" fill="#58AE61"/>
+  <path d="M78 125C72 121 68 139 65 148C61 159 68 167 78 164C89 164 91 155 87 145C84 137 84 127 78 125Z" fill="#409C52"/>
+  <path d="M59 140V180M78 140V174" stroke="#608351" stroke-width="3" stroke-linecap="round"/>
+  <!-- Pin casts a small shadow on its fold. -->
+  <ellipse cx="149" cy="128" rx="10" ry="4" fill="#7FADC7" opacity=".24"/>
+  <path d="M149 18C129 18 116 32 116 50C116 69 135 94 149 113C162 94 182 70 182 50C182 32 168 18 149 18Z" fill="url(#pin)"/>
+  <circle cx="149" cy="50" r="13" fill="#FFFFFF"/>
+  <!-- Station canopy, support, pump, hose, and concrete island. -->
+  <path d="M240 126H249V200H240Z" fill="#A7B5BE"/>
+  <path d="M245 127H249V199H245Z" fill="#C7D1D5"/>
+  <path d="M226 119H327V129H226Z" fill="#B8C6CA"/>
+  <rect x="226" y="111" width="101" height="15" rx="2" fill="#F8D34C"/>
+  <path d="M226 115H327V120H226Z" fill="#ED615B"/>
+  <path d="M226 123H327V126H226Z" fill="#91B8AE"/>
+  <path d="M267 199H324L334 228 258 207Z" fill="#D3DADD"/>
+  <path d="M270 143Q270 139 274 139H299Q304 139 304 144V198H270Z" fill="url(#pump)"/>
+  <rect x="276" y="145" width="22" height="17" rx="1.5" fill="#BFCFD9"/>
+  <rect x="277" y="167" width="14" height="23" rx="1" fill="#A3B4C0"/>
+  <path d="M304 162 309 167V184Q309 190 303 188" fill="none" stroke="#63717A" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M302 162V172" fill="none" stroke="#4F5E66" stroke-width="4" stroke-linecap="round"/>
+  <path d="M268 197H307V202H268Z" fill="#99A7AF"/>
+</svg>
