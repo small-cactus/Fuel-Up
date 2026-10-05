@@ -53,8 +53,12 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   private var sessionID=UUID().uuidString.lowercased()
   private var lastQualityErrorAt=Date.distantPast
   private var permissionSetup=false
+  private var pendingMotionSetup=false
+  private var motionRequestInFlight=false
   private var pendingLocationSetup=false
+  private var locationSetupStarted=false
   private var notificationPermissionTask:Task<Void,Never>?
+  private var trackingFaults:[String:String]=[:]
   private let networkMonitor=NWPathMonitor()
   private var networkAvailable=false
   private var wifiNetwork=false
@@ -119,22 +123,25 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
         }
       }
       networkMonitor.start(queue:DispatchQueue(label:"fuelup.research.network"))
-    } catch {issue=error.localizedDescription;status="Storage unavailable"}
+    } catch {issue=error.localizedDescription;status="Storage unavailable";setTrackingFault("storage","Fuel Up cannot save drive data. Open the app to check storage.")}
   }
   func resume(reason:String) {
+    defer {checkTrackingHealth()}
+    continueMotionSetup()
     continueLocationSetup()
     permissionRevision+=1
-    Task {notificationPermission=await DrivingResearchNotifications.shared.permission()}
+    Task {notificationPermission=await DrivingResearchNotifications.shared.permission();checkTrackingHealth()}
     guard enabled,consented else {return}
     prepare();guard configured else{return}
-    do {identity=try ResearchIdentity.load();participant=identity!.id} catch {issue=error.localizedDescription;return}
+    do {identity=try ResearchIdentity.load();participant=identity!.id;trackingFaults.removeValue(forKey:"identity")}
+    catch {issue=error.localizedDescription;stopSensors();setTrackingFault("identity","Fuel Up cannot access your research profile. Unlock and open the app to resume.");return}
     guard ready else {
       stopSensors();status="Paused — finish permissions"
       record("permission",["location":locationPermission,"precise":precise,"motion":motionPermission]);return
     }
     if !running {
       running=true;sessionID=UUID().uuidString.lowercased()
-      record("lifecycle",["reason":reason,"os":UIDevice.current.systemVersion,"version":Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "", "build":Bundle.main.object(forInfoDictionaryKey:"CFBundleVersion") as? String ?? "", "background":UIApplication.shared.applicationState != .active])
+      guard record("lifecycle",["reason":reason,"os":UIDevice.current.systemVersion,"version":Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "", "build":Bundle.main.object(forInfoDictionaryKey:"CFBundleVersion") as? String ?? "", "background":UIApplication.shared.applicationState != .active]) else{return}
       manager.startMonitoringSignificantLocationChanges()
       manager.startUpdatingLocation()
       activity.startActivityUpdates(to:.main) { [weak self] value in
@@ -161,15 +168,23 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   }
   // One setup flow, entered from the research screen or consent action only.
   func requestPermissions() {
-    guard UIApplication.shared.applicationState == .active,consented,!permissionSetup else{return}
+    guard UIApplication.shared.applicationState == .active,consented,!permissionSetup,!motionRequestInFlight else{return}
     permissionSetup=true
+    locationSetupStarted=false
+    checkTrackingHealth()
     status="Finish permissions, then collection starts automatically"
     Task {
       await requestStopNotifications()
       guard consented,permissionSetup else{return}
-      pendingLocationSetup=true
-      continueLocationSetup()
+      pendingMotionSetup=true
+      continueMotionSetup()
     }
+  }
+  private func continueMotionSetup() {
+    guard pendingMotionSetup,UIApplication.shared.applicationState == .active else{return}
+    pendingMotionSetup=false
+    guard consented,permissionSetup else{return}
+    requestMotion()
   }
   private func continueLocationSetup() {
     // Authorization alerts can leave the app inactive until their dismissal
@@ -177,25 +192,38 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     guard pendingLocationSetup,UIApplication.shared.applicationState == .active else{return}
     pendingLocationSetup=false
     guard consented,permissionSetup else{return}
+    locationSetupStarted=true
     switch manager.authorizationStatus {
     case .notDetermined:manager.requestWhenInUseAuthorization()
-    case .authorizedWhenInUse:manager.requestAlwaysAuthorization()
-    case .authorizedAlways:requestMotion()
-    default:permissionSetup=false
+    case .authorizedWhenInUse:
+      manager.requestAlwaysAuthorization()
+      finishPermissionSetup()
+    default:finishPermissionSetup()
     }
   }
   private func requestMotion() {
-    permissionSetup=false
-    if CMMotionActivityManager.authorizationStatus() == .notDetermined {
+    if CMMotionActivityManager.isActivityAvailable(),CMMotionActivityManager.authorizationStatus() == .notDetermined {
+      motionRequestInFlight=true
       activity.queryActivityStarting(from:Date().addingTimeInterval(-60),to:Date(),to:.main) { [weak self] _,_ in
-        Task { @MainActor in self?.resume(reason:"permissions") }
+        Task { @MainActor in
+          guard let self else{return}
+          self.motionRequestInFlight=false
+          guard self.consented,self.permissionSetup else{return}
+          self.pendingLocationSetup=true
+          self.continueLocationSetup()
+        }
       }
-    } else {resume(reason:"permissions")}
+    } else {pendingLocationSetup=true;continueLocationSetup()}
+  }
+  private func finishPermissionSetup() {
+    permissionSetup=false;locationSetupStarted=false
+    resume(reason:"permissions")
   }
   func pause() {
-    permissionSetup=false;pendingLocationSetup=false
+    permissionSetup=false;pendingLocationSetup=false;pendingMotionSetup=false;locationSetupStarted=false
     record("consent",["version":1,"enabled":false])
     enabled=false;UserDefaults.standard.set(false,forKey:Self.enabledKey)
+    trackingFaults.removeAll();checkTrackingHealth()
     DrivingResearchNotifications.shared.cancelAll()
     stopSensors();DrivingResearchSync.shared.pause();status="Paused"
     if let visit=detector.active {record("visit_gap",visitPayload(visit))}
@@ -236,16 +264,18 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   }
   func locationManagerDidChangeAuthorization(_ manager:CLLocationManager) {
     permissionRevision+=1
-    if permissionSetup,notificationPermissionTask == nil,!pendingLocationSetup,UIApplication.shared.applicationState == .active {
-      if manager.authorizationStatus == .authorizedWhenInUse {manager.requestAlwaysAuthorization()}
-      else if manager.authorizationStatus == .authorizedAlways {requestMotion()}
-      else if manager.authorizationStatus == .denied || manager.authorizationStatus == .restricted {permissionSetup=false}
+    if permissionSetup,locationSetupStarted,notificationPermissionTask == nil,!pendingMotionSetup,!motionRequestInFlight,manager.authorizationStatus != .notDetermined {
+      pendingLocationSetup=true
+      continueLocationSetup()
     }
     if configured {resume(reason:"authorization_changed")}
   }
   func locationManager(_ manager:CLLocationManager,didUpdateLocations locations:[CLLocation]) {
     guard enabled else{return}
-    guard ready else{stopSensors();status="Paused — finish permissions";return}
+    guard ready else{stopSensors();status="Paused — finish permissions";checkTrackingHealth();return}
+    if locations.contains(where:{$0.horizontalAccuracy >= 0 && abs($0.timestamp.timeIntervalSinceNow)<60}) {
+      clearTrackingFault("location");clearTrackingFault("location_paused")
+    }
     let now=Date().timeIntervalSince1970
     for location in locations.sorted(by:{$0.timestamp<$1.timestamp}) {
       let fix=ResearchFix(timestamp:location.timestamp.timeIntervalSince1970,receivedAt:now,latitude:location.coordinate.latitude,longitude:location.coordinate.longitude,accuracy:location.horizontalAccuracy,speed:location.speed,course:location.course,speedAccuracy:location.speedAccuracy,simulated:location.sourceInformation?.isSimulatedBySoftware ?? false,accessory:location.sourceInformation?.isProducedByAccessory ?? false)
@@ -289,8 +319,14 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   }
   private func checkMotion() {
     guard Date().timeIntervalSince(lastMotionCheck)>30 else{return};lastMotionCheck=Date()
-    activity.queryActivityStarting(from:Date().addingTimeInterval(-180),to:Date(),to:.main) { [weak self] values,_ in
-      Task { @MainActor in for value in values ?? [] {self?.handleMotion(value)} }
+    checkTrackingHealth()
+    activity.queryActivityStarting(from:Date().addingTimeInterval(-180),to:Date(),to:.main) { [weak self] values,error in
+      Task { @MainActor in
+        guard let self,self.enabled else{return}
+        if error != nil {self.setTrackingFault("motion","Motion data is unavailable. Open Driving Research to check Motion & Fitness access.")}
+        else {self.clearTrackingFault("motion")}
+        for value in values ?? [] {self.handleMotion(value)}
+      }
     }
   }
   private func visitPayload(_ visit:ResearchVisit)->[String:Any] {
@@ -298,6 +334,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   }
   private func saveDetector() {UserDefaults.standard.set(try? JSONEncoder().encode(detector),forKey:"research.detector")}
   func requestStopNotifications() async {
+    defer{checkTrackingHealth()}
     if let task=notificationPermissionTask {await task.value;return}
     guard consented,UIApplication.shared.applicationState == .active else{return}
     let task=Task { @MainActor in
@@ -315,7 +352,9 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   }
   func researchScreenBecameActive() async {
     guard !permissionSetup else{return}
-    await requestStopNotifications()
+    if enabled,consented,CMMotionActivityManager.isActivityAvailable(),CMMotionActivityManager.authorizationStatus() == .notDetermined {
+      requestPermissions()
+    } else {await requestStopNotifications()}
   }
   func refreshConfirmations() {
     prepare()
@@ -346,10 +385,23 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   }
   func locationManager(_ manager:CLLocationManager,didFailWithError error:Error) {
     guard enabled else{return}
+    // locationUnknown is a normal temporary lack of a fix, not a stopped trip.
+    let locationError=error as? CLError
+    if locationError?.code != .locationUnknown {
+      setTrackingFault("location","Location updates were interrupted. Open Driving Research to check location access.")
+    }
     if Date().timeIntervalSince(lastQualityErrorAt)>60 {lastQualityErrorAt=Date();record("diagnostic",["locationError":(error as NSError).code])}
   }
-  func locationManagerDidPauseLocationUpdates(_ manager:CLLocationManager) {record("diagnostic",["locationPaused":true])}
-  func locationManagerDidResumeLocationUpdates(_ manager:CLLocationManager) {record("diagnostic",["locationResumed":true])}
+  func locationManagerDidPauseLocationUpdates(_ manager:CLLocationManager) {
+    record("diagnostic",["locationPaused":true])
+    if enabled,lastMode != "monitoring",running {
+      setTrackingFault("location_paused","Location tracking paused during a drive or station stop. Open Fuel Up if it does not resume.")
+      manager.startUpdatingLocation()
+    }
+  }
+  func locationManagerDidResumeLocationUpdates(_ manager:CLLocationManager) {
+    clearTrackingFault("location_paused");record("diagnostic",["locationResumed":true])
+  }
   func locationManager(_ manager:CLLocationManager,monitoringDidFailFor region:CLRegion?,withError error:Error) {
     issue="A station geofence could not be registered. Location recording continues."
     record("diagnostic",["geofenceError":(error as NSError).code,"region":region?.identifier ?? ""])
@@ -367,8 +419,38 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     guard consented,let store else{return false}
     do {
       var payload=fields;payload["schemaVersion"]=1;payload["detectorVersion"]="station-stop-v1";payload["sessionId"]=sessionID
-      try store.append(ResearchEvent(kind:kind,payload:payload));refreshCounts();sync();return true
-    } catch {issue=error.localizedDescription;stopSensors();status="Paused — storage needs attention";return false}
+      try store.append(ResearchEvent(kind:kind,payload:payload));clearTrackingFault("storage");refreshCounts();sync();return true
+    } catch {issue=error.localizedDescription;stopSensors();status="Paused — storage needs attention";setTrackingFault("storage","Drive recording stopped because data could not be saved. Check your iPhone’s available storage.");return false}
+  }
+  private func setTrackingFault(_ id:String,_ message:String) {
+    trackingFaults[id]=message;checkTrackingHealth()
+  }
+  private func clearTrackingFault(_ id:String) {
+    if trackingFaults.removeValue(forKey:id) != nil {checkTrackingHealth()}
+  }
+  private func checkTrackingHealth() {
+    var problems:[ResearchTrackingIssue]=[]
+    if !CLLocationManager.locationServicesEnabled() {
+      problems.append(.init(id:"location_services",message:"Location Services is off. Turn it on to record drives."))
+    } else if manager.authorizationStatus != .authorizedAlways {
+      problems.append(.init(id:"location_permission",message:"Allow Always location access in Settings to record drives in the background."))
+    } else if !precise {
+      problems.append(.init(id:"precise_location",message:"Turn on Precise Location in Settings to detect station stops."))
+    }
+    if motionPermission != "Allowed" {
+      problems.append(.init(id:"motion_permission",message:motionPermission == "Unavailable" ? "Motion tracking is unavailable on this device." : "Allow Motion & Fitness access to record drives."))
+    }
+    if UIApplication.shared.backgroundRefreshStatus != .available {
+      problems.append(.init(id:"background_refresh",message:"Background App Refresh is unavailable. Check Settings and Low Power Mode."))
+    }
+    if ["Off","Alerts off","Not requested"].contains(notificationPermission) {
+      problems.append(.init(id:"notifications",message:"Allow notifications in Settings to receive stop confirmations and tracking alerts."))
+    }
+    if configured,ready,!running,trackingFaults.isEmpty {
+      problems.append(.init(id:"tracking_stopped",message:"Drive recording is not running. Open Fuel Up to resume it."))
+    }
+    problems += trackingFaults.sorted{$0.key<$1.key}.map{.init(id:$0.key,message:$0.value)}
+    DrivingResearchHealth.shared.update(problems,enabled:enabled && consented,settingUp:permissionSetup || busy)
   }
   func refreshCounts() {
     do {

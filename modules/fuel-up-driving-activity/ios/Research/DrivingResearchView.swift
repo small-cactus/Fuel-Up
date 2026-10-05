@@ -62,6 +62,7 @@ struct DrivingResearchScreen: View {
   @ObservedObject private var collector = DrivingResearchCollector.shared
   @ObservedObject private var transfer = DrivingResearchSync.shared
   @ObservedObject private var notificationTests = DrivingResearchTestNotifications.shared
+  @ObservedObject private var health = DrivingResearchHealth.shared
   @Environment(\.scenePhase) private var scenePhase
   @Environment(\.dynamicTypeSize) private var typeSize
   @State private var confirmDelete = false
@@ -116,6 +117,11 @@ struct DrivingResearchScreen: View {
         if let issue = collector.issue {
           Label(issue, systemImage: "exclamationmark.circle")
             .font(.subheadline).foregroundStyle(.secondary).accessibilityIdentifier("research-issue")
+        }
+        if let message=health.message {
+          Label(message,systemImage:"exclamationmark.triangle")
+            .font(.subheadline).foregroundStyle(.secondary)
+            .accessibilityIdentifier("research-tracking-health")
         }
         if collector.consented && needsPermissions {
           section("Permissions") {

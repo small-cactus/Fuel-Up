@@ -9,6 +9,8 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
   static let shared = DrivingResearchNotifications()
   private var forwarding: UNUserNotificationCenterDelegate?
   private let center = UNUserNotificationCenter.current()
+  private static let healthCategory="fuelup.research.health"
+  private static let healthID="fuelup.research.tracking-health"
 
   func install() {
     _ = NotificationCenterManager.shared
@@ -23,7 +25,7 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
         options: [.customDismissAction])
       let testCategory = UNNotificationCategory(identifier: DrivingResearchTestNotifications.category, actions: actions,
         intentIdentifiers: [], hiddenPreviewsBodyPlaceholder: "Confirm your station stop", options: [.customDismissAction])
-      center.setNotificationCategories(Set(categories.filter { $0.identifier != ResearchConfirmation.category && $0.identifier != DrivingResearchTestNotifications.category }).union([category,testCategory]))
+      center.setNotificationCategories(Set(categories.filter { $0.identifier != ResearchConfirmation.category && $0.identifier != DrivingResearchTestNotifications.category && $0.identifier != Self.healthCategory }).union([category,testCategory,UNNotificationCategory(identifier:Self.healthCategory,actions:[],intentIdentifiers:[],options:[])]))
     }
   }
   func requestPermission() async -> Bool {
@@ -38,6 +40,27 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
     case .denied: return "Off"
     default: return "Not requested"
     }
+  }
+  func scheduleTrackingHealth(_ message:String) async -> Bool {
+    install()
+    let settings=await center.notificationSettings()
+    guard [.authorized,.provisional,.ephemeral].contains(settings.authorizationStatus) else{return false}
+    let content=UNMutableNotificationContent()
+    content.title="Tracking needs attention 👀"
+    content.body=message+" Tap to review."
+    content.categoryIdentifier=Self.healthCategory
+    content.threadIdentifier="fuelup.research.health"
+    content.sound = .default
+    content.interruptionLevel = .active
+    do {
+      try await center.add(UNNotificationRequest(identifier:Self.healthID,content:content,
+        trigger:UNTimeIntervalNotificationTrigger(timeInterval:3,repeats:false)))
+      return true
+    } catch {return false}
+  }
+  func clearTrackingHealth() {
+    center.removePendingNotificationRequests(withIdentifiers:[Self.healthID])
+    center.removeDeliveredNotifications(withIdentifiers:[Self.healthID])
   }
   func schedule(_ visit: ResearchVisit) async -> String {
     install()
@@ -71,7 +94,7 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
   }
   func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
                               withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-    guard [ResearchConfirmation.category,DrivingResearchTestNotifications.category].contains(notification.request.content.categoryIdentifier) else {
+    guard [ResearchConfirmation.category,DrivingResearchTestNotifications.category,Self.healthCategory].contains(notification.request.content.categoryIdentifier) else {
       if let forwarding, forwarding.responds(to: #selector(UNUserNotificationCenterDelegate.userNotificationCenter(_:willPresent:withCompletionHandler:))) {
         forwarding.userNotificationCenter?(center, willPresent: notification, withCompletionHandler: completionHandler)
       } else { completionHandler([]) }
@@ -81,6 +104,15 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
   }
   func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
                               withCompletionHandler completionHandler: @escaping () -> Void) {
+    if response.notification.request.content.categoryIdentifier == Self.healthCategory {
+      if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
+        Task { @MainActor in
+          guard DrivingResearchCollector.shared.consented else{return}
+          if let url=URL(string:"fuelup:///driving-research") {UIApplication.shared.open(url)}
+        }
+      }
+      completionHandler();return
+    }
     if response.notification.request.content.categoryIdentifier == DrivingResearchTestNotifications.category {
       defer {completionHandler()}
       guard UserDefaults.standard.bool(forKey:DrivingResearchCollector.consentKey),
