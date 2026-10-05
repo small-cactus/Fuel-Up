@@ -42,9 +42,8 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
     let settings = await center.notificationSettings()
     guard [.authorized, .provisional, .ephemeral].contains(settings.authorizationStatus) else { return "permission_missing" }
     let content = UNMutableNotificationContent()
-    content.title = "⛽ Quick stop check"
-    content.subtitle = visit.station.name
-    content.body = "Did you get fuel? Hold to answer."
+    content.title = ResearchConfirmation.notificationTitle(for: visit)
+    content.subtitle = ResearchConfirmation.notificationSubtitle
     content.categoryIdentifier = ResearchConfirmation.category
     content.threadIdentifier = "fuelup.research.stops"
     content.sound = .default

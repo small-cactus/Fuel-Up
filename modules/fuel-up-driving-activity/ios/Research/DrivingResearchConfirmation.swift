@@ -7,6 +7,18 @@ enum ResearchConfirmation {
   static let actions = [("fueled", "Got fuel", "fuelpump.fill"),
                         ("not_fueling", "Stopped, no fuel", "bag.fill"),
                         ("not_a_stop", "Not a stop", "car.side")]
+  static let notificationSubtitle = "help Fuel Up get better. Tap and hold to answer"
+  static func notificationTitle(for visit: ResearchVisit) -> String {
+    if visit.candidate { return "got fuel?" }
+    let station = visit.station.name.trimmingCharacters(in: .whitespacesAndNewlines)
+    return station.isEmpty || station == "Gas station" ? "got something at the gas station?" : "got something at \(station)?"
+  }
+  static func shouldPrompt(event: String, visit: ResearchVisit) -> Bool {
+    // A brief observed stop gets a neutral question only after departure. Do not
+    // prompt for drive-bys, interrupted observations, or repeat a longer stop.
+    event == "visit_candidate" || (event == "visit_departure" && !visit.candidate &&
+      visit.samples >= 3 && visit.lastInsideAt - visit.startedAt >= 30)
+  }
   static func state(_ records: [ResearchEvent]) -> (prompted: Set<String>, labels: [String: String]) {
     var prompted = Set<String>(), labels: [String: String] = [:]
     for event in records {

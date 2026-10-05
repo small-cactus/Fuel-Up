@@ -245,7 +245,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
           visits.removeAll{$0.id==visit.id};visits.insert(visit,at:0);visits=Array(visits.prefix(30))
           UserDefaults.standard.set(try? JSONEncoder().encode(visits),forKey:"research.visits")
         }
-        if kind == "visit_candidate" {prompt(visit)}
+        if ResearchConfirmation.shouldPrompt(event:kind,visit:visit) {prompt(visit)}
       }
       saveDetector()
       if now-fix.timestamp<30,fix.accuracy>=0,fix.accuracy<150,!fix.simulated {
