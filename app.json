@@ -95,7 +95,8 @@
           "location",
           "processing"
         ]
-      }
+      },
+      "buildNumber": "23"
     },
     "android": {
       "package": "com.anthonyh.fuelup",
