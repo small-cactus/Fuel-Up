@@ -42,7 +42,7 @@ final class DrivingResearchTestNotifications: ObservableObject {
       defer {if background != .invalid {UIApplication.shared.endBackgroundTask(background)};refresh()}
       do {
         let identity=try ResearchIdentity.load()
-        for test in try store.all() where test.dirty==true {
+        while let test=try store.all().first(where:{$0.dirty==true}) {
           try Task.checkCancellation()
           var fields:[String:Any]=["testId":test.id,"status":test.status]
           if let label=test.label {fields["label"]=label}

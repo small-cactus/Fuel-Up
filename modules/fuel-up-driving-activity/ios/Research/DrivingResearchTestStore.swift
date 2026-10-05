@@ -41,6 +41,11 @@ final class DrivingResearchTestStore: @unchecked Sendable {
   private func save(_ tests:[ResearchNotificationTest]) throws {
     try FileManager.default.createDirectory(at:url.deletingLastPathComponent(),withIntermediateDirectories:true)
     try JSONEncoder().encode(tests).write(to:url,options:.atomic)
+    var saved=url,values=URLResourceValues();values.isExcludedFromBackup=true
+    try saved.setResourceValues(values)
+    #if os(iOS)
+    try FileManager.default.setAttributes([.protectionKey:FileProtectionType.completeUntilFirstUserAuthentication],ofItemAtPath:url.path)
+    #endif
   }
   @discardableResult func reconcile(_ remote:[ResearchNotificationTest],now:Double=Date().timeIntervalSince1970) throws -> [String] {
     lock.lock();defer{lock.unlock()}
