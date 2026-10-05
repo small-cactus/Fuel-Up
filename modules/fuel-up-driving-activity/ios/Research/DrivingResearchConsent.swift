@@ -22,19 +22,18 @@ struct DrivingResearchConsent: View {
           Button(action: onDismiss) {
             Image(systemName: "xmark")
               .font(.system(size: 17, weight: .semibold))
-              .foregroundStyle(.secondary)
+              .foregroundStyle(.primary)
               .frame(width: 44, height: 44)
-              .contentShape(Rectangle())
+              .contentShape(Circle())
+              .glassEffect(.regular.interactive(), in: Circle())
           }
           .buttonStyle(.plain)
           .accessibilityLabel("Close")
           .accessibilityIdentifier("research-consent-close")
           Spacer(minLength: 0)
         }
-        // Center the 44-point close target inside the sheet's measured corner
-        // on both axes, with a minimum margin for flatter presentations.
-        .padding(.horizontal, max(24, (sheetCornerRadius ?? 0) - 22))
-        .padding(.top, max(4, (sheetCornerRadius ?? 0) - 22))
+        .padding(.horizontal, closeButtonInset)
+        .padding(.top, closeButtonInset)
 
         ScrollView {
           VStack(spacing: 24) {
@@ -99,6 +98,13 @@ struct DrivingResearchConsent: View {
     .background(DrivingResearchSheetCorners { sheetCornerRadius = $0 })
     .presentationCornerRadius(sheetCornerRadius)
     .presentationDetents([.large])
+  }
+
+  // Nest the 22-point-radius button inside the sheet's curve with an 8-point
+  // gap along the diagonal. Larger sheet corners adjust both insets together.
+  private var closeButtonInset: CGFloat {
+    let radius = sheetCornerRadius ?? 44
+    return max(12, radius - max(0, radius - 22 - 8) / sqrt(2) - 22)
   }
 
   private func consentRow(_ title: String, icon: String, color: Color, detail: String) -> some View {
