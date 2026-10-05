@@ -9,9 +9,9 @@ enum ResearchConfirmation {
                         ("not_a_stop", "Not a stop", "car.side")]
   static let notificationSubtitle = "help Fuel Up get better. Tap and hold to answer"
   static func notificationTitle(for visit: ResearchVisit) -> String {
-    if visit.candidate { return "got fuel?" }
+    if visit.candidate { return "got fuel? 👀" }
     let station = visit.station.name.trimmingCharacters(in: .whitespacesAndNewlines)
-    return station.isEmpty || station == "Gas station" ? "got something at the gas station?" : "got something at \(station)?"
+    return station.isEmpty || station == "Gas station" ? "got something at the gas station? 👀" : "got something at \(station)? 👀"
   }
   static func shouldPrompt(event: String, visit: ResearchVisit) -> Bool {
     // A brief observed stop gets a neutral question only after departure. Do not

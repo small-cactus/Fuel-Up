@@ -37,13 +37,13 @@ import Foundation
     assert(ambiguous.process(fix(1000),stations:[station,other]).first?.1.ambiguousIDs.count == 2)
     var brief=ambiguous.active!
     brief.lastInsideAt=brief.startedAt+45;brief.samples=3
-    assert(ResearchConfirmation.notificationTitle(for:brief) == "got something at Test Station?")
+    assert(ResearchConfirmation.notificationTitle(for:brief) == "got something at Test Station? 👀")
     assert(ResearchConfirmation.shouldPrompt(event:"visit_departure",visit:brief))
     assert(!ResearchConfirmation.shouldPrompt(event:"visit_gap",visit:brief))
     brief.lastInsideAt=brief.startedAt+10
     assert(!ResearchConfirmation.shouldPrompt(event:"visit_departure",visit:brief))
     brief.candidate=true
-    assert(ResearchConfirmation.notificationTitle(for:brief) == "got fuel?")
+    assert(ResearchConfirmation.notificationTitle(for:brief) == "got fuel? 👀")
     assert(ResearchConfirmation.shouldPrompt(event:"visit_candidate",visit:brief))
     assert(!ResearchConfirmation.shouldPrompt(event:"visit_departure",visit:brief))
     assert(ResearchConfirmation.notificationSubtitle == "help Fuel Up get better. Tap and hold to answer")
