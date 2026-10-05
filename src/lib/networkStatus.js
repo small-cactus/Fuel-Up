@@ -29,7 +29,7 @@ function createNetworkStatus({ timeoutMs } = {}) {
         setConnected: connected => { if (connected !== snapshot.connected) publish({ connected }); },
         async retryFailedReads() {
             if (snapshot.connected === false) return;
-            await Promise.all(snapshot.services.filter(service => service.status === 'unresponsive').map(async ({ id }) => {
+            await Promise.all(snapshot.services.filter(service => service.status === 'unresponsive' && !service.pending).map(async ({ id }) => {
                 if (!readRetries.has(id) || retrying.has(id)) return;
                 retrying.add(id);
                 try { await readRetries.get(id)(); } catch { /* The transport publishes the result. */ }

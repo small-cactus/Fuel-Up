@@ -7,7 +7,7 @@ const { SERVICES } = require('../src/lib/networkStatus');
 global.IS_REACT_ACT_ENVIRONMENT = true;
 const defaults = { connected: true, services: SERVICES.map(s => ({ ...s, status: 'unknown' })) };
 const Overlay = load('src/components/ConnectionOverlay.js', {
-    'react-native': { AppState: { currentState: 'active', addEventListener: () => ({ remove() {} }) }, ScrollView: 'ScrollView', Text: 'Text', View: 'View', StyleSheet: { absoluteFillObject: {}, absoluteFill: {}, create: s => s } },
+    'react-native': { ActivityIndicator: 'ActivityIndicator', AppState: { currentState: 'active', addEventListener: () => ({ remove() {} }) }, ScrollView: 'ScrollView', Text: 'Text', View: 'View', StyleSheet: { absoluteFillObject: {}, absoluteFill: {}, create: s => s } },
     './ConnectionBlur': { __esModule: true, default: 'ConnectionBlur' }, 'expo-glass-effect': { GlassView: 'GlassView' }, 'expo-symbols': { SymbolView: 'SymbolView' },
     'react-native-safe-area-context': { useSafeAreaInsets: () => ({ top: 62, bottom: 34 }) },
     '../ThemeContext': { useTheme: () => ({ isDark: false, themeColors: { text: '#000', textOpacity: '#666' } }) },
@@ -37,7 +37,7 @@ test('server failure identifies failed and untested services separately', async 
     assert.equal(strings.filter(s => s === 'Not responding').length, 1);
     assert.equal(strings.filter(s => s === 'Not checked').length, SERVICES.length - 1);
     assert(strings.includes('Fuel Up servers are having an outage'));
-    assert.equal(view.root.findAllByType('GlassView').length, 2);
+    assert.equal(view.root.findAllByType('GlassView').length, 1);
     assert.doesNotMatch(JSON.stringify(view.toJSON()), /simulated|developer|fake/i);
     await act(async () => view.unmount());
 });
@@ -64,5 +64,21 @@ test('a pending request never blurs; actual timeout mounts the blur and warning 
     await store.fetch('https://example/functions/v1/gas-prices', {}, async () => ({ status: 200 }));
     await act(async () => view.update(React.createElement(Overlay, { status: store.getSnapshot() })));
     assert.equal(view.toJSON(), null, 'successful response removes blur and warning together');
+    await act(async () => view.unmount());
+});
+test('each actively reconnecting service shows a spinner inside the single glass panel', async () => {
+    let view;
+    const status = { ...defaults, services: defaults.services.map(s => ({ ...s,
+        status: s.id === 'prices' ? 'unresponsive' : s.status,
+        pending: ['prices', 'history'].includes(s.id) ? { startedAt: 1, deadlineAt: 20001 } : null,
+    })) };
+    await act(async () => { view = create(React.createElement(Overlay, { status })); });
+    const panel = view.root.findByType('GlassView');
+    assert.equal(panel.findAllByType('ActivityIndicator').length, 2);
+    assert.deepEqual(panel.findAllByType('ActivityIndicator').map(n => n.props.accessibilityLabel),
+        ['Reconnecting to Fuel prices', 'Reconnecting to Price history']);
+    assert.equal(panel.findAllByType('SymbolView').length, 0);
+    assert.equal(panel.findAllByType('Text').filter(n => n.props.accessibilityRole === 'header').length, 0);
+    assert(panel.findAllByType('Text').some(n => String(n.props.children).includes('A fix is already underway')));
     await act(async () => view.unmount());
 });

@@ -4,8 +4,8 @@ import { BlurView } from 'expo-blur';
 import Animated, { cancelAnimation, useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated';
 
 const AnimatedBlur = Animated.createAnimatedComponent(BlurView);
-export const ERROR_BLUR = 40;
-const BLUR_DURATION_MS = 650;
+export const ERROR_BLUR = 65;
+const BLUR_DURATION_MS = 500;
 
 // Mounted only with the connection warning after a real failure. Pending requests
 // never mount a blur; the animation starts at the same time as the warning.

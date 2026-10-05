@@ -113,3 +113,18 @@ test('native cancellation clears pending without manufacturing a service failure
     const research = store.getSnapshot().services.find(s => s.id === 'research');
     assert.equal(research.status, 'responding'); assert.equal(research.pending, null);
 });
+test('reconnection retries are real requests and never overlap an active request', async () => {
+    const store = createNetworkStatus();
+    const response = deferred(); let calls = 0;
+    const transport = async () => { calls++; return calls === 1 ? { status: 503 } : response.promise; };
+    await store.fetch(pricesURL, {}, transport);
+    const retry = store.retryFailedReads();
+    assert.equal(calls, 2);
+    assert.ok(priceStatus(store).pending);
+    assert.equal(priceStatus(store).status, 'unresponsive');
+    await store.retryFailedReads();
+    assert.equal(calls, 2, 'polling does not duplicate the pending reconnect');
+    response.resolve({ status: 200 }); await retry;
+    assert.equal(priceStatus(store).pending, null);
+    assert.equal(priceStatus(store).status, 'responding');
+});

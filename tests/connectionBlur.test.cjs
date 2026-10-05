@@ -4,7 +4,7 @@ const React = require('react');
 const { act, create } = require('react-test-renderer');
 const load = require('./helpers/loadComponent.cjs');
 global.IS_REACT_ACT_ENVIRONMENT = true;
-test('warning blur starts its 650ms animation when mounted', async t => {
+test('warning blur starts its 500ms animation when mounted', async t => {
     const shared = { value: 0 };
     const { default: Blur, ERROR_BLUR } = load('src/components/ConnectionBlur.js', {
         'react-native': { StyleSheet: { absoluteFill: {} } },
@@ -17,7 +17,7 @@ test('warning blur starts its 650ms animation when mounted', async t => {
     });
     let view;
     await act(async () => { view = create(React.createElement(Blur, { isDark: false })); });
-    assert.deepEqual(shared.value, { value: ERROR_BLUR, duration: 650 });
-    assert.equal(ERROR_BLUR, 40);
+    assert.deepEqual(shared.value, { value: ERROR_BLUR, duration: 500 });
+    assert.equal(ERROR_BLUR, 65);
     await act(async () => view.unmount());
 });

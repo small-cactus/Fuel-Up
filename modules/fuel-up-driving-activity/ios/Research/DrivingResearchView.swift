@@ -6,12 +6,36 @@ final class DrivingResearchInsets: ObservableObject {
   @Published var bottom: CGFloat = 0
 }
 
+final class DrivingResearchPresentation: ObservableObject {
+  @Published var screenAppeared = false
+}
+
+// SwiftUI's initial task can run while the navigation push is still in flight.
+// UIKit's appearance completion is the point at which a sheet can animate normally.
+final class DrivingResearchHostingController: UIHostingController<DrivingResearchScreen> {
+  private var appearanceGeneration = 0
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    let generation = appearanceGeneration
+    DispatchQueue.main.async { [weak self] in
+      guard let self, self.appearanceGeneration == generation, self.view.window != nil else { return }
+      self.rootView.presentation.screenAppeared = true
+    }
+  }
+  override func viewWillDisappear(_ animated: Bool) {
+    appearanceGeneration += 1
+    rootView.presentation.screenAppeared = false
+    super.viewWillDisappear(animated)
+  }
+}
+
 final class DrivingResearchView: ExpoView {
   private var host:UIHostingController<DrivingResearchScreen>?
   private let contentInsets = DrivingResearchInsets()
   required init(appContext:AppContext?=nil) {
     super.init(appContext:appContext)
-    let controller=UIHostingController(rootView:DrivingResearchScreen(contentInsets: contentInsets))
+    let controller=DrivingResearchHostingController(rootView:DrivingResearchScreen(
+      contentInsets: contentInsets, presentation: DrivingResearchPresentation()))
     if #available(iOS 16.4,*) {controller.safeAreaRegions=[]}
     controller.view.backgroundColor = .clear;host=controller;addSubview(controller.view)
   }
@@ -34,6 +58,7 @@ final class DrivingResearchView: ExpoView {
 
 struct DrivingResearchScreen: View {
   @ObservedObject var contentInsets: DrivingResearchInsets
+  @ObservedObject var presentation: DrivingResearchPresentation
   @ObservedObject private var collector = DrivingResearchCollector.shared
   @ObservedObject private var transfer = DrivingResearchSync.shared
   @ObservedObject private var notificationTests = DrivingResearchTestNotifications.shared
@@ -137,7 +162,8 @@ struct DrivingResearchScreen: View {
     }
     .scrollEdgeEffectHidden()
     .tint(.primary)
-    .task {
+    .task(id: presentation.screenAppeared) {
+      guard presentation.screenAppeared else { return }
       collector.prepare();notificationTests.refresh();collector.resume(reason: "debug_screen");takeNotificationVisit()
       if !presentedIntroduction {
         presentedIntroduction = true

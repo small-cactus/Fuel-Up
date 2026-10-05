@@ -1,0 +1,293 @@
+{
+  "current": {
+    "connected": true,
+    "recoveryGeneration": 2,
+    "services": [
+      {
+        "id": "prices",
+        "name": "Fuel prices",
+        "pending": null,
+        "status": "responding"
+      },
+      {
+        "id": "history",
+        "name": "Price history",
+        "pending": null,
+        "status": "responding"
+      },
+      {
+        "id": "memberships",
+        "name": "Memberships",
+        "status": "unknown"
+      },
+      {
+        "id": "notifications",
+        "name": "Notifications",
+        "status": "unknown"
+      },
+      {
+        "id": "research",
+        "name": "Driving research",
+        "status": "unknown"
+      },
+      {
+        "id": "account",
+        "name": "Account services",
+        "status": "unknown"
+      }
+    ]
+  },
+  "events": [
+    {
+      "at": 1791217481611,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "status": "unknown"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791217496611,
+            "startedAt": 1791217481611
+          },
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "at": 1791217481615,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791217501614,
+            "startedAt": 1791217481614
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791217496611,
+            "startedAt": 1791217481611
+          },
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "at": 1791217496616,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791217501614,
+            "startedAt": 1791217481614
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "at": 1791217496668,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791217501614,
+            "startedAt": 1791217481614
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791217511668,
+            "startedAt": 1791217496668
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "at": 1791217501630,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791217511668,
+            "startedAt": 1791217496668
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "at": 1791217501680,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791217521679,
+            "startedAt": 1791217501679
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791217511668,
+            "startedAt": 1791217496668
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "at": 1791217511680,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791217521679,
+            "startedAt": 1791217501679
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "at": 1791217511713,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791217521679,
+            "startedAt": 1791217501679
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791217526713,
+            "startedAt": 1791217511713
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "at": 1791217521697,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791217526713,
+            "startedAt": 1791217511713
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "at": 1791217521746,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791217541746,
+            "startedAt": 1791217521746
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791217526713,
+            "startedAt": 1791217511713
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "at": 1791217524896,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791217541746,
+            "startedAt": 1791217521746
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "responding"
+        }
+      ]
+    },
+    {
+      "at": 1791217527097,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "responding"
+        }
+      ]
+    }
+  ]
+}
