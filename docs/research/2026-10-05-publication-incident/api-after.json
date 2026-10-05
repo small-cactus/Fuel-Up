@@ -1,0 +1,86 @@
+{
+  "at": "2026-10-05T00:59:05.062Z",
+  "providerRequests": 0,
+  "checks": [
+    {
+      "fuelType": "regular",
+      "requiresE85": false,
+      "status": 200,
+      "quotes": 5,
+      "scanId": 5116,
+      "historyError": null
+    },
+    {
+      "fuelType": "midgrade",
+      "requiresE85": false,
+      "status": 200,
+      "quotes": 5,
+      "scanId": 5116,
+      "historyError": null
+    },
+    {
+      "fuelType": "premium",
+      "requiresE85": false,
+      "status": 200,
+      "quotes": 5,
+      "scanId": 5116,
+      "historyError": null
+    },
+    {
+      "fuelType": "diesel",
+      "requiresE85": false,
+      "status": 200,
+      "quotes": 5,
+      "scanId": 5116,
+      "historyError": null
+    },
+    {
+      "fuelType": "e85",
+      "requiresE85": false,
+      "status": 200,
+      "quotes": 5,
+      "scanId": 5116,
+      "historyError": null
+    },
+    {
+      "fuelType": "regular",
+      "requiresE85": true,
+      "status": 200,
+      "quotes": 5,
+      "scanId": 5116,
+      "historyError": null
+    },
+    {
+      "fuelType": "midgrade",
+      "requiresE85": true,
+      "status": 200,
+      "quotes": 5,
+      "scanId": 5116,
+      "historyError": null
+    },
+    {
+      "fuelType": "premium",
+      "requiresE85": true,
+      "status": 200,
+      "quotes": 5,
+      "scanId": 5116,
+      "historyError": null
+    },
+    {
+      "fuelType": "diesel",
+      "requiresE85": true,
+      "status": 200,
+      "quotes": 5,
+      "scanId": 5116,
+      "historyError": null
+    },
+    {
+      "fuelType": "e85",
+      "requiresE85": true,
+      "status": 200,
+      "quotes": 5,
+      "scanId": 5116,
+      "historyError": null
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "detectedAt": "2026-10-05T00:50:20Z",
+  "projectRef": "vjindchxfebaltbslqwc",
+  "collection": {
+    "expectedHours": 99,
+    "complete": 84,
+    "partial": 10,
+    "expiredUnstarted": 5,
+    "newGaps": 0,
+    "wrongRegionJobs": 0,
+    "citySucceeded": 2418,
+    "cityMissed": 54,
+    "expiredCityJobs": 0
+  },
+  "publication": {
+    "latestCompleteRun": 5116,
+    "cacheRun": 5056,
+    "missingBatches": 6
+  },
+  "database": {
+    "dashboard": "Unhealthy",
+    "diagnostic": "Connection failed at the TCP layer (CONNECT_TIMEOUT) after 5002ms: timeout expired.",
+    "cronFailure": "job startup timeout",
+    "nationalDispatchFailuresInTwoHours": 18,
+    "at": "2026-10-05T00:51:28Z",
+    "dashboardCpuPercent": 17,
+    "dashboardDiskPercent": 9,
+    "dashboardRamPercent": 54
+  },
+  "recovery": {
+    "attempt": 1,
+    "action": "Restart project through authenticated Supabase dashboard",
+    "at": "2026-10-05T00:55Z",
+    "underlyingInfrastructureCause": "unconfirmed",
+    "providerRequests": 0
+  }
+}

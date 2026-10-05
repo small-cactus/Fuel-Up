@@ -1,0 +1,57 @@
+[
+  {
+    "at": "2026-10-05T00:57:28.439Z",
+    "jobId": 366544,
+    "archiveVerified": true,
+    "sha256": "34f58ac114fc990b76be3be32902f35d3554d649e5dcab32ff3a4694f4006c0f",
+    "stations": 2000,
+    "elapsedMs": 5424,
+    "status": 200,
+    "body": "2000",
+    "providerRequests": 0
+  },
+  {
+    "at": "2026-10-05T00:57:34.756Z",
+    "jobId": 366559,
+    "archiveVerified": true,
+    "sha256": "72072e27b1dbcad8523128df41f5bc152b148030353579040f710558e58ea185",
+    "stations": 2000,
+    "elapsedMs": 2762,
+    "status": 200,
+    "body": "2000",
+    "providerRequests": 0
+  },
+  {
+    "at": "2026-10-05T00:57:41.008Z",
+    "jobId": 366589,
+    "archiveVerified": true,
+    "sha256": "10f48f963806ac69d8ba3428ff674dc02229bfff63939fa0623ffbcd468dba89",
+    "stations": 2000,
+    "elapsedMs": 3131,
+    "status": 200,
+    "body": "2000",
+    "providerRequests": 0
+  },
+  {
+    "at": "2026-10-05T00:57:48.036Z",
+    "jobId": 366590,
+    "archiveVerified": true,
+    "sha256": "795b1cfbf09d8c6891c9c3e70a98eeec3f6e1f979e10d209fd93b0b9a7a01e16",
+    "stations": 2000,
+    "elapsedMs": 3724,
+    "status": 200,
+    "body": "2000",
+    "providerRequests": 0
+  },
+  {
+    "at": "2026-10-05T00:57:55.692Z",
+    "jobId": 366591,
+    "archiveVerified": true,
+    "sha256": "370c7dcf98aa77536216b8a4f62c45b166ed8b576c45cb2607bb8eb79635642e",
+    "stations": 2000,
+    "elapsedMs": 3942,
+    "status": 200,
+    "body": "2000",
+    "providerRequests": 0
+  }
+]

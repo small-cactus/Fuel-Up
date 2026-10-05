@@ -1,0 +1,69 @@
+[
+  {
+    "result": {
+      "at": "2026-10-05T01:01:24.7543+00:00",
+      "health": {
+        "archive_bytes": 260535,
+        "completed_at": null,
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 5156,
+        "missed_batches": 0,
+        "observed_stations": 10213,
+        "priced_stations": 5959,
+        "slot_at": "2026-10-05T01:00:00+00:00",
+        "status": "running",
+        "succeeded_batches": 6
+      },
+      "regional": [
+        {
+          "execution_region": "us-east-1",
+          "expected_batches": 59,
+          "observed_stations": 0,
+          "run_id": 5156,
+          "slot_at": "2026-10-05T01:00:00+00:00",
+          "succeeded_batches": 0,
+          "wrong_region_jobs": 0
+        },
+        {
+          "execution_region": "us-west-1",
+          "expected_batches": 9,
+          "observed_stations": 4000,
+          "run_id": 5156,
+          "slot_at": "2026-10-05T01:00:00+00:00",
+          "succeeded_batches": 2,
+          "wrong_region_jobs": 0
+        },
+        {
+          "execution_region": "us-west-2",
+          "expected_batches": 4,
+          "observed_stations": 6213,
+          "run_id": 5156,
+          "slot_at": "2026-10-05T01:00:00+00:00",
+          "succeeded_batches": 4,
+          "wrong_region_jobs": 0
+        }
+      ],
+      "workers": [
+        {
+          "enabled": true,
+          "function_name": "fuel-national-east",
+          "last_dispatch_at": "2026-10-05T00:15:00.36125+00:00",
+          "region": "us-east-1"
+        },
+        {
+          "enabled": true,
+          "function_name": "fuel-national-northwest",
+          "last_dispatch_at": "2026-10-05T01:00:00.076581+00:00",
+          "region": "us-west-2"
+        },
+        {
+          "enabled": true,
+          "function_name": "fuel-national-southwest",
+          "last_dispatch_at": "2026-10-05T01:01:00.23831+00:00",
+          "region": "us-west-1"
+        }
+      ]
+    }
+  }
+]

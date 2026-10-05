@@ -1,0 +1,118 @@
+[
+  {
+    "result": {
+      "active_queries": 1,
+      "at": "2026-10-05T01:00:29.063255+00:00",
+      "city": {
+        "cities_observed": 24,
+        "ends_at": "2026-10-07T18:19:00+00:00",
+        "id": "hourly-24-cities-20260930-v1",
+        "last_dispatch_at": "2026-10-05T01:00:00.098042+00:00",
+        "last_success_at": "2026-10-05T00:43:30.565666+00:00",
+        "missed": 54,
+        "planned_city_hours": 4032,
+        "provider_backoff_until": "2026-10-04T23:17:03.070828+00:00",
+        "queued_due": 0,
+        "running": 0,
+        "starts_at": "2026-09-30T18:19:00+00:00",
+        "station_observations": 48360,
+        "status": "active",
+        "succeeded": 2418
+      },
+      "cron": [
+        {
+          "active": true,
+          "end_time": "2026-10-05T01:00:00.22366+00:00",
+          "jobname": "fuel-national-discovery",
+          "message": "1 row",
+          "schedule": "* * * * *",
+          "start_time": "2026-10-05T01:00:00.116375+00:00",
+          "status": "succeeded"
+        },
+        {
+          "active": true,
+          "end_time": "2026-10-05T01:00:00.221115+00:00",
+          "jobname": "fuel-national-dispatch",
+          "message": "1 row",
+          "schedule": "* * * * *",
+          "start_time": "2026-10-05T01:00:00.073285+00:00",
+          "status": "succeeded"
+        },
+        {
+          "active": true,
+          "end_time": "2026-10-05T01:00:00.11876+00:00",
+          "jobname": "fuel-national-projection-repair",
+          "message": "1 row",
+          "schedule": "* * * * *",
+          "start_time": "2026-10-05T01:00:00.09531+00:00",
+          "status": "succeeded"
+        },
+        {
+          "active": true,
+          "end_time": "2026-10-05T01:00:00.109197+00:00",
+          "jobname": "fuel-national-trends-cache",
+          "message": "1 row",
+          "schedule": "* * * * *",
+          "start_time": "2026-10-05T01:00:00.100567+00:00",
+          "status": "succeeded"
+        },
+        {
+          "active": true,
+          "end_time": "2026-10-05T01:00:00.10722+00:00",
+          "jobname": "fuel-national-watchdog",
+          "message": "1 row",
+          "schedule": "*/5 * * * *",
+          "start_time": "2026-10-05T01:00:00.093215+00:00",
+          "status": "succeeded"
+        },
+        {
+          "active": true,
+          "end_time": "2026-10-05T01:00:00.129667+00:00",
+          "jobname": "fuel-research-dispatch",
+          "message": "1 row",
+          "schedule": "* * * * *",
+          "start_time": "2026-10-05T01:00:00.124131+00:00",
+          "status": "succeeded"
+        },
+        {
+          "active": true,
+          "end_time": "2026-10-05T01:00:00.125255+00:00",
+          "jobname": "fuel-research-watchdog",
+          "message": "1 row",
+          "schedule": "*/5 * * * *",
+          "start_time": "2026-10-05T01:00:00.097995+00:00",
+          "status": "succeeded"
+        }
+      ],
+      "hours": [
+        {
+          "archive_bytes": 94985,
+          "completed_at": null,
+          "expected_batches": 72,
+          "expected_stations": 141660,
+          "id": 5156,
+          "missed_batches": 0,
+          "observed_stations": 4000,
+          "priced_stations": 2202,
+          "slot_at": "2026-10-05T01:00:00+00:00",
+          "status": "running",
+          "succeeded_batches": 2
+        },
+        {
+          "archive_bytes": 3540114,
+          "completed_at": "2026-10-05T00:15:06.12957+00:00",
+          "expected_batches": 72,
+          "expected_stations": 141660,
+          "id": 5116,
+          "missed_batches": 0,
+          "observed_stations": 141660,
+          "priced_stations": 86951,
+          "slot_at": "2026-10-05T00:00:00+00:00",
+          "status": "complete",
+          "succeeded_batches": 72
+        }
+      ],
+      "last_cron_failure": "2026-10-05T00:54:00.004793+00:00"
+    }
+  }
+]

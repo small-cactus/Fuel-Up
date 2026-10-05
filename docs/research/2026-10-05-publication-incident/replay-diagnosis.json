@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-05T00:54:08.122Z",
+  "jobId": 366544,
+  "archiveVerified": true,
+  "sha256": "34f58ac114fc990b76be3be32902f35d3554d649e5dcab32ff3a4694f4006c0f",
+  "stations": 2000,
+  "elapsedMs": 45009,
+  "providerRequests": 0,
+  "error": "TimeoutError",
+  "message": "The operation was aborted due to timeout"
+}
