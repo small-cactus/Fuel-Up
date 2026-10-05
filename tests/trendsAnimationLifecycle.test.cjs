@@ -18,6 +18,7 @@ test('a gradient target starts once and superseded/unmounted animation work is s
         'd3-shape': await import('d3-shape'), 'd3-scale': await import('d3-scale'),
     }).default;
     const Screen = load('app/(tabs)/trends.js', {
+        '../../src/components/SkeletonReveal': ({ loading, placeholder, children }) => loading ? placeholder : children,
         '../../src/lib/useNetworkStatus': { __esModule: true, default: () => ({ faultsEnabled: false }) },
         '../../src/screens/trends/TrendLeaderboardSkeleton': () => null,
         '../../src/screens/trends/ObservedPriceChart': Chart,

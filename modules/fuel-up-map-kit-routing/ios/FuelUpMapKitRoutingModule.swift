@@ -74,6 +74,11 @@ public final class FuelUpMapKitRoutingModule: Module {
       Events("onAction")
     }
 
+    View(NativeSkeletonRevealView.self) {
+      ViewName("NativeSkeletonRevealView")
+      Prop("loading") { (view, loading: Bool) in view.setLoading(loading) }
+    }
+
     View(ClusterLabPageControl.self) {
       ViewName("ClusterLabPageControl")
       Prop("pageCount") { (view, count: Int) in view.pageCount = count }

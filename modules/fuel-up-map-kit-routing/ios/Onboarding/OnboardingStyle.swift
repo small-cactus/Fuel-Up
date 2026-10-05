@@ -47,8 +47,10 @@ struct OnboardingSelectionRow: View {
       HStack(spacing: 14) {
         if fuelIcon != nil || brandIcon != nil { OnboardingRowIcon(fuel: fuelIcon, brand: brandIcon) }
         VStack(alignment: .leading, spacing: 3) {
-          Text(title).font(.body.weight(.medium)).foregroundStyle(.primary)
-          if let subtitle { Text(subtitle).font(.subheadline).foregroundStyle(.secondary) }
+          // Resolve semantic label colors before the temporary Metal pass;
+          // glass vibrancy's separate text layer is not sampled by layerEffect.
+          Text(title).font(.body.weight(.medium)).foregroundStyle(Color(uiColor: .label))
+          if let subtitle { Text(subtitle).font(.subheadline).foregroundStyle(Color(uiColor: .secondaryLabel)) }
         }
         Spacer(minLength: 8)
         Image(systemName: selected ? "checkmark.circle.fill" : "circle")

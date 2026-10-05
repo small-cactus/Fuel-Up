@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import TrendLeaderboard from './TrendLeaderboard';
 import TrendLeaderboardSkeleton from './TrendLeaderboardSkeleton';
+import SkeletonReveal from '../../components/SkeletonReveal';
 export default function NationalTrendPrices({
   quotes,
   loading,
@@ -11,13 +12,15 @@ export default function NationalTrendPrices({
   themeColors
 }) {
   return <View style={styles.container}>
-        {loading ? <TrendLeaderboardSkeleton isDark={isDark} themeColors={themeColors} /> : quotes.length ? <TrendLeaderboard national stations={quotes.map(q => ({
+        <SkeletonReveal loading={loading} placeholder={<TrendLeaderboardSkeleton isDark={isDark} themeColors={themeColors} />}>
+        {quotes.length ? <TrendLeaderboard national stations={quotes.map(q => ({
       ...q,
       name: q.stationName,
       latestPrice: q.price
     }))} gradeLabel={gradeLabel} isDark={isDark} themeColors={themeColors} /> : <Text style={[styles.empty, {
       color: themeColors.textOpacity
     }]}>{error || `No ${gradeLabel.toLowerCase()} prices reported in the last 24 hours.`}</Text>}
+      </SkeletonReveal>
     </View>;
 }
 const styles = StyleSheet.create({
