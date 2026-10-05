@@ -1,5 +1,5 @@
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const kinds = new Set(['consent','lifecycle','permission','location','motion','geofence','station_catalog','visit_observation','visit_candidate','visit_departure','visit_gap','visit_label','diagnostic']);
+const kinds = new Set(['consent','lifecycle','permission','location','motion','geofence','station_catalog','visit_observation','visit_candidate','visit_departure','visit_gap','visit_prompt','visit_label','diagnostic']);
 export function validateDrivingEvents(events, now = Date.now()/1000) {
   if (!Array.isArray(events) || !events.length || events.length > 200) throw Error('INVALID_BATCH');
   const ids = new Set();
@@ -8,7 +8,8 @@ export function validateDrivingEvents(events, now = Date.now()/1000) {
     const p=JSON.parse(e.payload);
     if (!p || Array.isArray(p) || typeof p !== 'object') throw Error('INVALID_PAYLOAD');
     if (e.kind==='location' && (!Number.isFinite(p.latitude) || Math.abs(p.latitude)>90 || !Number.isFinite(p.longitude) || Math.abs(p.longitude)>180 || !Number.isFinite(p.timestamp) || !Number.isFinite(p.accuracy))) throw Error('INVALID_LOCATION');
-    if (e.kind==='visit_label' && (!uuid.test(p.visitId) || !['fueled','not_fueling','wrong_station','unsure'].includes(p.label))) throw Error('INVALID_LABEL');
+    if (e.kind==='visit_label' && (!uuid.test(p.visitId) || !['fueled','not_fueling','not_a_stop','wrong_station','unsure'].includes(p.label))) throw Error('INVALID_LABEL');
+    if (e.kind==='visit_prompt' && (!uuid.test(p.visitId) || p.confirmationState!=='unconfirmed' || !['created','scheduled','permission_missing','schedule_failed','dismissed'].includes(p.status))) throw Error('INVALID_PROMPT');
     ids.add(e.id);
   }
   return events;

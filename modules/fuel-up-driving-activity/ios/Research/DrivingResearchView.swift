@@ -78,6 +78,11 @@ struct DrivingResearchScreen: View {
           row("Location", collector.locationPermission, icon: "location.fill")
           row("Precise Location", collector.precise ? "On" : "Off", icon: "scope")
           row("Motion & Fitness", collector.motionPermission, icon: "figure.walk")
+          row("Stop Notifications", collector.notificationPermission, icon: "bell.badge")
+          if collector.consented && collector.notificationPermission == "Not requested" {
+            Button("Enable Stop Notifications", systemImage: "bell") {Task {await collector.requestStopNotifications()}}
+              .frame(maxWidth: .infinity, alignment: .leading).frame(minHeight: 44)
+          }
           if collector.consented && !collector.ready {
             Button("Finish Setup", systemImage: "checkmark.shield") {collector.requestPermissions()}
               .frame(maxWidth: .infinity, alignment: .leading).frame(minHeight: 44)
@@ -115,7 +120,7 @@ struct DrivingResearchScreen: View {
               HStack {
                 VStack(alignment: .leading, spacing: 4) {
                   Text(visit.station.name).foregroundStyle(.primary)
-                  Text("\(time(visit.startedAt)) · Possible stop").font(.caption).foregroundStyle(.secondary)
+                  Text("\(time(visit.startedAt)) · \(ResearchConfirmation.title(for: collector.visitLabels[visit.id]))").font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 8)
                 Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(.tertiary)
@@ -133,7 +138,8 @@ struct DrivingResearchScreen: View {
     }
     .scrollEdgeEffectHidden()
     .tint(.blue)
-    .task {collector.prepare();collector.resume(reason: "debug_screen")}
+    .task {collector.prepare();collector.resume(reason: "debug_screen");takeNotificationVisit()}
+    .onChange(of: collector.confirmationVisit?.id) {takeNotificationVisit()}
     .onChange(of: scenePhase) {if scenePhase == .active {collector.resume(reason: "foreground")}}
     .sheet(isPresented: $showConsent) {
       NavigationStack {
@@ -158,15 +164,18 @@ struct DrivingResearchScreen: View {
       Button("Delete Research Data", role: .destructive) {Task {await collector.deleteData()}}
     }
     .confirmationDialog("What happened at this stop?", isPresented: Binding(get: {selectedVisit != nil}, set: {if !$0 {selectedVisit = nil}}), titleVisibility: .visible) {
-      ForEach([("fueled","I bought fuel"),("not_fueling","I stopped, but did not fuel"),("wrong_station","This is the wrong station"),("unsure","I’m not sure")], id: \.0) {value in
+      ForEach([("fueled","Got fuel"),("not_fueling","Stopped, no fuel"),("not_a_stop","Not a stop"),("wrong_station","Wrong station"),("unsure","Not sure")], id: \.0) {value in
         Button(value.1) {
-          if let visit = selectedVisit {collector.label(visit,value.0);labelMessage = "Saved: \(value.1)"}
+          if let visit = selectedVisit, collector.label(visit,value.0) {labelMessage = "Saved: \(value.1)"}
           selectedVisit = nil
         }
       }
     }
   }
 
+  private func takeNotificationVisit() {
+    if let visit=collector.confirmationVisit {selectedVisit=visit;collector.confirmationVisit=nil}
+  }
   private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
     VStack(alignment: .leading, spacing: 10) {
       Text(title).font(.headline).padding(.horizontal, 4).accessibilityAddTraits(.isHeader)

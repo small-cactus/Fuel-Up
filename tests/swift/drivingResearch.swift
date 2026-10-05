@@ -46,6 +46,22 @@ import Foundation
     try reopened.acknowledge([event.id]);try reopened.acknowledge([event.id])
     assert(try! reopened.counts().pending == 0)
     assert(try! reopened.counts().total == 1)
+    let visit=ambiguous.active!
+    try reopened.append(ResearchEvent(kind:"visit_prompt",payload:["visitId":visit.id,"status":"created","confirmationState":"unconfirmed"]))
+    try reopened.append(ResearchEvent(kind:"visit_prompt",payload:["visitId":visit.id,"status":"dismissed","confirmationState":"unconfirmed"]))
+    let unconfirmed=ResearchConfirmation.state(try reopened.confirmationRecords())
+    assert(unconfirmed.prompted.contains(visit.id))
+    assert(unconfirmed.labels[visit.id] == nil,"Ignoring or dismissing is not a negative label")
+    assert(ResearchConfirmation.title(for:nil) == "Unconfirmed")
+    assert(ResearchConfirmation.label(for:"dismiss") == nil)
+    for label in ["fueled","not_fueling","not_a_stop"] {
+      let payload=ResearchConfirmation.payload(visit:visit,label:label,source:"notification")!
+      assert(payload["confirmationState"] as? String == "answered")
+      try reopened.append(ResearchEvent(kind:"visit_label",payload:payload))
+    }
+    let afterRestart=try DrivingResearchStore(directory:directory)
+    assert(ResearchConfirmation.state(try! afterRestart.confirmationRecords()).labels[visit.id] == "not_a_stop")
+    assert(ResearchConfirmation.payload(visit:visit,label:"auto_fueled",source:"app") == nil)
     try reopened.erase();assert(try! reopened.counts().total == 0)
     print("PASS: dwell, drive-by, stale/duplicate/inaccurate fixes, evidence gaps, ambiguity, durable outbox, idempotent acknowledgement, erase")
   }

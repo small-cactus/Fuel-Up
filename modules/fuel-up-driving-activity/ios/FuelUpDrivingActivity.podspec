@@ -19,7 +19,8 @@ Pod::Spec.new do |s|
   s.source           = { :path => '.' }
 
   s.dependency 'ExpoModulesCore'
-  s.frameworks = 'CoreMotion', 'CoreLocation', 'Security'
+  s.dependency 'ExpoNotifications'
+  s.frameworks = 'CoreMotion', 'CoreLocation', 'Security', 'UserNotifications'
   s.libraries = 'sqlite3'
 
   s.pod_target_xcconfig = {

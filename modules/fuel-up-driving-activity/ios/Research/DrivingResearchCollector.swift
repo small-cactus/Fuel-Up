@@ -9,7 +9,7 @@ import Network
 final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrency CLLocationManagerDelegate {
   static let shared = DrivingResearchCollector()
   static let enabledKey="fuelup.driving-research.enabled.v1"
-  static let consentKey="fuelup.driving-research.consent.v1"
+  nonisolated static let consentKey="fuelup.driving-research.consent.v1"
   @Published var enabled=UserDefaults.standard.bool(forKey:enabledKey)
   @Published var status="Not collecting"
   @Published var issue:String?
@@ -26,6 +26,10 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   @Published var busy=false
   @Published var permissionRevision=0
   @Published var participant="Not enrolled"
+  @Published var notificationPermission="Not requested"
+  @Published var visitLabels:[String:String]=[:]
+  @Published var confirmationVisit:ResearchVisit?
+  private var promptedVisitIDs=Set<String>()
   @Published var uploadSchedule="Checking connection"
   let manager=CLLocationManager()
   let activity=CMMotionActivityManager()
@@ -99,7 +103,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       // Resume the same observed visit, but the detector marks gaps instead of
       // assuming the user remained there while the process was not running.
       if let data=UserDefaults.standard.data(forKey:"research.detector") {detector=(try? JSONDecoder().decode(ResearchVisitDetector.self,from:data)) ?? ResearchVisitDetector()}
-      stationCount=stations.count;configured=true;refreshCounts()
+      stationCount=stations.count;configured=true;refreshCounts();refreshConfirmations()
       networkMonitor.pathUpdateHandler = { [weak self] path in
         Task { @MainActor in
           guard let self else{return}
@@ -114,6 +118,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   }
   func resume(reason:String) {
     permissionRevision+=1
+    Task {notificationPermission=await DrivingResearchNotifications.shared.permission()}
     guard enabled,consented else {return}
     prepare();guard configured else{return}
     do {identity=try ResearchIdentity.load();participant=identity!.id} catch {issue=error.localizedDescription;return}
@@ -171,6 +176,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   func pause() {
     record("consent",["version":1,"enabled":false])
     enabled=false;UserDefaults.standard.set(false,forKey:Self.enabledKey)
+    DrivingResearchNotifications.shared.cancelAll()
     stopSensors();uploadTask?.cancel();uploadTask=nil;status="Paused"
     if let visit=detector.active {record("visit_gap",visitPayload(visit))}
     detector=ResearchVisitDetector();saveDetector()
@@ -190,7 +196,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       }
       try store?.erase();try ResearchIdentity.erase()
       for key in [Self.consentKey,"research.visits","research.stations","research.catalogCenter","research.lastCatalog","research.detector","research.lastUpload","research.lastUploadAttempt"] {UserDefaults.standard.removeObject(forKey:key)}
-      identity=nil;participant="Not enrolled";visits=[];stations=[];stationCount=0;lastUpload=nil;lastUploadAttempt=nil;issue=nil;refreshCounts()
+      identity=nil;participant="Not enrolled";visits=[];visitLabels=[:];promptedVisitIDs=[];confirmationVisit=nil;stations=[];stationCount=0;lastUpload=nil;lastUploadAttempt=nil;issue=nil;refreshCounts()
       catalogCenter=nil;lastCatalog=nil;lastFix=nil;motion="Unknown";lastDrive = .distantPast
       status="Research data deleted"
     } catch {issue="Deletion did not finish. Collection is paused; reconnect and try again. Local data is retained until deletion succeeds."}
@@ -239,6 +245,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
           visits.removeAll{$0.id==visit.id};visits.insert(visit,at:0);visits=Array(visits.prefix(30))
           UserDefaults.standard.set(try? JSONEncoder().encode(visits),forKey:"research.visits")
         }
+        if kind == "visit_candidate" {prompt(visit)}
       }
       saveDetector()
       if now-fix.timestamp<30,fix.accuracy>=0,fix.accuracy<150,!fix.simulated {
@@ -266,9 +273,37 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     ["visitId":visit.id,"stationId":visit.station.id,"stationName":visit.station.name,"startedAt":visit.startedAt,"lastInsideAt":visit.lastInsideAt,"samples":visit.samples,"candidate":visit.candidate,"ambiguousStationIds":visit.ambiguousIDs,"fuelPurchaseConfirmed":false]
   }
   private func saveDetector() {UserDefaults.standard.set(try? JSONEncoder().encode(detector),forKey:"research.detector")}
-  func label(_ visit:ResearchVisit,_ label:String) {
-    guard consented else{return}
-    record("visit_label",["visitId":visit.id,"stationId":visit.station.id,"label":label,"source":"participant","labeledAt":Date().timeIntervalSince1970]);sync()
+  func requestStopNotifications() async {
+    guard consented,UIApplication.shared.applicationState == .active else{return}
+    _=await DrivingResearchNotifications.shared.requestPermission()
+    notificationPermission=await DrivingResearchNotifications.shared.permission()
+  }
+  func refreshConfirmations() {
+    prepare()
+    do {
+      let state=ResearchConfirmation.state(try store?.confirmationRecords() ?? [])
+      promptedVisitIDs=state.prompted;visitLabels=state.labels;refreshCounts()
+    } catch {issue=error.localizedDescription}
+  }
+  func openConfirmation(_ visit:ResearchVisit) {
+    prepare();refreshConfirmations();confirmationVisit=visit
+  }
+  private func prompt(_ visit:ResearchVisit) {
+    guard enabled,consented,!promptedVisitIDs.contains(visit.id),visitLabels[visit.id]==nil else{return}
+    let fields:[String:Any]=["visitId":visit.id,"stationId":visit.station.id,"status":"created","confirmationState":"unconfirmed"]
+    // Claim locally before scheduling: relaunches never repeat an unanswered prompt.
+    guard record("visit_prompt",fields) else{return}
+    promptedVisitIDs.insert(visit.id)
+    Task {
+      guard enabled,consented,visitLabels[visit.id]==nil else{return}
+      let result=await DrivingResearchNotifications.shared.schedule(visit)
+      if !enabled || !consented || visitLabels[visit.id] != nil {DrivingResearchNotifications.shared.remove(visit.id);return}
+      var outcome=fields;outcome["status"]=result;record("visit_prompt",outcome)
+    }
+  }
+  @discardableResult func label(_ visit:ResearchVisit,_ label:String)->Bool {
+    guard consented,let payload=ResearchConfirmation.payload(visit:visit,label:label,source:"app"),record("visit_label",payload) else{return false}
+    DrivingResearchNotifications.shared.remove(visit.id);refreshConfirmations();sync();return true
   }
   func locationManager(_ manager:CLLocationManager,didFailWithError error:Error) {
     guard enabled else{return}
@@ -289,12 +324,12 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     // Wake-up evidence only. A delayed boundary callback never proves fueling.
     manager.requestLocation();manager.startUpdatingLocation();checkMotion();sync()
   }
-  private func record(_ kind:String,_ fields:[String:Any]) {
-    guard consented,let store else{return}
+  @discardableResult private func record(_ kind:String,_ fields:[String:Any])->Bool {
+    guard consented,let store else{return false}
     do {
       var payload=fields;payload["schemaVersion"]=1;payload["detectorVersion"]="station-stop-v1";payload["sessionId"]=sessionID
-      try store.append(ResearchEvent(kind:kind,payload:payload));refreshCounts()
-    } catch {issue=error.localizedDescription;stopSensors();status="Paused — storage needs attention"}
+      try store.append(ResearchEvent(kind:kind,payload:payload));refreshCounts();return true
+    } catch {issue=error.localizedDescription;stopSensors();status="Paused — storage needs attention";return false}
   }
   func refreshCounts() {
     do {

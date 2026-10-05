@@ -42,3 +42,14 @@ test('delete can retry after a lost response and revocation',async()=>{
  assert.equal((await handler(request({action:'delete',participantId:id}))).status,200);
  assert.deepEqual(calls,['delete_driving_research','delete_driving_research']);
 });
+
+test('explicit answers and unanswered prompt evidence stay distinct',()=>{
+ for(const label of ['fueled','not_fueling','not_a_stop','unsure']) {
+  assert.equal(validateDrivingEvents([{...event,kind:'visit_label',payload:JSON.stringify({visitId:id,label,source:'participant'})}]).length,1);
+ }
+ for(const status of ['created','scheduled','permission_missing','schedule_failed','dismissed']) {
+  const prompt={...event,kind:'visit_prompt',payload:JSON.stringify({visitId:id,status,confirmationState:'unconfirmed'})};
+  assert.equal(validateDrivingEvents([prompt]).length,1);
+  assert.throws(()=>validateDrivingEvents([{...prompt,payload:JSON.stringify({visitId:id,status,confirmationState:'answered'})}]));
+ }
+});
