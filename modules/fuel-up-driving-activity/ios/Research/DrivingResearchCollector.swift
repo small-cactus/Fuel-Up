@@ -26,7 +26,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   @Published var busy=false
   @Published var permissionRevision=0
   @Published var participant="Not enrolled"
-  @Published var notificationPermission="Not requested"
+  @Published var notificationPermission="Checking"
   @Published var visitLabels:[String:String]=[:]
   @Published var confirmationVisit:ResearchVisit?
   private var promptedVisitIDs=Set<String>()
@@ -45,9 +45,6 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   private var lastCatalogAttempt=Date.distantPast
   private var catalogCenter:ResearchFix?
   private var catalogBusy=false
-  private var uploadTask:Task<Void,Never>?
-  private var nextUpload=Date.distantPast
-  private var uploadFailures=0
   private var configured=false
   private var running=false
   private var lastMode=""
@@ -56,6 +53,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   private var permissionSetup=false
   private let networkMonitor=NWPathMonitor()
   private var networkAvailable=false
+  private var wifiNetwork=false
   private var expensiveNetwork=true
   private var constrainedNetwork=false
   private var lastUploadAttempt=UserDefaults.standard.object(forKey:"research.lastUploadAttempt") as? Date
@@ -93,6 +91,8 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     do {
       let folder=try FileManager.default.url(for:.applicationSupportDirectory,in:.userDomainMask,appropriateFor:nil,create:true).appendingPathComponent("DrivingResearch",isDirectory:true)
       store=try DrivingResearchStore(directory:folder)
+      DrivingResearchSync.shared.configure(store!)
+      DrivingResearchSync.shared.onChange = { [weak self] in self?.lastUpload=UserDefaults.standard.object(forKey:"research.lastUpload") as? Date;self?.refreshCounts() }
       if let data=UserDefaults.standard.data(forKey:"research.stations") {stations=(try? JSONDecoder().decode([ResearchStation].self,from:data)) ?? []}
       if let data=UserDefaults.standard.data(forKey:"research.catalogCenter") {catalogCenter=try? JSONDecoder().decode(ResearchFix.self,from:data)}
       lastCatalog=UserDefaults.standard.object(forKey:"research.lastCatalog") as? Date
@@ -108,9 +108,10 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
         Task { @MainActor in
           guard let self else{return}
           self.networkAvailable=path.status == .satisfied
+          self.wifiNetwork=path.usesInterfaceType(.wifi)
           self.expensiveNetwork=path.isExpensive
           self.constrainedNetwork=path.isConstrained
-          self.uploadSchedule = !self.networkAvailable ? "Offline" : path.isConstrained ? "Low Data Mode · paused" : path.isExpensive ? "Cellular · 10 min" : "Wi-Fi · 5 min"
+          self.sync()
         }
       }
       networkMonitor.start(queue:DispatchQueue(label:"fuelup.research.network"))
@@ -136,7 +137,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       }
     }
     manager.requestLocation()
-    applyMode();checkMotion();sync()
+    applyMode();checkMotion();sync();DrivingResearchBackground.schedule()
   }
   func enable() async {
     guard !busy else {return};busy=true;defer{busy=false}
@@ -177,7 +178,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     record("consent",["version":1,"enabled":false])
     enabled=false;UserDefaults.standard.set(false,forKey:Self.enabledKey)
     DrivingResearchNotifications.shared.cancelAll()
-    stopSensors();uploadTask?.cancel();uploadTask=nil;status="Paused"
+    stopSensors();DrivingResearchSync.shared.pause();status="Paused"
     if let visit=detector.active {record("visit_gap",visitPayload(visit))}
     detector=ResearchVisitDetector();saveDetector()
   }
@@ -194,7 +195,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
         let id=try identity ?? ResearchIdentity.load()
         _=try await transport.send("delete",identity:id)
       }
-      try store?.erase();try ResearchIdentity.erase()
+      try store?.erase();try ResearchIdentity.erase();DrivingResearchSync.shared.erase()
       for key in [Self.consentKey,"research.visits","research.stations","research.catalogCenter","research.lastCatalog","research.detector","research.lastUpload","research.lastUploadAttempt"] {UserDefaults.standard.removeObject(forKey:key)}
       identity=nil;participant="Not enrolled";visits=[];visitLabels=[:];promptedVisitIDs=[];confirmationVisit=nil;stations=[];stationCount=0;lastUpload=nil;lastUploadAttempt=nil;issue=nil;refreshCounts()
       catalogCenter=nil;lastCatalog=nil;lastFix=nil;motion="Unknown";lastDrive = .distantPast
@@ -328,7 +329,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     guard consented,let store else{return false}
     do {
       var payload=fields;payload["schemaVersion"]=1;payload["detectorVersion"]="station-stop-v1";payload["sessionId"]=sessionID
-      try store.append(ResearchEvent(kind:kind,payload:payload));refreshCounts();return true
+      try store.append(ResearchEvent(kind:kind,payload:payload));refreshCounts();sync();return true
     } catch {issue=error.localizedDescription;stopSensors();status="Paused — storage needs attention";return false}
   }
   func refreshCounts() {
@@ -338,36 +339,8 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     } catch {issue=error.localizedDescription}
   }
   func sync(force:Bool=false) {
-    guard consented,uploadTask==nil,force || (enabled && Date()>=nextUpload),let store else{return}
-    guard ResearchTransferPolicy.canUpload(now:Date().timeIntervalSince1970,lastAttempt:lastUploadAttempt?.timeIntervalSince1970,online:networkAvailable,expensive:expensiveNetwork,constrained:constrainedNetwork,manual:force) else{return}
-    uploadTask=Task { [weak self] in
-      guard let self else{return}
-      var backgroundTask:UIBackgroundTaskIdentifier = .invalid
-      backgroundTask=UIApplication.shared.beginBackgroundTask(withName:"Sync driving research") { [weak self] in
-        self?.uploadTask?.cancel()
-      }
-      defer {
-        if backgroundTask != .invalid {UIApplication.shared.endBackgroundTask(backgroundTask)}
-        self.uploadTask=nil;self.refreshCounts()
-      }
-      do {
-        let id=try self.identity ?? ResearchIdentity.load();self.identity=id;self.participant=id.id
-        let events=try store.events(pending:true)
-        guard !events.isEmpty else{return}
-        self.lastUploadAttempt=Date();UserDefaults.standard.set(self.lastUploadAttempt,forKey:"research.lastUploadAttempt")
-        let array=try JSONSerialization.jsonObject(with:JSONEncoder().encode(events))
-        let response=try await self.transport.send("upload",identity:id,fields:["events":array])
-        try Task.checkCancellation()
-        guard let ids=response["ids"] as? [String],Set(ids)==Set(events.map(\.id)),response["accepted"] as? Int == events.count else {throw URLError(.cannotParseResponse)}
-        try store.acknowledge(ids)
-        self.lastUpload=Date();UserDefaults.standard.set(self.lastUpload,forKey:"research.lastUpload")
-        self.uploadFailures=0;self.nextUpload=Date().addingTimeInterval(30)
-        if self.issue?.hasPrefix("Upload pending") == true {self.issue=nil}
-      } catch is CancellationError {} catch {
-        self.uploadFailures+=1;self.nextUpload=Date().addingTimeInterval(min(900,30*pow(2,Double(min(self.uploadFailures,5)))))
-        self.issue="Upload pending — saved on this phone. It will retry when connected."
-      }
-    }
+    DrivingResearchSync.shared.wake(online:networkAvailable,wifi:wifiNetwork,automatic:enabled)
+    if force {DrivingResearchSync.shared.syncAll()}
   }
   private func refreshStations(around fix:ResearchFix) {
     guard !catalogBusy,let identity,Date().timeIntervalSince(lastCatalogAttempt)>30 else{return}

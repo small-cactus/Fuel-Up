@@ -2,11 +2,11 @@ import Foundation
 
 // Sensors write locally. A motion change never creates its own network request.
 enum ResearchTransferPolicy {
-  static func canUpload(now:Double,lastAttempt:Double?,online:Bool,expensive:Bool,constrained:Bool,manual:Bool=false)->Bool {
-    guard online else{return false}
-    if manual {return true}
-    guard !constrained else{return false}
-    return now-(lastAttempt ?? now) >= (expensive ? 600 : 300)
+  static func canUpload(online:Bool,wifi:Bool,pending:Int,draining:Bool=false,manual:Bool=false)->Bool {
+    online && (manual || (wifi && (pending>=500 || draining)))
+  }
+  static func countReportDue(now:Double,lastReport:Double?)->Bool {
+    lastReport == nil || now-lastReport! >= 6*3600
   }
   static func needsCatalog(moved:Double,age:Double,constrained:Bool)->Bool {
     moved >= (constrained ? 10_000 : 5_000) || age >= (constrained ? 3_600 : 1_800)

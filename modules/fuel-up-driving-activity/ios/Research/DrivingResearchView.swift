@@ -35,9 +35,11 @@ final class DrivingResearchView: ExpoView {
 struct DrivingResearchScreen: View {
   @ObservedObject var contentInsets: DrivingResearchInsets
   @ObservedObject private var collector = DrivingResearchCollector.shared
+  @ObservedObject private var transfer = DrivingResearchSync.shared
   @Environment(\.scenePhase) private var scenePhase
   @Environment(\.dynamicTypeSize) private var typeSize
   @State private var confirmDelete = false
+  @State private var confirmDeleteAgain = false
   @State private var showConsent = false
   @State private var selectedVisit: ResearchVisit?
   @State private var labelMessage: String?
@@ -49,7 +51,7 @@ struct DrivingResearchScreen: View {
           .accessibilityAddTraits(.isHeader)
         glassCard {
           HStack(spacing: 14) {
-            Image(systemName: "car.side.fill").font(.title2).foregroundStyle(.blue)
+            Image(systemName: "car.side.fill").font(.title2).foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 4) {
               Text(collector.enabled && collector.ready ? "Collecting" : collector.enabled ? "Finish setup" : "Paused")
                 .font(.headline)
@@ -72,43 +74,39 @@ struct DrivingResearchScreen: View {
         }
         if let issue = collector.issue {
           Label(issue, systemImage: "exclamationmark.circle")
-            .font(.subheadline).foregroundStyle(.orange).accessibilityIdentifier("research-issue")
+            .font(.subheadline).foregroundStyle(.secondary).accessibilityIdentifier("research-issue")
         }
-        section("Permissions") {
-          row("Location", collector.locationPermission, icon: "location.fill")
-          row("Precise Location", collector.precise ? "On" : "Off", icon: "scope")
-          row("Motion & Fitness", collector.motionPermission, icon: "figure.walk")
-          row("Stop Notifications", collector.notificationPermission, icon: "bell.badge")
-          if collector.consented && collector.notificationPermission == "Not requested" {
-            Button("Enable Stop Notifications", systemImage: "bell") {Task {await collector.requestStopNotifications()}}
-              .frame(maxWidth: .infinity, alignment: .leading).frame(minHeight: 44)
+        if collector.consented && needsPermissions {
+          section("Permissions") {
+            if collector.locationPermission != "Always" {row("Location", collector.locationPermission, icon:"location.fill")}
+            if !collector.precise {row("Precise Location", "Off", icon:"scope")}
+            if collector.motionPermission != "Allowed" {row("Motion & Fitness", collector.motionPermission, icon:"figure.walk")}
+            if collector.notificationPermission != "On" && collector.notificationPermission != "Checking" {row("Stop Notifications",collector.notificationPermission,icon:"bell.badge")}
+            if UIApplication.shared.backgroundRefreshStatus != .available {row("Background App Refresh","Off",icon:"arrow.clockwise")}
+            if collector.notificationPermission == "Not requested" {
+              Button("Enable Stop Notifications",systemImage:"bell") {Task {await collector.requestStopNotifications()}}
+                .frame(maxWidth:.infinity,alignment:.leading).frame(minHeight:44)
+            }
+            if !collector.ready {
+              Button("Finish Setup",systemImage:"checkmark.shield") {collector.requestPermissions()}
+                .frame(maxWidth:.infinity,alignment:.leading).frame(minHeight:44)
+            }
+            Button("iPhone Settings",systemImage:"gear") {
+              if let url=URL(string:UIApplication.openSettingsURLString) {UIApplication.shared.open(url)}
+            }.frame(maxWidth:.infinity,alignment:.leading).frame(minHeight:44)
           }
-          if collector.consented && !collector.ready {
-            Button("Finish Setup", systemImage: "checkmark.shield") {collector.requestPermissions()}
-              .frame(maxWidth: .infinity, alignment: .leading).frame(minHeight: 44)
-          }
-          Button("iPhone Settings", systemImage: "gear") {
-            if let url = URL(string: UIApplication.openSettingsURLString) {UIApplication.shared.open(url)}
-          }.frame(maxWidth: .infinity, alignment: .leading).frame(minHeight: 44)
         }
         if collector.consented {
-          section("Tracking") {
-            row("Motion", collector.motion, icon: "car.side")
-            row("Nearby Stations", "\(collector.stationCount)", icon: "fuelpump")
-            row("Geofences", "\(collector.fenceCount)", icon: "location.circle")
-            if let fix = collector.lastFix {
-              row("Accuracy", "±\(Int(max(0,fix.accuracy))) m", icon: "scope")
+          glassCard {
+            Button {collector.sync(force:true)} label: {
+              HStack {
+                Label("Sync All",systemImage:"arrow.triangle.2.circlepath")
+                Spacer()
+                if transfer.syncing {ProgressView()}
+              }.frame(minHeight:44)
             }
+            if let message=transfer.message {Text(message).font(.caption).foregroundStyle(.secondary)}
           }
-        }
-        section("Saved Data") {
-          row("Recorded", "\(collector.total)", icon: "checkmark.circle")
-          row("Pending", "\(collector.pending)", icon: "arrow.up.circle")
-          row("Uploads", collector.uploadSchedule, icon: "network")
-          row("Last Sync", collector.lastUpload?.formatted(date: .omitted, time: .shortened) ?? "—", icon: "clock")
-          Button("Sync Saved Data", systemImage: "arrow.triangle.2.circlepath") {collector.sync(force: true)}
-            .frame(maxWidth: .infinity, alignment: .leading).frame(minHeight: 44)
-            .disabled(!collector.consented)
         }
         section("Station Visits") {
           if collector.visits.isEmpty {
@@ -117,7 +115,8 @@ struct DrivingResearchScreen: View {
           }
           ForEach(collector.visits) {visit in
             Button {selectedVisit = visit} label: {
-              HStack {
+              HStack(spacing:12) {
+                DrivingResearchStationLogo(name:visit.station.name)
                 VStack(alignment: .leading, spacing: 4) {
                   Text(visit.station.name).foregroundStyle(.primary)
                   Text("\(time(visit.startedAt)) · \(ResearchConfirmation.title(for: collector.visitLabels[visit.id]))").font(.caption).foregroundStyle(.secondary)
@@ -131,13 +130,13 @@ struct DrivingResearchScreen: View {
         }
         if collector.consented {
           Button("Delete Research Data", role: .destructive) {confirmDelete = true}
-            .frame(maxWidth: .infinity).frame(minHeight: 44).disabled(collector.busy)
+            .frame(maxWidth: .infinity).frame(minHeight: 44).foregroundStyle(.secondary).disabled(collector.busy)
         }
       }
       .padding(.horizontal, 20).padding(.top, contentInsets.top + 16).padding(.bottom, contentInsets.bottom + 28)
     }
     .scrollEdgeEffectHidden()
-    .tint(.blue)
+    .tint(.primary)
     .task {collector.prepare();collector.resume(reason: "debug_screen");takeNotificationVisit()}
     .onChange(of: collector.confirmationVisit?.id) {takeNotificationVisit()}
     .onChange(of: scenePhase) {if scenePhase == .active {collector.resume(reason: "foreground")}}
@@ -145,7 +144,7 @@ struct DrivingResearchScreen: View {
       NavigationStack {
         ScrollView {
           VStack(alignment: .leading, spacing: 24) {
-            Image(systemName: "car.side.fill").font(.largeTitle).foregroundStyle(.blue)
+            Image(systemName: "car.side.fill").font(.largeTitle).foregroundStyle(.secondary)
             Text("Join Driving Research").font(.title.bold())
             Text("Share precise locations, motion, timestamps, station stops, and your visit labels with Fuel Up to improve recommendations. Collection continues in the background.")
             Text("Records use a random participant ID and are kept until you delete them. You can pause or delete your research data here anytime.")
@@ -161,8 +160,12 @@ struct DrivingResearchScreen: View {
       }.presentationDetents([.large])
     }
     .confirmationDialog("Delete this phone’s research data?", isPresented: $confirmDelete, titleVisibility: .visible) {
-      Button("Delete Research Data", role: .destructive) {Task {await collector.deleteData()}}
+      Button("Continue", role: .destructive) {confirmDeleteAgain=true}
     }
+    .alert("Delete all your research data?",isPresented:$confirmDeleteAgain) {
+      Button("Cancel",role:.cancel) {}
+      Button("Delete Everything",role:.destructive) {Task {await collector.deleteData()}}
+    } message: {Text("This deletes the data on this phone and its synced research data. This cannot be undone.")}
     .confirmationDialog("What happened at this stop?", isPresented: Binding(get: {selectedVisit != nil}, set: {if !$0 {selectedVisit = nil}}), titleVisibility: .visible) {
       ForEach([("fueled","Got fuel"),("not_fueling","Stopped, no fuel"),("not_a_stop","Not a stop"),("wrong_station","Wrong station"),("unsure","Not sure")], id: \.0) {value in
         Button(value.1) {
@@ -173,6 +176,9 @@ struct DrivingResearchScreen: View {
     }
   }
 
+  private var needsPermissions:Bool {
+    !collector.ready || (collector.notificationPermission != "On" && collector.notificationPermission != "Checking") || UIApplication.shared.backgroundRefreshStatus != .available
+  }
   private func takeNotificationVisit() {
     if let visit=collector.confirmationVisit {selectedVisit=visit;collector.confirmationVisit=nil}
   }

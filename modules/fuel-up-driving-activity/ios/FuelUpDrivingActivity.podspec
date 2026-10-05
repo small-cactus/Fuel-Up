@@ -20,7 +20,7 @@ Pod::Spec.new do |s|
 
   s.dependency 'ExpoModulesCore'
   s.dependency 'ExpoNotifications'
-  s.frameworks = 'CoreMotion', 'CoreLocation', 'Security', 'UserNotifications'
+  s.frameworks = 'CoreMotion', 'CoreLocation', 'Security', 'UserNotifications', 'BackgroundTasks'
   s.libraries = 'sqlite3'
 
   s.pod_target_xcconfig = {

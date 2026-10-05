@@ -33,11 +33,14 @@ final class DrivingResearchTransport {
     c.urlCache=nil; c.httpCookieStorage=nil
     return URLSession(configuration:c)
   }()
-  func send(_ action:String, identity:ResearchIdentity, fields:[String:Any]=[:]) async throws -> [String:Any] {
+  func send(_ action:String, identity:ResearchIdentity, fields:[String:Any]=[:], wifiOnly:Bool=false) async throws -> [String:Any] {
     var body=fields;body["action"]=action;body["participantId"]=identity.id
     var request=URLRequest(url:endpoint);request.httpMethod="POST"
     request.setValue("application/json",forHTTPHeaderField:"Content-Type")
     request.setValue(identity.token,forHTTPHeaderField:"x-research-token")
+    request.allowsCellularAccess = !wifiOnly
+    request.allowsExpensiveNetworkAccess = true
+    request.allowsConstrainedNetworkAccess = true
     request.httpBody=try JSONSerialization.data(withJSONObject:body)
     let(data,response)=try await session.data(for:request)
     guard let http=response as? HTTPURLResponse,http.statusCode==200 else {throw URLError(.badServerResponse)}

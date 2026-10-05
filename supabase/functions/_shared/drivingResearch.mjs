@@ -1,7 +1,7 @@
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const kinds = new Set(['consent','lifecycle','permission','location','motion','geofence','station_catalog','visit_observation','visit_candidate','visit_departure','visit_gap','visit_prompt','visit_label','diagnostic']);
 export function validateDrivingEvents(events, now = Date.now()/1000) {
-  if (!Array.isArray(events) || !events.length || events.length > 200) throw Error('INVALID_BATCH');
+  if (!Array.isArray(events) || !events.length || events.length > 1000) throw Error('INVALID_BATCH');
   const ids = new Set();
   for (const e of events) {
     if (!uuid.test(e.id) || ids.has(e.id) || !kinds.has(e.kind) || !Number.isFinite(e.recordedAt) || e.recordedAt < 0 || e.recordedAt > now+300 || typeof e.payload !== 'string' || e.payload.length > 32000) throw Error('INVALID_EVENT');
@@ -23,7 +23,7 @@ export function createDrivingResearchHandler({db}) {
     try {
       const body=await request.text(); if (body.length>1_000_000) return reply({error:'TOO_LARGE'},413);
       const input=JSON.parse(body), {action,participantId}=input;
-      if (!uuid.test(participantId)||!['enroll','upload','stations','delete'].includes(action)) return reply({error:'INVALID_REQUEST'},400);
+      if (!uuid.test(participantId)||!['enroll','upload','stations','delete','control'].includes(action)) return reply({error:'INVALID_REQUEST'},400);
       const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token))),v=>v.toString(16).padStart(2,'0')).join('');
       const auth={p_id:participantId,p_hash:hash};
       if (action==='enroll') {
@@ -40,6 +40,13 @@ export function createDrivingResearchHandler({db}) {
       }
       const access=await db.rpc('access_driving_research',auth);
       if (access.error||access.data!==true) return reply({error:'UNAUTHORIZED_OR_RATE_LIMITED'},403);
+      if(action==='control') {
+        const hasCounts=input.total!==undefined || input.pending!==undefined;
+        if (hasCounts && (!Number.isSafeInteger(input.total)||!Number.isSafeInteger(input.pending)||input.pending<0||input.total<input.pending||input.total>100000000)) return reply({error:'INVALID_COUNTS'},400);
+        if (input.completedRequestId!==undefined && !uuid.test(input.completedRequestId)) return reply({error:'INVALID_REQUEST'},400);
+        const result=await db.rpc('driving_research_control',{...auth,p_total:hasCounts?input.total:null,p_pending:hasCounts?input.pending:null,p_completed:input.completedRequestId??null});
+        return result.error?reply({error:'CONTROL_UNAVAILABLE'},503):reply(result.data);
+      }
       if(action==='stations') {
         if (!Number.isFinite(input.latitude)||Math.abs(input.latitude)>90||!Number.isFinite(input.longitude)||Math.abs(input.longitude)>180) return reply({error:'INVALID_COORDINATE'},400);
         const result=await db.rpc('driving_research_stations',{p_lat:input.latitude,p_lon:input.longitude});

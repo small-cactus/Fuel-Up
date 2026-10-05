@@ -85,6 +85,14 @@
         "CADisableMinimumFrameDurationOnPhone": true,
         "LSApplicationQueriesSchemes": [
           "comgooglemaps"
+        ],
+        "BGTaskSchedulerPermittedIdentifiers": [
+          "com.anthonyh.fuelup.research-sync"
+        ],
+        "UIBackgroundModes": [
+          "fetch",
+          "location",
+          "processing"
         ]
       }
     },

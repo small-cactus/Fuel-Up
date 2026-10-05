@@ -17,3 +17,26 @@ swiftc modules/fuel-up-driving-activity/ios/Research/DrivingResearchModels.swift
 /tmp/fuel-stop-tests
 node --test tests/drivingResearch.test.mjs tests/drivingResearchQuiet.test.cjs
 ```
+
+## Uploads and operator sync requests
+
+Automatic uploads start at 500 queued records on Wi-Fi and drain the entire queue, including the final remainder below 500. Cellular waits for Wi-Fi. A persistent drain intent resumes after an interruption without reapplying the threshold. Sync All and an operator request bypass Wi-Fi/Low Data Mode/threshold restrictions, but require a real connection. Upload requests carry up to 1,000 records and are also bounded by encoded bytes; every acknowledged batch retains the original event IDs. The single operation continues until no queued records remain. Offline manual requests persist for later connectivity. Pause cancels an active drain; deletion removes local and server data, count reports and remote requests after two confirmations.
+
+The phone reports retained local record count and pending count once six hours have elapsed since its last successful report, using Wi-Fi or cellular. BackgroundTasks and existing native sensor/foreground/connectivity wakes provide execution opportunities. iOS decides when a suspended app runs; six hours is a reporting cadence, not an exact delivery guarantee. A disconnected phone cannot send counts or samples.
+
+Operator tools (Supabase admin authentication required):
+
+```sh
+node scripts/driving-research/status.mjs
+node scripts/driving-research/requestSync.mjs PARTICIPANT_UUID
+```
+
+A request is durable and scoped to exactly one enrolled participant. Duplicate requests reuse the outstanding command. The native app checks at most once per 15 minutes during ordinary wakes and also during scheduled background work. This is a queued request, not an APNs push or an immediate wake guarantee. It completes only after the local queue is drained; the server retains completion metadata. Participant credentials cannot queue requests for another person or see/complete another person's command. A paused collector does not accept remote commands until resumed; explicit manual sync remains available.
+
+```sh
+node scripts/driving-research/verifySync.mjs
+```
+
+This live test uses two temporary synthetic participants, verifies isolation and 1,201 immutable uploaded records (including retry of the first 1,000), then deletes the synthetic records, count reports and commands. The count reported to operators is a timestamped snapshot, not a live or lifetime counter. No personal routes belong in committed test evidence.
+
+Validation for the Wi-Fi policy update: the focused Swift policy/store suite and 11 Node tests passed. The database migration and endpoint were deployed without applying unrelated pending migrations. A signed Release build was installed on the paired physical phone. Its count report arrived and an operator request was acknowledged as complete after a native relaunch. This verifies connected delivery and queue completion, not an instantaneous wake or exact six-hour background timing. Text outside filled blue buttons uses neutral theme colors; the Tracking and Saved Data sections are removed, and only missing permissions appear. Station logos reuse the bundled brand catalog, with a native pump icon for unknown brands.

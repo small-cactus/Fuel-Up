@@ -2,16 +2,18 @@ import Foundation
 
 @main struct ResearchTests {
   static func main() throws {
-    // A storm of sensor callbacks cannot defeat the network batching window.
-    for now in stride(from: 0.0, to: 600.0, by: 0.25) {
-      assert(!ResearchTransferPolicy.canUpload(now:now,lastAttempt:0,online:true,expensive:true,constrained:false))
+    for count in 0..<500 {
+      assert(!ResearchTransferPolicy.canUpload(online:true,wifi:true,pending:count))
     }
-    assert(ResearchTransferPolicy.canUpload(now:600,lastAttempt:0,online:true,expensive:true,constrained:false))
-    assert(!ResearchTransferPolicy.canUpload(now:299,lastAttempt:0,online:true,expensive:false,constrained:false))
-    assert(ResearchTransferPolicy.canUpload(now:300,lastAttempt:0,online:true,expensive:false,constrained:false))
-    assert(!ResearchTransferPolicy.canUpload(now:3600,lastAttempt:0,online:true,expensive:false,constrained:true))
-    assert(!ResearchTransferPolicy.canUpload(now:3600,lastAttempt:0,online:false,expensive:false,constrained:false,manual:true))
-    assert(ResearchTransferPolicy.canUpload(now:1,lastAttempt:0,online:true,expensive:true,constrained:true,manual:true))
+    assert(ResearchTransferPolicy.canUpload(online:true,wifi:true,pending:500))
+    assert(ResearchTransferPolicy.canUpload(online:true,wifi:true,pending:1500))
+    assert(ResearchTransferPolicy.canUpload(online:true,wifi:true,pending:1,draining:true))
+    assert(!ResearchTransferPolicy.canUpload(online:true,wifi:false,pending:1500))
+    assert(!ResearchTransferPolicy.canUpload(online:true,wifi:false,pending:1,draining:true))
+    assert(ResearchTransferPolicy.canUpload(online:true,wifi:false,pending:1,manual:true))
+    assert(!ResearchTransferPolicy.canUpload(online:false,wifi:false,pending:1500,manual:true))
+    assert(ResearchTransferPolicy.countReportDue(now:21600,lastReport:0))
+    assert(!ResearchTransferPolicy.countReportDue(now:21599,lastReport:0))
     assert(!ResearchTransferPolicy.needsCatalog(moved:4999,age:1799,constrained:false))
     assert(ResearchTransferPolicy.needsCatalog(moved:5000,age:10,constrained:false))
     assert(!ResearchTransferPolicy.needsCatalog(moved:9999,age:3599,constrained:true))

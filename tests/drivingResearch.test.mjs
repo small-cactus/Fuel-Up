@@ -53,3 +53,22 @@ test('explicit answers and unanswered prompt evidence stay distinct',()=>{
   assert.throws(()=>validateDrivingEvents([{...prompt,payload:JSON.stringify({visitId:id,status,confirmationState:'answered'})}]));
  }
 });
+test('control authenticates participant and validates counts and acknowledgements',async()=>{
+ const calls=[];
+ const handler=createDrivingResearchHandler({db:{rpc:async(name,args)=>{calls.push({name,args});return {data:name==='access_driving_research'?true:{syncRequestId:id}}}}});
+ const r=await handler(request({action:'control',participantId:id,total:1400,pending:500,completedRequestId:id}));
+ assert.equal(r.status,200);assert.deepEqual(await r.json(),{syncRequestId:id});
+ assert.deepEqual(calls.map(c=>c.name),['access_driving_research','driving_research_control']);
+ assert.equal(calls[1].args.p_id,id);assert.equal(calls[1].args.p_total,1400);assert.equal(calls[1].args.p_pending,500);assert.equal(calls[1].args.p_completed,id);
+ for(const fields of [{total:1,pending:2},{total:1},{total:-1,pending:0},{total:2.5,pending:1},{completedRequestId:'invalid'}]) {
+  assert.equal((await handler(request({action:'control',participantId:id,...fields}))).status,400);
+ }
+ const denied=createDrivingResearchHandler({db:{rpc:async()=>({data:false})}});
+ assert.equal((await denied(request({action:'control',participantId:id}))).status,403);
+ assert.equal((await handler(request({action:'requestSync',participantId:id}))).status,400,'participant API cannot queue administrative commands');
+});
+test('bulk upload accepts 1000 unique records and still rejects oversized batches',()=>{
+ const events=Array.from({length:1001},(_,i)=>({...event,id:`11111111-1111-4111-8111-${String(i).padStart(12,'0')}`}));
+ assert.equal(validateDrivingEvents(events.slice(0,1000)).length,1000);
+ assert.throws(()=>validateDrivingEvents(events));
+});
