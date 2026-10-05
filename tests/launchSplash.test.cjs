@@ -18,31 +18,37 @@ test('map-ready releases one launch only and unsubscribed listeners stay silent'
 });
 
 for (const mapReady of [true, false]) {
-    test(`splash releases on ${mapReady ? 'rendered map without delay' : 'deadline when map is offline'}`, async t => {
+    test(`splash animates after ${mapReady ? 'map readiness' : 'offline deadline'} and unmounts only on completion`, async t => {
         t.mock.timers.enable({ apis: ['setTimeout'] });
         const state = createLaunchReadiness();
         let hidden = 0;
         const Splash = load('src/components/LaunchSplash.js', {
-            'react-native': { View: 'View', Image: 'Image', StyleSheet: { create: v => v, absoluteFillObject: {}, absoluteFill: {} } },
+            'react-native': {
+                Platform: { OS: 'ios' }, Animated: { Value: class {} },
+                StyleSheet: { create: v => v, absoluteFillObject: {} },
+            },
+            'expo-modules-core': { requireNativeViewManager: () => 'NativeSplash' },
             'expo-splash-screen': { preventAutoHideAsync: async () => {}, hideAsync: async () => { hidden++; } },
             '../ThemeContext': { useTheme: () => ({ isDark: false }) },
             '../lib/launchReadiness': { launchReadiness: state, finishLaunch: () => state.finish() },
         }).default;
         let view;
         await act(async () => { view = create(React.createElement(Splash)); });
-        assert.equal(view.root.findByType('View').props.testID, 'launch-splash');
-        await act(async () => view.root.findByType('View').props.onLayout());
-        assert.equal(hidden, 0, 'native artwork stays while its replacement image loads');
-        await act(async () => view.root.findByType('Image').props.onLoadEnd());
-        assert.equal(hidden, 1, 'native screen hands off after branded cover has layout and artwork');
-        await act(async () => {
-            if (mapReady) state.finish();
-            else t.mock.timers.tick(3999);
-        });
+        assert.equal(hidden, 0, 'keep OS artwork until native replacement is drawn');
+        if (mapReady) await act(async () => state.finish());
+        assert.equal(view.root.findByType('NativeSplash').props.exiting, false,
+            'even an already-ready map waits for the OS handoff');
+        await act(async () => view.root.findByType('NativeSplash').props.onArtworkReady());
+        assert.equal(hidden, 1);
         if (!mapReady) {
-            assert.notEqual(view.toJSON(), null);
+            await act(async () => t.mock.timers.tick(3999));
+            assert.equal(view.root.findByType('NativeSplash').props.exiting, false);
             await act(async () => t.mock.timers.tick(1));
         }
+        assert.equal(view.root.findByType('NativeSplash').props.exiting, true);
+        assert.equal(view.root.findByType('NativeSplash').props.pointerEvents, 'none');
+        assert.notEqual(view.toJSON(), null, 'readiness does not cut the animation short');
+        await act(async () => view.root.findByType('NativeSplash').props.onExitComplete());
         assert.equal(view.toJSON(), null);
         assert.equal(state.getSnapshot(), true);
         await act(async () => view.unmount());

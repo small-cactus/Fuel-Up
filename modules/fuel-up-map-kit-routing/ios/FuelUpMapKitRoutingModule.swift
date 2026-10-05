@@ -47,6 +47,13 @@ public final class FuelUpMapKitRoutingModule: Module {
       AsyncFunction("showAll") { (view: ClusterLabMapView) in view.showAll() }
     }
 
+    View(NativeLaunchSplashView.self) {
+      ViewName("NativeLaunchSplashView")
+      Prop("isDark") { (view, dark: Bool) in view.setDark(dark) }
+      Prop("exiting") { (view, exiting: Bool) in view.setExiting(exiting) }
+      Events("onArtworkReady", "onExitComplete")
+    }
+
     View(NativeOnboardingView.self) {
       ViewName("NativeOnboardingView")
       Prop("initialChoices") { (view, choices: [String: Any]) in view.model.configure(choices) }
