@@ -37,7 +37,6 @@ export default function useNationalLeaderboard({
     const controller = new AbortController();
     active.current = controller;
     setRefreshing(showRefresh);
-    const timeout = setTimeout(() => controller.abort(), 20000);
     try {
       const response = await fetchNationalTrends({
         fuelType,
@@ -55,7 +54,6 @@ export default function useNationalLeaderboard({
           scope, quotes: (previous?.scope === scope ? previous.quotes : cache.get(scope)?.quotes) || [], error: error.message }));
       }
     } finally {
-      clearTimeout(timeout);
       if (active.current === controller) {
         active.current = null;
         setRefreshing(false);

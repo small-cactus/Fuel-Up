@@ -1,0 +1,87 @@
+{
+  "events": [
+    {
+      "at": 1791215504673,
+      "connected": true,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791215524672,
+            "startedAt": 1791215504672
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "status": "unknown"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "status": "unknown"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "status": "unknown"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "at": 1791215524680,
+      "connected": true,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "status": "unknown"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "status": "unknown"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "status": "unknown"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "status": "unknown"
+        }
+      ]
+    }
+  ],
+  "finished": {
+    "elapsed": 20054,
+    "error": "Failed to send a request to the Edge Function"
+  }
+}

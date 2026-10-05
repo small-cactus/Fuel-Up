@@ -19,6 +19,7 @@ import useNetworkStatus from '../../lib/useNetworkStatus';
 
 const NativeMap = Platform.OS === 'ios' ? requireNativeViewManager('FuelUpMapKitRouting') : null;
 const EMPTY_ORIGIN = {};
+const HOME_LOADING_SERVICES = ['prices'];
 
 export default function HomeScreen() {
     const active = useIsFocused();
@@ -107,7 +108,7 @@ export default function HomeScreen() {
         <View pointerEvents="none" style={headerStyle}>
             <FuelUpHeaderLogo isDark={isDark} />
         </View>
-        <ConnectionOverlay active={active} />
+        <ConnectionOverlay active={active} loadingServiceIds={HOME_LOADING_SERVICES} />
         </View>
     );
 }

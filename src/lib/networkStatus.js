@@ -1,3 +1,4 @@
+const { apiRequestTimeout } = require('./apiTimeouts');
 // Shared transport boundary. Only app APIs use this; MapKit tiles, Metro and
 // bundled assets keep working, including the Dev switch used to recover.
 const SERVICES = [
@@ -8,35 +9,26 @@ const SERVICES = [
     { id: 'research', name: 'Driving research' },
     { id: 'account', name: 'Account services' },
 ];
-function createNetworkStatus({ timeoutMs = 12000 } = {}) {
+function createNetworkStatus({ timeoutMs } = {}) {
     const listeners = new Set();
-    const gates = new Set();
     const latestRequest = new Map();
     const readRetries = new Map();
     const retrying = new Set();
     let requestSequence = 0;
-    let snapshot = { faultsEnabled: false, connected: null, generation: 0, recoveryGeneration: 0,
+    let snapshot = { connected: null, recoveryGeneration: 0,
         services: SERVICES.map(service => ({ ...service, status: 'unknown' })) };
     const publish = changes => { snapshot = { ...snapshot, ...changes }; listeners.forEach(fn => fn()); };
-    const report = (id, status) => {
-        if (snapshot.faultsEnabled) return;
+    const report = (id, status, pending = null) => {
         const recovered = status === 'responding' && snapshot.services.some(service => service.id === id && service.status === 'unresponsive');
-        publish({ recoveryGeneration: snapshot.recoveryGeneration + (recovered ? 1 : 0), services: snapshot.services.map(service => service.id === id ? { ...service, status } : service) });
+        publish({ recoveryGeneration: snapshot.recoveryGeneration + (recovered ? 1 : 0), services: snapshot.services.map(service => service.id === id ? { ...service, status: ['pending', 'cancelled'].includes(status) ? service.status : status, pending } : service) });
     };
-    const waitForRelease = () => snapshot.faultsEnabled ? new Promise(resolve => gates.add(resolve)) : Promise.resolve();
     const api = {
         getSnapshot: () => snapshot,
         subscribe: listener => { listeners.add(listener); return () => listeners.delete(listener); },
         report,
         setConnected: connected => { if (connected !== snapshot.connected) publish({ connected }); },
-        setFaultsEnabled(enabled) {
-            if (enabled === snapshot.faultsEnabled) return;
-            publish({ faultsEnabled: enabled, generation: snapshot.generation + 1,
-                services: SERVICES.map(service => ({ ...service, status: enabled ? 'unresponsive' : 'unknown' })) });
-            if (!enabled) { const pending = [...gates]; gates.clear(); pending.forEach(resolve => resolve()); }
-        },
         async retryFailedReads() {
-            if (snapshot.faultsEnabled || snapshot.connected === false) return;
+            if (snapshot.connected === false) return;
             await Promise.all(snapshot.services.filter(service => service.status === 'unresponsive').map(async ({ id }) => {
                 if (!readRetries.has(id) || retrying.has(id)) return;
                 retrying.add(id);
@@ -55,33 +47,35 @@ function createNetworkStatus({ timeoutMs = 12000 } = {}) {
                 (method === 'POST' && ['prices', 'memberships'].includes(id)))) {
                 readRetries.set(id, () => api.fetch(input, { ...init, signal: undefined }, transport));
             }
-            // Hold before dispatch AND before returning an already in-flight response.
-            // Turning the switch off releases the gate; normal AbortSignal semantics
-            // then apply. Fault mode never silently sends queued writes repeatedly.
-            await waitForRelease();
             const signal = init?.signal || input?.signal;
             if (signal?.aborted) throw Object.assign(new Error('Request cancelled'), { name: 'AbortError' });
-            const generation = snapshot.generation;
             const requestId = ++requestSequence;
             latestRequest.set(id, requestId);
-            const reportRequest = status => { if (snapshot.generation === generation && latestRequest.get(id) === requestId) report(id, status); };
+            const reportRequest = status => { if (latestRequest.get(id) === requestId) report(id, status); };
             const controller = new AbortController();
-            const abort = () => controller.abort();
-            signal?.addEventListener('abort', abort, { once: true });
+            const startedAt = Date.now();
+            const duration = timeoutMs ?? apiRequestTimeout(input, init);
+            const previousStatus = snapshot.services.find(service => service.id === id)?.status || 'unknown';
+            report(id, 'pending', { startedAt, deadlineAt: startedAt + duration });
             let timedOut = false;
-            const timer = setTimeout(() => { timedOut = true; reportRequest('unresponsive'); controller.abort(); }, timeoutMs);
+            let rejectAbort;
+            const abortPromise = new Promise((_, reject) => { rejectAbort = reject; });
+            const abort = () => {
+                rejectAbort(Object.assign(new Error(timedOut ? 'API request timed out' : 'Request cancelled'),
+                    { name: timedOut ? 'TimeoutError' : 'AbortError' }));
+                controller.abort();
+            };
+            signal?.addEventListener('abort', abort, { once: true });
+            const timer = setTimeout(() => { timedOut = true; abort(); }, duration);
             try {
-                const response = await transport(input, { ...init, signal: controller.signal });
-                clearTimeout(timer);
-                await waitForRelease();
+                const response = await Promise.race([transport(input, { ...init, signal: controller.signal }), abortPromise]);
                 reportRequest(response.status >= 500 || response.status === 429 ? 'unresponsive' : 'responding');
                 return response;
             } catch (error) {
-                clearTimeout(timer);
-                await waitForRelease();
-                if (error?.name !== 'AbortError' || timedOut) reportRequest('unresponsive');
+                reportRequest(timedOut || error?.name !== 'AbortError' ? 'unresponsive' : previousStatus);
                 throw error;
             } finally { clearTimeout(timer); signal?.removeEventListener('abort', abort); }
+
         },
     };
     return api;

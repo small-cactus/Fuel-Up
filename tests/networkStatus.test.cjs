@@ -4,27 +4,70 @@ const { createNetworkStatus } = require('../src/lib/networkStatus');
 const tick = () => new Promise(setImmediate);
 const deferred = () => { let resolve; const promise = new Promise(r => resolve = r); return { promise, resolve }; };
 
-test('faults hold new requests without dispatch and release once disabled', async () => {
-    const store = createNetworkStatus(); let calls = 0, finished = false;
-    store.setFaultsEnabled(true);
-    const result = store.fetch('https://example/functions/v1/gas-prices', {}, async () => { calls++; return { status: 200 }; }).then(() => finished = true);
-    await tick(); assert.equal(calls, 0); assert.equal(finished, false);
-    assert.ok(store.getSnapshot().services.every(s => s.status === 'unresponsive'));
-    store.setFaultsEnabled(false); await result;
-    assert.equal(calls, 1); assert.equal(finished, true);
-    assert.equal(store.getSnapshot().services.find(s => s.id === 'prices').status, 'responding');
-    assert.equal(store.getSnapshot().services.find(s => s.id === 'research').status, 'unknown');
+const { createAPITransport } = require('../src/lib/apiTransport');
+const { apiRequestTimeout } = require('../src/lib/apiTimeouts');
+const pricesURL = 'https://example/functions/v1/gas-prices';
+const priceStatus = store => store.getSnapshot().services.find(s => s.id === 'prices');
+
+test('only actual requests affect health; toggling faults neither fails nor recovers services', async () => {
+    const store = createNetworkStatus({ timeoutMs: 10 }); let calls = 0;
+    const transport = createAPITransport(async () => { calls++; return { status: 200 }; });
+    const initial = store.getSnapshot();
+    transport.setEnabled(true);
+    assert.equal(store.getSnapshot(), initial);
+    const result = store.fetch(pricesURL, {}, transport.fetch);
+    assert.equal(priceStatus(store).status, 'unknown');
+    assert.equal(priceStatus(store).pending.deadlineAt - priceStatus(store).pending.startedAt, 10);
+    await assert.rejects(result, { name: 'TimeoutError' });
+    assert.equal(calls, 0);
+    assert.equal(priceStatus(store).status, 'unresponsive');
+    assert.equal(priceStatus(store).pending, null);
+    assert(store.getSnapshot().services.filter(s => s.id !== 'prices').every(s => s.status === 'unknown'));
+    const failed = store.getSnapshot();
+    transport.setEnabled(false);
+    assert.equal(store.getSnapshot(), failed);
+    await store.fetch(pricesURL, {}, transport.fetch);
+    assert.equal(priceStatus(store).status, 'responding');
+    assert.equal(store.getSnapshot().recoveryGeneration, 1);
+    assert.equal('faultsEnabled' in store.getSnapshot(), false);
 });
-test('faults hold already dispatched responses, and cancellation cannot dispatch queued writes', async () => {
-    const store = createNetworkStatus(); const pending = deferred(); let finished = false;
-    const result = store.fetch('https://example/rest/v1/station_prices', {}, () => pending.promise).then(() => finished = true);
-    await tick(); store.setFaultsEnabled(true); pending.resolve({ status: 200 }); await tick();
+test('injected and real non-returning transports use the same Trends deadline for the map', async t => {
+    t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1000 });
+    for (const injected of [false, true]) {
+        const store = createNetworkStatus();
+        const transport = createAPITransport(async () => ({ status: 200 }));
+        transport.setEnabled(true);
+        const result = store.fetch(pricesURL, {}, injected ? transport.fetch : () => new Promise(() => {}));
+        const rejected = assert.rejects(result, { name: 'TimeoutError' });
+        assert.equal(priceStatus(store).pending.deadlineAt - Date.now(), 20000);
+        t.mock.timers.tick(19999); await tick();
+        assert.equal(priceStatus(store).status, 'unknown');
+        t.mock.timers.tick(1); await rejected;
+        assert.equal(priceStatus(store).status, 'unresponsive');
+    }
+    assert.equal(apiRequestTimeout(pricesURL, { body: JSON.stringify({ scope: 'national' }) }), 20000);
+    assert.equal(apiRequestTimeout('https://example/rest/v1/rpc/fuel_memberships_for_state'), 15000);
+});
+test('faults hold dispatched responses; cancellation and timeout cannot dispatch queued writes', async () => {
+    const store = createNetworkStatus({ timeoutMs: 100 }); const pending = deferred(); let finished = false;
+    const transport = createAPITransport(() => pending.promise);
+    const result = store.fetch(pricesURL, {}, transport.fetch).then(() => finished = true);
+    await tick(); transport.setEnabled(true); pending.resolve({ status: 200 }); await tick();
     assert.equal(finished, false);
-    const controller = new AbortController(); let writes = 0;
-    const write = store.fetch('https://example/rest/v1/push_tokens', { signal: controller.signal }, () => { writes++; });
-    controller.abort(); await tick(); assert.equal(writes, 0);
-    const rejected = assert.rejects(write, { name: 'AbortError' });
-    store.setFaultsEnabled(false); await result; await rejected; assert.equal(writes, 0);
+    transport.setEnabled(false); await result;
+    for (const cancel of [true, false]) {
+        const writeStore = createNetworkStatus({ timeoutMs: 5 });
+        let writes = 0; const writeTransport = createAPITransport(async () => { writes++; return { status: 200 }; });
+        writeTransport.setEnabled(true);
+        const controller = new AbortController();
+        const write = writeStore.fetch('https://example/rest/v1/push_tokens', { method: 'POST', signal: controller.signal }, writeTransport.fetch);
+        const rejected = assert.rejects(write, { name: cancel ? 'AbortError' : 'TimeoutError' });
+        if (cancel) controller.abort();
+        await rejected;
+        writeTransport.setEnabled(false); await tick();
+        assert.equal(writes, 0);
+        assert.equal(writeStore.getSnapshot().services.find(s => s.id === 'notifications').status, cancel ? 'unknown' : 'unresponsive');
+    }
 });
 test('timeout marks only the affected service, aborts transport, and success recovers it', async () => {
     const store = createNetworkStatus({ timeoutMs: 5 });
@@ -60,12 +103,13 @@ test('outage recovery retries failed reads but never replays writes', async () =
     assert.equal(reads, 2); assert.equal(writes, 1);
     assert.equal(store.getSnapshot().recoveryGeneration, 1, 'successful recovery prompts Home to refresh its prices');
     assert.equal(store.getSnapshot().services.find(s => s.id === 'history').status, 'responding');
-    store.setFaultsEnabled(true); await store.retryFailedReads(); assert.equal(reads, 2);
+    store.setConnected(false); await store.retryFailedReads(); assert.equal(reads, 2);
 });
-test('responses from before a fault cycle cannot reintroduce a stale outage', async () => {
-    const store = createNetworkStatus(); const pending = deferred();
-    const request = store.fetch('https://example/rest/v1/station_prices', {}, () => pending.promise);
-    await tick(); store.setFaultsEnabled(true); store.setFaultsEnabled(false);
-    pending.resolve({ status: 503 }); await request;
-    assert.equal(store.getSnapshot().services.find(s => s.id === 'history').status, 'unknown');
+test('native cancellation clears pending without manufacturing a service failure', () => {
+    const store = createNetworkStatus();
+    store.report('research', 'responding');
+    store.report('research', 'pending', { startedAt: 1, deadlineAt: 20001 });
+    store.report('research', 'cancelled');
+    const research = store.getSnapshot().services.find(s => s.id === 'research');
+    assert.equal(research.status, 'responding'); assert.equal(research.pending, null);
 });

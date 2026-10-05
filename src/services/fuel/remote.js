@@ -9,16 +9,10 @@ async function fetchGasBuddyQuote({ latitude, longitude, radiusMiles, fuelType, 
     try {
         const { supabase } = require('../../lib/supabase');
         if (!supabase) throw new Error('Supabase is not configured.');
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), config.requestTimeoutMs);
-        let result;
-        try {
-            result = await supabase.functions.invoke('gas-prices', {
-                body: { latitude, longitude, radiusMiles, fuelType, requiresE85 },
-                signal: controller.signal,
-                region: 'us-east-2',
-            });
-        } finally { clearTimeout(timer); }
+        const result = await supabase.functions.invoke('gas-prices', {
+            body: { latitude, longitude, radiusMiles, fuelType, requiresE85 },
+            region: 'us-east-2',
+        });
         if (result.error) throw result.error;
         const data = result.data;
         if (data?.version !== 1 || !Array.isArray(data.quotes)) throw new Error('Invalid gas-prices response.');

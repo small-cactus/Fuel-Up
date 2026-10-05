@@ -27,12 +27,10 @@ struct ResearchIdentity: Codable {
 }
 
 
-// Shared reachability and a session-only fault gate for native API calls.
+// Reachability and real API outcomes; no knowledge of developer fault state.
 @MainActor final class FuelUpNetworkStatus {
   static let shared = FuelUpNetworkStatus()
   private let monitor = NWPathMonitor()
-  private var waiting: [CheckedContinuation<Void, Never>] = []
-  private(set) var faultsEnabled = false
   private(set) var connected: Bool?
   var emit: (([String: Any]) -> Void)?
   private init() {
@@ -45,16 +43,12 @@ struct ResearchIdentity: Codable {
     }
     monitor.start(queue: DispatchQueue(label: "com.anthonyh.fuelup.reachability"))
   }
-  func setFaults(_ enabled: Bool) {
-    faultsEnabled = enabled
-    if !enabled { let pending = waiting; waiting.removeAll(); pending.forEach { $0.resume() } }
+  func report(_ status: String, pending: [String: Double]? = nil) {
+    var event: [String: Any] = ["service": "research", "status": status]
+    if let pending { event["pending"] = pending }
+    emit?(event)
   }
-  func waitForRelease() async {
-    if faultsEnabled { await withCheckedContinuation { waiting.append($0) } }
-  }
-  func report(_ status: String) {
-    if !faultsEnabled { emit?(["service": "research", "status": status]) }
-  }
+
 }
 
 final class DrivingResearchTransport {
@@ -74,18 +68,16 @@ final class DrivingResearchTransport {
     request.allowsExpensiveNetworkAccess = true
     request.allowsConstrainedNetworkAccess = true
     request.httpBody=try JSONSerialization.data(withJSONObject:body)
-    await FuelUpNetworkStatus.shared.waitForRelease()
-    try Task.checkCancellation()
-    let watchdog = Task {
-      do { try await Task.sleep(nanoseconds: 12_000_000_000) }
-      catch { return }
-      await FuelUpNetworkStatus.shared.report("unresponsive")
-    }
-    defer { watchdog.cancel() }
+    let started = Date()
+    let deadline = started.addingTimeInterval(session.configuration.timeoutIntervalForRequest)
+    await FuelUpNetworkStatus.shared.report("pending", pending: [
+      "startedAt": started.timeIntervalSince1970 * 1000, "deadlineAt": deadline.timeIntervalSince1970 * 1000])
     var receivedResponse = false
     do {
+      try await APINetworkFaultGate.shared.waitForDelivery(until: deadline)
+      request.timeoutInterval = min(20, max(0.01, deadline.timeIntervalSinceNow))
       let(data,response)=try await session.data(for:request)
-      await FuelUpNetworkStatus.shared.waitForRelease()
+      try await APINetworkFaultGate.shared.waitForDelivery(until: deadline)
       receivedResponse = true
       guard let http=response as? HTTPURLResponse else {throw URLError(.badServerResponse)}
       await FuelUpNetworkStatus.shared.report(http.statusCode >= 500 || http.statusCode == 429 ? "unresponsive" : "responding")
@@ -93,9 +85,15 @@ final class DrivingResearchTransport {
       guard let result=try JSONSerialization.jsonObject(with:data) as? [String:Any] else {throw URLError(.cannotParseResponse)}
       return result
     } catch {
-      await FuelUpNetworkStatus.shared.waitForRelease()
-      if !receivedResponse && (error as? URLError)?.code != .cancelled && !(error is CancellationError) {
-        await FuelUpNetworkStatus.shared.report("unresponsive")
+      if !receivedResponse {
+        var failure = error
+        if (error as? URLError)?.code != .cancelled && !(error is CancellationError) {
+          do { try await APINetworkFaultGate.shared.waitForDelivery(until: deadline) }
+          catch { failure = error }
+        }
+        let cancelled = (failure as? URLError)?.code == .cancelled || failure is CancellationError
+        await FuelUpNetworkStatus.shared.report(cancelled ? "cancelled" : "unresponsive")
+        throw failure
       }
       throw error
     }
