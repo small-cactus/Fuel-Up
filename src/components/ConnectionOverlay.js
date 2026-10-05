@@ -12,15 +12,13 @@ const STATUS_LABELS = { responding: 'Responding', unresponsive: 'Not responding'
 
 // Mount last inside any screen's full-size root. Navigation outside that screen
 // stays available. An explicit status prop also supports previews/other monitors.
-export default function ConnectionOverlay({ status: suppliedStatus, active = true, loadingServiceIds, style }) {
+export default function ConnectionOverlay({ status: suppliedStatus, active = true, style }) {
     const observedStatus = useNetworkStatus();
     const status = suppliedStatus || observedStatus;
     const { isDark, themeColors } = useTheme();
     const insets = useSafeAreaInsets();
     const offline = status.connected === false;
     const outage = status.services.some(service => service.status === 'unresponsive');
-    const pending = status.services.filter(service => !loadingServiceIds || loadingServiceIds.includes(service.id))
-        .map(service => service.pending).filter(Boolean).sort((a, b) => a.deadlineAt - b.deadlineAt)[0];
     const failed = offline || outage;
     useEffect(() => {
         if (!active || !outage || offline || suppliedStatus) return;
@@ -29,10 +27,10 @@ export default function ConnectionOverlay({ status: suppliedStatus, active = tru
         const subscription = AppState.addEventListener('change', state => { if (state === 'active') retry(); });
         return () => { clearInterval(timer); subscription.remove(); };
     }, [active, outage, offline, suppliedStatus]);
-    if (!active || (!failed && !pending)) return null;
-    return <View style={[styles.overlay, style]} pointerEvents={failed ? 'auto' : 'none'} accessibilityViewIsModal={failed} testID="connection-overlay">
-        <ConnectionBlur pending={pending} failed={failed} isDark={isDark} />
-        {failed && <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 36, paddingBottom: insets.bottom + 36 }]}>
+    if (!active || !failed) return null;
+    return <View style={[styles.overlay, style]} pointerEvents="auto" accessibilityViewIsModal testID="connection-overlay">
+        <ConnectionBlur isDark={isDark} />
+        <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 36, paddingBottom: insets.bottom + 36 }]}>
             <SymbolView name={offline ? 'wifi.slash' : 'exclamationmark.icloud'} size={58} tintColor={themeColors.text} />
             <Text accessibilityRole="header" style={[styles.title, { color: themeColors.text }]}>{offline ? 'No internet connection' : 'Fuel Up servers are having an outage'}</Text>
             <GlassView glassEffectStyle="regular" style={styles.messageGlass}>
@@ -47,7 +45,7 @@ export default function ConnectionOverlay({ status: suppliedStatus, active = tru
                 </View>)}
             </GlassView>}
 
-        </ScrollView>}
+        </ScrollView>
     </View>;
 }
 const styles = StyleSheet.create({

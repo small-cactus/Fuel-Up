@@ -25,7 +25,7 @@ test('offline copy does not claim a server outage or an automatic repair', async
     await act(async () => { view = create(React.createElement(Overlay, { status: { ...defaults, connected: false } })); });
     const text = JSON.stringify(view.toJSON());
     assert.match(text, /No internet connection/); assert.doesNotMatch(text, /fix is already|20 minutes|servers are/);
-    assert.equal(view.root.findByType('ConnectionBlur').props.failed, true);
+    assert.equal(view.root.findAllByType('ConnectionBlur').length, 1);
     assert.equal(view.root.findByType('SymbolView').props.name, 'wifi.slash');
     await act(async () => view.unmount());
 });
@@ -41,16 +41,28 @@ test('server failure identifies failed and untested services separately', async 
     assert.doesNotMatch(JSON.stringify(view.toJSON()), /simulated|developer|fake/i);
     await act(async () => view.unmount());
 });
-test('pending requests supply their real deadline to progressive blur without an error or touch blocking', async () => {
+test('a pending request never blurs; actual timeout mounts the blur and warning together', async t => {
+    t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1000 });
+    const { createNetworkStatus } = require('../src/lib/networkStatus');
+    const store = createNetworkStatus();
+    const request = store.fetch('https://example/functions/v1/gas-prices', {}, () => new Promise(() => {}));
+    const rejected = assert.rejects(request, { name: 'TimeoutError' });
     let view;
-    const pending = { startedAt: 1000, deadlineAt: 11000 };
-    const status = { ...defaults, services: defaults.services.map(s => s.id === 'prices' ? { ...s, pending } : s) };
-    await act(async () => { view = create(React.createElement(Overlay, { status, loadingServiceIds: ['prices'] })); });
-    assert.deepEqual(view.root.findByType('ConnectionBlur').props.pending, pending);
-    assert.equal(view.root.findByType('ConnectionBlur').props.failed, false);
-    assert.equal(view.root.findByType('View').props.pointerEvents, 'none');
-    assert.equal(view.root.findAllByType('Text').length, 0);
-    await act(async () => view.update(React.createElement(Overlay, { status, loadingServiceIds: ['memberships'] })));
-    assert.equal(view.toJSON(), null);
+    await act(async () => { view = create(React.createElement(Overlay, { status: store.getSnapshot() })); });
+    assert.equal(view.toJSON(), null, 'no overlay at request start');
+    for (const elapsed of [1000, 18999]) {
+        await act(async () => {
+            t.mock.timers.tick(elapsed);
+            view.update(React.createElement(Overlay, { status: store.getSnapshot() }));
+        });
+        assert.equal(view.toJSON(), null, 'no overlay throughout the pending interval');
+    }
+    t.mock.timers.tick(1); await rejected;
+    await act(async () => view.update(React.createElement(Overlay, { status: store.getSnapshot() })));
+    assert.equal(view.root.findAllByType('ConnectionBlur').length, 1);
+    assert.match(JSON.stringify(view.toJSON()), /Fuel Up servers are having an outage/);
+    await store.fetch('https://example/functions/v1/gas-prices', {}, async () => ({ status: 200 }));
+    await act(async () => view.update(React.createElement(Overlay, { status: store.getSnapshot() })));
+    assert.equal(view.toJSON(), null, 'successful response removes blur and warning together');
     await act(async () => view.unmount());
 });

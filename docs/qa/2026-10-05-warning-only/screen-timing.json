@@ -1,0 +1,89 @@
+[
+  {
+    "at": 1791216901760,
+    "blur": 0,
+    "elapsed": 49,
+    "prices": {
+      "id": "prices",
+      "name": "Fuel prices",
+      "pending": {
+        "deadlineAt": 1791216921756,
+        "startedAt": 1791216901756
+      },
+      "status": "responding"
+    },
+    "warning": 0
+  },
+  {
+    "at": 1791216902725,
+    "blur": 0,
+    "elapsed": 1014,
+    "prices": {
+      "id": "prices",
+      "name": "Fuel prices",
+      "pending": {
+        "deadlineAt": 1791216921756,
+        "startedAt": 1791216901756
+      },
+      "status": "responding"
+    },
+    "warning": 0
+  },
+  {
+    "at": 1791216906725,
+    "blur": 0,
+    "elapsed": 5014,
+    "prices": {
+      "id": "prices",
+      "name": "Fuel prices",
+      "pending": {
+        "deadlineAt": 1791216921756,
+        "startedAt": 1791216901756
+      },
+      "status": "responding"
+    },
+    "warning": 0
+  },
+  {
+    "at": 1791216911725,
+    "blur": 0,
+    "elapsed": 10014,
+    "prices": {
+      "id": "prices",
+      "name": "Fuel prices",
+      "pending": {
+        "deadlineAt": 1791216921756,
+        "startedAt": 1791216901756
+      },
+      "status": "responding"
+    },
+    "warning": 0
+  },
+  {
+    "at": 1791216920725,
+    "blur": 0,
+    "elapsed": 19014,
+    "prices": {
+      "id": "prices",
+      "name": "Fuel prices",
+      "pending": {
+        "deadlineAt": 1791216921756,
+        "startedAt": 1791216901756
+      },
+      "status": "responding"
+    },
+    "warning": 0
+  },
+  {
+    "at": 1791216922225,
+    "blur": 1,
+    "elapsed": 20514,
+    "prices": {
+      "id": "prices",
+      "name": "Fuel prices",
+      "pending": null,
+      "status": "unresponsive"
+    },
+    "warning": 2
+  }
+]
