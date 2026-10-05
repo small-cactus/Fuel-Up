@@ -88,3 +88,30 @@ test('test answers use only the isolated endpoint and cannot enter training data
  const denied=createDrivingResearchHandler({db:{rpc:async()=>({data:false})}});
  assert.equal((await denied(request({action:'testStatus',participantId:id,...fields}))).status,403);
 });
+
+test('public health check reads the database without enrollment, mutation, or participant disclosure',async()=>{
+ for(const failure of [false,true,'throw']) {
+  const calls=[];
+  const db = {
+   from(table) {
+    calls.push(table);
+    return {
+     select(column, options) {
+      calls.push({column, options});
+      return {
+       async limit(n) {
+        calls.push(n);
+        if(failure==='throw') throw Error('private database detail');
+        return {error:failure?{message:'private database detail'}:null,data:[{id:'private'}]};
+       }
+      };
+     }
+    };
+   }
+  };
+  const response=await createDrivingResearchHandler({db})(new Request('https://example/functions/v1/driving-research/health'));
+  assert.equal(response.status,failure?503:200);
+  assert.deepEqual(await response.json(),{available:!failure});
+  assert.deepEqual(calls,['driving_research_participants',{column:'id',options:{head:true}},1]);
+ }
+});

@@ -9,6 +9,7 @@ function apiRequestTimeout(input, init) {
         try { body = JSON.parse(init?.body || '{}'); } catch { /* Local request default. */ }
         return body?.scope === 'national' ? NATIONAL_API_TIMEOUT_MS : MAP_API_TIMEOUT_MS;
     }
+    if (url.includes('/functions/v1/driving-research')) return 20_000;
     return DEFAULT_API_TIMEOUT_MS;
 }
 module.exports = { MAP_API_TIMEOUT_MS, NATIONAL_API_TIMEOUT_MS, DEFAULT_API_TIMEOUT_MS, apiRequestTimeout };

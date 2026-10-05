@@ -48,6 +48,8 @@ if (hasSupabaseConfig) {
     try {
         const { networkStatus } = require('./networkStatus');
         const { apiTransport } = require('./apiTransport');
+        const { createServiceChecks } = require('./serviceChecks');
+        networkStatus.configureHealthChecks(createServiceChecks({ url: supabaseUrl, key: supabaseAnonKey, monitor: networkStatus, transport: apiTransport.fetch }));
         supabase = createClient(supabaseUrl, supabaseAnonKey, {
             global: { fetch: (input, init) => networkStatus.fetch(input, init, apiTransport.fetch) },
         });

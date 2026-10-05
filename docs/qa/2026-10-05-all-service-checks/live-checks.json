@@ -1,0 +1,79 @@
+{
+  "recordedAt": "2026-10-05T16:48:24.877Z",
+  "requests": [
+    {
+      "path": "/rest/v1/rpc/fuel_memberships_for_state",
+      "method": "POST",
+      "status": 200,
+      "milliseconds": 444
+    },
+    {
+      "path": "/auth/v1/health",
+      "method": "GET",
+      "status": 200,
+      "milliseconds": 446
+    },
+    {
+      "path": "/rest/v1/push_tokens",
+      "method": "HEAD",
+      "status": 200,
+      "milliseconds": 591
+    },
+    {
+      "path": "/rest/v1/station_prices",
+      "method": "HEAD",
+      "status": 200,
+      "milliseconds": 609
+    },
+    {
+      "path": "/functions/v1/gas-prices",
+      "method": "POST",
+      "status": 200,
+      "milliseconds": 906
+    },
+    {
+      "path": "/functions/v1/driving-research/health",
+      "method": "GET",
+      "status": 200,
+      "milliseconds": 887
+    }
+  ],
+  "services": [
+    {
+      "id": "prices",
+      "name": "Fuel prices",
+      "status": "responding",
+      "pending": null
+    },
+    {
+      "id": "history",
+      "name": "Price history",
+      "status": "responding",
+      "pending": null
+    },
+    {
+      "id": "memberships",
+      "name": "Memberships",
+      "status": "responding",
+      "pending": null
+    },
+    {
+      "id": "notifications",
+      "name": "Notifications",
+      "status": "responding",
+      "pending": null
+    },
+    {
+      "id": "research",
+      "name": "Driving research",
+      "status": "responding",
+      "pending": null
+    },
+    {
+      "id": "account",
+      "name": "Account services",
+      "status": "responding",
+      "pending": null
+    }
+  ]
+}

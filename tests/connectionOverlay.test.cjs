@@ -35,7 +35,7 @@ test('server failure identifies failed and untested services separately', async 
     await act(async () => { view = create(React.createElement(Overlay, { status })); });
     const strings = view.root.findAllByType('Text').map(n => n.props.children);
     assert.equal(strings.filter(s => s === 'Not responding').length, 1);
-    assert.equal(strings.filter(s => s === 'Not checked').length, SERVICES.length - 1);
+    assert.equal(strings.filter(s => s === 'Waiting to check…').length, SERVICES.length - 1);
     assert(strings.includes('Fuel Up servers are having an outage'));
     assert.equal(view.root.findAllByType('GlassView').length, 1);
     assert.doesNotMatch(JSON.stringify(view.toJSON()), /simulated|developer|fake/i);

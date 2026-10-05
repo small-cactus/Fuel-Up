@@ -14,6 +14,7 @@ function createNetworkStatus({ timeoutMs } = {}) {
     const latestRequest = new Map();
     const readRetries = new Map();
     const retrying = new Set();
+    let healthChecks = {};
     let requestSequence = 0;
     let snapshot = { connected: null, recoveryGeneration: 0,
         services: SERVICES.map(service => ({ ...service, status: 'unknown' })) };
@@ -27,6 +28,18 @@ function createNetworkStatus({ timeoutMs } = {}) {
         subscribe: listener => { listeners.add(listener); return () => listeners.delete(listener); },
         report,
         setConnected: connected => { if (connected !== snapshot.connected) publish({ connected }); },
+        configureHealthChecks(checks) { healthChecks = checks; },
+        async checkServices({ onlyUnhealthy = false } = {}) {
+            if (snapshot.connected === false) return;
+            await Promise.all(snapshot.services.filter(service => !service.pending &&
+                (!onlyUnhealthy || service.status !== 'responding')).map(async ({ id }) => {
+                const check = healthChecks[id];
+                if (!check || retrying.has(id)) return;
+                retrying.add(id);
+                try { await check(); } catch { /* Each monitored check publishes its own result. */ }
+                finally { retrying.delete(id); }
+            }));
+        },
         async retryFailedReads() {
             if (snapshot.connected === false) return;
             await Promise.all(snapshot.services.filter(service => service.status === 'unresponsive' && !service.pending).map(async ({ id }) => {
@@ -36,14 +49,14 @@ function createNetworkStatus({ timeoutMs } = {}) {
                 finally { retrying.delete(id); }
             }));
         },
-        async fetch(input, init, transport = globalThis.fetch) {
+        async fetch(input, init, transport = globalThis.fetch, { serviceId, healthCheck = false } = {}) {
             const url = String(input?.url || input);
-            const id = url.includes('/functions/v1/gas-prices') ? 'prices' :
+            const id = serviceId || (url.includes('/functions/v1/gas-prices') ? 'prices' :
                 url.includes('fuel_memberships_for_state') ? 'memberships' :
-                url.includes('station_prices') ? 'history' : url.includes('push_tokens') ? 'notifications' : 'account';
+                url.includes('station_prices') ? 'history' : url.includes('push_tokens') ? 'notifications' : url.includes('/functions/v1/driving-research') ? 'research' : 'account');
             const method = String(init?.method || input?.method || 'GET').toUpperCase();
             // Recheck only known reads, never replay a notification/auth write.
-            if (typeof input === 'string' && (['GET', 'HEAD'].includes(method) ||
+            if (!healthCheck && typeof input === 'string' && (['GET', 'HEAD'].includes(method) ||
                 (method === 'POST' && ['prices', 'memberships'].includes(id)))) {
                 readRetries.set(id, () => api.fetch(input, { ...init, signal: undefined }, transport));
             }
@@ -69,7 +82,8 @@ function createNetworkStatus({ timeoutMs } = {}) {
             const timer = setTimeout(() => { timedOut = true; abort(); }, duration);
             try {
                 const response = await Promise.race([transport(input, { ...init, signal: controller.signal }), abortPromise]);
-                reportRequest(response.status >= 500 || response.status === 429 ? 'unresponsive' : 'responding');
+                const failed = healthCheck ? response.status < 200 || response.status >= 300 : response.status >= 500 || response.status === 429;
+                reportRequest(failed ? 'unresponsive' : 'responding');
                 return response;
             } catch (error) {
                 reportRequest(timedOut || error?.name !== 'AbortError' ? 'unresponsive' : previousStatus);

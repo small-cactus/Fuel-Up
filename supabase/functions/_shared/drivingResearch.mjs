@@ -18,6 +18,14 @@ export function validateDrivingEvents(events, now = Date.now()/1000) {
 export function createDrivingResearchHandler({db}) {
   return async request => {
     const reply=(value,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
+    // No enrollment, identity, telemetry or participant data is needed to check
+    // this service. Exercise its database dependency and return only availability.
+    if (request.method==='GET' && new URL(request.url).pathname.endsWith('/driving-research/health')) {
+      try {
+        const result=await db.from('driving_research_participants').select('id',{head:true}).limit(1);
+        return reply({available:!result.error},result.error?503:200);
+      } catch { return reply({available:false},503); }
+    }
     if (request.method!=='POST') return reply({error:'METHOD_NOT_ALLOWED'},405);
     const token=request.headers.get('x-research-token');
     if (!/^[a-f0-9]{64}$/.test(token||'')) return reply({error:'UNAUTHORIZED'},401);

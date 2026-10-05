@@ -1,0 +1,2078 @@
+{
+  "events": [
+    {
+      "connected": true,
+      "elapsed": 48,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218939968,
+            "startedAt": 1791218919968
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "status": "unknown"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "status": "unknown"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "status": "unknown"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 20064,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "status": "unknown"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "status": "unknown"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "status": "unknown"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 20107,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218960027,
+            "startedAt": 1791218940027
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "status": "unknown"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "status": "unknown"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "status": "unknown"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 20107,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218960027,
+            "startedAt": 1791218940027
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218955027,
+            "startedAt": 1791218940027
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "status": "unknown"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "status": "unknown"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 20108,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218960027,
+            "startedAt": 1791218940027
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218955027,
+            "startedAt": 1791218940027
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218955027,
+            "startedAt": 1791218940027
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "status": "unknown"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 20108,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218960027,
+            "startedAt": 1791218940027
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218955027,
+            "startedAt": 1791218940027
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218955027,
+            "startedAt": 1791218940027
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218955028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 20108,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218960027,
+            "startedAt": 1791218940027
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218955027,
+            "startedAt": 1791218940027
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218955027,
+            "startedAt": 1791218940027
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218955028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218960028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 20108,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218960027,
+            "startedAt": 1791218940027
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218955027,
+            "startedAt": 1791218940027
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218955027,
+            "startedAt": 1791218940027
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218955028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218960028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218955028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 35111,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218960027,
+            "startedAt": 1791218940027
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218955027,
+            "startedAt": 1791218940027
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218955028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218960028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218955028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 35125,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218960027,
+            "startedAt": 1791218940027
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218955028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218960028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218955028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 35135,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218960027,
+            "startedAt": 1791218940027
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218960028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218955028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 35143,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218960027,
+            "startedAt": 1791218940027
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218960028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": null,
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 35151,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218960027,
+            "startedAt": 1791218940027
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218960028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": null,
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 35151,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218960027,
+            "startedAt": 1791218940027
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218960028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": null,
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 35152,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218960027,
+            "startedAt": 1791218940027
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218960028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": null,
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 35152,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218960027,
+            "startedAt": 1791218940027
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218960028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218970072,
+            "startedAt": 1791218955072
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 40111,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218960028,
+            "startedAt": 1791218940028
+          },
+          "status": "unknown"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218970072,
+            "startedAt": 1791218955072
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 40131,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218970072,
+            "startedAt": 1791218955072
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 40160,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218970072,
+            "startedAt": 1791218955072
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 40160,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218970072,
+            "startedAt": 1791218955072
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 50161,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218970072,
+            "startedAt": 1791218955072
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 50185,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218970071,
+            "startedAt": 1791218955071
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218970072,
+            "startedAt": 1791218955072
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 50201,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218970072,
+            "startedAt": 1791218955072
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 50216,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": null,
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 50226,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218985146,
+            "startedAt": 1791218970146
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": null,
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 50227,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218985146,
+            "startedAt": 1791218970146
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": null,
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 50227,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218985146,
+            "startedAt": 1791218970146
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": null,
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 50227,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218985146,
+            "startedAt": 1791218970146
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 60178,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218985146,
+            "startedAt": 1791218970146
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791218980080,
+            "startedAt": 1791218960080
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 60200,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218985146,
+            "startedAt": 1791218970146
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 60244,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791219000164,
+            "startedAt": 1791218980164
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218985146,
+            "startedAt": 1791218970146
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": null,
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 60244,
+      "recoveryGeneration": 0,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791219000164,
+            "startedAt": 1791218980164
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218985146,
+            "startedAt": 1791218970146
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791219000164,
+            "startedAt": 1791218980164
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 61127,
+      "recoveryGeneration": 1,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791219000164,
+            "startedAt": 1791218980164
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": {
+            "deadlineAt": 1791218985146,
+            "startedAt": 1791218970146
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791219000164,
+            "startedAt": 1791218980164
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": null,
+          "status": "responding"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 61210,
+      "recoveryGeneration": 2,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791219000164,
+            "startedAt": 1791218980164
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791219000164,
+            "startedAt": 1791218980164
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": null,
+          "status": "responding"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 61227,
+      "recoveryGeneration": 3,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791219000164,
+            "startedAt": 1791218980164
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": {
+            "deadlineAt": 1791218985147,
+            "startedAt": 1791218970147
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791219000164,
+            "startedAt": 1791218980164
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": null,
+          "status": "responding"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 61244,
+      "recoveryGeneration": 4,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791219000164,
+            "startedAt": 1791218980164
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": {
+            "deadlineAt": 1791219000164,
+            "startedAt": 1791218980164
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": null,
+          "status": "responding"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 61527,
+      "recoveryGeneration": 5,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": {
+            "deadlineAt": 1791219000164,
+            "startedAt": 1791218980164
+          },
+          "status": "unresponsive"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": null,
+          "status": "responding"
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "elapsed": 61548,
+      "recoveryGeneration": 6,
+      "services": [
+        {
+          "id": "prices",
+          "name": "Fuel prices",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "history",
+          "name": "Price history",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "memberships",
+          "name": "Memberships",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "research",
+          "name": "Driving research",
+          "pending": null,
+          "status": "responding"
+        },
+        {
+          "id": "account",
+          "name": "Account services",
+          "pending": null,
+          "status": "responding"
+        }
+      ]
+    }
+  ],
+  "final": {
+    "connected": true,
+    "recoveryGeneration": 6,
+    "services": [
+      {
+        "id": "prices",
+        "name": "Fuel prices",
+        "pending": null,
+        "status": "responding"
+      },
+      {
+        "id": "history",
+        "name": "Price history",
+        "pending": null,
+        "status": "responding"
+      },
+      {
+        "id": "memberships",
+        "name": "Memberships",
+        "pending": null,
+        "status": "responding"
+      },
+      {
+        "id": "notifications",
+        "name": "Notifications",
+        "pending": null,
+        "status": "responding"
+      },
+      {
+        "id": "research",
+        "name": "Driving research",
+        "pending": null,
+        "status": "responding"
+      },
+      {
+        "id": "account",
+        "name": "Account services",
+        "pending": null,
+        "status": "responding"
+      }
+    ]
+  }
+}

@@ -8,7 +8,7 @@ import { useTheme } from '../ThemeContext';
 import useNetworkStatus from '../lib/useNetworkStatus';
 import { networkStatus } from '../lib/networkStatus';
 
-const STATUS_LABELS = { responding: 'Responding', unresponsive: 'Not responding', unknown: 'Not checked' };
+const STATUS_LABELS = { responding: 'Responding', unresponsive: 'Not responding', unknown: 'Waiting to check…' };
 
 // Mount last inside any screen's full-size root. Navigation outside that screen
 // stays available. An explicit status prop also supports previews/other monitors.
@@ -22,8 +22,8 @@ export default function ConnectionOverlay({ status: suppliedStatus, active = tru
     const failed = offline || outage;
     useEffect(() => {
         if (!active || !outage || offline || suppliedStatus) return;
-        const retry = () => { if (AppState.currentState === 'active') void networkStatus.retryFailedReads(); };
-        retry();
+        const retry = () => { if (AppState.currentState === 'active') void networkStatus.checkServices({ onlyUnhealthy: true }); };
+        if (AppState.currentState === 'active') void networkStatus.checkServices();
         const timer = setInterval(retry, 5000);
         const subscription = AppState.addEventListener('change', state => { if (state === 'active') retry(); });
         return () => { clearInterval(timer); subscription.remove(); };
@@ -45,7 +45,7 @@ export default function ConnectionOverlay({ status: suppliedStatus, active = tru
                         {service.pending && <ActivityIndicator size="small" color={themeColors.text}
                             accessibilityLabel={`Reconnecting to ${service.name}`} />}
                         <Text style={[styles.serviceStatus, { color: themeColors.textOpacity }]}>{service.pending
-                            ? 'Reconnecting…' : STATUS_LABELS[service.status] || STATUS_LABELS.unknown}</Text>
+                            ? (service.status === 'unresponsive' ? 'Reconnecting…' : 'Checking…') : STATUS_LABELS[service.status] || STATUS_LABELS.unknown}</Text>
                     </View>
                 </View>)}
             </View>}
