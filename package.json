@@ -21,6 +21,7 @@
     "bench:predictive:native-reranker:gpu": "python3 ./scripts/nativeRerankerGpuBench.py --dataset /tmp/native_reranker_gpu_dataset.json",
     "test:predictive:sim": "node --test ./tests/predictiveSystem.integration.test.cjs",
     "test:cluster": "node --test ./tests/clusterAnimationMath.test.cjs ./tests/clusterProbe.integration.test.cjs",
+    "test:map-launch": "node --test ./tests/homeMapLayout.test.cjs ./tests/mapLaunch.integration.test.cjs",
     "test:location": "node --test ./tests/locationRefresh.test.mjs ./tests/locationMovementScenarios.test.mjs ./tests/locationProbe.integration.test.cjs",
     "fuel:build": "node scripts/buildFuelFunctionShared.cjs",
     "test:fuel-cloud": "node scripts/buildFuelFunctionShared.cjs --check && node --test tests/gasPricesFunction.test.mjs tests/fuelRepair.test.mjs tests/fuelDataContracts.test.cjs tests/fuelCacheReset.test.cjs tests/priceValidation.test.cjs tests/fuelSearchState.test.mjs tests/cachedGasPrices.test.mjs",

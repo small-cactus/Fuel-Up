@@ -39,7 +39,7 @@ export default function useClusterLabStations(active) {
                 ? { ...quote, distanceMiles: calculateDistanceMiles(origin, quote) } : quote;
             const localized = { ...snapshot, quote: rebase(snapshot?.quote), topStations: snapshot?.topStations?.map(rebase) };
             const stations = buildLabStations(localized, { origin, radiusMiles, minimumRating, fuelGrade: fuelType, requiresE85, preferredBrands: preferences.preferredBrands, fuelMemberships: preferences.fuelMemberships });
-            setResult({ scope, origin: { latitude: origin.latitude, longitude: origin.longitude }, stations });
+            setResult({ scope, origin: { latitude: origin.latitude, longitude: origin.longitude }, stations, loaded: true });
             clearTimeout(expiryTimer);
             const expirations = stations.map(station => Date.parse(station.updatedAt) + REPORTED_PRICE_MAX_AGE_MS).filter(Number.isFinite);
             if (expirations.length) {
@@ -78,7 +78,12 @@ export default function useClusterLabStations(active) {
                 const fresh = await refreshFuelPriceSnapshot(query);
                 publish(origin, fresh.snapshot);
             } catch (error) {
-                if (!cancelled) console.warn('[Home] Station load failed:', error.message);
+                if (!cancelled) {
+                    console.warn('[Home] Station load failed:', error.message);
+                    setResult(previous => previous?.scope === scope ? previous : {
+                        scope, origin: null, stations: [], loaded: true,
+                    });
+                }
             } finally { refreshing = false; }
         };
         refresh();
@@ -87,7 +92,9 @@ export default function useClusterLabStations(active) {
         return () => { cancelled = true; clearInterval(timer); clearTimeout(expiryTimer); subscription.remove(); };
     }, [active, scope, latitude, longitude, fuelType, radiusMiles, minimumRating, preferredProvider, requiresE85, setResolvedFuelSearchContext, preferences.preferredBrands, preferences.fuelMemberships]);
 
-    return useMemo(() => result?.scope === scope ? result : {
-        origin: mapOrigin?.scope === scope ? { latitude: mapOrigin.latitude, longitude: mapOrigin.longitude } : null, stations: [],
+    return useMemo(() => result?.scope === scope ? {
+        ...result, origin: result.origin || (mapOrigin?.scope === scope ? mapOrigin : null),
+    } : {
+        origin: mapOrigin?.scope === scope ? { latitude: mapOrigin.latitude, longitude: mapOrigin.longitude } : null, stations: [], loaded: false,
     }, [result, mapOrigin, scope]);
 }

@@ -6,6 +6,10 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   let renderer = ClusterLabRenderer()
   let onMapReady = EventDispatcher()
   private var reportedMapReady = false
+  private var contentReady = false
+  private var hasRenderedMap = false
+  private var hasPresentedStations = false
+  private var revealed = false
   let onStationSelect = EventDispatcher()
   let onOverviewChange = EventDispatcher()
   private var overview = true
@@ -33,6 +37,9 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   private var fittedInsets = UIEdgeInsets.zero
   private var isFittingCamera = false
   var probe: ClusterLabProbe?
+  #if DEBUG
+  private let launchProbe = ClusterLabLaunchProbe()
+  #endif
 
   required init(appContext: AppContext? = nil) {
     super.init(appContext: appContext)
@@ -110,7 +117,8 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     origin = .init(latitude: latitude, longitude: longitude)
     needsCameraFit = true
     if latestStations.isEmpty {
-      setRegion(.init(center: origin!, span: .init(latitudeDelta: 0.06, longitudeDelta: 0.06)), animated: false)
+      setRegion(.init(center: origin!, span: .init(latitudeDelta: 0.06, longitudeDelta: 0.06)),
+                animated: revealed && !UIAccessibility.isReduceMotionEnabled)
     }
     refresh()
   }
@@ -148,7 +156,20 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   }
 
   func mapViewDidFinishRenderingMap(_ mapView: MKMapView, fullyRendered: Bool) {
-    guard fullyRendered, origin != nil, !reportedMapReady else { return }
+    if fullyRendered { hasRenderedMap = true }
+    refresh()
+  }
+
+  func setContentReady(_ ready: Bool) {
+    contentReady = ready
+    refresh()
+  }
+
+  func setRevealed(_ value: Bool) { revealed = value }
+
+  private func reportReadyIfNeeded() {
+    guard !reportedMapReady, contentReady, origin != nil, hasRenderedMap,
+          !cameraMoving, latestStations.isEmpty || (hasPresentedStations && !needsCameraFit) else { return }
     reportedMapReady = true
     onMapReady([:])
   }
@@ -287,6 +308,9 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
                          height: nativeViewport.height * unitsPerPoint)
     isFittingCamera = true
     defer { isFittingCamera = false }
+    #if DEBUG
+    launchProbe.fit(animated: animated, visible: hasPresentedStations, contentReady: contentReady, inset: overlayBottomInset)
+    #endif
     if animated, let saved = fittedOverview, saved.stations == stations, saved.bounds == fitBounds, saved.location == locationKey,
        let camera = saved.camera.copy() as? MKMapCamera {
       overviewDestination = camera.copy() as? MKMapCamera
@@ -336,12 +360,14 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
 
   private func fitIfNeeded() {
     guard needsCameraFit, pendingProbe == nil else { return }
+    guard probe != nil || contentReady else { return }
     // MapKit may expose the destination camera while its presentation is still
     // flying. Replacing that flight with another fit can jump to the destination.
     // Coalesce layout changes until the native flight ends, then animate any
     // remaining adjustment from the settled camera.
     if overviewDestination != nil { animateDeferredFit = true; return }
-    let animateFit = animateDeferredFit && !UIAccessibility.isReduceMotionEnabled
+    let animateFit = (animateDeferredFit || (probe == nil && (hasPresentedStations || revealed))) &&
+      !UIAccessibility.isReduceMotionEnabled
     animateDeferredFit = false
     if let probe {
       // Probe fixtures still receive real card/safe-area layout updates before
@@ -369,7 +395,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
       renderer.reconcile(map: map)
       needsReconcile = false
       animationMoving = renderer.render(map: map, deltaTime: 0)
-      renderer.container.isHidden = false
+      updatePresentation()
     }
     startPendingProbe()
   }
@@ -403,11 +429,22 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
       renderer.reconcile(map: map)
     }
     animationMoving = renderer.render(map: map, deltaTime: elapsed)
-    renderer.container.isHidden = false
+    updatePresentation()
     probe?.recordAnchor(mapAnchor.sample(map: map))
     let continuous = needsReconcile || cameraMoving || animationMoving || mapAnchor.needsPlacementUpdate || probe != nil
     frameClock?.requestContinuous(continuous)
     if !continuous { lastTimestamp = 0 }
+  }
+
+  private func updatePresentation() {
+    // Once visible, keep chips attached throughout any deferred layout/refit.
+    let ready = probe != nil || hasPresentedStations || (contentReady && !needsCameraFit && !cameraMoving)
+    renderer.container.isHidden = !ready
+    if ready && !latestStations.isEmpty { hasPresentedStations = true }
+    reportReadyIfNeeded()
+    #if DEBUG
+    launchProbe.sample(map: map, visible: ready, ready: reportedMapReady, count: latestStations.count, inset: overlayBottomInset)
+    #endif
   }
 
   func requestProbe(_ token: String?) {

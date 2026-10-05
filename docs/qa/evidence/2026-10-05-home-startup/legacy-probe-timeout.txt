@@ -1,0 +1,25 @@
+TAP version 13
+# Subtest: cluster probe integration enforces strict smoothness, continuity, and transition coverage
+not ok 1 - cluster probe integration enforces strict smoothness, continuity, and transition coverage
+  ---
+  duration_ms: 129725.432625
+  location: '/Users/anthonyh/Desktop/Fuel Up/tests/clusterProbe.integration.test.cjs:240:1'
+  failureType: 'testCodeFailure'
+  error: 'Timed out waiting for probe token probe-test-1791205085078.'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    waitForProbeReport (/Users/anthonyh/Desktop/Fuel Up/scripts/clusterProbeIntegration.cjs:164:11)
+    async runClusterProbeIntegration (/Users/anthonyh/Desktop/Fuel Up/scripts/clusterProbeIntegration.cjs:182:20)
+    async TestContext.<anonymous> (/Users/anthonyh/Desktop/Fuel Up/tests/clusterProbe.integration.test.cjs:247:7)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 129805.8735

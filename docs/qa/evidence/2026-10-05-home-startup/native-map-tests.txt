@@ -1,0 +1,46 @@
+TAP version 13
+# Subtest: Swift Glass Lab renders timely transitions and preserves native container geometry
+ok 1 - Swift Glass Lab renders timely transitions and preserves native container geometry
+  ---
+  duration_ms: 29482.036417
+  ...
+# 25 native connection frames during committed merges; no false parent bridges
+# Visible contact resistance 4.51pt over 10 samples
+# Native stretch: 14 separated samples before recoil; release gaps 17.6, 16.6, 75.0, 28.6, 30.7, 41.8, 35.1, 76.2, 43.6, 29.1pt
+# Main price recoil 19.68pt; 47 identity-bound outward copies
+# Maximum rendered rebound 18.00pt
+# Longest transition 296ms; maximum measured travel 1205.46pt/frame
+# 1650 native frames; 94 transitions; /Users/anthonyh/Library/Developer/CoreSimulator/Devices/E5661CAA-BB65-4806-879A-D00C553836E7/data/Containers/Data/Application/D3E52B24-F81F-45F4-82AB-D01B53ABFBB4/Documents/cluster-lab-probe.json
+# Subtest: Show all restores the fitted overview after north focus and interruption
+ok 2 - Show all restores the fitted overview after north focus and interruption
+  ---
+  duration_ms: 7515.166917
+  ...
+# 54 intermediate overview camera frames; all six stations visible and normal-sized
+# Subtest: Show all restores the fitted overview after rotated focus and interruption
+ok 3 - Show all restores the fitted overview after rotated focus and interruption
+  ---
+  duration_ms: 8082.213917
+  ...
+# 54 intermediate overview camera frames; all six stations visible and normal-sized
+# Subtest: Show all restores the fitted overview after layout focus and interruption
+ok 4 - Show all restores the fitted overview after layout focus and interruption
+  ---
+  duration_ms: 7889.970459
+  ...
+# 54 intermediate overview camera frames; all six stations visible and normal-sized
+# Subtest: overview fits the live user dot outside the station envelope
+ok 5 - overview fits the live user dot outside the station envelope
+  ---
+  duration_ms: 4212.348958
+  ...
+# 118 live frames include the outside user dot and all six stations
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 57247.378208

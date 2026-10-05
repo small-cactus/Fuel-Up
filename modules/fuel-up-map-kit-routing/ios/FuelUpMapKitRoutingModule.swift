@@ -40,6 +40,8 @@ public final class FuelUpMapKitRoutingModule: Module {
       Prop("active") { (view, active: Bool) in view.setActive(active) }
       Prop("probeToken") { (view, token: String?) in view.requestProbe(token) }
       Prop("overlayBottomInset") { (view, inset: Double) in view.setOverlayBottomInset(CGFloat(inset)) }
+      Prop("contentReady") { (view, ready: Bool) in view.setContentReady(ready) }
+      Prop("revealed") { (view, revealed: Bool) in view.setRevealed(revealed) }
       Events("onStationSelect", "onOverviewChange", "onMapReady")
       AsyncFunction("focusStation") { (view: ClusterLabMapView, id: String) in view.focusStation(id) }
       AsyncFunction("showAll") { (view: ClusterLabMapView) in view.showAll() }

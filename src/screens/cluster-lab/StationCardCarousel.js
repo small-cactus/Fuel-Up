@@ -15,6 +15,9 @@ const StationCardCarousel = forwardRef(function StationCardCarousel({ stations, 
     const programmaticPage = useRef(null);
     const measuredHeights = useRef(new Map());
     const [cardHeight, setCardHeight] = useState(230);
+    const [hasMeasuredCard, setHasMeasuredCard] = useState(false);
+    const [overlayLayoutHeight, setOverlayLayoutHeight] = useState(0);
+    const [resetHeight, setResetHeight] = useState(0);
     const [now, setNow] = useState(Date.now);
     const index = Math.max(0, stations.findIndex(station => station.id === selectedId));
     const selected = useRef(index);
@@ -29,8 +32,18 @@ const StationCardCarousel = forwardRef(function StationCardCarousel({ stations, 
 
     useLayoutEffect(() => {
         measuredHeights.current.clear();
+        setHasMeasuredCard(false);
         list.current?.scrollToOffset({ offset: selected.current * width, animated: false });
     }, [width, fontScale, compact]);
+
+    useLayoutEffect(() => {
+        // SwiftUI card sizing crosses the bridge after the initial RN layout.
+        // Never fit the map against the provisional 230pt card or an old layout.
+        if (hasMeasuredCard && resetHeight > 0 &&
+            Math.abs(overlayLayoutHeight - (cardHeight + resetHeight + 44)) <= 1) {
+            onHeight(overlayLayoutHeight + bottom);
+        }
+    }, [hasMeasuredCard, overlayLayoutHeight, cardHeight, resetHeight, bottom, onHeight]);
 
     useImperativeHandle(ref, () => ({
         scrollTo(index, animated = true) {
@@ -57,8 +70,9 @@ const StationCardCarousel = forwardRef(function StationCardCarousel({ stations, 
 
     return (
         <View pointerEvents="box-none" style={[styles.overlay, { bottom }]}
-            onLayout={event => onHeight(event.nativeEvent.layout.height + bottom)}>
+            onLayout={event => setOverlayLayoutHeight(event.nativeEvent.layout.height)}>
             <View pointerEvents={overview ? 'none' : 'box-none'} accessibilityElementsHidden={overview}
+                onLayout={event => setResetHeight(event.nativeEvent.layout.height)}
                 importantForAccessibility={overview ? 'no-hide-descendants' : 'auto'}
                 style={[styles.resetRow, overview && styles.hiddenReset]}>
                 <GlassActionButton title="Show all" icon="arrow.up.left.and.arrow.down.right"
@@ -81,6 +95,8 @@ const StationCardCarousel = forwardRef(function StationCardCarousel({ stations, 
                         themeColors={themeColors} compact={compact} now={now} onNavigate={onNavigate}
                         onLayout={event => {
                             const measured = Math.ceil(event.nativeEvent.layout.height);
+                            if (!Number.isFinite(measured) || measured <= 0) return;
+                            setHasMeasuredCard(true);
                             measuredHeights.current.set(item.id, measured);
                             // Card content has no fixed height. Keep neighboring pages aligned.
                             const tallest = Math.max(...measuredHeights.current.values());

@@ -8,6 +8,7 @@ import { usePreferences } from '../../PreferencesContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { openStationNavigation } from '../../lib/openNavigation';
 import { finishLaunch } from '../../lib/launchReadiness';
+import { useLaunchReady } from '../../components/LaunchSplash';
 import useClusterLabStations from './useClusterLabStations';
 import useHomeDeviceLocation from './useHomeDeviceLocation';
 import StationCardCarousel from './StationCardCarousel';
@@ -17,11 +18,12 @@ const EMPTY_ORIGIN = {};
 
 export default function HomeScreen() {
     const active = useIsFocused();
+    const revealed = useLaunchReady();
     useHomeDeviceLocation(active);
     const { isDark, themeColors } = useTheme();
     const { preferences } = usePreferences();
     const insets = useSafeAreaInsets();
-    const { origin, stations } = useClusterLabStations(active);
+    const { origin, stations, loaded } = useClusterLabStations(active);
     const { clusterLabProbe } = useLocalSearchParams();
     const map = useRef(null);
     const carousel = useRef(null);
@@ -82,6 +84,8 @@ export default function HomeScreen() {
             isDark={isDark}
             active={active}
             overlayBottomInset={stations.length ? overlayHeight + 8 : 0}
+            contentReady={loaded && (!stations.length || overlayHeight > 0)}
+            revealed={revealed}
             onMapReady={finishLaunch}
             onStationSelect={mapSelected}
             onOverviewChange={overviewChanged}

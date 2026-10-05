@@ -17,6 +17,12 @@ struct DrivingResearchConsent: View {
   var body: some View {
     NavigationStack {
       VStack(spacing: 0) {
+        Capsule()
+          .fill(.tertiary)
+          .frame(width: 36, height: 5)
+          .padding(.top, 16)
+          .accessibilityHidden(true)
+
         ScrollView {
           VStack(spacing: 24) {
             Image("ResearchConsentMap", bundle: Self.resources)
@@ -80,7 +86,7 @@ struct DrivingResearchConsent: View {
     .background(DrivingResearchSheetCorners { sheetCornerRadius = $0 })
     .presentationCornerRadius(sheetCornerRadius)
     .presentationDetents([.large])
-    .presentationDragIndicator(.visible)
+    .presentationDragIndicator(.hidden)
   }
 
   private func consentRow(_ title: String, icon: String, color: Color, detail: String) -> some View {
