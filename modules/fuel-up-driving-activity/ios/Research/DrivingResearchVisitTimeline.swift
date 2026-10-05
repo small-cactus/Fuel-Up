@@ -32,7 +32,7 @@ struct DrivingResearchVisitTimeline: View {
           VStack(spacing:0) {
             event("Arrived at \(visit.station.name)",at:visit.startedAt,top:false,bottom:departure != nil)
             if let departure {
-              Rectangle().fill(.secondary.opacity(0.45)).frame(width:1.5,height:24)
+              Rectangle().fill(Color(uiColor: .tertiaryLabel)).frame(width:1.5,height:24)
                 .frame(maxWidth:.infinity,alignment:.leading).padding(.leading,5.25)
               event("Left \(previous.station.name)",at:departure,top:true,bottom:false)
             }
@@ -52,7 +52,7 @@ struct DrivingResearchVisitTimeline: View {
             let middle=geometry.size.height/2
             if top {path.move(to:CGPoint(x:6,y:0));path.addLine(to:CGPoint(x:6,y:middle-5))}
             if bottom {path.move(to:CGPoint(x:6,y:middle+5));path.addLine(to:CGPoint(x:6,y:geometry.size.height))}
-          }.stroke(.secondary.opacity(0.45),lineWidth:1.5)
+          }.stroke(Color(uiColor: .tertiaryLabel),lineWidth:1.5)
           Circle().stroke(.secondary,lineWidth:1.5).frame(width:10,height:10)
             .position(x:6,y:geometry.size.height/2)
         }.frame(width:12).accessibilityHidden(true)
