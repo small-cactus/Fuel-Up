@@ -14,7 +14,6 @@ import useHomeDeviceLocation from './useHomeDeviceLocation';
 import StationCardCarousel from './StationCardCarousel';
 import FuelUpHeaderLogo from '../../components/FuelUpHeaderLogo';
 import TopCanopy from '../../components/TopCanopy';
-import ConnectionOverlay from '../../components/ConnectionOverlay';
 import useNetworkStatus from '../../lib/useNetworkStatus';
 
 const NativeMap = Platform.OS === 'ios' ? requireNativeViewManager('FuelUpMapKitRouting') : null;
@@ -107,7 +106,6 @@ export default function HomeScreen() {
         <View pointerEvents="none" style={headerStyle}>
             <FuelUpHeaderLogo isDark={isDark} />
         </View>
-        <ConnectionOverlay active={active} />
         </View>
     );
 }
