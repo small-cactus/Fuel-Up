@@ -33,8 +33,22 @@ try {
  const [counts]=query(`select (select count(*) from driving_research_events where participant_id='${a.id}') as real_count,(select count(*) from driving_research_notification_tests where id='${testId}') as test_count`);
  assert.equal(Number(counts.real_count),1,'Test deletion preserves unrelated research records');assert.equal(Number(counts.test_count),0);
  console.log('PASS: isolated targeted test, idempotent send/answer, participant isolation, late-response handling, test-only deletion preserves research');
+ const deviceToken=randomBytes(32).toString('hex');
+ assert.equal((await post(a,'registerPush',{deviceToken,environment:'sandbox'})).registered,true);
+ const pushId=randomUUID();
+ const claim=()=>query(`select public.prepare_driving_research_push_test('${a.id}','Mobil',true,'${pushId}') as claim`)[0].claim;
+ const first=claim();assert.equal(first.claimed,true);assert.equal(first.environment,'sandbox');assert.equal(first.deviceToken,deviceToken);
+ assert.equal(claim().claimed,false,'A duplicate or unknown APNs attempt must never resend');
+ const pushFixture=(await post(a,'control')).notificationTests.find(t=>t.id===pushId);
+ assert.equal(pushFixture.delivery,'apns');assert.equal(pushFixture.pushStatus,'sending');
+ assert.equal((await post(b,'control')).notificationTests.length,0);
+ assert.equal((await post(a,'testStatus',{testId:pushId,status:'answered',label:'fueled',responseAt:Date.now()/1000})).saved,true,'Cold push can answer without local scheduling');
+ const [pushRights]=query(`select has_table_privilege('anon','public.driving_research_push_devices','select') as anon,has_function_privilege('authenticated','public.prepare_driving_research_push_test(uuid,text,boolean,uuid)','execute') as authenticated`);
+ assert.equal(pushRights.anon,false);assert.equal(pushRights.authenticated,false);
+ console.log('PASS: private push registration, atomic APNs-only fixture, no duplicate sends, cold answer');
+
 } finally {
  for(const p of [a,b]) await post(p,'delete');
- const [counts]=query(`select (select count(*) from driving_research_events where participant_id in ('${a.id}','${b.id}'))+(select count(*) from driving_research_notification_tests where participant_id in ('${a.id}','${b.id}')) as remaining`);
+ const [counts]=query(`select (select count(*) from driving_research_push_devices where participant_id in ('${a.id}','${b.id}'))+(select count(*) from driving_research_events where participant_id in ('${a.id}','${b.id}'))+(select count(*) from driving_research_notification_tests where participant_id in ('${a.id}','${b.id}')) as remaining`);
  assert.equal(Number(counts.remaining),0);console.log('PASS: synthetic fixtures removed');
 }

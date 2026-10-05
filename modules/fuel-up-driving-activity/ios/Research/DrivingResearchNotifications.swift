@@ -100,6 +100,10 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
       } else { completionHandler([]) }
       return
     }
+    if notification.request.content.categoryIdentifier == DrivingResearchTestNotifications.category {
+      try? DrivingResearchTestNotifications.receivePush(notification.request.content.userInfo)
+      Task { @MainActor in await DrivingResearchTestNotifications.shared.flush() }
+    }
     completionHandler([.banner, .list, .sound])
   }
   func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
@@ -118,6 +122,7 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
       guard UserDefaults.standard.bool(forKey:DrivingResearchCollector.consentKey),
             let id=response.notification.request.content.userInfo["testId"] as? String else{return}
       do {
+        try DrivingResearchTestNotifications.receivePush(response.notification.request.content.userInfo)
         guard try DrivingResearchTestStore.shared.all().contains(where:{$0.id==id && $0.expiresAt>Date().timeIntervalSince1970}) else{return}
         if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
           Task { @MainActor in

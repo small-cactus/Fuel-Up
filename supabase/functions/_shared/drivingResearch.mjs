@@ -32,7 +32,7 @@ export function createDrivingResearchHandler({db}) {
     try {
       const body=await request.text(); if (body.length>1_000_000) return reply({error:'TOO_LARGE'},413);
       const input=JSON.parse(body), {action,participantId}=input;
-      if (!uuid.test(participantId)||!['enroll','upload','stations','delete','control','testStatus'].includes(action)) return reply({error:'INVALID_REQUEST'},400);
+      if (!uuid.test(participantId)||!['enroll','upload','stations','delete','control','testStatus','registerPush'].includes(action)) return reply({error:'INVALID_REQUEST'},400);
       const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token))),v=>v.toString(16).padStart(2,'0')).join('');
       const auth={p_id:participantId,p_hash:hash};
       if (action==='enroll') {
@@ -49,6 +49,11 @@ export function createDrivingResearchHandler({db}) {
       }
       const access=await db.rpc('access_driving_research',auth);
       if (access.error||access.data!==true) return reply({error:'UNAUTHORIZED_OR_RATE_LIMITED'},403);
+      if(action==='registerPush') {
+        if (!/^[a-f0-9]{32,512}$/.test(input.deviceToken||'') || !['sandbox','production'].includes(input.environment)) return reply({error:'INVALID_PUSH_DEVICE'},400);
+        const result=await db.rpc('register_driving_research_push',{...auth,p_token:input.deviceToken,p_environment:input.environment});
+        return result.error?reply({error:'PUSH_REGISTRATION_UNAVAILABLE'},503):reply({registered:result.data===true});
+      }
       if(action==='control') {
         const hasCounts=input.total!==undefined || input.pending!==undefined;
         if (hasCounts && (!Number.isSafeInteger(input.total)||!Number.isSafeInteger(input.pending)||input.pending<0||input.total<input.pending||input.total>100000000)) return reply({error:'INVALID_COUNTS'},400);

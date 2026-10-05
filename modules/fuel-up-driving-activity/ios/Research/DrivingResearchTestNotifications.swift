@@ -19,13 +19,21 @@ final class DrivingResearchTestNotifications: ObservableObject {
     let remote=try JSONDecoder().decode([ResearchNotificationTest].self,from:JSONSerialization.data(withJSONObject:records))
     let removed=try store.reconcile(remote)
     for id in removed {removeNotification(id);if openTestID==id {openTestID=nil}}
-    for test in try store.all() where test.status=="queued" {
+    for test in try store.all() where test.status=="queued" && test.delivery != "apns" {
       // Claim before scheduling. Repeated control checks never repeat a prompt.
       try store.update(test.id) {$0.status="preparing";$0.dirty=true}
       let outcome=await schedule(test)
       try store.update(test.id) {if $0.label==nil && $0.status=="preparing" {$0.status=outcome;$0.dirty=true}}
     }
     refresh();await flush()
+  }
+  nonisolated static func receivePush(_ userInfo:[AnyHashable:Any]) throws {
+    guard UserDefaults.standard.bool(forKey:DrivingResearchCollector.consentKey),
+      let payload=userInfo["researchTest"] as? [String:Any],
+      let participant=payload["participantId"] as? String,participant == (try ResearchIdentity.load()).id,
+      let id=userInfo["testId"] as? String,payload["id"] as? String == id else{return}
+    let test=try JSONDecoder().decode(ResearchNotificationTest.self,from:JSONSerialization.data(withJSONObject:payload))
+    _=try DrivingResearchTestStore.shared.receivePush(test)
   }
   func answer(_ id:String,label:String) {
     do {
@@ -66,6 +74,9 @@ final class DrivingResearchTestNotifications: ObservableObject {
     let center=UNUserNotificationCenter.current(),key=Self.prefix+id
     center.removePendingNotificationRequests(withIdentifiers:[key])
     center.removeDeliveredNotifications(withIdentifiers:[key])
+    center.getDeliveredNotifications {items in
+      center.removeDeliveredNotifications(withIdentifiers:items.filter{$0.request.content.categoryIdentifier == Self.category && $0.request.content.userInfo["testId"] as? String == id}.map{$0.request.identifier})
+    }
   }
   private func schedule(_ test:ResearchNotificationTest) async -> String {
     DrivingResearchNotifications.shared.install()

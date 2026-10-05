@@ -29,9 +29,20 @@ import Foundation
     let removed=try store.reconcile([stop],now:250)
     assert(removed==[id])
     assert(!tryValue {try store.answer(id,label:"fueled",now:260)},"Deleted test cannot be recreated by a late notification action")
+    var push=fixture;push.delivery="apns"
+    assert(!tryValue {try store.receivePush(push,now:270)},"Deleted APNs fixture cannot return from an old banner")
     assert(!tryValue {try store.answer(other,label:"fueled",now:1001)},"Expired tests cannot be answered")
     assert(tryValue {try store.reconcile([stop],now:1001)}==[other])
     assert(tryValue {try store.all().isEmpty})
+    let fresh=ResearchNotificationTest(id:UUID().uuidString,stationName:"Mobil",candidate:true,createdAt:2000,expiresAt:3000,status:"queued",delivery:"apns")
+    assert(tryValue {try store.receivePush(fresh,now:2100)})
+    assert(tryValue {try store.answer(fresh.id,label:"fueled",now:2101)})
+    assert(tryValue {try store.receivePush(fresh,now:2102)})
+    assert(tryValue {try store.all().first!.label}=="fueled","Duplicate push preserves cold answer")
+    let extra=ResearchNotificationTest(id:UUID().uuidString,stationName:"Shell",candidate:false,createdAt:2000,expiresAt:3000,status:"queued",delivery:"apns")
+    assert(tryValue {try store.receivePush(extra,now:2103)})
+    assert(tryValue {try store.all().count}==2,"Push merges without clearing other tests")
+    assert(!tryValue {try store.receivePush(extra,now:3001)})
     print("PASS: matching copy, durable answers, update races, isolated test deletion, expiration")
   }
   static func tryValue<T>(_ block:() throws -> T) -> T {try! block()}

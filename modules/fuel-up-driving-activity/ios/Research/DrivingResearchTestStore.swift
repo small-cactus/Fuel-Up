@@ -11,10 +11,13 @@ struct ResearchNotificationTest: Codable, Identifiable {
   var label: String?
   var responseAt: Double?
   var dirty: Bool?
+  var delivery: String?
+  var pushStatus: String?
 
   var title: String {ResearchConfirmation.notificationTitle(candidate:candidate,stationName:stationName)}
   var summary: String {
     if let label {return "\(ResearchConfirmation.title(for:label)) · \(dirty == true ? "Waiting to sync" : "Answer synced")"}
+    if delivery == "apns",status == "queued" {return pushStatus == "accepted" ? "Sent to Apple · Unconfirmed" : "Push delivery pending"}
     switch status {
     case "scheduled": return "Notification scheduled · Unconfirmed"
     case "permission_missing": return "Notifications need permission"
@@ -38,6 +41,17 @@ final class DrivingResearchTestStore: @unchecked Sendable {
     guard FileManager.default.fileExists(atPath:url.path) else{return []}
     return try JSONDecoder().decode([ResearchNotificationTest].self,from:Data(contentsOf:url))
   }
+  private var removedURL:URL {url.appendingPathExtension("removed")}
+  private func tombstones() throws -> [String:Double] {
+    guard FileManager.default.fileExists(atPath:removedURL.path) else{return [:]}
+    return try JSONDecoder().decode([String:Double].self,from:Data(contentsOf:removedURL))
+  }
+  private func rememberRemoval(_ tests:[ResearchNotificationTest],now:Double=Date().timeIntervalSince1970) throws {
+    var removed=try tombstones().filter{$0.value>now}
+    for test in tests where test.expiresAt>now {removed[test.id]=test.expiresAt}
+    try FileManager.default.createDirectory(at:url.deletingLastPathComponent(),withIntermediateDirectories:true)
+    try JSONEncoder().encode(removed).write(to:removedURL,options:.atomic)
+  }
   private func save(_ tests:[ResearchNotificationTest]) throws {
     try FileManager.default.createDirectory(at:url.deletingLastPathComponent(),withIntermediateDirectories:true)
     try JSONEncoder().encode(tests).write(to:url,options:.atomic)
@@ -51,8 +65,21 @@ final class DrivingResearchTestStore: @unchecked Sendable {
     lock.lock();defer{lock.unlock()}
     let local=try all(),active=remote.filter{$0.expiresAt>now}
     let ids=Set(active.map(\.id)),removed=local.filter{!ids.contains($0.id)}.map(\.id)
+    try rememberRemoval(local.filter{removed.contains($0.id)},now:now)
     try save(active.map {test in local.first{$0.id==test.id} ?? test})
     return removed
+  }
+  // A remote notification can arrive before the app has fetched its fixture.
+  // Merge only that fixture; never replace other tests or overwrite an answer.
+  @discardableResult func receivePush(_ test:ResearchNotificationTest,now:Double=Date().timeIntervalSince1970) throws -> Bool {
+    guard UUID(uuidString:test.id) != nil,test.delivery == "apns",test.expiresAt>now,
+      test.createdAt<=now+300,test.expiresAt>test.createdAt,test.stationName.count<=80 else{return false}
+    lock.lock();defer{lock.unlock()}
+    guard (try tombstones()[test.id] ?? 0)<=now else{return false}
+    var tests=try all()
+    if tests.contains(where:{$0.id==test.id}) {return true}
+    var received=test;received.status="scheduled";received.dirty=true
+    tests.append(received);try save(tests);return true
   }
   @discardableResult func update(_ id:String,_ change:(inout ResearchNotificationTest)->Void) throws -> Bool {
     lock.lock();defer{lock.unlock()}
@@ -74,7 +101,8 @@ final class DrivingResearchTestStore: @unchecked Sendable {
     }
   }
   func remove(_ id:String) throws {
-    lock.lock();defer{lock.unlock()};try save(all().filter{$0.id != id})
+    lock.lock();defer{lock.unlock()}
+    let tests=try all();try rememberRemoval(tests.filter{$0.id==id});try save(tests.filter{$0.id != id})
   }
-  func erase() throws {lock.lock();defer{lock.unlock()};try save([])}
+  func erase() throws {lock.lock();defer{lock.unlock()};try rememberRemoval(all());try save([])}
 }

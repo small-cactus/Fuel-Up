@@ -49,7 +49,8 @@
       "expo-router",
       "./plugins/withIosBuildCompatibility",
       "./plugins/withIosSceneLifecycle",
-      "./plugins/withLaunchBubbleShader"
+      "./plugins/withLaunchBubbleShader",
+      "./plugins/withResearchPushNotifications"
     ],
     "orientation": "portrait",
     "icon": "./assets/fuelup-icon.png",
@@ -125,6 +126,11 @@
                       "group.com.anthonyh.fuelup"
                     ]
                   }
+                },
+                {
+                  "targetName": "FuelUpNotificationService",
+                  "bundleIdentifier": "com.anthonyh.fuelup.notifications",
+                  "entitlements": {}
                 }
               ]
             }

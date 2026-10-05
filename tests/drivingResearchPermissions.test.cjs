@@ -47,6 +47,10 @@ import Foundation
     response?.resume(returning:allowed);response=nil
   }
 }
+@MainActor final class DrivingResearchPushRegistration {
+  static let shared=DrivingResearchPushRegistration()
+  func registerIfAllowed() {}
+}
 @MainActor final class LocationManager {
   enum Authorization {case notDetermined,authorizedWhenInUse,authorizedAlways,denied,restricted}
   var authorizationStatus=Authorization.notDetermined

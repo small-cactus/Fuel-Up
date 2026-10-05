@@ -120,6 +120,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
           self.expensiveNetwork=path.isExpensive
           self.constrainedNetwork=path.isConstrained
           self.sync()
+          if self.networkAvailable {DrivingResearchPushRegistration.shared.registerIfAllowed()}
         }
       }
       networkMonitor.start(queue:DispatchQueue(label:"fuelup.research.network"))
@@ -244,6 +245,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       }
       try store?.erase();try DrivingResearchTestNotifications.shared.erase();try ResearchIdentity.erase();DrivingResearchSync.shared.erase()
       for key in [Self.consentKey,"research.visits","research.stations","research.catalogCenter","research.lastCatalog","research.detector","research.lastUpload","research.lastUploadAttempt"] {UserDefaults.standard.removeObject(forKey:key)}
+      DrivingResearchPushRegistration.shared.erase()
       identity=nil;participant="Not enrolled";visits=[];visitLabels=[:];notifiedVisitIDs=[];departureTimes=[:];promptedVisitIDs=[];confirmationVisit=nil;stations=[];stationCount=0;lastUpload=nil;lastUploadAttempt=nil;issue=nil;refreshCounts()
       catalogCenter=nil;lastCatalog=nil;lastFix=nil;motion="Unknown";lastDrive = .distantPast
       status="Research data deleted"
@@ -334,7 +336,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   }
   private func saveDetector() {UserDefaults.standard.set(try? JSONEncoder().encode(detector),forKey:"research.detector")}
   func requestStopNotifications() async {
-    defer{checkTrackingHealth()}
+    defer{checkTrackingHealth();DrivingResearchPushRegistration.shared.registerIfAllowed()}
     if let task=notificationPermissionTask {await task.value;return}
     guard consented,UIApplication.shared.applicationState == .active else{return}
     let task=Task { @MainActor in

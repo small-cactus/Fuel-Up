@@ -115,3 +115,15 @@ test('public health check reads the database without enrollment, mutation, or pa
   assert.deepEqual(calls,['driving_research_participants',{column:'id',options:{head:true}},1]);
  }
 });
+
+test('push registration authenticates the participant and validates its address',async()=>{
+ const calls=[];
+ const handler=createDrivingResearchHandler({db:{rpc:async(name,args)=>{calls.push({name,args});return{data:true}}}});
+ const fields={action:'registerPush',participantId:id,deviceToken:'a'.repeat(64),environment:'sandbox'};
+ assert.equal((await handler(request(fields))).status,200);
+ assert.deepEqual(calls.map(x=>x.name),['access_driving_research','register_driving_research_push']);
+ assert.equal(calls[1].args.p_token,fields.deviceToken);
+ for(const invalid of [{deviceToken:'invalid'},{environment:'development'}]) assert.equal((await handler(request({...fields,...invalid}))).status,400);
+ const denied=createDrivingResearchHandler({db:{rpc:async()=>({data:false})}});
+ assert.equal((await denied(request(fields))).status,403);
+});
