@@ -1,0 +1,79 @@
+[
+  {
+    "jsonb_build_object": {
+      "active_waits": [
+        {
+          "backend_type": "client backend",
+          "state": "active",
+          "wait_event": "DataFileRead",
+          "wait_event_type": "IO"
+        }
+      ],
+      "at": "2026-10-05T15:06:22.502427+00:00",
+      "deployed": {
+        "name": "narrow_national_trend_aggregation",
+        "version": "20261005152000"
+      },
+      "post_deploy_events": [
+        {
+          "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+          "created_at": "2026-10-05T15:05:55.181447+00:00",
+          "job_id": 428905
+        },
+        {
+          "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+          "created_at": "2026-10-05T15:05:29.172516+00:00",
+          "job_id": 428903
+        },
+        {
+          "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+          "created_at": "2026-10-05T15:05:16.557893+00:00",
+          "job_id": 428902
+        },
+        {
+          "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+          "created_at": "2026-10-05T15:04:53.141768+00:00",
+          "job_id": 428901
+        }
+      ],
+      "recent_jobs": [
+        {
+          "execution_region": "us-east-1",
+          "id": 428907,
+          "observed_at": "2026-10-05T15:06:14.194+00:00",
+          "status": "succeeded",
+          "summarized": true
+        },
+        {
+          "execution_region": "us-east-1",
+          "id": 428906,
+          "observed_at": "2026-10-05T15:06:04.977+00:00",
+          "status": "succeeded",
+          "summarized": true
+        },
+        {
+          "execution_region": "us-east-1",
+          "id": 428905,
+          "observed_at": "2026-10-05T15:05:47.144+00:00",
+          "status": "succeeded",
+          "summarized": true
+        },
+        {
+          "execution_region": "us-east-1",
+          "id": 428904,
+          "observed_at": "2026-10-05T15:05:34.879+00:00",
+          "status": "succeeded",
+          "summarized": true
+        },
+        {
+          "execution_region": "us-east-1",
+          "id": 428903,
+          "observed_at": "2026-10-05T15:05:23.265+00:00",
+          "status": "succeeded",
+          "summarized": true
+        }
+      ],
+      "statement_stats_since": "2026-10-04T10:52:53.516752+00:00"
+    }
+  }
+]

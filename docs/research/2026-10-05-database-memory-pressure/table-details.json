@@ -1,0 +1,19 @@
+[
+  {
+    "jsonb_build_object": {
+      "indexes": [
+        "CREATE INDEX fuel_station_latest_state ON public.fuel_station_latest USING btree (((station #>> '{address,region}'::text[])))",
+        "CREATE INDEX fuel_station_latest_membership_state ON public.fuel_station_latest USING btree (((station #>> '{address,region}'::text[]))) WHERE (lower(replace(replace(TRIM(BOTH FROM (station ->> 'name'::text)), ''''::text, ''::text), '’'::text, ''::text)) ~ '^(costco|sams|bjs)'::text)",
+        "CREATE UNIQUE INDEX fuel_station_latest_pkey ON public.fuel_station_latest USING btree (station_id)",
+        "CREATE INDEX fuel_station_latest_location ON public.fuel_station_latest USING btree (latitude, longitude)"
+      ],
+      "plan": null,
+      "stats_reset": null,
+      "triggers": [
+        "CREATE TRIGGER fuel_price_lookup_insert AFTER INSERT ON public.fuel_station_latest FOR EACH ROW EXECUTE FUNCTION project_fuel_station_prices()",
+        "CREATE TRIGGER fuel_price_lookup_update AFTER UPDATE OF station ON public.fuel_station_latest FOR EACH ROW WHEN (((old.station -> 'prices'::text) IS DISTINCT FROM (new.station -> 'prices'::text))) EXECUTE FUNCTION project_fuel_station_prices()",
+        "CREATE TRIGGER remember_station_e85 BEFORE INSERT OR UPDATE OF station ON public.fuel_station_latest FOR EACH ROW EXECUTE FUNCTION remember_station_e85()"
+      ]
+    }
+  }
+]

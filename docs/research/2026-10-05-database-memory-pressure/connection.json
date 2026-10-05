@@ -1,0 +1,184 @@
+[
+  {
+    "jsonb_build_object": {
+      "connections": [
+        {
+          "application_name": "postgres_exporter",
+          "backend_type": "client backend",
+          "count": 1,
+          "state": "idle",
+          "wait_event": "ClientRead",
+          "wait_event_type": "Client"
+        },
+        {
+          "application_name": "",
+          "backend_type": "autovacuum launcher",
+          "count": 1,
+          "state": null,
+          "wait_event": "AutovacuumMain",
+          "wait_event_type": "Activity"
+        },
+        {
+          "application_name": "",
+          "backend_type": "archiver",
+          "count": 1,
+          "state": null,
+          "wait_event": "ArchiverMain",
+          "wait_event_type": "Activity"
+        },
+        {
+          "application_name": "",
+          "backend_type": "walwriter",
+          "count": 1,
+          "state": null,
+          "wait_event": "WalWriterMain",
+          "wait_event_type": "Activity"
+        },
+        {
+          "application_name": "",
+          "backend_type": "logical replication launcher",
+          "count": 1,
+          "state": null,
+          "wait_event": "LogicalLauncherMain",
+          "wait_event_type": "Activity"
+        },
+        {
+          "application_name": "mgmt-api",
+          "backend_type": "client backend",
+          "count": 1,
+          "state": "active",
+          "wait_event": null,
+          "wait_event_type": null
+        },
+        {
+          "application_name": "",
+          "backend_type": "background writer",
+          "count": 1,
+          "state": null,
+          "wait_event": "BgwriterMain",
+          "wait_event_type": "Activity"
+        },
+        {
+          "application_name": "PostgREST 14.5",
+          "backend_type": "client backend",
+          "count": 3,
+          "state": "idle",
+          "wait_event": "ClientRead",
+          "wait_event_type": "Client"
+        },
+        {
+          "application_name": "pg_net 0.19.5",
+          "backend_type": "pg_net 0.19.5 worker",
+          "count": 1,
+          "state": null,
+          "wait_event": "Extension",
+          "wait_event_type": "Extension"
+        },
+        {
+          "application_name": "pg_cron scheduler",
+          "backend_type": "pg_cron launcher",
+          "count": 1,
+          "state": null,
+          "wait_event": "Extension",
+          "wait_event_type": "Extension"
+        },
+        {
+          "application_name": "",
+          "backend_type": "checkpointer",
+          "count": 1,
+          "state": null,
+          "wait_event": "CheckpointWriteDelay",
+          "wait_event_type": "Timeout"
+        },
+        {
+          "application_name": "Supabase Storage API",
+          "backend_type": "client backend",
+          "count": 2,
+          "state": "idle",
+          "wait_event": "ClientRead",
+          "wait_event_type": "Client"
+        }
+      ],
+      "cron": [
+        {
+          "active": true,
+          "jobname": "fuel-research-dispatch",
+          "schedule": "* * * * *"
+        },
+        {
+          "active": true,
+          "jobname": "fuel-research-watchdog",
+          "schedule": "*/5 * * * *"
+        },
+        {
+          "active": true,
+          "jobname": "fuel-national-discovery",
+          "schedule": "* * * * *"
+        },
+        {
+          "active": true,
+          "jobname": "fuel-national-dispatch",
+          "schedule": "* * * * *"
+        },
+        {
+          "active": true,
+          "jobname": "fuel-national-watchdog",
+          "schedule": "*/5 * * * *"
+        },
+        {
+          "active": true,
+          "jobname": "fuel-national-trends-cache",
+          "schedule": "* * * * *"
+        },
+        {
+          "active": true,
+          "jobname": "fuel-e85-directory-daily",
+          "schedule": "45 6 * * *"
+        },
+        {
+          "active": true,
+          "jobname": "fuel-national-projection-repair",
+          "schedule": "* * * * *"
+        }
+      ],
+      "sizes": [
+        {
+          "heap": 174817280,
+          "indexes": 19038208,
+          "relname": "fuel_station_latest",
+          "total": 193937408
+        },
+        {
+          "heap": 27721728,
+          "indexes": 66355200,
+          "relname": "fuel_station_price_lookup",
+          "total": 94117888
+        },
+        {
+          "heap": 11460608,
+          "indexes": 4579328,
+          "relname": "fuel_e85_directory",
+          "total": 16080896
+        },
+        {
+          "heap": 4341760,
+          "indexes": 9183232,
+          "relname": "objects",
+          "total": 13565952
+        },
+        {
+          "heap": 11337728,
+          "indexes": 188416,
+          "relname": "fuel_national_trend_batches",
+          "total": 11567104
+        },
+        {
+          "heap": 1843200,
+          "indexes": 90112,
+          "relname": "fuel_research_snapshots",
+          "total": 7405568
+        }
+      ]
+    }
+  }
+]
