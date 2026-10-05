@@ -1,0 +1,121 @@
+{
+  "appId": "6759831421",
+  "version": "1.0",
+  "locale": "en-US",
+  "sourceCommit": "3b5e7b7",
+  "captureDate": "2026-10-05",
+  "files": [
+    {
+      "file": "ipad/01-nearby-gas.png",
+      "width": 2064,
+      "height": 2752,
+      "bytes": 5019824,
+      "sha256": "cca629a06616305902915fd9658d44374f4c37a74f85a2b8db6b3fabc57749b1"
+    },
+    {
+      "file": "ipad/02-national-trends.png",
+      "width": 2064,
+      "height": 2752,
+      "bytes": 1398185,
+      "sha256": "de85ae94d73ab6a492872b9fef69a436f522c2df38abd8c7fefee698def0418e"
+    },
+    {
+      "file": "ipad/03-fuel-types.png",
+      "width": 2064,
+      "height": 2752,
+      "bytes": 306212,
+      "sha256": "ddb171d22f6e3b090ff49f6742e10553db3c454dcbfaab7669a728462206b808"
+    },
+    {
+      "file": "ipad/04-station-brands.png",
+      "width": 2064,
+      "height": 2752,
+      "bytes": 598887,
+      "sha256": "ac78f88d79f27704f3df5903ae279ee48be3462e5d94f52428c132620f788b79"
+    },
+    {
+      "file": "iphone-compact/01-nearby-gas.png",
+      "width": 1080,
+      "height": 2340,
+      "bytes": 2208010,
+      "sha256": "25b83e23eefb0bb4bbf00c2a10cb40e390c05d3ea8ea9edb73cfe23f483b18a0"
+    },
+    {
+      "file": "iphone-compact/02-national-trends.png",
+      "width": 1080,
+      "height": 2340,
+      "bytes": 1143355,
+      "sha256": "ddbc49192259ad8b18c510e11c209e089d564ef3cbdace894a3a7ee8b36ae5a2"
+    },
+    {
+      "file": "iphone-compact/03-fuel-types.png",
+      "width": 1080,
+      "height": 2340,
+      "bytes": 386331,
+      "sha256": "44101fd68051da7262301d674b2d78eec8725a691cc83292de2885e98dd72f7a"
+    },
+    {
+      "file": "iphone-compact/04-station-brands.png",
+      "width": 1080,
+      "height": 2340,
+      "bytes": 496759,
+      "sha256": "410dd91313762fba33b25032f710fdd923c605ad4d24301cff8e969e0e14e9ca"
+    },
+    {
+      "file": "iphone-large/01-nearby-gas.png",
+      "width": 1320,
+      "height": 2868,
+      "bytes": 2991200,
+      "sha256": "f56eb20a6f611cab7da2eb6b87d3cb4570ae3c543ee858dfa28dd45b813fa738"
+    },
+    {
+      "file": "iphone-large/02-national-trends.png",
+      "width": 1320,
+      "height": 2868,
+      "bytes": 1495262,
+      "sha256": "ca4e5e246a79e553637ba5550380d4947ec88c933cb54dfd721b9a00947d91db"
+    },
+    {
+      "file": "iphone-large/03-fuel-types.png",
+      "width": 1320,
+      "height": 2868,
+      "bytes": 384243,
+      "sha256": "9b899875947f7544870e8fe9da6e6fffa88eb1367e00753bc11aee7b6155f593"
+    },
+    {
+      "file": "iphone-large/04-station-brands.png",
+      "width": 1320,
+      "height": 2868,
+      "bytes": 552771,
+      "sha256": "bc0cbc27e3b868c82b96e56c3bc3a03b2ce3947cf917b3133d39ce71fa51afd5"
+    },
+    {
+      "file": "iphone-medium/01-nearby-gas.png",
+      "width": 1206,
+      "height": 2622,
+      "bytes": 2584686,
+      "sha256": "245802c25687337d4a3cc305c8202b0a6225437702baeaa566b641096cbe92fc"
+    },
+    {
+      "file": "iphone-medium/02-national-trends.png",
+      "width": 1206,
+      "height": 2622,
+      "bytes": 1292834,
+      "sha256": "75e83e82ad68d6780cf03f3f74c9588a66f75ce3d5944abeebe0206fd39f438f"
+    },
+    {
+      "file": "iphone-medium/03-fuel-types.png",
+      "width": 1206,
+      "height": 2622,
+      "bytes": 375067,
+      "sha256": "1f43357ef191e028720e446faf0830e1c8b50b4fbfb654b27021920b9d45201f"
+    },
+    {
+      "file": "iphone-medium/04-station-brands.png",
+      "width": 1206,
+      "height": 2622,
+      "bytes": 518989,
+      "sha256": "94c7ef9b036a4a2d4e4bf38a4d18effec3a2ab5fa0a4f53cd0f6ac5c409c8a16"
+    }
+  ]
+}
