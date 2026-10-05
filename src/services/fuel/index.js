@@ -440,6 +440,13 @@ function hasUsableCachedFuelWindow({
     }));
 }
 
+function getInFlightFuelPriceSnapshot({ latitude, longitude, radiusMiles, fuelType, requiresE85 = false }) {
+    const config = getFuelServiceConfig();
+    return inflightRequests.get(buildCacheKey({ latitude, longitude,
+        radiusMiles: radiusMiles || config.defaultRadiusMiles,
+        fuelType: fuelType || config.defaultFuelType, requiresE85, preferredProvider: 'gasbuddy' })) || null;
+}
+
 async function refreshFuelPriceSnapshot({
     latitude,
     longitude,
@@ -784,6 +791,7 @@ module.exports = {
     findUsableCachedFuelSnapshot,
     getFuelFailureMessage,
     getCachedFuelPriceSnapshot,
+    getInFlightFuelPriceSnapshot,
     hasUsableCachedFuelWindow,
     isFuelCacheResetError,
     refreshFuelPriceSnapshot,

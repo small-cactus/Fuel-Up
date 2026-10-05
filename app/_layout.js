@@ -9,6 +9,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import * as FileSystem from 'expo-file-system/legacy';
 import OnboardingScreen from '../src/screens/OnboardingScreen';
+import TrendsBackgroundRefresh from '../src/components/TrendsBackgroundRefresh';
 import { onboardingHandoff } from '../src/lib/onboardingHandoff';
 import ProgressiveBlurReveal from '../src/components/ProgressiveBlurReveal';
 import '../src/lib/predictiveLocation';
@@ -443,6 +444,7 @@ export default function RootLayout() {
             <ThemeProvider>
                 <PreferencesProvider>
                     <View style={{ flex: 1 }}>
+                        <TrendsBackgroundRefresh />
                         <AppGate />
                         <LaunchSplash />
                     </View>

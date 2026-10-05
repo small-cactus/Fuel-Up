@@ -83,3 +83,17 @@ test('a requested duplicate higher grade does not reappear via the client cache'
     const result=await service.refreshFuelPriceSnapshot({...query,fuelType:'midgrade'});
     assert.deepEqual(result.snapshot.topStations,[]);
 });
+
+test('Trends can join the exact Home station request without another database read', async t => {
+    let finish, reads=0;
+    const {service}=await setup(t,()=>{reads++;return new Promise(resolve=>{finish=resolve})});
+    const home=service.refreshFuelPriceSnapshot(query);
+    while(!finish) await new Promise(setImmediate);
+    const shared=service.getInFlightFuelPriceSnapshot(query);
+    assert.ok(shared);
+    assert.equal(service.getInFlightFuelPriceSnapshot({...query,fuelType:'premium'}),null);
+    finish([station([price('regular_gas',3.10)])]);
+    assert.deepEqual((await shared).snapshot,(await home).snapshot);
+    assert.equal(reads,1);
+    assert.equal(service.getInFlightFuelPriceSnapshot(query),null);
+});

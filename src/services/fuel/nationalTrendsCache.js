@@ -1,8 +1,12 @@
 import { fetchNationalTrends } from './nationalLeaderboard';
+import { publishTrendCacheChange } from './trendCacheEvents';
+import { trendSnapshotStore } from './trendSnapshotStore';
 
 const CACHE_TTL_MS = 60 * 60000;
 const cache = new Map();
 const prefetches = new Map();
+let generation = 0;
+const diskKey = ({ fuelType, requiresE85 }) => `national:${JSON.stringify([fuelType, requiresE85])}`;
 
 export const nationalTrendsScope = ({ fuelType, requiresE85, resetToken }) =>
     JSON.stringify([fuelType, requiresE85, resetToken]);
@@ -17,18 +21,42 @@ export function rememberNationalTrends(scope, result) {
     cache.delete(scope);
     cache.set(scope, result);
     if (cache.size > 20) cache.delete(cache.keys().next().value);
+    publishTrendCacheChange();
 }
 
-// Onboarding owns this request. A tab can join it without cancelling it when
-// the tab loses focus; the tab's existing scope/abort guards still protect UI.
+export function clearNationalTrendsCache() {
+    generation++;
+    cache.clear();
+    prefetches.clear();
+    publishTrendCacheChange();
+}
+export async function restoreNationalTrends(options) {
+    const started = generation;
+    const scope = nationalTrendsScope(options);
+    const saved = await trendSnapshotStore.get(diskKey(options));
+    if (started === generation && saved && Array.isArray(saved.quotes)
+        && Array.isArray(saved.trendData?.averagePricesByDay) && !cache.has(scope)) {
+        rememberNationalTrends(scope, { ...saved, scope });
+    }
+}
+
+// Shared by launch, onboarding and the tab. Changing tabs does not cancel an
+// app-wide refresh; each consumer still guards its own scope before rendering.
 export function prefetchNationalTrends(options) {
     const scope = nationalTrendsScope(options);
     const cached = cache.get(scope);
-    if (isNationalTrendsFresh(cached)) return Promise.resolve(cached);
     if (prefetches.has(scope)) return prefetches.get(scope);
+    const age = Date.now() - cached?.loadedAt;
+    if ((!options.force && isNationalTrendsFresh(cached))
+        || (options.force && age >= 0 && age < (options.maxAgeMs || 0))) return Promise.resolve(cached);
+    const started = generation;
     const request = fetchNationalTrends(options).then(response => {
         const result = { scope, ...response, loadedAt: Date.now(), error: null };
-        if (!response.historyError) rememberNationalTrends(scope, result);
+        if (started !== generation) return null;
+        if (!response.historyError) {
+            rememberNationalTrends(scope, result);
+            void trendSnapshotStore.set(diskKey(options), result);
+        }
         return result;
     }).finally(() => {
         if (prefetches.get(scope) === request) prefetches.delete(scope);

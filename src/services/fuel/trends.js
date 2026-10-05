@@ -2,7 +2,9 @@ import { rankStationQuotes } from '../../lib/stationPreferences.js';
 import { supabase } from '../../lib/supabase.js';
 import { buildVisibleStations } from '../../lib/visibleStations.js';
 import { buildFuelSearchRequestKey } from '../../lib/fuelSearchState.js';
-const { refreshFuelPriceSnapshot, getCachedFuelPriceSnapshot } = require('./index');
+const { refreshFuelPriceSnapshot, getCachedFuelPriceSnapshot, getInFlightFuelPriceSnapshot } = require('./index');
+const { publishTrendCacheChange } = require('./trendCacheEvents');
+const { trendSnapshotStore } = require('./trendSnapshotStore');
 const { buildRawTrendRows } = require('./rawTrendRows');
 const { buildAveragePriceTrendSeries } = require('./trendAggregation');
 const { buildTrendLeaderboard } = require('./trendLeaderboard');
@@ -48,10 +50,12 @@ export function isTrendCacheGenerationCurrent(generation) {
 
 export function clearTrendDataCache(fuelType = null) {
     trendCacheGeneration += 1;
+    void trendSnapshotStore.clear();
     clearObjectValues(cachedTrendDataByRequestKey, fuelType);
     clearObjectValues(lastResolvedTrendDataByRequestKey, fuelType);
     clearObjectValues(lastTrendsScreenViewedAtMsByRequestKey, fuelType);
     clearObjectValues(inFlightTrendDataRequestsByRequestKey, fuelType);
+    publishTrendCacheChange();
 }
 
 export function buildTrendRequestKey({
@@ -104,13 +108,16 @@ export async function fetchTrendData({
     // independently selecting from a second response on a tab switch.
     const latestSnapshot = async () => {
         const cached = await getCachedFuelPriceSnapshot(query);
+        const sharedRequest = getInFlightFuelPriceSnapshot?.(query);
+        if (sharedRequest) return (await sharedRequest).snapshot;
         const age = Date.now() - Date.parse(cached?.fetchedAt);
         if (cached && age >= 0 && age < 5 * 60000) return cached;
         return (await refreshFuelPriceSnapshot(query)).snapshot;
     };
     const [history, snapshot] = await Promise.all([supabase
         .from('station_prices')
-        .select('*')
+        .select('station_id,provider_id,fuel_type,all_prices,station_name,address,latitude,longitude,created_at,updated_at_source')
+        .eq('provider_id', 'gasbuddy')
         .eq('search_latitude_rounded', searchLat)
         .eq('search_longitude_rounded', searchLng)
         .eq('fuel_type', fuelType)
@@ -120,6 +127,7 @@ export async function fetchTrendData({
         latestSnapshot(),
     ]);
     const { data: descendingRows, error } = history;
+    if (error) throw new Error('Unable to refresh trend history.');
 
     const rows = Array.isArray(descendingRows) ? descendingRows.slice().reverse() : descendingRows;
 
@@ -292,6 +300,7 @@ export function setCachedTrendData(requestKey = '', data = null) {
     }
 
     cachedTrendDataByRequestKey[requestKey] = data;
+    publishTrendCacheChange();
 }
 
 export function getLastResolvedTrendData(requestKey = '') {
@@ -322,6 +331,16 @@ export function getInFlightTrendDataRequest(requestKey = '') {
     return inFlightTrendDataRequestsByRequestKey[requestKey] || null;
 }
 
+export async function restoreTrendData(requestKey) {
+    const generation = captureTrendCacheGeneration();
+    const saved = await trendSnapshotStore.get(`local:${requestKey}`);
+    if (!saved || !Array.isArray(saved.data?.leaderboard) || !Array.isArray(saved.data?.averagePricesByDay)
+        || !isTrendCacheGenerationCurrent(generation) || getCachedTrendData(requestKey)) return;
+    setLastTrendsScreenViewedAt(requestKey, saved.loadedAt);
+    setLastResolvedTrendData(requestKey, saved.data);
+    setCachedTrendData(requestKey, saved.data);
+}
+
 export async function prefetchTrendData({
     latitude,
     longitude,
@@ -333,6 +352,7 @@ export async function prefetchTrendData({
     fuelMemberships = [],
     requiresE85 = false,
     requestKey = '',
+    maxAgeMs = 0,
 }) {
     const resolvedRequestKey = buildTrendRequestKey({
         latitude,
@@ -351,6 +371,10 @@ export async function prefetchTrendData({
         return inFlightTrendDataRequestsByRequestKey[resolvedRequestKey];
     }
 
+    const age = Date.now() - getLastTrendsScreenViewedAt(resolvedRequestKey);
+    if (maxAgeMs > 0 && age >= 0 && age < maxAgeMs && getCachedTrendData(resolvedRequestKey)) {
+        return getCachedTrendData(resolvedRequestKey);
+    }
     const requestGeneration = captureTrendCacheGeneration();
     let request;
 
@@ -371,7 +395,9 @@ export async function prefetchTrendData({
             }
             setCachedTrendData(resolvedRequestKey, data);
             setLastResolvedTrendData(resolvedRequestKey, data);
-            setLastTrendsScreenViewedAt(resolvedRequestKey, Date.now());
+            const loadedAt = Date.now();
+            setLastTrendsScreenViewedAt(resolvedRequestKey, loadedAt);
+            void trendSnapshotStore.set(`local:${resolvedRequestKey}`, { data, loadedAt });
             return data;
         } finally {
             if (inFlightTrendDataRequestsByRequestKey[resolvedRequestKey] === request) {

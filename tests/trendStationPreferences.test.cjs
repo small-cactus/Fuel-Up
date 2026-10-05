@@ -17,15 +17,16 @@ async function setup(options = {}) {
         provider_id: 'gasbuddy', all_prices: { ...quote.allPrices, _payment: { regular: { credit: quote.price } } }, updated_at_source: new Date(Date.now() - hours * 3600000).toISOString(), latitude: quote.latitude, longitude: quote.longitude,
         created_at: new Date(Date.now() - hours * 3600000).toISOString(),
     })));
-    const db = { select() { return this; }, eq() { return this; }, gte() { return this; }, order() { return this; },
-        limit: async () => ({ data: options.noHistory ? [] : rows, error: null }) };
+    const db = { select(columns) { options.onSelect?.(columns); return this; }, eq(key, value) { options.onFilter?.(key, value); return this; }, gte() { return this; }, order() { return this; },
+        limit: async () => { options.onHistory?.(); return { data: options.noHistory ? [] : rows, error: options.historyError }; } };
     return load('src/services/fuel/trends.js', {
         '../../lib/supabase.js': { supabase: { from: () => db } },
         '../../lib/fuelGrade.js': grades,
         '../../lib/homeState.js': home,
         '../../lib/stationPreferences.js': preferences,
         '../../lib/fuelSearchState.js': search,
-        './index': { getCachedFuelPriceSnapshot: async () => options.cachedSnapshot || null, refreshFuelPriceSnapshot: async () => { if (options.noRefetch) assert.fail('Trends refetched the fresh Home snapshot'); return { snapshot: { topStations: quotes } }; } },
+        './trendSnapshotStore': { trendSnapshotStore: options.store || { get: async () => null, set: async () => {}, clear: async () => {} } },
+        './index': { getInFlightFuelPriceSnapshot: () => options.inflight || null, getCachedFuelPriceSnapshot: async () => options.cachedSnapshot || null, refreshFuelPriceSnapshot: async () => { if (options.noRefetch) assert.fail('Trends refetched the fresh Home snapshot'); return { snapshot: { topStations: quotes } }; } },
         './priceValidation': { buildValidationState: input => ({ outputs: input.map(row => ({ row, result: { finalDisplayedPrice: row.price } })) }) },
     });
 }
@@ -97,4 +98,39 @@ test('Home and Local use identical membership exclusions and bounded preferred r
         assert.deepEqual(local.leaderboard.map(s=>s.stationId),home.map(s=>s.id));
         assert.equal(local.leaderboard[0].stationId,fuelMemberships.length?'sams':'shell');
     }
+});
+
+test('Trends joins Home in flight instead of using an older cached snapshot or issuing another station read', async () => {
+    let complete;
+    const inflight = new Promise(resolve => { complete = resolve; });
+    const trends = await setup({ inflight, noRefetch: true, cachedSnapshot: { fetchedAt: new Date().toISOString(), topStations: [] } });
+    const request = trends.fetchTrendData({ latitude: 27.95, longitude: -82.45, fuelType: 'regular' });
+    complete({snapshot:{fetchedAt:new Date().toISOString(),topStations:[{
+        stationId:'home',stationName:'Home station',latitude:27.95,longitude:-82.45,
+        fuelType:'regular',providerTier:'station',providerId:'gasbuddy',price:3.11,updatedAt:new Date().toISOString(),
+    }]}});
+    assert.equal((await request).leaderboard[0].stationId,'home');
+});
+
+test('local results restore into a new session and failed refreshes preserve them', async () => {
+    const saved=new Map();
+    const store={get:async key=>saved.get(key),set:async(key,value)=>saved.set(key,value),clear:async()=>saved.clear()};
+    let selected,filters=[],historyRequests=0;
+    const params={latitude:27.95,longitude:-82.45,fuelType:'regular',radiusMiles:6};
+    const first=await setup({store,onSelect:v=>{selected=v},onFilter:(...v)=>filters.push(v),onHistory:()=>historyRequests++});
+    const data=await first.prefetchTrendData(params);
+    await first.prefetchTrendData({...params,maxAgeMs:2000});
+    assert.equal(historyRequests,1,'opening the tab just after prefetch does not download history twice');
+    assert.ok(!selected.includes('*'));
+    assert.ok(selected.includes('all_prices'),'preserve the original payment price evidence');
+    assert.ok(filters.some(([key,value])=>key==='provider_id'&&value==='gasbuddy'),'query matches the existing partial index');
+    const second=await setup({store,historyError:{message:'offline'}});
+    const key=second.buildTrendRequestKey(params);
+    await second.restoreTrendData(key);
+    assert.deepEqual(second.getCachedTrendData(key),data);
+    await assert.rejects(second.prefetchTrendData(params),/history/);
+    assert.deepEqual(second.getCachedTrendData(key),data,'a failed history query cannot overwrite a good chart');
+    second.clearTrendDataCache();
+    await second.restoreTrendData(key);
+    assert.equal(second.getCachedTrendData(key),null);
 });

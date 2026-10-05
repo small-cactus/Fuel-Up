@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { AppState } from 'react-native';
-import { fetchNationalTrends } from '../../services/fuel/nationalLeaderboard';
+import { subscribeTrendCache, getTrendCacheVersion } from '../../services/fuel/trendCacheEvents';
 import { isFreshReportedQuote, REPORTED_PRICE_MAX_AGE_MS } from '../../services/fuel/reportedPrices';
 import {
-  nationalTrendsScope, getCachedNationalTrends, getNationalTrendsPrefetch,
+  nationalTrendsScope, getCachedNationalTrends, prefetchNationalTrends,
   isNationalTrendsFresh, rememberNationalTrends as remember,
 } from '../../services/fuel/nationalTrendsCache';
 
@@ -14,6 +14,7 @@ export default function useNationalLeaderboard({
   requiresE85,
   resetToken
 }) {
+  useSyncExternalStore(subscribeTrendCache, getTrendCacheVersion, getTrendCacheVersion);
   const scope = nationalTrendsScope({ fuelType, requiresE85, resetToken });
   const current = useRef(scope);
   current.current = scope;
@@ -33,20 +34,12 @@ export default function useNationalLeaderboard({
     active.current = controller;
     setRefreshing(showRefresh);
     try {
-      const response = await (getNationalTrendsPrefetch(scope) || fetchNationalTrends({
-        fuelType,
-        requiresE85,
-        signal: controller.signal
-      }));
-      if (!controller.signal.aborted && current.current === scope) {
-        const next = { scope, ...response, loadedAt: Date.now(), error: null };
-        if (!response.historyError) remember(scope, next);
-        setResult(next);
-      }
+      const next = await prefetchNationalTrends({ fuelType, requiresE85, resetToken, force });
+      if (next && !controller.signal.aborted && current.current === scope) setResult(next);
     } catch (error) {
       if (current.current === scope && active.current === controller) {
         setResult(previous => ({ ...(previous?.scope === scope ? previous : getCachedNationalTrends(scope)),
-          scope, quotes: (previous?.scope === scope ? previous.quotes : getCachedNationalTrends(scope)?.quotes) || [], error: error.message }));
+          scope, failedAt: Date.now(), quotes: (previous?.scope === scope ? previous.quotes : getCachedNationalTrends(scope)?.quotes) || [], error: error.message }));
       }
     } finally {
       if (active.current === controller) {
@@ -70,7 +63,10 @@ export default function useNationalLeaderboard({
       subscription.remove();
     };
   }, [enabled, load]));
-  const data = result?.scope === scope ? result : getCachedNationalTrends(scope) || null;
+  const cached = getCachedNationalTrends(scope);
+  const currentResult = result?.scope === scope ? result : null;
+  const data = cached && (!currentResult || (enabled && cached.loadedAt >= currentResult.loadedAt))
+    ? cached : currentResult;
   useEffect(() => {
     if (!enabled || !data?.quotes.length) return;
     const nextExpiry = Math.min(...data.quotes.map(q => Date.parse(q.updatedAt) + REPORTED_PRICE_MAX_AGE_MS));
@@ -88,7 +84,7 @@ export default function useNationalLeaderboard({
     historyError: data?.historyError || null,
     loading: !data,
     refreshing,
-    error: data?.error,
+    error: currentResult?.error && (!cached || cached.loadedAt <= currentResult.failedAt) ? currentResult.error : null,
     onRefresh: () => load({
       refreshing: true, force: true
     })

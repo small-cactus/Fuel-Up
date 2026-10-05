@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { isFreshReportedPrice, REPORTED_PRICE_MAX_AGE_MS } from '../../services/fuel/reportedPrices';
 import * as Location from 'expo-location';
 import { AppState } from 'react-native';
+import { subscribeTrendCache, getTrendCacheVersion } from '../../services/fuel/trendCacheEvents';
 import {
     buildTrendRequestKey,
     captureTrendCacheGeneration,
@@ -31,6 +32,7 @@ export default function useTrendData({
     resetToken,
     commitOrigin,
 }) {
+    useSyncExternalStore(subscribeTrendCache, getTrendCacheVersion, getTrendCacheVersion);
     const scope = JSON.stringify([currentRequestKey, fuelGrade, radiusMiles, preferredProvider, minimumRating, preferredBrands, fuelMemberships, requiresE85, resetToken]);
     const scopeRef = useRef(scope);
     scopeRef.current = scope;
@@ -107,6 +109,7 @@ export default function useTrendData({
                     fuelMemberships,
                     requiresE85,
                     requestKey,
+                    maxAgeMs: refreshing ? 0 : 2000,
                 });
                 if (!isCurrent()) return;
                 setResult({ scope, requestKey, data, generation, resetToken, error: null });
