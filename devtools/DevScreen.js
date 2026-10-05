@@ -3,50 +3,50 @@ import { Alert, StyleSheet, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../../src/ThemeContext';
-import { useAppState } from '../../src/AppStateContext';
-import { usePreferences } from '../../src/PreferencesContext';
-import TopCanopy from '../../src/components/TopCanopy';
-import FuelUpHeaderLogo from '../../src/components/FuelUpHeaderLogo';
-import NativeDevForm from '../../src/components/dev/NativeDevForm';
-import { getApiStats, resetApiStats } from '../../src/lib/devCounter';
+import { useTheme } from '../src/ThemeContext';
+import { useAppState } from '../src/AppStateContext';
+import { usePreferences } from '../src/PreferencesContext';
+import TopCanopy from '../src/components/TopCanopy';
+import FuelUpHeaderLogo from '../src/components/FuelUpHeaderLogo';
+import NativeDevForm from '../src/components/dev/NativeDevForm';
+import { getApiStats, resetApiStats } from '../src/lib/devCounter';
 import {
     scheduleTestNotification,
     startLiveActivity,
     updateLiveActivity,
     endLiveActivity,
-} from '../../src/lib/notifications';
-import { isFuelCacheResetError, refreshFuelPriceSnapshot } from '../../src/services/fuel';
+} from '../src/lib/notifications';
+import { isFuelCacheResetError, refreshFuelPriceSnapshot } from '../src/services/fuel';
 
-const { createPredictiveFuelingEngine } = require('../../src/lib/predictiveFuelingEngine.js');
-const { createPredictiveTestHarness } = require('../../src/lib/predictiveTestHarness.js');
-const { TEST_ROUTES, DENVER_STATIONS } = require('../../src/data/testRoutes.js');
-const { runBatchMetrics } = require('../../src/lib/predictionMetrics.js');
-const { createMLPredictor, generateTrainingData } = require('../../src/lib/mlPredictor.js');
-const { computePRF1, gridSearchParameters } = require('../../src/lib/accuracyMetrics.js');
-const { createBackgroundFetchSimulator, NETWORK_CONDITIONS } = require('../../src/lib/backgroundFetchSimulator.js');
-const { estimateRange, formatUrgencyMessage, SYNTHETIC_FILL_UP_HISTORIES } = require('../../src/lib/rangeEstimator.js');
-const { PROFILE_PRESETS } = require('../../src/lib/userFuelingProfile.js');
-const { EXPANDED_TEST_ROUTES, EXPANDED_STATIONS } = require('../../src/data/expandedTestRoutes.js');
+const { createPredictiveFuelingEngine } = require('../src/lib/predictiveFuelingEngine.js');
+const { createPredictiveTestHarness } = require('../src/lib/predictiveTestHarness.js');
+const { TEST_ROUTES, DENVER_STATIONS } = require('../src/data/testRoutes.js');
+const { runBatchMetrics } = require('../src/lib/predictionMetrics.js');
+const { createMLPredictor, generateTrainingData } = require('../src/lib/mlPredictor.js');
+const { computePRF1, gridSearchParameters } = require('../src/lib/accuracyMetrics.js');
+const { createBackgroundFetchSimulator, NETWORK_CONDITIONS } = require('../src/lib/backgroundFetchSimulator.js');
+const { estimateRange, formatUrgencyMessage, SYNTHETIC_FILL_UP_HISTORIES } = require('../src/lib/rangeEstimator.js');
+const { PROFILE_PRESETS } = require('../src/lib/userFuelingProfile.js');
+const { EXPANDED_TEST_ROUTES, EXPANDED_STATIONS } = require('../src/data/expandedTestRoutes.js');
 const {
     getPredictiveFuelingBackendDebugState,
     getPredictiveFuelingBackendState,
     resetPredictiveFuelingBackendData,
     subscribeToPredictiveFuelingBackend,
     subscribeToPredictiveFuelingBackendDebug,
-} = require('../../src/lib/predictiveFuelingBackend.js');
+} = require('../src/lib/predictiveFuelingBackend.js');
 const {
     getPredictiveFuelingDriveGateDebugState,
     subscribeToPredictiveFuelingDriveGateDebugState,
-} = require('../../src/lib/predictiveFuelingDriveGate.js');
+} = require('../src/lib/predictiveFuelingDriveGate.js');
 const {
     getPredictiveLocationDebugState,
     subscribeToPredictiveLocationDebugState,
-} = require('../../src/lib/predictiveLocation.js');
+} = require('../src/lib/predictiveLocation.js');
 const {
     SIM_SCENARIOS: LIVE_ACTIVITY_SCENARIOS,
     createPredictiveFuelingLiveActivitySim,
-} = require('../../src/lib/predictiveFuelingLiveActivitySim.js');
+} = require('../src/lib/predictiveFuelingLiveActivitySim.js');
 
 const TOP_CANOPY_HEIGHT = 44;
 
@@ -367,7 +367,7 @@ export default function DevStatsScreen() {
         setTimeout(() => {
             const allRoutes = useExpandedRoutes ? [...TEST_ROUTES, ...EXPANDED_TEST_ROUTES] : TEST_ROUTES;
             const allStations = useExpandedRoutes ? EXPANDED_STATIONS : DENVER_STATIONS;
-            const { routeToSamples } = require('../../src/lib/predictiveTestHarness.js');
+            const { routeToSamples } = require('../src/lib/predictiveTestHarness.js');
             const trainingData = generateTrainingData(
                 allRoutes,
                 allStations,

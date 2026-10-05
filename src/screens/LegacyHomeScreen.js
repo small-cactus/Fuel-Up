@@ -43,7 +43,7 @@ import {
 import { buildOverviewCoordinates, cameraTargetChanged, homeMapPadding } from '../../src/screens/home/mapCamera';
 import { startTransition, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { AppState, Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { GlassView } from 'expo-glass-effect';

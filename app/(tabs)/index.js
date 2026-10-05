@@ -11,9 +11,13 @@ export default function HomeRoute() {
     useEffect(() => {
         if (!useLegacyMap) hideRootReveal();
     }, [useLegacyMap, hideRootReveal]);
-    if (useLegacyMap) {
-        const LegacyHomeScreen = require('../../src/screens/LegacyHomeScreen').default;
-        return <LegacyHomeScreen />;
+    // Keep the literal guard around require so Metro excludes this screen from
+    // iOS Release, while development can still load the real probe on demand.
+    if (Platform.OS !== 'ios' || __DEV__) {
+        if (useLegacyMap) {
+            const LegacyHomeScreen = require('../../src/screens/LegacyHomeScreen').default;
+            return <LegacyHomeScreen />;
+        }
     }
     return <HomeScreen />;
 }

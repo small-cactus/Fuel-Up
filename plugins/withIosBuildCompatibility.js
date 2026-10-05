@@ -8,7 +8,22 @@ function quoteBundleCommand(project) {
         if (!phase.shellScript || !String(phase.name).includes('Bundle React Native')) continue;
         const script = JSON.parse(phase.shellScript);
         const next = script.replace(/^`(.+react-native-xcode\.sh.+)`$/m, '"$$($1)"');
-        phase.shellScript = JSON.stringify(next);
+        const packaging = `# Fuel Up Release packaging
+if [[ "$CONFIGURATION" == *Release* ]]; then
+  export EXTRA_PACKAGER_ARGS="\${EXTRA_PACKAGER_ARGS:-} --minify true"
+  if [[ -z "\${SKIP_BUNDLING:-}" ]]; then
+    # Metro copies referenced assets but does not remove obsolete ones.
+    # This is only the generated asset folder inside the current build product.
+    rm -rf "\${CONFIGURATION_BUILD_DIR:?}/\${UNLOCALIZED_RESOURCES_FOLDER_PATH:?}/assets"
+  fi
+fi
+`;
+        const command = next.lastIndexOf('"$(');
+        if (!next.includes('# Fuel Up Release packaging') && command < 0) {
+            throw new Error('Cannot locate React Native bundle command for Release packaging');
+        }
+        phase.shellScript = JSON.stringify(next.includes('# Fuel Up Release packaging')
+            ? next : next.slice(0, command) + packaging + next.slice(command));
     }
     return project;
 }
@@ -29,7 +44,23 @@ module.exports = function withIosBuildCompatibility(config) {
         // Apply the app's support floor to its widget target too: expo-widgets
         // otherwise regenerates that target with its own older default.
         for (const configuration of Object.values(next.modResults.hash.project.objects.XCBuildConfiguration || {})) {
-            if (configuration.buildSettings) configuration.buildSettings.IPHONEOS_DEPLOYMENT_TARGET = '26.0';
+            if (!configuration.buildSettings) continue;
+            const settings = configuration.buildSettings;
+            settings.IPHONEOS_DEPLOYMENT_TARGET = '26.0';
+            // expo-widgets generates Release with -Onone, which also enables
+            // Xcode's preview/debug dylib. Ship optimized native code instead.
+            if (String(configuration.name).replaceAll('"', '') === 'Release') {
+                Object.assign(settings, {
+                    SWIFT_OPTIMIZATION_LEVEL: '"-O"',
+                    SWIFT_COMPILATION_MODE: 'wholemodule',
+                    ENABLE_DEBUG_DYLIB: 'NO',
+                    DEAD_CODE_STRIPPING: 'YES',
+                    COPY_PHASE_STRIP: 'YES',
+                    STRIP_INSTALLED_PRODUCT: 'YES',
+                    DEPLOYMENT_POSTPROCESSING: 'YES',
+                    STRIP_STYLE: '"non-global"',
+                });
+            }
         }
         return next;
     });

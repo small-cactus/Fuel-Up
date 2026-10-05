@@ -28,7 +28,7 @@ test('a delayed cached location cannot replace a fresh fix or restart the radius
 });
 
 test('designer accepts an unfinished decimal without replacing typed text', async () => {
-    const Designer = load('app/live-activity-designer.js', {
+    const Designer = load('devtools/LiveActivityDesigner.js', {
         '../src/components/native/NativeGlassContainer': { __esModule: true, default: 'NativeGlassContainer' },
         'react-native': { Pressable: 'Pressable', ScrollView: 'ScrollView', Text: 'Text', TextInput: 'TextInput', View: 'View', StyleSheet: { create: x => x, hairlineWidth: 1 } },
         'react-native-safe-area-context': { SafeAreaView: 'SafeAreaView' },

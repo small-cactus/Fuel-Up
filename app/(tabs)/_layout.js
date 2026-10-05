@@ -42,10 +42,6 @@ export default function TabLayout() {
                 <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
             </NativeTabs.Trigger>
 
-            <NativeTabs.Trigger name="dev">
-                <NativeTabs.Trigger.Icon sf="hammer" md="build" />
-                <NativeTabs.Trigger.Label>Dev</NativeTabs.Trigger.Label>
-            </NativeTabs.Trigger>
         </NativeTabs>
     );
 }

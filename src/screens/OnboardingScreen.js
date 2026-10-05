@@ -11,7 +11,7 @@ import { useTheme } from '../ThemeContext';
 // The iOS app requires iOS 26+. Only other platforms use the React flow.
 const NativeOnboarding = Platform.OS === 'ios'
     ? require('./onboarding/NativeOnboarding').default : null;
-const LegacyOnboarding = !NativeOnboarding ? require('./OnboardingScreen.legacy').default : null;
+const LegacyOnboarding = Platform.OS !== 'ios' ? require('./OnboardingScreen.legacy').default : null;
 
 export default function OnboardingScreen() {
     const { preferences, updatePreferences, completeOnboarding } = usePreferences();

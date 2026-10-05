@@ -1,0 +1,24 @@
+{
+  "measurement": "Sum of regular file bytes in signed arm64 Release .app; not App Store download size",
+  "beforeBytes": 97602485,
+  "afterBytes": 45376707,
+  "reductionPercent": 53.5,
+  "majorFiles": {
+    "FuelUp": {
+      "beforeBytes": 48025056,
+      "afterBytes": 16026336
+    },
+    "main.jsbundle": {
+      "beforeBytes": 6241608,
+      "afterBytes": 4765073
+    },
+    "PlugIns/ExpoWidgetsTarget.appex/ExpoWidgetsTarget": {
+      "beforeBytes": 92112,
+      "afterBytes": 8309200
+    },
+    "PlugIns/ExpoWidgetsTarget.appex/ExpoWidgetsTarget.debug.dylib": {
+      "beforeBytes": 19276560,
+      "afterBytes": 0
+    }
+  }
+}

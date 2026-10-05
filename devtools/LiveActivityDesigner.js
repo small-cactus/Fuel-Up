@@ -17,9 +17,7 @@ import NativeGlassContainer from '../src/components/native/NativeGlassContainer'
  * under RN Fabric and crashes the dev client — documented in
  * `src/components/dev/NativeDevForm.js`.
  *
- * Navigation:
- *   dev tab → Live Activity section → "Open Design Previewer"
- *   (registered in app/_layout.js)
+ * Development source only; intentionally not registered as an app route.
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';

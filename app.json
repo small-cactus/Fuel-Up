@@ -46,7 +46,6 @@
           ]
         }
       ],
-      "expo-video",
       "expo-router",
       "./plugins/withIosBuildCompatibility",
       "./plugins/withIosSceneLifecycle",

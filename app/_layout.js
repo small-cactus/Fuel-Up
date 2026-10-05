@@ -412,14 +412,6 @@ function AppGate() {
                         sheetGrabberVisible: true,
                     }}
                 />
-                <Stack.Screen
-                    name="live-activity-designer"
-                    options={{
-                        headerShown: true,
-                        title: 'Live Activity Designer',
-                        presentation: 'card',
-                    }}
-                />
             </Stack>}
             {showOnboarding && <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 }} accessibilityViewIsModal>
                 <OnboardingScreen />
