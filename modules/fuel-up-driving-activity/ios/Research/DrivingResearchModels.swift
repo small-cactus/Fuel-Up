@@ -72,6 +72,13 @@ struct ResearchVisit: Codable, Identifiable {
 
 // A detector of possible stops, never a fuel-purchase label. All thresholds are
 // versioned with the uploaded events so offline training can re-evaluate them.
+enum ResearchStopPolicy {
+  static let version = "station-stop-v2"
+  // Confirmed development stops lasted over three minutes. Short stationary
+  // traffic near a station produced false prompts, including a two-minute stop.
+  static let minimumPromptDwell: Double = 180
+}
+
 struct ResearchVisitDetector: Codable {
   var active: ResearchVisit?
   var lastTimestamp: Double = 0
@@ -85,8 +92,13 @@ struct ResearchVisitDetector: Codable {
     }
     if var visit = active {
       if fix.distance(to: visit.station) + fix.accuracy <= 110, fix.speed >= 0, fix.speed < 2.5 {
+        let previousDwell = visit.lastInsideAt - visit.startedAt
         visit.lastInsideAt = fix.timestamp; visit.samples += 1
-        if !visit.candidate, fix.timestamp - visit.startedAt >= 120, visit.samples >= 3 {
+        // An active v1 visit may already have candidate=true at two minutes.
+        // Crossing the new threshold still emits once; the persisted prompt
+        // claim prevents re-notifying visits that were already prompted by v1.
+        if (!visit.candidate || previousDwell < ResearchStopPolicy.minimumPromptDwell),
+           fix.timestamp - visit.startedAt >= ResearchStopPolicy.minimumPromptDwell, visit.samples >= 3 {
           visit.candidate = true; events.append(("visit_candidate", visit))
         }
         active = visit

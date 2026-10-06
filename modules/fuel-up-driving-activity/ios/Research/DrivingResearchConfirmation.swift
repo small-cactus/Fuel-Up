@@ -17,10 +17,12 @@ enum ResearchConfirmation {
     return station.isEmpty || station == "Gas station" ? "got something at the gas station? 👀" : "got something at \(station)? 👀"
   }
   static func shouldPrompt(event: String, visit: ResearchVisit) -> Bool {
-    // A brief observed stop gets a neutral question only after departure. Do not
-    // prompt for drive-bys, interrupted observations, or repeat a longer stop.
-    event == "visit_candidate" || (event == "visit_departure" && !visit.candidate &&
-      visit.samples >= 3 && visit.lastInsideAt - visit.startedAt >= 30)
+    // Keep short observations for research, but do not turn a traffic-light
+    // stop into a notification. Duration applies to every real-stop prompt,
+    // including a restored visit created by an older detector version.
+    guard visit.samples >= 3,
+          visit.lastInsideAt - visit.startedAt >= ResearchStopPolicy.minimumPromptDwell else { return false }
+    return event == "visit_candidate" || (event == "visit_departure" && !visit.candidate)
   }
   static func state(_ records: [ResearchEvent]) -> (prompted: Set<String>, labels: [String: String], notified: Set<String>, departures: [String: Double]) {
     var prompted = Set<String>(), labels: [String: String] = [:], notified = Set<String>(), departures: [String:Double] = [:]

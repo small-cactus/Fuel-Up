@@ -32,10 +32,37 @@ import Foundation
     var d=ResearchVisitDetector()
     assert(d.process(fix(1000),stations:[station]).first?.0 == "visit_observation")
     assert(d.process(fix(1060),stations:[station]).isEmpty)
-    assert(d.process(fix(1120),stations:[station]).first?.0 == "visit_candidate")
-    assert(d.process(fix(1120),stations:[station]).isEmpty,"Duplicate fix must not inflate evidence")
-    assert(d.process(fix(1140,27.0001,200),stations:[station]).isEmpty,"Bad accuracy must not prove a stop")
-    assert(d.process(fix(1160,27.01,10,15),stations:[station]).first?.0 == "visit_departure")
+    assert(d.process(fix(1120),stations:[station]).isEmpty,"Two minutes in traffic must not trigger a prompt")
+    assert(d.process(fix(1179),stations:[station]).isEmpty)
+    assert(d.process(fix(1180),stations:[station]).first?.0 == "visit_candidate")
+    assert(d.process(fix(1180),stations:[station]).isEmpty,"Duplicate fix must not inflate evidence")
+    assert(d.process(fix(1190,27.0001,200),stations:[station]).isEmpty,"Bad accuracy must not prove a stop")
+    assert(d.process(fix(1200,27.01,10,15),stations:[station]).first?.0 == "visit_departure")
+    // A persisted v1 candidate reaches the new boundary without losing its ID.
+    var restored=ResearchVisitDetector()
+    _=restored.process(fix(1000),stations:[station])
+    restored.active!.lastInsideAt=1120;restored.active!.samples=4;restored.active!.candidate=true
+    restored.lastTimestamp=1120
+    let originalID=restored.active!.id
+    let encoded=try JSONEncoder().encode(restored)
+    restored=try JSONDecoder().decode(ResearchVisitDetector.self,from:encoded)
+    let migrated=restored.process(fix(1180),stations:[station])
+    assert(migrated.first?.0 == "visit_candidate" && migrated.first?.1.id == originalID)
+    assert(restored.process(fix(1185),stations:[station]).isEmpty,"Do not repeatedly emit the boundary")
+    // Synthetic timing cases bracket the labeled traffic stops, without using
+    // the participant's coordinates, station IDs, or route in test fixtures.
+    for duration in [30.0,60,90,120,139,179] {
+      var traffic=ResearchVisitDetector();var prompts=0
+      for time in stride(from:1000.0,through:1000+duration,by:1) {
+        for (kind,visit) in traffic.process(fix(time),stations:[station]) {
+          if ResearchConfirmation.shouldPrompt(event:kind,visit:visit) {prompts+=1}
+        }
+      }
+      for (kind,visit) in traffic.process(fix(1001+duration,27.01,10,15),stations:[station]) {
+        if ResearchConfirmation.shouldPrompt(event:kind,visit:visit) {prompts+=1}
+      }
+      assert(prompts==0,"Brief traffic stop must remain unprompted")
+    }
     var pass=ResearchVisitDetector()
     assert(pass.process(fix(1000,27,10,15),stations:[station]).isEmpty,"Driving past is not a visit")
     assert(pass.process(fix(1000,27,10,0,1100),stations:[station]).isEmpty,"Cached fix is not evidence")
@@ -48,11 +75,13 @@ import Foundation
     var brief=ambiguous.active!
     brief.lastInsideAt=brief.startedAt+45;brief.samples=3
     assert(ResearchConfirmation.notificationTitle(for:brief) == "got something at Test Station? 👀")
-    assert(ResearchConfirmation.shouldPrompt(event:"visit_departure",visit:brief))
+    assert(!ResearchConfirmation.shouldPrompt(event:"visit_departure",visit:brief),"Short departures must not bypass the duration gate")
     assert(!ResearchConfirmation.shouldPrompt(event:"visit_gap",visit:brief))
     brief.lastInsideAt=brief.startedAt+10
     assert(!ResearchConfirmation.shouldPrompt(event:"visit_departure",visit:brief))
     brief.candidate=true
+    assert(!ResearchConfirmation.shouldPrompt(event:"visit_candidate",visit:brief),"Old short candidates cannot bypass the new prompt gate")
+    brief.lastInsideAt=brief.startedAt+180
     assert(ResearchConfirmation.notificationTitle(for:brief) == "got fuel? 👀")
     assert(ResearchConfirmation.shouldPrompt(event:"visit_candidate",visit:brief))
     assert(!ResearchConfirmation.shouldPrompt(event:"visit_departure",visit:brief))

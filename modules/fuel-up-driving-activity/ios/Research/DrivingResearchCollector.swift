@@ -420,7 +420,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   @discardableResult private func record(_ kind:String,_ fields:[String:Any])->Bool {
     guard consented,let store else{return false}
     do {
-      var payload=fields;payload["schemaVersion"]=1;payload["detectorVersion"]="station-stop-v1";payload["sessionId"]=sessionID
+      var payload=fields;payload["schemaVersion"]=1;payload["detectorVersion"]=ResearchStopPolicy.version;payload["sessionId"]=sessionID
       try store.append(ResearchEvent(kind:kind,payload:payload));clearTrackingFault("storage");refreshCounts();sync();return true
     } catch {issue=error.localizedDescription;stopSensors();status="Paused — storage needs attention";setTrackingFault("storage","Drive recording stopped because data could not be saved. Check your iPhone’s available storage.");return false}
   }
