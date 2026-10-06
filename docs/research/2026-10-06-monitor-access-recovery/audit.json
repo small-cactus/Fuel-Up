@@ -1,0 +1,70 @@
+{
+  "city_overdue": 0,
+  "cron_recent": [
+    {
+      "failures": 0,
+      "jobname": "fuel-national-discovery",
+      "last_finished": "2026-10-06T08:54:00.09867+00:00"
+    },
+    {
+      "failures": 0,
+      "jobname": "fuel-national-dispatch",
+      "last_finished": "2026-10-06T08:54:00.096297+00:00"
+    },
+    {
+      "failures": 0,
+      "jobname": "fuel-national-projection-repair",
+      "last_finished": "2026-10-06T08:54:00.077668+00:00"
+    },
+    {
+      "failures": 0,
+      "jobname": "fuel-national-trends-cache",
+      "last_finished": "2026-10-06T08:54:00.090606+00:00"
+    },
+    {
+      "failures": 0,
+      "jobname": "fuel-national-watchdog",
+      "last_finished": "2026-10-06T08:50:00.108104+00:00"
+    },
+    {
+      "failures": 0,
+      "jobname": "fuel-research-dispatch",
+      "last_finished": "2026-10-06T08:54:00.089114+00:00"
+    },
+    {
+      "failures": 0,
+      "jobname": "fuel-research-watchdog",
+      "last_finished": "2026-10-06T08:50:00.103713+00:00"
+    }
+  ],
+  "latest_archive": {
+    "jobs": 72,
+    "missing_hash": 0,
+    "missing_objects": 0,
+    "wrong_bytes": 0
+  },
+  "now": "2026-10-06T08:54:51.334652+00:00",
+  "pending_repairs": [
+    {
+      "attempts": 6,
+      "job_id": 366544,
+      "last_error": "PROJECTION_PUBLISH_FAILED",
+      "next_attempt_at": "2026-10-05T00:49:32.683094+00:00"
+    },
+    {
+      "attempts": 5,
+      "job_id": 366559,
+      "last_error": "PROJECTION_PUBLISH_FAILED",
+      "next_attempt_at": "2026-10-05T00:57:57.801522+00:00"
+    }
+  ],
+  "recent_provenance": 0,
+  "slots": {
+    "complete": 116,
+    "current_in_progress": 0,
+    "expected": 131,
+    "expired_partial": 10,
+    "expired_unstarted": 5,
+    "latest_gap": "2026-10-04T10:00:00+00:00"
+  }
+}
