@@ -93,3 +93,23 @@ Dashboard screenshots were saved locally as
 `/tmp/fuel-database-restarting-20261006.png` and
 `/tmp/fuel-database-recovered-20261006.png`; they are supporting UI evidence,
 while the committed query, endpoint, and archive artifacts verify service state.
+
+## 11:55 UTC follow-up
+
+The first nationwide sweep after recovery (11:00, run 7159) completed all 72
+batches and all 141,660 IDs at 11:22:34 UTC. A full immutable archive read-back
+using `auditHour.mjs` passed all 72 objects, exact station IDs, hashes, bytes,
+observation windows and regional provenance. It contains 91,299 priced and
+50,361 unpriced provider observations. Ten Trends scopes published this run at
+11:23, with no missing projection batches.
+
+City collection completed another 24 city-hours: 3,258 successes, 65,160
+observations and the same 54 historical misses. There are no overdue city jobs.
+National coverage is 118 complete of 134 expected slots, with the same 11
+expired partial and 5 unstarted slots. The latest gap remains the already
+reported October 6 10:00 partial. No new gaps or repairs were found. All main
+and watchdog jobs executed through 11:55; the last failures remain those of
+the earlier outage/restart. Zero wrong-region jobs were recorded over 24 hours.
+The cooldown is expired, and archive usage is 456,978,463 of 900,000,000 bytes.
+This follow-up confirms recovery held through a complete sweep; it does not
+establish a permanent fix for resource pressure.

@@ -1,0 +1,104 @@
+{
+  "city": {
+    "cities_observed": 24,
+    "ends_at": "2026-10-07T18:19:00+00:00",
+    "id": "hourly-24-cities-20260930-v1",
+    "last_dispatch_at": "2026-10-06T11:55:00.134419+00:00",
+    "last_success_at": "2026-10-06T11:42:00.794278+00:00",
+    "missed": 54,
+    "planned_city_hours": 4032,
+    "provider_backoff_until": "2026-10-06T06:10:49.071467+00:00",
+    "queued_due": 0,
+    "running": 0,
+    "starts_at": "2026-09-30T18:19:00+00:00",
+    "station_observations": 65160,
+    "status": "active",
+    "succeeded": 3258
+  },
+  "national": {
+    "archive_bytes": 3609145,
+    "completed_at": "2026-10-06T11:22:34.456443+00:00",
+    "expected_batches": 72,
+    "expected_stations": 141660,
+    "id": 7159,
+    "missed_batches": 0,
+    "observed_stations": 141660,
+    "priced_stations": 91299,
+    "slot_at": "2026-10-06T11:00:00+00:00",
+    "status": "complete",
+    "succeeded_batches": 72
+  },
+  "audit": {
+    "city_overdue": 0,
+    "cron_recent": [
+      {
+        "failures": 28,
+        "jobname": "fuel-national-discovery",
+        "last_failure": "2026-10-06T11:03:00.002475+00:00",
+        "last_finished": "2026-10-06T11:55:00.151109+00:00"
+      },
+      {
+        "failures": 25,
+        "jobname": "fuel-national-dispatch",
+        "last_failure": "2026-10-06T11:03:00.002475+00:00",
+        "last_finished": "2026-10-06T11:55:00.148327+00:00"
+      },
+      {
+        "failures": 26,
+        "jobname": "fuel-national-projection-repair",
+        "last_failure": "2026-10-06T11:03:00.002475+00:00",
+        "last_finished": "2026-10-06T11:55:00.124169+00:00"
+      },
+      {
+        "failures": 31,
+        "jobname": "fuel-national-trends-cache",
+        "last_failure": "2026-10-06T11:03:00.002475+00:00",
+        "last_finished": "2026-10-06T11:55:00.128698+00:00"
+      },
+      {
+        "failures": 4,
+        "jobname": "fuel-national-watchdog",
+        "last_failure": "2026-10-06T10:55:00.000304+00:00",
+        "last_finished": "2026-10-06T11:55:00.111864+00:00"
+      },
+      {
+        "failures": 27,
+        "jobname": "fuel-research-dispatch",
+        "last_failure": "2026-10-06T11:03:00.002475+00:00",
+        "last_finished": "2026-10-06T11:55:00.143365+00:00"
+      },
+      {
+        "failures": 5,
+        "jobname": "fuel-research-watchdog",
+        "last_failure": "2026-10-06T11:00:00.00063+00:00",
+        "last_finished": "2026-10-06T11:55:00.137164+00:00"
+      }
+    ],
+    "now": "2026-10-06T11:55:54.718451+00:00",
+    "postmaster_started": "2026-10-06T11:06:33.129424+00:00",
+    "regional_errors": 0,
+    "responses": [
+      {
+        "content": "{\"results\":[{\"id\":8034,\"city\":\"tampa\",\"status\":\"succeeded\",\"stations\":20}]}",
+        "created": "2026-10-06T11:42:00.105559+00:00",
+        "error_msg": null,
+        "status_code": 200
+      },
+      {
+        "content": "{\"results\":[{\"id\":7866,\"city\":\"las-vegas\",\"status\":\"succeeded\",\"stations\":20}]}",
+        "created": "2026-10-06T11:41:00.11229+00:00",
+        "error_msg": null,
+        "status_code": 200
+      }
+    ],
+    "shared_buffers": "96MB",
+    "slots": {
+      "complete": 118,
+      "current_in_progress": 0,
+      "expected": 134,
+      "expired_partial": 11,
+      "expired_unstarted": 5,
+      "latest_gap": "2026-10-06T10:00:00+00:00"
+    }
+  }
+}
