@@ -49,7 +49,10 @@ final class ClusterLabPill {
   let view = ClusterLabGlass.pill()
   private let priceLabel = UILabel()
   private let countLabel = UILabel()
-  private let icon = UIImageView(image: UIImage(systemName: "fuelpump.fill"))
+  private let fuelImageViews = [UIImageView(), UIImageView()]
+  private var fuelIcons: [String] = []
+  private var chipPrices: String?
+  private var iconTheme: Bool?
   private var lastScale: CGFloat = 1
   private var lastCount = 0
   private var marketDescription = "Price comparison unavailable"
@@ -72,30 +75,40 @@ final class ClusterLabPill {
     return []
   }
 
-  init(stationID: String, price: Double, name: String) {
+  init(stationID: String, price: Double, name: String, fuelIcons: [String] = [], chipPrices: String? = nil) {
     self.stationID = stationID
     self.price = price
+    self.fuelIcons = fuelIcons
+    self.chipPrices = chipPrices
+    iconTheme = nil
     view.isUserInteractionEnabled = false
     view.clipsToBounds = false
     let content = ClusterLabGlass.content(of: view)
-    priceLabel.text = price.isFinite ? String(format: "$%.2f", price) : "E85"
+    priceLabel.text = chipPrices ?? (price.isFinite ? String(format: "$%.2f", price) : "E85")
+    priceLabel.numberOfLines = chipPrices == nil ? 1 : 2
     for label in [priceLabel, countLabel] {
       label.font = .systemFont(ofSize: 15, weight: .bold)
       label.textAlignment = .center
       content.addSubview(label)
     }
-    content.addSubview(icon)
-    icon.contentMode = .scaleAspectFit
+    for image in fuelImageViews {
+      content.addSubview(image)
+      image.contentMode = .scaleAspectFit
+    }
     view.isAccessibilityElement = true
     view.accessibilityLabel = name
   }
 
   // An arriving view may be reused as the attached cluster count. That is the
   // only identity transfer; traveling station pills retain their own ID.
-  func adoptCluster(stationID: String, price: Double, name: String) {
+  func adoptCluster(stationID: String, price: Double, name: String, fuelIcons: [String] = [], chipPrices: String? = nil) {
     self.stationID = stationID
     self.price = price
-    priceLabel.text = price.isFinite ? String(format: "$%.2f", price) : "E85"
+    self.fuelIcons = fuelIcons
+    self.chipPrices = chipPrices
+    iconTheme = nil
+    priceLabel.text = chipPrices ?? (price.isFinite ? String(format: "$%.2f", price) : "E85")
+    priceLabel.numberOfLines = chipPrices == nil ? 1 : 2
     view.accessibilityLabel = name
     lastCheapestPrice = nil
     wasRecommended = false
@@ -153,11 +166,10 @@ final class ClusterLabPill {
     // Onboarding's adaptive foreground stays readable over these lighter tints.
     let color: UIColor = .label
     priceLabel.textColor = color
-    icon.tintColor = color
     countLabel.textColor = color
     // Only text fades. The effect and every glass ancestor stay at alpha 1.
     priceLabel.alpha = priceMix
-    icon.alpha = priceMix
+    for image in fuelImageViews { image.alpha = priceMix }
     countLabel.alpha = 1 - priceMix
     if scale != lastScale {
       lastScale = scale
@@ -165,10 +177,24 @@ final class ClusterLabPill {
       countLabel.font = .systemFont(ofSize: 15 * scale, weight: .bold)
       if !(view is UIVisualEffectView) { view.layer.cornerRadius = 16 * scale }
     }
-    icon.frame = CGRect(x: (width - 66) / 2 * scale, y: 9 * scale, width: 14 * scale, height: 14 * scale)
-    priceLabel.frame = CGRect(x: ((width - 66) / 2 + 16) * scale, y: 0, width: 50 * scale, height: 32 * scale)
+    if iconTheme != dark {
+      iconTheme = dark
+      for (index, image) in fuelImageViews.enumerated() {
+        image.isHidden = index >= fuelIcons.count
+        image.image = index < fuelIcons.count ? OnboardingAssets.image("fuel-\(fuelIcons[index])\(dark ? "-dark" : "")") : nil
+      }
+    }
+    let iconWidth: CGFloat = fuelIcons.isEmpty ? 0 : 23
+    for (index, image) in fuelImageViews.enumerated() {
+      let size: CGFloat = fuelIcons.count > 1 ? 17 : 24
+      image.frame = CGRect(x: 2 * scale, y: (fuelIcons.count > 1 ? CGFloat(index) * 15 : 4) * scale,
+                           width: size * scale, height: size * scale)
+    }
+    priceLabel.font = .systemFont(ofSize: (chipPrices == nil ? 15 : 10.5) * scale, weight: .bold)
+    priceLabel.frame = CGRect(x: (iconWidth + 2) * scale, y: 0,
+                             width: max(0, width - iconWidth - 6) * scale, height: 32 * scale)
     countLabel.frame = view.bounds
-    view.accessibilityValue = priceMix > 0.5 ? "\(priceLabel.text ?? ""), \(marketDescription)" : countLabel.text
+    view.accessibilityValue = priceMix > 0.5 ? "\(priceLabel.text ?? ""), \(fuelIcons.joined(separator: ", ")), \(marketDescription)" : countLabel.text
   }
 }
 

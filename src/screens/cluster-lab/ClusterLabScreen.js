@@ -28,28 +28,42 @@ export default function HomeScreen() {
     const revealed = useLaunchReady();
     useHomeDeviceLocation(active);
     const { isDark, themeColors } = useTheme();
-    const { preferences } = usePreferences();
+    const { preferences, fuelSearchCriteriaSignature } = usePreferences();
     const insets = useSafeAreaInsets();
     const headerStyle = useMemo(() => [styles.header, { paddingTop: insets.top }], [insets.top]);
-    const { origin, stations, loaded, error } = useClusterLabStations(active);
+    const { origin, stations: allStations, loaded, error } = useClusterLabStations(active);
     useEffect(() => { if (error) onboardingHandoff.fail(new Error('Could not load nearby prices. Check your connection and try Save again.')); }, [error]);
     const mapReady = useCallback(() => { finishLaunch(); onboardingHandoff.mapReady(); }, []);
     const { clusterLabProbe } = useLocalSearchParams();
     const map = useRef(null);
     const carousel = useRef(null);
+    const [clusterIDs, setClusterIDs] = useState(null);
+    const stations = useMemo(() => clusterIDs ? allStations.filter(station => clusterIDs.includes(station.id)) : allStations, [allStations, clusterIDs]);
     const [selectedId, setSelectedId] = useState(null);
     const [overview, setOverview] = useState(true);
     const [overlayHeight, setOverlayHeight] = useState(0);
     const selection = !overview && stations.some(station => station.id === selectedId) ? selectedId : stations[0]?.id;
     const selectionRef = useRef(selection);
+    const previousCriteria = useRef(fuelSearchCriteriaSignature);
     selectionRef.current = selection;
     useEffect(() => {
         if (active) {
+            setClusterIDs(null);
             setOverview(true);
             setSelectedId(null);
             carousel.current?.scrollTo(0, false);
         }
     }, [active]);
+    useEffect(() => {
+        if (previousCriteria.current === fuelSearchCriteriaSignature) return;
+        previousCriteria.current = fuelSearchCriteriaSignature;
+        setClusterIDs(null);
+        setSelectedId(null);
+        setOverview(true);
+        // Settings changes happen while this tab is detached. The native
+        // active transition restores its overview when Home becomes visible.
+        if (active) void map.current?.showAll();
+    }, [fuelSearchCriteriaSignature, active]);
     useEffect(() => {
         if (selectedId !== selection) {
             setSelectedId(selection || null);
@@ -66,20 +80,25 @@ export default function HomeScreen() {
         void map.current?.focusStation(id);
     }, []);
     const showAll = useCallback(() => {
+        setClusterIDs(null);
         setOverview(true);
-        setSelectedId(stations[0]?.id || null);
+        setSelectedId(allStations[0]?.id || null);
         carousel.current?.scrollTo(0, false);
         void map.current?.showAll();
-    }, [stations]);
+    }, [allStations]);
     const overviewChanged = useCallback(event => setOverview(event.nativeEvent.overview), []);
     const mapSelected = useCallback(event => {
         const id = event.nativeEvent.id;
-        const index = stations.findIndex(station => station.id === id);
+        const ids = event.nativeEvent.stationIDs;
+        const members = ids?.length ? ids : null;
+        const next = members ? allStations.filter(station => members.includes(station.id)) : allStations;
+        setClusterIDs(members);
+        const index = next.findIndex(station => station.id === id);
         if (index < 0) return;
         setOverview(false);
         setSelectedId(id);
         carousel.current?.scrollTo(index);
-    }, [stations]);
+    }, [allStations]);
     const navigate = useCallback(station => {
         void openStationNavigation({ latitude: station.latitude, longitude: station.longitude,
             label: station.name, navigationApp: preferences.navigationApp });
@@ -90,7 +109,7 @@ export default function HomeScreen() {
         <NativeMap ref={map}
             style={StyleSheet.absoluteFill}
             origin={origin || EMPTY_ORIGIN}
-            stations={stations}
+            stations={allStations}
             isDark={isDark}
             active={active}
             overlayBottomInset={stations.length ? overlayHeight + 8 : 0}

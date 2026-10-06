@@ -91,7 +91,7 @@ const StationCardCarousel = forwardRef(function StationCardCarousel({ stations, 
                     if (Number.isFinite(offset)) settle(offset);
                 }}
                 renderItem={({ item, index: page }) => <View style={{ width, paddingHorizontal: 16 }}>
-                    <StationPriceCard station={item} rank={page + 1} fuelGrade={fuelGrade} isDark={isDark}
+                    <StationPriceCard station={item} rank={page + 1} fuelGrade={item.fuelType || fuelGrade} isDark={isDark}
                         themeColors={themeColors} compact={compact} now={now} onNavigate={onNavigate}
                         onLayout={event => {
                             const measured = Math.ceil(event.nativeEvent.layout.height);

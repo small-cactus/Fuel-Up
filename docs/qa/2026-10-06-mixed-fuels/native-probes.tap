@@ -1,0 +1,27 @@
+TAP version 13
+# Subtest: Swift Glass Lab renders timely transitions and preserves native container geometry
+ok 1 - Swift Glass Lab renders timely transitions and preserves native container geometry
+  ---
+  duration_ms: 29932.918792
+  ...
+# 27 native connection frames during committed merges; no false parent bridges
+# Visible contact resistance 3.28pt over 8 samples
+# Native stretch: 16 separated samples before recoil; release gaps 31.5, 32.6, 28.5, 30.3, 55.6, 51.1, 37.8, 65.8, 61.0, 69.6, 34.1, 32.3pt
+# Main price recoil 17.63pt; 54 identity-bound outward copies
+# Maximum rendered rebound 17.99pt
+# Longest transition 247ms; maximum measured travel 1094.13pt/frame
+# 1643 native frames; 113 transitions; /Users/anthonyh/Library/Developer/CoreSimulator/Devices/0EE3DFFD-087C-483C-A651-C55C59A719A3/data/Containers/Data/Application/0E1F38CB-A1D1-4983-96B9-D5B6F46228E3/Documents/cluster-lab-probe.json
+# Subtest: cluster tap isolates its members, keeps the parent selected and Show all restores the search
+ok 2 - cluster tap isolates its members, keeps the parent selected and Show all restores the search
+  ---
+  duration_ms: 6645.759875
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 36651.863291

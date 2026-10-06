@@ -886,3 +886,33 @@ test('personalized recommendation exclusively owns green across 50 zoom cycles a
     assert.ok(green.every(v => v.tintOwner === 'lab-2'));
     t.diagnostic(`${report.samples.length} live frames; ${splits} splits and ${merges} merges; recommendation stayed green`);
 });
+
+test('cluster tap isolates its members, keeps the parent selected and Show all restores the search', { timeout: 30000 }, async () => {
+    const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+    const token = `browse-${Date.now()}`;
+    const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+    const file = path.join(container, 'Documents/cluster-lab-probe.json');
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    let report;
+    const deadline = Date.now() + 25000;
+    while (Date.now() < deadline) {
+        try {
+            const value = JSON.parse(readFileSync(file, 'utf8'));
+            if (value.token === token) { report = value; break; }
+        } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    assert.ok(report, 'cluster browse probe did not export');
+    assert.equal(report.status, 'completed');
+    const detail = report.focus;
+    assert.equal(detail.requested, true);
+    assert.ok(detail.memberIDs.length > 1 && detail.memberIDs.length < detail.allIDs.length);
+    assert.deepEqual([...detail.isolatedIDs].sort(), [...detail.memberIDs].sort());
+    assert.equal(detail.selectedID, detail.parent);
+    const prices = detail.isolatedViews.filter(view => view.role === 'price');
+    assert.deepEqual(prices.map(view => view.id).sort(), [...detail.memberIDs].sort(), 'every member must be visible as a price');
+    assert(detail.isolatedViews.every(view => detail.memberIDs.includes(view.id)), 'outside station remained visible');
+    assert(prices.every(view => view.contained), 'isolated station clipped');
+    assert.equal(detail.restored, true);
+    assert.deepEqual([...detail.restoredIDs].sort(), [...detail.allIDs].sort());
+});

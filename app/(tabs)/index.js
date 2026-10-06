@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import { useAppState } from '../../src/AppStateContext';
 import HomeScreen from '../../src/screens/cluster-lab/ClusterLabScreen';
 
@@ -7,7 +8,8 @@ export default function HomeRoute() {
     const { isClusterProbeSessionActive, hideRootReveal } = useAppState();
     // Retain the original live probe and non-iOS fallback. Normal iOS launches
     // use the native glass map without mounting the previous map or its fetches.
-    const useLegacyMap = Platform.OS !== 'ios' || (__DEV__ && isClusterProbeSessionActive);
+    const { clusterLabProbe } = useLocalSearchParams();
+    const useLegacyMap = Platform.OS !== 'ios' || (__DEV__ && isClusterProbeSessionActive && !clusterLabProbe);
     useEffect(() => {
         if (!useLegacyMap) hideRootReveal();
     }, [useLegacyMap, hideRootReveal]);
