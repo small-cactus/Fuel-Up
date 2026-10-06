@@ -22,4 +22,3 @@ Turn on Also show E85 in Fuel Type settings. E85 stations appear alongside your 
 - App Store Connect browser session expired. Processing completion, What to Test, and testing-group assignments still require a fresh sign-in; not yet verified.
 - App bundle main.jsbundle SHA-256: `3f05f0aedc639c16160bea222cb946e448b6f1ed095e17dc7723ef8857be1e19`.
 - Local evidence: `/tmp/FuelUp-TestFlight-25.xcarchive`, `/tmp/fuelup-testflight-25-archive.log`, `/tmp/fuelup-testflight-25-upload-retry.log`, `/tmp/fuelup-testflight-25-tests.log`.
-
