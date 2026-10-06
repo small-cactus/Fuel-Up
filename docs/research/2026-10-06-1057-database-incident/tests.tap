@@ -1,0 +1,126 @@
+TAP version 13
+# nearby-cache TRANSPORT_ERROR undefined
+# Subtest: fresh DB reads are cache-only, including forceRefresh; preserve payment and observation times
+ok 1 - fresh DB reads are cache-only, including forceRefresh; preserve payment and observation times
+  ---
+  duration_ms: 6.599375
+  ...
+# Subtest: exact radius, requested grade, and E85 restrictions survive DB normalization
+ok 2 - exact radius, requested grade, and E85 restrictions survive DB normalization
+  ---
+  duration_ms: 1.0815
+  ...
+# Subtest: empty cache and failed DB never invoke a fallback or write
+ok 3 - empty cache and failed DB never invoke a fallback or write
+  ---
+  duration_ms: 0.746792
+  ...
+# Subtest: serving returns raw reported prices only, with a 24-hour cutoff for the selected payment and grade
+ok 4 - serving returns raw reported prices only, with a 24-hour cutoff for the selected payment and grade
+  ---
+  duration_ms: 0.38375
+  ...
+# Subtest: E85 access survives old, empty and omitted quotes without filling a price
+ok 5 - E85 access survives old, empty and omitted quotes without filling a price
+  ---
+  duration_ms: 1.637125
+  ...
+# Subtest: independent AFDC stations appear only for E85 and never inherit another grade price
+ok 6 - independent AFDC stations appear only for E85 and never inherit another grade price
+  ---
+  duration_ms: 0.195792
+  ...
+# Subtest: supplemental E85 sources preserve provenance, no price, and exact radius
+ok 7 - supplemental E85 sources preserve provenance, no price, and exact radius
+  ---
+  duration_ms: 0.189834
+  ...
+# Subtest: read-back audit verifies real bytes, exact IDs, region, window, and unpriced coverage
+ok 8 - read-back audit verifies real bytes, exact IDs, region, window, and unpriced coverage
+  ---
+  duration_ms: 1.772417
+  ...
+# Subtest: validly hashed stale or wrong-region snapshots still fail the audit
+ok 9 - validly hashed stale or wrong-region snapshots still fail the audit
+  ---
+  duration_ms: 0.827125
+  ...
+# Subtest: replay preserves original prices and timestamps
+ok 10 - replay preserves original prices and timestamps
+  ---
+  duration_ms: 11.941375
+  ...
+# Subtest: corrupt or swapped archive is rejected before publishing
+ok 11 - corrupt or swapped archive is rejected before publishing
+  ---
+  duration_ms: 4.031916
+  ...
+# Subtest: only Storage and serving RPCs are used; original research job is never recollected
+ok 12 - only Storage and serving RPCs are used; original research job is never recollected
+  ---
+  duration_ms: 1.260958
+  ...
+# Subtest: failed archive verification records a bounded retry, never publishes
+ok 13 - failed archive verification records a bounded retry, never publishes
+  ---
+  duration_ms: 0.834458
+  ...
+# Subtest: public app credentials cannot start repair
+ok 14 - public app credentials cannot start repair
+  ---
+  duration_ms: 7.56975
+  ...
+# Subtest: all 50 states plus DC have exactly one fixed regional owner
+ok 15 - all 50 states plus DC have exactly one fixed regional owner
+  ---
+  duration_ms: 2.525542
+  ...
+# Subtest: regional batches never mix owners and counts reconcile across the US
+ok 16 - regional batches never mix owners and counts reconcile across the US
+  ---
+  duration_ms: 2.385625
+  ...
+# Subtest: ambiguous cross-region station identity stops catalog publishing
+ok 17 - ambiguous cross-region station identity stops catalog publishing
+  ---
+  duration_ms: 0.314917
+  ...
+# Subtest: same-region cross-state duplicates deduplicate, without double charging provider work
+ok 18 - same-region cross-state duplicates deduplicate, without double charging provider work
+  ---
+  duration_ms: 0.2495
+  ...
+# Subtest: every wrong or missing execution region is rejected before collection
+ok 19 - every wrong or missing execution region is rejected before collection
+  ---
+  duration_ms: 16.991708
+  ...
+# Subtest: unauthorized regional invocation never touches database or provider
+ok 20 - unauthorized regional invocation never touches database or provider
+  ---
+  duration_ms: 0.171041
+  ...
+# Subtest: health verifies runtime geography without claiming jobs; collect passes only the verified runtime region
+ok 21 - health verifies runtime geography without claiming jobs; collect passes only the verified runtime region
+  ---
+  duration_ms: 1.817959
+  ...
+# Subtest: worker rejects a wrong-region job before making any provider request
+ok 22 - worker rejects a wrong-region job before making any provider request
+  ---
+  duration_ms: 0.338375
+  ...
+# Subtest: generic worker cannot run without a known execution region
+ok 23 - generic worker cannot run without a known execution region
+  ---
+  duration_ms: 0.290833
+  ...
+1..23
+# tests 23
+# suites 0
+# pass 23
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 108.646959

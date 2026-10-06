@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-10-06T11:07:56.617Z",
+  "providerRequests": 0,
+  "results": [
+    {
+      "name": "fuel-national-east",
+      "httpStatus": 200,
+      "gatewayRegion": "us-east-1",
+      "body": {
+        "status": "region_verified",
+        "expectedRegion": "us-east-1",
+        "actualRegion": "us-east-1"
+      }
+    },
+    {
+      "name": "fuel-national-southwest",
+      "httpStatus": 200,
+      "gatewayRegion": "us-west-1",
+      "body": {
+        "status": "region_verified",
+        "expectedRegion": "us-west-1",
+        "actualRegion": "us-west-1"
+      }
+    },
+    {
+      "name": "fuel-national-northwest",
+      "httpStatus": 200,
+      "gatewayRegion": "us-west-2",
+      "body": {
+        "status": "region_verified",
+        "expectedRegion": "us-west-2",
+        "actualRegion": "us-west-2"
+      }
+    }
+  ]
+}

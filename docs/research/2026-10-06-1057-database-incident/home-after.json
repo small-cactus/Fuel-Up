@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-10-06T11:07:28.532Z",
+  "httpStatus": 200,
+  "elapsedMs": 1233,
+  "source": "national-cache",
+  "quotes": 47,
+  "summary": {
+    "stationCount": 105,
+    "quoteCount": 47,
+    "oldestObservedAt": "2026-10-06T09:05:46.042+00:00",
+    "newestObservedAt": "2026-10-06T10:05:24.004+00:00",
+    "pricePolicy": "reported-last-24-hours"
+  }
+}
