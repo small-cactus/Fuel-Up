@@ -22,4 +22,11 @@ Enable optional Driving Research in Settings, then drive normally. Check whether
 
 ## Distribution
 
-Archive/upload and tester availability verification pending.
+- Release archive succeeded; app, notification extension, and widget extension signatures verified, all version 1.0.0 (24).
+- Apple upload succeeded on October 6, 2026 at 15:30:01 UTC; App Store Connect visibly shows build 24 processing.
+- Xcode reported the same non-blocking missing Hermes framework dSYM warning as build 23. The uploaded package was accepted; Hermes native crash frames may lack symbols.
+- Verified the actual distribution app signature with `codesign --verify --deep --strict`; signed entitlements have `aps-environment=production` and `get-task-allow=false`.
+- Uploaded IPA: 45,500,245 bytes; SHA-256 `4621198f361e1e7da2e8e71b320f9395f414404ab894d35165931205ff2a471e`.
+- Tester availability verification pending.
+
+Local archive: `/tmp/FuelUp-TestFlight-24.xcarchive`. Logs: `/tmp/fuelup-testflight-24-archive.log`, `/tmp/fuelup-testflight-24-upload.log`, `/tmp/fuelup-testflight-24-tests.log`. Generated artifacts are not committed.
