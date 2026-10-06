@@ -35,6 +35,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   @Published var uploadSchedule="Checking connection"
   let manager=CLLocationManager()
   let activity=CMMotionActivityManager()
+  private let crossChecks=DrivingResearchCrossChecks()
   private var store:DrivingResearchStore?
   private let transport=DrivingResearchTransport()
   private var identity:ResearchIdentity?
@@ -142,11 +143,29 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     }
     if !running {
       running=true;sessionID=UUID().uuidString.lowercased()
-      guard record("lifecycle",["reason":reason,"os":UIDevice.current.systemVersion,"version":Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "", "build":Bundle.main.object(forInfoDictionaryKey:"CFBundleVersion") as? String ?? "", "background":UIApplication.shared.applicationState != .active]) else{return}
+      guard record("lifecycle",[
+        "reason":reason,"os":UIDevice.current.systemVersion,
+        "version":Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "",
+        "build":Bundle.main.object(forInfoDictionaryKey:"CFBundleVersion") as? String ?? "",
+        "background":UIApplication.shared.applicationState != .active,
+        "lowPowerMode":ProcessInfo.processInfo.isLowPowerModeEnabled,
+        "backgroundRefreshStatus":UIApplication.shared.backgroundRefreshStatus.rawValue,
+        "stepCountingAvailable":CMPedometer.isStepCountingAvailable(),
+        "walkingDistanceAvailable":CMPedometer.isDistanceAvailable(),"crossCheckVersion":1
+      ]) else{return}
       manager.startMonitoringSignificantLocationChanges()
+      manager.startMonitoringVisits()
       manager.startUpdatingLocation()
       activity.startActivityUpdates(to:.main) { [weak self] value in
         guard let value else {return};Task { @MainActor in self?.handleMotion(value) }
+      }
+    }
+    if let store {
+      crossChecks.start(store:store) { [weak self] kind,fields in
+        guard let self,self.enabled,self.consented,self.running,self.ready else{return false}
+        var evidence=fields
+        evidence["trackingContext"]=["lowPowerMode":ProcessInfo.processInfo.isLowPowerModeEnabled,"backgroundRefreshStatus":UIApplication.shared.backgroundRefreshStatus.rawValue,"sampledAt":Date().timeIntervalSince1970]
+        return self.record(kind,evidence)
       }
     }
     manager.requestLocation()
@@ -231,6 +250,8 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     detector=ResearchVisitDetector();saveDetector()
   }
   private func stopSensors() {
+    crossChecks.stop()
+    manager.stopMonitoringVisits()
     manager.stopUpdatingLocation();manager.stopMonitoringSignificantLocationChanges();activity.stopActivityUpdates()
     for region in manager.monitoredRegions where region.identifier.hasPrefix("research:") {manager.stopMonitoring(for:region)}
     running=false;fenceCount=0;lastMode=""
@@ -244,6 +265,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
         _=try await transport.send("delete",identity:id)
       }
       try store?.erase();try DrivingResearchTestNotifications.shared.erase();try ResearchIdentity.erase();DrivingResearchSync.shared.erase()
+      crossChecks.erase()
       for key in [Self.consentKey,"research.visits","research.stations","research.catalogCenter","research.lastCatalog","research.detector","research.lastUpload","research.lastUploadAttempt"] {UserDefaults.standard.removeObject(forKey:key)}
       DrivingResearchPushRegistration.shared.erase()
       identity=nil;participant="Not enrolled";visits=[];visitLabels=[:];notifiedVisitIDs=[];departureTimes=[:];promptedVisitIDs=[];confirmationVisit=nil;stations=[];stationCount=0;lastUpload=nil;lastUploadAttempt=nil;issue=nil;refreshCounts()
@@ -289,6 +311,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
         lastPersistedFix=fix.timestamp
         var payload=(try? JSONSerialization.jsonObject(with:JSONEncoder().encode(fix))) as? [String:Any] ?? [:]
         payload["quality"]=fix.rejection ?? "accepted";payload["mode"]=lastMode
+        if location.courseAccuracy.isFinite,location.courseAccuracy>=0 {payload["courseAccuracy"]=location.courseAccuracy}
         record("location",payload)
       }
       let changes=detector.process(fix,stations:stations)
@@ -303,6 +326,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
         if ResearchConfirmation.shouldPrompt(event:kind,visit:visit) {prompt(visit)}
       }
       if !changes.isEmpty {refreshConfirmations()}
+      if changes.contains(where:{$0.0 == "visit_departure" || $0.0 == "visit_gap"}) {crossChecks.drain()}
       saveDetector()
       if now-fix.timestamp<30,fix.accuracy>=0,fix.accuracy<150,!fix.simulated {
         refreshStations(around:fix);refreshFences(around:fix)
@@ -409,6 +433,18 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     record("diagnostic",["geofenceError":(error as NSError).code,"region":region?.identifier ?? ""])
   }
   func locationManager(_ manager:CLLocationManager,didEnterRegion region:CLRegion) {boundary(region,"enter")}
+  func locationManager(_ manager:CLLocationManager,didVisit visit:CLVisit) {
+    guard enabled,consented,ready,running else{return}
+    // Use only the cached station catalog. Apple visits never trigger a fuel
+    // label, notification, provider lookup, or an independent upload.
+    // Visit delivery can lag behind the moving catalog. Retain recent observed
+    // stations so a delayed departure can still be cross-checked locally.
+    var known:[String:ResearchStation]=[:]
+    for station in stations + visits.map(\.station) + [detector.active?.station].compactMap({$0}) {
+      known[station.id]=station
+    }
+    crossChecks.visit(visit,stations:Array(known.values))
+  }
   func locationManager(_ manager:CLLocationManager,didExitRegion region:CLRegion) {boundary(region,"exit")}
   func locationManager(_ manager:CLLocationManager,didDetermineState state:CLRegionState,for region:CLRegion) {boundary(region,"state_\(state.rawValue)")}
   private func boundary(_ region:CLRegion,_ transition:String) {

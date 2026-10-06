@@ -81,7 +81,7 @@
         "aps-environment": "development"
       },
       "infoPlist": {
-        "NSMotionUsageDescription": "Fuel Up uses motion signals to understand when you are driving toward a likely fuel stop.",
+        "NSMotionUsageDescription": "Fuel Up uses driving, walking, and step activity to understand station stops and improve fuel recommendations.",
         "ITSAppUsesNonExemptEncryption": false,
         "CADisableMinimumFrameDurationOnPhone": true,
         "LSApplicationQueriesSchemes": [

@@ -42,7 +42,7 @@ struct DrivingResearchConsent: View {
 
             VStack(spacing: 24) {
               consentRow("Share your activity", icon: "location.fill", color: .blue,
-                detail: "Share precise location, motion, times, station stops, and your answers. Collection continues in the background.")
+                detail: "Share location, motion, steps at stops, and your answers. Collection continues in the background.")
               consentRow("You’re in control", icon: "chart.bar.fill", color: .purple,
                 detail: "Pause anytime. Your data stays until you delete it.")
               consentRow("Help us improve", icon: "lock.fill", color: .green,
@@ -74,7 +74,7 @@ struct DrivingResearchConsent: View {
           ScrollView {
             VStack(alignment: .leading, spacing: 20) {
               Text("Driving Research").font(.title.bold())
-              Text("Fuel Up collects precise locations, motion, timestamps, station stops, and your visit answers to research and improve fuel recommendations. Collection continues in the background when enabled.")
+              Text("Fuel Up collects precise locations, motion, timestamps, station stops, and your visit answers to research and improve fuel recommendations. At station stops, it also collects step counts, estimated walking distance, and Apple’s arrival and departure estimates. Tracking conditions, such as Low Power Mode and location accuracy, help explain gaps. Collection continues in the background when enabled.")
               Text("Records are linked to a random participant ID. Location history can still identify places you visit; a random ID does not make it anonymous.")
               Text("Records are kept until you delete them. You can pause collection or delete the data on this phone and its synced research data from Driving Research in Settings.")
             }.padding(24)

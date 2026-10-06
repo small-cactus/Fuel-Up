@@ -13,7 +13,7 @@ final class DrivingResearchStore {
     try folder.setResourceValues(values)
     url = directory.appendingPathComponent("research.sqlite")
     guard sqlite3_open(url.path, &db) == SQLITE_OK else { throw failure() }
-    try execute("PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS events(id TEXT PRIMARY KEY, kind TEXT NOT NULL, recorded REAL NOT NULL, body BLOB NOT NULL, uploaded INTEGER NOT NULL DEFAULT 0); CREATE INDEX IF NOT EXISTS pending ON events(uploaded,recorded);")
+    try execute("PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS events(id TEXT PRIMARY KEY, kind TEXT NOT NULL, recorded REAL NOT NULL, body BLOB NOT NULL, uploaded INTEGER NOT NULL DEFAULT 0); CREATE INDEX IF NOT EXISTS pending ON events(uploaded,recorded); CREATE INDEX IF NOT EXISTS event_kind_time ON events(kind,recorded);")
     #if os(iOS)
     try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication], ofItemAtPath: directory.path)
     for suffix in ["", "-wal", "-shm"] where FileManager.default.fileExists(atPath: url.path + suffix) {
@@ -37,6 +37,25 @@ final class DrivingResearchStore {
       sqlite3_bind_text(s,1,event.id,-1,transient); sqlite3_bind_text(s,2,event.kind,-1,transient); sqlite3_bind_double(s,3,event.recordedAt)
       _ = data.withUnsafeBytes { sqlite3_bind_blob(s,4,$0.baseAddress,Int32(data.count),transient) }
       guard sqlite3_step(s) == SQLITE_DONE else { throw failure() }
+    }
+  }
+  func pendingPedometerVisits(since: Double) throws -> [ResearchEvent] {
+    try queue.sync {
+      let s=try statement("""
+        SELECT e.body FROM events e
+        WHERE e.kind IN ('visit_departure','visit_gap') AND e.recorded>=?
+        AND NOT EXISTS (
+          SELECT 1 FROM events p WHERE p.kind='visit_pedometer'
+          AND json_extract(json_extract(CAST(p.body AS TEXT),'$.payload'),'$.visitId')
+            = json_extract(json_extract(CAST(e.body AS TEXT),'$.payload'),'$.visitId')
+        ) ORDER BY e.recorded ASC LIMIT 1
+        """)
+      defer {sqlite3_finalize(s)}
+      sqlite3_bind_double(s,1,since)
+      let code=sqlite3_step(s)
+      if code == SQLITE_DONE {return []}
+      guard code == SQLITE_ROW else {throw failure()}
+      return [try JSONDecoder().decode(ResearchEvent.self,from:Data(bytes:sqlite3_column_blob(s,0),count:Int(sqlite3_column_bytes(s,0))))]
     }
   }
   private func scalar(_ sql: String) throws -> Int {
