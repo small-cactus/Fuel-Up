@@ -7,7 +7,7 @@ font=TTFont('/System/Library/Fonts/Supplemental/Arial Bold.ttf'); glyphs=font.ge
 root=Path('modules/fuel-up-map-kit-routing/ios/Resources/FuelIcons.xcassets')
 root.mkdir(parents=True, exist_ok=True)
 (root/'Contents.json').write_text(json.dumps({'info':{'author':'xcode','version':1}}))
-for key,text,color in [('regular','87','#FFFFFF'),('midgrade','89','#BFC5CD'),('premium','93','#D6AD42'),('diesel','D','#1E8C50'),('e85','E85','#F9D838')]:
+for key,text,color in [('regular','87','#F9D838'),('midgrade','89','#F9D838'),('premium','93','#F9D838'),('diesel','D','#1E8C50'),('e85','E85','#F9D838')]:
  size=15 if len(text)>2 else 20
  scale=size/upm;width=sum(glyphs[cmap[ord(c)]].width for c in text)*scale;x=25-width/2; paths=[]
  for c in text:

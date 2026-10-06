@@ -37,9 +37,7 @@ final class ClusterLabProbe {
     let fixture: [(Double, Double)] = [(0, 0), (0.00055, 0.00075), (-0.0005, -0.0008),
                                      (0.0011, -0.0006), (-0.001, 0.0007), (0.0001, 0.0015)]
     // The pair run isolates +1 travel; the normal six-station gate is unchanged.
-    let offsets = token.hasPrefix("browse-") ? [(0.0, 0.0), (0.0001, 0.0002), (-0.0001, -0.0002),
-      (0.009, 0.01), (-0.009, -0.01), (0.009, -0.01)] :
-      token.hasPrefix("roundtrip-") ? [(0.0, 0.0), (0.0, 0.0015), (0.0015, 0.0),
+    let offsets = token.hasPrefix("roundtrip-") ? [(0.0, 0.0), (0.0, 0.0015), (0.0015, 0.0),
       (0.0015, 0.0015), (-0.0015, 0.004), (0.0015, 0.004), (0.0, 0.00001), (0.0015, 0.00151)] :
       token.hasPrefix("overview-") ? [(0.0, 0.0), (0.0, 0.0001)] + Array(fixture.dropFirst(2)) :
       token.hasPrefix("location-") ? [(0.0, 0.0), (0.0, 0.00001), (0.0011, 0.0015), (-0.001, -0.0015)] :
@@ -52,9 +50,6 @@ final class ClusterLabProbe {
       ClusterLabStation(["id": "lab-\(index)", "latitude": center.latitude + offset.0,
                          "longitude": center.longitude + offset.1 + (token.hasPrefix("fit-user-") ? 0.04 : 0), "price": 3.10 + Double(index) * 0.10,
                          "name": "Probe station \(index)",
-                         "offersE85": token.hasPrefix("browse-") && index == 1,
-                         "offersDiesel": token.hasPrefix("browse-") && index == 2,
-                         "chipPrices": token.hasPrefix("browse-") && index == 1 ? "93 3.20\nE85 2.50" : "",
                          "isRecommended": token.hasPrefix("rapid-recommended-") && index == 1])
     })
     if isFit || token.hasPrefix("overview-") || token.hasPrefix("roundtrip-") { view.fitCamera(to: view.renderer.stations) }
@@ -88,39 +83,6 @@ final class ClusterLabProbe {
   func tick(time: Double) {
     guard let view, !finished else { return }
     if startTime == 0 { startTime = time }
-    if token.hasPrefix("browse-") {
-      let elapsed = time - startTime
-      if elapsed >= 1, stage < 0 {
-        stage = 0
-        baseline = view.renderer.frameSamples.last?["views"] as? [[String: Any]] ?? []
-        let owners = view.renderer.clusterOwners
-        let all = view.renderer.stations.map(\.id)
-        let parent = owners.values.sorted().first { owner in
-          let count = owners.values.filter { $0 == owner }.count
-          return count > 1 && count < all.count
-        }
-        focusDetails["allIDs"] = all
-        if let parent {
-          focusDetails["parent"] = parent
-          focusDetails["memberIDs"] = all.filter { (owners[$0] ?? $0) == parent }
-          focusDetails["requested"] = view.selectStation(parent)
-        }
-      }
-      if elapsed >= 3, stage == 0 {
-        stage = 1
-        focusDetails["isolatedIDs"] = view.renderer.stations.map(\.id)
-        focusDetails["selectedID"] = view.renderer.emphasis.selectedId ?? ""
-        focusDetails["isolatedViews"] = view.renderer.frameSamples.last?["views"] ?? []
-        focusDetails["fitBounds"] = [view.fitBounds.minX, view.fitBounds.minY, view.fitBounds.width, view.fitBounds.height]
-        focusDetails["restored"] = view.showAll()
-      }
-      if elapsed >= 5 {
-        stage = 2
-        focusDetails["restoredIDs"] = view.renderer.stations.map(\.id)
-        finish(status: "completed")
-      }
-      return
-    }
     if token.hasPrefix("contact-") {
       let elapsed = time - startTime
       let next = Int(max(0, elapsed - 1) / 1.5)

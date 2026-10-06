@@ -5,11 +5,8 @@ struct ClusterLabStation: Equatable {
   let latitude: Double
   let longitude: Double
   let price: Double
-  let comparisonPrice: Double
   let name: String
   let isRecommended: Bool
-  let fuelIcons: [String]
-  let chipPrices: String?
   var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
   var mapPoint: MKMapPoint { MKMapPoint(coordinate) }
 
@@ -24,15 +21,8 @@ struct ClusterLabStation: Equatable {
     // Infinity is an internal ordering sentinel only, never a displayed price.
     let price = reported.flatMap { $0.isFinite && $0 > 0 ? $0 : nil } ?? .infinity
     self.id = id; self.latitude = latitude; self.longitude = longitude; self.price = price
-    // An added E85-only station has no comparable gasoline quote. Its actual
-    // E85 value still appears in the chip, but cannot set the gasoline baseline.
-    comparisonPrice = value.keys.contains("comparisonPrice") ?
-      (value["comparisonPrice"] as? Double).flatMap { $0.isFinite && $0 > 0 ? $0 : nil } ?? .infinity : price
     name = value["name"] as? String ?? "Gas station"
     isRecommended = value["isRecommended"] as? Bool ?? false
-    fuelIcons = [("e85", value["offersE85"] as? Bool == true),
-                 ("diesel", value["offersDiesel"] as? Bool == true)].filter { $0.1 }.map { $0.0 }
-    chipPrices = (value["chipPrices"] as? String).flatMap { $0.isEmpty ? nil : $0 }
   }
 }
 
@@ -182,19 +172,18 @@ final class ClusterLabRenderer {
 
   init() { container.isUserInteractionEnabled = false }
 
-  func setStations(_ next: [ClusterLabStation], marketStations: [ClusterLabStation]? = nil) {
-    let snapshot = next.sorted { $0.comparisonPrice == $1.comparisonPrice ? $0.id < $1.id : $0.comparisonPrice < $1.comparisonPrice }
+  func setStations(_ next: [ClusterLabStation]) {
+    let snapshot = next.sorted { $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price }
     guard snapshot != stations else { return }
     // Keep the full search's identity-to-color table, independent of the culled
     // views and current cluster owners. Only new station data can replace it.
-    let marketSnapshot = marketStations ?? snapshot
-    markets = ClusterLabMarket.assess(marketSnapshot.map {
-      LabMarketQuote(id: $0.id, latitude: $0.latitude, longitude: $0.longitude, price: $0.comparisonPrice)
+    markets = ClusterLabMarket.assess(snapshot.map {
+      LabMarketQuote(id: $0.id, latitude: $0.latitude, longitude: $0.longitude, price: $0.price)
     })
     cheapestStationID = markets.values.first?.cheapestStationID
     // The ranked JS snapshot is authoritative, including preference adjustments
     // and availability-only E85. Legacy probe fixtures retain raw-price fallback.
-    recommendedStationID = marketSnapshot.first(where: \.isRecommended)?.id ?? cheapestStationID
+    recommendedStationID = snapshot.first(where: \.isRecommended)?.id ?? cheapestStationID
     for station in snapshot {
       var assessment = markets[station.id] ?? .unknown
       assessment.recommendedStationID = recommendedStationID
@@ -231,7 +220,7 @@ final class ClusterLabRenderer {
   }
 
   private func makePill(_ motion: LabStationMotion) -> ClusterLabPill {
-    let pill = ClusterLabPill(stationID: motion.station.id, price: motion.station.price, name: motion.station.name, fuelIcons: motion.station.fuelIcons, chipPrices: motion.station.chipPrices)
+    let pill = ClusterLabPill(stationID: motion.station.id, price: motion.station.price, name: motion.station.name)
     addFocusAction(pill, id: motion.station.id)
     motion.pill = pill
     return pill
@@ -267,7 +256,7 @@ final class ClusterLabRenderer {
     let candidates = stations.compactMap { station -> LabProjectedStation? in
       let point = map.convert(station.coordinate, toPointTo: map)
       guard point.x.isFinite, point.y.isFinite, visible.contains(point) else { return nil }
-      return LabProjectedStation(id: station.id, price: station.comparisonPrice, point: point, isRecommended: station.id == recommendedStationID)
+      return LabProjectedStation(id: station.id, price: station.price, point: point, isRecommended: station.id == recommendedStationID)
     }
     let now = CACurrentMediaTime()
     let interval = now - projectionTime
@@ -322,7 +311,7 @@ final class ClusterLabRenderer {
         motions[station.id] = motion
         if ownerId == station.id { _ = makePill(motion) }
         else if badges[ownerId] == nil {
-          let badge = ClusterLabPill(stationID: owner.id, price: owner.price, name: owner.name, fuelIcons: owner.fuelIcons, chipPrices: owner.chipPrices)
+          let badge = ClusterLabPill(stationID: owner.id, price: owner.price, name: owner.name)
           addFocusAction(badge, id: ownerId)
           badges[ownerId] = badge
         }
@@ -607,7 +596,7 @@ final class ClusterLabRenderer {
         // The first arriving mover becomes the accumulator in place. The effect
         // view never remounts and no duplicate glass surface flashes underneath.
         badge = pill; first.pill = nil; badges[ownerId] = badge
-        badge.adoptCluster(stationID: ownerId, price: owner.station.price, name: owner.station.name, fuelIcons: owner.station.fuelIcons, chipPrices: owner.station.chipPrices)
+        badge.adoptCluster(stationID: ownerId, price: owner.station.price, name: owner.station.name)
         addFocusAction(badge, id: ownerId)
       } else { continue }
       var center = owner.pill?.view.center ?? project(owner.point, map: map)

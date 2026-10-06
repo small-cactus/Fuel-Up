@@ -15,7 +15,7 @@ test('Home shares its fallback GPS origin so Trends searches the same radius cen
         '../../PreferencesContext':{usePreferences:()=>({preferences:{preferredOctane:'regular',searchRadiusMiles:5}})},
         '../../lib/deviceLocationCache':{getLastDeviceLocationRegion:async()=>null},
         '../../services/fuel':{getCachedFuelPriceSnapshot:async()=>null,refreshFuelPriceSnapshot:async query=>{queries.push(query);return {snapshot:{}};}},
-        './homeFuelStations':{buildHomeFuelStations:()=>[]},
+        './stationCardModel':{buildLabStations:()=>[]},
     }).default;
     hook(true);t.after(effect());
     await new Promise(setImmediate);
@@ -39,7 +39,7 @@ test('Home publishes local data then refreshes DB on focus and foreground; clean
         '../../PreferencesContext':{usePreferences:()=>({preferences:{preferredOctane:'regular',searchRadiusMiles:5}})},
         '../../lib/deviceLocationCache':{},
         '../../services/fuel':{getCachedFuelPriceSnapshot:async()=>({topStations:['cached']}),refreshFuelPriceSnapshot:()=>{calls++;return new Promise(resolve=>resolveRefresh=resolve);}},
-        './homeFuelStations':{buildHomeFuelStations:s=>s?.topStations||[]},
+        './stationCardModel':{buildLabStations:s=>s?.topStations||[]},
     }).default;
     hook(true);cleanup=effect();
     await new Promise(setImmediate);
@@ -67,7 +67,7 @@ test('Home removes a quote immediately after its 24-hour expiry without a networ
         '../../PreferencesContext':{usePreferences:()=>({preferences:{preferredOctane:'regular',searchRadiusMiles:5}})},
         '../../lib/deviceLocationCache':{},
         '../../services/fuel':{getCachedFuelPriceSnapshot:async()=>({topStations:[quote]}),refreshFuelPriceSnapshot:async()=>{calls++;return {snapshot:{topStations:[quote]}};}},
-        './homeFuelStations':{buildHomeFuelStations:s=>s.topStations.filter(q=>isFreshReportedQuote(q))},
+        './stationCardModel':{buildLabStations:s=>s.topStations.filter(q=>isFreshReportedQuote(q))},
     }).default;
     hook(true);const cleanup=effect();t.after(cleanup);
     await new Promise(setImmediate);
@@ -122,7 +122,7 @@ test('cached station distances are recalculated from the current search center b
         '../../PreferencesContext':{usePreferences:()=>({preferences:{preferredOctane:'regular',searchRadiusMiles:5}})},
         '../../lib/deviceLocationCache':{},
         '../../services/fuel':{getCachedFuelPriceSnapshot:async()=>({quote:stale,topStations:[stale]}),refreshFuelPriceSnapshot:async()=>({snapshot:{quote:stale,topStations:[stale]}})},
-        './homeFuelStations':{buildHomeFuelStations:s=>[s.quote,...s.topStations].filter(q=>q.distanceMiles<=5)},
+        './stationCardModel':{buildLabStations:s=>[s.quote,...s.topStations].filter(q=>q.distanceMiles<=5)},
     }).default;
     hook(true);t.after(effect());await new Promise(setImmediate);
     assert.equal(results.at(-1).stations.length,2);
@@ -143,7 +143,7 @@ test('Home publishes map origin before an unresolved price-cache read', async t 
         '../../PreferencesContext':{usePreferences:()=>({preferences:{preferredOctane:'regular',searchRadiusMiles:6}})},
         '../../lib/deviceLocationCache':{},
         '../../services/fuel':{getCachedFuelPriceSnapshot:()=>{readStarted=true;return new Promise(()=>{});}},
-        './homeFuelStations':{buildHomeFuelStations:()=>[]},
+        './stationCardModel':{buildLabStations:()=>[]},
     }).default;
     hook(true); t.after(effect());
     await new Promise(setImmediate);
@@ -173,7 +173,7 @@ for (const cachedFresh of [true, false]) {
                 refreshFuelPriceSnapshot: async () => ({ snapshot: { cacheKey: 'fresh', topStations: ['fresh'] } }),
                 flushCachedEntry: key => { writes.push(key); return new Promise(resolve => { finishWrite = resolve; }); },
             },
-            './homeFuelStations': { buildHomeFuelStations: s => s.topStations },
+            './stationCardModel': { buildLabStations: s => s.topStations },
         }).default;
         hook(true); t.after(effect()); await new Promise(setImmediate);
         assert.equal(results.some(v => v.loaded), false);
@@ -183,31 +183,3 @@ for (const cachedFresh of [true, false]) {
         if (cachedFresh) { finishWrite(); await new Promise(setImmediate); }
     });
 }
-
-test('Also show E85 reads both cached grades without restricting the selected-fuel search', async t => {
-    let effect;
-    const queries = [], combined = [];
-    const hook = load('src/screens/cluster-lab/useClusterLabStations.js', {
-        '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ connected: true }) },
-        react: { useEffect: fn => { effect = fn; }, useMemo: fn => fn(), useState: () => [null, () => {}] },
-        'react-native': { AppState: { currentState: 'active', addEventListener: () => ({ remove() {} }) } },
-        'expo-location': {},
-        '../../AppStateContext': { useAppState: () => ({ resolvedFuelSearchContext: { latitude: 27, longitude: -82 } }) },
-        '../../PreferencesContext': { usePreferences: () => ({ preferences: { preferredOctane: 'premium', requiresE85: true, searchRadiusMiles: 6 } }) },
-        '../../lib/deviceLocationCache': {},
-        '../../services/fuel': {
-            getCachedFuelPriceSnapshot: async query => ({ topStations: [query.fuelType] }),
-            refreshFuelPriceSnapshot: async query => {
-                queries.push(query);
-                return { snapshot: { topStations: [query.fuelType] } };
-            },
-        },
-        './homeFuelStations': { buildHomeFuelStations: (primary, ethanol) => {
-            combined.push([primary.topStations, ethanol.topStations]); return [];
-        } },
-    }).default;
-    hook(true); t.after(effect()); await new Promise(setImmediate);
-    assert.deepEqual(queries.map(q => q.fuelType), ['premium', 'e85']);
-    assert(queries.every(q => q.requiresE85 === false));
-    assert.deepEqual(combined, [[['premium'], ['e85']], [['premium'], ['e85']]]);
-});
