@@ -1,0 +1,27 @@
+TAP version 13
+# Subtest: Swift Glass Lab renders timely transitions and preserves native container geometry
+ok 1 - Swift Glass Lab renders timely transitions and preserves native container geometry
+  ---
+  duration_ms: 29864.52675
+  ...
+# 26 native connection frames during committed merges; no false parent bridges
+# Visible contact resistance 4.77pt over 4 samples
+# Native stretch: 23 separated samples before recoil; release gaps 27.6, 29.3, 28.7, 42.2, 57.4, 31.5, 39.0, 34.7, 43.4, 67.9, 33.7, 38.3pt
+# Main price recoil 20.31pt; 55 identity-bound outward copies
+# Maximum rendered rebound 17.85pt
+# Longest transition 248ms; maximum measured travel 1094.13pt/frame
+# 1645 native frames; 113 transitions; /Users/anthonyh/Library/Developer/CoreSimulator/Devices/0EE3DFFD-087C-483C-A651-C55C59A719A3/data/Containers/Data/Application/A9B0BA8E-25E7-420C-92FD-F2E528B83B6B/Documents/cluster-lab-probe.json
+# Subtest: E85 glass stays yellow through live split and merge without tinting other stations
+ok 2 - E85 glass stays yellow through live split and merge without tinting other stations
+  ---
+  duration_ms: 29575.351375
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 59533.238917

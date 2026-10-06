@@ -45,7 +45,7 @@ export default function useClusterLabStations(active) {
             const stations = buildLabStations(localized, { origin, radiusMiles, minimumRating, fuelGrade: fuelType, requiresE85, preferredBrands: preferences.preferredBrands, fuelMemberships: preferences.fuelMemberships }, extra);
             setResult({ scope, origin: { latitude: origin.latitude, longitude: origin.longitude }, stations, loaded: true });
             clearTimeout(expiryTimer);
-            const expirations = stations.map(station => Date.parse(station.updatedAt) + REPORTED_PRICE_MAX_AGE_MS).filter(Number.isFinite);
+            const expirations = stations.flatMap(station => [station.updatedAt, station.secondaryUpdatedAt].map(date => Date.parse(date) + REPORTED_PRICE_MAX_AGE_MS)).filter(Number.isFinite);
             if (expirations.length) {
                 // Remove an expired price even while idle/offline. This only
                 // re-filters the snapshot; it does not make a network request.

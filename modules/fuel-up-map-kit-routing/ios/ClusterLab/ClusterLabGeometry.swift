@@ -1,13 +1,15 @@
 import Foundation
 import CoreGraphics
 
-// Pure screen-space broad phase. The recommendation owns its cluster; other
-// representatives use stable price/ID order. Hysteresis prevents membership chatter at a contact boundary.
+// Pure screen-space broad phase. Yellow E85 stations lead mixed clusters,
+// then recommendation and stable price/ID order break ties. Hysteresis prevents
+// membership chatter at a contact boundary.
 struct LabProjectedStation {
   let id: String
   let price: Double
   let point: CGPoint
   var isRecommended: Bool = false
+  var highlightE85: Bool = false
 }
 
 enum ClusterLabGeometry {
@@ -81,6 +83,7 @@ enum ClusterLabGeometry {
   static func owners(_ stations: [LabProjectedStation], previous: [String: String], selectedId: String? = nil,
                      displayOffsets: [String: CGFloat] = [:], pillWidth: CGFloat = pillSize.width) -> [String: String] {
     let sorted = stations.sorted {
+      if $0.highlightE85 != $1.highlightE85 { return $0.highlightE85 }
       if $0.isRecommended != $1.isRecommended { return $0.isRecommended }
       return $0.price == $1.price ? $0.id < $1.id : $0.price < $1.price
     }

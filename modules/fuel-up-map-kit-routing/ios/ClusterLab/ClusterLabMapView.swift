@@ -292,8 +292,8 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     let start = xs[(gapIndex + 1) % xs.count]
     let points = stations.map { station -> LabProjectedStation in
       let p = station.mapPoint
-      return LabProjectedStation(id: station.id, price: station.price,
-        point: CGPoint(x: p.x < start ? p.x + world : p.x, y: p.y), isRecommended: station.isRecommended)
+      return LabProjectedStation(id: station.id, price: station.comparisonPrice,
+        point: CGPoint(x: p.x < start ? p.x + world : p.x, y: p.y), isRecommended: station.isRecommended, highlightE85: station.highlightE85)
     }
     let projectedLocation = location.map { CGPoint(x: $0.x < start ? $0.x + world : $0.x, y: $0.y) }
     let maximumScale = bounds.width / (250 * MKMapPointsPerMeterAtLatitude(first.latitude))

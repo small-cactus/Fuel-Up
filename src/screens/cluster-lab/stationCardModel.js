@@ -1,4 +1,5 @@
 import { buildVisibleStations } from '../../lib/visibleStations.js';
+import { getFuelGradeMeta } from '../../lib/fuelGrade.js';
 import { stationOffersE85 } from '../../lib/stationPreferences.js';
 
 export function buildLabStations(snapshot, options = {}, e85Snapshot = null) {
@@ -7,8 +8,19 @@ export function buildLabStations(snapshot, options = {}, e85Snapshot = null) {
         ? buildVisibleStations(e85Snapshot, { ...options, fuelGrade: 'e85', requiresE85: false }) : [];
     const ids = new Set(main.map(station => station.id));
     const ethanolIDs = new Set(extra.map(station => station.id));
+    const primaryByID = new Map(main.map(station => [station.id, station]));
+    const ethanolByID = new Map(extra.map(station => [station.id, station]));
+    const priceText = value => Number.isFinite(value) && value > 0 ? `$${value.toFixed(2)}` : '—';
+    const hasDualPrices = station => options.requiresE85 && options.fuelGrade !== 'e85' &&
+        (stationOffersE85(station) || ethanolIDs.has(station.id));
     return [...main, ...extra.filter(station => !ids.has(station.id))].map((station, index) => ({
         ...station,
+        dualPrices: hasDualPrices(station) ? {
+            primaryLabel: getFuelGradeMeta(options.fuelGrade).octane,
+            primaryPrice: priceText(primaryByID.get(station.id)?.price),
+            e85Price: priceText(ethanolByID.get(station.id)?.price),
+        } : null,
+        secondaryUpdatedAt: hasDualPrices(station) ? ethanolByID.get(station.id)?.updatedAt : null,
         // Keep the selected grade's recommendation; do not rank cheaper ethanol
         // against gasoline. Added E85 quotes still retain their own display price.
         isRecommended: index === 0,

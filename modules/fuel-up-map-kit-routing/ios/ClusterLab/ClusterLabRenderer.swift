@@ -267,7 +267,7 @@ final class ClusterLabRenderer {
     let candidates = stations.compactMap { station -> LabProjectedStation? in
       let point = map.convert(station.coordinate, toPointTo: map)
       guard point.x.isFinite, point.y.isFinite, visible.contains(point) else { return nil }
-      return LabProjectedStation(id: station.id, price: station.comparisonPrice, point: point, isRecommended: station.id == recommendedStationID)
+      return LabProjectedStation(id: station.id, price: station.comparisonPrice, point: point, isRecommended: station.id == recommendedStationID, highlightE85: station.highlightE85)
     }
     let now = CACurrentMediaTime()
     let interval = now - projectionTime

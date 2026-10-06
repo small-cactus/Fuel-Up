@@ -17,7 +17,7 @@ enum ClusterLabFocus {
               y: center.y + (point.y - target.point.y) * scale)
     }
     func clear(_ scale: CGFloat) -> Bool {
-      let points = stations.map { LabProjectedStation(id: $0.id, price: $0.price, point: project($0.point, scale), isRecommended: $0.isRecommended) }
+      let points = stations.map { LabProjectedStation(id: $0.id, price: $0.price, point: project($0.point, scale), isRecommended: $0.isRecommended, highlightE85: $0.highlightE85) }
       let contactFrames = Dictionary(uniqueKeysWithValues: points.map {
         ($0.id, ClusterLabGeometry.pillFrame(at: $0.point, selected: $0.id == id))
       })

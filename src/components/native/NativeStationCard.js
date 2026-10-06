@@ -21,6 +21,8 @@ export default function NativeStationCard({ station, rank, fuelGrade, isDark, th
     const Header = stacked ? VStack : HStack;
     const PriceRow = stacked ? VStack : HStack;
     const Subtitle = stacked ? VStack : HStack;
+    const dualPrices = station?.dualPrices;
+    const dualPriceSize = stacked ? (compact ? 30 : 44) * scale : Math.min(34 * scale, (width - 84) / 9);
     const priceSize = Math.min((compact ? 30 : 44) * scale, (width - 68) / 4.2);
     return <Host ignoreSafeArea="all" matchContents={{ vertical: true }} colorScheme={isDark ? 'dark' : 'light'}
         style={{ width: '100%' }} onLayoutContent={event => onLayout?.({ nativeEvent: { layout: event.nativeEvent } })}>
@@ -49,7 +51,17 @@ export default function NativeStationCard({ station, rank, fuelGrade, isDark, th
                     ]} />
                 </HStack>
             </Header>
-            {Number.isFinite(price) ? <PriceRow alignment={stacked ? 'leading' : 'firstTextBaseline'} spacing={6}>
+            {dualPrices ? <PriceRow alignment={stacked ? 'leading' : 'top'} spacing={stacked ? 8 : 20}>
+                {[[dualPrices.primaryLabel, dualPrices.primaryPrice], ['E85', dualPrices.e85Price]].map(([label, value]) =>
+                    <VStack key={label} alignment="leading" spacing={2}>
+                        <Text modifiers={text(12, 'semibold', themeColors.textOpacity)}>{label}</Text>
+                        <HStack alignment="firstTextBaseline" spacing={3}>
+                            <Text modifiers={[font({ size: dualPriceSize, weight: 'bold' }), foregroundStyle(themeColors.text), lineLimit(1),
+                                accessibilityLabel(`${label}: ${value === '—' ? 'Price unavailable' : value} per gallon`)]}>{value}</Text>
+                            {value !== '—' && <Text modifiers={text(12, 'regular', themeColors.textOpacity)}>/ gal</Text>}
+                        </HStack>
+                    </VStack>)}
+            </PriceRow> : Number.isFinite(price) ? <PriceRow alignment={stacked ? 'leading' : 'firstTextBaseline'} spacing={6}>
                 <Text modifiers={[font({ size: priceSize, weight: 'bold' }), foregroundStyle(themeColors.text), lineLimit(1)]}>${price.toFixed(2)}</Text>
                 <Text modifiers={text(15, 'regular', themeColors.textOpacity)}>/ gal</Text>
             </PriceRow> : <Text modifiers={text(12, 'medium', themeColors.textOpacity)}>{station ? 'E85 available · Price unavailable' : isRefreshing ? 'Checking nearby prices…' : 'Price unavailable'}</Text>}

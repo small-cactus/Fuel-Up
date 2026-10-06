@@ -134,6 +134,11 @@ test('Also show E85 adds stations without removing gasoline or duplicating share
     assert.deepEqual(stations.map(s => s.highlightE85), [false, true, true, true]);
     assert.deepEqual(stations.filter(s => s.isRecommended).map(s => s.id), ['gas']);
     assert.equal(stations[1].price, 3.8);
+    assert.deepEqual(stations[1].dualPrices, { primaryLabel: '93', primaryPrice: '$3.80', e85Price: '$2.50' });
+    assert.deepEqual(stations[2].dualPrices, { primaryLabel: '93', primaryPrice: '—', e85Price: '$2.10' });
+    assert.equal(stations[3].dualPrices.e85Price, '—');
+    const stale = buildLabStations(primary, options, { topStations: extra.topStations.map(s => ({ ...s, updatedAt: '2020-01-01T00:00:00Z' })) });
+    assert.equal(stale.find(s => s.id === 'both').dualPrices.e85Price, '—');
     assert.equal(stations[2].fuelType, 'e85');
     assert.equal(stations[2].price, 2.1);
     assert.equal(stations[2].comparisonPrice, null);

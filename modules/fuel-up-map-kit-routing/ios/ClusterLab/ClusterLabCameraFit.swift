@@ -23,7 +23,7 @@ enum ClusterLabCameraFit {
     let minX = anchors.map(\.x).min()!, maxX = anchors.map(\.x).max()!
     let minY = anchors.map(\.y).min()!, maxY = anchors.map(\.y).max()!
     let points = stations.map {
-      LabProjectedStation(id: $0.id, price: $0.price, point: CGPoint(x: $0.point.x - minX, y: $0.point.y - minY), isRecommended: $0.isRecommended)
+      LabProjectedStation(id: $0.id, price: $0.price, point: CGPoint(x: $0.point.x - minX, y: $0.point.y - minY), isRecommended: $0.isRecommended, highlightE85: $0.highlightE85)
     }
     let dx = maxX - minX, dy = maxY - minY
     var scale = min(maximumScale, dx > 0 ? (usable.width - 84) / dx : maximumScale,
@@ -53,7 +53,7 @@ enum ClusterLabCameraFit {
     for boundary in boundaries {
       let projected = points.map {
         LabProjectedStation(id: $0.id, price: $0.price,
-                            point: CGPoint(x: $0.point.x * scale, y: $0.point.y * scale), isRecommended: $0.isRecommended)
+                            point: CGPoint(x: $0.point.x * scale, y: $0.point.y * scale), isRecommended: $0.isRecommended, highlightE85: $0.highlightE85)
       }
       let owners = ClusterLabGeometry.owners(projected, previous: [:])
       let byId = Dictionary(uniqueKeysWithValues: points.map { ($0.id, $0.point) })
@@ -96,7 +96,7 @@ enum ClusterLabCameraFit {
     let byId = Dictionary(uniqueKeysWithValues: points.map { ($0.id, $0.point) })
     func rightEdge(_ scale: CGFloat) -> CGFloat {
       let projected = points.map { LabProjectedStation(id: $0.id, price: $0.price,
-        point: CGPoint(x: $0.point.x * scale, y: $0.point.y * scale), isRecommended: $0.isRecommended) }
+        point: CGPoint(x: $0.point.x * scale, y: $0.point.y * scale), isRecommended: $0.isRecommended, highlightE85: $0.highlightE85) }
       let owners = ClusterLabGeometry.owners(projected, previous: [:])
       var edge = dx * scale + 42
       for point in points {

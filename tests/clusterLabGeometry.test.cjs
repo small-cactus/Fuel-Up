@@ -92,6 +92,22 @@ for input in [[recommended, cheaper], [cheaper, recommended]] {
   let grouped = ClusterLabGeometry.owners(input, previous: [:])
   assert(grouped["recommended"] == "recommended" && grouped["cheaper"] == "recommended")
 }
+// E85 wins a mixed cluster, even against the selected recommendation and
+// without a current E85 price. Among yellow peers, existing stable ordering wins.
+let yellow = LabProjectedStation(id: "yellow", price: .infinity, point: CGPoint(x: 60, y: 0), highlightE85: true)
+for input in [[recommended, cheaper, yellow], [yellow, cheaper, recommended]] {
+  let grouped = ClusterLabGeometry.owners(input, previous: ["cheaper": "recommended"])
+  assert(grouped.values.allSatisfy { $0 == "yellow" })
+}
+let yellowPeer = LabProjectedStation(id: "yellow-peer", price: 4, point: CGPoint(x: 65, y: 0), highlightE85: true)
+let yellowOwners = ClusterLabGeometry.owners([yellow, yellowPeer, cheaper], previous: [:])
+assert(yellowOwners.values.allSatisfy { $0 == "yellow-peer" })
+assert(ClusterLabGeometry.owners([cheaper, yellowPeer, yellow], previous: [:]) == yellowOwners)
+let distantYellow = LabProjectedStation(id: yellow.id, price: yellow.price, point: CGPoint(x: 500, y: 0), highlightE85: true)
+assert(ClusterLabGeometry.owners([recommended, cheaper, distantYellow], previous: [:])["cheaper"] == "recommended")
+// Turning the yellow flag off restores ordinary recommendation ownership.
+let plain = LabProjectedStation(id: yellow.id, price: yellow.price, point: yellow.point)
+assert(ClusterLabGeometry.owners([recommended, cheaper, plain], previous: ["recommended": "yellow"])["yellow"] == "recommended")
 // A still-connected badge pulls away through the existing hysteresis band.
 assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 84, y: 32)) == 0)
 assert(ClusterLabGeometry.badgeStretch(separation: CGPoint(x: 102, y: 0)) == 9)

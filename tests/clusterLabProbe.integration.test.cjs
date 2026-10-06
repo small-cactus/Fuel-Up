@@ -907,7 +907,7 @@ test('E85 glass stays yellow through live split and merge without tinting other 
     assert.equal(report.status, 'completed');
     assert.equal(report.stagesCompleted, 11);
     assert.ok(report.samples.length >= 250);
-    let yellowPrices = 0, yellowMovers = 0;
+    let yellowPrices = 0, yellowMovers = 0, yellowBadges = 0;
     for (const frame of report.samples) {
         for (const view of frame.views) {
             const yellow = ['lab-1', 'lab-3'].includes(view.tintOwner);
@@ -916,9 +916,12 @@ test('E85 glass stays yellow through live split and merge without tinting other 
             expected.forEach((channel, i) => assert.ok(Math.abs(channel - view.materialTint[i]) < 0.00001, `wrong material for ${view.id}`));
             assert.equal(view.glassGroup < 0, yellow, 'yellow and ordinary glass shared a composite');
             assert.ok(view.contained, 'glass clipped during transition');
+            if (yellow) assert.ok(['lab-1', 'lab-3'].includes(view.clusterOwner), 'yellow member hidden under an ordinary parent');
+            if (yellow && view.role === 'badge') yellowBadges++;
             if (yellow && view.role === 'price') yellowPrices++;
             if (yellow && ['merge', 'split'].includes(view.role)) yellowMovers++;
         }
     }
     assert.ok(yellowPrices > 20 && yellowMovers > 10, 'missing yellow price or moving glass coverage');
+    assert.ok(yellowBadges > 20, 'yellow stations never owned a cluster count');
 });
