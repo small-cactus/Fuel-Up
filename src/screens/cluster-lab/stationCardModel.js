@@ -1,4 +1,22 @@
-export { buildVisibleStations as buildLabStations } from '../../lib/visibleStations.js';
+import { buildVisibleStations } from '../../lib/visibleStations.js';
+import { stationOffersE85 } from '../../lib/stationPreferences.js';
+
+export function buildLabStations(snapshot, options = {}, e85Snapshot = null) {
+    const main = buildVisibleStations(snapshot, { ...options, requiresE85: false });
+    const extra = options.requiresE85 && options.fuelGrade !== 'e85'
+        ? buildVisibleStations(e85Snapshot, { ...options, fuelGrade: 'e85', requiresE85: false }) : [];
+    const ids = new Set(main.map(station => station.id));
+    const ethanolIDs = new Set(extra.map(station => station.id));
+    return [...main, ...extra.filter(station => !ids.has(station.id))].map((station, index) => ({
+        ...station,
+        // Keep the selected grade's recommendation; do not rank cheaper ethanol
+        // against gasoline. Added E85 quotes still retain their own display price.
+        isRecommended: index === 0,
+        comparisonPrice: !options.fuelGrade || station.fuelType === options.fuelGrade ? station.price : null,
+        highlightE85: Boolean((options.requiresE85 || options.fuelGrade === 'e85') &&
+            (stationOffersE85(station) || ethanolIDs.has(station.id))),
+    }));
+}
 
 export function stationAge(updatedAt, now = Date.now()) {
     const date = new Date(updatedAt).getTime();

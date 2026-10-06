@@ -24,15 +24,23 @@ final class ClusterLabGlassGroups {
   }
 
   func update(_ views: [String: UIView], families: [String: String], anchors: [String: Int],
-              highlightedFamilies: Set<String>) -> [String: String] {
+              highlightedFamilies: Set<String>, yellowIDs: Set<String> = []) -> [String: String] {
     let items = views.map { LabGlassItem(id: $0.key, frame: $0.value.frame, family: families[$0.key], anchorPriority: anchors[$0.key] ?? 0) }
     // Prepare the shared effect before native glass reaches visible contact.
     // The effect's 36pt spacing and strict vertical contact remain unchanged.
-    let layout = ClusterLabGlassGrouping.isolatedLayout(items, previous: assignments,
+    let layout = ClusterLabGlassGrouping.isolatedLayout(items.filter { !yellowIDs.contains($0.id) }, previous: assignments.filter { $0.value >= 0 },
       highlightedFamilies: highlightedFamilies, preparation: true)
-    let next = layout.groups
-    let connections = ClusterLabGlassGrouping.isolatedLayout(items, previous: next,
+    var next = layout.groups
+    var connections = ClusterLabGlassGrouping.isolatedLayout(items.filter { !yellowIDs.contains($0.id) }, previous: next,
       highlightedFamilies: highlightedFamilies).connections
+    // A separate stable namespace prevents yellow from tinting green/neutral
+    // pills through UIKit's shared native glass composite, including movers.
+    let yellow = ClusterLabGlassGrouping.layout(items.filter { yellowIDs.contains($0.id) },
+      previous: assignments.filter { $0.value < 0 }.mapValues { -$0 - 1 }, preparation: true)
+    var layers = layout.layers
+    for (id, group) in yellow.groups { next[id] = -group - 1 }
+    for (id, connection) in yellow.connections { connections[id] = connection }
+    for (group, layer) in yellow.layers { layers[-group - 1] = (layout.layers.values.max() ?? -1) + 1 + layer }
     let live = Set(views.values.map(ObjectIdentifier.init))
     viewReparents = viewReparents.filter { live.contains($0.key) }
     for container in containers.values where container.frame != root.bounds { container.frame = root.bounds }
@@ -57,7 +65,7 @@ final class ClusterLabGlassGroups {
         for view in ordered { parent.bringSubviewToFront(view) }
       }
     }
-    let orderedContainers = used.sorted { layout.layers[$0]! < layout.layers[$1]! }.compactMap { containers[$0] }
+    let orderedContainers = used.sorted { layers[$0]! < layers[$1]! }.compactMap { containers[$0] }
     if !root.subviews.elementsEqual(orderedContainers, by: { $0 === $1 }) {
       for container in orderedContainers { root.bringSubviewToFront(container) }
     }
@@ -71,7 +79,7 @@ final class ClusterLabGlassGroups {
   }
   func containsHighlight(_ view: UIView) -> Bool {
     guard let group = group(of: view) else { return false }
-    return group % 2 == 1
+    return group < 0 || group % 2 == 1
   }
   func paintLayer(of view: UIView) -> Int? {
     guard let group = group(of: view), let container = containers[group] else { return nil }

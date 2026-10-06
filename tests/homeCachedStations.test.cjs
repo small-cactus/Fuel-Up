@@ -183,3 +183,33 @@ for (const cachedFresh of [true, false]) {
         if (cachedFresh) { finishWrite(); await new Promise(setImmediate); }
     });
 }
+
+test('Also show E85 keeps gasoline available while the extra grade refreshes', async t => {
+    let effect, finishE85;
+    const queries = [], published = [];
+    const hook = load('src/screens/cluster-lab/useClusterLabStations.js', {
+        '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ connected: true }) },
+        react: { useEffect: fn => { effect = fn; }, useMemo: fn => fn(), useState: () => [null, () => {}] },
+        'react-native': { AppState: { currentState: 'active', addEventListener: () => ({ remove() {} }) } },
+        'expo-location': {},
+        '../../AppStateContext': { useAppState: () => ({ resolvedFuelSearchContext: { latitude: 28, longitude: -82 } }) },
+        '../../PreferencesContext': { usePreferences: () => ({ preferences: { preferredOctane: 'premium', requiresE85: true, searchRadiusMiles: 5 } }) },
+        '../../lib/deviceLocationCache': {},
+        '../../services/fuel': {
+            getCachedFuelPriceSnapshot: async query => { queries.push(query); return { source: `cached-${query.fuelType}` }; },
+            refreshFuelPriceSnapshot: query => {
+                queries.push(query);
+                return query.fuelType === 'e85' ? new Promise(resolve => { finishE85 = resolve; }) : Promise.resolve({ snapshot: { source: 'fresh-premium' } });
+            },
+        },
+        './stationCardModel': { buildLabStations: (main, options, extra) => { published.push([main.source, extra.source]); return []; } },
+    }).default;
+    hook(true); t.after(effect());
+    await new Promise(setImmediate);
+    assert.deepEqual(queries.map(q => q.fuelType), ['premium', 'e85', 'premium', 'e85']);
+    assert(queries.every(q => q.requiresE85 === false));
+    assert.deepEqual(published, [['cached-premium', 'cached-e85'], ['fresh-premium', 'cached-e85']]);
+    finishE85({ snapshot: { source: 'fresh-e85' } });
+    await new Promise(setImmediate);
+    assert.deepEqual(published.at(-1), ['fresh-premium', 'fresh-e85']);
+});

@@ -50,6 +50,7 @@ final class ClusterLabProbe {
       ClusterLabStation(["id": "lab-\(index)", "latitude": center.latitude + offset.0,
                          "longitude": center.longitude + offset.1 + (token.hasPrefix("fit-user-") ? 0.04 : 0), "price": 3.10 + Double(index) * 0.10,
                          "name": "Probe station \(index)",
+                         "highlightE85": token.hasPrefix("yellow-") && [1, 3].contains(index),
                          "isRecommended": token.hasPrefix("rapid-recommended-") && index == 1])
     })
     if isFit || token.hasPrefix("overview-") || token.hasPrefix("roundtrip-") { view.fitCamera(to: view.renderer.stations) }

@@ -55,6 +55,7 @@ final class ClusterLabPill {
   private var marketDescription = "Price comparison unavailable"
   private var lastCheapestPrice: Double?
   private var wasRecommended = false
+  private(set) var highlightE85: Bool
   private var price: Double
   private(set) var stationID: String
   private(set) var tintScore: Double = 0
@@ -72,9 +73,10 @@ final class ClusterLabPill {
     return []
   }
 
-  init(stationID: String, price: Double, name: String) {
+  init(stationID: String, price: Double, name: String, highlightE85: Bool = false) {
     self.stationID = stationID
     self.price = price
+    self.highlightE85 = highlightE85
     view.isUserInteractionEnabled = false
     view.clipsToBounds = false
     let content = ClusterLabGlass.content(of: view)
@@ -92,9 +94,10 @@ final class ClusterLabPill {
 
   // An arriving view may be reused as the attached cluster count. That is the
   // only identity transfer; traveling station pills retain their own ID.
-  func adoptCluster(stationID: String, price: Double, name: String) {
+  func adoptCluster(stationID: String, price: Double, name: String, highlightE85: Bool = false) {
     self.stationID = stationID
     self.price = price
+    self.highlightE85 = highlightE85
     priceLabel.text = price.isFinite ? String(format: "$%.2f", price) : "E85"
     view.accessibilityLabel = name
     lastCheapestPrice = nil
@@ -130,7 +133,7 @@ final class ClusterLabPill {
     let nextScore: Double = isRecommended ? 1 : 0
     guard force || !hasTint || nextScore != tintScore else { return }
     hasTint = true; tintScore = nextScore; tintUpdateCount += 1
-    let color = ClusterLabGlass.marketTint(score: nextScore)
+    let color = highlightE85 ? UIColor(red: 1, green: 0.8, blue: 0, alpha: 0.5) : ClusterLabGlass.marketTint(score: nextScore)
     if #available(iOS 26.0, *), let glass = view as? UIVisualEffectView {
       let effect = UIGlassEffect(style: .regular)
       effect.isInteractive = false
@@ -168,7 +171,7 @@ final class ClusterLabPill {
     icon.frame = CGRect(x: (width - 66) / 2 * scale, y: 9 * scale, width: 14 * scale, height: 14 * scale)
     priceLabel.frame = CGRect(x: ((width - 66) / 2 + 16) * scale, y: 0, width: 50 * scale, height: 32 * scale)
     countLabel.frame = view.bounds
-    view.accessibilityValue = priceMix > 0.5 ? "\(priceLabel.text ?? ""), \(marketDescription)" : countLabel.text
+    view.accessibilityValue = priceMix > 0.5 ? "\(priceLabel.text ?? ""), \(highlightE85 ? "E85 available, " : "")\(marketDescription)" : countLabel.text
   }
 }
 

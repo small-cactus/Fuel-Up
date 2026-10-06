@@ -886,3 +886,39 @@ test('personalized recommendation exclusively owns green across 50 zoom cycles a
     assert.ok(green.every(v => v.tintOwner === 'lab-2'));
     t.diagnostic(`${report.samples.length} live frames; ${splits} splits and ${merges} merges; recommendation stayed green`);
 });
+
+
+test('E85 glass stays yellow through live split and merge without tinting other stations', { timeout: 90000 }, async () => {
+    const device = process.env.FUELUP_SIMULATOR_UDID || 'booted';
+    const token = `yellow-${Date.now()}`;
+    const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
+    const file = path.join(container, 'Documents/cluster-lab-probe.json');
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    let report;
+    const deadline = Date.now() + 75000;
+    while (Date.now() < deadline) {
+        try {
+            const value = JSON.parse(readFileSync(file, 'utf8'));
+            if (value.token === token) { report = value; break; }
+        } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error; }
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    assert.ok(report, 'yellow glass probe did not export');
+    assert.equal(report.status, 'completed');
+    assert.equal(report.stagesCompleted, 11);
+    assert.ok(report.samples.length >= 250);
+    let yellowPrices = 0, yellowMovers = 0;
+    for (const frame of report.samples) {
+        for (const view of frame.views) {
+            const yellow = ['lab-1', 'lab-3'].includes(view.tintOwner);
+            const expected = yellow ? [1, 0.8, 0, 0.5] : view.tintOwner === 'lab-0' ? [0, 1, 47 / 255, 0.3] : [];
+            assert.equal(view.materialTint.length, expected.length);
+            expected.forEach((channel, i) => assert.ok(Math.abs(channel - view.materialTint[i]) < 0.00001, `wrong material for ${view.id}`));
+            assert.equal(view.glassGroup < 0, yellow, 'yellow and ordinary glass shared a composite');
+            assert.ok(view.contained, 'glass clipped during transition');
+            if (yellow && view.role === 'price') yellowPrices++;
+            if (yellow && ['merge', 'split'].includes(view.role)) yellowMovers++;
+        }
+    }
+    assert.ok(yellowPrices > 20 && yellowMovers > 10, 'missing yellow price or moving glass coverage');
+});

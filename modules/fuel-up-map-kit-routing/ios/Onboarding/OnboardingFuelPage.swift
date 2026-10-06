@@ -24,7 +24,7 @@ struct OnboardingFuelPage: View {
           }
         }.modifier(OnboardingGlass())
         if model.fuel != "e85" {
-          Toggle("Also needs E85", isOn: $model.requiresE85)
+          Toggle("Also show E85", isOn: $model.requiresE85)
             .font(.body).padding(20).modifier(OnboardingGlass())
             .accessibilityIdentifier("onboarding-requires-e85")
             .onChange(of: model.requiresE85) { _ in model.changed() }

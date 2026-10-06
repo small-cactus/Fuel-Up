@@ -41,7 +41,7 @@ test('pagination clamps overscroll and rejects unavailable layouts', () => {
 });
 
 
-test('Glass Lab cache fallback applies Home radius, rating, selected fuel and E85 eligibility', () => {
+test('Glass Lab cache fallback applies Home radius, rating, selected fuel while also showing E85', () => {
     const base = { providerTier: 'station', latitude: 27.95, longitude: -82.45,
         price: 3.2, updatedAt: new Date().toISOString(), fuelType: 'regular', rating: 4.5, distanceMiles: 1, allPrices: { regular: 3.2, premium: 4.1, e85: 2.6 } };
     const topStations = [
@@ -53,7 +53,9 @@ test('Glass Lab cache fallback applies Home radius, rating, selected fuel and E8
     ];
     const stations = buildLabStations({ topStations }, { radiusMiles: 5, minimumRating: 4,
         fuelGrade: 'premium', requiresE85: true });
-    assert.deepEqual(stations.map(station => station.id), ['eligible']);
+    assert.deepEqual(stations.map(station => station.id), ['eligible', 'no-e85']);
+    assert.equal(stations[0].highlightE85, true);
+    assert.equal(stations[1].highlightE85, false);
     assert.equal(stations[0].price, 4.1);
 });
 
@@ -112,4 +114,31 @@ test('green map identity follows the same personalized first card without changi
         assert.equal(stations.find(s => s.id === 'cheap').price, 3.00);
         assert.ok(!stations.some(s => s.id === 'membership'));
     }
+});
+
+
+test('Also show E85 adds stations without removing gasoline or duplicating shared IDs', () => {
+    const base = { providerTier: 'station', latitude: 28, longitude: -82, updatedAt: new Date().toISOString() };
+    const primary = { topStations: [
+        { ...base, stationId: 'gas', fuelType: 'premium', price: 3.5 },
+        { ...base, stationId: 'both', fuelType: 'premium', price: 3.8 },
+    ] };
+    const extra = { topStations: [
+        { ...base, stationId: 'both', fuelType: 'e85', price: 2.5, offersE85: true },
+        { ...base, stationId: 'ethanol', fuelType: 'e85', price: 2.1, offersE85: true },
+        { ...base, stationId: 'unpriced', fuelType: 'e85', price: null, offersE85: true },
+    ] };
+    const options = { fuelGrade: 'premium', requiresE85: true };
+    const stations = buildLabStations(primary, options, extra);
+    assert.deepEqual(stations.map(s => s.id), ['gas', 'both', 'ethanol', 'unpriced']);
+    assert.deepEqual(stations.map(s => s.highlightE85), [false, true, true, true]);
+    assert.deepEqual(stations.filter(s => s.isRecommended).map(s => s.id), ['gas']);
+    assert.equal(stations[1].price, 3.8);
+    assert.equal(stations[2].fuelType, 'e85');
+    assert.equal(stations[2].price, 2.1);
+    assert.equal(stations[2].comparisonPrice, null);
+    assert.equal(stations[3].price, null);
+    const off = buildLabStations(primary, { ...options, requiresE85: false }, extra);
+    assert.deepEqual(off.map(s => s.id), ['gas', 'both']);
+    assert(off.every(s => !s.highlightE85));
 });
