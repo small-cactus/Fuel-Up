@@ -43,6 +43,12 @@ struct OnboardingFlow: View {
         if ready && model.step == 1 { model.selectStep(2) }
       }
       .tint(.blue)
+      .alert("Location Access Is Off", isPresented: $model.showLocationSettingsAlert) {
+        Button("Cancel", role: .cancel) {}
+        Button("Settings") { model.openLocationSettings() }
+      } message: {
+        Text("Allow location access in Settings to find gas stations near you.")
+      }
   }
 }
 

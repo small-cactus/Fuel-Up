@@ -205,7 +205,11 @@
     "Tap to review.": "Toca para revisar.",
     "{count}m ago": "hace {count} min",
     "{count}h ago": "hace {count} h",
-    "{count}d ago": "hace {count} d"
+    "{count}d ago": "hace {count} d",
+    "Support": "Ayuda",
+    "Privacy Policy": "Política de privacidad",
+    "Location Access Is Off": "El acceso a la ubicación está desactivado",
+    "Allow location access in Settings to find gas stations near you.": "Permite el acceso a la ubicación en Ajustes para encontrar gasolineras cerca de ti."
   },
   "zh-Hans": {
     "Home": "首页",
@@ -413,7 +417,11 @@
     "Tap to review.": "轻点查看。",
     "{count}m ago": "{count} 分钟前",
     "{count}h ago": "{count} 小时前",
-    "{count}d ago": "{count} 天前"
+    "{count}d ago": "{count} 天前",
+    "Support": "支持",
+    "Privacy Policy": "隐私政策",
+    "Location Access Is Off": "位置访问已关闭",
+    "Allow location access in Settings to find gas stations near you.": "请在设置中允许位置访问，以查找附近的加油站。"
   },
   "zh-Hant": {
     "Home": "首頁",
@@ -621,7 +629,11 @@
     "Tap to review.": "點一下查看。",
     "{count}m ago": "{count} 分鐘前",
     "{count}h ago": "{count} 小時前",
-    "{count}d ago": "{count} 天前"
+    "{count}d ago": "{count} 天前",
+    "Support": "支援",
+    "Privacy Policy": "隱私權政策",
+    "Location Access Is Off": "位置存取已關閉",
+    "Allow location access in Settings to find gas stations near you.": "請在設定中允許位置存取，以尋找附近的加油站。"
   },
   "fil": {
     "Home": "Home",
@@ -829,7 +841,11 @@
     "Tap to review.": "Pindutin para suriin.",
     "{count}m ago": "{count} min ang nakalipas",
     "{count}h ago": "{count} oras ang nakalipas",
-    "{count}d ago": "{count} araw ang nakalipas"
+    "{count}d ago": "{count} araw ang nakalipas",
+    "Support": "Suporta",
+    "Privacy Policy": "Patakaran sa Privacy",
+    "Location Access Is Off": "Naka-off ang Access sa Lokasyon",
+    "Allow location access in Settings to find gas stations near you.": "Payagan ang access sa lokasyon sa Settings para makahanap ng mga gasolinahan malapit sa iyo."
   },
   "vi": {
     "Home": "Trang chủ",
@@ -1037,7 +1053,11 @@
     "Tap to review.": "Chạm để xem.",
     "{count}m ago": "{count} phút trước",
     "{count}h ago": "{count} giờ trước",
-    "{count}d ago": "{count} ngày trước"
+    "{count}d ago": "{count} ngày trước",
+    "Support": "Hỗ trợ",
+    "Privacy Policy": "Chính sách quyền riêng tư",
+    "Location Access Is Off": "Quyền truy cập vị trí đang tắt",
+    "Allow location access in Settings to find gas stations near you.": "Cho phép truy cập vị trí trong Cài đặt để tìm trạm xăng gần bạn."
   },
   "fr": {
     "Home": "Accueil",
@@ -1245,6 +1265,10 @@
     "Tap to review.": "Touchez pour vérifier.",
     "{count}m ago": "il y a {count} min",
     "{count}h ago": "il y a {count} h",
-    "{count}d ago": "il y a {count} j"
+    "{count}d ago": "il y a {count} j",
+    "Support": "Assistance",
+    "Privacy Policy": "Politique de confidentialité",
+    "Location Access Is Off": "L’accès à la position est désactivé",
+    "Allow location access in Settings to find gas stations near you.": "Autorisez l’accès à votre position dans Réglages pour trouver des stations-service à proximité."
   }
 }

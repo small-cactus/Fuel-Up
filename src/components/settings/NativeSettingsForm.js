@@ -212,7 +212,7 @@ export default function NativeSettingsForm({
                     />
                 </Section>}
 
-                <Section title={t("Research & Debug")}>
+                <Section title={t("Driving Research")}>
                     <SettingsLink title={t("Driving Research")} systemImage="person.2.fill"
                         onPress={onDrivingResearch} testID="settings-driving-research" />
                 </Section>
@@ -237,6 +237,14 @@ export default function NativeSettingsForm({
                         }}
                         label={t("Show Setup Again")}
                     />
+                </Section>
+                <Section>
+                    <SettingsLink title={t("Support")} systemImage="questionmark.circle"
+                        onPress={() => Linking.openURL('https://sites.google.com/view/fuel-up-gas/support')}
+                        testID="settings-support" />
+                    <SettingsLink title={t("Privacy Policy")} systemImage="hand.raised"
+                        onPress={() => Linking.openURL('https://sites.google.com/view/fuel-up-gas/home')}
+                        testID="settings-privacy-policy" />
                 </Section>
             </Form>
         </Host>

@@ -44,6 +44,7 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
   private var initialMemberships = Set<String>()
   private var initialFavorites = Set<String>()
   @Published var locationRequested = false
+  @Published var showLocationSettingsAlert = false
   var locationReady: Bool { locationRequested && hasLocationAccess && coordinate != nil }
 
   init(tracksLocation: Bool = true) {
@@ -88,7 +89,7 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
     locationError = nil
     if hasLocationAccess { location.startUpdatingLocation(); location.requestLocation() }
     else if locationBlocked {
-      if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
+      showLocationSettingsAlert = true
     } else { location.requestWhenInUseAuthorization() }
   }
   func selectStep(_ target: Int) {
@@ -104,7 +105,11 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
     } else {
       location.stopUpdatingLocation(); coordinate = nil
       if step > 1 { selectStep(1) }
+      if locationRequested && locationBlocked && step == 1 { showLocationSettingsAlert = true }
     }
+  }
+  func openLocationSettings() {
+    if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
   }
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
     guard let fix = locations.last, fix.horizontalAccuracy >= 0,

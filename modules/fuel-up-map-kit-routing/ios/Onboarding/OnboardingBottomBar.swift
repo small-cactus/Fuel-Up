@@ -34,7 +34,6 @@ struct OnboardingFooter: View {
   @Namespace private var buttons
 
   private var buttonTitle: String {
-    if model.step == 1 && model.locationBlocked { return "Open Settings" }
     if model.step == 1 && model.locationRequested && model.hasLocationAccess && !model.locationReady && model.locationError == nil { return "Finding your location…" }
     return model.step == 3 ? "Skip" : "Continue"
   }
