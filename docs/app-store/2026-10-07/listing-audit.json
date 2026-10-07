@@ -1,0 +1,113 @@
+{
+  "auditedAt": "2026-10-07",
+  "appId": "6759831421",
+  "costUSD": 0,
+  "scope": "Read-only audit of the App Store Connect draft and public ASO tools. No listing edits or review submission.",
+  "verifiedLive": {
+    "status": "Prepare for Submission",
+    "build": "1.0.0 (26)",
+    "release": "Manual",
+    "name": "Fuel Up: Find Cheap Gas Prices",
+    "subtitle": "E85 & Diesel Station Finder",
+    "keywords": "nearby,locator,premium,gasoline,compare,trends,regular,midgrade,ethanol,flex,map,near,me,93,91,local",
+    "promotionalText": "Compare nearby gas prices, explore fuel trends, and find stations that fit your fuel type and brand preferences.",
+    "supportURL": null,
+    "marketingURL": null,
+    "listingLocales": [
+      "en-US"
+    ],
+    "contentRights": "Set Up Content Rights Information",
+    "accessibility": "Get Started; no published support declarations shown",
+    "privacyPolicyURL": "https://sites.google.com/view/fuel-up-gas/home",
+    "privacyPolicyEffectiveDate": "2026-02-28",
+    "privacyChoicesURL": null,
+    "appPreviews": 0,
+    "iphoneMediumScreenshots": 4,
+    "productPageOptimization": "Create Test; no tests shown"
+  },
+  "freeToolsUsed": [
+    {
+      "name": "Appstro Metadata Checker",
+      "url": "https://www.appstro.dev/aso-metadata-checker",
+      "result": "No issues found for live name, subtitle, keywords and promotional text. Name 30/30; subtitle 27/30; keywords 100/100; promo 112/170. 16 unique keyword tokens. Description was inspected directly, not entered into this tool."
+    },
+    {
+      "name": "Appstro live keyword research",
+      "url": "https://www.appstro.dev/app-store-keyword-tool?seed=diesel&country=us",
+      "result": "diesel fuel prices difficulty42; diesel fuel finder43; broad diesel62. Relevant search results included GasBuddy, Mudflap, Fuelbook, Diesel Near Me. Scores are proprietary heuristics, not Apple volume or rank predictions."
+    },
+    {
+      "name": "AppDrift autocomplete",
+      "url": "https://appdrift.co/tools/keyword-suggestion?seed=gasolina&store=ios&country=us",
+      "result": "18 suggestions from27/27 lists; relevant Spanish terms include gasolina precio and gasolina barata. Many other suggestions are branded or irrelevant. Autocomplete provides no search-volume estimates."
+    }
+  ],
+  "priorities": [
+    {
+      "priority": 1,
+      "area": "Review readiness and trust",
+      "finding": "Support URL blank; public policy predates research and describes conditional server storage rather than actual research collection, motion and visit labels, retention and in-app server deletion. Contact section refers to an app/store contact rather than providing one. Content rights declaration unfinished.",
+      "action": "Publish a working support page/contact and accurate updated privacy policy; complete rights declaration only after owner confirms provider/brand permissions. Retain truthful privacy labels."
+    },
+    {
+      "priority": 2,
+      "area": "Localization",
+      "finding": "Only English US listing despite seven app languages in source documentation.",
+      "action": "Start with Spanish Mexico listing localization for US users, including natural local keywords and screenshots; preserve US-only availability. Then Chinese and remaining supported App Store locales after editorial QA."
+    },
+    {
+      "priority": 3,
+      "area": "Conversion copy",
+      "finding": "Promo and description lead with a generic comparison feature. No-account benefit appears in reviewer notes but not public copy.",
+      "action": "Lead with nearby reported prices, E85 discovery and no account requirement. Proposed opening: Find cheaper gas nearby, including E85 and diesel. Compare reported prices on a simple map, with no account required. Keep research optional and explain it accurately."
+    },
+    {
+      "priority": 4,
+      "area": "Accessibility disclosure",
+      "finding": "App Accessibility remains unconfigured.",
+      "action": "Test core tasks against Apple's feature criteria before publishing support labels; native components alone do not prove VoiceOver, Larger Text or Reduced Motion support."
+    },
+    {
+      "priority": 5,
+      "area": "Measurement and social proof",
+      "finding": "No product-page tests shown; source search in src, modules and ios/FuelUp found no requestReview/StoreReview/store-review/requestRating matches. This search is not proof that no alternative review integration exists.",
+      "action": "After launch, measure search impressions, product-page views and downloads by source. Run one Apple product-page experiment at a time when sufficient traffic exists. Add an appropriate native review prompt after a successful user experience if absent; do not tie beta benefits to ratings."
+    },
+    {
+      "priority": 6,
+      "area": "Marketing destination and audience-specific pages",
+      "finding": "Marketing URL blank; existing public site is a privacy page.",
+      "action": "Create a small clear landing page with product benefits, screenshots, download link and support/privacy links. Later use tailored E85 or diesel custom product pages for relevant outreach; these are optional, not launch blockers."
+    },
+    {
+      "priority": 7,
+      "area": "Video and screenshots",
+      "finding": "Four current screenshots attached on inspected slot; zero preview videos.",
+      "action": "Do not add filler to reach ten screenshots. An optional short real-app video can show map interactions, but test whether it improves conversion. Existing artwork is a baseline, not a proven maximum-conversion winner."
+    }
+  ],
+  "competitorPositioning": {
+    "GasBuddy": {
+      "url": "https://apps.apple.com/us/app/gasbuddy-find-pay-for-gas/id406719683",
+      "focus": "Gas prices, rewards and payment"
+    },
+    "Upside": {
+      "url": "https://apps.apple.com/us/app/upside-gas-food-cash-back/id1099997174",
+      "focus": "Cash back on gas, groceries and dining"
+    },
+    "recommendation": "Emphasize Fuel Up's simple map, fuel-specific discovery and no-account comparison; do not imply cashback, guaranteed savings, or verified pump truth."
+  },
+  "primaryGuidance": [
+    "https://developer.apple.com/app-store/product-page/",
+    "https://developer.apple.com/app-store/product-page-optimization/",
+    "https://developer.apple.com/app-store/review/",
+    "https://developer.apple.com/help/app-store-connect/manage-app-accessibility/overview-of-accessibility-nutrition-labels"
+  ],
+  "limitations": [
+    "No paid tools/accounts created; no ranking or conversion lift measured.",
+    "Earlier saved ASO file uses the shorter title Fuel Up: Cheap Gas Prices; live title above supersedes that record for this audit.",
+    "Keyword formatting passes do not establish demand; 93,91,flex,local and other secondary tokens still need performance evidence.",
+    "No submission validation was invoked; readiness findings are not an exhaustive Apple review approval guarantee.",
+    "No native-speaker translation review or accessibility certification performed."
+  ]
+}
