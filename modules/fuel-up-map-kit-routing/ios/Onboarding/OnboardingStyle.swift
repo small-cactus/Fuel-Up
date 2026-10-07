@@ -5,9 +5,9 @@ struct OnboardingHeading: View {
   let subtitle: String
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
-      Text(title).font(.system(.largeTitle, design: .rounded).bold())
+      Text(LocalizedStringKey(title)).font(.system(.largeTitle, design: .rounded).bold())
         .accessibilityAddTraits(.isHeader)
-      Text(subtitle).font(.body).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+      Text(LocalizedStringKey(subtitle)).font(.body).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
     }.frame(maxWidth: .infinity, alignment: .leading)
   }
 }
@@ -29,7 +29,7 @@ struct OnboardingPrimaryButton: View {
   }
   private var button: some View {
     Button(action: action) {
-      Text(title).font(.headline).frame(maxWidth: .infinity).frame(minHeight: 36)
+      Text(LocalizedStringKey(title)).font(.headline).frame(maxWidth: .infinity).frame(minHeight: 36)
     }.buttonBorderShape(.capsule).controlSize(.large).tint(.blue)
       .accessibilityIdentifier("onboarding-next")
   }
@@ -47,8 +47,8 @@ struct OnboardingSelectionRow: View {
       HStack(spacing: 14) {
         if fuelIcon != nil || brandIcon != nil { OnboardingRowIcon(fuel: fuelIcon, brand: brandIcon) }
         VStack(alignment: .leading, spacing: 3) {
-          Text(title).font(.body.weight(.medium)).foregroundStyle(.primary)
-          if let subtitle { Text(subtitle).font(.subheadline).foregroundStyle(.secondary) }
+          Text(LocalizedStringKey(title)).font(.body.weight(.medium)).foregroundStyle(.primary)
+          if let subtitle { Text(LocalizedStringKey(subtitle)).font(.subheadline).foregroundStyle(.secondary) }
         }
         Spacer(minLength: 8)
         Image(systemName: selected ? "checkmark.circle.fill" : "circle")

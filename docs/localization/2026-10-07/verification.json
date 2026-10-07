@@ -1,0 +1,28 @@
+{
+  "languages": [
+    "en",
+    "es",
+    "zh-Hans",
+    "zh-Hant",
+    "fil",
+    "vi",
+    "fr"
+  ],
+  "simulator": "iPhone 17 Pro Max, iOS 26.5",
+  "verified": [
+    "Release simulator build",
+    "165 default tests",
+    "6 localization tests",
+    "English Home and Settings",
+    "Native per-app picker lists all seven languages",
+    "Spanish Home, Settings, native fuel preferences and research consent",
+    "Simplified Chinese Home and Trends"
+  ],
+  "limitations": [
+    "Native-speaker editorial review pending",
+    "Not every screen, language, text size, or iPhone has received visual QA",
+    "Provider errors, some accessibility descriptions, and server-authored remote test pushes may remain English",
+    "iOS per-app picker requires more than one device preferred language"
+  ],
+  "distribution": "US-only setting saved separately; localization build not uploaded or submitted"
+}

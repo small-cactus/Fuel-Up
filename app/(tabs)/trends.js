@@ -1,3 +1,4 @@
+import { t, language, relativeTime } from '../../src/localization';
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Animated, StyleSheet, Text, View, ScrollView, Dimensions, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -56,19 +57,7 @@ function hexToRgba(hex, alpha) {
     return `rgba(${r}, ${g}, ${b}, ${clamp01(alpha)})`;
 }
 
-function formatRelativeTime(updatedAt) {
-    if (!updatedAt) return '—';
-    const updated = new Date(updatedAt).getTime();
-    if (!Number.isFinite(updated)) return '—';
-
-    const diffMins = Math.floor((Date.now() - updated) / 60000);
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
-    const diffDays = Math.floor(diffHours / 24);
-    return `${diffDays}d ago`;
-}
+const formatRelativeTime = relativeTime;
 
 function formatTrendDeltaPercent(delta, baselinePrice) {
     const numericDelta = Number(delta);
@@ -103,13 +92,13 @@ function formatTrendAxisLabel(dateValue, rangeStartValue, rangeEndValue) {
     );
 
     if (isSingleDayRange) {
-        return date.toLocaleTimeString(undefined, {
+        return date.toLocaleTimeString(language, {
             hour: 'numeric',
             minute: '2-digit',
         });
     }
 
-    return date.toLocaleDateString(undefined, {
+    return date.toLocaleDateString(language, {
         month: 'short',
         day: 'numeric',
     });
@@ -406,9 +395,7 @@ export default function TrendsScreen() {
                 >
                     <View style={styles.contentWrap}>
                         <View style={styles.heroGraphPad}>
-                            <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>
-                                Reported {selectedFuelGradeMeta.label} {priceScope === 'national' ? 'National' : 'Local'} Average
-                            </Text>
+                            <Text style={[styles.heroSub, darkModeWeightStyle.heroSub, { color: themeColors.textOpacity }]}>{t('Reported {grade} {scope} Average', { grade: t(selectedFuelGradeMeta.label), scope: priceScope === 'national' ? t('National') : t('Local') })}</Text>
                             <View style={styles.heroPriceRow}>
                                 <View style={styles.heroPriceValues}>
                                     {hasHeroTrendData ? <>
@@ -468,14 +455,14 @@ export default function TrendsScreen() {
                             ) : null}
 
                             {priceScope === 'national' ? <>
-                                {!chartLoading && !hasHeroTrendData && <Text style={[styles.emptyText, { color: themeColors.textOpacity }]}>{national.historyError || 'National price history will appear as reports arrive.'}</Text>}
-                                <NationalTrendPrices {...national} loading={national.loading} gradeLabel={selectedFuelGradeMeta.label} isDark={isDark} themeColors={themeColors} />
+                                {!chartLoading && !hasHeroTrendData && <Text style={[styles.emptyText, { color: themeColors.textOpacity }]}>{national.historyError || t("National price history will appear as reports arrive.")}</Text>}
+                                <NationalTrendPrices {...national} loading={national.loading} gradeLabel={t(selectedFuelGradeMeta.label)} isDark={isDark} themeColors={themeColors} />
                             </> : <View style={styles.contentPad}>
                                 {/* 2. Leaderboard */}
                                 {chartLoading ? <TrendLeaderboardSkeleton isDark={isDark} themeColors={themeColors} /> : displayTrendData?.leaderboard?.length > 0 && (
                                     <TrendLeaderboard
                                         stations={displayTrendData.leaderboard}
-                                        gradeLabel={selectedFuelGradeMeta.label}
+                                        gradeLabel={t(selectedFuelGradeMeta.label)}
                                         updatedLabel={leaderboardUpdatedLabel}
                                         isDark={isDark}
                                         themeColors={themeColors}
@@ -485,7 +472,7 @@ export default function TrendsScreen() {
                                 {/* Empty/No Data Fallback */}
                                 {!chartLoading && !displayTrendData?.averagePricesByDay?.length && !displayTrendData?.leaderboard?.length && (
                                     <View style={styles.emptyState}>
-                                        <Text style={[styles.emptyText, darkModeWeightStyle.emptyText, { color: themeColors.textOpacity }]}>{trendError || 'Not enough historical data collected yet to render trends. Check back soon.'}</Text>
+                                        <Text style={[styles.emptyText, darkModeWeightStyle.emptyText, { color: themeColors.textOpacity }]}>{trendError || t("Not enough historical data collected yet to render trends. Check back soon.")}</Text>
                                     </View>
                                 )}
                             </View>}

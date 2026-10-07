@@ -1,3 +1,4 @@
+import { t } from '../../localization';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import TrendLeaderboard from './TrendLeaderboard';
@@ -17,7 +18,7 @@ export default function NationalTrendPrices({
       latestPrice: q.price
     }))} gradeLabel={gradeLabel} isDark={isDark} themeColors={themeColors} /> : <Text style={[styles.empty, {
       color: themeColors.textOpacity
-    }]}>{error || `No ${gradeLabel.toLowerCase()} prices reported in the last 24 hours.`}</Text>}
+    }]}>{error || t('No {grade} prices reported in the last 24 hours.', { grade: gradeLabel })}</Text>}
     </View>;
 }
 const styles = StyleSheet.create({

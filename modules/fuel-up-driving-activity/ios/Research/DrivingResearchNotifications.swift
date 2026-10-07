@@ -17,7 +17,7 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
     if center.delegate !== self { forwarding = center.delegate; center.delegate = self }
     center.getNotificationCategories { [center] categories in
       let actions = ResearchConfirmation.actions.map { item in
-        UNNotificationAction(identifier: item.0, title: item.1, options: [],
+        UNNotificationAction(identifier: item.0, title: NSLocalizedString(item.1, comment: ""), options: [],
                              icon: UNNotificationActionIcon(systemImageName: item.2))
       }
       let category = UNNotificationCategory(identifier: ResearchConfirmation.category, actions: actions,
@@ -46,8 +46,8 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
     let settings=await center.notificationSettings()
     guard [.authorized,.provisional,.ephemeral].contains(settings.authorizationStatus) else{return false}
     let content=UNMutableNotificationContent()
-    content.title="Tracking needs attention 👀"
-    content.body=message+" Tap to review."
+    content.title=NSLocalizedString("Tracking needs attention 👀", comment: "")
+    content.body=message+" "+NSLocalizedString("Tap to review.", comment: "")
     content.categoryIdentifier=Self.healthCategory
     content.threadIdentifier="fuelup.research.health"
     content.sound = .default

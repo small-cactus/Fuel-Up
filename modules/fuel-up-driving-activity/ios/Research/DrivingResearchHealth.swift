@@ -38,7 +38,7 @@ final class DrivingResearchHealth: ObservableObject {
     // finish before we diagnose permissions that the person is still granting.
     suspended=enabled && settingUp
     issues=enabled ? current : []
-    message=issues.isEmpty || suspended ? nil : issues.map(\.message).joined(separator:" ")
+    message=issues.isEmpty || suspended ? nil : issues.map { NSLocalizedString($0.message, comment: "") }.joined(separator:" ")
     revision+=1
     guard task == nil else{return}
     task=Task {
@@ -57,7 +57,7 @@ final class DrivingResearchHealth: ObservableObject {
         if issues.isEmpty {
           DrivingResearchNotifications.shared.clearTrackingHealth()
         } else if !pending.isEmpty {
-          let sent=await DrivingResearchNotifications.shared.scheduleTrackingHealth(pending.map(\.message).joined(separator:" "))
+          let sent=await DrivingResearchNotifications.shared.scheduleTrackingHealth(pending.map { NSLocalizedString($0.message, comment: "") }.joined(separator:" "))
           if sent,generation == revision {state.acknowledge(pending);persist()}
         }
         if generation == revision {break}

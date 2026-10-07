@@ -1,3 +1,4 @@
+import { t, languageName } from '../../localization';
 /**
  * Native SwiftUI settings form, hosted inside a React Native tab screen.
  *
@@ -16,6 +17,7 @@
 
 import { GlassForm as Form, GlassSection as Section } from '../../../modules/fuel-up-glass';
 import React from 'react';
+import { Linking } from 'react-native';
 import { nativeResearchOwnsTracking } from '../../lib/drivingResearchPolicy';
 import {
     Button,
@@ -89,10 +91,10 @@ export default function NativeSettingsForm({
             ignoreSafeArea="all"
         >
             <Form>
-                <Section title="Fuel Preferences">
+                <Section title={t("Fuel Preferences")}>
                     <LabeledContent
                         label={(
-                            <Label title="Search Radius" systemImage="location.magnifyingglass" />
+                            <Label title={t("Search Radius")} systemImage="location.magnifyingglass" />
                         )}
                     >
                         <Text
@@ -138,17 +140,17 @@ export default function NativeSettingsForm({
                         }}
                     />
 
-                    <SettingsLink title="Fuel Type" systemImage="gauge.with.dots.needle.33percent"
-                        value={`${getFuelGradeMeta(preferredOctane).label}${requiresE85 && preferredOctane !== 'e85' ? ' + E85' : ''}`}
+                    <SettingsLink title={t("Fuel Type")} systemImage="gauge.with.dots.needle.33percent"
+                        value={`${t(getFuelGradeMeta(preferredOctane).label)}${requiresE85 && preferredOctane !== 'e85' ? ' + E85' : ''}`}
                         onPress={onEditFuel} testID="settings-fuel-type" />
-                    <SettingsLink title="Station Brands" systemImage="heart"
-                        value={fuelMemberships.length + preferredBrands.length ? `${fuelMemberships.length + preferredBrands.length} selected` : undefined}
+                    <SettingsLink title={t("Station Brands")} systemImage="heart"
+                        value={fuelMemberships.length + preferredBrands.length ? t('{count} selected', { count: fuelMemberships.length + preferredBrands.length }) : undefined}
                         onPress={onEditPreferredBrands} testID="settings-preferred-brands" />
                 </Section>
 
-                <Section title="Navigation">
+                <Section title={t("Navigation")}>
                     <Picker
-                        label="Map App"
+                        label={t("Map App")}
                         systemImage="map.fill"
                         selection={navigationApp}
                         onSelectionChange={selection => {
@@ -159,15 +161,17 @@ export default function NativeSettingsForm({
                     >
                         {NAVIGATION_APP_OPTIONS.map(option => (
                             <Text key={option.key} modifiers={[tag(option.key)]}>
-                                {option.label}
+                                {t(option.label)}
                             </Text>
                         ))}
                     </Picker>
                 </Section>
 
-                <Section title="Appearance">
+                <Section title={t("Appearance")}>
+                    <SettingsLink title={t("Language")} systemImage="globe" value={languageName}
+                        onPress={() => Linking.openSettings()} testID="settings-language" />
                     <Picker
-                        label="Theme"
+                        label={t("Theme")}
                         systemImage={isDark ? 'moon.stars.fill' : 'sun.max.fill'}
                         selection={themeMode}
                         onSelectionChange={selection => {
@@ -178,7 +182,7 @@ export default function NativeSettingsForm({
                     >
                         {APPEARANCE_OPTIONS.map(option => (
                             <Text key={option.key} modifiers={[tag(option.key)]}>
-                                {option.label}
+                                {t(option.label)}
                             </Text>
                         ))}
                     </Picker>
@@ -208,12 +212,12 @@ export default function NativeSettingsForm({
                     />
                 </Section>}
 
-                <Section title="Research & Debug">
-                    <SettingsLink title="Driving Research" systemImage="person.2.fill"
+                <Section title={t("Research & Debug")}>
+                    <SettingsLink title={t("Driving Research")} systemImage="person.2.fill"
                         onPress={onDrivingResearch} testID="settings-driving-research" />
                 </Section>
 
-                <Section title="Data">
+                <Section title={t("Data")}>
                     <Button
                         role="destructive"
                         systemImage="arrow.counterclockwise"
@@ -222,7 +226,7 @@ export default function NativeSettingsForm({
                                 onResetFuelCache();
                             }
                         }}
-                        label="Refresh Gas Prices"
+                        label={t("Refresh Gas Prices")}
                     />
                     <Button
                         systemImage="arrow.uturn.backward"
@@ -231,7 +235,7 @@ export default function NativeSettingsForm({
                                 onResetOnboarding();
                             }
                         }}
-                        label="Show Setup Again"
+                        label={t("Show Setup Again")}
                     />
                 </Section>
             </Form>

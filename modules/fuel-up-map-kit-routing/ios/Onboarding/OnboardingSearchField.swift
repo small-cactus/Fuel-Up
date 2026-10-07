@@ -9,7 +9,7 @@ struct OnboardingSearchField: UIViewRepresentable {
   func makeUIView(context: Context) -> UISearchBar {
     let view = UISearchBar()
     view.delegate = context.coordinator
-    view.placeholder = placeholder
+    view.placeholder = NSLocalizedString(placeholder, comment: "")
     view.searchBarStyle = .minimal
     view.autocapitalizationType = .none
     view.autocorrectionType = .no
@@ -18,7 +18,7 @@ struct OnboardingSearchField: UIViewRepresentable {
   }
   func updateUIView(_ view: UISearchBar, context: Context) {
     context.coordinator.parent = self
-    view.placeholder = placeholder
+    view.placeholder = NSLocalizedString(placeholder, comment: "")
     if view.text != text { view.text = text }
   }
   final class Coordinator: NSObject, UISearchBarDelegate {

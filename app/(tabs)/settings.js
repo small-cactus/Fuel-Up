@@ -1,3 +1,4 @@
+import { t } from '../../src/localization';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppState, Alert, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -91,9 +92,9 @@ export default function SettingsScreen() {
             clearTrendDataCache();
             setFuelDebugState(null);
             requestFuelReset();
-            if (mountedRef.current) Alert.alert('Prices Refreshed', 'The map will check for the latest gas prices.');
+            if (mountedRef.current) Alert.alert(t("Prices Refreshed"), t("The map will check for the latest gas prices."));
         } catch (error) {
-            if (mountedRef.current) Alert.alert('Reset Failed', 'We couldn’t refresh gas prices. Please try again.');
+            if (mountedRef.current) Alert.alert(t("Reset Failed"), t("We couldn’t refresh gas prices. Please try again."));
         } finally {
             resettingFuelRef.current = false;
         }
@@ -102,12 +103,12 @@ export default function SettingsScreen() {
     const handleConfirmFuelReset = () => {
         fireTapHaptic();
         Alert.alert(
-            'Refresh Gas Prices',
-            'Check for the latest prices near you?',
+            t("Refresh Gas Prices"),
+            t("Check for the latest prices near you?"),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t("Cancel"), style: 'cancel' },
                 {
-                    text: 'Refresh',
+                    text: t("Refresh"),
                     style: 'destructive',
                     onPress: () => {
                         noThrow(Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium));
@@ -121,12 +122,12 @@ export default function SettingsScreen() {
     const handleResetOnboarding = () => {
         fireTapHaptic();
         Alert.alert(
-            'Show Setup Again',
-            'Go through setup again? Your current preferences will be kept unless you change them.',
+            t("Show Setup Again"),
+            t("Go through setup again? Your current preferences will be kept unless you change them."),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t("Cancel"), style: 'cancel' },
                 {
-                    text: 'Continue',
+                    text: t("Continue"),
                     style: 'destructive',
                     onPress: () => {
                         noThrow(Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium));
@@ -162,9 +163,9 @@ export default function SettingsScreen() {
                     ? 'Fuel Up still needs Always Allow, Precise Location, and Motion & Fitness access in iPhone Settings to fully enable predictive fueling.'
                     : 'Turn on Location Services in iPhone Settings first, then come back and enable Always Allow, Precise Location, and Motion & Fitness.',
                 [
-                    { text: 'Not Now', style: 'cancel' },
+                    { text: t("Not Now"), style: 'cancel' },
                     {
-                        text: 'Open Settings',
+                        text: t("Open Settings"),
                         onPress: () => {
                             noThrow(openPredictiveTrackingSettingsAsync());
                         },

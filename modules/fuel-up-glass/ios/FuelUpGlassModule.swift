@@ -4,6 +4,7 @@ import ExpoUI
 public final class FuelUpGlassModule: Module {
   public func definition() -> ModuleDefinition {
     Name("FuelUpGlass")
+    Function("getAppLanguage") { Bundle.main.preferredLocalizations.first ?? "en" }
     OnCreate {
       ViewModifierRegistry.register("fuelGlassForm") { _, _, _ in GlassFormModifier() }
       ViewModifierRegistry.register("fuelGlassSection") { params, _, _ in

@@ -1,9 +1,10 @@
+import { t } from '../../localization';
 import React from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { GlassView } from 'expo-glass-effect';
 export default function TrendLeaderboardSkeleton({ isDark, themeColors }) {
     const fill = { backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)' };
-    return <GlassView glassEffectStyle="regular" style={styles.card} accessibilityLabel="Loading station prices" accessibilityState={{ busy: true }} testID="trend-leaderboard-loading">
+    return <GlassView glassEffectStyle="regular" style={styles.card} accessibilityLabel={t("Loading station prices")} accessibilityState={{ busy: true }} testID="trend-leaderboard-loading">
         <View style={styles.header}>
             <View style={[styles.title, fill]} />
             <ActivityIndicator color={themeColors.text} />

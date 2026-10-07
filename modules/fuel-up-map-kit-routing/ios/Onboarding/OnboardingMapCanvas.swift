@@ -37,8 +37,8 @@ final class OnboardingMapCanvas: UIView, MKMapViewDelegate {
     layer.addSublayer(circle)
     addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(pinched(_:))))
     isAccessibilityElement = true; accessibilityTraits = .adjustable
-    accessibilityLabel = "Search area"
-    accessibilityHint = "Swipe up or down to change the radius by one mile."
+    accessibilityLabel = NSLocalizedString("Search area", comment: "")
+    accessibilityHint = NSLocalizedString("Swipe up or down to change the radius by one mile.", comment: "")
   }
   required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
   override func layoutSubviews() {

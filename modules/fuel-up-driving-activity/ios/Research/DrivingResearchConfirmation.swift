@@ -7,14 +7,14 @@ enum ResearchConfirmation {
   static let actions = [("fueled", "Got fuel", "fuelpump.fill"),
                         ("not_fueling", "Stopped, no fuel", "bag.fill"),
                         ("not_a_stop", "Not a stop", "car.side")]
-  static let notificationSubtitle = "help Fuel Up get better. Tap and hold to answer"
+  static var notificationSubtitle: String { NSLocalizedString("help Fuel Up get better. Tap and hold to answer", comment: "") }
   static func notificationTitle(for visit: ResearchVisit) -> String {
     notificationTitle(candidate:visit.candidate,stationName:visit.station.name)
   }
   static func notificationTitle(candidate:Bool,stationName:String) -> String {
-    if candidate { return "got fuel? 👀" }
+    if candidate { return NSLocalizedString("got fuel? 👀", comment: "") }
     let station = stationName.trimmingCharacters(in: .whitespacesAndNewlines)
-    return station.isEmpty || station == "Gas station" ? "got something at the gas station? 👀" : "got something at \(station)? 👀"
+    return station.isEmpty || station == "Gas station" ? NSLocalizedString("got something at the gas station? 👀", comment: "") : NSLocalizedString("got something at {station}? 👀", comment: "").replacingOccurrences(of: "{station}", with: station)
   }
   static func shouldPrompt(event: String, visit: ResearchVisit) -> Bool {
     // Keep short observations for research, but do not turn a traffic-light

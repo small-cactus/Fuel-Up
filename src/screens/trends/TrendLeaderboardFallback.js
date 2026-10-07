@@ -1,7 +1,7 @@
+import { t, language, relativeTime } from '../../localization';
 import React from 'react';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { GlassView } from 'expo-glass-effect';
-import { stationAge } from '../cluster-lab/stationCardModel';
 import { SymbolView } from 'expo-symbols';
 
 export default function TrendLeaderboard({ stations, gradeLabel, updatedLabel, isDark, themeColors, national = false }) {
@@ -12,11 +12,11 @@ export default function TrendLeaderboard({ stations, gradeLabel, updatedLabel, i
     return (
         <GlassView style={styles.card} glassEffectStyle="regular" tintColor={isDark ? '#101010ff' : '#FFFFFF'}>
             <View style={[styles.header, (stacked || national) && styles.stacked]}>
-                <Text maxFontSizeMultiplier={2} accessibilityRole="header" style={[styles.title, textColor, { fontWeight: isDark ? '700' : '800' }]}>{national ? `Cheapest ${gradeLabel}` : `${gradeLabel} Leaderboard`}</Text>
-                <Text style={[styles.updated, secondaryColor]}>{national ? 'United States · Last 24 hours' : `Latest report ${updatedLabel}`}</Text>
+                <Text maxFontSizeMultiplier={2} accessibilityRole="header" style={[styles.title, textColor, { fontWeight: isDark ? '700' : '800' }]}>{national ? t('Cheapest {grade}', { grade: gradeLabel }) : t('{grade} Leaderboard', { grade: gradeLabel })}</Text>
+                <Text style={[styles.updated, secondaryColor]}>{national ? t("United States · Last 24 hours") : t('Latest report {time}', { time: updatedLabel })}</Text>
             </View>
             {stations.map((station, index) => {
-                const rank = index === 0 ? '1st' : index === 1 ? '2nd' : index === 2 ? '3rd' : `${index + 1}th`;
+                const rank = language !== 'en' ? String(index + 1) : index === 0 ? '1st' : index === 1 ? '2nd' : index === 2 ? '3rd' : `${index + 1}th`;
                 const medalColor = index === 0 ? themeColors.text : index === 1 ? '#8f8f8f' : '#CD7F32';
                 const shift = Number(station.rankShift) || 0;
                 const shiftColor = shift > 0 ? '#51CF66' : shift < 0 ? '#FF6B6B' : themeColors.textOpacity;
@@ -28,7 +28,7 @@ export default function TrendLeaderboard({ stations, gradeLabel, updatedLabel, i
                     ]}>
                         <View style={[styles.details, stacked && styles.fullWidth]}>
                             <View style={[styles.nameRow, stacked && styles.stacked]}>
-                                <Text style={[styles.name, textColor, { fontWeight: isDark ? '600' : '700' }]}>{station.name || 'Unknown Station'}</Text>
+                                <Text style={[styles.name, textColor, { fontWeight: isDark ? '600' : '700' }]}>{station.name || t("Unknown Station")}</Text>
                                 <View style={styles.rank}>
                                     {index < 3 && <SymbolView name="laurel.leading" tintColor={medalColor} size={30} />}
                                     <Text style={[styles.numeric, { fontSize: index < 3 ? 18 : 13, color: index < 3 ? medalColor : themeColors.textOpacity, fontWeight: isDark ? '600' : '700' }]}>{rank}</Text>
@@ -48,8 +48,8 @@ export default function TrendLeaderboard({ stations, gradeLabel, updatedLabel, i
                         </View>
                         <View style={[styles.priceColumn, stacked && styles.priceRow]}>
                             <Text style={[styles.price, styles.numeric, textColor, { fontWeight: isDark ? '700' : '800' }]}>${station.latestPrice.toFixed(2)}</Text>
-                            {(station.paymentType === 'cash' || station.allPrices?._payment?.[station.fuelType]?.selected === 'cash') && <Text style={[styles.updated, secondaryColor]}>Cash</Text>}
-                            {national ? <Text style={[styles.updated, secondaryColor]}>{stationAge(station.updatedAt)}</Text> : <View style={styles.shift}>
+                            {(station.paymentType === 'cash' || station.allPrices?._payment?.[station.fuelType]?.selected === 'cash') && <Text style={[styles.updated, secondaryColor]}>{t("Cash")}</Text>}
+                            {national ? <Text style={[styles.updated, secondaryColor]}>{relativeTime(station.updatedAt)}</Text> : <View style={styles.shift}>
                                 {shift !== 0 && <SymbolView name={shift > 0 ? 'arrow.up' : 'arrow.down'} tintColor={shiftColor} size={13} weight="bold" />}
                                 <Text style={[styles.numeric, { fontSize: 13, fontWeight: '600', color: shiftColor }]}>{shift === 0 ? '—' : Math.abs(shift)}</Text>
                             </View>}

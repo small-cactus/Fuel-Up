@@ -81,7 +81,7 @@ struct OnboardingBrandsPage: View {
               }
             }.modifier(OnboardingGlass())
           } else {
-            Text(allBrands.count > 10 && !brandSearch.isEmpty ? "No matching stations." : "No nearby brands for this fuel.")
+            Text(LocalizedStringKey(allBrands.count > 10 && !brandSearch.isEmpty ? "No matching stations." : "No nearby brands for this fuel."))
               .foregroundStyle(.secondary)
           }
           if model.error != nil { retry("Nearby brands couldn’t load.") }
@@ -100,11 +100,11 @@ struct OnboardingBrandsPage: View {
     return options.filter { term.isEmpty || $0.label.localizedCaseInsensitiveContains(term) }
   }
   private func sectionTitle(_ text: String) -> some View {
-    Text(text).font(.headline).accessibilityAddTraits(.isHeader)
+    Text(LocalizedStringKey(text)).font(.headline).accessibilityAddTraits(.isHeader)
   }
   private func retry(_ text: String) -> some View {
     VStack(alignment: .leading, spacing: 8) {
-      Text(text).font(.subheadline).foregroundStyle(.secondary)
+      Text(LocalizedStringKey(text)).font(.subheadline).foregroundStyle(.secondary)
       Button("Try again") { model.emit?(["type": "retry"]) }.frame(minHeight: 44)
     }
   }

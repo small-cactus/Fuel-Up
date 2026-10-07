@@ -83,9 +83,9 @@ struct DrivingResearchScreen: View {
           HStack(spacing: 14) {
             Image(systemName: "person.2.fill").font(.title2).foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 4) {
-              Text(collector.enabled && collector.ready ? "Collecting" : collector.enabled ? "Finish setup" : "Paused")
+              Text(LocalizedStringKey(collector.enabled && collector.ready ? "Collecting" : collector.enabled ? "Finish setup" : "Paused"))
                 .font(.headline)
-              if collector.enabled {Text(collector.status).font(.subheadline).foregroundStyle(.secondary)}
+              if collector.enabled {Text(LocalizedStringKey(collector.status)).font(.subheadline).foregroundStyle(.secondary)}
             }
             Spacer(minLength: 0)
             if collector.busy {ProgressView()}
@@ -97,7 +97,7 @@ struct DrivingResearchScreen: View {
               else if collector.consented {Task {await collector.enable()}}
               else {showConsent = true}
             } label: {
-              Label(collector.enabled ? "Pause" : "Enable", systemImage: collector.enabled ? "pause.fill" : "record.circle")
+              Label(LocalizedStringKey(collector.enabled ? "Pause" : "Enable"), systemImage: collector.enabled ? "pause.fill" : "record.circle")
                 .frame(maxWidth: .infinity).frame(minHeight: 32)
             }
             .buttonStyle(.glassProminent).tint(.blue).disabled(collector.busy)
@@ -112,14 +112,14 @@ struct DrivingResearchScreen: View {
                 .accessibilityIdentifier("research-sync")
             }
           }
-          if let message=transfer.message {Text(message).font(.caption).foregroundStyle(.secondary)}
+          if let message=transfer.message {Text(LocalizedStringKey(message)).font(.caption).foregroundStyle(.secondary)}
         }
         if let issue = collector.issue {
-          Label(issue, systemImage: "exclamationmark.circle")
+          Label(LocalizedStringKey(issue), systemImage: "exclamationmark.circle")
             .font(.subheadline).foregroundStyle(.secondary).accessibilityIdentifier("research-issue")
         }
         if let message=health.message {
-          Label(message,systemImage:"exclamationmark.triangle")
+          Label(LocalizedStringKey(message),systemImage:"exclamationmark.triangle")
             .font(.subheadline).foregroundStyle(.secondary)
             .accessibilityIdentifier("research-tracking-health")
         }
@@ -142,7 +142,7 @@ struct DrivingResearchScreen: View {
         section("Station Visits") {
           DrivingResearchVisitTimeline(visits:collector.visits.filter {collector.notifiedVisitIDs.contains($0.id)},
             labels:collector.visitLabels,departures:collector.departureTimes) {selectedVisit=$0}
-          if let labelMessage {Text(labelMessage).font(.caption).foregroundStyle(.secondary)}
+          if let labelMessage {Text(LocalizedStringKey(labelMessage)).font(.caption).foregroundStyle(.secondary)}
         }
         if collector.consented {
           if !notificationTests.tests.isEmpty {
@@ -206,11 +206,11 @@ struct DrivingResearchScreen: View {
       Button("Cancel",role:.cancel) {}
       Button("Delete Everything",role:.destructive) {Task {await collector.deleteData()}}
     } message: {Text("This deletes the data on this phone and its synced research data. This cannot be undone.")}
-    .confirmationDialog(selectedTest == nil ? "What happened at this stop?" : "TEST · What happened at this stop?", isPresented: Binding(get: {selectedVisit != nil || selectedTest != nil}, set: {if !$0 {selectedVisit = nil;selectedTest=nil}}), titleVisibility: .visible) {
+    .confirmationDialog(LocalizedStringKey(selectedTest == nil ? "What happened at this stop?" : "TEST · What happened at this stop?"), isPresented: Binding(get: {selectedVisit != nil || selectedTest != nil}, set: {if !$0 {selectedVisit = nil;selectedTest=nil}}), titleVisibility: .visible) {
       ForEach([("fueled","Got fuel"),("not_fueling","Stopped, no fuel"),("not_a_stop","Not a stop"),("wrong_station","Wrong station"),("unsure","Not sure")], id: \.0) {value in
-        Button(value.1) {
+        Button(LocalizedStringKey(value.1)) {
           if let id=selectedTest {notificationTests.answer(id,label:value.0)}
-          else if let visit = selectedVisit, collector.label(visit,value.0) {labelMessage = "Saved: \(value.1)"}
+          else if let visit = selectedVisit, collector.label(visit,value.0) {labelMessage = NSLocalizedString("Saved: {answer}", comment: "").replacingOccurrences(of: "{answer}", with: NSLocalizedString(value.1, comment: ""))}
           selectedVisit = nil;selectedTest=nil
         }
       }
@@ -226,7 +226,7 @@ struct DrivingResearchScreen: View {
   }
   private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
     VStack(alignment: .leading, spacing: 10) {
-      Text(title).font(.headline).padding(.horizontal, 4).accessibilityAddTraits(.isHeader)
+      Text(LocalizedStringKey(title)).font(.headline).padding(.horizontal, 4).accessibilityAddTraits(.isHeader)
       glassCard(content: content)
     }
   }
@@ -239,14 +239,14 @@ struct DrivingResearchScreen: View {
     Group {
       if typeSize.isAccessibilitySize {
         VStack(alignment: .leading, spacing: 8) {
-          Label(title, systemImage: icon)
-          Text(value).foregroundStyle(.secondary)
+          Label(LocalizedStringKey(title), systemImage: icon)
+          Text(LocalizedStringKey(value)).foregroundStyle(.secondary)
         }.frame(maxWidth: .infinity, alignment: .leading)
       } else {
         LabeledContent {
-          Text(value).foregroundStyle(.secondary).multilineTextAlignment(.trailing)
+          Text(LocalizedStringKey(value)).foregroundStyle(.secondary).multilineTextAlignment(.trailing)
         } label: {
-          Label(title, systemImage: icon)
+          Label(LocalizedStringKey(title), systemImage: icon)
         }
       }
     }.frame(minHeight: 36)

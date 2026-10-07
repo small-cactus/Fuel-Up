@@ -1,3 +1,4 @@
+import { t } from '../src/localization';
 import React, { useCallback, useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
@@ -39,8 +40,8 @@ export default function PricesSheet() {
                 </View>
             )) : (
                 <View style={styles.empty}>
-                    <Text style={[styles.title, { color: themeColors.text }]}>No prices to show</Text>
-                    <Text style={[styles.message, { color: themeColors.text }]}>{error || 'Return to Home to refresh nearby stations.'}</Text>
+                    <Text style={[styles.title, { color: themeColors.text }]}>{t("No prices to show")}</Text>
+                    <Text style={[styles.message, { color: themeColors.text }]}>{error || t("Return to Home to refresh nearby stations.")}</Text>
                 </View>
             )}
         </ScrollView>

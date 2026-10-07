@@ -1,9 +1,9 @@
+import { t, relativeTime, distanceText } from '../../localization';
 import React from 'react';
 import { useWindowDimensions } from 'react-native';
 import { Host, VStack, HStack, Text, Image, Spacer, Button, ProgressView } from '@expo/ui/swift-ui';
 import { accessibilityLabel, buttonStyle, controlSize, disabled, fixedSize, font, foregroundStyle, glassEffect, lineLimit, layoutPriority, padding, tint } from '@expo/ui/swift-ui/modifiers';
 import { getFuelGradeMeta, resolveQuotePriceForFuelGrade } from '../../lib/fuelGrade';
-import { stationAge, stationDistance } from '../../screens/cluster-lab/stationCardModel';
 
 export default function NativeStationCard({ station, rank, fuelGrade, isDark, themeColors, now,
     compact, onNavigate, onLayout, isRefreshing = false, errorMsg, emptyTitle }) {
@@ -12,9 +12,9 @@ export default function NativeStationCard({ station, rank, fuelGrade, isDark, th
     const stacked = fontScale > 1.3;
     const grade = getFuelGradeMeta(fuelGrade);
     const price = resolveQuotePriceForFuelGrade(station, fuelGrade);
-    const name = station?.name || emptyTitle || 'Cheapest Nearby';
+    const name = station?.name || emptyTitle || t("Cheapest Nearby");
     const rating = Number.isFinite(station?.rating) ? station.rating.toFixed(1) : null;
-    const details = [stationDistance(station?.distanceMiles), stationAge(station?.updatedAt, now)].filter(Boolean).join(' · ');
+    const details = [distanceText(station?.distanceMiles), station?.updatedAt ? relativeTime(station.updatedAt, now) : null].filter(Boolean).join(' · ');
     const canNavigate = typeof onNavigate === 'function' && Number.isFinite(station?.latitude)
         && Math.abs(station.latitude) <= 90 && Number.isFinite(station?.longitude) && Math.abs(station.longitude) <= 180;
     const text = (size, weight = 'medium', color = themeColors.text) => [font({ size: size * scale, weight }), foregroundStyle(color), fixedSize({ horizontal: false, vertical: true })];
@@ -35,7 +35,7 @@ export default function NativeStationCard({ station, rank, fuelGrade, isDark, th
                 <VStack alignment="leading" spacing={4}>
                     <Text modifiers={text(19, 'bold')}>{name}</Text>
                     <Subtitle alignment={stacked ? 'leading' : 'center'} spacing={8}>
-                        <Text modifiers={text(12, 'medium', themeColors.textOpacity)}>{Number.isFinite(price) && rank ? `#${rank} · ` : ''}{grade.label}{grade.octane !== grade.label ? ` ${grade.octane}` : ''}</Text>
+                        <Text modifiers={text(12, 'medium', themeColors.textOpacity)}>{Number.isFinite(price) && rank ? `#${rank} · ` : ''}{t(grade.label)}{grade.octane !== grade.label ? ` ${grade.octane}` : ''}</Text>
                         {rating && <HStack spacing={3}>
                             <Image systemName="star.fill" size={11 * scale} color="#FFB800" />
                             <Text modifiers={text(12)}>{rating}</Text>
@@ -45,9 +45,9 @@ export default function NativeStationCard({ station, rank, fuelGrade, isDark, th
                 {!stacked && <Spacer />}
                 <HStack spacing={8} modifiers={[layoutPriority(1)]}>
                     {isRefreshing && <ProgressView />}
-                    <Button onPress={() => onNavigate?.(station)} label="Go" systemImage="arrow.up.right" modifiers={[
+                    <Button onPress={() => onNavigate?.(station)} label={t("Go")} systemImage="arrow.up.right" modifiers={[
                         buttonStyle('glassProminent'), controlSize('large'), tint('#248A3D'), disabled(!canNavigate),
-                        accessibilityLabel(`Navigate to ${name}`), font({ size: 16 * scale, weight: 'bold' }),
+                        accessibilityLabel(t('Navigate to {station}', { station: name })), font({ size: 16 * scale, weight: 'bold' }),
                     ]} />
                 </HStack>
             </Header>
@@ -57,14 +57,14 @@ export default function NativeStationCard({ station, rank, fuelGrade, isDark, th
                         <Text modifiers={text(12, 'semibold', themeColors.textOpacity)}>{label}</Text>
                         <HStack alignment="firstTextBaseline" spacing={3}>
                             <Text modifiers={[font({ size: dualPriceSize, weight: 'bold' }), foregroundStyle(themeColors.text), lineLimit(1),
-                                accessibilityLabel(`${label}: ${value === '—' ? 'Price unavailable' : value} per gallon`)]}>{value}</Text>
+                                accessibilityLabel(`${label}: ${t('{price} per gallon', { price: value === '—' ? t('Price unavailable') : value })}`)]}>{value}</Text>
                             {value !== '—' && <Text modifiers={text(12, 'regular', themeColors.textOpacity)}>/ gal</Text>}
                         </HStack>
                     </VStack>)}
             </PriceRow> : Number.isFinite(price) ? <PriceRow alignment={stacked ? 'leading' : 'firstTextBaseline'} spacing={6}>
                 <Text modifiers={[font({ size: priceSize, weight: 'bold' }), foregroundStyle(themeColors.text), lineLimit(1)]}>${price.toFixed(2)}</Text>
                 <Text modifiers={text(15, 'regular', themeColors.textOpacity)}>/ gal</Text>
-            </PriceRow> : <Text modifiers={text(12, 'medium', themeColors.textOpacity)}>{station ? 'E85 available · Price unavailable' : isRefreshing ? 'Checking nearby prices…' : 'Price unavailable'}</Text>}
+            </PriceRow> : <Text modifiers={text(12, 'medium', themeColors.textOpacity)}>{station ? t("E85 available · Price unavailable") : isRefreshing ? t("Checking nearby prices…") : t("Price unavailable")}</Text>}
             {!compact && station?.address ? <Text modifiers={text(14, 'regular')}>{station.address}</Text> : null}
             {!compact && details ? <Text modifiers={text(12, 'medium', themeColors.textOpacity)}>{details}</Text> : null}
             {errorMsg ? <Text modifiers={text(12, 'medium', themeColors.textOpacity)}>{errorMsg}</Text> : null}

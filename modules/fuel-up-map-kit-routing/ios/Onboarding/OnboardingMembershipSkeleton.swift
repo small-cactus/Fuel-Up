@@ -8,7 +8,7 @@ struct OnboardingMembershipSkeleton: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
       HStack {
-        Text(title).font(.headline)
+        Text(LocalizedStringKey(title)).font(.headline)
         Spacer()
         ProgressView().tint(.primary)
       }
@@ -29,7 +29,7 @@ struct OnboardingMembershipSkeleton: View {
       .accessibilityHidden(true)
     }
     .accessibilityElement(children: .ignore)
-    .accessibilityLabel(loadingLabel)
+    .accessibilityLabel(LocalizedStringKey(loadingLabel))
     .accessibilityIdentifier(identifier)
   }
 }

@@ -1,3 +1,4 @@
+import { t } from '../../localization';
 import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import MapView, { Circle, PROVIDER_APPLE } from 'react-native-maps';
@@ -19,7 +20,7 @@ export default function RadiusStep({ isDark, themeColors, insets, value, onChang
             contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 140 }} showsVerticalScrollIndicator={false}>
             <View style={[styles.header, { paddingTop: insets.top + 32 }]}>
                 <Text style={[styles.title, { color: themeColors.text }]}>Search Nearby</Text>
-                <Text style={[styles.subtitle, { color: themeColors.text }]}>How far would you go for a better price?</Text>
+                <Text style={[styles.subtitle, { color: themeColors.text }]}>{t("How far would you go for a better price?")}</Text>
             </View>
             <View style={styles.mapContainer}>
                 {coordinate ? (

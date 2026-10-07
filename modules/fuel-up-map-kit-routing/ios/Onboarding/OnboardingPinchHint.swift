@@ -14,7 +14,7 @@ struct OnboardingPinchHint: View {
           Image(systemName: "arrow.left.and.right").font(.title2)
           Circle().fill(.white).frame(width: 22, height: 22)
         }.frame(height: 48).accessibilityHidden(true)
-        Text(voiceOver ? "Swipe up or down on the map to resize radius" : "Pinch to resize radius")
+        Text(LocalizedStringKey(voiceOver ? "Swipe up or down on the map to resize radius" : "Pinch to resize radius"))
           .font(.title2.weight(.semibold)).multilineTextAlignment(.center)
           .fixedSize(horizontal: false, vertical: true)
       }.foregroundStyle(.white).padding(.horizontal, 36)

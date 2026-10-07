@@ -1,3 +1,4 @@
+import { t } from '../../src/localization';
 import React, { useEffect, useSyncExternalStore } from 'react';
 import { useNavigation } from 'expo-router';
 import { onboardingHandoff } from '../../src/lib/onboardingHandoff';
@@ -29,17 +30,17 @@ export default function TabLayout() {
         >
             <NativeTabs.Trigger name="index" disableAutomaticContentInsets>
                 <NativeTabs.Trigger.Icon sf="location" md="home" />
-                <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+                <NativeTabs.Trigger.Label>{t("Home")}</NativeTabs.Trigger.Label>
             </NativeTabs.Trigger>
 
             <NativeTabs.Trigger name="trends">
                 <NativeTabs.Trigger.Icon sf="chart.line.uptrend.xyaxis" md="trending-up" />
-                <NativeTabs.Trigger.Label>Trends</NativeTabs.Trigger.Label>
+                <NativeTabs.Trigger.Label>{t("Trends")}</NativeTabs.Trigger.Label>
             </NativeTabs.Trigger>
 
             <NativeTabs.Trigger name="settings">
                 <NativeTabs.Trigger.Icon sf="gearshape" md="settings" />
-                <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
+                <NativeTabs.Trigger.Label>{t("Settings")}</NativeTabs.Trigger.Label>
             </NativeTabs.Trigger>
 
         </NativeTabs>

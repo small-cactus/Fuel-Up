@@ -1,3 +1,4 @@
+import { t } from '../../localization';
 import React from 'react';
 import { Platform, View, Pressable, Text, StyleSheet } from 'react-native';
 import { Host, Menu, Picker, HStack, Image, Text as NativeText } from '@expo/ui/swift-ui';
@@ -12,14 +13,14 @@ export default function TrendScopeControl({
       <Menu modifiers={[buttonStyle('glass'), controlSize('small'), frame({ minHeight: 44 })]} label={
         <HStack spacing={6} modifiers={[fixedSize({ horizontal: true, vertical: true })]}>
           <NativeText modifiers={[font({ size: 14, weight: 'semibold' }), foregroundStyle(themeColors.text)]}>
-            {value === 'local' ? 'Local' : 'National'}
+            {value === 'local' ? t("Local") : t("National")}
           </NativeText>
           <Image systemName="chevron.down" size={10} color={themeColors.text} />
         </HStack>
       }>
-        <Picker label="Price region" selection={value} onSelectionChange={onChange} modifiers={[pickerStyle('inline')]}>
-          <NativeText modifiers={[tag('local')]}>Local</NativeText>
-          <NativeText modifiers={[tag('national')]}>National</NativeText>
+        <Picker label={t("Price region")} selection={value} onSelectionChange={onChange} modifiers={[pickerStyle('inline')]}>
+          <NativeText modifiers={[tag('local')]}>{t("Local")}</NativeText>
+          <NativeText modifiers={[tag('national')]}>{t("National")}</NativeText>
         </Picker>
       </Menu>
     </Host>;
@@ -29,7 +30,7 @@ export default function TrendScopeControl({
             <Text style={{
         color: themeColors.text,
         fontWeight: value === scope ? '700' : '400'
-      }}>{scope === 'local' ? 'Local' : 'National'}</Text>
+      }}>{scope === 'local' ? t("Local") : t("National")}</Text>
         </Pressable>)}</View>;
 }
 const styles = StyleSheet.create({

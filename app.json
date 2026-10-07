@@ -50,7 +50,8 @@
       "./plugins/withIosBuildCompatibility",
       "./plugins/withIosSceneLifecycle",
       "./plugins/withLaunchBubbleShader",
-      "./plugins/withResearchPushNotifications"
+      "./plugins/withResearchPushNotifications",
+      "./plugins/withFuelUpLocalization"
     ],
     "orientation": "portrait",
     "icon": "./assets/fuelup-icon.png",
@@ -94,6 +95,15 @@
           "fetch",
           "location",
           "processing"
+        ],
+        "CFBundleLocalizations": [
+          "en",
+          "es",
+          "zh-Hans",
+          "zh-Hant",
+          "fil",
+          "vi",
+          "fr"
         ]
       },
       "buildNumber": "25"

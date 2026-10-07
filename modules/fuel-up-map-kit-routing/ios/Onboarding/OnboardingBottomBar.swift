@@ -43,7 +43,7 @@ struct OnboardingFooter: View {
     if !model.searchFocused {
       VStack(spacing: 12) {
         if let error = model.saveError {
-          Text(error).font(.footnote).foregroundStyle(.secondary)
+          Text(LocalizedStringKey(error)).font(.footnote).foregroundStyle(.secondary)
             .multilineTextAlignment(.center).accessibilityIdentifier("onboarding-save-error")
         }
         OnboardingPageControl(selection: Binding(get: { model.step }, set: { model.selectStep($0) }), count: 4)
@@ -94,7 +94,7 @@ struct OnboardingFooter: View {
           ProgressView().tint(prominent ? .white : .primary)
             .accessibilityLabel("Preparing Home")
         }
-        Text(title).font(.headline)
+        Text(LocalizedStringKey(title)).font(.headline)
       }.foregroundStyle(prominent ? Color.white : Color.primary)
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, minHeight: 66)

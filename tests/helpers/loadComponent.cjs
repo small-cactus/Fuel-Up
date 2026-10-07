@@ -13,7 +13,11 @@ module.exports = function loadComponent(file, mocks) {
     loaded.filename = filename;
     loaded.paths = Module._nodeModulePaths(path.dirname(filename));
     const originalRequire = loaded.require.bind(loaded);
-    loaded.require = name => /\.(png|jpg|mp4)$/.test(name) ? 1 : Object.hasOwn(mocks, name) ? mocks[name] : originalRequire(name);
+    // Native app-language resolution is unavailable in Node. Existing component
+    // tests run in English; individual localization tests can override this seam.
+    const { translate, formatRelativeTime } = require('../../src/localization/core.cjs');
+    const localization = { t: (key, values) => translate({}, 'en', key, values), language: 'en', languageName: 'English', relativeTime: (time, now) => formatRelativeTime({}, 'en', time, now) };
+    loaded.require = name => /\.(png|jpg|mp4)$/.test(name) ? 1 : Object.hasOwn(mocks, name) ? mocks[name] : /\/localization$/.test(name) ? localization : originalRequire(name);
     loaded._compile(output.code, filename);
     return loaded.exports;
 };

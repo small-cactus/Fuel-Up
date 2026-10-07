@@ -61,7 +61,7 @@ struct OnboardingPageControl: UIViewRepresentable {
   func updateUIView(_ view: UIPageControl, context: Context) {
     context.coordinator.parent = self
     view.currentPage = selection
-    view.accessibilityLabel = "Setup pages"
+    view.accessibilityLabel = NSLocalizedString("Setup pages", comment: "")
     view.accessibilityValue = "\(selection + 1) of \(count)"
   }
   final class Coordinator: NSObject {

@@ -23,7 +23,7 @@ struct OnboardingRadiusPage: View {
             }
           }.padding(.horizontal, 12).padding(.vertical, 16).modifier(OnboardingGlass())
           Spacer()
-          Text("\(Int(model.radius.rounded())) miles")
+          Text(NSLocalizedString("{count} miles", comment: "").replacingOccurrences(of: "{count}", with: String(Int(model.radius.rounded()))))
             .font(.system(.title, design: .rounded).bold()).monospacedDigit()
             .padding(.horizontal, 16).padding(.vertical, 10).modifier(OnboardingGlass())
             .padding(.leading, 12)

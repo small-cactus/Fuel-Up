@@ -20,7 +20,7 @@ struct DrivingResearchVisitTimeline: View {
             DrivingResearchStationLogo(name:visit.station.name)
             VStack(alignment:.leading,spacing:4) {
               Text(visit.station.name).foregroundStyle(.primary)
-              Text(ResearchConfirmation.title(for:labels[visit.id])).font(.caption).foregroundStyle(.secondary)
+              Text(LocalizedStringKey(ResearchConfirmation.title(for:labels[visit.id]))).font(.caption).foregroundStyle(.secondary)
             }
             Spacer(minLength:8)
             Image(systemName:"chevron.right").font(.caption.bold()).foregroundStyle(.tertiary)
@@ -30,11 +30,11 @@ struct DrivingResearchVisitTimeline: View {
           let previous=stops[index+1]
           let departure=departures[previous.id]
           VStack(spacing:0) {
-            event("Arrived at \(visit.station.name)",at:visit.startedAt,top:false,bottom:departure != nil)
+            event(NSLocalizedString("Arrived at {station}", comment: "").replacingOccurrences(of: "{station}", with: visit.station.name),at:visit.startedAt,top:false,bottom:departure != nil)
             if let departure {
               Rectangle().fill(Color(uiColor: .tertiaryLabel)).frame(width:1.5,height:24)
                 .frame(maxWidth:.infinity,alignment:.leading).padding(.leading,5.25)
-              event("Left \(previous.station.name)",at:departure,top:true,bottom:false)
+              event(NSLocalizedString("Left {station}", comment: "").replacingOccurrences(of: "{station}", with: previous.station.name),at:departure,top:true,bottom:false)
             }
           }.padding(.leading,16).padding(.vertical,4)
         }

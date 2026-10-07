@@ -54,15 +54,15 @@ struct OnboardingLocationPage: View {
       Image(systemName: icon).font(.system(size: 30, weight: .semibold))
         .foregroundStyle(color).frame(width: 42, height: 44).accessibilityHidden(true)
       VStack(alignment: .leading, spacing: 4) {
-        Text(title).font(.headline)
-        Text(detail).font(.subheadline).foregroundStyle(.secondary)
+        Text(LocalizedStringKey(title)).font(.headline)
+        Text(LocalizedStringKey(detail)).font(.subheadline).foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
       }
     }
   }
 
   private func status(_ text: String) -> some View {
-    Text(text).font(.subheadline).foregroundStyle(.secondary)
+    Text(LocalizedStringKey(text)).font(.subheadline).foregroundStyle(.secondary)
       .multilineTextAlignment(.center).padding(.horizontal, 28)
   }
 }

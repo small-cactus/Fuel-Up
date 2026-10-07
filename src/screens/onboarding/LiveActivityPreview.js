@@ -1,3 +1,4 @@
+import { t } from '../../localization';
 import React, { useEffect, useState } from 'react';
 import { Platform, View, Text as RNText, useWindowDimensions } from 'react-native';
 import { Asset } from 'expo-asset';
@@ -33,7 +34,7 @@ export default function LiveActivityPreview() {
                 </VStack>
                 {fontScale <= 1.3 && <Spacer />}
                 <VStack alignment="trailing" spacing={2}>
-                    <Text modifiers={text(11, 'semibold', '#FFFFFF99')}>Regular</Text>
+                    <Text modifiers={text(11, 'semibold', '#FFFFFF99')}>{t("Regular")}</Text>
                     <Text modifiers={text(24, 'heavy', '#00CB36')}>$2.62</Text>
                 </VStack>
             </Content>

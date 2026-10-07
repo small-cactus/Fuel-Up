@@ -1,3 +1,4 @@
+import { t } from '../../localization';
 import React, { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 import { FlatList, StyleSheet, View, useWindowDimensions } from 'react-native';
 import GlassActionButton from '../../components/native/GlassActionButton';
@@ -75,8 +76,8 @@ const StationCardCarousel = forwardRef(function StationCardCarousel({ stations, 
                 onLayout={event => setResetHeight(event.nativeEvent.layout.height)}
                 importantForAccessibility={overview ? 'no-hide-descendants' : 'auto'}
                 style={[styles.resetRow, overview && styles.hiddenReset]}>
-                <GlassActionButton title="Show all" icon="arrow.up.left.and.arrow.down.right"
-                    label="Show all stations" hint="Fits all stations and your location on the map"
+                <GlassActionButton title={t("Show all")} icon="arrow.up.left.and.arrow.down.right"
+                    label={t("Show all stations")} hint={t("Fits all stations and your location on the map")}
                     isDark={isDark} onPress={onShowAll} />
             </View>
             <FlatList key={`${width}:${fontScale}`} ref={list} testID="glass-lab-station-cards" data={stations} horizontal pagingEnabled

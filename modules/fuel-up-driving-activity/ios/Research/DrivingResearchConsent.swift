@@ -55,7 +55,7 @@ struct DrivingResearchConsent: View {
 
         VStack(spacing: 4) {
           Button(action: onAgree) {
-            Text(isConsented ? "Done" : "Agree & Enable").font(.headline)
+            Text(LocalizedStringKey(isConsented ? "Done" : "Agree & Enable")).font(.headline)
               .frame(maxWidth: .infinity).frame(minHeight: 40)
           }
           .buttonStyle(.glassProminent).tint(.blue).controlSize(.large)
@@ -98,8 +98,8 @@ struct DrivingResearchConsent: View {
         .background(color.opacity(0.13), in: Circle())
         .accessibilityHidden(true)
       VStack(alignment: .leading, spacing: 4) {
-        Text(title).font(.headline)
-        Text(detail).font(.subheadline).foregroundStyle(.secondary)
+        Text(LocalizedStringKey(title)).font(.headline)
+        Text(LocalizedStringKey(detail)).font(.subheadline).foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
       }
     }
