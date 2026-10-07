@@ -1,0 +1,31 @@
+{
+  "bundles": [
+    {
+      "bundle": "com.anthonyh.fuelup",
+      "version": "1.0.0",
+      "build": "27"
+    },
+    {
+      "bundle": "com.anthonyh.fuelup.notifications",
+      "version": "1.0.0",
+      "build": "27"
+    },
+    {
+      "bundle": "com.anthonyh.fuelup.ExpoWidgetsTarget",
+      "version": "1.0.0",
+      "build": "27"
+    }
+  ],
+  "apns": "production",
+  "nonExemptEncryption": false,
+  "mainBundleSHA256": "6d0c6ee67b48239d3ddc8c83c19635fad00ae53e1789018f0abeb5e3c038fb02",
+  "localizations": [
+    "en.lproj",
+    "es.lproj",
+    "fil.lproj",
+    "fr.lproj",
+    "vi.lproj",
+    "zh-Hans.lproj",
+    "zh-Hant.lproj"
+  ]
+}
