@@ -1,0 +1,774 @@
+0 AXWebArea App Store Keyword Tool — Free ASO Keyword Research | Appstro, URL: appstro.dev/app-store-keyword-tool?seed=gas&country=us
+					414 text 10  keywords · sorted by opportunity · click a row to analyze
+				415 link Description: Export with a free account, Help: Exports need a free account, Value: appstro.dev/account?mode=signup&next=%2Fapp-store-keyword-tool%3Fseed%3Dgas%26country%3Dus
+				416 button Score all (5)
+				417 button Deep expand (a–z long-tails)
+				418 table
+					419 row
+						420 cell
+							421 text Keyword
+						422 cell
+							423 text Traffic
+						424 cell
+							425 text Difficulty
+						426 cell
+							427 text Opportunity
+						428 cell
+							429 text Top apps
+					430 row
+						431 cell
+							432 text gas prices-gas station finder
+							433 link Description: Check rank for gas prices-gas station finder, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=gas%20prices-gas%20station%20finder&country=us
+						434 cell
+							435 text 92
+						436 cell
+							437 text 66  ·  Hard
+						438 cell
+							439 text 37
+						440 cell
+							441 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+							442 link Description: Gas Prices Near You, Help: Gas Prices Near You — 7,632 ratings, Value: appstro.dev/analytics/581748070
+							443 link Description: Upside: Gas & Food Cash Back, Help: Upside: Gas & Food Cash Back — 685,154 ratings, Value: appstro.dev/analytics/1099997174
+							444 link Description: Find Cheap Gas – Fuel Prices, Help: Find Cheap Gas – Fuel Prices — 115 ratings, Value: appstro.dev/analytics/6759683321
+							445 link Description: Cheap Gas Finder USA, Help: Cheap Gas Finder USA — 18 ratings, Value: appstro.dev/analytics/6762310363
+					446 row
+						447 cell
+							448 text gas n wash
+							449 link Description: Check rank for gas n wash, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=gas%20n%20wash&country=us
+						450 cell
+							451 text 83
+						452 cell
+							453 text 62  ·  Hard
+						454 cell
+							455 text 36
+						456 cell
+							457 link Description: Gas N Wash, Help: Gas N Wash — 70 ratings, Value: appstro.dev/analytics/1660351704
+							458 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+							459 link Description: Speedway: Rewards & Shopping, Help: Speedway: Rewards & Shopping — 46,802 ratings, Value: appstro.dev/analytics/568047979
+							460 link Description: Upside: Gas & Food Cash Back, Help: Upside: Gas & Food Cash Back — 685,154 ratings, Value: appstro.dev/analytics/1099997174
+							461 link Description: Shell: Fuel, Charge & More, Help: Shell: Fuel, Charge & More — 87,635 ratings, Value: appstro.dev/analytics/1410234033
+					462 row
+						463 cell
+							464 text gas buddy
+							465 link Description: Check rank for gas buddy, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=gas%20buddy&country=us
+						466 cell
+							467 text 100
+						468 cell
+							469 text 77  ·  Very hard
+						470 cell
+							471 text 30
+						472 cell
+							473 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+							474 link Description: Upside: Gas & Food Cash Back, Help: Upside: Gas & Food Cash Back — 685,154 ratings, Value: appstro.dev/analytics/1099997174
+							475 link Description: Gas Prices Near You, Help: Gas Prices Near You — 7,632 ratings, Value: appstro.dev/analytics/581748070
+							476 link Description: Waze Navigation & Live Traffic, Help: Waze Navigation & Live Traffic — 3,193,355 ratings, Value: appstro.dev/analytics/323229106
+							477 link Description: Find Cheap Gas – Fuel Prices, Help: Find Cheap Gas – Fuel Prices — 115 ratings, Value: appstro.dev/analytics/6759683321
+					478 row
+						479 cell
+							480 text gas station
+							481 link Description: Check rank for gas station, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=gas%20station&country=us
+						482 cell
+							483 text 66
+						484 cell
+							485 text 77  ·  Very hard
+						486 cell
+							487 text 20
+						488 cell
+							489 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+							490 link Description: Circle K, Help: Circle K — 26,130 ratings, Value: appstro.dev/analytics/1592397814
+							491 link Description: Shell: Fuel, Charge & More, Help: Shell: Fuel, Charge & More — 87,635 ratings, Value: appstro.dev/analytics/1410234033
+							492 link Description: Marathon Rewards, Help: Marathon Rewards — 109,790 ratings, Value: appstro.dev/analytics/6443502704
+							493 link Description: 7-Eleven: Rewards & Shopping, Help: 7-Eleven: Rewards & Shopping — 470,491 ratings, Value: appstro.dev/analytics/589653414
+					494 row
+						495 cell
+							496 text gas
+							497 link Description: Check rank for gas, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=gas&country=us
+						498 cell
+							499 text 75
+						500 cell
+							501 text 84  ·  Very hard
+						502 cell
+							503 text 18
+						504 cell
+							505 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+							506 link Description: Upside: Gas & Food Cash Back, Help: Upside: Gas & Food Cash Back — 685,154 ratings, Value: appstro.dev/analytics/1099997174
+							507 link Description: Shell: Fuel, Charge & More, Help: Shell: Fuel, Charge & More — 87,635 ratings, Value: appstro.dev/analytics/1410234033
+							508 link Description: Exxon Mobil Rewards+, Help: Exxon Mobil Rewards+ — 211,746 ratings, Value: appstro.dev/analytics/668175318
+							509 link Description: Circle K, Help: Circle K — 26,130 ratings, Value: appstro.dev/analytics/1592397814
+					510 row
+						511 cell
+							512 text gas’s buddy
+							513 link Description: Check rank for gas’s buddy, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=gas%E2%80%99s%20buddy&country=us
+						514 cell
+							515 text 58
+						516 cell
+							517 button analyze
+						518 cell
+							519 text —
+					520 row
+						521 cell
+							522 text gas south
+							523 link Description: Check rank for gas south, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=gas%20south&country=us
+						524 cell
+							525 text 49
+						526 cell
+							527 button analyze
+						528 cell
+							529 text —
+					530 row
+						531 cell
+							532 text gas and wash
+							533 link Description: Check rank for gas and wash, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=gas%20and%20wash&country=us
+						534 cell
+							535 text 41
+						536 cell
+							537 button analyze
+						538 cell
+							539 text —
+					540 row
+						541 cell
+							542 text gas dash
+							543 link Description: Check rank for gas dash, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=gas%20dash&country=us
+						544 cell
+							545 text 32
+						546 cell
+							547 button analyze
+						548 cell
+							549 text —
+					550 row
+						551 cell
+							552 text gasolina móvil
+							553 link Description: Check rank for gasolina móvil, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=gasolina%20m%C3%B3vil&country=us
+						554 cell
+							555 text 24
+						556 cell
+							557 button analyze
+						558 cell
+							559 text —
+				65 container
+					66 text Data is pulled live from the App Store on every search — Apple’s own autocomplete and its current top-10 results, never a stored keyword index. Same workbench as the standalone
+					67 link Description: keyword suggestions, Value: appstro.dev/keyword-research
+					68 text page.
+				69 link Description: Search an app instead, Value: appstro.dev/
+				70 link Description: Read the ASO guide, Value: appstro.dev/aso-guide
+			71 heading What is an App Store keyword tool?, Value: 2
+				72 text What is an App Store keyword tool?
+			73 text An app store keyword tool is software that surfaces the exact search terms people type into the App Store, then scores each term so you know which ones are worth targeting. Instead of guessing at metadata, an app store keyword research tool gives you data: how popular a phrase is, how hard it is to rank for, and which apps currently own the top spots for it. Appstro's free app store keyword tool does all three — find the keywords any iOS app ranks for, uncover untapped opportunities, and compare your keyword strategy against competitors, with no credit card, no trial period, no locked reports and no per-search credits. Keyword suggestions come from Apple's autocomplete in 30 storefronts; rank tracking covers 175+.
+			74 heading Discover keywords, Value: 3
+				75 text Discover keywords
+			76 text Pull the real search terms your app — or any competitor — ranks for, straight from live App Store search results.
+			77 heading Score popularity & difficulty, Value: 3
+				78 text Score popularity & difficulty
+			79 text See how early a phrase surfaces in Apple’s autocomplete and how entrenched the current top-10 apps are, so you can prioritize winnable terms.
+			80 heading Track & compare, Value: 3
+
+0 AXWebArea App Store Keyword Tool — Free ASO Keyword Research | Appstro, URL: appstro.dev/app-store-keyword-tool?seed=e85&country=us
+					414 text 10  keywords · sorted by opportunity · click a row to analyze
+				415 link Description: Export with a free account, Help: Exports need a free account, Value: appstro.dev/account?mode=signup&next=%2Fapp-store-keyword-tool%3Fseed%3De85%26country%3Dus
+				416 button Score all (5)
+				417 button Deep expand (a–z long-tails)
+				418 table
+					419 row
+						420 cell
+							421 text Keyword
+						422 cell
+							423 text Traffic
+						424 cell
+							425 text Difficulty
+						426 cell
+							427 text Opportunity
+						428 cell
+							429 text Top apps
+					430 row
+						431 cell
+							432 text e85 calculator
+							433 link Description: Check rank for e85 calculator, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=e85%20calculator&country=us
+						434 cell
+							435 text 92
+						436 cell
+							437 text 22  ·  Easy
+						438 cell
+							439 text 74
+						440 cell
+							441 link Description: e85Cal, Help: e85Cal — 37 ratings, Value: appstro.dev/analytics/1470313135
+							442 link Description: E85 Calculator, Help: E85 Calculator — 1 ratings, Value: appstro.dev/analytics/1029273167
+							443 link Description: E85 App, Help: E85 App — 44 ratings, Value: appstro.dev/analytics/1508517906
+							444 link Description: RaceTools, Help: RaceTools — 91 ratings, Value: appstro.dev/analytics/1578074779
+							445 link Description: E85 Stations USA, Help: E85 Stations USA — 2,364 ratings, Value: appstro.dev/analytics/6446505663
+					446 row
+						447 cell
+							448 text e85 station locator
+							449 link Description: Check rank for e85 station locator, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=e85%20station%20locator&country=us
+						450 cell
+							451 text 100
+						452 cell
+							453 text 34  ·  Easy
+						454 cell
+							455 text 69
+						456 cell
+							457 link Description: E85 Stations USA, Help: E85 Stations USA — 2,364 ratings, Value: appstro.dev/analytics/6446505663
+							458 link Description: E85 App, Help: E85 App — 44 ratings, Value: appstro.dev/analytics/1508517906
+							459 link Description: Pearson Fuels - E85 Stations, Help: Pearson Fuels - E85 Stations — 133 ratings, Value: appstro.dev/analytics/1184769431
+							460 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+							461 link Description: Alternative Fueling Stations, Help: Alternative Fueling Stations — 6,935 ratings, Value: appstro.dev/analytics/718577947
+					462 row
+						463 cell
+							464 text e85 scout
+							465 link Description: Check rank for e85 scout, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=e85%20scout&country=us
+						466 cell
+							467 text 75
+						468 cell
+							469 text 30  ·  Easy
+						470 cell
+							471 text 55
+						472 cell
+							473 link Description: E85 Stations USA, Help: E85 Stations USA — 2,364 ratings, Value: appstro.dev/analytics/6446505663
+							474 link Description: E85 App, Help: E85 App — 44 ratings, Value: appstro.dev/analytics/1508517906
+							475 link Description: E85 Search, Help: E85 Search — 1 ratings, Value: appstro.dev/analytics/6758813502
+							476 link Description: Pearson Fuels - E85 Stations, Help: Pearson Fuels - E85 Stations — 133 ratings, Value: appstro.dev/analytics/1184769431
+							477 link Description: e85Cal, Help: e85Cal — 37 ratings, Value: appstro.dev/analytics/1470313135
+					478 row
+						479 cell
+							480 text e85
+							481 link Description: Check rank for e85, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=e85&country=us
+						482 cell
+							483 text 66
+						484 cell
+							485 text 42  ·  Medium
+						486 cell
+							487 text 41
+						488 cell
+							489 link Description: E85 Stations USA, Help: E85 Stations USA — 2,364 ratings, Value: appstro.dev/analytics/6446505663
+							490 link Description: E85 App, Help: E85 App — 44 ratings, Value: appstro.dev/analytics/1508517906
+							491 link Description: Pearson Fuels - E85 Stations, Help: Pearson Fuels - E85 Stations — 133 ratings, Value: appstro.dev/analytics/1184769431
+							492 link Description: Alternative Fueling Stations, Help: Alternative Fueling Stations — 6,935 ratings, Value: appstro.dev/analytics/718577947
+							493 link Description: E85 Navigator, Help: E85 Navigator — 2 ratings, Value: appstro.dev/analytics/6800078473
+					494 row
+						495 cell
+							496 text e85 gas station finder apps
+							497 link Description: Check rank for e85 gas station finder apps, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=e85%20gas%20station%20finder%20apps&country=us
+						498 cell
+							499 text 83
+						500 cell
+							501 text 65  ·  Hard
+						502 cell
+							503 text 34
+						504 cell
+							505 link Description: E85 Stations USA, Help: E85 Stations USA — 2,364 ratings, Value: appstro.dev/analytics/6446505663
+							506 link Description: E85 App, Help: E85 App — 44 ratings, Value: appstro.dev/analytics/1508517906
+							507 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+							508 link Description: Pearson Fuels - E85 Stations, Help: Pearson Fuels - E85 Stations — 133 ratings, Value: appstro.dev/analytics/1184769431
+							509 link Description: Upside: Gas & Food Cash Back, Help: Upside: Gas & Food Cash Back — 685,154 ratings, Value: appstro.dev/analytics/1099997174
+					510 row
+						511 cell
+							512 text e85 stations usa
+							513 link Description: Check rank for e85 stations usa, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=e85%20stations%20usa&country=us
+						514 cell
+							515 text 58
+						516 cell
+							517 button analyze
+						518 cell
+							519 text —
+					520 row
+						521 cell
+							522 text e85 finder
+							523 link Description: Check rank for e85 finder, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=e85%20finder&country=us
+						524 cell
+							525 text 49
+						526 cell
+							527 button analyze
+						528 cell
+							529 text —
+					530 row
+						531 cell
+							532 text e85cal
+							533 link Description: Check rank for e85cal, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=e85cal&country=us
+						534 cell
+							535 text 41
+						536 cell
+							537 button analyze
+						538 cell
+							539 text —
+					540 row
+						541 cell
+							542 text e85 mix calculator
+							543 link Description: Check rank for e85 mix calculator, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=e85%20mix%20calculator&country=us
+						544 cell
+							545 text 32
+						546 cell
+							547 button analyze
+						548 cell
+							549 text —
+					550 row
+						551 cell
+							552 text e85 gas
+							553 link Description: Check rank for e85 gas, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=e85%20gas&country=us
+						554 cell
+							555 text 24
+						556 cell
+							557 button analyze
+						558 cell
+							559 text —
+				65 container
+					66 text Data is pulled live from the App Store on every search — Apple’s own autocomplete and its current top-10 results, never a stored keyword index. Same workbench as the standalone
+					67 link Description: keyword suggestions, Value: appstro.dev/keyword-research
+					68 text page.
+				69 link Description: Search an app instead, Value: appstro.dev/
+				70 link Description: Read the ASO guide, Value: appstro.dev/aso-guide
+			71 heading What is an App Store keyword tool?, Value: 2
+				72 text What is an App Store keyword tool?
+			73 text An app store keyword tool is software that surfaces the exact search terms people type into the App Store, then scores each term so you know which ones are worth targeting. Instead of guessing at metadata, an app store keyword research tool gives you data: how popular a phrase is, how hard it is to rank for, and which apps currently own the top spots for it. Appstro's free app store keyword tool does all three — find the keywords any iOS app ranks for, uncover untapped opportunities, and compare your keyword strategy against competitors, with no credit card, no trial period, no locked reports and no per-search credits. Keyword suggestions come from Apple's autocomplete in 30 storefronts; rank tracking covers 175+.
+			74 heading Discover keywords, Value: 3
+				75 text Discover keywords
+			76 text Pull the real search terms your app — or any competitor — ranks for, straight from live App Store search results.
+			77 heading Score popularity & difficulty, Value: 3
+				78 text Score popularity & difficulty
+			79 text See how early a phrase surfaces in Apple’s autocomplete and how entrenched the current top-10 apps are, so you can prioritize winnable terms.
+			80 heading Track & compare, Value: 3
+
+0 AXWebArea App Store Keyword Tool — Free ASO Keyword Research | Appstro, URL: appstro.dev/app-store-keyword-tool?seed=cheap+gas&country=us
+					414 text 10  keywords · sorted by opportunity · click a row to analyze
+				415 link Description: Export with a free account, Help: Exports need a free account, Value: appstro.dev/account?mode=signup&next=%2Fapp-store-keyword-tool%3Fseed%3Dcheap%2Bgas%26country%3Dus
+				416 button Score all (5)
+				417 button Deep expand (a–z long-tails)
+				418 table
+					419 row
+						420 cell
+							421 text Keyword
+						422 cell
+							423 text Traffic
+						424 cell
+							425 text Difficulty
+						426 cell
+							427 text Opportunity
+						428 cell
+							429 text Top apps
+					430 row
+						431 cell
+							432 text cheap gas finder
+							433 link Description: Check rank for cheap gas finder, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=cheap%20gas%20finder&country=us
+						434 cell
+							435 text 100
+						436 cell
+							437 text 34  ·  Easy
+						438 cell
+							439 text 69
+						440 cell
+							441 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+							442 link Description: Cheap Gas Finder USA, Help: Cheap Gas Finder USA — 18 ratings, Value: appstro.dev/analytics/6762310363
+							443 link Description: Gas Prices Near You, Help: Gas Prices Near You — 7,632 ratings, Value: appstro.dev/analytics/581748070
+							444 link Description: Upside: Gas & Food Cash Back, Help: Upside: Gas & Food Cash Back — 685,154 ratings, Value: appstro.dev/analytics/1099997174
+							445 link Description: Find Cheap Gas – Fuel Prices, Help: Find Cheap Gas – Fuel Prices — 115 ratings, Value: appstro.dev/analytics/6759683321
+					446 row
+						447 cell
+							448 text cheap gas near me
+							449 link Description: Check rank for cheap gas near me, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=cheap%20gas%20near%20me&country=us
+						450 cell
+							451 text 92
+						452 cell
+							453 text 41  ·  Medium
+						454 cell
+							455 text 58
+						456 cell
+							457 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+							458 link Description: Gas Prices Near You, Help: Gas Prices Near You — 7,632 ratings, Value: appstro.dev/analytics/581748070
+							459 link Description: Cheap Gas Finder USA, Help: Cheap Gas Finder USA — 18 ratings, Value: appstro.dev/analytics/6762310363
+							460 link Description: Upside: Gas & Food Cash Back, Help: Upside: Gas & Food Cash Back — 685,154 ratings, Value: appstro.dev/analytics/1099997174
+							461 link Description: GasMeUp: Find Cheap Gas, Help: GasMeUp: Find Cheap Gas — 2 ratings, Value: appstro.dev/analytics/6777846453
+					462 row
+						463 cell
+							464 text find cheap gas prices near you
+							465 link Description: Check rank for find cheap gas prices near you, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=find%20cheap%20gas%20prices%20near%20you&country=us
+						466 cell
+							467 text 75
+						468 cell
+							469 text 36  ·  Medium
+						470 cell
+							471 text 50
+						472 cell
+							473 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+							474 link Description: Cheap Gas Finder USA, Help: Cheap Gas Finder USA — 18 ratings, Value: appstro.dev/analytics/6762310363
+							475 link Description: Gas Prices Near You, Help: Gas Prices Near You — 7,632 ratings, Value: appstro.dev/analytics/581748070
+							476 link Description: Find Cheap Gas – Fuel Prices, Help: Find Cheap Gas – Fuel Prices — 115 ratings, Value: appstro.dev/analytics/6759683321
+							477 link Description: Upside: Gas & Food Cash Back, Help: Upside: Gas & Food Cash Back — 685,154 ratings, Value: appstro.dev/analytics/1099997174
+					478 row
+						479 cell
+							480 text cheap gas
+							481 link Description: Check rank for cheap gas, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=cheap%20gas&country=us
+						482 cell
+							483 text 83
+						484 cell
+							485 text 50  ·  Medium
+						486 cell
+							487 text 45
+						488 cell
+							489 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+							490 link Description: Cheap Gas Finder USA, Help: Cheap Gas Finder USA — 18 ratings, Value: appstro.dev/analytics/6762310363
+							491 link Description: Upside: Gas & Food Cash Back, Help: Upside: Gas & Food Cash Back — 685,154 ratings, Value: appstro.dev/analytics/1099997174
+							492 link Description: Gas Prices Near You, Help: Gas Prices Near You — 7,632 ratings, Value: appstro.dev/analytics/581748070
+							493 link Description: FuelSaver - Cheap Gas Sation, Help: FuelSaver - Cheap Gas Sation — 1 ratings, Value: appstro.dev/analytics/6761938959
+					494 row
+						495 cell
+							496 text cheap gas prices
+							497 link Description: Check rank for cheap gas prices, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=cheap%20gas%20prices&country=us
+						498 cell
+							499 text 66
+						500 cell
+							501 text 36  ·  Medium
+						502 cell
+							503 text 44
+						504 cell
+							505 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+							506 link Description: Gas Prices Near You, Help: Gas Prices Near You — 7,632 ratings, Value: appstro.dev/analytics/581748070
+							507 link Description: Cheap Fuel & Gas Tracker, Help: Cheap Fuel & Gas Tracker — 7 ratings, Value: appstro.dev/analytics/6768006115
+							508 link Description: Gasolino - Cheap Gas Prices, Help: Gasolino - Cheap Gas Prices — 0 ratings, Value: appstro.dev/analytics/6760481207
+							509 link Description: Cheap Gas Finder USA, Help: Cheap Gas Finder USA — 18 ratings, Value: appstro.dev/analytics/6762310363
+					510 row
+						511 cell
+							512 text cheap gas finder usa
+							513 link Description: Check rank for cheap gas finder usa, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=cheap%20gas%20finder%20usa&country=us
+						514 cell
+							515 text 58
+						516 cell
+							517 button analyze
+						518 cell
+							519 text —
+					520 row
+						521 cell
+							522 text find cheap gas – fuel prices
+							523 link Description: Check rank for find cheap gas – fuel prices, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=find%20cheap%20gas%20%E2%80%93%20fuel%20prices&country=us
+						524 cell
+							525 text 49
+						526 cell
+							527 button analyze
+						528 cell
+							529 text —
+					530 row
+						531 cell
+							532 text cheap gasoline
+							533 link Description: Check rank for cheap gasoline, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=cheap%20gasoline&country=us
+						534 cell
+							535 text 41
+						536 cell
+							537 button analyze
+						538 cell
+							539 text —
+					540 row
+						541 cell
+							542 text find cheap gas
+							543 link Description: Check rank for find cheap gas, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=find%20cheap%20gas&country=us
+						544 cell
+							545 text 32
+						546 cell
+							547 button analyze
+						548 cell
+							549 text —
+					550 row
+						551 cell
+							552 text cheap gas station
+							553 link Description: Check rank for cheap gas station, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker?keyword=cheap%20gas%20station&country=us
+						554 cell
+							555 text 24
+						556 cell
+							557 button analyze
+						558 cell
+							559 text —
+				65 container
+					66 text Data is pulled live from the App Store on every search — Apple’s own autocomplete and its current top-10 results, never a stored keyword index. Same workbench as the standalone
+					67 link Description: keyword suggestions, Value: appstro.dev/keyword-research
+					68 text page.
+				69 link Description: Search an app instead, Value: appstro.dev/
+				70 link Description: Read the ASO guide, Value: appstro.dev/aso-guide
+			71 heading What is an App Store keyword tool?, Value: 2
+				72 text What is an App Store keyword tool?
+			73 text An app store keyword tool is software that surfaces the exact search terms people type into the App Store, then scores each term so you know which ones are worth targeting. Instead of guessing at metadata, an app store keyword research tool gives you data: how popular a phrase is, how hard it is to rank for, and which apps currently own the top spots for it. Appstro's free app store keyword tool does all three — find the keywords any iOS app ranks for, uncover untapped opportunities, and compare your keyword strategy against competitors, with no credit card, no trial period, no locked reports and no per-search credits. Keyword suggestions come from Apple's autocomplete in 30 storefronts; rank tracking covers 175+.
+			74 heading Discover keywords, Value: 3
+				75 text Discover keywords
+			76 text Pull the real search terms your app — or any competitor — ranks for, straight from live App Store search results.
+			77 heading Score popularity & difficulty, Value: 3
+				78 text Score popularity & difficulty
+			79 text See how early a phrase surfaces in Apple’s autocomplete and how entrenched the current top-10 apps are, so you can prioritize winnable terms.
+			80 heading Track & compare, Value: 3
+
+0 AXWebArea App Store Keyword Tool — Free ASO Keyword Research | Appstro, URL: appstro.dev/app-store-keyword-tool
+					414 text 10  keywords · sorted by opportunity · click a row to analyze
+				415 link Description: Export with a free account, Help: Exports need a free account, Value: appstro.dev/account
+				416 button Score all (5)
+				417 button Deep expand (a–z long-tails)
+				418 table
+					419 row
+						420 cell
+							421 text Keyword
+						422 cell
+							423 text Traffic
+						424 cell
+							425 text Difficulty
+						426 cell
+							427 text Opportunity
+						428 cell
+							429 text Top apps
+					430 row
+						431 cell
+							432 text diesel fuel prices
+							433 link Description: Check rank for diesel fuel prices, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker
+						434 cell
+							435 text 100
+						436 cell
+							437 text 42  ·  Medium
+						438 cell
+							439 text 62
+						440 cell
+							441 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+							442 link Description: Mudflap, Help: Mudflap — 4,609 ratings, Value: appstro.dev/analytics/1488815024
+							443 link Description: Gas Prices Near You, Help: Gas Prices Near You — 7,632 ratings, Value: appstro.dev/analytics/581748070
+							444 link Description: Fuelbook, Help: Fuelbook — 1,220 ratings, Value: appstro.dev/analytics/427247688
+							445 link Description: EDS Diesel, Help: EDS Diesel — 3 ratings, Value: appstro.dev/analytics/1560167726
+					446 row
+						447 cell
+							448 text diesel fuel finder
+							449 link Description: Check rank for diesel fuel finder, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker
+						450 cell
+							451 text 92
+						452 cell
+							453 text 43  ·  Medium
+						454 cell
+							455 text 56
+						456 cell
+							457 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+							458 link Description: Diesel Near Me, Help: Diesel Near Me — 0 ratings, Value: appstro.dev/analytics/6760606869
+							459 link Description: Mudflap, Help: Mudflap — 4,609 ratings, Value: appstro.dev/analytics/1488815024
+							460 link Description: Fuelbook, Help: Fuelbook — 1,220 ratings, Value: appstro.dev/analytics/427247688
+							461 link Description: Trucker Path: Truck GPS & Fuel, Help: Trucker Path: Truck GPS & Fuel — 153,713 ratings, Value: appstro.dev/analytics/782746890
+					462 row
+						463 cell
+							464 text diesel decoder
+							465 link Description: Check rank for diesel decoder, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker
+						466 cell
+							467 text 66
+						468 cell
+							469 text 34  ·  Easy
+						470 cell
+							471 text 46
+						472 cell
+							473 link Description: Diesel Decoder, Help: Diesel Decoder — 45 ratings, Value: appstro.dev/analytics/1529808675
+							474 link Description: Diesel VIN, Help: Diesel VIN — 7 ratings, Value: appstro.dev/analytics/1454244763
+							475 link Description: OBD2 Car Scanner - EOBD Facile, Help: OBD2 Car Scanner - EOBD Facile — 5,105 ratings, Value: appstro.dev/analytics/713921569
+							476 link Description: Diesel Repair Mobile, Help: Diesel Repair Mobile — 3 ratings, Value: appstro.dev/analytics/6599861426
+							477 link Description: Mudflap, Help: Mudflap — 4,609 ratings, Value: appstro.dev/analytics/1488815024
+					478 row
+						479 cell
+							480 text diesel truck games
+							481 link Description: Check rank for diesel truck games, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker
+						482 cell
+							483 text 83
+						484 cell
+							485 text 59  ·  Hard
+						486 cell
+							487 text 38
+						488 cell
+							489 link Description: Diesel Challenge 2K15, Help: Diesel Challenge 2K15 — 34,779 ratings, Value: appstro.dev/analytics/736898850
+							490 link Description: Offroad Outlaws, Help: Offroad Outlaws — 90,388 ratings, Value: appstro.dev/analytics/1286538410
+							491 link Description: Diesel Drag Racing Pro, Help: Diesel Drag Racing Pro — 592 ratings, Value: appstro.dev/analytics/1186036457
+							492 link Description: Trucks Off Road, Help: Trucks Off Road — 9,036 ratings, Value: appstro.dev/analytics/1486115426
+							493 link Description: 4x4 Delivery Trucker, Help: 4x4 Delivery Trucker — 399 ratings, Value: appstro.dev/analytics/1215670487
+					494 row
+						495 cell
+							496 text diesel
+							497 link Description: Check rank for diesel, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker
+						498 cell
+							499 text 75
+						500 cell
+							501 text 62  ·  Hard
+						502 cell
+							503 text 33
+						504 cell
+							505 link Description: DieselOn, Help: DieselOn — 350 ratings, Value: appstro.dev/analytics/1156389971
+							506 link Description: Supreme, Help: Supreme — 2,138 ratings, Value: appstro.dev/analytics/664573705
+							507 link Description: ZARA, Help: ZARA — 413,292 ratings, Value: appstro.dev/analytics/547951480
+							508 link Description: FARFETCH - Shop Luxury Fashion, Help: FARFETCH - Shop Luxury Fashion — 217,174 ratings, Value: appstro.dev/analytics/906698760
+							509 link Description: GasBuddy: Find & Pay for Gas, Help: GasBuddy: Find & Pay for Gas — 447,908 ratings, Value: appstro.dev/analytics/406719683
+					510 row
+						511 cell
+							512 text diesel repair mobile
+							513 link Description: Check rank for diesel repair mobile, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker
+						514 cell
+							515 text 58
+						516 cell
+							517 button analyze
+						518 cell
+							519 text —
+					520 row
+						521 cell
+							522 text diesel laptops
+							523 link Description: Check rank for diesel laptops, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker
+						524 cell
+							525 text 49
+						526 cell
+							527 button analyze
+						528 cell
+							529 text —
+					530 row
+						531 cell
+							532 text diesel repair
+							533 link Description: Check rank for diesel repair, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker
+						534 cell
+							535 text 41
+						536 cell
+							537 button analyze
+						538 cell
+							539 text —
+					540 row
+						541 cell
+							542 text diesel driving academy
+							543 link Description: Check rank for diesel driving academy, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker
+						544 cell
+							545 text 32
+						546 cell
+							547 button analyze
+						548 cell
+							549 text —
+					550 row
+						551 cell
+							552 text diesel mechanic
+							553 link Description: Check rank for diesel mechanic, Help: Check any app's rank for this keyword, Value: appstro.dev/keyword-rank-checker
+						554 cell
+							555 text 24
+						556 cell
+							557 button analyze
+						558 cell
+							559 text —
+				65 container
+					66 text Data is pulled live from the App Store on every search — Apple’s own autocomplete and its current top-10 results, never a stored keyword index. Same workbench as the standalone
+					67 link Description: keyword suggestions, Value: appstro.dev/keyword-research
+					68 text page.
+				69 link Description: Search an app instead, Value: appstro.dev/
+				70 link Description: Read the ASO guide, Value: appstro.dev/aso-guide
+			71 heading What is an App Store keyword tool?, Value: 2
+				72 text What is an App Store keyword tool?
+			73 text An app store keyword tool is software that surfaces the exact search terms people type into the App Store, then scores each term so you know which ones are worth targeting. Instead of guessing at metadata, an app store keyword research tool gives you data: how popular a phrase is, how hard it is to rank for, and which apps currently own the top spots for it. Appstro's free app store keyword tool does all three — find the keywords any iOS app ranks for, uncover untapped opportunities, and compare your keyword strategy against competitors, with no credit card, no trial period, no locked reports and no per-search credits. Keyword suggestions come from Apple's autocomplete in 30 storefronts; rank tracking covers 175+.
+			74 heading Discover keywords, Value: 3
+				75 text Discover keywords
+			76 text Pull the real search terms your app — or any competitor — ranks for, straight from live App Store search results.
+			77 heading Score popularity & difficulty, Value: 3
+				78 text Score popularity & difficulty
+			79 text See how early a phrase surfaces in Apple’s autocomplete and how entrenched the current top-10 apps are, so you can prioritize winnable terms.
+			80 heading Track & compare, Value: 3
+
+0 AXWebArea Free App Store Keyword Generator - ASO Keyword Ideas | AppDrift, URL: appdrift.co/tools/keyword-suggestion?seed=e85&store=ios&country=us
+			128 text 29 suggestions found.
+			257 container
+				258 heading 29 suggestions for “e85”, Value: 2
+					259 text 29 suggestions for “e85”
+				260 text App Store  autocomplete ·  United States  ·  27  of  27  lists read Filter suggestions
+				261 search text field (settable) Filter suggestions, ID: suggestion-filter
+				262 checkbox (settable, integer) Description: Show probable app names (4 hidden), Value: 0
+				263 text 0  selected
+				264 heading Top suggestions for “e85”, Value: 3
+					265 text Top suggestions for “ e85 ”
+				266 content list
+					267 container
+						268 checkbox (settable, integer) Description: e85 station locator #1 for “e85” · in 2 lists, Value: 0, ID: suggestion-e85-station-locator-direct
+						269 text e85 station locator #1 for “e85”  · in 2 lists Not scored
+						270 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+station+locator&store=ios&country=us
+					271 container
+						272 checkbox (settable, integer) Description: e85 calculator #2 for “e85” · in 2 lists, Value: 0, ID: suggestion-e85-calculator-direct
+						273 text e85 calculator #2 for “e85”  · in 2 lists Not scored
+						274 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+calculator&store=ios&country=us
+					275 container
+						276 checkbox (settable, integer) Description: e85 gas station finder apps #3 for “e85” · in 3 lists, Value: 0, ID: suggestion-e85-gas-station-finder-apps-direct
+						277 text e85 gas station finder apps #3 for “e85”  · in 3 lists Not scored
+						278 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+gas+station+finder+apps&store=ios&country=us
+					279 container
+						280 checkbox (settable, integer) Description: e85 scout #4 for “e85” · in 2 lists, Value: 0, ID: suggestion-e85-scout-direct
+						281 text e85 scout #4 for “e85”  · in 2 lists Not scored
+						282 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+scout&store=ios&country=us
+					283 container
+						284 checkbox (settable, integer) Description: e85 #5 for “e85”, Value: 0, ID: suggestion-e85-direct
+						285 text e85 #5 for “e85” Not scored
+						286 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85&store=ios&country=us
+					287 container
+						288 checkbox (settable, integer) Description: e85 stations usa #6 for “e85” · in 2 lists, Value: 0, ID: suggestion-e85-stations-usa-direct
+						289 text e85 stations usa #6 for “e85”  · in 2 lists Not scored
+						290 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+stations+usa&store=ios&country=us
+					291 container
+						292 checkbox (settable, integer) Description: e85 finder #7 for “e85” · in 2 lists, Value: 0, ID: suggestion-e85-finder-direct
+						293 text e85 finder #7 for “e85”  · in 2 lists Not scored
+						294 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+finder&store=ios&country=us
+					295 container
+						296 checkbox (settable, integer) Description: e85cal #8 for “e85”, Value: 0, ID: suggestion-e85cal-direct
+						297 text e85cal #8 for “e85” Not scored
+						298 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85cal&store=ios&country=us
+					299 container
+						300 checkbox (settable, integer) Description: e85 mix calculator #9 for “e85” · in 2 lists, Value: 0, ID: suggestion-e85-mix-calculator-direct
+						301 text e85 mix calculator #9 for “e85”  · in 2 lists Not scored
+						302 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+mix+calculator&store=ios&country=us
+					303 container
+						304 checkbox (settable, integer) Description: e85 gas #10 for “e85” · in 3 lists, Value: 0, ID: suggestion-e85-gas-direct
+						305 text e85 gas #10 for “e85”  · in 3 lists Not scored
+						306 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+gas&store=ios&country=us
+				307 heading More suggestions, a–z, Value: 3
+					308 text More suggestions, a–z
+				309 content list
+					310 container
+						311 checkbox (settable, integer) Description: e85 app From “e85 a…”, Value: 0, ID: suggestion-e85-app-expanded
+						312 text e85 app From “e85 a…” Not scored
+						313 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+app&store=ios&country=us
+					314 container
+						315 checkbox (settable, integer) Description: e85 blend From “e85 b…”, Value: 0, ID: suggestion-e85-blend-expanded
+						316 text e85 blend From “e85 b…” Not scored
+						317 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+blend&store=ios&country=us
+					318 container
+						319 checkbox (settable, integer) Description: e85 calc From “e85 c…”, Value: 0, ID: suggestion-e85-calc-expanded
+						320 text e85 calc From “e85 c…” Not scored
+						321 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+calc&store=ios&country=us
+					322 container
+						323 checkbox (settable, integer) Description: e85 content From “e85 c…”, Value: 0, ID: suggestion-e85-content-expanded
+						324 text e85 content From “e85 c…” Not scored
+						325 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+content&store=ios&country=us
+					326 container
+						327 checkbox (settable, integer) Description: nostrum e85 ethanol module app From “e85 e…”, Value: 0, ID: suggestion-nostrum-e85-ethanol-module-app-expanded
+						328 text nostrum e85 ethanol module app From “e85 e…” Not scored
+						329 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=nostrum+e85+ethanol+module+app&store=ios&country=us
+					330 container
+						331 checkbox (settable, integer) Description: find e85 fueling stations app From “e85 f…”, Value: 0, ID: suggestion-find-e85-fueling-stations-app-expanded
+						332 text find e85 fueling stations app From “e85 f…” Not scored
+						333 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=find+e85+fueling+stations+app&store=ios&country=us
+					334 container
+						335 checkbox (settable, integer) Description: e85 gas finder From “e85 g…” · in 2 lists, Value: 0, ID: suggestion-e85-gas-finder-expanded
+						336 text e85 gas finder From “e85 g…”  · in 2 lists Not scored
+						337 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+gas+finder&store=ios&country=us
+					338 container
+						339 checkbox (settable, integer) Description: e85 gas station From “e85 g…” · in 3 lists, Value: 0, ID: suggestion-e85-gas-station-expanded
+						340 text e85 gas station From “e85 g…”  · in 3 lists Not scored
+						341 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+gas+station&store=ios&country=us
+					342 container
+						343 checkbox (settable, integer) Description: e85 locator From “e85 l…”, Value: 0, ID: suggestion-e85-locator-expanded
+						344 text e85 locator From “e85 l…” Not scored
+						345 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+locator&store=ios&country=us
+					346 container
+						347 checkbox (settable, integer) Description: e85 mix From “e85 m…”, Value: 0, ID: suggestion-e85-mix-expanded
+						348 text e85 mix From “e85 m…” Not scored
+						349 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+mix&store=ios&country=us
+					350 container
+						351 checkbox (settable, integer) Description: e85 map From “e85 m…”, Value: 0, ID: suggestion-e85-map-expanded
+						352 text e85 map From “e85 m…” Not scored
+						353 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+map&store=ios&country=us
+					354 container
+						355 checkbox (settable, integer) Description: e85 mix ethanol calculator From “e85 m…”, Value: 0, ID: suggestion-e85-mix-ethanol-calculator-expanded
+						356 text e85 mix ethanol calculator From “e85 m…” Not scored
+						357 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+mix+ethanol+calculator&store=ios&country=us
+					358 container
+						359 checkbox (settable, integer) Description: hampton e85 mix calculator From “e85 m…”, Value: 0, ID: suggestion-hampton-e85-mix-calculator-expanded
+						360 text hampton e85 mix calculator From “e85 m…” Not scored
+						361 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=hampton+e85+mix+calculator&store=ios&country=us
+					362 container
+						363 checkbox (settable, integer) Description: e85 navigator From “e85 n…”, Value: 0, ID: suggestion-e85-navigator-expanded
+						364 text e85 navigator From “e85 n…” Not scored
+						365 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+navigator&store=ios&country=us
+					366 container
+						367 checkbox (settable, integer) Description: e85 search From “e85 s…”, Value: 0, ID: suggestion-e85-search-expanded
+						368 text e85 search From “e85 s…” Not scored
+						369 link Description: Check rank, Value: appdrift.co/tools/rank-checker?keyword=e85+search&store=ios&country=us
+				370 text Autocomplete lists searches people type in this storefront, in the store’s own order. It carries no search volume. Difficulty describes the apps currently ranking for a phrase; it does not predict your rank.
+			129 container
+				130 heading Track “e85” every day, Value: 2

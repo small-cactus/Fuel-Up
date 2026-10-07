@@ -1,0 +1,76 @@
+{
+  "researchedAt": "2026-10-07T01:54:32.370795+00:00",
+  "storefront": "United States",
+  "locale": "en-US",
+  "cost": 0,
+  "appId": "6759831421",
+  "before": {
+    "name": "Fuel Up: Find Cheaper Gas",
+    "subtitle": "Compare nearby gas prices",
+    "keywords": "gas prices,fuel,stations,nearby,diesel,E85,premium,gasoline,price trends,fill up"
+  },
+  "after": {
+    "name": "Fuel Up: Cheap Gas Prices",
+    "subtitle": "E85 & Diesel Station Finder",
+    "keywords": "nearby,locator,premium,gasoline,compare,trends,regular,midgrade,ethanol,flex,map,near,me,93,91,local"
+  },
+  "fieldLengths": {
+    "name": 25,
+    "subtitle": 27,
+    "keywords": 100
+  },
+  "sources": [
+    "https://www.appstro.dev/app-store-keyword-tool",
+    "https://appdrift.co/tools/keyword-suggestion?seed=e85&store=ios&country=us",
+    "https://developer.apple.com/app-store/search/"
+  ],
+  "method": "Read live US autocomplete and competing apps with free tools. Prioritize feature relevance and narrower search intent. Apple guidance used for limits, duplication and prohibited competitor terms. No paid account or campaign created.",
+  "appstroDifficultyHeuristics": {
+    "gas": 84,
+    "gas station": 77,
+    "cheap gas finder": 34,
+    "cheap gas near me": 41,
+    "cheap gas prices": 36,
+    "e85 station locator": 34,
+    "e85": 42,
+    "diesel fuel prices": 42,
+    "diesel fuel finder": 43
+  },
+  "independentCrossCheck": {
+    "tool": "AppDrift",
+    "seed": "e85",
+    "suggestionsFound": 29,
+    "topRelevantSuggestions": [
+      "e85 station locator",
+      "e85 gas station finder apps",
+      "e85 finder"
+    ],
+    "relevantExpandedSuggestions": [
+      "e85 gas finder",
+      "e85 locator",
+      "e85 map"
+    ]
+  },
+  "strategy": "Keep broad cheap gas prices in title. Highlight E85 and diesel station finding in subtitle. Hidden tokens extend locator, nearby, map, premium, comparison and trend searches without exact duplicates. Other fuel-grade tokens are feature-derived, not proven-demand winners.",
+  "excluded": [
+    "Competitor and station brand names",
+    "Cashback and rewards unsupported by app",
+    "E85 blend or mix calculator searches unsupported by app",
+    "Repair and game searches unrelated to fuel discovery"
+  ],
+  "limitations": [
+    "Difficulty scores are tool-specific heuristics, not Apple scores or ranking guarantees.",
+    "Autocomplete ordering is not search volume and includes branded app names.",
+    "No conversion or ranking lift can be measured before public launch.",
+    "93 and 91 are premium-grade discovery terms; app does not guarantee exact station octane."
+  ],
+  "validation": {
+    "appStoreConnectSaved": true,
+    "keywordReadbackMatches": true,
+    "nameSubtitleSavedStateObserved": true,
+    "status": "Prepare for Submission",
+    "submitted": false,
+    "codeOrBinaryChanged": false
+  },
+  "nextMeasurement": "After release, compare App Store Search impressions, product-page conversion and downloads in App Store Connect. Reassess targeted terms after enough traffic; avoid claiming causation from an uncontrolled before-after comparison."
+}

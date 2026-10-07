@@ -19,7 +19,8 @@
     "Removed obsolete Also needs E85 fuel-type screenshots from three iPhone slots and the iPad 13-inch slot; assets retained in Asset Library",
     "Verified each populated screenshot slot has three images: Home, National Trends, Station Brands",
     "Verified archive declares ITSAppUsesNonExemptEncryption=false",
-    "Verified TestFlight build 25 shows Testing and both internal and external groups"
+    "Verified TestFlight build 25 shows Testing and both internal and external groups",
+    "Optimized en-US name, subtitle and 100-character keyword field using free Appstro and AppDrift research; saved without submission"
   ],
   "remaining": [
     "Owner must provide or approve a public support URL/email; Support URL remains blank",
@@ -32,12 +33,12 @@
   "privacyPolicyDraft": "privacy-policy-draft.html",
   "privacyNotes": "App Store label updated. Existing public policy remains unchanged and predates driving research. App does not use advertising tracking. Existing Crash Data and Performance Data remain not linked.",
   "validation": "Live App Store Connect UI read-back, source inspection of driving research collection/sync/deletion, and archive plist inspection. No app code or binary changed.",
-  "verifiedAt": "2026-10-07T00:28:34.913198+00:00",
+  "verifiedAt": "2026-10-07T01:54:32.370795+00:00",
   "listing": {
-    "name": "Fuel Up: Find Cheaper Gas",
-    "subtitle": "Compare nearby gas prices",
+    "name": "Fuel Up: Cheap Gas Prices",
+    "subtitle": "E85 & Diesel Station Finder",
     "promotionalText": "Compare nearby gas prices, explore fuel trends, and find stations that fit your fuel type and brand preferences.",
-    "keywords": "gas prices,fuel,stations,nearby,diesel,E85,premium,gasoline,price trends,fill up",
+    "keywords": "nearby,locator,premium,gasoline,compare,trends,regular,midgrade,ethanol,flex,map,near,me,93,91,local",
     "copyright": "2026 Anthony Hayward",
     "categories": [
       "Utilities",
