@@ -1,0 +1,128 @@
+{
+  "begin": "CREATE OR REPLACE FUNCTION public.begin_fuel_national_hour()\n RETURNS bigint\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\ndeclare cfg fuel_national_config; cat fuel_national_catalogs; run bigint;\nbegin\n  select * into cfg from fuel_national_config where id for update;\n  update fuel_national_jobs j set status='missed',lease_until=null,last_error=coalesce(last_error,'HOUR_DEADLINE_MISSED')\n    from fuel_national_runs r where r.id=j.run_id and r.deadline_at<=now() and j.status in ('queued','running');\n  update fuel_national_runs set status='partial',completed_at=now() where status='running' and deadline_at<=now();\n  if not cfg.enabled or cfg.starts_at>now() then return null; end if;\n  if cfg.ends_at is null or cfg.catalog_id is null then\n    update fuel_national_config set enabled=false,halt_reason='INVALID_COLLECTION_CONFIGURATION' where fuel_national_config.id; return null;\n  end if;\n  if cfg.ends_at<=now() then update fuel_national_config set enabled=false,halt_reason='COLLECTION_END' where fuel_national_config.id; return null; end if;\n  select * into cat from fuel_national_catalogs where id=cfg.catalog_id;\n  if cat.id is null or least(coalesce(cfg.catalog_valid_until,cat.created_at+interval '24 hours'),cat.created_at+interval '8 days')<=now() or cat.station_count>cfg.approved_lookups_per_hour\n    or cat.batch_count>cfg.max_requests_per_hour then\n    update fuel_national_config set enabled=false,halt_reason='CATALOG_STALE_OR_BUDGET_INSUFFICIENT' where fuel_national_config.id; return null;\n  end if;\n  insert into fuel_national_runs(slot_at,deadline_at,catalog_id,expected_stations,expected_batches)\n    values(date_trunc('hour',now()),least(date_trunc('hour',now())+interval '1 hour',cfg.ends_at),cat.id,cat.station_count,cat.batch_count)\n    on conflict(slot_at) do nothing;\n  select id into run from fuel_national_runs where slot_at=date_trunc('hour',now());\n  insert into fuel_national_jobs(run_id,catalog_id,ordinal)\n    select run,b.catalog_id,b.ordinal from fuel_national_batches b join fuel_national_runs r on r.catalog_id=b.catalog_id where r.id=run\n    on conflict(run_id,ordinal) do nothing;\n  return run;\nend $function$\n",
+  "bytes": "CREATE OR REPLACE FUNCTION public.fuel_national_archive_bytes()\n RETURNS bigint\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\n select greatest(\n   (select coalesce(sum(archive_bytes),0) from public.fuel_national_jobs),\n   (select coalesce(sum(case when metadata->>'size' ~ '^[0-9]+$' then (metadata->>'size')::bigint else 8000000 end),0)\n    from storage.objects where bucket_id='fuel-national')\n )::bigint;\n$function$\n",
+  "claim": "CREATE OR REPLACE FUNCTION public.claim_fuel_national_region_job(p_region text)\n RETURNS TABLE(id bigint, run_id bigint, lease_token uuid, station_ids text[], execution_region text, request_interval_seconds integer)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\ndeclare cfg fuel_national_config; picked bigint;\nbegin\n  if not exists(select 1 from fuel_national_regions where region=p_region and enabled) then raise exception 'Unknown or disabled execution region'; end if;\n  select * into cfg from fuel_national_config where fuel_national_config.id for update;\n  if not cfg.enabled or cfg.ends_at<=now() or cfg.provider_backoff_until>now() or cfg.last_request_at>now()-make_interval(secs=>cfg.request_interval_seconds) then return; end if;\n  -- A denial already seen by the existing campaign also blocks national work.\n  if exists(select 1 from fuel_research_campaigns where status='active' and provider_backoff_until>now()) then return; end if;\n  if exists(select 1 from fuel_national_jobs where status='running' and lease_until>now())\n    or exists(select 1 from fuel_discovery_jobs where status='running' and lease_until>now()) then return; end if;\n  if public.fuel_national_archive_bytes()+8000000>cfg.archive_budget_bytes then\n    update fuel_national_config set enabled=false,halt_reason='ARCHIVE_BUDGET_REACHED' where fuel_national_config.id; return;\n  end if;\n  select j.id into picked from fuel_national_jobs j join fuel_national_runs r on r.id=j.run_id join fuel_national_batches b on b.catalog_id=j.catalog_id and b.ordinal=j.ordinal\n    where b.execution_region=p_region and r.status='running' and r.deadline_at>now() and j.next_attempt_at<=now() and j.attempts<3\n      and (j.status='queued' or (j.status='running' and j.lease_until<=now())) order by j.id limit 1 for update of j;\n  if picked is null then return; end if;\n  if (select coalesce(sum(j.attempts),0) from fuel_national_jobs j join fuel_national_runs r on r.id=j.run_id where r.slot_at=date_trunc('hour',now()))>=cfg.max_requests_per_hour\n    or (select coalesce(sum(j.attempts*cardinality(b.station_ids)),0) from fuel_national_jobs j join fuel_national_runs r on r.id=j.run_id join fuel_national_batches b on b.catalog_id=j.catalog_id and b.ordinal=j.ordinal where r.slot_at=date_trunc('hour',now()))\n      +(select cardinality(b.station_ids) from fuel_national_jobs j join fuel_national_batches b on b.catalog_id=j.catalog_id and b.ordinal=j.ordinal where j.id=picked)>cfg.approved_lookups_per_hour then return; end if;\n  update fuel_national_config set last_request_at=now() where fuel_national_config.id;\n  return query update fuel_national_jobs j set execution_region=p_region,status='running',attempts=j.attempts+1,lease_token=gen_random_uuid(),lease_until=now()+interval '90 seconds'\n    from fuel_national_batches b where j.id=picked and b.catalog_id=j.catalog_id and b.ordinal=j.ordinal returning j.id,j.run_id,j.lease_token,b.station_ids,b.execution_region,cfg.request_interval_seconds;\nend $function$\n",
+  "config": {
+    "approved_lookups_per_hour": 161660,
+    "archive_budget_bytes": 900000000,
+    "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+    "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+    "enabled": false,
+    "ends_at": "2026-10-07T18:19:00+00:00",
+    "halt_reason": "COLLECTION_END",
+    "id": true,
+    "last_dispatch_at": "2026-10-07T18:16:00.297645+00:00",
+    "last_request_at": "2026-10-07T18:16:22.762514+00:00",
+    "max_requests_per_hour": 92,
+    "provider_backoff_until": "2026-10-07T18:12:54.381439+00:00",
+    "request_interval_seconds": 10,
+    "starts_at": "2026-09-30T22:00:00+00:00"
+  },
+  "sizes": [
+    {
+      "bytes": 17317888,
+      "table": "fuel_national_trend_batches"
+    },
+    {
+      "bytes": 327680,
+      "table": "fuel_national_trends_cache"
+    },
+    {
+      "bytes": 16384,
+      "table": "fuel_query_cache"
+    },
+    {
+      "bytes": 49152,
+      "table": "fuel_refresh_locks"
+    },
+    {
+      "bytes": 81920,
+      "table": "fuel_provider_events"
+    },
+    {
+      "bytes": 49152,
+      "table": "fuel_repair_jobs"
+    },
+    {
+      "bytes": 2138112,
+      "table": "fuel_research_jobs"
+    },
+    {
+      "bytes": 155648,
+      "table": "fuel_research_campaigns"
+    },
+    {
+      "bytes": 10412032,
+      "table": "fuel_research_snapshots"
+    },
+    {
+      "bytes": 16097280,
+      "table": "fuel_e85_directory"
+    },
+    {
+      "bytes": 32768,
+      "table": "fuel_cold_archives"
+    },
+    {
+      "bytes": 32768,
+      "table": "fuel_e85_sources"
+    },
+    {
+      "bytes": 4308992,
+      "table": "fuel_national_jobs"
+    },
+    {
+      "bytes": 475136,
+      "table": "fuel_national_events"
+    },
+    {
+      "bytes": 81920,
+      "table": "fuel_national_catalogs"
+    },
+    {
+      "bytes": 679936,
+      "table": "fuel_national_batches"
+    },
+    {
+      "bytes": 32768,
+      "table": "fuel_national_config"
+    },
+    {
+      "bytes": 98304,
+      "table": "fuel_national_runs"
+    },
+    {
+      "bytes": 32768,
+      "table": "fuel_discovery_attempts"
+    },
+    {
+      "bytes": 57344,
+      "table": "fuel_discovery_config"
+    },
+    {
+      "bytes": 6914048,
+      "table": "fuel_discovery_jobs"
+    },
+    {
+      "bytes": 73728,
+      "table": "fuel_projection_repairs"
+    },
+    {
+      "bytes": 32768,
+      "table": "fuel_national_state_routes"
+    },
+    {
+      "bytes": 81920,
+      "table": "fuel_national_regions"
+    },
+    {
+      "bytes": 194035712,
+      "table": "fuel_station_latest"
+    },
+    {
+      "bytes": 96567296,
+      "table": "fuel_station_price_lookup"
+    }
+  ],
+  "watchdog": "CREATE OR REPLACE FUNCTION public.watchdog_fuel_national()\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nbegin\n if not exists(select 1 from fuel_national_config where enabled and ends_at>now()) then return false; end if;\n if not exists(select 1 from cron.job where jobname='fuel-national-dispatch') then\n   perform cron.schedule('fuel-national-dispatch','* * * * *','select public.dispatch_fuel_national()');\n   insert into fuel_national_events(code) values('MAIN_SCHEDULE_RESTORED');\n   return true;\n end if;\n return false;\nend $function$\n"
+}

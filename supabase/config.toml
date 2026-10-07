@@ -30,3 +30,6 @@ verify_jwt = false
 
 [functions.driving-research]
 verify_jwt = false
+
+[functions.fuel-national-retention]
+verify_jwt = false

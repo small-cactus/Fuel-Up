@@ -1,0 +1,20 @@
+[
+  {
+    "authenticated": false,
+    "status": 401,
+    "body": {
+      "error": "UNAUTHORIZED"
+    }
+  },
+  {
+    "authenticated": true,
+    "status": 200,
+    "body": {
+      "status": "idle",
+      "removedObjects": 0,
+      "marked_archives": 0,
+      "removed_operational_hours": 0,
+      "providerRequests": 0
+    }
+  }
+]

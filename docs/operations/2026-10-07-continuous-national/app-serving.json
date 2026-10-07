@@ -1,0 +1,30 @@
+{
+  "verifiedAt": "2026-10-07T19:37:02.456Z",
+  "checks": [
+    {
+      "scope": "local",
+      "httpStatus": 200,
+      "milliseconds": 1870,
+      "quoteCount": 34,
+      "source": "national-cache",
+      "summary": {
+        "stationCount": 66,
+        "quoteCount": 34,
+        "oldestObservedAt": "2026-10-07T18:05:05.342+00:00",
+        "newestObservedAt": "2026-10-07T19:36:05.123+00:00",
+        "pricePolicy": "reported-last-24-hours"
+      }
+    },
+    {
+      "scope": "national",
+      "httpStatus": 200,
+      "milliseconds": 609,
+      "quoteCount": 5,
+      "historyPoints": 103,
+      "source": "national-cache",
+      "summary": {
+        "pricePolicy": "reported-last-24-hours"
+      }
+    }
+  ]
+}
