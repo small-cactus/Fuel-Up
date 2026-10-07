@@ -35,3 +35,16 @@ Apple recommends showing the app's essence first and keeping each subsequent scr
 This design is a conversion hypothesis, not a proven maximum. After release and sufficient traffic, compare the first image against an alternative using Apple's Product Page Optimization, keeping other listing variables stable. Evaluate conversion rate with uncertainty; do not call a winner on a small sample. No paid ASO tools or invented search-volume estimates were used.
 
 The listing must remain in Prepare for Submission. Uploading these assets does not authorize App Review submission.
+
+## Upload receipt
+
+Uploaded and verified in App Store Connect on October 7, 2026 UTC for app `6759831421`, version 1.0, English (U.S.):
+
+| Category | Final count | Export folder |
+| --- | --- | --- |
+| iPhone with Dynamic Island, medium | 4 | `exports/iphone-medium` |
+| iPhone with Dynamic Island, large | 4 | `exports/iphone-large` |
+| iPhone with Face ID, medium | 4 | `exports/iphone-compact` |
+| iPad 13-inch | 4 | `exports/ipad` |
+
+Every populated category shows `01-nearby.png`, `02-trends.png`, `03-e85.png`, `04-brands.png` in that order. All four uploads finished processing in every category. Previous attachments were removed from the draft; their recoverable source assets remain in Apple's Asset Library. The version page was reopened and confirmed saved, with Save disabled and status **Prepare for Submission**. No review was submitted. `app-store-draft.png` and `app-store-ipad.png` preserve visible dashboard proof.
