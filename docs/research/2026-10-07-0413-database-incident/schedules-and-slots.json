@@ -1,0 +1,121 @@
+{
+  "city_overdue": 0,
+  "cron_recent": [
+    {
+      "failures": 12,
+      "jobname": "fuel-national-discovery",
+      "last_failure": "2026-10-07T04:23:00.000655+00:00",
+      "last_finished": "2026-10-07T04:27:00.344969+00:00"
+    },
+    {
+      "failures": 11,
+      "jobname": "fuel-national-dispatch",
+      "last_failure": "2026-10-07T04:23:00.000655+00:00",
+      "last_finished": "2026-10-07T04:27:00.339669+00:00"
+    },
+    {
+      "failures": 13,
+      "jobname": "fuel-national-projection-repair",
+      "last_failure": "2026-10-07T04:23:00.000655+00:00",
+      "last_finished": "2026-10-07T04:27:00.255902+00:00"
+    },
+    {
+      "failures": 12,
+      "jobname": "fuel-national-trends-cache",
+      "last_failure": "2026-10-07T04:23:00.000655+00:00",
+      "last_finished": "2026-10-07T04:27:00.269435+00:00"
+    },
+    {
+      "failures": 4,
+      "jobname": "fuel-national-watchdog",
+      "last_failure": "2026-10-07T04:20:00.000081+00:00",
+      "last_finished": "2026-10-07T04:20:32.639995+00:00"
+    },
+    {
+      "failures": 12,
+      "jobname": "fuel-research-dispatch",
+      "last_failure": "2026-10-07T04:23:00.000655+00:00",
+      "last_finished": "2026-10-07T04:27:00.336376+00:00"
+    },
+    {
+      "failures": 4,
+      "jobname": "fuel-research-watchdog",
+      "last_failure": "2026-10-07T04:20:00.000081+00:00",
+      "last_finished": "2026-10-07T04:20:37.795926+00:00"
+    }
+  ],
+  "now": "2026-10-07T04:27:47.27739+00:00",
+  "postmaster_started": "2026-10-07T04:26:03.367822+00:00",
+  "regional_errors": 0,
+  "responses": [
+    {
+      "content": "{\"results\":[{\"id\":586853,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1515,\"projection\":\"published\"},{\"id\":586854,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1528,\"projection\":\"published\"},{\"id\":586855,\"status\":\"succeeded\",\"stations\":1747,\"priced\":1305,\"projection\":\"published\"}],\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+      "created": "2026-10-07T04:27:00.34136+00:00",
+      "error_msg": null,
+      "status_code": 200
+    },
+    {
+      "content": "{\"results\":[{\"id\":4187,\"city\":\"new-york\",\"status\":\"succeeded\",\"stations\":20},{\"id\":4355,\"city\":\"los-angeles\",\"status\":\"succeeded\",\"stations\":20}]}",
+      "created": "2026-10-07T04:27:00.34136+00:00",
+      "error_msg": null,
+      "status_code": 200
+    },
+    {
+      "content": "{\"error\":\"CLAIM_FAILED\"}",
+      "created": "2026-10-07T04:22:25.912074+00:00",
+      "error_msg": null,
+      "status_code": 503
+    },
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+      "created": "2026-10-07T04:22:25.912074+00:00",
+      "error_msg": null,
+      "status_code": 503
+    },
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+      "created": "2026-10-07T04:19:02.239249+00:00",
+      "error_msg": null,
+      "status_code": 503
+    },
+    {
+      "content": "{\"results\":[{\"id\":4187,\"city\":\"new-york\",\"status\":\"retry_pending\",\"code\":\"SNAPSHOT_COMMIT_FAILED\"}]}",
+      "created": "2026-10-07T04:19:02.239249+00:00",
+      "error_msg": null,
+      "status_code": 200
+    },
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+      "created": "2026-10-07T04:18:06.559468+00:00",
+      "error_msg": null,
+      "status_code": 503
+    },
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+      "created": "2026-10-07T04:17:08.219146+00:00",
+      "error_msg": null,
+      "status_code": 503
+    },
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+      "created": "2026-10-07T04:14:02.962884+00:00",
+      "error_msg": null,
+      "status_code": 503
+    },
+    {
+      "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+      "created": "2026-10-07T04:13:14.062878+00:00",
+      "error_msg": null,
+      "status_code": 503
+    }
+  ],
+  "shared_buffers": "96MB",
+  "slots": {
+    "complete": 134,
+    "current_in_progress": 1,
+    "expected": 151,
+    "expired_partial": 11,
+    "expired_unstarted": 5,
+    "latest_gap": "2026-10-06T10:00:00+00:00"
+  }
+}
