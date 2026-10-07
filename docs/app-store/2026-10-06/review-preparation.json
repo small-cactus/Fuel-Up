@@ -13,7 +13,7 @@
     "Copied existing TestFlight review contact into Apple's private App Review contact fields",
     "Completed new social-media age-rating questions; calculated rating remains 4+",
     "Set initial free price schedule with USD 0.00 base and zero equivalent prices",
-    "Preserved existing 175-territory availability and disabled Mac/Vision Pro availability",
+    "Restricted availability to United States only; automatic future-country availability off; Mac/Vision Pro availability remains disabled",
     "Published Fitness, User ID and Purchase History privacy disclosures for Analytics and App Functionality; linked to participant identity; no tracking",
     "Corrected Product Interaction and Other Diagnostic Data to linked; Analytics and App Functionality; no tracking",
     "Removed obsolete Also needs E85 fuel-type screenshots from three iPhone slots and the iPad 13-inch slot; assets retained in Asset Library",
@@ -47,5 +47,14 @@
     "ageRating": "4+",
     "supportUrl": null,
     "requiresSignIn": false
+  },
+  "availability": {
+    "countries": [
+      "USA"
+    ],
+    "automaticallyIncludeNewCountries": false,
+    "verifiedAt": "2026-10-07T02:02:03.333814+00:00",
+    "observedState": "Availability (1 Country or Region); United States: Available on App Release",
+    "submitted": false
   }
 }
