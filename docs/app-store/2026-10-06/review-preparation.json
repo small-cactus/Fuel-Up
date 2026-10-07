@@ -1,7 +1,7 @@
 {
   "appId": "6759831421",
   "version": "1.0",
-  "build": "1.0.0 (25)",
+  "build": "1.0.0 (26)",
   "status": "Prepare for Submission",
   "submitted": false,
   "releaseMode": "Manual",
@@ -20,7 +20,8 @@
     "Verified each populated screenshot slot has three images: Home, National Trends, Station Brands",
     "Verified archive declares ITSAppUsesNonExemptEncryption=false",
     "Verified TestFlight build 25 shows Testing and both internal and external groups",
-    "Optimized en-US name, subtitle and 100-character keyword field using free Appstro and AppDrift research; saved without submission"
+    "Optimized en-US name, subtitle and 100-character keyword field using free Appstro and AppDrift research; saved without submission",
+    "Replaced attached build 25 with processed localized build 26; saved draft, Prepare for Submission; no Add for Review action"
   ],
   "remaining": [
     "Owner must provide or approve a public support URL/email; Support URL remains blank",
@@ -56,5 +57,6 @@
     "verifiedAt": "2026-10-07T02:02:03.333814+00:00",
     "observedState": "Availability (1 Country or Region); United States: Available on App Release",
     "submitted": false
-  }
+  },
+  "buildAttachmentVerifiedAt": "2026-10-07T03:10:00Z"
 }
