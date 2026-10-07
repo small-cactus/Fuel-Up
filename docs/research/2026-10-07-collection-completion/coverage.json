@@ -1,0 +1,160 @@
+{
+  "archive_missing_objects": 0,
+  "archive_storage": {
+    "bucket": "fuel-national",
+    "bytes": 570217294,
+    "objects": 11121
+  },
+  "at": "2026-10-07T19:11:57.506509+00:00",
+  "city_jobs": {
+    "missed": 54,
+    "succeeded": 3978,
+    "total": 4032,
+    "unresolved": 0
+  },
+  "coverage": {
+    "absent": 5,
+    "complete": 149,
+    "expected": 165,
+    "partial": 11,
+    "running": 0
+  },
+  "incomplete_hours": [
+    {
+      "deadline": "2026-10-02T12:00:00+00:00",
+      "observed_stations": 0,
+      "run_id": 1654,
+      "slot": "2026-10-02T11:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 0
+    },
+    {
+      "deadline": "2026-10-01T14:00:00+00:00",
+      "observed_stations": 93960,
+      "run_id": 539,
+      "slot": "2026-10-01T13:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 48
+    },
+    {
+      "deadline": "2026-10-02T19:00:00+00:00",
+      "observed_stations": 107960,
+      "run_id": 2009,
+      "slot": "2026-10-02T18:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 55
+    },
+    {
+      "deadline": "2026-10-02T13:00:00+00:00",
+      "observed_stations": 0,
+      "run_id": 1701,
+      "slot": "2026-10-02T12:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 0
+    },
+    {
+      "deadline": "2026-10-01T16:00:00+00:00",
+      "observed_stations": 0,
+      "run_id": 565,
+      "slot": "2026-10-01T15:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 0
+    },
+    {
+      "deadline": "2026-10-04T11:00:00+00:00",
+      "observed_stations": 97960,
+      "run_id": 4301,
+      "slot": "2026-10-04T10:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 50
+    },
+    {
+      "deadline": "2026-10-02T11:00:00+00:00",
+      "observed_stations": 119960,
+      "run_id": 1614,
+      "slot": "2026-10-02T10:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 61
+    },
+    {
+      "deadline": "2026-10-06T11:00:00+00:00",
+      "observed_stations": 49960,
+      "run_id": 7122,
+      "slot": "2026-10-06T10:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 26
+    },
+    {
+      "deadline": "2026-10-01T08:00:00+00:00",
+      "observed_stations": 12213,
+      "run_id": 537,
+      "slot": "2026-10-01T07:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 7
+    },
+    {
+      "deadline": "2026-10-03T20:00:00+00:00",
+      "observed_stations": 131960,
+      "run_id": 3428,
+      "slot": "2026-10-03T19:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 67
+    },
+    {
+      "deadline": "2026-10-01T15:00:00+00:00",
+      "observed_stations": 109960,
+      "run_id": 549,
+      "slot": "2026-10-01T14:00:00+00:00",
+      "status": "partial",
+      "succeeded_batches": 56
+    },
+    {
+      "deadline": "2026-10-01T13:00:00+00:00",
+      "observed_stations": null,
+      "run_id": null,
+      "slot": "2026-10-01T12:00:00+00:00",
+      "status": "absent",
+      "succeeded_batches": null
+    },
+    {
+      "deadline": "2026-10-01T12:00:00+00:00",
+      "observed_stations": null,
+      "run_id": null,
+      "slot": "2026-10-01T11:00:00+00:00",
+      "status": "absent",
+      "succeeded_batches": null
+    },
+    {
+      "deadline": "2026-10-01T11:00:00+00:00",
+      "observed_stations": null,
+      "run_id": null,
+      "slot": "2026-10-01T10:00:00+00:00",
+      "status": "absent",
+      "succeeded_batches": null
+    },
+    {
+      "deadline": "2026-10-01T10:00:00+00:00",
+      "observed_stations": null,
+      "run_id": null,
+      "slot": "2026-10-01T09:00:00+00:00",
+      "status": "absent",
+      "succeeded_batches": null
+    },
+    {
+      "deadline": "2026-10-01T09:00:00+00:00",
+      "observed_stations": null,
+      "run_id": null,
+      "slot": "2026-10-01T08:00:00+00:00",
+      "status": "absent",
+      "succeeded_batches": null
+    }
+  ],
+  "national_totals": {
+    "archive_bytes": 568993959,
+    "priced_station_observations": 14200242,
+    "station_observations": 21831273,
+    "successful_batches": 11098
+  },
+  "recent_cron_failures": 0,
+  "wrong_regions": 0
+}

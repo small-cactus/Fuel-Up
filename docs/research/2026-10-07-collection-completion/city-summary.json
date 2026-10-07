@@ -1,0 +1,140 @@
+{
+  "campaign": "hourly-24-cities-20260930-v1",
+  "exportCutoff": "2026-10-07T19:11:30.765Z",
+  "sha256": "6d5a382264e2a75bcd7e0da6369a6beed3367fcf466427c94977fc853cf009d2",
+  "compressedBytes": 480796,
+  "plannedCityHours": 4032,
+  "snapshots": 3978,
+  "missedCityHours": 54,
+  "stationObservations": 79560,
+  "uniqueStationIds": 505,
+  "observationsWithoutAnyPrice": 27206,
+  "observationTimeSplitCounts": {
+    "training": 1674,
+    "validation": 1152,
+    "reservedFinal": 1152
+  },
+  "cities": [
+    {
+      "city": "atlanta",
+      "snapshots": 164,
+      "stationObservations": 3280
+    },
+    {
+      "city": "austin",
+      "snapshots": 167,
+      "stationObservations": 3340
+    },
+    {
+      "city": "boston",
+      "snapshots": 164,
+      "stationObservations": 3280
+    },
+    {
+      "city": "charlotte",
+      "snapshots": 164,
+      "stationObservations": 3280
+    },
+    {
+      "city": "chicago",
+      "snapshots": 168,
+      "stationObservations": 3360
+    },
+    {
+      "city": "columbus",
+      "snapshots": 165,
+      "stationObservations": 3300
+    },
+    {
+      "city": "dallas",
+      "snapshots": 167,
+      "stationObservations": 3340
+    },
+    {
+      "city": "denver",
+      "snapshots": 164,
+      "stationObservations": 3280
+    },
+    {
+      "city": "fort-worth",
+      "snapshots": 165,
+      "stationObservations": 3300
+    },
+    {
+      "city": "houston",
+      "snapshots": 168,
+      "stationObservations": 3360
+    },
+    {
+      "city": "indianapolis",
+      "snapshots": 164,
+      "stationObservations": 3280
+    },
+    {
+      "city": "jacksonville",
+      "snapshots": 166,
+      "stationObservations": 3320
+    },
+    {
+      "city": "las-vegas",
+      "snapshots": 164,
+      "stationObservations": 3280
+    },
+    {
+      "city": "los-angeles",
+      "snapshots": 168,
+      "stationObservations": 3360
+    },
+    {
+      "city": "miami",
+      "snapshots": 164,
+      "stationObservations": 3280
+    },
+    {
+      "city": "new-york",
+      "snapshots": 168,
+      "stationObservations": 3360
+    },
+    {
+      "city": "philadelphia",
+      "snapshots": 168,
+      "stationObservations": 3360
+    },
+    {
+      "city": "phoenix",
+      "snapshots": 168,
+      "stationObservations": 3360
+    },
+    {
+      "city": "san-antonio",
+      "snapshots": 167,
+      "stationObservations": 3340
+    },
+    {
+      "city": "san-diego",
+      "snapshots": 167,
+      "stationObservations": 3340
+    },
+    {
+      "city": "san-jose",
+      "snapshots": 166,
+      "stationObservations": 3320
+    },
+    {
+      "city": "seattle",
+      "snapshots": 164,
+      "stationObservations": 3280
+    },
+    {
+      "city": "tampa",
+      "snapshots": 164,
+      "stationObservations": 3280
+    },
+    {
+      "city": "washington-dc",
+      "snapshots": 164,
+      "stationObservations": 3280
+    }
+  ],
+  "limitation": "Provider-selected city panels and reported quotes, not complete city inventories or pump truth. Split counts are inventory only; reserved final observations were not used for fitting or evaluation."
+}
