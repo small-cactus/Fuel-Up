@@ -48,3 +48,15 @@ Local evidence: `/tmp/FuelUp-TestFlight-27.xcarchive`,
 `/tmp/fuelup-testflight-27-upload.log`, and
 `/tmp/fuelup-testflight-27-tests.log`.
 
+## App Store review submission
+
+On October 7, 2026 at approximately 09:24 America/New_York, the user explicitly
+requested public App Review submission, superseding the earlier draft-only limit.
+Verified the selected version 1.0 / build 1.0.0 (27) and manual release setting.
+Added the version for review, then submitted the single item. App Store Connect
+confirmed “1 Item Submitted” and changed version 1.0 to “Waiting for Review”.
+Submission ID: `a52dabb2-077a-4f3c-bbc2-c936965936af`.
+
+This confirms receipt for review, not approval or public release. The existing
+manual release setting remains unchanged. Evidence:
+`build-27/app-review-submitted.png`.
