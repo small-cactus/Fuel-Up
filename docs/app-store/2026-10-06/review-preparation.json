@@ -1,0 +1,50 @@
+{
+  "appId": "6759831421",
+  "version": "1.0",
+  "build": "1.0.0 (25)",
+  "status": "Prepare for Submission",
+  "submitted": false,
+  "releaseMode": "Manual",
+  "completed": [
+    "Replaced attached build 12 with processed build 25",
+    "Updated promotional text, description and keywords for current app behavior",
+    "Changed subtitle to Compare nearby gas prices",
+    "Saved App Review walkthrough and disabled sign-in requirement",
+    "Copied existing TestFlight review contact into Apple's private App Review contact fields",
+    "Completed new social-media age-rating questions; calculated rating remains 4+",
+    "Set initial free price schedule with USD 0.00 base and zero equivalent prices",
+    "Preserved existing 175-territory availability and disabled Mac/Vision Pro availability",
+    "Published Fitness, User ID and Purchase History privacy disclosures for Analytics and App Functionality; linked to participant identity; no tracking",
+    "Corrected Product Interaction and Other Diagnostic Data to linked; Analytics and App Functionality; no tracking",
+    "Removed obsolete Also needs E85 fuel-type screenshots from three iPhone slots and the iPad 13-inch slot; assets retained in Asset Library",
+    "Verified each populated screenshot slot has three images: Home, National Trends, Station Brands",
+    "Verified archive declares ITSAppUsesNonExemptEncryption=false",
+    "Verified TestFlight build 25 shows Testing and both internal and external groups"
+  ],
+  "remaining": [
+    "Owner must provide or approve a public support URL/email; Support URL remains blank",
+    "Owner must confirm rights or permission for third-party prices and logos before Content Rights declaration can be completed",
+    "Google Sites requires owner reauthentication before existing public privacy policy can be updated",
+    "Review privacy-policy-draft.html, supply approved public contact and effective date, publish to existing policy URL, and verify public read-back",
+    "Final submission validation has not been invoked because Add for Review was intentionally not clicked"
+  ],
+  "existingPrivacyPolicyUrl": "https://sites.google.com/view/fuel-up-gas/home",
+  "privacyPolicyDraft": "privacy-policy-draft.html",
+  "privacyNotes": "App Store label updated. Existing public policy remains unchanged and predates driving research. App does not use advertising tracking. Existing Crash Data and Performance Data remain not linked.",
+  "validation": "Live App Store Connect UI read-back, source inspection of driving research collection/sync/deletion, and archive plist inspection. No app code or binary changed.",
+  "verifiedAt": "2026-10-07T00:28:34.913198+00:00",
+  "listing": {
+    "name": "Fuel Up: Find Cheaper Gas",
+    "subtitle": "Compare nearby gas prices",
+    "promotionalText": "Compare nearby gas prices, explore fuel trends, and find stations that fit your fuel type and brand preferences.",
+    "keywords": "gas prices,fuel,stations,nearby,diesel,E85,premium,gasoline,price trends,fill up",
+    "copyright": "2026 Anthony Hayward",
+    "categories": [
+      "Utilities",
+      "Travel"
+    ],
+    "ageRating": "4+",
+    "supportUrl": null,
+    "requiresSignIn": false
+  }
+}

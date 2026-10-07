@@ -19,6 +19,6 @@ Turn on Also show E85 in Fuel Type settings. E85 stations appear alongside your 
 - The first upload encountered a temporary DNS failure and was interrupted before final acceptance was recorded. Retried the same verified archive and build number.
 - Apple confirmed upload success and package processing on October 6, 2026 at 20:44:54 UTC. Export command exited 0.
 - Non-blocking warning: Hermes framework dSYM is missing, as in build 24. Apple accepted the package.
-- App Store Connect browser session expired. Processing completion, What to Test, and testing-group assignments still require a fresh sign-in; not yet verified.
+- Follow-up App Store Connect verification: build 25 is processed, shows Testing, and is assigned to both Fuel Up Internal Testing and Fuel Up External Testing (5 invites shown). It was also attached to the unsubmitted App Store version 1.0 draft during review preparation. What to Test was not rechecked in that follow-up.
 - App bundle main.jsbundle SHA-256: `3f05f0aedc639c16160bea222cb946e448b6f1ed095e17dc7723ef8857be1e19`.
 - Local evidence: `/tmp/FuelUp-TestFlight-25.xcarchive`, `/tmp/fuelup-testflight-25-archive.log`, `/tmp/fuelup-testflight-25-upload-retry.log`, `/tmp/fuelup-testflight-25-tests.log`.
