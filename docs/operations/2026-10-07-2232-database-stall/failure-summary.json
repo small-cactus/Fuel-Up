@@ -1,0 +1,26 @@
+{
+  "detectedAt": "2026-10-07T22:32:33Z",
+  "runId": 9175,
+  "succeededBatches": 47,
+  "queuedBatches": 25,
+  "lastProviderClaimAt": "2026-10-07T22:09:43.857278Z",
+  "workerFailures": {
+    "code": "DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED",
+    "httpStatus": 503,
+    "observedFrom": "2026-10-07T22:10:01.621105Z",
+    "latestInspected": "2026-10-07T22:33:06.594643Z"
+  },
+  "retentionFailures": {
+    "code": "NATIONAL_RETENTION_FAILED",
+    "httpStatus": 503,
+    "observedAt": ["2026-10-07T22:20:08.365529Z", "2026-10-07T22:30:08.513799Z"]
+  },
+  "cronFailuresLastHourAtDiagnosis": 62,
+  "managementDiagnostics": "HTTP 544: Failed to create login role: Connection terminated due to connection timeout",
+  "resourceMetrics": "HTTP 504; current memory pressure not measurable",
+  "activeSharedProviderCooldowns": 0,
+  "newUnresolvedProjectionRepairs": 0,
+  "recoveryAttempts": 1,
+  "action": "Authenticated dashboard Restart project; existing free Nano plan and configuration unchanged",
+  "limitation": "Database unavailability is observed; exact trigger and current OS memory/swap state are not established. Source errors remain in the database and pg_net response log."
+}

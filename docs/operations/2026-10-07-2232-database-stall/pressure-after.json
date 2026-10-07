@@ -1,0 +1,33 @@
+{
+  "sampledAt": "2026-10-07T22:42:55.280Z",
+  "project": "vjindchxfebaltbslqwc",
+  "elapsedSeconds": 15.5,
+  "rebooted": false,
+  "countersAdvanced": false,
+  "limitation": "Metrics did not advance; cached samples cannot establish an idle or healthy interval.",
+  "memoryBytes": {
+    "total": 431304704,
+    "available": 207376384,
+    "swapTotal": 1073737728,
+    "swapFree": 775458816
+  },
+  "swapInPages": null,
+  "swapOutPages": null,
+  "swapInBytesAt4KiB": null,
+  "swapOutBytesAt4KiB": null,
+  "majorFaults": null,
+  "oomKills": null,
+  "cpuIoWaitPercent": null,
+  "disks": {
+    "nvme0n1": {
+      "read_bytes": null,
+      "written_bytes": null,
+      "io_time_seconds": null
+    },
+    "nvme1n1": {
+      "read_bytes": null,
+      "written_bytes": null,
+      "io_time_seconds": null
+    }
+  }
+}
