@@ -1,0 +1,146 @@
+{
+  "features": [
+    {
+      "file": "01-nearby",
+      "lines": [
+        "Find cheaper gas.",
+        "Near you."
+      ],
+      "sub": "Compare nearby reported prices.",
+      "bg": "#DDF3E7",
+      "ink": "#102C23",
+      "accent": "#177447"
+    },
+    {
+      "file": "02-trends",
+      "lines": [
+        "Gas prices change.",
+        "Stay in the know."
+      ],
+      "sub": "Explore national and local trends.",
+      "bg": "#E4EDF9",
+      "ink": "#142A43",
+      "accent": "#2462A2"
+    },
+    {
+      "file": "03-e85",
+      "lines": [
+        "Your usual fuel.",
+        "And E85."
+      ],
+      "sub": "Spot E85 stations in yellow.",
+      "bg": "#F9EAB7",
+      "ink": "#302917",
+      "accent": "#8B6214"
+    },
+    {
+      "file": "04-brands",
+      "lines": [
+        "Your stations.",
+        "Your way."
+      ],
+      "sub": "Choose brands and memberships.",
+      "bg": "#EAE6F5",
+      "ink": "#29223C",
+      "accent": "#7252A3"
+    }
+  ],
+  "exports": [
+    {
+      "file": "exports/iphone-large/01-nearby.png",
+      "width": 1320,
+      "height": 2868,
+      "source": "raw/iphone-large/01-nearby.png"
+    },
+    {
+      "file": "exports/iphone-large/02-trends.png",
+      "width": 1320,
+      "height": 2868,
+      "source": "raw/iphone-large/02-trends.png"
+    },
+    {
+      "file": "exports/iphone-large/03-e85.png",
+      "width": 1320,
+      "height": 2868,
+      "source": "raw/iphone-large/03-e85.png"
+    },
+    {
+      "file": "exports/iphone-large/04-brands.png",
+      "width": 1320,
+      "height": 2868,
+      "source": "raw/iphone-large/04-brands.png"
+    },
+    {
+      "file": "exports/iphone-medium/01-nearby.png",
+      "width": 1206,
+      "height": 2622,
+      "source": "raw/iphone-large/01-nearby.png"
+    },
+    {
+      "file": "exports/iphone-medium/02-trends.png",
+      "width": 1206,
+      "height": 2622,
+      "source": "raw/iphone-large/02-trends.png"
+    },
+    {
+      "file": "exports/iphone-medium/03-e85.png",
+      "width": 1206,
+      "height": 2622,
+      "source": "raw/iphone-large/03-e85.png"
+    },
+    {
+      "file": "exports/iphone-medium/04-brands.png",
+      "width": 1206,
+      "height": 2622,
+      "source": "raw/iphone-large/04-brands.png"
+    },
+    {
+      "file": "exports/iphone-compact/01-nearby.png",
+      "width": 1080,
+      "height": 2340,
+      "source": "raw/iphone-large/01-nearby.png"
+    },
+    {
+      "file": "exports/iphone-compact/02-trends.png",
+      "width": 1080,
+      "height": 2340,
+      "source": "raw/iphone-large/02-trends.png"
+    },
+    {
+      "file": "exports/iphone-compact/03-e85.png",
+      "width": 1080,
+      "height": 2340,
+      "source": "raw/iphone-large/03-e85.png"
+    },
+    {
+      "file": "exports/iphone-compact/04-brands.png",
+      "width": 1080,
+      "height": 2340,
+      "source": "raw/iphone-large/04-brands.png"
+    },
+    {
+      "file": "exports/ipad/01-nearby.png",
+      "width": 2064,
+      "height": 2752,
+      "source": "raw/ipad/01-nearby.png"
+    },
+    {
+      "file": "exports/ipad/02-trends.png",
+      "width": 2064,
+      "height": 2752,
+      "source": "raw/ipad/02-trends.png"
+    },
+    {
+      "file": "exports/ipad/03-e85.png",
+      "width": 2064,
+      "height": 2752,
+      "source": "raw/ipad/03-e85.png"
+    },
+    {
+      "file": "exports/ipad/04-brands.png",
+      "width": 2064,
+      "height": 2752,
+      "source": "raw/ipad/04-brands.png"
+    }
+  ]
+}
