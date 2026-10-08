@@ -92,3 +92,20 @@ database failure remains a limitation, and Trends' next snapshot remains pending
 This incident used two scoped recovery actions (one restart, one four-summary
 archive replay), both with successful relevant validation. No production code
 change or deployment occurred. The phone app was never opened.
+
+## 15:46 UTC follow-up: pending publication recovered
+
+The 15:00 run (10158) completed all 72 batches at 15:15:45. All ten Trends
+scopes published it at 15:17:00, with zero missing matching summaries. The public
+Trends response verified that completed timestamp at 15:46:43 (HTTP 200, 489 ms);
+Home returned 35 quotes (HTTP 200, 2,586 ms). All 21 operational slots are complete,
+without absent, partial or expired running hours. All three fixed regional
+assignments matched, with zero wrong-region jobs.
+
+Protected health checks found no Cron failures after 14:55, no HTTP errors in
+the last 20 minutes, no waiting locks, no active shared cooldowns and no unresolved
+operational projection repairs. Retention returned 200 at 15:40 with zero deletions
+and zero provider requests. Archive accounting is 647,243,104 bytes, below the
+900,000,000-byte budget. No further repair was needed. This confirms recovery of
+the previously pending cache publication, not elimination of the recurring
+database failure cause. Continuous monitoring remains active.

@@ -1,0 +1,83 @@
+{
+  "checkedAt": "2026-10-08T15:46:43.078Z",
+  "results": [
+    {
+      "name": "home",
+      "status": 200,
+      "ms": 2586,
+      "quotes": 35,
+      "error": null
+    },
+    {
+      "name": "trends",
+      "status": 200,
+      "ms": 489,
+      "quotes": 5,
+      "completedAt": "2026-10-08T15:15:45.687101+00:00",
+      "error": null
+    }
+  ],
+  "slots": {
+    "complete": 21,
+    "current_absent": 0,
+    "expected": 21,
+    "expired_absent": 0,
+    "expired_running": 0,
+    "partial": 0
+  },
+  "latestHour": {
+    "archive_bytes": 3665705,
+    "completed_at": "2026-10-08T15:15:45.687101+00:00",
+    "expected_batches": 72,
+    "expected_stations": 141660,
+    "id": 10158,
+    "missed_batches": 0,
+    "observed_stations": 141660,
+    "priced_stations": 92968,
+    "slot_at": "2026-10-08T15:00:00+00:00",
+    "status": "complete",
+    "succeeded_batches": 72
+  },
+  "trendsCache": {
+    "age_minutes": 29.2643485,
+    "behind_latest_complete": false,
+    "published_at": "2026-10-08T15:17:00.226476+00:00",
+    "run_id": 10158,
+    "scopes": 10
+  },
+  "projection": {
+    "completed_at": "2026-10-08T15:15:45.687101+00:00",
+    "missing_batches": 0,
+    "run_id": 10158,
+    "slot_at": "2026-10-08T15:00:00+00:00"
+  },
+  "regional": [
+    {
+      "execution_region": "us-east-1",
+      "expected_batches": 59,
+      "observed_stations": 117700,
+      "run_id": 10158,
+      "slot_at": "2026-10-08T15:00:00+00:00",
+      "succeeded_batches": 59,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-2",
+      "expected_batches": 4,
+      "observed_stations": 6213,
+      "run_id": 10158,
+      "slot_at": "2026-10-08T15:00:00+00:00",
+      "succeeded_batches": 4,
+      "wrong_region_jobs": 0
+    },
+    {
+      "execution_region": "us-west-1",
+      "expected_batches": 9,
+      "observed_stations": 17747,
+      "run_id": 10158,
+      "slot_at": "2026-10-08T15:00:00+00:00",
+      "succeeded_batches": 9,
+      "wrong_region_jobs": 0
+    }
+  ]
+}
