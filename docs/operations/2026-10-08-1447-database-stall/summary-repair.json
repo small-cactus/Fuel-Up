@@ -1,0 +1,114 @@
+{
+  "verifiedAt": "2026-10-08T15:03:22.621Z",
+  "runId": 10114,
+  "providerRequests": 0,
+  "rawWrites": 0,
+  "servingPriceWrites": 0,
+  "matchingBatches": 72,
+  "replayed": [
+    {
+      "jobId": 726235,
+      "sha256": "45614eccad8544de28664d4764ddd1a0a99172f24958d2095f0bf948e320bea1",
+      "stations": 2000,
+      "priced": 1365,
+      "bytes": 53214,
+      "executionRegion": "us-east-1",
+      "startedAt": "2026-10-08T14:14:08.245Z",
+      "observedAt": "2026-10-08T14:14:10.522Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-10-08T14:14:10.463Z",
+        "elapsedMs": 2218,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a475c00dbfb6e438-IAD",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Thu, 08 Oct 2026 14:14:10 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 789852,
+        "fullElapsedMs": 2258
+      }
+    },
+    {
+      "jobId": 726236,
+      "sha256": "90f311e3057b75b69c05f4765b78dea8190a9f6102999888daa248ff239f8d92",
+      "stations": 2000,
+      "priced": 1316,
+      "bytes": 51706,
+      "executionRegion": "us-east-1",
+      "startedAt": "2026-10-08T14:44:18.808Z",
+      "observedAt": "2026-10-08T14:44:21.268Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-10-08T14:44:21.207Z",
+        "elapsedMs": 2399,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a475ec41b9f9e5b8-IAD",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Thu, 08 Oct 2026 14:44:21 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 778170,
+        "fullElapsedMs": 2441
+      }
+    },
+    {
+      "jobId": 726237,
+      "sha256": "ac998ff3307f1e5e3e1b196fc3c8ab46c218d1cc08d3bc2f6d2450b6a0187a9e",
+      "stations": 2000,
+      "priced": 1322,
+      "bytes": 51266,
+      "executionRegion": "us-east-1",
+      "startedAt": "2026-10-08T14:44:45.192Z",
+      "observedAt": "2026-10-08T14:44:47.678Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-10-08T14:44:47.618Z",
+        "elapsedMs": 2426,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a475ece679c5e5b8-IAD",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Thu, 08 Oct 2026 14:44:47 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 773986,
+        "fullElapsedMs": 2474
+      }
+    },
+    {
+      "jobId": 726239,
+      "sha256": "69536ee800cf6a99c0ef8f6532f5e001ce3189b37446db5706cc4264d0b9b539",
+      "stations": 2000,
+      "priced": 1353,
+      "bytes": 50497,
+      "executionRegion": "us-east-1",
+      "startedAt": "2026-10-08T14:54:14.150Z",
+      "observedAt": "2026-10-08T14:54:16.180Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-10-08T14:54:16.118Z",
+        "elapsedMs": 1968,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a475faca7e8c7ca7-IAD",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Thu, 08 Oct 2026 14:54:16 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 760527,
+        "fullElapsedMs": 2022
+      }
+    }
+  ]
+}

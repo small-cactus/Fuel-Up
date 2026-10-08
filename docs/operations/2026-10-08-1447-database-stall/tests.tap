@@ -1,0 +1,85 @@
+TAP version 13
+# Subtest: all 50 states plus DC have exactly one fixed regional owner
+ok 1 - all 50 states plus DC have exactly one fixed regional owner
+  ---
+  duration_ms: 1.184708
+  ...
+# Subtest: regional batches never mix owners and counts reconcile across the US
+ok 2 - regional batches never mix owners and counts reconcile across the US
+  ---
+  duration_ms: 1.837167
+  ...
+# Subtest: ambiguous cross-region station identity stops catalog publishing
+ok 3 - ambiguous cross-region station identity stops catalog publishing
+  ---
+  duration_ms: 0.292792
+  ...
+# Subtest: same-region cross-state duplicates deduplicate, without double charging provider work
+ok 4 - same-region cross-state duplicates deduplicate, without double charging provider work
+  ---
+  duration_ms: 0.245209
+  ...
+# Subtest: every wrong or missing execution region is rejected before collection
+ok 5 - every wrong or missing execution region is rejected before collection
+  ---
+  duration_ms: 12.194583
+  ...
+# Subtest: unauthorized regional invocation never touches database or provider
+ok 6 - unauthorized regional invocation never touches database or provider
+  ---
+  duration_ms: 0.2495
+  ...
+# Subtest: health verifies runtime geography without claiming jobs; collect passes only the verified runtime region
+ok 7 - health verifies runtime geography without claiming jobs; collect passes only the verified runtime region
+  ---
+  duration_ms: 2.584042
+  ...
+# Subtest: worker rejects a wrong-region job before making any provider request
+ok 8 - worker rejects a wrong-region job before making any provider request
+  ---
+  duration_ms: 0.30425
+  ...
+# Subtest: generic worker cannot run without a known execution region
+ok 9 - generic worker cannot run without a known execution region
+  ---
+  duration_ms: 0.288083
+  ...
+# Subtest: expires only eligible operational objects then reconciles manifests
+ok 10 - expires only eligible operational objects then reconciles manifests
+  ---
+  duration_ms: 1.747708
+  ...
+# Subtest: preserves research, recent snapshots, future boundaries, and invalid paths
+ok 11 - preserves research, recent snapshots, future boundaries, and invalid paths
+  ---
+  duration_ms: 0.516958
+  ...
+# Subtest: Storage failure never marks archives as removed
+ok 12 - Storage failure never marks archives as removed
+  ---
+  duration_ms: 0.093916
+  ...
+# Subtest: empty retry still reconciles deletion committed before a prior crash
+ok 13 - empty retry still reconciles deletion committed before a prior crash
+  ---
+  duration_ms: 0.139166
+  ...
+# Subtest: reconciliation failure is surfaced for scheduled retry
+ok 14 - reconciliation failure is surfaced for scheduled retry
+  ---
+  duration_ms: 0.157084
+  ...
+# Subtest: public callers cannot delete or run maintenance
+ok 15 - public callers cannot delete or run maintenance
+  ---
+  duration_ms: 11.686083
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 90.138042

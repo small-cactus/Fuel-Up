@@ -1,0 +1,16 @@
+{
+  "detectedAt": "2026-10-08T14:47:37Z",
+  "project": "vjindchxfebaltbslqwc",
+  "lastVerifiedHealthy": "2026-10-08T13:46:16Z",
+  "home": {"status":503,"milliseconds":17695,"error":"CACHE_UNAVAILABLE"},
+  "trends": {"error":"20-second request timeout"},
+  "statusQuery": {"httpStatus":400,"sqlState":"57014","error":"canceling statement due to statement timeout"},
+  "supplementalHealthQuery": {"httpStatus":400,"sqlState":"57014","error":"canceling statement due to statement timeout"},
+  "activityDiagnostic": {"httpStatus":544,"error":"Failed to create login role: Connection terminated due to connection timeout"},
+  "resourceMetrics": "Request timeout; current memory pressure could not be measured",
+  "dashboard": {"state":"Unhealthy","critical":"Database not usable","detail":"Connection failed at the TCP layer (CONNECT_TIMEOUT) after 5000ms: timeout expired."},
+  "regionalHealth": "Six provider-free regional health and wrong-region checks passed",
+  "recoveryAttempts":1,
+  "recovery":"Single project restart accepted by dashboard around 14:51 UTC",
+  "limitation":"Database unavailability is verified. Exact trigger, collection progress during outage and contemporary resource pressure remain unverified until read-back. No billing, routing, budgets, retention or collector enablement changes."
+}
