@@ -1,0 +1,12 @@
+{
+  "detectedAt": "2026-10-09T09:14:11Z",
+  "projectRef": "vjindchxfebaltbslqwc",
+  "home": {"result": "timeout", "deadlineMilliseconds": 20000},
+  "trends": {"result": "timeout", "deadlineMilliseconds": 20000},
+  "statusQuery": {"httpStatus": 400, "postgresCode": "57014", "message": "canceling statement due to statement timeout", "context": "SQL function fuel_national_archive_bytes statement 1"},
+  "healthQuery": {"httpStatus": 400, "postgresCode": "57014", "message": "canceling statement due to statement timeout"},
+  "dashboard": {"status": "Unhealthy", "issue": "Database not usable", "detail": "Connection failed at the TCP layer (CONNECT_TIMEOUT) after 5009ms: timeout expired."},
+  "regionalHealthAndWrongRegionGuards": {"passed": 6, "providerRequests": 0},
+  "restart": {"attempt": 1, "requestedAtApproximate": "2026-10-09T09:16:20Z", "dashboardAcknowledged": "Restarting"},
+  "limitations": "Exact outage onset and underlying trigger were not established by the failed database diagnostics. Restart acknowledgment is not proof of recovery."
+}

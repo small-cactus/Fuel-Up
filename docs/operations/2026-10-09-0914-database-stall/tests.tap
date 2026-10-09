@@ -1,0 +1,125 @@
+TAP version 13
+# Subtest: provider connect resets retry but never conceal a mixed denial or unknown error
+ok 1 - provider connect resets retry but never conceal a mixed denial or unknown error
+  ---
+  duration_ms: 1.522125
+  ...
+# Subtest: partial data with a connect reset is rejected without an immediate second request
+ok 2 - partial data with a connect reset is rejected without an immediate second request
+  ---
+  duration_ms: 13.291875
+  ...
+# Subtest: known provider connection failures retry with a floor and respect longer Retry-After
+ok 3 - known provider connection failures retry with a floor and respect longer Retry-After
+  ---
+  duration_ms: 0.157834
+  ...
+# Subtest: denials anywhere in a large mixed list dominate transient classification
+ok 4 - denials anywhere in a large mixed list dominate transient classification
+  ---
+  duration_ms: 0.151958
+  ...
+# Subtest: unknown or malformed GraphQL failures retain review requirement
+ok 5 - unknown or malformed GraphQL failures retain review requirement
+  ---
+  duration_ms: 0.06275
+  ...
+# Subtest: transport rejects partial data, records original evidence, and does not retry internally
+ok 6 - transport rejects partial data, records original evidence, and does not retry internally
+  ---
+  duration_ms: 0.68775
+  ...
+# Subtest: HTTP 200 rate denial preserves Retry-After
+ok 7 - HTTP 200 rate denial preserves Retry-After
+  ---
+  duration_ms: 0.348125
+  ...
+# Subtest: diagnostics retain the deciding error beyond the first ten without changing retry policy
+ok 8 - diagnostics retain the deciding error beyond the first ten without changing retry policy
+  ---
+  duration_ms: 8.705792
+  ...
+# Subtest: all 50 states plus DC have exactly one fixed regional owner
+ok 9 - all 50 states plus DC have exactly one fixed regional owner
+  ---
+  duration_ms: 1.161
+  ...
+# Subtest: regional batches never mix owners and counts reconcile across the US
+ok 10 - regional batches never mix owners and counts reconcile across the US
+  ---
+  duration_ms: 1.167833
+  ...
+# Subtest: ambiguous cross-region station identity stops catalog publishing
+ok 11 - ambiguous cross-region station identity stops catalog publishing
+  ---
+  duration_ms: 0.212292
+  ...
+# Subtest: same-region cross-state duplicates deduplicate, without double charging provider work
+ok 12 - same-region cross-state duplicates deduplicate, without double charging provider work
+  ---
+  duration_ms: 0.198083
+  ...
+# Subtest: every wrong or missing execution region is rejected before collection
+ok 13 - every wrong or missing execution region is rejected before collection
+  ---
+  duration_ms: 12.227208
+  ...
+# Subtest: unauthorized regional invocation never touches database or provider
+ok 14 - unauthorized regional invocation never touches database or provider
+  ---
+  duration_ms: 0.171875
+  ...
+# Subtest: health verifies runtime geography without claiming jobs; collect passes only the verified runtime region
+ok 15 - health verifies runtime geography without claiming jobs; collect passes only the verified runtime region
+  ---
+  duration_ms: 1.489375
+  ...
+# Subtest: worker rejects a wrong-region job before making any provider request
+ok 16 - worker rejects a wrong-region job before making any provider request
+  ---
+  duration_ms: 0.394291
+  ...
+# Subtest: generic worker cannot run without a known execution region
+ok 17 - generic worker cannot run without a known execution region
+  ---
+  duration_ms: 0.580084
+  ...
+# Subtest: expires only eligible operational objects then reconciles manifests
+ok 18 - expires only eligible operational objects then reconciles manifests
+  ---
+  duration_ms: 1.563792
+  ...
+# Subtest: preserves research, recent snapshots, future boundaries, and invalid paths
+ok 19 - preserves research, recent snapshots, future boundaries, and invalid paths
+  ---
+  duration_ms: 0.371083
+  ...
+# Subtest: Storage failure never marks archives as removed
+ok 20 - Storage failure never marks archives as removed
+  ---
+  duration_ms: 0.072584
+  ...
+# Subtest: empty retry still reconciles deletion committed before a prior crash
+ok 21 - empty retry still reconciles deletion committed before a prior crash
+  ---
+  duration_ms: 0.107875
+  ...
+# Subtest: reconciliation failure is surfaced for scheduled retry
+ok 22 - reconciliation failure is surfaced for scheduled retry
+  ---
+  duration_ms: 0.13125
+  ...
+# Subtest: public callers cannot delete or run maintenance
+ok 23 - public callers cannot delete or run maintenance
+  ---
+  duration_ms: 11.452833
+  ...
+1..23
+# tests 23
+# suites 0
+# pass 23
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 96.332
