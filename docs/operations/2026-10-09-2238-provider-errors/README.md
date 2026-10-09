@@ -16,3 +16,11 @@ Read-only monitoring at 22:38 UTC found run 12012 still running before its 23:00
 The blocker is upstream unavailability combined with bounded retries and the existing hourly lookup budget, not a stopped collector requiring re-enablement. Leave the limits intact and inspect the next scheduled hour for recovery. No repair/deployment was attempted, and no provider request was issued by this monitor. Verification used the protected status report, actual job states, recorded response evidence, and supplemental database/cron/retention health queries; no code changed, so unit tests were not needed. Archive read-back remains required if a later recovery needs verification.
 
 The prior 51 operational hours are complete with no expired missing slots. This run is still before its deadline; the next monitor must report its final outcome separately from any recovery. Fixed inventory observations do not establish verified pump prices.
+
+## Scheduled recovery verified at 23:38 UTC
+
+The next scheduled run, 12072 for 23:00 UTC, completed all 72 batches at 23:17:19 without operator collection or configuration changes. It used 73 worker attempts and preserved all three regional routes. All ten Trends scopes published the complete run at 23:19; missing batch projections and unresolved operational repairs are zero. Schedules, cooldowns, capacity, and the 23:30 retention invocation remain healthy.
+
+`node scripts/national-prices/auditHour.mjs 12072 /tmp/fuel-national-recovery-2337-audit.json` downloaded and verified all 72 immutable archives: hashes, schema, exact catalog IDs and regional provenance passed. Coverage is 141,660 IDs, with 92,661 priced and 48,999 unpriced provider observations; compressed archives total 3,641,374 bytes. This proves stored collection integrity, not pump-price truth.
+
+The 22:00 run finalized partial at 23:00: 66/72 batches, 129,960 observed IDs, six missing batches (11,700 IDs). Its evidence remains preserved; it was not backfilled or represented as complete. Across all 53 expected operational hours, 52 are complete and one partial, with no absent or expired-running slots. No repair or deployment was required for recovery.
