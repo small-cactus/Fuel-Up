@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-10T06:56:00.250Z",
+  "checks": [
+    {
+      "name": "home",
+      "status": 200,
+      "ms": 1702,
+      "source": "national-cache",
+      "quotes": 39
+    },
+    {
+      "name": "trends",
+      "status": 200,
+      "ms": 1207,
+      "source": "national-cache",
+      "quotes": 5,
+      "completedAt": "2026-10-10T05:14:46.913866+00:00"
+    }
+  ]
+}
