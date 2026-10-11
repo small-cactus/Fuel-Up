@@ -1,0 +1,15 @@
+[
+  {
+    "service": "home",
+    "status": 200,
+    "ms": 1197,
+    "source": "national-cache"
+  },
+  {
+    "service": "trends",
+    "status": 200,
+    "ms": 1181,
+    "source": "national-cache",
+    "completedAt": "2026-10-11T01:15:03.726371+00:00"
+  }
+]
