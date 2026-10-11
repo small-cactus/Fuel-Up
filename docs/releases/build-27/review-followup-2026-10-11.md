@@ -34,6 +34,15 @@ filled the form with the app name, App ID, iOS platform, and the updated inquiry
 in review-status-inquiry.txt. The form remains UNSENT, pending explicit user
 authorization to contact Apple. The submission remains unchanged.
 
+## Inquiry sent
+
+The user explicitly authorized sending the prepared inquiry. Submitted it through
+Apple Developer Support's App Review Status form on October 11, 2026. Verified
+the confirmation page: "Thanks for contacting us." Case ID: `102992893008`.
+Apple states it will review the message and reply. This confirms support receipt,
+not review advancement or app approval. The original app submission was not
+withdrawn or changed.
+
 Official guidance:
 - https://developer.apple.com/help/app-review/after-submitting-for-review/review-status
 - https://developer.apple.com/help/app-review/after-submitting-for-review/contact-app-review
