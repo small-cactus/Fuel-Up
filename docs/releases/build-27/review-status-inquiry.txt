@@ -1,20 +1,9 @@
-Subject: Review status inquiry — Fuel Up, App ID 6759831421, version 1.0
-
 Hello App Review team,
 
-Could you please check the review status of Fuel Up: Find Cheap Gas Prices?
+Could you please check the review status of Fuel Up: Find Cheap Gas Prices (App ID 6759831421)?
 
-App ID: 6759831421
-Bundle ID: com.anthonyh.fuelup
-App Store version: 1.0
-Build: 1.0.0 (27)
-Submission ID: a52dabb2-077a-4f3c-bbc2-c936965936af
-Submitted: October 7, 2026, approximately 13:24 UTC
-Waiting for Review confirmation: October 7, 2026, 13:25 UTC
+Version 1.0, build 1.0.0 (27), was submitted on October 7, 2026 at 9:24 a.m. Eastern (13:24 UTC). Submission ID: a52dabb2-077a-4f3c-bbc2-c936965936af.
 
-The latest status notification we have received is Waiting for Review. We have
-not found a subsequent request for information. Please let us know whether
-anything is outstanding or preventing review, and whether any action is needed
-from us to proceed.
+App Store Connect still shows Waiting for Review. We checked the submission details and found no reviewer messages or action-required issues. Please let us know whether anything is outstanding or preventing review, and what action, if any, is needed from us to proceed.
 
 Thank you.

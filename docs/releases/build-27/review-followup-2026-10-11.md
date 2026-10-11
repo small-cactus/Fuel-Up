@@ -21,6 +21,19 @@ or resubmission was performed. No expedited-review justification is asserted.
 Next step: authenticated App Review status inspection, followed by the prepared
 status inquiry if still appropriate and explicitly authorized by the user.
 
+## Authenticated follow-up
+
+After the user confirmed sign-in was ready, inspected the live App Store Connect
+version, App Review submissions list, and submission details. Version 1.0 with
+build 1.0.0 (27) remains Waiting for Review. The dashboard confirms October 7,
+2026 at 9:24 AM Eastern and the same submission ID. No reviewer messages or
+action-required issues were displayed. Manual release is still selected.
+
+Opened Apple Developer Support > App Review > App Review Status > Email and
+filled the form with the app name, App ID, iOS platform, and the updated inquiry
+in review-status-inquiry.txt. The form remains UNSENT, pending explicit user
+authorization to contact Apple. The submission remains unchanged.
+
 Official guidance:
 - https://developer.apple.com/help/app-review/after-submitting-for-review/review-status
 - https://developer.apple.com/help/app-review/after-submitting-for-review/contact-app-review
