@@ -1,0 +1,531 @@
+Window: "Unified Logs | Fuel Up | Supabase", App: Safari.
+0 standard window Unified Logs | Fuel Up | Supabase, ID: SafariWindow?IsSecure=true&UUID=CAD224E5-CC65-42BE-B151-2FCEB9C6DAB9, Secondary Actions: Raise
+	1 split group
+		2 splitter (disabled, settable, float) -1
+		3 tab group
+			4 scroll area
+				5 HTML content Description: Unified Logs | Fuel Up | Supabase, URL: supabase.com/dashboard/project/vjindchxfebaltbslqwc/logs?filter=log_type:eq:postgres
+					6 link Skip to content, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/logs?filter=log_type:eq:postgres#main
+					7 container
+						8 link Supabase Back to organization home, Value: supabase.com/dashboard/org/uctzvgdvjyfgrrneoaak
+						9 link Fuel Up FREE, Value: supabase.com/dashboard/org/uctzvgdvjyfgrrneoaak
+						10 pop up button Show organizations
+						11 link Fuel Up, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc
+						12 pop up button Show organization projects
+						13 link main PRODUCTION, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc
+						14 pop up button Show project branches
+						15 button Connect
+						16 pop up button Feedback
+						17 pop up button Search...
+						18 button Help
+						19 button Advisor Center
+						20 button SQL Editor
+						21 button AI Assistant
+						22 pop up button
+					23 container
+						24 content list
+							25 link Project Overview, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc
+							26 link Table Editor, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/editor
+							27 link SQL Editor, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/sql
+						28 content list
+							29 link Database, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/database/schemas
+							30 link Authentication, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/auth/users
+							31 link Storage, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/storage/files
+							32 link Edge Functions, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/functions
+							33 link Compute NEW, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/compute
+							34 link Realtime, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/realtime/inspector
+						35 content list
+							36 link Advisors, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/advisors/security
+							37 link Observability, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/observability
+							38 link Logs, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/logs
+							39 link Integrations, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/integrations
+						40 content list
+							41 link Project Settings, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/settings/general
+						42 pop up button Sidebar control
+					43 container
+						44 text Your project is about to deplete its Disk IO Budget
+						45 text Once exhausted, disk throughput will return to its baseline of 5 MB/s. The budget refills whenever disk IO demand is at or below baseline. Upgrade your compute or use the AI Assistant to identify and optimize disk-intensive queries.
+						46 pop up button Troubleshoot
+						47 link Upgrade compute, Value: supabase.com/dashboard/org/uctzvgdvjyfgrrneoaak/billing?panel=subscriptionPlan&source=resource_exhaustion_banner
+						48 text Logs BETA
+						49 button Reset
+						50 text NEW
+						51 button Dismiss banner
+						52 heading Introducing unified logs, Value: 3
+							53 text Introducing unified logs
+						54 button More information
+						55 button (expanded) Time Range, Secondary Actions: Collapse
+							56 container Time Range
+								57 pop up button Last 60 minutes
+						58 button (expanded) Log Type, Secondary Actions: Collapse
+							59 container Log Type
+								60 text field (settable) Search
+								61 checkbox (settable, integer) API Gateway 153, Value: 0
+								62 container
+									63 text API Gateway
+									64 button (collapsed) Expand
+									65 text 153
+								66 checkbox (settable, integer) Postgres 584, Value: 1
+								67 container
+									68 text Postgres
+									69 button (collapsed) Expand
+									70 text 584
+								71 checkbox (settable, integer) PostgREST 81, Value: 0
+								72 text PostgREST 81
+								73 checkbox (settable, integer) Auth 0, Value: 0
+								74 text Auth 0
+								75 checkbox (settable, integer) Storage 122, Value: 0
+								76 text Storage 122
+								77 checkbox (settable, integer) Edge Function 41, Value: 0
+								78 text Edge Function 41
+								79 checkbox (settable, integer) Realtime 3, Value: 0
+								80 text Realtime 3
+								81 checkbox (settable, integer) Supavisor 0, Value: 0
+								82 text Supavisor 0
+								83 checkbox (settable, integer) PgBouncer 518, Value: 0
+								84 text PgBouncer 518
+								85 checkbox (settable, integer) Compute 0, Value: 0
+								86 text Compute 0
+						87 button 1
+						88 button (expanded) Level, Secondary Actions: Collapse
+							89 container Level
+								90 checkbox (settable, integer) Success 2xx 555, Value: 0
+								91 container
+									92 text Success 2xx 555
+								93 checkbox (settable, integer) Warning 4xx 0, Value: 0
+								94 container
+									95 text Warning 4xx 0
+								96 checkbox (settable, integer) Error 5xx 29, Value: 0
+								97 container
+									98 text Error 5xx 29
+						99 button (collapsed) User, Secondary Actions: Expand
+						100 button (collapsed) Status, Secondary Actions: Expand
+						101 button (collapsed) Method, Secondary Actions: Expand
+						102 button (collapsed) Pathname, Secondary Actions: Expand
+						103 heading Capture your logs, Value: 3
+							104 text Capture your logs
+						105 text Send logs to your preferred observability or storage platform.
+						106 link Go to Log Drains, Value: supabase.com/dashboard/project/vjindchxfebaltbslqwc/settings/log-drains
+						107 splitter 18.101
+						108 button Hide filters
+						109 button Change property from Log Type
+						110 text field (settable) Operator for Log Type, Value: =
+						111 text field (settable) Value for Log Type, Value: postgres
+						112 button Remove Log Type filter
+						113 text field (settable) Add more filters...
+						114 button Refresh logs
+						115 combo box (collapsed, settable) Secondary Actions: Expand
+						116 pop up button Download logs
+						117 button Live
+						118 text 17:40
+						119 text 17:44
+						120 text 17:48
+						121 text 17:52
+						122 text 17:56
+						123 text 18:00
+						124 text 18:04
+						125 text 18:08
+						126 text 18:12
+						127 text 18:16
+						128 text 18:20
+						129 text 18:24
+						130 text 18:28
+						131 text 18:32
+						132 text 18:37
+						133 pop up button
+						134 table
+							135 row (selectable) DATE
+EVENT MESSAGE
+							136 row (selectable)
+								137 cell (selectable)
+									138 checkbox (settable, integer) Select log, Value: 0
+								139 cell (selectable) 11 Oct 26 18:37:04
+								140 cell (selectable) postgres
+								141 cell (selectable) 00000
+								142 cell (selectable) cron job 20 completed: 1 row
+							143 row (selectable)
+								144 cell (selectable)
+									145 checkbox (settable, integer) Select log, Value: 0
+								146 cell (selectable) 11 Oct 26 18:37:04
+								147 cell (selectable) postgres
+								148 cell (selectable) 00000
+								149 cell (selectable) cron job 15 completed: 1 row
+							150 row (selectable)
+								151 cell (selectable)
+									152 checkbox (settable, integer) Select log, Value: 0
+								153 cell (selectable) 11 Oct 26 18:37:04
+								154 cell (selectable) postgres
+								155 cell (selectable) 00000
+								156 cell (selectable) cron job 7 completed: 1 row
+							157 row (selectable)
+								158 cell (selectable)
+									159 checkbox (settable, integer) Select log, Value: 0
+								160 cell (selectable) 11 Oct 26 18:37:03
+								161 cell (selectable) postgres
+								162 cell (selectable) 00000
+								163 cell (selectable) cron job 4 completed: 1 row
+							164 row (selectable)
+								165 cell (selectable)
+									166 checkbox (settable, integer) Select log, Value: 0
+								167 cell (selectable) 11 Oct 26 18:37:00
+								168 cell (selectable) postgres
+								169 cell (selectable) 00000
+								170 cell (selectable) cron job 7 starting: select public.dispatch_fuel_discovery()
+							171 row (selectable)
+								172 cell (selectable)
+									173 checkbox (settable, integer) Select log, Value: 0
+								174 cell (selectable) 11 Oct 26 18:37:00
+								175 cell (selectable) postgres
+								176 cell (selectable) 00000
+								177 cell (selectable) cron job 15 starting: select public.publish_completed_national_trends();
+							178 row (selectable)
+								179 cell (selectable)
+									180 checkbox (settable, integer) Select log, Value: 0
+								181 cell (selectable) 11 Oct 26 18:37:00
+								182 cell (selectable) postgres
+								183 cell (selectable) 00000
+								184 cell (selectable) cron job 4 starting: select public.dispatch_fuel_national();
+							185 row (selectable)
+								186 cell (selectable)
+									187 checkbox (settable, integer) Select log, Value: 0
+								188 cell (selectable) 11 Oct 26 18:37:00
+								189 cell (selectable) postgres
+								190 cell (selectable) 00000
+								191 cell (selectable) cron job 20 starting: select public.dispatch_fuel_projection_repair();
+							192 row (selectable)
+								193 cell (selectable)
+									194 checkbox (settable, integer) Select log, Value: 0
+								195 cell (selectable) 11 Oct 26 18:36:20
+								196 cell (selectable) postgres
+								197 cell (selectable) 57014
+								198 cell (selectable) canceling statement due to statement timeout
+							199 row (selectable)
+								200 cell (selectable)
+									201 checkbox (settable, integer) Select log, Value: 0
+								202 cell (selectable) 11 Oct 26 18:36:09
+								203 cell (selectable) postgres
+								204 cell (selectable) 00000
+								205 cell (selectable) cron job 4 completed: 1 row
+							206 row (selectable)
+								207 cell (selectable)
+									208 checkbox (settable, integer) Select log, Value: 0
+								209 cell (selectable) 11 Oct 26 18:36:05
+								210 cell (selectable) postgres
+								211 cell (selectable) 00000
+								212 cell (selectable) cron job 15 completed: 1 row
+							213 row (selectable)
+								214 cell (selectable)
+									215 checkbox (settable, integer) Select log, Value: 0
+								216 cell (selectable) 11 Oct 26 18:36:04
+								217 cell (selectable) postgres
+								218 cell (selectable) 00000
+								219 cell (selectable) cron job 7 completed: 1 row
+							220 row (selectable)
+								221 cell (selectable)
+									222 checkbox (settable, integer) Select log, Value: 0
+								223 cell (selectable) 11 Oct 26 18:36:03
+								224 cell (selectable) postgres
+								225 cell (selectable) 00000
+								226 cell (selectable) cron job 20 completed: 1 row
+							227 row (selectable)
+								228 cell (selectable)
+									229 checkbox (settable, integer) Select log, Value: 0
+								230 cell (selectable) 11 Oct 26 18:36:01
+								231 cell (selectable) postgres
+								232 cell (selectable) 00000
+								233 cell (selectable) cron job 7 starting: select public.dispatch_fuel_discovery()
+							234 row (selectable)
+								235 cell (selectable)
+									236 checkbox (settable, integer) Select log, Value: 0
+								237 cell (selectable) 11 Oct 26 18:36:01
+								238 cell (selectable) postgres
+								239 cell (selectable) 00000
+								240 cell (selectable) cron job 15 starting: select public.publish_completed_national_trends();
+							241 row (selectable)
+								242 cell (selectable)
+									243 checkbox (settable, integer) Select log, Value: 0
+								244 cell (selectable) 11 Oct 26 18:36:01
+								245 cell (selectable) postgres
+								246 cell (selectable) 00000
+								247 cell (selectable) cron job 4 starting: select public.dispatch_fuel_national();
+							248 row (selectable)
+								249 cell (selectable)
+									250 checkbox (settable, integer) Select log, Value: 0
+								251 cell (selectable) 11 Oct 26 18:36:00
+								252 cell (selectable) postgres
+								253 cell (selectable) 00000
+								254 cell (selectable) cron job 20 starting: select public.dispatch_fuel_projection_repair();
+							255 row (selectable)
+								256 cell (selectable)
+									257 checkbox (settable, integer) Select log, Value: 0
+								258 cell (selectable) 11 Oct 26 18:35:33
+								259 cell (selectable) postgres
+								260 cell (selectable) 57014
+								261 cell (selectable) canceling statement due to statement timeout
+							262 row (selectable)
+								263 cell (selectable)
+									264 checkbox (settable, integer) Select log, Value: 0
+								265 cell (selectable) 11 Oct 26 18:35:25
+								266 cell (selectable) postgres
+								267 cell (selectable) 00000
+								268 cell (selectable) PID 94211 in cancel request did not match any process
+							269 row (selectable)
+								270 cell (selectable)
+									271 checkbox (settable, integer) Select log, Value: 0
+								272 cell (selectable) 11 Oct 26 18:35:25
+								273 cell (selectable) postgres
+								274 cell (selectable) 00000
+								275 cell (selectable) PID 94196 in cancel request did not match any process
+							276 row (selectable)
+								277 cell (selectable)
+									278 checkbox (settable, integer) Select log, Value: 0
+								279 cell (selectable) 11 Oct 26 18:35:24
+								280 cell (selectable) postgres
+								281 cell (selectable) 00000
+								282 cell (selectable) duration: 11309.423 ms plan: Query Text: SELECT sum(calls) as total_queries, sum(total_exec_time / 1000) as total_time_seconds FROM extensions.pg_stat_statements t1 JOIN pg_database t3 ON (t1.dbid=t3.oid) Aggregate (cost=13.81..13.82 rows=1 width=40) -> Hash Join (cost=1.05..13.73 rows=10 width=16) Hash Cond: (pg_stat_statements.dbid = t3.oid) -> Function Scan on pg_stat_statements (cost=0.00..10.00 rows=1000 width=20) -> Hash (cost=1.02..1.02 rows=2 width=4) -> Seq Scan on pg_database t3 (cost=0.00..1.02 r
+							283 row (selectable)
+								284 cell (selectable)
+									285 checkbox (settable, integer) Select log, Value: 0
+								286 cell (selectable) 11 Oct 26 18:35:24
+								287 cell (selectable) postgres
+								288 cell (selectable) 08P01
+								289 cell (selectable) could not accept SSL connection: EOF detected
+							290 row (selectable)
+								291 cell (selectable)
+									292 checkbox (settable, integer) Select log, Value: 0
+								293 cell (selectable) 11 Oct 26 18:35:24
+								294 cell (selectable) postgres
+								295 cell (selectable) 08P01
+								296 cell (selectable) could not accept SSL connection: EOF detected
+							297 row (selectable)
+								298 cell (selectable)
+									299 checkbox (settable, integer) Select log, Value: 0
+								300 cell (selectable) 11 Oct 26 18:35:19
+								301 cell (selectable) postgres
+								302 cell (selectable) 08P01
+								303 cell (selectable) could not accept SSL connection: EOF detected
+							304 row (selectable)
+								305 cell (selectable)
+									306 checkbox (settable, integer) Select log, Value: 0
+								307 cell (selectable) 11 Oct 26 18:35:17
+								308 cell (selectable) postgres
+								309 cell (selectable) 57014
+								310 cell (selectable) canceling statement due to statement timeout
+							311 row (selectable)
+								312 cell (selectable)
+									313 checkbox (settable, integer) Select log, Value: 0
+								314 cell (selectable) 11 Oct 26 18:35:14
+								315 cell (selectable) postgres
+								316 cell (selectable) 08P01
+								317 cell (selectable) could not accept SSL connection: EOF detected
+							318 row (selectable)
+								319 cell (selectable)
+									320 checkbox (settable, integer) Select log, Value: 0
+								321 cell (selectable) 11 Oct 26 18:35:13
+								322 cell (selectable) postgres
+								323 cell (selectable) 08P01
+								324 cell (selectable) could not accept SSL connection: EOF detected
+							325 row (selectable)
+								326 cell (selectable)
+									327 checkbox (settable, integer) Select log, Value: 0
+								328 cell (selectable) 11 Oct 26 18:35:13
+								329 cell (selectable) postgres
+								330 cell (selectable) 08P01
+								331 cell (selectable) could not accept SSL connection: EOF detected
+							332 row (selectable)
+								333 cell (selectable)
+									334 checkbox (settable, integer) Select log, Value: 0
+								335 cell (selectable) 11 Oct 26 18:35:05
+								336 cell (selectable) postgres
+								337 cell (selectable) 00000
+								338 cell (selectable) duration: 15186.745 ms plan: Query Text: with normalized_pg_stat_statements as ( select calls, -- Truncate query by 10000 characters, because likely we don't need more than that in WHERE clauses lower(regexp_replace(trim(left(query, 10000)), E'\\s+', ' ', 'g')) as query from extensions.pg_stat_statements where userid not in ( select oid from pg_roles where rolname in ('authenticator', 'pgbouncer', 'supabase_admin', 'supabase_storage_admin') ) and not pg_is_in_recovery() ) select coalesce(sum(calls), 0) as u
+							339 row (selectable)
+								340 cell (selectable)
+									341 checkbox (settable, integer) Select log, Value: 0
+								342 cell (selectable) 11 Oct 26 18:35:00
+								343 cell (selectable) postgres
+								344 cell (selectable) 00000
+								345 cell (selectable) cron job 7 starting: select public.dispatch_fuel_discovery()
+							346 row (selectable)
+								347 cell (selectable)
+									348 checkbox (settable, integer) Select log, Value: 0
+								349 cell (selectable) 11 Oct 26 18:35:00
+								350 cell (selectable) postgres
+								351 cell (selectable) 00000
+								352 cell (selectable) cron job 15 starting: select public.publish_completed_national_trends();
+							353 row (selectable)
+								354 cell (selectable)
+									355 checkbox (settable, integer) Select log, Value: 0
+								356 cell (selectable) 11 Oct 26 18:35:00
+								357 cell (selectable) postgres
+								358 cell (selectable) 00000
+								359 cell (selectable) cron job 4 starting: select public.dispatch_fuel_national();
+							360 row (selectable)
+								361 cell (selectable)
+									362 checkbox (settable, integer) Select log, Value: 0
+								363 cell (selectable) 11 Oct 26 18:35:00
+								364 cell (selectable) postgres
+								365 cell (selectable) 00000
+								366 cell (selectable) cron job 20 starting: select public.dispatch_fuel_projection_repair();
+							367 row (selectable)
+								368 cell (selectable)
+									369 checkbox (settable, integer) Select log, Value: 0
+								370 cell (selectable) 11 Oct 26 18:35:00
+								371 cell (selectable) postgres
+								372 cell (selectable) 00000
+								373 cell (selectable) cron job 12 starting: select public.watchdog_fuel_national();
+							374 row (selectable)
+								375 cell (selectable)
+									376 checkbox (settable, integer) Select log, Value: 0
+								377 cell (selectable) 11 Oct 26 18:34:22
+								378 cell (selectable) postgres
+								379 cell (selectable) 57014
+								380 cell (selectable) canceling statement due to statement timeout
+							381 row (selectable)
+								382 cell (selectable)
+									383 checkbox (settable, integer) Select log, Value: 0
+								384 cell (selectable) 11 Oct 26 18:34:02
+								385 cell (selectable) postgres
+								386 cell (selectable) 00000
+								387 cell (selectable) cron job 4 completed: 1 row
+							388 row (selectable)
+								389 cell (selectable)
+									390 checkbox (settable, integer) Select log, Value: 0
+								391 cell (selectable) 11 Oct 26 18:34:00
+								392 cell (selectable) postgres
+								393 cell (selectable) 00000
+								394 cell (selectable) cron job 15 completed: 1 row
+							395 row (selectable)
+								396 cell (selectable)
+									397 checkbox (settable, integer) Select log, Value: 0
+								398 cell (selectable) 11 Oct 26 18:34:00
+								399 cell (selectable) postgres
+								400 cell (selectable) 00000
+								401 cell (selectable) cron job 7 completed: 1 row
+							402 row (selectable)
+								403 cell (selectable)
+									404 checkbox (settable, integer) Select log, Value: 0
+								405 cell (selectable) 11 Oct 26 18:34:00
+								406 cell (selectable) postgres
+								407 cell (selectable) 00000
+								408 cell (selectable) cron job 20 completed: 1 row
+							409 row (selectable)
+								410 cell (selectable)
+									411 checkbox (settable, integer) Select log, Value: 0
+								412 cell (selectable) 11 Oct 26 18:34:00
+								413 cell (selectable) postgres
+								414 cell (selectable) 00000
+								415 cell (selectable) cron job 7 starting: select public.dispatch_fuel_discovery()
+							416 row (selectable)
+								417 cell (selectable)
+									418 checkbox (settable, integer) Select log, Value: 0
+								419 cell (selectable) 11 Oct 26 18:34:00
+								420 cell (selectable) postgres
+								421 cell (selectable) 00000
+								422 cell (selectable) cron job 15 starting: select public.publish_completed_national_trends();
+							423 row (selectable)
+								424 cell (selectable)
+									425 checkbox (settable, integer) Select log, Value: 0
+								426 cell (selectable) 11 Oct 26 18:34:00
+								427 cell (selectable) postgres
+								428 cell (selectable) 00000
+								429 cell (selectable) cron job 4 starting: select public.dispatch_fuel_national();
+							430 row (selectable)
+								431 cell (selectable)
+									432 checkbox (settable, integer) Select log, Value: 0
+								433 cell (selectable) 11 Oct 26 18:34:00
+								434 cell (selectable) postgres
+								435 cell (selectable) 00000
+								436 cell (selectable) cron job 20 starting: select public.dispatch_fuel_projection_repair();
+							437 row (selectable)
+								438 cell (selectable)
+									439 checkbox (settable, integer) Select log, Value: 0
+								440 cell (selectable) 11 Oct 26 18:33:18
+								441 cell (selectable) postgres
+								442 cell (selectable) 57014
+								443 cell (selectable) canceling statement due to statement timeout
+							444 row (selectable)
+								445 cell (selectable)
+									446 checkbox (settable, integer) Select log, Value: 0
+								447 cell (selectable) 11 Oct 26 18:33:14
+								448 cell (selectable) postgres
+								449 cell (selectable) 00000
+								450 cell (selectable) checkpoint starting: time
+							451 row (selectable)
+								452 cell (selectable)
+									453 checkbox (settable, integer) Select log, Value: 0
+								454 cell (selectable) 11 Oct 26 18:33:05
+								455 cell (selectable) postgres
+								456 cell (selectable) 00000
+								457 cell (selectable) process 94164 acquired ShareLock on transaction 532436 after 1270.214 ms
+							458 row (selectable)
+								459 cell (selectable)
+									460 checkbox (settable, integer) Select log, Value: 0
+								461 cell (selectable) 11 Oct 26 18:33:05
+								462 cell (selectable) postgres
+								463 cell (selectable) 00000
+								464 cell (selectable) process 94164 still waiting for ShareLock on transaction 532436 after 1000.107 ms
+							465 row (selectable)
+								466 cell (selectable)
+									467 checkbox (settable, integer) Select log, Value: 0
+								468 cell (selectable) 11 Oct 26 18:33:03
+								469 cell (selectable) postgres
+								470 cell (selectable) 00000
+								471 cell (selectable) cron job 15 completed: 1 row
+							472 row (selectable)
+								473 cell (selectable)
+									474 checkbox (settable, integer) Select log, Value: 0
+								475 cell (selectable) 11 Oct 26 18:33:03
+								476 cell (selectable) postgres
+								477 cell (selectable) 00000
+								478 cell (selectable) cron job 20 completed: 1 row
+							479 row (selectable)
+								480 cell (selectable)
+									481 checkbox (settable, integer) Select log, Value: 0
+								482 cell (selectable) 11 Oct 26 18:33:00
+								483 cell (selectable) postgres
+								484 cell (selectable) 00000
+								485 cell (selectable) cron job 7 starting: select public.dispatch_fuel_discovery()
+							486 row (selectable)
+								487 cell (selectable) Load more, Columns: 0-6, Value: Showing 50 of 584 rows
+					488 button Close banner
+					489 text PREVIEW
+					490 text User growth
+					491 text Track how your user base is trending.
+					492 text select
+					493 text date_trunc('week', last_sign_in_at) as week,
+					494 text count(distinct id) as active_users
+					495 text Explorer & Notebooks
+					496 text New unified workspace for querying data and chatting with Assistant.
+					497 button Enable Explorer
+					498 text Unified Logs | Fuel Up | Supabase
+	499 toolbar
+		500 container Secondary Actions: Move previous, Move next, Remove from toolbar
+			501 button Description: show sidebar, Help: Show sidebar, ID: SidebarButton
+			502 menu button Description: Tab Group picker, ID: TabGroupPickerButton?TabGroup=
+		503 container BackForwardSegmentedControl
+			504 button Description: Go back, Help: Show the previous page, ID: BackButton
+			505 button (disabled) Description: Go forward, Help: Show the next page, ID: ForwardButton
+		506 container Secondary Actions: Move previous, Move next, Remove from toolbar
+			507 button Page Menu, ID: AssistantButton
+			508 button (disabled) Add page to Reading List, ID: OneStepBookmarkingButton
+			509 text field (settable) Description: smart search field, Value: https://supabase.com/dashboard/project/vjindchxfebaltbslqwc/logs?filter=log_type:eq:postgres, ID: WEB_BROWSER_ADDRESS_AND_SEARCH_FIELD
+			510 button Reload this page, ID: ReloadButton
+		511 button Description: New Tab, ID: NewTabButton, Secondary Actions: Move previous, Move next, Remove from toolbar
+		512 button Description: Share, ID: ShareButton, Secondary Actions: Move previous, Move next, Remove from toolbar
+		513 button Description: Tab Overview, ID: TabOverviewButton, Secondary Actions: Move previous, Remove from toolbar
+	514 close button
+	515 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	516 minimize button
+517 menu bar
+	518 Safari
+	519 File
+	520 Edit
+	521 View, ID: SafariViewMenu
+	522 History
+	523 Bookmarks, ID: SafariBookmarksMenu
+	524 Develop
+	525 Window, ID: SafariWindowMenu
+	526 Help, ID: SafariHelpMenu
+
+The focused UI element is 5 HTML content Description: Unified Logs | Fuel Up | Supabase, URL: supabase.com/dashboard/project/vjindchxfebaltbslqwc/logs?filter=log_type:eq:postgres

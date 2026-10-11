@@ -1,0 +1,87 @@
+{
+  "auditedAt": "2026-10-11T22:45:58.999Z",
+  "runId": 14849,
+  "slotAt": "2026-10-11T22:00:00+00:00",
+  "verified": true,
+  "samples": [
+    {
+      "jobId": 1067112,
+      "sha256": "e89fad060f7ba53943eebd330b179b51d10e22c007f7a5e107cb61153c312bbc",
+      "stations": 2000,
+      "priced": 1145,
+      "bytes": 44805,
+      "executionRegion": "us-east-1",
+      "startedAt": "2026-10-11T22:45:13.011Z",
+      "observedAt": "2026-10-11T22:45:15.163Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-10-11T22:45:15.107Z",
+        "elapsedMs": 2096,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a49164d46ca19a22-IAD",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Sun, 11 Oct 2026 22:45:15 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 721939,
+        "fullElapsedMs": 2138
+      }
+    },
+    {
+      "jobId": 1067169,
+      "sha256": "5a9878cbedc9371069811616ca58f9b28ece53916dcde45292753dbb43cb2cd1",
+      "stations": 2000,
+      "priced": 1428,
+      "bytes": 66093,
+      "executionRegion": "us-west-1",
+      "startedAt": "2026-10-11T22:03:24.677Z",
+      "observedAt": "2026-10-11T22:03:28.008Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-10-11T22:03:27.576Z",
+        "elapsedMs": 2899,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a49127974e58b828-SJC",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Sun, 11 Oct 2026 22:03:27 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 899522,
+        "fullElapsedMs": 3312
+      }
+    },
+    {
+      "jobId": 1067174,
+      "sha256": "9253269d297bce67ae1a5c19fbe10fc7e8d85729bfd865a69b39abab892ddad5",
+      "stations": 213,
+      "priced": 137,
+      "bytes": 6046,
+      "executionRegion": "us-west-2",
+      "startedAt": "2026-10-11T22:00:37.936Z",
+      "observedAt": "2026-10-11T22:00:38.436Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-10-11T22:00:38.288Z",
+        "elapsedMs": 352,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a49123851e40debd-PDX",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Sun, 11 Oct 2026 22:00:38 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 88308,
+        "fullElapsedMs": 499
+      }
+    }
+  ],
+  "limitation": "Sampled immutable provider archives; not whole-hour verification or pump truth."
+}
