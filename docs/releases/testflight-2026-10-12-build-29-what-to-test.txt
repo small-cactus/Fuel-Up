@@ -1,0 +1,9 @@
+Build 29: more reliable app-usage uploads
+
+Please open Fuel Up once after updating. The app now registers each installation for silent background sync, including testers who have not joined optional Driving Research. These sync requests can upload app-usage events already collected, such as onboarding progress, permission choices, screen usage, and map/station interactions.
+
+Silent sync requests have no banner, sound, or badge and do not need visible-notification permission. iOS decides when background delivery is allowed, so a sync may wait until you next open the app.
+
+Optional Driving Research remains separate and still requires enrollment and its location/motion permissions. Your existing notification choices and research pause settings are preserved.
+
+Please check that normal onboarding, map browsing, and station cards still work as expected, and report any crashes or unexpected prompts through TestFlight feedback.

@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "build": 29,
+  "all_bundle_versions_verified": true,
+  "archive_signature": "deep_strict_passed",
+  "distribution_apns_environment": "production",
+  "ipa_sha256": "42745afe5b70ae4713b16d126b9b8a61657ab4cb283767899b9227d32cf1afff",
+  "source_implementation": "07a53f9",
+  "targeted_tests_passed": 9,
+  "backend": "deployed_and_verified",
+  "upload": "accepted",
+  "testflight": "processing",
+  "uploaded_at": "2026-10-12T21:08:18Z",
+  "warning": "Missing prebuilt hermesvm.framework dSYM; upload succeeded, Hermes crash symbolication may be incomplete"
+}
