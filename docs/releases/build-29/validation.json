@@ -9,7 +9,20 @@
   "targeted_tests_passed": 9,
   "backend": "deployed_and_verified",
   "upload": "accepted",
-  "testflight": "processing",
+  "testflight": "testing_internal_and_external",
   "uploaded_at": "2026-10-12T21:08:18Z",
-  "warning": "Missing prebuilt hermesvm.framework dSYM; upload succeeded, Hermes crash symbolication may be incomplete"
+  "warning": "Missing prebuilt hermesvm.framework dSYM; upload succeeded, Hermes crash symbolication may be incomplete",
+  "external_group": {
+    "name": "Fuel Up External Testing",
+    "testers": 6,
+    "status": "Testing",
+    "automatically_notify_testers": true,
+    "verified_at": "2026-10-12T21:12:20Z"
+  },
+  "internal_group": {
+    "name": "Fuel Up Internal Testing",
+    "testers": 1,
+    "status": "Testing",
+    "verified_at": "2026-10-12T21:12:56.015457+00:00"
+  }
 }

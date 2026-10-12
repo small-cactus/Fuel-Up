@@ -1,5 +1,7 @@
 # Installation app-usage silent sync
 
+Release follow-up: [TestFlight build 29](../../releases/testflight-2026-10-12-build-29.md) is now Testing for the existing internal and external groups. The implementation-stage notes below predate that release.
+
 Every launch/foreground now attempts APNs registration independently of optional driving research and visible-notification authorization. This path does not request provisional or full alert authorization. It only flushes the existing allowlisted installation app-usage outbox; it does not enroll research or request new sensor permissions.
 
 The server migration and installation-telemetry function were deployed October 12, 2026. A new native app release is required. TestFlight build 28 does not contain this registration path. Existing installations cannot be registered remotely without an app launch running the new code. No real-user installation push was sent during this change.
