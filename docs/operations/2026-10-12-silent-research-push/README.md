@@ -67,3 +67,11 @@ It does not enable paused collection. A new binary is required on each tester.
 Five focused tests passed, including the actual Swift permission methods with
 unconsented, background, setup-in-progress, provisional, duplicate-activation,
 authorized, denied, and paused-participant cases.
+
+## Production build 28 test at 20:19 UTC
+
+At the user's request, sent one silent sync push through the existing claim-protected operator script to each of the two enrolled participants with registered addresses. Both used production APNs, both requests were accepted, and authenticated sync completions arrived in 4.122 and 4.577 seconds. Read-back found 23 and 22 new research records respectively. Both devices reported build 28 and background application state; the operator did not open either app.
+
+Each device uploaded 12 available step-history packets and two available motion-history packets, along with other research events. Both also uploaded build 28 installation launch/permission snapshots with full notification authorization (2). This verifies a real background wake and upload on both reachable production devices. It does not guarantee every future silent push will be delivered. Participants without registered push addresses could not be reached; no address, consent or permission was manufactured.
+
+Aggregate evidence is in `production-test-2019.json`. Raw private records remain outside the repository. No code or deployment changes were made.

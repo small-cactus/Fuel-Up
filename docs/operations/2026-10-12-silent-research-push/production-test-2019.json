@@ -1,0 +1,107 @@
+{
+  "checkedAt": "2026-10-12T20:19:54.254445+00:00",
+  "registeredRecipients": 2,
+  "sentOncePerRecipient": true,
+  "notificationType": "silent background data sync; no alert, sound or badge",
+  "recipients": [
+    {
+      "recipient": 1,
+      "transport": "production APNs",
+      "pushStatus": "accepted",
+      "pushAttemptedAt": "2026-10-12T20:19:12.82373+00:00",
+      "syncCompletedAt": "2026-10-12T20:19:16.946044+00:00",
+      "syncCompletionSeconds": 4.122,
+      "newResearchRecordsAtCheck": 23,
+      "researchAppStateAtReceipt": "background",
+      "reportedBuild": "28",
+      "recordTypes": [
+        {
+          "kind": "diagnostic",
+          "source": "apple_motion_history",
+          "count": 2
+        },
+        {
+          "kind": "diagnostic",
+          "source": "apple_step_history",
+          "count": 12
+        },
+        {
+          "kind": "diagnostic",
+          "source": null,
+          "count": 1
+        },
+        {
+          "kind": "lifecycle",
+          "source": null,
+          "count": 1
+        },
+        {
+          "kind": "location",
+          "source": null,
+          "count": 3
+        },
+        {
+          "kind": "motion",
+          "source": null,
+          "count": 4
+        }
+      ],
+      "stepHistoryAvailablePackets": 12,
+      "motionHistoryAvailablePackets": 2
+    },
+    {
+      "recipient": 2,
+      "transport": "production APNs",
+      "pushStatus": "accepted",
+      "pushAttemptedAt": "2026-10-12T20:19:18.011663+00:00",
+      "syncCompletedAt": "2026-10-12T20:19:22.588331+00:00",
+      "syncCompletionSeconds": 4.577,
+      "newResearchRecordsAtCheck": 22,
+      "researchAppStateAtReceipt": "background",
+      "reportedBuild": "28",
+      "recordTypes": [
+        {
+          "kind": "diagnostic",
+          "source": "apple_motion_history",
+          "count": 2
+        },
+        {
+          "kind": "diagnostic",
+          "source": "apple_step_history",
+          "count": 12
+        },
+        {
+          "kind": "diagnostic",
+          "source": null,
+          "count": 1
+        },
+        {
+          "kind": "lifecycle",
+          "source": null,
+          "count": 1
+        },
+        {
+          "kind": "location",
+          "source": null,
+          "count": 3
+        },
+        {
+          "kind": "motion",
+          "source": null,
+          "count": 3
+        }
+      ],
+      "stepHistoryAvailablePackets": 12,
+      "motionHistoryAvailablePackets": 2
+    }
+  ],
+  "notes": [
+    "User explicitly requested a test to all reachable users. The existing silent-push preference was preserved.",
+    "Both devices supplied build 28 lifecycle evidence, background receipt state and authenticated sync completion.",
+    "Both also uploaded build 28 installation launch and full-authorization snapshots (authorization=2).",
+    "No phone was opened or launched by the operator. No permission or consent was changed.",
+    "Old pending-count reports are snapshots, not proof of remaining outbox entries.",
+    "History query packets reported available; record counts are not fuel purchases. One successful test does not guarantee subsequent iOS delivery.",
+    "Participant identifiers, push addresses and raw sensor payloads are excluded."
+  ]
+}
