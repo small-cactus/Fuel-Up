@@ -42,6 +42,10 @@ import CoreLocation
       checkPermissions(reason: "launch")
     } catch { /* Retry initialization next foreground; never block onboarding. */ }
   }
+  func flushForBackgroundPush() {
+    start()
+    uploader?.flush()
+  }
   func foreground() {
     if store == nil { start() }
     guard store != nil, !active else { checkPermissions(reason: "active"); return }

@@ -81,7 +81,7 @@ final class DrivingResearchTestNotifications: ObservableObject {
   private func schedule(_ test:ResearchNotificationTest) async -> String {
     DrivingResearchNotifications.shared.install()
     let center=UNUserNotificationCenter.current(),settings=await center.notificationSettings()
-    guard [.authorized,.provisional,.ephemeral].contains(settings.authorizationStatus) else{return "permission_missing"}
+    guard settings.authorizationStatus == .authorized else{return "permission_missing"}
     let content=UNMutableNotificationContent()
     content.title=test.title;content.subtitle=ResearchConfirmation.notificationSubtitle
     content.categoryIdentifier=Self.category;content.threadIdentifier="fuelup.research.tests"

@@ -41,3 +41,10 @@ export function sendPush(request) {
   stream.end(request.payload);
  });
 }
+
+export function syncPushRequest(claim,credentials) {
+ if(!['sandbox','production'].includes(claim.environment)||!/^[a-f0-9]{32,512}$/.test(claim.deviceToken)) throw Error('Invalid registered push address');
+ if(!/^[0-9a-f-]{36}$/i.test(claim.requestId)||!Number.isFinite(Number(claim.expiresAt))) throw Error('Invalid sync request');
+ const payload=JSON.stringify({aps:{'content-available':1},type:'fuelup.research.sync.v1',requestId:claim.requestId});
+ return {host:claim.environment==='sandbox'?'https://api.sandbox.push.apple.com':'https://api.push.apple.com',payload,headers:{':method':'POST',':path':`/3/device/${claim.deviceToken}`,authorization:`bearer ${providerToken(credentials)}`,'apns-topic':'com.anthonyh.fuelup','apns-push-type':'background','apns-priority':'5','apns-expiration':String(Math.floor(Number(claim.expiresAt))),'apns-collapse-id':'fuelup.research.sync','apns-id':claim.requestId}};
+}

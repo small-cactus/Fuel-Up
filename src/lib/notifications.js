@@ -89,15 +89,17 @@ export async function registerForPushNotificationsAsync() {
         return null;
     }
 
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-
-    if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
+    const fullyAuthorized = permission => Platform.OS === 'ios'
+        ? permission.ios?.status === Notifications.IosAuthorizationStatus.AUTHORIZED
+        : permission.status === 'granted';
+    let permission = await Notifications.getPermissionsAsync();
+    if (!fullyAuthorized(permission)) {
+        permission = await Notifications.requestPermissionsAsync({
+            ios: { allowAlert: true, allowSound: true, allowBadge: false, allowProvisional: false },
+        });
     }
 
-    if (finalStatus !== 'granted') {
+    if (!fullyAuthorized(permission)) {
         console.log('Failed to get push token for push notification!');
         return null;
     }

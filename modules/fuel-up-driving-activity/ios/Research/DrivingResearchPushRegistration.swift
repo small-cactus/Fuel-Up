@@ -18,8 +18,7 @@ final class DrivingResearchPushRegistration {
     lastAttempt=Date()
     registration=Task {
       defer{registration=nil}
-      let settings=await UNUserNotificationCenter.current().notificationSettings()
-      guard [.authorized,.provisional,.ephemeral].contains(settings.authorizationStatus) else{return}
+      // Silent APNs registration is independent of visible-alert authorization.
       // Register on each launch. Apple can rotate a device token at any time.
       UIApplication.shared.registerForRemoteNotifications()
       await upload()

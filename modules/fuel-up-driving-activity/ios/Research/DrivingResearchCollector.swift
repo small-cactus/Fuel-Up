@@ -396,7 +396,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       let notifications=DrivingResearchNotifications.shared
       notificationPermission=await notifications.permission()
       guard consented,UIApplication.shared.applicationState == .active else{return}
-      if notificationPermission == "Not requested" {
+      if ["Not requested", "Quiet delivery"].contains(notificationPermission) {
         InstallationTelemetry.shared.track("permission_request", ["permission":"notifications"])
         _=await notifications.requestPermission()
         InstallationTelemetry.shared.checkPermissions(reason:"notifications_result")
@@ -547,7 +547,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     if UIApplication.shared.backgroundRefreshStatus != .available {
       problems.append(.init(id:"background_refresh",message:"Background App Refresh is unavailable. Check Settings and Low Power Mode."))
     }
-    if ["Off","Alerts off","Not requested"].contains(notificationPermission) {
+    if ["Off","Alerts off","Not requested","Quiet delivery"].contains(notificationPermission) {
       problems.append(.init(id:"notifications",message:"Allow notifications in Settings to receive stop confirmations and tracking alerts."))
     }
     if configured,ready,!running,trackingFaults.isEmpty {

@@ -146,6 +146,12 @@ ${methods}
     assert(location.manager.requests==1)
     app.applicationState = .active;location.foreground()
     assert(location.manager.requests==2 && !location.permissionSetup,"Inactive location callbacks resume the permission flow")
+    system.value="Quiet delivery"
+    let provisional=Collector();provisional.consented=true
+    let upgrading=Task {await provisional.researchScreenBecameActive()}
+    await settle();assert(system.response != nil,"Provisional authorization requests full alert permission")
+    system.answer(true);await upgrading.value
+    assert(provisional.notificationPermission=="On")
     print("PASS: consent, foreground, coalescing, sequential prompts, denial, existing participants")
   }
 }

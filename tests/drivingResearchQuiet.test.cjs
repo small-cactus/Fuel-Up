@@ -27,3 +27,17 @@ test('native migration unregisters old tasks before native collection resumes',a
  await api.migrateToNativeResearchAsync();
  assert.deepEqual(calls,['stop-location','stop-fences','end-activities','cancel-own','resume']);
 });
+test('visible notification registration upgrades provisional status and requires full authorization',async()=>{
+ for(const upgraded of [true,false]) {
+  let requests=0,tokens=0;
+  const api=load('src/lib/notifications.js',{
+   './drivingResearchPolicy':{},'expo-device':{isDevice:true},'expo-constants':{},'react-native':{Platform:{OS:'ios'},Linking:{}},
+   'expo-notifications':{IosAuthorizationStatus:{AUTHORIZED:2},setNotificationHandler:()=>{},
+    getPermissionsAsync:async()=>({status:'granted',ios:{status:3}}),
+    requestPermissionsAsync:async options=>{requests++;assert.equal(options.ios.allowProvisional,false);assert.equal(options.ios.allowAlert,true);return {status:'granted',ios:{status:upgraded?2:3}}},
+    getDevicePushTokenAsync:async()=>{tokens++;return {data:'device-token'}}},
+  });
+  assert.equal(await api.registerForPushNotificationsAsync(),upgraded?'device-token':null);
+  assert.equal(requests,1);assert.equal(tokens,upgraded?1:0);
+ }
+});

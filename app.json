@@ -94,7 +94,8 @@
         "UIBackgroundModes": [
           "fetch",
           "location",
-          "processing"
+          "processing",
+          "remote-notification"
         ],
         "CFBundleLocalizations": [
           "en",

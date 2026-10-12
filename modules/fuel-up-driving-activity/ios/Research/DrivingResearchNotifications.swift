@@ -30,7 +30,8 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
   }
   func requestPermission() async -> Bool {
     install()
-    return (try? await center.requestAuthorization(options: [.alert, .sound])) ?? false
+    _ = try? await center.requestAuthorization(options: [.alert, .sound])
+    return await center.notificationSettings().authorizationStatus == .authorized
   }
   func permission() async -> String {
     let settings = await center.notificationSettings()
@@ -44,7 +45,7 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
   func scheduleTrackingHealth(_ message:String) async -> Bool {
     install()
     let settings=await center.notificationSettings()
-    guard [.authorized,.provisional,.ephemeral].contains(settings.authorizationStatus) else{return false}
+    guard settings.authorizationStatus == .authorized else{return false}
     let content=UNMutableNotificationContent()
     content.title=NSLocalizedString("Tracking needs attention 👀", comment: "")
     content.body=message+" "+NSLocalizedString("Tap to review.", comment: "")
@@ -65,7 +66,7 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
   func schedule(_ visit: ResearchVisit) async -> String {
     install()
     let settings = await center.notificationSettings()
-    guard [.authorized, .provisional, .ephemeral].contains(settings.authorizationStatus) else { return "permission_missing" }
+    guard settings.authorizationStatus == .authorized else { return "permission_missing" }
     let content = UNMutableNotificationContent()
     content.title = ResearchConfirmation.notificationTitle(for: visit)
     content.subtitle = ResearchConfirmation.notificationSubtitle
