@@ -6,8 +6,10 @@ User requested station-independent notification timing research, assuming instan
 
 - Recover historical Apple motion transitions across process suspension, limited to the enabled collection boundary and at most seven days. Query every 15 minutes at most on ordinary wakes, with three-minute settling delay and explicit incomplete/error evidence.
 - Append receipt-time timezone, UTC offset and application state to research records.
-- Preserve enabled enrollment, permission requirements, durable outbox and existing upload behavior. Pause clears the recovery boundary; no collection across paused periods or before the update's first collection boundary.
+- Preserve enabled enrollment, permission requirements and durable outbox; update research automatic upload to coalesced cellular/Wi-Fi transfer. Pause clears the recovery boundary; no collection across paused periods or before the update's first collection boundary.
 - Keep predictive notifications disabled. The update collects evidence for learning timing and does not change station recommendations.
+
+Additional collection includes per-installation onboarding, permissions, screen dwell, map/card activity and device profiles, plus consented general visits, step history and receipt context. Full scope: `docs/research/2026-10-12-expanded-telemetry/README.md`.
 
 ## Validation completed
 
@@ -19,6 +21,6 @@ User requested station-independent notification timing research, assuming instan
 
 ## Distribution status
 
-Release work paused at the user's request to reconsider background packet design. The running archive was interrupted before completion; no build was uploaded. Package/signature checks, Apple upload acceptance, processing and TestFlight group assignment are not yet verified. App Store build 27's existing review submission is not being replaced or resubmitted.
+The expanded telemetry implementation is committed in `4b2b907`. The installation-telemetry endpoint and protected schema are deployed. The normal signed simulator UI test read back 101 real app-generated events with exact local payload matches and no pending outbox records; see `../research/2026-10-12-expanded-telemetry/simulator-ui-verification.json`. An initial device archive succeeded, but final packaging must include the later source changes. The final-source signed Release build succeeded and was installed in place on the paired iPhone 18 Pro Max. `codesign --verify --deep --strict` passed and `devicectl device info apps` reported Fuel Up 1.0.0 (28). Existing application data was preserved; the phone app was not launched for visual/sensor QA. Disk exhaustion had damaged one compiler module; the failed module was removed and the incremental build then passed. No build has been uploaded to TestFlight; Apple acceptance, processing, hosted privacy publication/data-disclosure review and group assignment remain unverified. App Store build 27's existing review submission is not being replaced or resubmitted.
 
 Local build log: `/tmp/fuelup-testflight-28-archive.log`.

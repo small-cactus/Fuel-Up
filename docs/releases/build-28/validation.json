@@ -1,11 +1,25 @@
 {
-  "focused_tests_passed": 18,
+  "focused_tests_passed": 44,
   "timing_replay_tests_passed": 6,
   "prior_replay_tests_passed": 7,
   "live_synthetic_server_readback": "passed",
   "live_synthetic_fixture_cleanup": "verified",
   "eas_build_number": 28,
-  "archive": "interrupted_at_user_request",
+  "archive": "initial_archive_succeeded_final_rebuild_pending",
   "upload": "not_started",
-  "release_status": "paused_for_data_design"
+  "release_status": "physical_phone_installed_testflight_pending",
+  "regression_tests_passed": 165,
+  "normal_simulator_server_events_verified": 101,
+  "normal_simulator_exact_local_payload_matches": 101,
+  "normal_simulator_pending_uploads": 0,
+  "physical_phone": {
+    "model": "iPhone 18 Pro Max",
+    "version": "1.0.0",
+    "build": "28",
+    "install": "verified_in_place",
+    "signature": "codesign_deep_strict_passed",
+    "launched_for_phone_qa": false,
+    "installedAt": "2026-10-12T05:10:24.001221+00:00",
+    "javascriptBundleSHA256": "ede1ec045ffa8f602b46e6e3a5fef6094029c919519f171b435c09bfb517d687"
+  }
 }

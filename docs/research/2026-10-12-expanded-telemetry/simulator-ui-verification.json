@@ -1,0 +1,60 @@
+{
+  "verifiedAt": "2026-10-12T05:08:38.085292+00:00",
+  "sourceCommit": "4b2b907",
+  "mode": "normal signed Release app; standard launch; UI taps and gestures; no test deep link or fabricated app events",
+  "simulator": "iPhone 17 Pro Max / iOS 26.5",
+  "build": "1.0.0 (28)",
+  "simulatedLocation": "Clearwater, Florida (standard simulator location)",
+  "serverEventsReadBack": 101,
+  "exactLocalPayloadMatches": 101,
+  "oneInstallationAcrossLaunches": true,
+  "appLaunches": 3,
+  "onboardingComplete": true,
+  "highestOnboardingStep": 3,
+  "eventKinds": {
+    "app_launch": 3,
+    "app_foreground": 5,
+    "screen_view": 17,
+    "permission_snapshot": 13,
+    "screen_exit": 15,
+    "onboarding_step": 6,
+    "screen_heartbeat": 10,
+    "onboarding_action": 11,
+    "preferences_changed": 5,
+    "permission_request": 3,
+    "app_background": 3,
+    "onboarding_complete": 1,
+    "ui_action": 7,
+    "research_consent": 2
+  },
+  "medianUploadSeconds": 2.469,
+  "maxUploadSeconds": 52.539,
+  "outboxPendingAtInspection": 0,
+  "observedUiActions": [
+    "location deny then allow via Settings",
+    "premium grade choice",
+    "skip optional preferences",
+    "pan",
+    "pinch",
+    "show all stations",
+    "station carousel selection",
+    "Go on station 186777, rank 2, premium",
+    "Trends",
+    "Settings",
+    "research consent",
+    "notifications denied",
+    "research pause",
+    "background and relaunch"
+  ],
+  "screenDwellSeconds": {
+    "/trends": 14.771,
+    "/settings": 10.498
+  },
+  "limits": [
+    "No real cellular radio test in simulator",
+    "Motion unavailable; no real driving, visits or pedometer history verified",
+    "Initial unsigned run and disk-full setup excluded as successful QA",
+    "First background event delayed 52.539 seconds; later background receipts under one second",
+    "Not a cluster animation probe or TestFlight distribution proof"
+  ]
+}
