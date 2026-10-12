@@ -1,0 +1,339 @@
+{
+  "protocol_version": 1,
+  "events": 40962,
+  "kind_counts": {
+    "consent": 8,
+    "lifecycle": 43,
+    "diagnostic": 1001,
+    "location": 10623,
+    "geofence": 16717,
+    "motion": 11923,
+    "station_catalog": 91,
+    "visit_observation": 164,
+    "visit_departure": 161,
+    "visit_candidate": 15,
+    "visit_label": 20,
+    "permission": 3,
+    "visit_prompt": 36,
+    "visit_pedometer": 130,
+    "system_visit": 24,
+    "visit_gap": 3
+  },
+  "observation_span_days": 7.19,
+  "valid_locations": 10563,
+  "unique_observed_visits": 164,
+  "latest_label_counts": {
+    "fueled": 6,
+    "not_fueling": 5,
+    "not_a_stop": 9
+  },
+  "label_records_without_observed_visit": 0,
+  "confirmed_fuel_stops": 6,
+  "explicit_negative_visits": 14,
+  "unconfirmed_observed_visits": 144,
+  "distinct_confirmed_fuel_stations": 1,
+  "fuel_station_frequency_counts": [
+    6
+  ],
+  "later_fuel_stops_at_previously_confirmed_station": 5,
+  "positive_interval_hours": {
+    "n": 5,
+    "min": 21.4,
+    "median": 24.34,
+    "max": 69.73
+  },
+  "label_delay_minutes": {
+    "n": 20,
+    "min": 1.23,
+    "median": 3.82,
+    "max": 38.85
+  },
+  "upload_delay_hours": {
+    "n": 40962,
+    "min": 0.0,
+    "median": 1.47,
+    "max": 25.72
+  },
+  "events_uploaded_within_2_minutes": 1001,
+  "moving_minutes_with_recorded_decisions": 1406,
+  "approx_observed_moving_hours": 22.06,
+  "known_station_ids_with_static_geometry": 523,
+  "fuel_prearrival_fix_age_minutes": {
+    "n": 6,
+    "min": 0.03,
+    "median": 0.07,
+    "max": 0.08
+  },
+  "horizons_minutes": {
+    "2": {
+      "fuel_opportunities": 6,
+      "negative_opportunities": 14,
+      "fuel_with_fresh_fix": 6,
+      "negative_with_fresh_fix": 11,
+      "fuel_with_prior_confirmed_history": 5,
+      "habit_station_correct": 5,
+      "policies": {
+        "interval": {
+          "fuel_triggered": 0,
+          "fuel_exact_station": 0,
+          "negative_triggered": 0
+        },
+        "known_fuel_approach": {
+          "fuel_triggered": 2,
+          "fuel_exact_station": 2,
+          "negative_triggered": 0
+        },
+        "catalog_approach": {
+          "fuel_triggered": 4,
+          "fuel_exact_station": 3,
+          "negative_triggered": 5
+        },
+        "prior_route": {
+          "fuel_triggered": 5,
+          "fuel_exact_station": 5,
+          "negative_triggered": 0
+        }
+      }
+    },
+    "5": {
+      "fuel_opportunities": 6,
+      "negative_opportunities": 14,
+      "fuel_with_fresh_fix": 6,
+      "negative_with_fresh_fix": 12,
+      "fuel_with_prior_confirmed_history": 5,
+      "habit_station_correct": 5,
+      "policies": {
+        "interval": {
+          "fuel_triggered": 0,
+          "fuel_exact_station": 0,
+          "negative_triggered": 0
+        },
+        "known_fuel_approach": {
+          "fuel_triggered": 0,
+          "fuel_exact_station": 0,
+          "negative_triggered": 0
+        },
+        "catalog_approach": {
+          "fuel_triggered": 6,
+          "fuel_exact_station": 0,
+          "negative_triggered": 5
+        },
+        "prior_route": {
+          "fuel_triggered": 5,
+          "fuel_exact_station": 5,
+          "negative_triggered": 2
+        }
+      }
+    },
+    "15": {
+      "fuel_opportunities": 6,
+      "negative_opportunities": 14,
+      "fuel_with_fresh_fix": 4,
+      "negative_with_fresh_fix": 11,
+      "fuel_with_prior_confirmed_history": 5,
+      "habit_station_correct": 5,
+      "policies": {
+        "interval": {
+          "fuel_triggered": 0,
+          "fuel_exact_station": 0,
+          "negative_triggered": 0
+        },
+        "known_fuel_approach": {
+          "fuel_triggered": 0,
+          "fuel_exact_station": 0,
+          "negative_triggered": 0
+        },
+        "catalog_approach": {
+          "fuel_triggered": 3,
+          "fuel_exact_station": 0,
+          "negative_triggered": 6
+        },
+        "prior_route": {
+          "fuel_triggered": 0,
+          "fuel_exact_station": 0,
+          "negative_triggered": 0
+        }
+      }
+    },
+    "30": {
+      "fuel_opportunities": 6,
+      "negative_opportunities": 14,
+      "fuel_with_fresh_fix": 4,
+      "negative_with_fresh_fix": 8,
+      "fuel_with_prior_confirmed_history": 5,
+      "habit_station_correct": 5,
+      "policies": {
+        "interval": {
+          "fuel_triggered": 0,
+          "fuel_exact_station": 0,
+          "negative_triggered": 0
+        },
+        "known_fuel_approach": {
+          "fuel_triggered": 0,
+          "fuel_exact_station": 0,
+          "negative_triggered": 0
+        },
+        "catalog_approach": {
+          "fuel_triggered": 2,
+          "fuel_exact_station": 0,
+          "negative_triggered": 2
+        },
+        "prior_route": {
+          "fuel_triggered": 0,
+          "fuel_exact_station": 0,
+          "negative_triggered": 0
+        }
+      }
+    },
+    "60": {
+      "fuel_opportunities": 6,
+      "negative_opportunities": 14,
+      "fuel_with_fresh_fix": 3,
+      "negative_with_fresh_fix": 10,
+      "fuel_with_prior_confirmed_history": 5,
+      "habit_station_correct": 5,
+      "policies": {
+        "interval": {
+          "fuel_triggered": 0,
+          "fuel_exact_station": 0,
+          "negative_triggered": 0
+        },
+        "known_fuel_approach": {
+          "fuel_triggered": 0,
+          "fuel_exact_station": 0,
+          "negative_triggered": 0
+        },
+        "catalog_approach": {
+          "fuel_triggered": 1,
+          "fuel_exact_station": 0,
+          "negative_triggered": 3
+        },
+        "prior_route": {
+          "fuel_triggered": 0,
+          "fuel_exact_station": 0,
+          "negative_triggered": 0
+        }
+      }
+    }
+  },
+  "continuous_alert_replay": {
+    "interval": {
+      "prediction_window_minutes": 15.0,
+      "alerts": 0,
+      "alerts_per_calendar_day": 0.0,
+      "outcome_counts": {},
+      "distinct_fuel_stops_caught": 0,
+      "distinct_fuel_stops_exact_station": 0,
+      "lead_minutes_for_confirmed_matches": null,
+      "exact_match_distance_to_static_station_m": null,
+      "minutes_before_first_250m_entry": null,
+      "route_eta_absolute_error_minutes": null,
+      "precision_not_identifiable": "Unmatched and unconfirmed alerts are unknown, not established false positives."
+    },
+    "known_fuel_approach": {
+      "prediction_window_minutes": 15.0,
+      "alerts": 6,
+      "alerts_per_calendar_day": 0.83,
+      "outcome_counts": {
+        "confirmed_fuel_in_window": 5,
+        "confirmed_fuel_exact_station": 5,
+        "unconfirmed_encounter_in_window": 1
+      },
+      "distinct_fuel_stops_caught": 5,
+      "distinct_fuel_stops_exact_station": 5,
+      "lead_minutes_for_confirmed_matches": {
+        "n": 5,
+        "min": 0.95,
+        "median": 1.45,
+        "max": 2.63
+      },
+      "exact_match_distance_to_static_station_m": {
+        "n": 5,
+        "min": 846.22,
+        "median": 1207.35,
+        "max": 1858.25
+      },
+      "minutes_before_first_250m_entry": {
+        "n": 5,
+        "min": 0.5,
+        "median": 0.95,
+        "max": 2.08
+      },
+      "route_eta_absolute_error_minutes": null,
+      "precision_not_identifiable": "Unmatched and unconfirmed alerts are unknown, not established false positives."
+    },
+    "catalog_approach": {
+      "prediction_window_minutes": 15.0,
+      "alerts": 83,
+      "alerts_per_calendar_day": 11.55,
+      "outcome_counts": {
+        "unconfirmed_encounter_in_window": 56,
+        "no_observed_station_encounter": 22,
+        "explicit_nonfuel_in_window": 4,
+        "confirmed_fuel_in_window": 1
+      },
+      "distinct_fuel_stops_caught": 1,
+      "distinct_fuel_stops_exact_station": 0,
+      "lead_minutes_for_confirmed_matches": {
+        "n": 1,
+        "min": 0.35,
+        "median": 0.35,
+        "max": 0.35
+      },
+      "exact_match_distance_to_static_station_m": null,
+      "minutes_before_first_250m_entry": null,
+      "route_eta_absolute_error_minutes": null,
+      "precision_not_identifiable": "Unmatched and unconfirmed alerts are unknown, not established false positives."
+    },
+    "prior_route": {
+      "prediction_window_minutes": 30.0,
+      "alerts": 39,
+      "alerts_per_calendar_day": 5.43,
+      "outcome_counts": {
+        "unconfirmed_encounter_in_window": 24,
+        "no_observed_station_encounter": 10,
+        "explicit_nonfuel_in_window": 3,
+        "confirmed_fuel_in_window": 2,
+        "confirmed_fuel_exact_station": 2
+      },
+      "distinct_fuel_stops_caught": 2,
+      "distinct_fuel_stops_exact_station": 2,
+      "lead_minutes_for_confirmed_matches": {
+        "n": 2,
+        "min": 5.72,
+        "median": 6.03,
+        "max": 6.35
+      },
+      "exact_match_distance_to_static_station_m": {
+        "n": 2,
+        "min": 9054.67,
+        "median": 9608.51,
+        "max": 10162.34
+      },
+      "minutes_before_first_250m_entry": {
+        "n": 2,
+        "min": 5.22,
+        "median": 5.56,
+        "max": 5.9
+      },
+      "route_eta_absolute_error_minutes": {
+        "n": 2,
+        "min": 0.27,
+        "median": 0.39,
+        "max": 0.52
+      },
+      "precision_not_identifiable": "Unmatched and unconfirmed alerts are unknown, not established false positives."
+    }
+  },
+  "limitations": [
+    "Only a small number of self-reported fuel stops; no independent pump or transaction verification.",
+    "Visit onset is a detector observation, not exact physical arrival; pre-onset predictions may already be near the forecourt.",
+    "Only consented, uploaded samples are observed; absent/unanswered fuel purchases remain unknown.",
+    "Current static catalog coordinates are an approximation; catalog IDs are gated by their historical first recorded availability.",
+    "Approach predicts proximity and possible visits, not purchase intent; no learned probability or accuracy claim.",
+    "Thresholds are fixed exploratory hypotheses, with no model fitting or unseen confirmation set.",
+    "On-device availability is replayed; delayed server uploads cannot support the same live server predictions.",
+    "Motion, steps, system visits and lifecycle exist but are not used as purchase labels; post-arrival signals are excluded."
+  ],
+  "input_sha256": "8a568a1b10a56e74c7a0e4c6fbd1c52934bd61c0a4a65227cf0f78762661f757"
+}
