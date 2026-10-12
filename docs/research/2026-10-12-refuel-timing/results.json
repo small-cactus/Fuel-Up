@@ -1,0 +1,182 @@
+{
+  "protocol_version": 1,
+  "station_features_used": false,
+  "server_upload_delay_applied": false,
+  "events": 40962,
+  "span_days": 7.19,
+  "confirmed_fuel_stops": 6,
+  "explicit_negative_encounters": 14,
+  "unconfirmed_encounters": 144,
+  "wall_clock_minute_decisions": 10351,
+  "minutes_with_fresh_location": 1893,
+  "minutes_with_fresh_moving_location": 1311,
+  "inferred_movement_starts": 17,
+  "latest_inferred_start_to_fuel_minutes": {
+    "n": 5,
+    "min": 11.94,
+    "median": 41.05,
+    "max": 80.69
+  },
+  "observed_distance_between_positive_stops_km": {
+    "n": 5,
+    "min": 185.76,
+    "median": 201.48,
+    "max": 345.84
+  },
+  "valid_location_gaps_seconds": {
+    "n": 10562,
+    "min": 5.0,
+    "median": 6.0,
+    "max": 84522.81
+  },
+  "valid_location_gaps_over_15_minutes": 49,
+  "motion_receipt_delay_seconds": {
+    "n": 11923,
+    "min": 0.0,
+    "median": 0.01,
+    "max": 1831.04
+  },
+  "motion_records_received_over_3_minutes_late": 35,
+  "landmarks_minutes": {
+    "5": {
+      "positive_opportunities": 6,
+      "with_two_prior_fuel_answers": 4,
+      "with_three_prior_fuel_answers": 3,
+      "fresh_location": 6,
+      "moving": 6,
+      "triggers": {
+        "clock": 3,
+        "elapsed_cycle": 2,
+        "driving_cycle": 2,
+        "clock_and_cycle": 2,
+        "before_departure": 0
+      }
+    },
+    "15": {
+      "positive_opportunities": 6,
+      "with_two_prior_fuel_answers": 4,
+      "with_three_prior_fuel_answers": 3,
+      "fresh_location": 4,
+      "moving": 4,
+      "triggers": {
+        "clock": 1,
+        "elapsed_cycle": 1,
+        "driving_cycle": 1,
+        "clock_and_cycle": 1,
+        "before_departure": 0
+      }
+    },
+    "30": {
+      "positive_opportunities": 6,
+      "with_two_prior_fuel_answers": 4,
+      "with_three_prior_fuel_answers": 3,
+      "fresh_location": 4,
+      "moving": 4,
+      "triggers": {
+        "clock": 1,
+        "elapsed_cycle": 1,
+        "driving_cycle": 1,
+        "clock_and_cycle": 1,
+        "before_departure": 0
+      }
+    },
+    "60": {
+      "positive_opportunities": 6,
+      "with_two_prior_fuel_answers": 4,
+      "with_three_prior_fuel_answers": 3,
+      "fresh_location": 3,
+      "moving": 1,
+      "triggers": {
+        "clock": 2,
+        "elapsed_cycle": 0,
+        "driving_cycle": 0,
+        "clock_and_cycle": 0,
+        "before_departure": 1
+      }
+    }
+  },
+  "continuous_alerts": {
+    "clock": {
+      "alerts": 8,
+      "alerts_per_day": 1.11,
+      "outcomes": {
+        "unconfirmed_encounter_without_confirmed_fuel_match": 4,
+        "no_observed_encounter_in_window": 3,
+        "explicit_nonfuel_encounter_without_confirmed_fuel_match": 1
+      },
+      "distinct_confirmed_fuel_stops_caught": 0,
+      "distinct_confirmed_fuel_stops_with_15_minute_warning": 0,
+      "fuel_warning_minutes": null,
+      "warning_before_next_inferred_movement_start_minutes_for_fuel_matches": null
+    },
+    "elapsed_cycle": {
+      "alerts": 2,
+      "alerts_per_day": 0.28,
+      "outcomes": {
+        "confirmed_fuel_5_to_60_minutes_later": 2
+      },
+      "distinct_confirmed_fuel_stops_caught": 2,
+      "distinct_confirmed_fuel_stops_with_15_minute_warning": 1,
+      "fuel_warning_minutes": {
+        "n": 2,
+        "min": 11.77,
+        "median": 26.74,
+        "max": 41.72
+      },
+      "warning_before_next_inferred_movement_start_minutes_for_fuel_matches": null
+    },
+    "driving_cycle": {
+      "alerts": 2,
+      "alerts_per_day": 0.28,
+      "outcomes": {
+        "confirmed_fuel_5_to_60_minutes_later": 1,
+        "unconfirmed_encounter_without_confirmed_fuel_match": 1
+      },
+      "distinct_confirmed_fuel_stops_caught": 1,
+      "distinct_confirmed_fuel_stops_with_15_minute_warning": 1,
+      "fuel_warning_minutes": {
+        "n": 1,
+        "min": 31.72,
+        "median": 31.72,
+        "max": 31.72
+      },
+      "warning_before_next_inferred_movement_start_minutes_for_fuel_matches": null
+    },
+    "clock_and_cycle": {
+      "alerts": 2,
+      "alerts_per_day": 0.28,
+      "outcomes": {
+        "confirmed_fuel_5_to_60_minutes_later": 2
+      },
+      "distinct_confirmed_fuel_stops_caught": 2,
+      "distinct_confirmed_fuel_stops_with_15_minute_warning": 1,
+      "fuel_warning_minutes": {
+        "n": 2,
+        "min": 6.77,
+        "median": 24.24,
+        "max": 41.72
+      },
+      "warning_before_next_inferred_movement_start_minutes_for_fuel_matches": null
+    },
+    "before_departure": {
+      "alerts": 2,
+      "alerts_per_day": 0.28,
+      "outcomes": {
+        "no_observed_encounter_in_window": 2
+      },
+      "distinct_confirmed_fuel_stops_caught": 0,
+      "distinct_confirmed_fuel_stops_with_15_minute_warning": 0,
+      "fuel_warning_minutes": null,
+      "warning_before_next_inferred_movement_start_minutes_for_fuel_matches": null
+    }
+  },
+  "limitations": [
+    "Six self-reported fuel purchases from one selected person; not a calibrated model or unseen validation set.",
+    "Unanswered purchases and non-fueling trips cannot be exhaustively identified.",
+    "Movement session starts after observation gaps are not proven physical departures.",
+    "Driving distance excludes gaps and is a lower bound, not odometer or tank consumption.",
+    "UTC clock used consistently; longer replay needs recorded device timezone changes.",
+    "Counterfactual one-minute execution is assumed; this does not verify iOS wake or notification delivery."
+  ],
+  "input_sha256": "8a568a1b10a56e74c7a0e4c6fbd1c52934bd61c0a4a65227cf0f78762661f757"
+}

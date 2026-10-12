@@ -1,0 +1,10 @@
+{
+  "focused_tests_passed": 18,
+  "timing_replay_tests_passed": 6,
+  "prior_replay_tests_passed": 7,
+  "live_synthetic_server_readback": "passed",
+  "live_synthetic_fixture_cleanup": "verified",
+  "eas_build_number": 28,
+  "archive": "in_progress",
+  "upload": "not_yet_verified"
+}

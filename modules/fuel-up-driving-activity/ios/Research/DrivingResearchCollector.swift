@@ -36,6 +36,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   let manager=CLLocationManager()
   let activity=CMMotionActivityManager()
   private let crossChecks=DrivingResearchCrossChecks()
+  private let timingHistory=DrivingResearchTimingHistory()
   private var store:DrivingResearchStore?
   private let transport=DrivingResearchTransport()
   private var identity:ResearchIdentity?
@@ -168,6 +169,10 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
         return self.record(kind,evidence)
       }
     }
+    timingHistory.start { [weak self] kind,fields in
+      guard let self,self.enabled,self.consented,self.running,self.ready else{return false}
+      return self.record(kind,fields)
+    }
     manager.requestLocation()
     applyMode();checkMotion();sync();DrivingResearchBackground.schedule()
   }
@@ -243,6 +248,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     permissionSetup=false;pendingLocationSetup=false;pendingMotionSetup=false;locationSetupStarted=false
     record("consent",["version":1,"enabled":false])
     enabled=false;UserDefaults.standard.set(false,forKey:Self.enabledKey)
+    timingHistory.stop(resetBoundary:true)
     trackingFaults.removeAll();checkTrackingHealth()
     DrivingResearchNotifications.shared.cancelAll()
     stopSensors();DrivingResearchSync.shared.pause();status="Paused"
@@ -250,6 +256,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     detector=ResearchVisitDetector();saveDetector()
   }
   private func stopSensors() {
+    timingHistory.stop(resetBoundary:true)
     crossChecks.stop()
     manager.stopMonitoringVisits()
     manager.stopUpdatingLocation();manager.stopMonitoringSignificantLocationChanges();activity.stopActivityUpdates()
@@ -344,6 +351,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     applyMode()
   }
   private func checkMotion() {
+    timingHistory.drain()
     guard Date().timeIntervalSince(lastMotionCheck)>30 else{return};lastMotionCheck=Date()
     checkTrackingHealth()
     activity.queryActivityStarting(from:Date().addingTimeInterval(-180),to:Date(),to:.main) { [weak self] values,error in
@@ -457,6 +465,11 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     guard consented,let store else{return false}
     do {
       var payload=fields;payload["schemaVersion"]=1;payload["detectorVersion"]=ResearchStopPolicy.version;payload["sessionId"]=sessionID
+      // Context describes receipt time, including for delayed historical samples.
+      payload["timingContextVersion"]=1
+      payload["deviceTimeZone"]=TimeZone.current.identifier
+      payload["receiptUTCOffsetSeconds"]=TimeZone.current.secondsFromGMT()
+      payload["appStateAtReceipt"]=UIApplication.shared.applicationState.rawValue
       try store.append(ResearchEvent(kind:kind,payload:payload));clearTrackingFault("storage");refreshCounts();sync();return true
     } catch {issue=error.localizedDescription;stopSensors();status="Paused — storage needs attention";setTrackingFault("storage","Drive recording stopped because data could not be saved. Check your iPhone’s available storage.");return false}
   }
