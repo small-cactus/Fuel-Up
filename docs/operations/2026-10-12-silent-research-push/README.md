@@ -75,3 +75,11 @@ At the user's request, sent one silent sync push through the existing claim-prot
 Each device uploaded 12 available step-history packets and two available motion-history packets, along with other research events. Both also uploaded build 28 installation launch/permission snapshots with full notification authorization (2). This verifies a real background wake and upload on both reachable production devices. It does not guarantee every future silent push will be delivered. Participants without registered push addresses could not be reached; no address, consent or permission was manufactured.
 
 Aggregate evidence is in `production-test-2019.json`. Raw private records remain outside the repository. No code or deployment changes were made.
+
+## Immediate retry and TestFlight count reconciliation
+
+The user supplied a TestFlight screenshot showing three installed build-28 tester rows and requested another attempt. A protected recheck at approximately 20:22 UTC still found two research push registrations, both production and non-revoked. The third non-simulator installation visible in installation telemetry has a last recorded permission snapshot with research consent/enabled false and notification authorization undetermined; it cannot be reliably mapped to a specific anonymous TestFlight row. `DrivingResearchPushRegistration.registerIfAllowed()` requires research consent, so installed-build counts and reachable-research-address counts are different.
+
+The legacy `push_tokens` table has four unlinked addresses, all created no later than April 19; none match registered research addresses, and the table has neither participant association nor APNs environment. They do not establish an address for the missing build-28 tester and were not used for research sync.
+
+The authorized retry invoked the existing operator command once for each registered participant. Both returned `throttled`, `resent:false`, because the successful pushes were less than 30 minutes earlier. New durable sync requests remain queued for ordinary authenticated device wakes. No additional APNs push was sent, and no throttle, registration or consent gate was bypassed.
