@@ -3,7 +3,7 @@ import UIKit
 
 public final class DrivingResearchLifecycle: ExpoAppDelegateSubscriber {
   public func application(_ application:UIApplication,didFinishLaunchingWithOptions launchOptions:[UIApplication.LaunchOptionsKey:Any]?=nil)->Bool {
-    Task { @MainActor in InstallationTelemetry.shared.start() }
+    Task { @MainActor in InstallationTelemetry.shared.start(); InstallationSync.shared.activate() }
     DrivingResearchNotifications.shared.install()
     DrivingResearchBackground.register()
     Task { @MainActor in DrivingResearchPushRegistration.shared.registerIfAllowed() }
@@ -14,7 +14,7 @@ public final class DrivingResearchLifecycle: ExpoAppDelegateSubscriber {
     return true
   }
   public func applicationDidBecomeActive(_ application:UIApplication) {
-    Task { @MainActor in InstallationTelemetry.shared.foreground() }
+    Task { @MainActor in InstallationTelemetry.shared.foreground(); InstallationSync.shared.activate() }
     Task { @MainActor in DrivingResearchPushRegistration.shared.registerIfAllowed() }
     Task { @MainActor in
       let collector=DrivingResearchCollector.shared
@@ -36,6 +36,10 @@ public final class DrivingResearchLifecycle: ExpoAppDelegateSubscriber {
   }
   public func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                           fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+    if userInfo["type"] as? String == "fuelup.installation.sync.v1" {
+      Task { @MainActor in InstallationPushHandler.handle(userInfo, completion: completionHandler) }
+      return
+    }
     guard userInfo["type"] as? String == "fuelup.research.sync.v1",
           let requestID = userInfo["requestId"] as? String, UUID(uuidString: requestID) != nil,
           let aps = userInfo["aps"] as? [String: Any], aps["content-available"] as? Int == 1 else {
@@ -67,10 +71,16 @@ public final class DrivingResearchLifecycle: ExpoAppDelegateSubscriber {
     }
   }
   public func application(_ application:UIApplication,didRegisterForRemoteNotificationsWithDeviceToken deviceToken:Data) {
-    Task { @MainActor in DrivingResearchPushRegistration.shared.registered(deviceToken) }
+    Task { @MainActor in
+      InstallationSync.shared.registered(deviceToken)
+      DrivingResearchPushRegistration.shared.registered(deviceToken)
+    }
   }
   public func application(_ application:UIApplication,didFailToRegisterForRemoteNotificationsWithError error:Error) {
-    Task { @MainActor in DrivingResearchPushRegistration.shared.failed() }
+    Task { @MainActor in
+      InstallationSync.shared.failed()
+      DrivingResearchPushRegistration.shared.failed()
+    }
   }
 
 }

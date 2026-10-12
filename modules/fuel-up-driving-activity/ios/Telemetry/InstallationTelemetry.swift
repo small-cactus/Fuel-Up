@@ -46,6 +46,21 @@ import CoreLocation
     start()
     uploader?.flush()
   }
+  func drainForSync() async -> Bool {
+    start()
+    guard let store, let uploader else { return false }
+    let deadline = ProcessInfo.processInfo.systemUptime + 20
+    // Allow the asynchronous permission snapshot created on cold launch to join
+    // the outbox before observing it as empty. Keep retry/backoff policy intact.
+    do { try await Task.sleep(for: .milliseconds(250)) } catch { return false }
+    while !Task.isCancelled && ProcessInfo.processInfo.systemUptime < deadline {
+      uploader.flush()
+      guard let counts = try? store.counts() else { return false }
+      if counts.pending == 0 { return true }
+      do { try await Task.sleep(for: .milliseconds(200)) } catch { return false }
+    }
+    return false
+  }
   func foreground() {
     if store == nil { start() }
     guard store != nil, !active else { checkPermissions(reason: "active"); return }

@@ -1,3 +1,4 @@
+import {installationSyncCall} from './installationSync.mjs';
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const installationKinds = new Set(['app_launch','app_foreground','app_background','screen_view','screen_exit','screen_heartbeat',
     'onboarding_step','onboarding_action','onboarding_complete','onboarding_error','permission_request','permission_snapshot',
@@ -41,10 +42,18 @@ export function createInstallationTelemetryHandler({db}) {
         if(!/^[0-9a-f]{64}$/.test(token)) return response(401,{error:'unauthorized'});
         try {
             const text=await request.text(); if(text.length>250000) return response(413,{error:'batch_too_large'});
-            let batch; try {batch=validateInstallationBatch(JSON.parse(text));} catch {return response(400,{error:'invalid_batch'});}
+            let body; try {body=JSON.parse(text);} catch {return response(400,{error:'invalid_batch'});}
             const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token));
             const hash=Array.from(new Uint8Array(digest),v=>v.toString(16).padStart(2,'0')).join('');
-            const {data,error}=await db.rpc('ingest_installation_telemetry',{p_id:batch.installationId,p_hash:hash,p_profile:batch.profile,p_events:batch.events});
+            let call;
+            try {
+                if (body?.action!=null) call=installationSyncCall(body,hash);
+                else {
+                    const batch=validateInstallationBatch(body);
+                    call={name:'ingest_installation_telemetry',args:{p_id:batch.installationId,p_hash:hash,p_profile:batch.profile,p_events:batch.events}};
+                }
+            } catch {return response(400,{error:'invalid_batch'});}
+            const {data,error}=await db.rpc(call.name,call.args);
             if(error) return response(error.message?.includes('unauthorized')?401:error.message?.includes('rate_limited')?429:503,{error:'upload_unavailable'});
             return response(200,data);
         } catch {return response(503,{error:'upload_unavailable'});}

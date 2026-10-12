@@ -32,6 +32,7 @@ enum UIBackgroundFetchResult: Equatable {case newData,noData,failed}
   UserDefaults.standard.set(Date(),forKey:"research.lastUpload")
  }
 }
+@MainActor enum InstallationPushHandler { static func handle(_ payload: [AnyHashable:Any], completion: @escaping (UIBackgroundFetchResult)->Void) { completion(.noData) } }
 class Delegate {${method}}
 @main struct Main {
  @MainActor static func main() async {
