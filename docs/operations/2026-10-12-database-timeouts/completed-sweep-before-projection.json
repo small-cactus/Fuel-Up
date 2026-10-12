@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-12T16:29:42Z",
+  "hour": {
+    "archive_bytes": 3455786,
+    "completed_at": "2026-10-12T16:29:23.338919+00:00",
+    "expected_batches": 72,
+    "expected_stations": 141660,
+    "id": 15914,
+    "missed_batches": 0,
+    "observed_stations": 141660,
+    "priced_stations": 85512,
+    "slot_at": "2026-10-12T16:00:00+00:00",
+    "status": "complete",
+    "succeeded_batches": 72
+  },
+  "operationalSlots": {
+    "complete": 114,
+    "current_absent": 0,
+    "expected": 118,
+    "expired_absent": 0,
+    "expired_running": 0,
+    "partial": 4
+  },
+  "trendsCache": {
+    "age_minutes": 70.69628271666667,
+    "behind_latest_complete": true,
+    "published_at": "2026-10-12T15:19:00.238016+00:00",
+    "run_id": 15854,
+    "scopes": 10
+  },
+  "projectionBacklog": {
+    "completed_at": "2026-10-12T16:29:23.338919+00:00",
+    "missing_batches": 2,
+    "run_id": 15914,
+    "slot_at": "2026-10-12T16:00:00+00:00"
+  }
+}

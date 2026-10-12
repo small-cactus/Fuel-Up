@@ -1,0 +1,56 @@
+{
+  "at": "2026-10-12T16:28:01.231198+00:00",
+  "budgets": [
+    {
+      "id": 15914,
+      "lookups": 131960,
+      "requests": 67,
+      "slot_at": "2026-10-12T16:00:00+00:00"
+    },
+    {
+      "id": 15854,
+      "lookups": 143660,
+      "requests": 73,
+      "slot_at": "2026-10-12T15:00:00+00:00"
+    }
+  ],
+  "current_missing_projections": 2,
+  "operational_repairs": 0,
+  "schedules": [
+    {
+      "end_time": "2026-10-12T16:28:00.362605+00:00",
+      "jobname": "fuel-national-dispatch",
+      "runid": 77089,
+      "start_time": "2026-10-12T16:28:00.244855+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-12T16:28:00.27355+00:00",
+      "jobname": "fuel-national-projection-repair",
+      "runid": 77088,
+      "start_time": "2026-10-12T16:28:00.243482+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-12T16:20:01.263409+00:00",
+      "jobname": "fuel-national-retention",
+      "runid": 77065,
+      "start_time": "2026-10-12T16:20:00.699047+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-12T16:28:00.288423+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "runid": 77090,
+      "start_time": "2026-10-12T16:28:00.246193+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-12T16:25:00.258965+00:00",
+      "jobname": "fuel-national-watchdog",
+      "runid": 77075,
+      "start_time": "2026-10-12T16:25:00.241243+00:00",
+      "status": "succeeded"
+    }
+  ]
+}

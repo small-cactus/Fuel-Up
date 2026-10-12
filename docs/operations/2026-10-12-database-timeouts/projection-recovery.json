@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-12T16:32:07.969484+00:00",
+  "budgets": {
+    "lookups": 145660,
+    "requests": 74
+  },
+  "cache": {
+    "published_at": "2026-10-12T15:19:00.238016+00:00",
+    "run_id": 15854,
+    "scopes": 10
+  },
+  "missing": 0,
+  "repairs": [
+    {
+      "attempts": 1,
+      "completed_at": "2026-10-12T16:30:05.697749+00:00",
+      "job_id": 1143817,
+      "last_error": null
+    },
+    {
+      "attempts": 1,
+      "completed_at": "2026-10-12T16:31:04.148084+00:00",
+      "job_id": 1143819,
+      "last_error": null
+    }
+  ],
+  "retention": {
+    "end_time": "2026-10-12T16:30:00.351389+00:00",
+    "status": "succeeded"
+  }
+}
