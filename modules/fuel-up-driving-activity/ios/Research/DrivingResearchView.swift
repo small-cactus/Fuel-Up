@@ -187,6 +187,7 @@ struct DrivingResearchScreen: View {
       }
     }
     .sheet(isPresented: $showConsent, onDismiss: {
+      if !enableAfterConsent && !collector.consented { InstallationTelemetry.shared.track("research_consent", ["action":"dismiss_without_agree", "researchConsented":false]) }
       let shouldEnable=enableAfterConsent
       enableAfterConsent=false
       Task {

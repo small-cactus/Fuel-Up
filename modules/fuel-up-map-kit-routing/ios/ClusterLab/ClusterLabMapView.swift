@@ -5,6 +5,8 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   let map = MKMapView()
   let renderer = ClusterLabRenderer()
   let onMapReady = EventDispatcher()
+  let onResearchMapInteraction = EventDispatcher()
+  private var researchInteraction: ClusterLabResearchInteraction?
   private var reportedMapReady = false
   private var contentReady = false
   private var hasRenderedMap = false
@@ -55,6 +57,10 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     addSubview(map)
     mapAnchor.attach(to: map)
     focusInteraction = ClusterLabFocusInteraction(view: self)
+    researchInteraction = ClusterLabResearchInteraction(map: map) { [weak self] fields in
+      guard let self, self.active, self.probe == nil else { return }
+      self.onResearchMapInteraction(fields)
+    }
     observers.append(NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification,
                                                             object: nil, queue: .main) { [weak self] _ in
       self?.probe?.cancel()
@@ -76,6 +82,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     // Parent covers every visible pill and its offscreen approach. Extra space
     // includes the whole 84-point shell, refraction, and the +n displacement.
     map.frame = bounds
+    researchInteraction?.attach()
     if bounds.size != fittedSize || safeAreaInsets != fittedInsets { needsCameraFit = true }
     mapAnchor.layout(map: map)
     refresh()

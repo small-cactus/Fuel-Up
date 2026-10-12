@@ -37,6 +37,8 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   let activity=CMMotionActivityManager()
   private let crossChecks=DrivingResearchCrossChecks()
   private let timingHistory=DrivingResearchTimingHistory()
+  private let packetContext=DrivingResearchPacketContext()
+  private let stepHistory=DrivingResearchStepHistory()
   private var store:DrivingResearchStore?
   private let transport=DrivingResearchTransport()
   private var identity:ResearchIdentity?
@@ -62,6 +64,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   private var notificationPermissionTask:Task<Void,Never>?
   private var trackingFaults:[String:String]=[:]
   private let networkMonitor=NWPathMonitor()
+  private var networkKnown=false
   private var networkAvailable=false
   private var wifiNetwork=false
   private var expensiveNetwork=true
@@ -117,6 +120,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       networkMonitor.pathUpdateHandler = { [weak self] path in
         Task { @MainActor in
           guard let self else{return}
+          self.networkKnown=true
           self.networkAvailable=path.status == .satisfied
           self.wifiNetwork=path.usesInterfaceType(.wifi)
           self.expensiveNetwork=path.isExpensive
@@ -142,6 +146,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       stopSensors();status="Paused — finish permissions"
       record("permission",["location":locationPermission,"precise":precise,"motion":motionPermission]);return
     }
+    packetContext.start()
     if !running {
       running=true;sessionID=UUID().uuidString.lowercased()
       guard record("lifecycle",[
@@ -173,6 +178,11 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       guard let self,self.enabled,self.consented,self.running,self.ready else{return false}
       return self.record(kind,fields)
     }
+    stepHistory.start { [weak self] kind,fields in
+      guard let self,self.enabled,self.consented,self.running,self.ready else{return false}
+      return self.record(kind,fields)
+    }
+    if UIApplication.shared.applicationState == .active {recordAppForeground()}
     manager.requestLocation()
     applyMode();checkMotion();sync();DrivingResearchBackground.schedule()
   }
@@ -187,6 +197,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       if lastUploadAttempt == nil {
         lastUploadAttempt=Date();UserDefaults.standard.set(lastUploadAttempt,forKey:"research.lastUploadAttempt")
       }
+      InstallationTelemetry.shared.track("research_consent", ["action":"agree", "researchConsented":true])
       record("consent",["version":1,"enabled":true,"purpose":"driving-and-station-visit-research"])
       issue=nil;requestPermissions()
     } catch {issue="Could not enroll. Check your connection and try again."}
@@ -219,8 +230,11 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     guard consented,permissionSetup else{return}
     locationSetupStarted=true
     switch manager.authorizationStatus {
-    case .notDetermined:manager.requestWhenInUseAuthorization()
+    case .notDetermined:
+      InstallationTelemetry.shared.track("permission_request", ["permission":"location_when_in_use"])
+      manager.requestWhenInUseAuthorization()
     case .authorizedWhenInUse:
+      InstallationTelemetry.shared.track("permission_request", ["permission":"location_always"])
       manager.requestAlwaysAuthorization()
       finishPermissionSetup()
     default:finishPermissionSetup()
@@ -228,11 +242,13 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   }
   private func requestMotion() {
     if CMMotionActivityManager.isActivityAvailable(),CMMotionActivityManager.authorizationStatus() == .notDetermined {
+      InstallationTelemetry.shared.track("permission_request", ["permission":"motion"])
       motionRequestInFlight=true
       activity.queryActivityStarting(from:Date().addingTimeInterval(-60),to:Date(),to:.main) { [weak self] _,_ in
         Task { @MainActor in
           guard let self else{return}
           self.motionRequestInFlight=false
+          InstallationTelemetry.shared.checkPermissions(reason:"motion_result")
           guard self.consented,self.permissionSetup else{return}
           self.pendingLocationSetup=true
           self.continueLocationSetup()
@@ -247,6 +263,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   func pause() {
     permissionSetup=false;pendingLocationSetup=false;pendingMotionSetup=false;locationSetupStarted=false
     record("consent",["version":1,"enabled":false])
+    InstallationTelemetry.shared.track("research_consent", ["action":"pause", "researchEnabled":false])
     enabled=false;UserDefaults.standard.set(false,forKey:Self.enabledKey)
     timingHistory.stop(resetBoundary:true)
     trackingFaults.removeAll();checkTrackingHealth()
@@ -256,6 +273,8 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     detector=ResearchVisitDetector();saveDetector()
   }
   private func stopSensors() {
+    packetContext.stop()
+    stepHistory.stop(resetBoundary:true)
     timingHistory.stop(resetBoundary:true)
     crossChecks.stop()
     manager.stopMonitoringVisits()
@@ -318,6 +337,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
         lastPersistedFix=fix.timestamp
         var payload=(try? JSONSerialization.jsonObject(with:JSONEncoder().encode(fix))) as? [String:Any] ?? [:]
         payload["quality"]=fix.rejection ?? "accepted";payload["mode"]=lastMode
+        if location.verticalAccuracy.isFinite,location.verticalAccuracy>=0 {payload["altitudeMeters"]=location.altitude;payload["verticalAccuracyMeters"]=location.verticalAccuracy}
         if location.courseAccuracy.isFinite,location.courseAccuracy>=0 {payload["courseAccuracy"]=location.courseAccuracy}
         record("location",payload)
       }
@@ -352,6 +372,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   }
   private func checkMotion() {
     timingHistory.drain()
+    stepHistory.drain()
     guard Date().timeIntervalSince(lastMotionCheck)>30 else{return};lastMotionCheck=Date()
     checkTrackingHealth()
     activity.queryActivityStarting(from:Date().addingTimeInterval(-180),to:Date(),to:.main) { [weak self] values,error in
@@ -376,7 +397,9 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       notificationPermission=await notifications.permission()
       guard consented,UIApplication.shared.applicationState == .active else{return}
       if notificationPermission == "Not requested" {
+        InstallationTelemetry.shared.track("permission_request", ["permission":"notifications"])
         _=await notifications.requestPermission()
+        InstallationTelemetry.shared.checkPermissions(reason:"notifications_result")
         notificationPermission=await notifications.permission()
       }
     }
@@ -452,6 +475,9 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       known[station.id]=station
     }
     crossChecks.visit(visit,stations:Array(known.values))
+    if let fields=packetContext.visit(visit) {
+      if record("diagnostic",fields) {packetContext.didSaveVisit(fields)}
+    }
   }
   func locationManager(_ manager:CLLocationManager,didExitRegion region:CLRegion) {boundary(region,"exit")}
   func locationManager(_ manager:CLLocationManager,didDetermineState state:CLRegionState,for region:CLRegion) {boundary(region,"state_\(state.rawValue)")}
@@ -461,12 +487,39 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     // Wake-up evidence only. A delayed boundary callback never proves fueling.
     manager.requestLocation();manager.startUpdatingLocation();checkMotion();sync()
   }
+  func recordAppForeground() {
+    guard enabled,consented,running,let fields=packetContext.foreground() else{return}
+    record("diagnostic",fields)
+  }
+  func recordAppBackground() {
+    guard enabled,consented,running,let fields=packetContext.background() else{return}
+    record("diagnostic",fields)
+  }
+  @discardableResult func recordInteraction(_ fields:[String:Any])->Bool {
+    guard enabled,consented,running,ready,
+      let action=fields["action"] as? String,
+      ["station_go","station_select","map_gesture","map_show_all"].contains(action),
+      JSONSerialization.isValidJSONObject(fields),
+      let data=try? JSONSerialization.data(withJSONObject:fields),data.count<=8000 else{return false}
+    var evidence=fields
+    evidence["source"]="fuelup_interaction";evidence["interactionVersion"]=1
+    evidence["observedAt"]=Date().timeIntervalSince1970
+    packetContext.interaction(action,fields:fields)
+    return record("diagnostic",evidence)
+  }
   @discardableResult private func record(_ kind:String,_ fields:[String:Any])->Bool {
     guard consented,let store else{return false}
     do {
       var payload=fields;payload["schemaVersion"]=1;payload["detectorVersion"]=ResearchStopPolicy.version;payload["sessionId"]=sessionID
       // Context describes receipt time, including for delayed historical samples.
-      payload["timingContextVersion"]=1
+      payload["timingContextVersion"]=2
+      payload["contextAtReceipt"]=packetContext.snapshot()
+      if let installationId=InstallationTelemetry.shared.installationId {payload["installationId"]=installationId}
+      payload["networkAtReceipt"]=["known":networkKnown,"available":networkAvailable,"wifi":wifiNetwork,"expensive":expensiveNetwork,"constrained":constrainedNetwork]
+      payload["locationPermissionAtReceipt"]=locationPermission
+      payload["preciseLocationAtReceipt"]=precise
+      payload["motionPermissionAtReceipt"]=motionPermission
+      if let fix=lastFix {payload["lastFixAgeSecondsAtReceipt"]=max(0,Date().timeIntervalSince1970-fix.timestamp)}
       payload["deviceTimeZone"]=TimeZone.current.identifier
       payload["receiptUTCOffsetSeconds"]=TimeZone.current.secondsFromGMT()
       payload["appStateAtReceipt"]=UIApplication.shared.applicationState.rawValue

@@ -1,3 +1,4 @@
+import { trackInstallationEvent } from '../lib/installationTelemetry';
 import React, { useRef, useState, useSyncExternalStore } from 'react';
 import { useAppState } from '../AppStateContext';
 import { buildResolvedFuelSearchContext } from '../lib/fuelSearchState';
@@ -33,8 +34,10 @@ export default function OnboardingScreen() {
             const ready = onboardingHandoff.prepare();
             await ready;
             await completeOnboarding(choices);
+            void trackInstallationEvent('onboarding_complete', { screen: 'onboarding' });
             onboardingHandoff.reveal();
         } catch (error) {
+            void trackInstallationEvent('onboarding_error', { errorCode: 'save_or_map_handoff_failed', screen: 'onboarding' });
             onboardingHandoff.finish();
             saving.current = false;
             setSaveError(error.message || 'Could not save. Please try again.');

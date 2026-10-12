@@ -13,6 +13,7 @@ final class DrivingResearchSync: ObservableObject {
   private var upload: Task<Void,Never>?
   private var control: Task<Void,Never>?
   private var retry: Task<Void,Never>?
+  private var automaticKick: Task<Void,Never>?
   private var networkKnown = false
   private var online = false
   private var wifi = false
@@ -35,8 +36,15 @@ final class DrivingResearchSync: ObservableObject {
   func wake(online:Bool,wifi:Bool,automatic:Bool) {
     networkKnown=true;self.online=online;self.wifi=wifi;self.automatic=automatic
     guard consented,let store else{return}
-    if automatic,mode==nil,ResearchTransferPolicy.canUpload(online:true,wifi:true,pending:(try? store.counts().pending) ?? 0) {mode="wifi";persist()}
-    start()
+    if automatic,(mode==nil || mode=="wifi"),((try? store.counts().pending) ?? 0) > 0 {mode="automatic";persist()}
+    if mode=="automatic" {
+      if automaticKick==nil {
+        automaticKick=Task { [weak self] in
+          do {try await Task.sleep(for:.seconds(2))} catch {return}
+          self?.automaticKick=nil;self?.start()
+        }
+      }
+    } else {start()}
     if automatic {checkControl()}
   }
   func syncAll() {
@@ -48,7 +56,7 @@ final class DrivingResearchSync: ObservableObject {
     start()
   }
   func pause() {
-    automatic=false;upload?.cancel();control?.cancel();retry?.cancel()
+    automatic=false;upload?.cancel();control?.cancel();retry?.cancel();automaticKick?.cancel();automaticKick=nil
     mode=nil;persist();message=nil
     DrivingResearchBackground.cancel()
   }
@@ -66,7 +74,7 @@ final class DrivingResearchSync: ObservableObject {
     start()
     if let upload {await upload.value}
   }
-  private var allowed: Bool {ResearchTransferPolicy.canUpload(online:online,wifi:wifi && automatic,pending:0,draining:mode=="wifi",manual:mode=="all")}
+  private var allowed: Bool {online && (mode=="all" || automatic && (mode=="automatic" || mode=="wifi" && wifi))}
   private func start() {
     guard consented,allowed,upload==nil,Date()>=nextAttempt,let store else{return}
     syncing=true
@@ -85,14 +93,15 @@ final class DrivingResearchSync: ObservableObject {
           if events.isEmpty {
             if let remoteID {completionID=remoteID;self.remoteID=nil}
             mode=nil;persist();message="All data synced";failures=0
-            checkControl(force:true);break
+            if completionID != nil {checkControl(force:true)}
+            break
           }
           // Bound each request's bytes, not the amount this operation will sync.
           var encoded=try JSONEncoder().encode(events)
           while encoded.count>850_000,events.count>1 {
             events=Array(events.prefix(max(1,events.count/2)));encoded=try JSONEncoder().encode(events)
           }
-          let response=try await transport.send("upload",identity:identity,fields:["events":try JSONSerialization.jsonObject(with:encoded)],wifiOnly:mode != "all")
+          let response=try await transport.send("upload",identity:identity,fields:["events":try JSONSerialization.jsonObject(with:encoded)],wifiOnly:mode == "wifi")
           try Task.checkCancellation()
           guard let ids=response["ids"] as? [String],Set(ids)==Set(events.map(\.id)),response["accepted"] as? Int==events.count else {throw URLError(.cannotParseResponse)}
           try store.acknowledge(ids)

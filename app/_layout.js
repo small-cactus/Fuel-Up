@@ -1,3 +1,4 @@
+import { trackInstallationEvent } from '../src/lib/installationTelemetry';
 import { migrateToNativeResearchAsync } from '../src/lib/drivingResearch';
 import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Platform, View } from 'react-native';
@@ -88,6 +89,12 @@ function AppGate() {
     const onboardingPhase = useSyncExternalStore(onboardingHandoff.subscribe, onboardingHandoff.getSnapshot, onboardingHandoff.getSnapshot);
     const launchReady = useLaunchReady();
     const { preferences, isLoading } = usePreferences();
+    useEffect(() => {
+        if (isLoading) return;
+        void trackInstallationEvent('screen_view', {
+            screen: preferences.hasCompletedOnboarding ? pathname || '/' : 'onboarding',
+        });
+    }, [pathname, isLoading, preferences.hasCompletedOnboarding]);
     const {
         clusterProbeRequest,
         isClusterProbeSessionActive,

@@ -102,6 +102,7 @@ struct OnboardingFooter: View {
   }
 
   private func advance() {
+    OnboardingTelemetry.emit("onboarding_action", ["action":model.step == 3 ? "skip" : "continue", "step":model.step])
     if model.step == 1 && !model.locationReady { model.requestLocation() }
     else if model.step == 3 { model.finish(skippingPreferences: true) }
     else { model.selectStep(model.step + 1) }

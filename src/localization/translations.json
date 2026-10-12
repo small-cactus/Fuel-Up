@@ -101,13 +101,11 @@
     "Help Fuel Up": "Ayuda a Fuel Up",
     "Make your next fuel stop better.": "Mejora tu próxima parada para cargar combustible.",
     "Share your activity": "Comparte tu actividad",
-    "Share location, motion, steps at stops, and your answers. Collection continues in the background.": "Comparte ubicación, movimiento, pasos durante las paradas y tus respuestas. La recopilación continúa en segundo plano.",
     "Pause anytime. Your data stays until you delete it.": "Pausa cuando quieras. Tus datos se conservan hasta que los elimines.",
     "Help us improve": "Ayúdanos a mejorar",
     "Data uses a random participant ID for research and better recommendations.": "Los datos usan un ID de participante aleatorio para investigar y mejorar las recomendaciones.",
     "Agree & Enable": "Aceptar y activar",
     "Learn More": "Más información",
-    "Fuel Up collects precise locations, motion, timestamps, station stops, and your visit answers to research and improve fuel recommendations. At station stops, it also collects step counts, estimated walking distance, and Apple’s arrival and departure estimates. Tracking conditions, such as Low Power Mode and location accuracy, help explain gaps. Collection continues in the background when enabled.": "Fuel Up recopila ubicaciones precisas, movimiento, marcas de tiempo, paradas en estaciones y tus respuestas para investigar y mejorar las recomendaciones de combustible. En las paradas también recopila pasos, distancia caminada estimada y estimaciones de llegada y salida de Apple. Las condiciones de seguimiento, como el modo de bajo consumo y la precisión de ubicación, ayudan a explicar los datos faltantes. La recopilación continúa en segundo plano cuando está activada.",
     "Records are linked to a random participant ID. Location history can still identify places you visit; a random ID does not make it anonymous.": "Los registros están vinculados a un ID de participante aleatorio. El historial de ubicación puede identificar los lugares que visitas; un ID aleatorio no lo hace anónimo.",
     "Records are kept until you delete them. You can pause collection or delete the data on this phone and its synced research data from Driving Research in Settings.": "Los registros se conservan hasta que los elimines. Puedes pausar la recopilación o eliminar los datos de este teléfono y los datos de investigación sincronizados desde Investigación de conducción en Ajustes.",
     "Collecting": "Recopilando",
@@ -209,7 +207,9 @@
     "Support": "Ayuda",
     "Privacy Policy": "Política de privacidad",
     "Location Access Is Off": "El acceso a la ubicación está desactivado",
-    "Allow location access in Settings to find gas stations near you.": "Permite el acceso a la ubicación en Ajustes para encontrar gasolineras cerca de ti."
+    "Allow location access in Settings to find gas stations near you.": "Permite el acceso a la ubicación en Ajustes para encontrar gasolineras cerca de ti.",
+    "Share location, motion, steps, app activity, and your answers. Collection continues in the background.": "Comparte ubicación, movimiento, pasos, actividad en la app y tus respuestas. La recopilación continúa en segundo plano.",
+    "Fuel Up collects precise locations, motion, timestamps, station stops, and your visit answers to research and improve fuel recommendations. It also collects step counts, estimated walking distance, floors, Apple’s arrival and departure estimates at places you visit, and Fuel Up activity: app opens, map gestures, station selections, and Go taps with the selected station. Device conditions such as battery, charging, the app’s audio output type, connectivity, Low Power Mode, and location accuracy help explain gaps. It does not record audio or activity in other apps. Collection continues in the background when enabled.": "Fuel Up recopila ubicaciones precisas, movimiento, marcas de tiempo, paradas en estaciones y tus respuestas para investigar y mejorar las recomendaciones de combustible. En las paradas también recopila pasos, distancia caminada estimada y estimaciones de llegada y salida de Apple. Las condiciones de seguimiento, como el modo de bajo consumo y la precisión de ubicación, ayudan a explicar los datos faltantes. La recopilación continúa en segundo plano cuando está activada. También registramos pasos y plantas subidas, llegadas y salidas de otros lugares, aperturas de Fuel Up, gestos en el mapa, selección de estaciones y pulsaciones de Ir con la estación seleccionada. Se incluyen batería, carga, tipo de salida de audio de la app y conectividad. No grabamos audio ni actividad en otras apps."
   },
   "zh-Hans": {
     "Home": "首页",
@@ -313,13 +313,11 @@
     "Help Fuel Up": "帮助 Fuel Up",
     "Make your next fuel stop better.": "让下次加油更方便。",
     "Share your activity": "分享活动数据",
-    "Share location, motion, steps at stops, and your answers. Collection continues in the background.": "分享位置、运动、停车时的步数以及你的回答。数据会继续在后台收集。",
     "Pause anytime. Your data stays until you delete it.": "随时暂停。数据将保留，直到你删除。",
     "Help us improve": "帮助我们改进",
     "Data uses a random participant ID for research and better recommendations.": "数据使用随机参与者编号，用于研究和改进推荐。",
     "Agree & Enable": "同意并启用",
     "Learn More": "了解更多",
-    "Fuel Up collects precise locations, motion, timestamps, station stops, and your visit answers to research and improve fuel recommendations. At station stops, it also collects step counts, estimated walking distance, and Apple’s arrival and departure estimates. Tracking conditions, such as Low Power Mode and location accuracy, help explain gaps. Collection continues in the background when enabled.": "Fuel Up 收集精确位置、运动、时间戳、加油站停留和你的到访回答，用于研究和改进加油推荐。在加油站停留时，还会收集步数、估算步行距离，以及 Apple 的到达和离开时间估算。低电量模式和位置精度等跟踪条件有助于解释数据缺失。启用后，收集会在后台继续。",
     "Records are linked to a random participant ID. Location history can still identify places you visit; a random ID does not make it anonymous.": "记录关联到随机参与者编号。位置历史仍能识别你到访过的地点；随机编号并不意味着匿名。",
     "Records are kept until you delete them. You can pause collection or delete the data on this phone and its synced research data from Driving Research in Settings.": "记录将保留到你删除为止。你可在设置中的驾驶研究页面暂停收集，或删除此手机上的数据及已同步的研究数据。",
     "Collecting": "收集中",
@@ -421,7 +419,9 @@
     "Support": "支持",
     "Privacy Policy": "隐私政策",
     "Location Access Is Off": "位置访问已关闭",
-    "Allow location access in Settings to find gas stations near you.": "请在设置中允许位置访问，以查找附近的加油站。"
+    "Allow location access in Settings to find gas stations near you.": "请在设置中允许位置访问，以查找附近的加油站。",
+    "Share location, motion, steps, app activity, and your answers. Collection continues in the background.": "分享位置、运动、步数、应用内活动和你的回答。数据收集会在后台继续。",
+    "Fuel Up collects precise locations, motion, timestamps, station stops, and your visit answers to research and improve fuel recommendations. It also collects step counts, estimated walking distance, floors, Apple’s arrival and departure estimates at places you visit, and Fuel Up activity: app opens, map gestures, station selections, and Go taps with the selected station. Device conditions such as battery, charging, the app’s audio output type, connectivity, Low Power Mode, and location accuracy help explain gaps. It does not record audio or activity in other apps. Collection continues in the background when enabled.": "Fuel Up 收集精确位置、运动、时间戳、加油站停留和你的到访回答，用于研究和改进加油推荐。在加油站停留时，还会收集步数、估算步行距离，以及 Apple 的到达和离开时间估算。低电量模式和位置精度等跟踪条件有助于解释数据缺失。启用后，收集会在后台继续。 我们还记录步数、楼层数、其他地点的到达和离开、Fuel Up 的打开、地图手势、加油站选择和“出发”点击及所选加油站，以及电池、充电、应用音频输出类型和连接状态。我们不录制音频或其他应用中的活动。"
   },
   "zh-Hant": {
     "Home": "首頁",
@@ -525,13 +525,11 @@
     "Help Fuel Up": "幫助 Fuel Up",
     "Make your next fuel stop better.": "讓下次加油更方便。",
     "Share your activity": "分享活動資料",
-    "Share location, motion, steps at stops, and your answers. Collection continues in the background.": "分享位置、動作、停車時的步數以及你的回答。資料會繼續在背景收集。",
     "Pause anytime. Your data stays until you delete it.": "隨時暫停。資料將保留，直到你刪除。",
     "Help us improve": "幫助我們改善",
     "Data uses a random participant ID for research and better recommendations.": "資料使用隨機參與者編號，用於研究和改善推薦。",
     "Agree & Enable": "同意並啟用",
     "Learn More": "瞭解更多",
-    "Fuel Up collects precise locations, motion, timestamps, station stops, and your visit answers to research and improve fuel recommendations. At station stops, it also collects step counts, estimated walking distance, and Apple’s arrival and departure estimates. Tracking conditions, such as Low Power Mode and location accuracy, help explain gaps. Collection continues in the background when enabled.": "Fuel Up 收集精確位置、動作、時間戳記、加油站停留和你的到訪回答，用於研究和改善加油推薦。在加油站停留時，還會收集步數、估算步行距離，以及 Apple 的抵達和離開時間估算。低耗電模式和位置精確度等追蹤條件有助於解釋資料缺漏。啟用後，收集會在背景繼續。",
     "Records are linked to a random participant ID. Location history can still identify places you visit; a random ID does not make it anonymous.": "記錄連結至隨機參與者編號。位置歷史仍能識別你到訪過的地點；隨機編號並不代表匿名。",
     "Records are kept until you delete them. You can pause collection or delete the data on this phone and its synced research data from Driving Research in Settings.": "記錄將保留到你刪除為止。你可在設定中的駕駛研究頁面暫停收集，或刪除此手機上的資料及已同步的研究資料。",
     "Collecting": "收集中",
@@ -633,7 +631,9 @@
     "Support": "支援",
     "Privacy Policy": "隱私權政策",
     "Location Access Is Off": "位置存取已關閉",
-    "Allow location access in Settings to find gas stations near you.": "請在設定中允許位置存取，以尋找附近的加油站。"
+    "Allow location access in Settings to find gas stations near you.": "請在設定中允許位置存取，以尋找附近的加油站。",
+    "Share location, motion, steps, app activity, and your answers. Collection continues in the background.": "分享位置、動作、步數、App 內活動和你的回答。資料收集會在背景繼續。",
+    "Fuel Up collects precise locations, motion, timestamps, station stops, and your visit answers to research and improve fuel recommendations. It also collects step counts, estimated walking distance, floors, Apple’s arrival and departure estimates at places you visit, and Fuel Up activity: app opens, map gestures, station selections, and Go taps with the selected station. Device conditions such as battery, charging, the app’s audio output type, connectivity, Low Power Mode, and location accuracy help explain gaps. It does not record audio or activity in other apps. Collection continues in the background when enabled.": "Fuel Up 收集精確位置、動作、時間戳記、加油站停留和你的到訪回答，用於研究和改善加油推薦。在加油站停留時，還會收集步數、估算步行距離，以及 Apple 的抵達和離開時間估算。低耗電模式和位置精確度等追蹤條件有助於解釋資料缺漏。啟用後，收集會在背景繼續。 我們也會記錄步數、樓層數、其他地點的抵達和離開、Fuel Up 的開啟、地圖手勢、加油站選擇和「出發」點擊及所選加油站，以及電池、充電、App 音訊輸出類型和連線狀態。我們不錄製音訊或其他 App 中的活動。"
   },
   "fil": {
     "Home": "Home",
@@ -737,13 +737,11 @@
     "Help Fuel Up": "Tulungan ang Fuel Up",
     "Make your next fuel stop better.": "Pagandahin ang susunod mong pagpapagasolina.",
     "Share your activity": "Ibahagi ang aktibidad mo",
-    "Share location, motion, steps at stops, and your answers. Collection continues in the background.": "Ibahagi ang lokasyon, galaw, mga hakbang sa hintuan, at mga sagot mo. Nagpapatuloy ang pagkolekta sa background.",
     "Pause anytime. Your data stays until you delete it.": "I-pause anumang oras. Mananatili ang data hanggang burahin mo ito.",
     "Help us improve": "Tulungan kaming mapabuti",
     "Data uses a random participant ID for research and better recommendations.": "Gumagamit ang data ng random na participant ID para sa pananaliksik at mas magagandang rekomendasyon.",
     "Agree & Enable": "Sumang-ayon at paganahin",
     "Learn More": "Alamin pa",
-    "Fuel Up collects precise locations, motion, timestamps, station stops, and your visit answers to research and improve fuel recommendations. At station stops, it also collects step counts, estimated walking distance, and Apple’s arrival and departure estimates. Tracking conditions, such as Low Power Mode and location accuracy, help explain gaps. Collection continues in the background when enabled.": "Kinokolekta ng Fuel Up ang eksaktong lokasyon, galaw, oras, mga paghinto sa istasyon, at mga sagot mo upang pag-aralan at pagbutihin ang mga rekomendasyon sa gasolina. Sa mga hintuan, kinokolekta rin ang bilang ng hakbang, tinatayang layo ng paglalakad, at mga tantiya ng Apple sa pagdating at pag-alis. Nakakatulong ang mga kondisyon tulad ng Low Power Mode at katumpakan ng lokasyon para maipaliwanag ang mga puwang sa data. Nagpapatuloy ang pagkolekta sa background kapag naka-enable.",
     "Records are linked to a random participant ID. Location history can still identify places you visit; a random ID does not make it anonymous.": "Nakaugnay ang mga rekord sa random na participant ID. Maaari pa ring matukoy sa lokasyon ang mga lugar na pinupuntahan mo; hindi nagiging anonymous ang data dahil sa random na ID.",
     "Records are kept until you delete them. You can pause collection or delete the data on this phone and its synced research data from Driving Research in Settings.": "Mananatili ang mga rekord hanggang burahin mo ang mga ito. Maaari mong i-pause ang pagkolekta o burahin ang data sa teleponong ito at ang naka-sync na data sa Pananaliksik sa pagmamaneho sa mga setting.",
     "Collecting": "Nangongolekta",
@@ -845,7 +843,9 @@
     "Support": "Suporta",
     "Privacy Policy": "Patakaran sa Privacy",
     "Location Access Is Off": "Naka-off ang Access sa Lokasyon",
-    "Allow location access in Settings to find gas stations near you.": "Payagan ang access sa lokasyon sa Settings para makahanap ng mga gasolinahan malapit sa iyo."
+    "Allow location access in Settings to find gas stations near you.": "Payagan ang access sa lokasyon sa Settings para makahanap ng mga gasolinahan malapit sa iyo.",
+    "Share location, motion, steps, app activity, and your answers. Collection continues in the background.": "Ibahagi ang lokasyon, galaw, hakbang, paggamit ng app, at mga sagot mo. Nagpapatuloy ang pagkolekta sa background.",
+    "Fuel Up collects precise locations, motion, timestamps, station stops, and your visit answers to research and improve fuel recommendations. It also collects step counts, estimated walking distance, floors, Apple’s arrival and departure estimates at places you visit, and Fuel Up activity: app opens, map gestures, station selections, and Go taps with the selected station. Device conditions such as battery, charging, the app’s audio output type, connectivity, Low Power Mode, and location accuracy help explain gaps. It does not record audio or activity in other apps. Collection continues in the background when enabled.": "Kinokolekta ng Fuel Up ang eksaktong lokasyon, galaw, oras, mga paghinto sa istasyon, at mga sagot mo upang pag-aralan at pagbutihin ang mga rekomendasyon sa gasolina. Sa mga hintuan, kinokolekta rin ang bilang ng hakbang, tinatayang layo ng paglalakad, at mga tantiya ng Apple sa pagdating at pag-alis. Nakakatulong ang mga kondisyon tulad ng Low Power Mode at katumpakan ng lokasyon para maipaliwanag ang mga puwang sa data. Nagpapatuloy ang pagkolekta sa background kapag naka-enable. Itinatala rin ang mga hakbang at palapag, pagdating at pag-alis sa ibang lugar, pagbukas ng Fuel Up, paggalaw sa mapa, pagpili ng istasyon at pag-tap sa Go kasama ang napiling istasyon. Kasama ang baterya, pag-charge, uri ng audio output ng app at koneksyon. Hindi kami nagre-record ng audio o paggamit ng ibang app."
   },
   "vi": {
     "Home": "Trang chủ",
@@ -949,13 +949,11 @@
     "Help Fuel Up": "Giúp Fuel Up",
     "Make your next fuel stop better.": "Cải thiện lần đổ xăng tiếp theo.",
     "Share your activity": "Chia sẻ hoạt động",
-    "Share location, motion, steps at stops, and your answers. Collection continues in the background.": "Chia sẻ vị trí, chuyển động, bước chân tại điểm dừng và câu trả lời. Dữ liệu tiếp tục được thu thập trong nền.",
     "Pause anytime. Your data stays until you delete it.": "Tạm dừng bất cứ lúc nào. Dữ liệu được giữ đến khi bạn xóa.",
     "Help us improve": "Giúp chúng tôi cải thiện",
     "Data uses a random participant ID for research and better recommendations.": "Dữ liệu dùng mã người tham gia ngẫu nhiên để nghiên cứu và cải thiện đề xuất.",
     "Agree & Enable": "Đồng ý và bật",
     "Learn More": "Tìm hiểu thêm",
-    "Fuel Up collects precise locations, motion, timestamps, station stops, and your visit answers to research and improve fuel recommendations. At station stops, it also collects step counts, estimated walking distance, and Apple’s arrival and departure estimates. Tracking conditions, such as Low Power Mode and location accuracy, help explain gaps. Collection continues in the background when enabled.": "Fuel Up thu thập vị trí chính xác, chuyển động, dấu thời gian, các lần dừng tại trạm và câu trả lời của bạn để nghiên cứu và cải thiện đề xuất nhiên liệu. Tại trạm, ứng dụng cũng thu thập số bước, quãng đường đi bộ ước tính và thời điểm đến, rời đi do Apple ước tính. Các điều kiện theo dõi như Chế độ nguồn điện thấp và độ chính xác vị trí giúp giải thích dữ liệu thiếu. Khi bật, việc thu thập tiếp tục trong nền.",
     "Records are linked to a random participant ID. Location history can still identify places you visit; a random ID does not make it anonymous.": "Bản ghi được liên kết với mã người tham gia ngẫu nhiên. Lịch sử vị trí vẫn có thể xác định nơi bạn đến; mã ngẫu nhiên không làm dữ liệu trở nên ẩn danh.",
     "Records are kept until you delete them. You can pause collection or delete the data on this phone and its synced research data from Driving Research in Settings.": "Bản ghi được giữ đến khi bạn xóa. Bạn có thể tạm dừng thu thập hoặc xóa dữ liệu trên điện thoại và dữ liệu nghiên cứu đã đồng bộ trong Nghiên cứu lái xe ở Cài đặt.",
     "Collecting": "Đang thu thập",
@@ -1057,7 +1055,9 @@
     "Support": "Hỗ trợ",
     "Privacy Policy": "Chính sách quyền riêng tư",
     "Location Access Is Off": "Quyền truy cập vị trí đang tắt",
-    "Allow location access in Settings to find gas stations near you.": "Cho phép truy cập vị trí trong Cài đặt để tìm trạm xăng gần bạn."
+    "Allow location access in Settings to find gas stations near you.": "Cho phép truy cập vị trí trong Cài đặt để tìm trạm xăng gần bạn.",
+    "Share location, motion, steps, app activity, and your answers. Collection continues in the background.": "Chia sẻ vị trí, chuyển động, bước chân, hoạt động trong ứng dụng và câu trả lời. Dữ liệu tiếp tục được thu thập trong nền.",
+    "Fuel Up collects precise locations, motion, timestamps, station stops, and your visit answers to research and improve fuel recommendations. It also collects step counts, estimated walking distance, floors, Apple’s arrival and departure estimates at places you visit, and Fuel Up activity: app opens, map gestures, station selections, and Go taps with the selected station. Device conditions such as battery, charging, the app’s audio output type, connectivity, Low Power Mode, and location accuracy help explain gaps. It does not record audio or activity in other apps. Collection continues in the background when enabled.": "Fuel Up thu thập vị trí chính xác, chuyển động, dấu thời gian, các lần dừng tại trạm và câu trả lời của bạn để nghiên cứu và cải thiện đề xuất nhiên liệu. Tại trạm, ứng dụng cũng thu thập số bước, quãng đường đi bộ ước tính và thời điểm đến, rời đi do Apple ước tính. Các điều kiện theo dõi như Chế độ nguồn điện thấp và độ chính xác vị trí giúp giải thích dữ liệu thiếu. Khi bật, việc thu thập tiếp tục trong nền. Chúng tôi cũng ghi nhận bước chân, số tầng, thời điểm đến và rời các địa điểm khác, mở Fuel Up, thao tác bản đồ, chọn trạm và nhấn Đi kèm trạm đã chọn. Dữ liệu gồm pin, sạc, loại đầu ra âm thanh của ứng dụng và kết nối. Chúng tôi không ghi âm hoặc theo dõi hoạt động trong ứng dụng khác."
   },
   "fr": {
     "Home": "Accueil",
@@ -1161,13 +1161,11 @@
     "Help Fuel Up": "Aidez Fuel Up",
     "Make your next fuel stop better.": "Améliorez votre prochain arrêt carburant.",
     "Share your activity": "Partagez votre activité",
-    "Share location, motion, steps at stops, and your answers. Collection continues in the background.": "Partagez position, mouvements, pas aux arrêts et réponses. La collecte continue en arrière-plan.",
     "Pause anytime. Your data stays until you delete it.": "Mettez en pause à tout moment. Vos données sont conservées jusqu’à leur suppression.",
     "Help us improve": "Aidez-nous à progresser",
     "Data uses a random participant ID for research and better recommendations.": "Les données utilisent un identifiant aléatoire pour la recherche et de meilleures recommandations.",
     "Agree & Enable": "Accepter et activer",
     "Learn More": "En savoir plus",
-    "Fuel Up collects precise locations, motion, timestamps, station stops, and your visit answers to research and improve fuel recommendations. At station stops, it also collects step counts, estimated walking distance, and Apple’s arrival and departure estimates. Tracking conditions, such as Low Power Mode and location accuracy, help explain gaps. Collection continues in the background when enabled.": "Fuel Up recueille les positions précises, mouvements, horodatages, arrêts en station et réponses pour étudier et améliorer les recommandations. Aux arrêts, l’app recueille aussi le nombre de pas, la distance de marche estimée et les estimations d’arrivée et de départ d’Apple. Les conditions de suivi, comme le mode économie d’énergie et la précision de localisation, aident à expliquer les données manquantes. La collecte continue en arrière-plan lorsqu’elle est activée.",
     "Records are linked to a random participant ID. Location history can still identify places you visit; a random ID does not make it anonymous.": "Les enregistrements sont liés à un identifiant aléatoire. L’historique de localisation peut toujours identifier les lieux visités ; un identifiant aléatoire ne rend pas ces données anonymes.",
     "Records are kept until you delete them. You can pause collection or delete the data on this phone and its synced research data from Driving Research in Settings.": "Les enregistrements sont conservés jusqu’à leur suppression. Dans Recherche sur les trajets, dans Réglages, vous pouvez suspendre la collecte ou supprimer les données de ce téléphone et les données de recherche synchronisées.",
     "Collecting": "Collecte en cours",
@@ -1269,6 +1267,8 @@
     "Support": "Assistance",
     "Privacy Policy": "Politique de confidentialité",
     "Location Access Is Off": "L’accès à la position est désactivé",
-    "Allow location access in Settings to find gas stations near you.": "Autorisez l’accès à votre position dans Réglages pour trouver des stations-service à proximité."
+    "Allow location access in Settings to find gas stations near you.": "Autorisez l’accès à votre position dans Réglages pour trouver des stations-service à proximité.",
+    "Share location, motion, steps, app activity, and your answers. Collection continues in the background.": "Partagez position, mouvements, pas, activité dans l’app et réponses. La collecte continue en arrière-plan.",
+    "Fuel Up collects precise locations, motion, timestamps, station stops, and your visit answers to research and improve fuel recommendations. It also collects step counts, estimated walking distance, floors, Apple’s arrival and departure estimates at places you visit, and Fuel Up activity: app opens, map gestures, station selections, and Go taps with the selected station. Device conditions such as battery, charging, the app’s audio output type, connectivity, Low Power Mode, and location accuracy help explain gaps. It does not record audio or activity in other apps. Collection continues in the background when enabled.": "Fuel Up recueille les positions précises, mouvements, horodatages, arrêts en station et réponses pour étudier et améliorer les recommandations. Aux arrêts, l’app recueille aussi le nombre de pas, la distance de marche estimée et les estimations d’arrivée et de départ d’Apple. Les conditions de suivi, comme le mode économie d’énergie et la précision de localisation, aident à expliquer les données manquantes. La collecte continue en arrière-plan lorsqu’elle est activée. Nous enregistrons aussi les pas et étages, arrivées et départs d’autres lieux, ouvertures de Fuel Up, gestes sur la carte, sélections de stations et appuis sur Aller avec la station choisie. Batterie, charge, type de sortie audio de l’app et connexion sont inclus. Nous n’enregistrons ni audio ni activité dans d’autres apps."
   }
 }

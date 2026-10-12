@@ -28,6 +28,12 @@ test('research permission setup automatically requests notifications and seriali
   try {
     fs.writeFileSync(path.join(folder, 'main.swift'), `
 import Foundation
+@MainActor final class InstallationTelemetry {
+  static let shared=InstallationTelemetry()
+  var requests:[String]=[]
+  func track(_ kind:String,_ fields:[String:Any]) {if kind=="permission_request",let value=fields["permission"] as? String {requests.append(value)}}
+  func checkPermissions(reason:String) {}
+}
 @MainActor final class UIApplication {
   static let shared=UIApplication()
   enum State {case active,inactive,background}

@@ -3,6 +3,7 @@ import UIKit
 
 public final class DrivingResearchLifecycle: ExpoAppDelegateSubscriber {
   public func application(_ application:UIApplication,didFinishLaunchingWithOptions launchOptions:[UIApplication.LaunchOptionsKey:Any]?=nil)->Bool {
+    Task { @MainActor in InstallationTelemetry.shared.start() }
     DrivingResearchNotifications.shared.install()
     DrivingResearchBackground.register()
     Task { @MainActor in DrivingResearchPushRegistration.shared.registerIfAllowed() }
@@ -13,9 +14,22 @@ public final class DrivingResearchLifecycle: ExpoAppDelegateSubscriber {
     return true
   }
   public func applicationDidBecomeActive(_ application:UIApplication) {
+    Task { @MainActor in InstallationTelemetry.shared.foreground() }
     Task { @MainActor in DrivingResearchPushRegistration.shared.registerIfAllowed() }
     if UserDefaults.standard.bool(forKey:DrivingResearchCollector.enabledKey) {
       Task { @MainActor in DrivingResearchCollector.shared.resume(reason:"foreground") }
+    }
+  }
+  public func applicationDidEnterBackground(_ application:UIApplication) {
+    Task { @MainActor in
+      InstallationTelemetry.shared.background()
+      DrivingResearchCollector.shared.recordAppBackground()
+    }
+  }
+  public func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String,
+                          completionHandler: @escaping () -> Void) {
+    Task { @MainActor in
+      if !InstallationTelemetry.shared.handleBackgroundSession(identifier, completion: completionHandler) { completionHandler() }
     }
   }
   public func application(_ application:UIApplication,didRegisterForRemoteNotificationsWithDeviceToken deviceToken:Data) {

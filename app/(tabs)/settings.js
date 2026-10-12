@@ -1,3 +1,4 @@
+import { trackInstallationEvent } from '../../src/lib/installationTelemetry';
 import { t } from '../../src/localization';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppState, Alert, StyleSheet, View } from 'react-native';
@@ -70,21 +71,25 @@ export default function SettingsScreen() {
     };
 
     const handleRadiusChange = (nextValue) => {
+        void trackInstallationEvent('ui_action', { action: 'handleRadiusChange', surface: 'settings', status: nextValue });
         noThrow(Haptics.selectionAsync());
         updatePreference('searchRadiusMiles', Number(nextValue));
     };
 
     const handleThemeModeChange = (nextValue) => {
+        void trackInstallationEvent('ui_action', { action: 'handleThemeModeChange', surface: 'settings', status: nextValue });
         fireTapHaptic();
         setThemeMode(nextValue);
     };
 
     const handleNavigationAppChange = (nextValue) => {
+        void trackInstallationEvent('ui_action', { action: 'handleNavigationAppChange', surface: 'settings', status: nextValue });
         fireTapHaptic();
         updatePreference('navigationApp', nextValue);
     };
 
     const handleFuelReset = async () => {
+        void trackInstallationEvent('ui_action', { action: 'handleFuelReset', surface: 'settings' });
         if (resettingFuelRef.current) return;
         resettingFuelRef.current = true;
         try {
@@ -101,6 +106,7 @@ export default function SettingsScreen() {
     };
 
     const handleConfirmFuelReset = () => {
+        void trackInstallationEvent('ui_action', { action: 'handleConfirmFuelReset', surface: 'settings' });
         fireTapHaptic();
         Alert.alert(
             t("Refresh Gas Prices"),
@@ -120,6 +126,7 @@ export default function SettingsScreen() {
     };
 
     const handleResetOnboarding = () => {
+        void trackInstallationEvent('ui_action', { action: 'handleResetOnboarding', surface: 'settings' });
         fireTapHaptic();
         Alert.alert(
             t("Show Setup Again"),
@@ -139,6 +146,7 @@ export default function SettingsScreen() {
     };
 
     const handleReviewTrackingPermissions = async () => {
+        void trackInstallationEvent('ui_action', { action: 'handleReviewTrackingPermissions', surface: 'settings' });
         if (reviewingPermissionsRef.current) return;
         reviewingPermissionsRef.current = true;
         const revision = ++permissionRevisionRef.current;

@@ -50,6 +50,12 @@ public final class FuelUpDrivingActivityModule: Module {
     AsyncFunction("resumeResearchAsync") {
       await MainActor.run { DrivingResearchCollector.shared.resume(reason: "bridge_ready") }
     }
+    AsyncFunction("recordInstallationEventAsync") { (kind: String, fields: [String: Any]) in
+      await MainActor.run { InstallationTelemetry.shared.track(kind, fields) }
+    }
+    AsyncFunction("recordResearchInteractionAsync") { (fields: [String: Any]) in
+      await MainActor.run { DrivingResearchCollector.shared.recordInteraction(fields) }
+    }
     View(DrivingResearchView.self) {
       Prop("isDark") { (view, dark: Bool) in view.setDark(dark) }
       Prop("topInset") { (view, value: Double) in view.setTopInset(value) }

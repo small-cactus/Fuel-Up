@@ -7,6 +7,7 @@ import { useTheme } from '../../ThemeContext';
 import { usePreferences } from '../../PreferencesContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { openStationNavigation } from '../../lib/openNavigation';
+import { recordResearchInteraction } from '../../lib/researchInteractions';
 import { onboardingHandoff } from '../../lib/onboardingHandoff';
 import { finishLaunch } from '../../lib/launchReadiness';
 import { useLaunchReady } from '../../components/LaunchSplash';
@@ -61,11 +62,13 @@ export default function HomeScreen() {
         if (index >= 0) carousel.current?.scrollTo(index, false);
     }, [stations]);
     const select = useCallback(id => {
+        void recordResearchInteraction('station_select', { station: stations.find(s => s.id === id), surface: 'station_carousel' });
         setOverview(false);
         setSelectedId(id);
         void map.current?.focusStation(id);
-    }, []);
+    }, [stations]);
     const showAll = useCallback(() => {
+        void recordResearchInteraction('map_show_all', { surface: 'home_map' });
         setOverview(true);
         setSelectedId(stations[0]?.id || null);
         carousel.current?.scrollTo(0, false);
@@ -76,6 +79,7 @@ export default function HomeScreen() {
         const id = event.nativeEvent.id;
         const index = stations.findIndex(station => station.id === id);
         if (index < 0) return;
+        void recordResearchInteraction('station_select', { station: stations[index], surface: 'map_pin' });
         setOverview(false);
         setSelectedId(id);
         carousel.current?.scrollTo(index);
@@ -98,6 +102,7 @@ export default function HomeScreen() {
             revealed={revealed}
             onMapReady={mapReady}
             onStationSelect={mapSelected}
+            onResearchMapInteraction={event => { void recordResearchInteraction('map_gesture', event.nativeEvent); }}
             onOverviewChange={overviewChanged}
             probeToken={__DEV__ && typeof clusterLabProbe === 'string' ? clusterLabProbe : null}
         />

@@ -33,3 +33,6 @@ verify_jwt = false
 
 [functions.fuel-national-retention]
 verify_jwt = false
+
+[functions.installation-telemetry]
+verify_jwt = false

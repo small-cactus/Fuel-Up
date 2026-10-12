@@ -14,7 +14,12 @@ struct OnboardingBrand: Identifiable {
 // Draft choices live in Swift throughout navigation. Only completion persists them.
 final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelegate {
   let mapPresentation = OnboardingMapPresentation()
-  @Published var step = 0
+  @Published var step = 0 {
+    didSet {
+      guard tracksLocation, step != oldValue else { return }
+      OnboardingTelemetry.emit("onboarding_step", ["step": step, "previousStep": oldValue])
+    }
+  }
   @Published var settledStep = 0
   @Published var searchFocused = false
   @Published var footerHeight: CGFloat = 134
@@ -59,6 +64,7 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
   func configure(_ value: [String: Any]) {
     guard !initialized else { return }
     initialized = true
+    if tracksLocation { OnboardingTelemetry.emit("onboarding_step", ["step": step]) }
     radius = 6
     let grade = value["preferredOctane"] as? String ?? "regular"
     fuel = ["regular", "midgrade", "premium", "diesel", "e85"].contains(grade) ? grade : "regular"
@@ -83,8 +89,13 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
     ["searchRadiusMiles": radius.rounded(), "preferredOctane": fuel, "requiresE85": requiresE85,
      "preferredBrands": favorites.sorted(), "fuelMemberships": memberships.sorted()]
   }
-  func changed() { emit?(["type": "choices", "choices": choices]) }
+  func changed() {
+    OnboardingTelemetry.emit("preferences_changed", ["step": step, "fuelGrade": fuel, "requiresE85": requiresE85,
+      "radiusMiles": radius.rounded(), "selectedBrandCount": favorites.count, "membershipCount": memberships.count])
+    emit?(["type": "choices", "choices": choices])
+  }
   func requestLocation() {
+    OnboardingTelemetry.emit("permission_request", ["permission": "location_when_in_use", "step": step, "status": permission.rawValue])
     locationRequested = true
     locationError = nil
     if hasLocationAccess { location.startUpdatingLocation(); location.requestLocation() }
@@ -94,11 +105,14 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
   }
   func selectStep(_ target: Int) {
     guard !completing else { return }
+    if tracksLocation { OnboardingTelemetry.emit("onboarding_action", ["action":"select_step", "step":min(3,max(0,target)), "previousStep":step]) }
     let bounded = min(3, max(0, target))
     step = locationReady ? bounded : min(bounded, 1)
   }
   func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+    let previous = permission
     permission = manager.authorizationStatus
+    if tracksLocation { OnboardingTelemetry.emit("permission_snapshot", ["permission": "location", "status": permission.rawValue, "previousStatus": previous.rawValue, "precise": manager.accuracyAuthorization == .fullAccuracy, "step": step]) }
     guard tracksLocation else { return }
     if hasLocationAccess {
       location.startUpdatingLocation()
@@ -109,6 +123,7 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
     }
   }
   func openLocationSettings() {
+    OnboardingTelemetry.emit("onboarding_action", ["action": "open_location_settings", "step": step])
     if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
   }
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -123,6 +138,7 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
   }
   func finish(skippingPreferences: Bool = false) {
     guard !completing, locationReady else { return }
+    OnboardingTelemetry.emit("onboarding_action", ["action": "finish", "step": step, "skippedPreferences": skippingPreferences])
     completing = true
     completingWithoutPreferences = skippingPreferences
     saveError = nil

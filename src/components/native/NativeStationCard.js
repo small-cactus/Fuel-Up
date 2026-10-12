@@ -1,5 +1,6 @@
 import { t, relativeTime, distanceText } from '../../localization';
 import React from 'react';
+import { recordResearchInteraction } from '../../lib/researchInteractions';
 import { useWindowDimensions } from 'react-native';
 import { Host, VStack, HStack, Text, Image, Spacer, Button, ProgressView } from '@expo/ui/swift-ui';
 import { accessibilityLabel, buttonStyle, controlSize, disabled, fixedSize, font, foregroundStyle, glassEffect, lineLimit, layoutPriority, padding, tint } from '@expo/ui/swift-ui/modifiers';
@@ -45,7 +46,10 @@ export default function NativeStationCard({ station, rank, fuelGrade, isDark, th
                 {!stacked && <Spacer />}
                 <HStack spacing={8} modifiers={[layoutPriority(1)]}>
                     {isRefreshing && <ProgressView />}
-                    <Button onPress={() => onNavigate?.(station)} label={t("Go")} systemImage="arrow.up.right" modifiers={[
+                    <Button onPress={async () => {
+                        await recordResearchInteraction('station_go', { station: { ...station, price }, fuelGrade, rank, surface: 'station_card' });
+                        onNavigate?.(station);
+                    }} label={t("Go")} systemImage="arrow.up.right" modifiers={[
                         buttonStyle('glassProminent'), controlSize('large'), tint('#248A3D'), disabled(!canNavigate),
                         accessibilityLabel(t('Navigate to {station}', { station: name })), font({ size: 16 * scale, weight: 'bold' }),
                     ]} />
