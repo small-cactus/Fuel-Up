@@ -16,8 +16,10 @@ public final class DrivingResearchLifecycle: ExpoAppDelegateSubscriber {
   public func applicationDidBecomeActive(_ application:UIApplication) {
     Task { @MainActor in InstallationTelemetry.shared.foreground() }
     Task { @MainActor in DrivingResearchPushRegistration.shared.registerIfAllowed() }
-    if UserDefaults.standard.bool(forKey:DrivingResearchCollector.enabledKey) {
-      Task { @MainActor in DrivingResearchCollector.shared.resume(reason:"foreground") }
+    Task { @MainActor in
+      let collector=DrivingResearchCollector.shared
+      if collector.enabled { collector.resume(reason:"foreground") }
+      await collector.checkNotificationsOnAppOpen()
     }
   }
   public func applicationDidEnterBackground(_ application:UIApplication) {

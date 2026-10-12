@@ -62,6 +62,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   private var pendingLocationSetup=false
   private var locationSetupStarted=false
   private var notificationPermissionTask:Task<Void,Never>?
+  private var checkedNotificationsOnOpen=false
   private var trackingFaults:[String:String]=[:]
   private let networkMonitor=NWPathMonitor()
   private var networkKnown=false
@@ -406,6 +407,14 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     notificationPermissionTask=task
     await task.value
     notificationPermissionTask=nil
+  }
+  func checkNotificationsOnAppOpen() async {
+    // Existing enrollment is the opt-in. Never ask on a silent/background wake,
+    // during another setup prompt, or repeatedly after returning from an alert.
+    guard consented, !busy, !permissionSetup, !checkedNotificationsOnOpen,
+          UIApplication.shared.applicationState == .active else { return }
+    checkedNotificationsOnOpen=true
+    await requestStopNotifications()
   }
   func researchScreenBecameActive() async {
     guard !permissionSetup else{return}

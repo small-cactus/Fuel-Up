@@ -23,7 +23,7 @@ test('research permission setup automatically requests notifications and seriali
   };
   const methods = ['func requestPermissions()', 'private func continueLocationSetup()',
     'private func continueMotionSetup()', 'private func requestMotion()', 'private func finishPermissionSetup()',
-    'func locationManagerDidChangeAuthorization(', 'func requestStopNotifications()', 'func researchScreenBecameActive()'].map(method).join('\n');
+    'func locationManagerDidChangeAuthorization(', 'func requestStopNotifications()', 'func checkNotificationsOnAppOpen()', 'func researchScreenBecameActive()'].map(method).join('\n');
   const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'fuel-research-permissions-'));
   try {
     fs.writeFileSync(path.join(folder, 'main.swift'), `
@@ -84,6 +84,7 @@ typealias CLLocationManager=LocationManager
   var consented=false,enabled=false,permissionSetup=false,pendingLocationSetup=false,pendingMotionSetup=false,motionRequestInFlight=false,locationSetupStarted=false
   var permissionRevision=0,configured=false
   var notificationPermissionTask:Task<Void,Never>?
+  var busy=false,checkedNotificationsOnOpen=false
   var notificationPermission="Checking",status=""
   let manager=LocationManager()
   let activity=CMMotionActivityManager()
@@ -152,6 +153,31 @@ ${methods}
     await settle();assert(system.response != nil,"Provisional authorization requests full alert permission")
     system.answer(true);await upgrading.value
     assert(provisional.notificationPermission=="On")
+    let returning=Collector()
+    system.value="Quiet delivery"
+    let beforeRequests=system.requests
+    await returning.checkNotificationsOnAppOpen()
+    assert(system.requests==beforeRequests,"First-time nonparticipants are not prompted")
+    returning.consented=true;app.applicationState = .background
+    await returning.checkNotificationsOnAppOpen()
+    assert(!returning.checkedNotificationsOnOpen,"Background wakes cannot consume the foreground check")
+    app.applicationState = .active;returning.permissionSetup=true
+    await returning.checkNotificationsOnAppOpen()
+    assert(!returning.checkedNotificationsOnOpen,"An active setup owns its own prompts")
+    returning.permissionSetup=false
+    let foreground=Task {await returning.checkNotificationsOnAppOpen()}
+    await settle();assert(system.requests==beforeRequests+1,"Returning opted-in users upgrade from any app screen")
+    await returning.checkNotificationsOnAppOpen()
+    assert(system.requests==beforeRequests+1,"Duplicate active callbacks do not prompt twice")
+    system.answer(true);await foreground.value
+    assert(!returning.enabled,"Permission recheck must not restart paused research")
+    let authorized=Collector();authorized.consented=true
+    await authorized.checkNotificationsOnAppOpen()
+    assert(system.requests==beforeRequests+1,"Fully authorized users see no prompt")
+    system.value="Off"
+    let previouslyDenied=Collector();previouslyDenied.consented=true
+    await previouslyDenied.checkNotificationsOnAppOpen()
+    assert(system.requests==beforeRequests+1,"Denied users keep the existing Settings path")
     print("PASS: consent, foreground, coalescing, sequential prompts, denial, existing participants")
   }
 }

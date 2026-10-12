@@ -53,3 +53,17 @@ Repeat tests:
 node --test tests/drivingResearchAPNs.test.mjs tests/drivingResearchPermissions.test.cjs tests/drivingResearchQuiet.test.cjs tests/drivingResearchSilentPush.test.cjs
 node scripts/driving-research/verifySilentPush.mjs
 ```
+
+## App-open permission recheck
+
+Already-consented participants now receive the notification authorization check
+from `applicationDidBecomeActive`, regardless of which screen opens. Missing or
+provisional permission uses the existing full-authorization flow. Authorized or
+denied users receive no redundant OS request; the research Permissions section
+retains its Settings link for disabled alerts. The automatic check runs at most
+once per process, never from a background wake, and yields to active setup.
+It does not enable paused collection. A new binary is required on each tester.
+
+Five focused tests passed, including the actual Swift permission methods with
+unconsented, background, setup-in-progress, provisional, duplicate-activation,
+authorized, denied, and paused-participant cases.
