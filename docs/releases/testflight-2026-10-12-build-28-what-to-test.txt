@@ -1,0 +1,7 @@
+This update improves the opt-in Driving Research pilot and background syncing.
+
+For existing participants: open Fuel Up once after updating. If notification permission is missing or provisional, the app requests full permission. People with notifications already enabled will not be prompted again. If notifications were denied, enable them in iOS Settings. Research remains paused if you previously paused it.
+
+Please test normal setup, map browsing, station selection and Go, and whether stop-confirmation notifications arrive and accept answers. Data-sync requests now use silent background pushes; delivery timing is controlled by iOS.
+
+The update records onboarding and permission choices, screen-use durations and app/map/station interactions, and adds available motion/step history and device context to consented research packets. Predictive refueling alerts remain disabled while we validate timing predictions. You can pause or delete research data in Driving Research settings.

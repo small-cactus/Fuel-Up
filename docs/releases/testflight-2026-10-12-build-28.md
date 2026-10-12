@@ -36,3 +36,9 @@ Local build log: `/tmp/fuelup-testflight-28-archive.log`.
 - Existing App Store build 27 remains Waiting for Review and was not replaced or resubmitted.
 
 Logs: `/tmp/fuelup-testflight-28-final-archive.log`, `/tmp/fuelup-testflight-28-final-export.log`, `/tmp/fuelup-testflight-28-final-upload.log`.
+
+## Verified TestFlight availability
+
+App Store Connect processed build 28 and made it Ready to Submit. Added it to the existing Fuel Up External Testing group with the release test notes and Automatically notify testers selected; submitted through the beta-review flow. The returned group page showed **1.0.0 (28) — Testing, expires in 90 days** for all six existing external testers. The existing Fuel Up Internal Testing group (one tester) also showed **1.0.0 (28) — Testing**. No new groups or testers were created. Availability is verified; individual tester installation and notification-permission decisions are not.
+
+Test instructions tell existing participants to open the app after updating, explain full-permission upgrades and the Settings path for prior denials, and disclose the expanded collection scope. The full notes are in `testflight-2026-10-12-build-28-what-to-test.txt`.
