@@ -5,6 +5,7 @@
   "live_synthetic_server_readback": "passed",
   "live_synthetic_fixture_cleanup": "verified",
   "eas_build_number": 28,
-  "archive": "in_progress",
-  "upload": "not_yet_verified"
+  "archive": "interrupted_at_user_request",
+  "upload": "not_started",
+  "release_status": "paused_for_data_design"
 }

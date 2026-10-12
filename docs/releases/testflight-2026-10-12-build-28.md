@@ -19,6 +19,6 @@ User requested station-independent notification timing research, assuming instan
 
 ## Distribution status
 
-Release archive is in progress. Package/signature checks, Apple upload acceptance, processing and TestFlight group assignment are not yet verified. App Store build 27's existing review submission is not being replaced or resubmitted.
+Release work paused at the user's request to reconsider background packet design. The running archive was interrupted before completion; no build was uploaded. Package/signature checks, Apple upload acceptance, processing and TestFlight group assignment are not yet verified. App Store build 27's existing review submission is not being replaced or resubmitted.
 
 Local build log: `/tmp/fuelup-testflight-28-archive.log`.
