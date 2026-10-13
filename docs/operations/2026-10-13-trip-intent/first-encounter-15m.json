@@ -1,0 +1,63 @@
+{
+  "minimum_lead_minutes": 15.0,
+  "horizon_minutes": 30.0,
+  "method": "Causal, speed-free trip context plus same-person route-prefix contrasts. Training includes every eligible driving minute with a resolved next-encounter outcome, plus well-tracked no-encounter windows. Match the FIRST encountered station; every shorter encounter votes negative. Target lead is specified separately in this result. Fit on prior UTC days only; observed-segment weighted training. No raw speed, acceleration, slowing, or instantaneous nearest-station distance supplied to classifiers.",
+  "caveats": "Station-duration proxy, sparse observation coverage, tiny account sample, exploratory reused snapshot. Tracked no-encounter windows are observational proxy negatives, not verified non-fueling. GPS gaps can split one real trip into several observed segments. No live notifications.",
+  "input_and_feature_hashes": {
+    "research.json": "89dcbffc9837a17637fcde04c2911ab7354e7630b972bded5db3fd0897499d71",
+    "stations.json": "1014518228e4bae82d7cd1386bd09b2706731eb2447fa64834a4a217527a6d99",
+    "usage.json": "4dd6f0b343acc8335a5ad4dca780015bb8a26fd9b700ac10c4069d72c020ea46",
+    "tripIntentFeatures.py": "512f4a0d950d4416f970bfd2f6ae57eaff6ef6c9020429fc97e5c7e8a9b8e1e9",
+    "richTimingFeatures.py": "c6bbc990d1360276e33a73fcf6a1d18b8f497575e21835a7f0af33f1584e3e4d",
+    "destinationFeatures.py": "0a759d8c8d5b17e75297da0c192fca6af63a4c05455282e7d4ade4464aec534d",
+    "timingFeatures.py": "f5d8d56618f137811bb1e13d386b2365356e182a4520cc46be3ae9af6662ad26",
+    "backtestAnticipation.py": "f010f0a15d800ab3bee28dbc124851023599994fbc6f2c0edde8d64b6cce96b8",
+    "buildRichTimingDataset.py": "d2118e95131c0b6783577783ddf2d82803bcdc1eee9cbb6af2b61606b15b2987",
+    "label_configuration": {
+      "minimum_lead_seconds": 900,
+      "horizon_seconds": 1800
+    }
+  },
+  "observed_test_long_stops": 21,
+  "test_long_stops_with_useful_eligible_minute": 0,
+  "short_encounters_represented_in_training_rows": 212,
+  "features": [
+    "segment_elapsed_min",
+    "segment_observed_km",
+    "origin_displacement_km",
+    "utc_hour_sin",
+    "utc_hour_cos",
+    "utc_weekday_sin",
+    "utc_weekday_cos",
+    "prior_long_stops",
+    "prior_unique_stations",
+    "known_confirmed_fuel_count",
+    "hours_since_long_stop",
+    "observed_km_since_long_stop",
+    "observed_drive_h_since_long_stop",
+    "hours_since_confirmed_fuel",
+    "observed_km_since_confirmed_fuel",
+    "observed_drive_h_since_confirmed_fuel",
+    "long_stop_median_interval_h",
+    "long_stop_due_ratio",
+    "confirmed_fuel_median_interval_h",
+    "confirmed_fuel_due_ratio",
+    "appOpenedWithin15Minutes",
+    "appOpenedWithinHour",
+    "app_openAgeSeconds",
+    "app_foreground_count_30m",
+    "map_gesture_count_30m",
+    "station_select_count_30m",
+    "station_go_count_30m"
+  ],
+  "training_outcome_counts": {
+    "short": 1524,
+    "unknown": 321,
+    "tracked_no_encounter": 130,
+    "late_long": 105
+  },
+  "eligible_minutes": 2080,
+  "test_minutes": 1536,
+  "folds": [],
+  "models": {}
+}

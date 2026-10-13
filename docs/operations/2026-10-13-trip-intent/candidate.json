@@ -1,0 +1,24 @@
+{
+  "status": "offline_abstaining_candidate_insufficient_evidence",
+  "prospectively_validated": false,
+  "deployed": false,
+  "model": "precision_first_route_and_cycle",
+  "minimum_route_score": 0.9,
+  "score_is_calibrated_probability": false,
+  "minimum_independent_route_examples": 3,
+  "minimum_confirmed_fuel_due_ratio": 0.75,
+  "minimum_useful_lead_minutes": 15,
+  "prediction_horizon_minutes": 30,
+  "cooldown_minutes": 60,
+  "maximum_alerts_per_account_per_utc_day": 2,
+  "next_validation": "Freeze these rules and evaluate future unseen trips, reporting missed confirmed purchases, false alerts, unknown outcomes, lead times, and results per account.",
+  "target": "confirmed_fuel",
+  "require_unanimous_matched_positive_examples": true,
+  "allow_abstention": true,
+  "priority_order": [
+    "avoid_false_alerts",
+    "earlier_warning",
+    "recall"
+  ],
+  "zero_observed_errors_is_not_accuracy_guarantee": true
+}
