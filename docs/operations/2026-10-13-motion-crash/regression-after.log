@@ -1,0 +1,80 @@
+TAP version 13
+# /var/folders/tg/n2tmgtnn28s3nd65y2bw43140000gn/T/fuel-motion-concurrency-1E29Xk/main.swift:112:94: warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [\#ImplicitStrongCapture]
+# 100 |     }.runOnQueue(.main)
+# 101 | 
+# 102 |     AsyncFunction("getLatestActivityAsync") { (lookbackMs: Double?, promise: Promise) in
+#     |                                             |- note: 'self' implicitly strongly captured here
+#     |                                             `- note: add 'self' as a capture list item to silence
+# 103 |       guard CMMotionActivityManager.isActivityAvailable() else {
+# 104 |         promise.resolve(nil)
+#     :
+# 110 |       let start = now.addingTimeInterval(-(resolvedLookbackMs / 1000))
+# 111 | 
+# 112 |       activityManager.queryActivityStarting(from: start, to: now, to: activityQueue) { [weak self] activities, error in
+#     |                                                                                              |- warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [\#ImplicitStrongCapture]
+#     |                                                                                              `- note: explicitly assign the capture list item to silence
+# 113 |         if let error {
+# 114 |           promise.reject(GenericException(error.localizedDescription))
+# /var/folders/tg/n2tmgtnn28s3nd65y2bw43140000gn/T/fuel-motion-concurrency-1E29Xk/main.swift:171:71: warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [\#ImplicitStrongCapture]
+# 127 |     }.runOnQueue(.main)
+# 128 | 
+# 129 |     AsyncFunction("requestAuthorizationAsync") { (promise: Promise) in
+#     |                                                |- note: 'self' implicitly strongly captured here
+#     |                                                `- note: add 'self' as a capture list item to silence
+# 130 |       guard CMMotionActivityManager.isActivityAvailable() else {
+# 131 |         promise.resolve([
+#     :
+# 169 |       }
+# 170 | 
+# 171 |       activityManager.startActivityUpdates(to: activityQueue) { [weak self] activity in
+#     |                                                                       |- warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [\#ImplicitStrongCapture]
+#     |                                                                       `- note: explicitly assign the capture list item to silence
+# 172 |         guard let self else {
+# 173 |           return
+# /var/folders/tg/n2tmgtnn28s3nd65y2bw43140000gn/T/fuel-motion-concurrency-1E29Xk/main.swift:204:71: warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [\#ImplicitStrongCapture]
+# 185 |     }.runOnQueue(.main)
+# 186 | 
+# 187 |     AsyncFunction("startActivityUpdatesAsync") { (promise: Promise) in
+#     |                                                |- note: 'self' implicitly strongly captured here
+#     |                                                `- note: add 'self' as a capture list item to silence
+# 188 |       guard CMMotionActivityManager.isActivityAvailable() else {
+# 189 |         promise.reject(MotionActivityUnavailableException())
+#     :
+# 202 |       updateGeneration += 1
+# 203 |       let generation = updateGeneration
+# 204 |       activityManager.startActivityUpdates(to: activityQueue) { [weak self] activity in
+#     |                                                                       |- warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [\#ImplicitStrongCapture]
+#     |                                                                       `- note: explicitly assign the capture list item to silence
+# 205 |         guard let self, self.isUpdating, self.updateGeneration == generation, let activity else {
+# 206 |           return
+# /var/folders/tg/n2tmgtnn28s3nd65y2bw43140000gn/T/fuel-motion-concurrency-1E29Xk/main.swift:277:23: warning: capture of 'f' with non-Sendable type 'TestFunction' in a '@Sendable' closure [\#SendableClosureCaptures]
+#  10 |   func reject(_ error: Error) { done(nil) }
+#  11 | }
+#  12 | final class TestFunction {
+#     |             `- note: class 'TestFunction' does not conform to the 'Sendable' protocol
+#  13 |   let name: String
+#  14 |   let body: Any
+#     :
+# 275 |       f.queue.async {
+# 276 |         let promise = Promise { continuation.resume(returning: $0) }
+# 277 |         if let body = f.body as? (Promise) -> Void { body(promise) }
+#     |                       `- warning: capture of 'f' with non-Sendable type 'TestFunction' in a '@Sendable' closure [\#SendableClosureCaptures]
+# 278 |         else if let body = f.body as? (Double?, Promise) -> Void { body(600_000, promise) }
+# 279 |         else { fatalError("Unexpected test signature") }
+# [\#ImplicitStrongCapture]: <https://docs.swift.org/compiler/documentation/diagnostics/implicit-strong-capture>
+# [\#SendableClosureCaptures]: <https://docs.swift.org/compiler/documentation/diagnostics/sendable-closure-captures>
+# PASS 1000 overlapping live/history updates; cached reads; start/stop generations; authorization settlement; Thread Sanitizer clean
+# Subtest: motion bridge serializes live/history callbacks and ignores stopped stream generations
+ok 1 - motion bridge serializes live/history callbacks and ignores stopped stream generations
+  ---
+  duration_ms: 4322.675167
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4383.23675

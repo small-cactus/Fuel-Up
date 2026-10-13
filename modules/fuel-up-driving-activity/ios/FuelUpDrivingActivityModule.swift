@@ -14,14 +14,13 @@ internal final class MotionActivityUnavailableException: Exception, @unchecked S
 
 public final class FuelUpDrivingActivityModule: Module {
   private let activityManager = CMMotionActivityManager()
-  private let activityQueue: OperationQueue = {
-    let queue = OperationQueue()
-    queue.name = "com.anthonyh.fuelup.motion-activity"
-    queue.qualityOfService = .utility
-    return queue
-  }()
+  // Bridge commands, Core Motion callbacks and authorization polling share one
+  // queue. Swift dictionaries cannot be read/replaced concurrently: the old
+  // concurrent callback queue raced history queries against live updates.
+  private let activityQueue = OperationQueue.main
   private var isUpdating = false
   private var lastActivityPayload: [String: Any]?
+  private var updateGeneration = 0
 
   public func definition() -> ModuleDefinition {
     Name("FuelUpDrivingActivity")
@@ -65,11 +64,11 @@ public final class FuelUpDrivingActivityModule: Module {
 
     AsyncFunction("getAuthorizationStatusAsync") {
       return authorizationStatusLabel()
-    }
+    }.runOnQueue(.main)
 
     AsyncFunction("isActivityAvailableAsync") {
       return CMMotionActivityManager.isActivityAvailable()
-    }
+    }.runOnQueue(.main)
 
     AsyncFunction("getLatestActivityAsync") { (lookbackMs: Double?, promise: Promise) in
       guard CMMotionActivityManager.isActivityAvailable() else {
@@ -96,7 +95,7 @@ public final class FuelUpDrivingActivityModule: Module {
         self?.lastActivityPayload = payload
         promise.resolve(payload)
       }
-    }
+    }.runOnQueue(.main)
 
     AsyncFunction("requestAuthorizationAsync") { (promise: Promise) in
       guard CMMotionActivityManager.isActivityAvailable() else {
@@ -154,7 +153,7 @@ public final class FuelUpDrivingActivityModule: Module {
       }
 
       pollAuthorizationStatus(60)
-    }
+    }.runOnQueue(.main)
 
     AsyncFunction("startActivityUpdatesAsync") { (promise: Promise) in
       guard CMMotionActivityManager.isActivityAvailable() else {
@@ -171,8 +170,10 @@ public final class FuelUpDrivingActivityModule: Module {
       }
 
       isUpdating = true
+      updateGeneration += 1
+      let generation = updateGeneration
       activityManager.startActivityUpdates(to: activityQueue) { [weak self] activity in
-        guard let self, let activity else {
+        guard let self, self.isUpdating, self.updateGeneration == generation, let activity else {
           return
         }
 
@@ -185,15 +186,16 @@ public final class FuelUpDrivingActivityModule: Module {
         "started": true,
         "authorizationStatus": authorizationStatusLabel()
       ])
-    }
+    }.runOnQueue(.main)
 
     AsyncFunction("stopActivityUpdatesAsync") { (promise: Promise) in
       activityManager.stopActivityUpdates()
       isUpdating = false
+      updateGeneration += 1
       promise.resolve([
         "stopped": true
       ])
-    }
+    }.runOnQueue(.main)
   }
 
   private func authorizationStatusLabel() -> String {

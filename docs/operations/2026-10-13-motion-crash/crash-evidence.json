@@ -1,0 +1,19 @@
+{
+  "build": "1.0.0 (29)",
+  "device": "iPhone 15 Pro Max",
+  "os": "iOS 26.3.1",
+  "occurred_at": "2026-10-13T17:15:02.6574Z",
+  "process_role": "Non UI",
+  "exception": "EXC_BREAKPOINT (SIGTRAP)",
+  "crashed_thread": 20,
+  "binary_uuid": "851418ED-5D23-33CA-B561-08797AE1EAE9",
+  "archive_dsym_uuid_matches": true,
+  "crash_sha256": "0ad1d357572f288146ac3e402aad7afcc9563e6c4b4793826b94d5501d636034",
+  "symbolicated_app_frames": [
+    "specialized _dictionaryUpCast<A, B, C, D>(_:)",
+    "closure #1 in closure #14 in FuelUpDrivingActivityModule.definition() (FuelUpDrivingActivityModule.swift:181)",
+    "thunk for @escaping @callee_guaranteed (@guaranteed CMMotionActivity?) -> ()"
+  ],
+  "system_top_frame": "_xzm_xzone_malloc_freelist_outlined",
+  "raw_archive_committed": false
+}
