@@ -1,0 +1,102 @@
+TAP version 13
+# Subtest: requires participant token and consent; enrollment binds a hash, not a raw token
+ok 1 - requires participant token and consent; enrollment binds a hash, not a raw token
+  ---
+  duration_ms: 22.771292
+  ...
+# Subtest: revoked or invalid participants cannot upload, query stations or delete another participant
+ok 2 - revoked or invalid participants cannot upload, query stations or delete another participant
+  ---
+  duration_ms: 3.622042
+  ...
+# Subtest: upload acknowledges original IDs only after database success
+ok 3 - upload acknowledges original IDs only after database success
+  ---
+  duration_ms: 1.615292
+  ...
+# Subtest: validates batches, coordinates, timestamps, labels, and duplicate IDs
+ok 4 - validates batches, coordinates, timestamps, labels, and duplicate IDs
+  ---
+  duration_ms: 0.237833
+  ...
+# Subtest: station lookup uses only existing catalog coordinates
+ok 5 - station lookup uses only existing catalog coordinates
+  ---
+  duration_ms: 2.24575
+  ...
+# Subtest: delete can retry after a lost response and revocation
+ok 6 - delete can retry after a lost response and revocation
+  ---
+  duration_ms: 1.660583
+  ...
+# Subtest: explicit answers and unanswered prompt evidence stay distinct
+ok 7 - explicit answers and unanswered prompt evidence stay distinct
+  ---
+  duration_ms: 0.783083
+  ...
+# Subtest: control authenticates participant and validates counts and acknowledgements
+ok 8 - control authenticates participant and validates counts and acknowledgements
+  ---
+  duration_ms: 3.571292
+  ...
+# Subtest: bulk upload accepts 1000 unique records and still rejects oversized batches
+ok 9 - bulk upload accepts 1000 unique records and still rejects oversized batches
+  ---
+  duration_ms: 1.992209
+  ...
+# Subtest: test answers use only the isolated endpoint and cannot enter training data
+ok 10 - test answers use only the isolated endpoint and cannot enter training data
+  ---
+  duration_ms: 2.867833
+  ...
+# Subtest: public health check reads the database without enrollment, mutation, or participant disclosure
+ok 11 - public health check reads the database without enrollment, mutation, or participant disclosure
+  ---
+  duration_ms: 0.660209
+  ...
+# Subtest: push registration authenticates the participant and validates its address
+ok 12 - push registration authenticates the participant and validates its address
+  ---
+  duration_ms: 3.230167
+  ...
+# PASS: full-batch corner distance, durable restart, duplicates, delayed fixes, live freshness isolation, gaps, teleports, stationary drift, pause boundaries, invalid data, driving hold, deletion and corrupt-state failure
+# Subtest: native mileage ledger measures all samples and survives lifecycle boundaries
+ok 13 - native mileage ledger measures all samples and survives lifecycle boundaries
+  ---
+  duration_ms: 851.092
+  ...
+# Subtest: research permission setup automatically requests notifications and serializes system prompts
+ok 14 - research permission setup automatically requests notifications and serializes system prompts
+  ---
+  duration_ms: 650.195291
+  ...
+# Subtest: the research screen uses automatic setup after consent dismissal, with no separate notification button
+ok 15 - the research screen uses automatic setup after consent dismissal, with no separate notification button
+  ---
+  duration_ms: 0.658834
+  ...
+# Failed to get push token for push notification!
+# Subtest: research build cannot start Live Activities or schedule driving alerts
+ok 16 - research build cannot start Live Activities or schedule driving alerts
+  ---
+  duration_ms: 117.74725
+  ...
+# Subtest: native migration unregisters old tasks before native collection resumes
+ok 17 - native migration unregisters old tasks before native collection resumes
+  ---
+  duration_ms: 6.580917
+  ...
+# Subtest: visible notification registration upgrades provisional status and requires full authorization
+ok 18 - visible notification registration upgrades provisional status and requires full authorization
+  ---
+  duration_ms: 40.242709
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 919.26025

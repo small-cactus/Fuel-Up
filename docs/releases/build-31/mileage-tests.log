@@ -1,0 +1,21 @@
+TAP version 13
+# PASS: full-batch corner distance, durable restart, duplicates, delayed fixes, live freshness isolation, gaps, teleports, stationary drift, pause boundaries, invalid data, driving hold, deletion and corrupt-state failure
+# Subtest: native mileage ledger measures all samples and survives lifecycle boundaries
+ok 1 - native mileage ledger measures all samples and survives lifecycle boundaries
+  ---
+  duration_ms: 1581.489959
+  ...
+# Subtest: mileage metadata travels in the supported research diagnostic envelope
+ok 2 - mileage metadata travels in the supported research diagnostic envelope
+  ---
+  duration_ms: 8.611291
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1674.018917

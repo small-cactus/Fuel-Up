@@ -40,6 +40,10 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   private let packetContext=DrivingResearchPacketContext()
   private let stepHistory=DrivingResearchStepHistory()
   private var store:DrivingResearchStore?
+  private var mileage:DrivingResearchMileage?
+  private var mileageNeedsBoundary=false
+  private var lastMileageReport=Date.distantPast
+  private var stationarySince:Double?
   private let transport=DrivingResearchTransport()
   private var identity:ResearchIdentity?
   private var stations:[ResearchStation]=[]
@@ -105,6 +109,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     do {
       let folder=try FileManager.default.url(for:.applicationSupportDirectory,in:.userDomainMask,appropriateFor:nil,create:true).appendingPathComponent("DrivingResearch",isDirectory:true)
       store=try DrivingResearchStore(directory:folder)
+      mileage=try DrivingResearchMileage(directory:folder)
       DrivingResearchSync.shared.configure(store!)
       DrivingResearchSync.shared.onChange = { [weak self] in self?.lastUpload=UserDefaults.standard.object(forKey:"research.lastUpload") as? Date;self?.refreshCounts() }
       if let data=UserDefaults.standard.data(forKey:"research.stations") {stations=(try? JSONDecoder().decode([ResearchStation].self,from:data)) ?? []}
@@ -146,6 +151,10 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     guard ready else {
       stopSensors();status="Paused — finish permissions"
       record("permission",["location":locationPermission,"precise":precise,"motion":motionPermission]);return
+    }
+    if mileageNeedsBoundary {
+      do {try mileage?.boundary();mileageNeedsBoundary=false}
+      catch {issue=error.localizedDescription;status="Paused — mileage storage needs attention";return}
     }
     packetContext.start()
     if !running {
@@ -274,6 +283,11 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     detector=ResearchVisitDetector();saveDetector()
   }
   private func stopSensors() {
+    if running {
+      mileageNeedsBoundary=true
+      // Persist the break so a process restart cannot bridge paused collection.
+      do {try mileage?.boundary()} catch {issue=error.localizedDescription}
+    }
     packetContext.stop()
     stepHistory.stop(resetBoundary:true)
     timingHistory.stop(resetBoundary:true)
@@ -291,7 +305,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
         let id=try identity ?? ResearchIdentity.load()
         _=try await transport.send("delete",identity:id)
       }
-      try store?.erase();try DrivingResearchTestNotifications.shared.erase();try ResearchIdentity.erase();DrivingResearchSync.shared.erase()
+      try mileage?.erase();try store?.erase();try DrivingResearchTestNotifications.shared.erase();try ResearchIdentity.erase();DrivingResearchSync.shared.erase()
       crossChecks.erase()
       for key in [Self.consentKey,"research.visits","research.stations","research.catalogCenter","research.lastCatalog","research.detector","research.lastUpload","research.lastUploadAttempt"] {UserDefaults.standard.removeObject(forKey:key)}
       DrivingResearchPushRegistration.shared.erase()
@@ -302,7 +316,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   }
   private func applyMode() {
     let near=lastFix.map {fix in stations.contains {fix.distance(to:$0)<350}} ?? false
-    let drive=Date().timeIntervalSince(lastDrive)<180
+    let drive=ResearchDrivingMode.active(now:Date().timeIntervalSince1970,lastDrive:lastDrive.timeIntervalSince1970,stationarySince:stationarySince)
     let observingStop=detector.active.map { Date().timeIntervalSince1970 - $0.startedAt < 1200 } ?? false
     let mode=near && drive || observingStop ? "station" : drive ? "driving" : "monitoring"
     guard mode != lastMode else{return};lastMode=mode
@@ -328,11 +342,23 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       clearTrackingFault("location");clearTrackingFault("location_paused")
     }
     let now=Date().timeIntervalSince1970
-    for location in locations.sorted(by:{$0.timestamp<$1.timestamp}) {
-      let fix=ResearchFix(timestamp:location.timestamp.timeIntervalSince1970,receivedAt:now,latitude:location.coordinate.latitude,longitude:location.coordinate.longitude,accuracy:location.horizontalAccuracy,speed:location.speed,course:location.course,speedAccuracy:location.speedAccuracy,simulated:location.sourceInformation?.isSimulatedBySoftware ?? false,accessory:location.sourceInformation?.isProducedByAccessory ?? false)
+    let samples=locations.sorted(by:{$0.timestamp<$1.timestamp}).map {location in
+      (location,ResearchFix(timestamp:location.timestamp.timeIntervalSince1970,receivedAt:now,latitude:location.coordinate.latitude,longitude:location.coordinate.longitude,accuracy:location.horizontalAccuracy,speed:location.speed,course:location.course,speedAccuracy:location.speedAccuracy,simulated:location.sourceInformation?.isSimulatedBySoftware ?? false,accessory:location.sourceInformation?.isProducedByAccessory ?? false))
+    }
+    // Process the entire batch BEFORE five/30-second event sampling. The durable
+    // counter accepts delayed samples without relaxing the live detector rules.
+    do {try mileage?.process(samples.map {$0.1})}
+    catch {issue=error.localizedDescription;stopSensors();status="Paused — mileage storage needs attention";return}
+    if Date().timeIntervalSince(lastMileageReport)>=30 {
+      guard record("diagnostic",["mileageCheckpoint":true]) else {return}
+      lastMileageReport=Date()
+    }
+    for (location,fix) in samples {
       if fix.timestamp <= (lastFix?.timestamp ?? 0) {continue}
       lastFix=fix
-      if fix.rejection == nil,fix.speed>=8 {lastDrive=Date(timeIntervalSince1970:fix.timestamp)}
+      if fix.rejection == nil,fix.speed>=2.5 {
+        lastDrive=Date(timeIntervalSince1970:fix.timestamp);stationarySince=nil
+      }
       let minimumInterval=lastMode == "monitoring" ? 30.0 : 5.0
       if fix.timestamp-lastPersistedFix>=minimumInterval {
         lastPersistedFix=fix.timestamp
@@ -368,7 +394,10 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     guard timestamp>lastMotionTimestamp else{return};lastMotionTimestamp=timestamp
     motion=value.automotive ? "Automotive" : value.walking ? "Walking" : value.stationary ? "Stationary" : "Other / uncertain"
     record("motion",["timestamp":timestamp,"automotive":value.automotive,"stationary":value.stationary,"walking":value.walking,"running":value.running,"cycling":value.cycling,"unknown":value.unknown,"confidence":value.confidence.rawValue])
-    if value.automotive,value.confidence != .low,Date().timeIntervalSince(value.startDate)<180 {lastDrive=Date()}
+    if value.confidence != .low,Date().timeIntervalSince(value.startDate)>=0,Date().timeIntervalSince(value.startDate)<180 {
+      if value.stationary {if stationarySince == nil {stationarySince=timestamp}}
+      else if value.automotive {lastDrive=Date(timeIntervalSince1970:timestamp);stationarySince=nil}
+    }
     applyMode()
   }
   private func checkMotion() {
@@ -522,6 +551,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
       var payload=fields;payload["schemaVersion"]=1;payload["detectorVersion"]=ResearchStopPolicy.version;payload["sessionId"]=sessionID
       // Context describes receipt time, including for delayed historical samples.
       payload["timingContextVersion"]=2
+      if let mileage {payload["mileageAtReceipt"]=mileage.state.payload}
       payload["contextAtReceipt"]=packetContext.snapshot()
       if let installationId=InstallationTelemetry.shared.installationId {payload["installationId"]=installationId}
       payload["networkAtReceipt"]=["known":networkKnown,"available":networkAvailable,"wifi":wifiNetwork,"expensive":expensiveNetwork,"constrained":constrainedNetwork]

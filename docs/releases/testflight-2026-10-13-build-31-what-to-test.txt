@@ -1,0 +1,7 @@
+Improved driving mileage collection for research participants.
+
+Mileage now accumulates on your phone using all valid GPS samples before upload sampling. Delayed GPS batches can contribute to historical mileage, and the app records tracking gaps separately. Mileage survives app restarts, and driving tracking stays active through brief stops and slow traffic.
+
+For enrolled testers: leave Always Location, Precise Location, and Motion & Fitness enabled. Drive normally with the phone locked and confirm fuel purchases when prompted. If convenient, reset your car's trip meter after filling and note its reading at the next fill so we can compare GPS mileage against the car.
+
+Please report unexpected battery use, missing drives, or crashes. This build improves research measurements; it does not enable predictive fueling alerts. GPS mileage is an estimate, not your car's odometer or fuel level.

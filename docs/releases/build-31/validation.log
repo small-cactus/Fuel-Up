@@ -1,0 +1,128 @@
+TAP version 13
+# Subtest: requires participant token and consent; enrollment binds a hash, not a raw token
+ok 1 - requires participant token and consent; enrollment binds a hash, not a raw token
+  ---
+  duration_ms: 22.101625
+  ...
+# Subtest: revoked or invalid participants cannot upload, query stations or delete another participant
+ok 2 - revoked or invalid participants cannot upload, query stations or delete another participant
+  ---
+  duration_ms: 5.520542
+  ...
+# Subtest: upload acknowledges original IDs only after database success
+ok 3 - upload acknowledges original IDs only after database success
+  ---
+  duration_ms: 3.3465
+  ...
+# Subtest: validates batches, coordinates, timestamps, labels, and duplicate IDs
+ok 4 - validates batches, coordinates, timestamps, labels, and duplicate IDs
+  ---
+  duration_ms: 0.641708
+  ...
+# Subtest: station lookup uses only existing catalog coordinates
+ok 5 - station lookup uses only existing catalog coordinates
+  ---
+  duration_ms: 26.746542
+  ...
+# Subtest: delete can retry after a lost response and revocation
+ok 6 - delete can retry after a lost response and revocation
+  ---
+  duration_ms: 5.785083
+  ...
+# Subtest: explicit answers and unanswered prompt evidence stay distinct
+ok 7 - explicit answers and unanswered prompt evidence stay distinct
+  ---
+  duration_ms: 0.507125
+  ...
+# Subtest: control authenticates participant and validates counts and acknowledgements
+ok 8 - control authenticates participant and validates counts and acknowledgements
+  ---
+  duration_ms: 9.861708
+  ...
+# Subtest: bulk upload accepts 1000 unique records and still rejects oversized batches
+ok 9 - bulk upload accepts 1000 unique records and still rejects oversized batches
+  ---
+  duration_ms: 5.263042
+  ...
+# Subtest: test answers use only the isolated endpoint and cannot enter training data
+ok 10 - test answers use only the isolated endpoint and cannot enter training data
+  ---
+  duration_ms: 11.813375
+  ...
+# Subtest: public health check reads the database without enrollment, mutation, or participant disclosure
+ok 11 - public health check reads the database without enrollment, mutation, or participant disclosure
+  ---
+  duration_ms: 2.36025
+  ...
+# Subtest: push registration authenticates the participant and validates its address
+ok 12 - push registration authenticates the participant and validates its address
+  ---
+  duration_ms: 4.676042
+  ...
+# PASS: durable completion, coalescing, pause, timeout, unknown versus zero, station/time/accuracy scope, partial visits, deduplication, deletion
+# Subtest: native cross-check queue survives relaunch, respects pause, and keeps unknown distinct from zero
+ok 13 - native cross-check queue survives relaunch, respects pause, and keeps unknown distinct from zero
+  ---
+  duration_ms: 2528.573459
+  ...
+# PASS: full-batch corner distance, durable restart, duplicates, delayed fixes, live freshness isolation, gaps, teleports, stationary drift, pause boundaries, invalid data, driving hold, deletion and corrupt-state failure
+# Subtest: native mileage ledger measures all samples and survives lifecycle boundaries
+ok 14 - native mileage ledger measures all samples and survives lifecycle boundaries
+  ---
+  duration_ms: 1750.697542
+  ...
+# Subtest: mileage metadata travels in the supported research diagnostic envelope
+ok 15 - mileage metadata travels in the supported research diagnostic envelope
+  ---
+  duration_ms: 10.878125
+  ...
+# Subtest: research permission setup automatically requests notifications and serializes system prompts
+ok 16 - research permission setup automatically requests notifications and serializes system prompts
+  ---
+  duration_ms: 1387.899125
+  ...
+# Subtest: the research screen uses automatic setup after consent dismissal, with no separate notification button
+ok 17 - the research screen uses automatic setup after consent dismissal, with no separate notification button
+  ---
+  duration_ms: 2.358458
+  ...
+# Failed to get push token for push notification!
+# Subtest: research build cannot start Live Activities or schedule driving alerts
+ok 18 - research build cannot start Live Activities or schedule driving alerts
+  ---
+  duration_ms: 432.404625
+  ...
+# Subtest: native migration unregisters old tasks before native collection resumes
+ok 19 - native migration unregisters old tasks before native collection resumes
+  ---
+  duration_ms: 29.969458
+  ...
+# Subtest: visible notification registration upgrades provisional status and requires full authorization
+ok 20 - visible notification registration upgrades provisional status and requires full authorization
+  ---
+  duration_ms: 109.207875
+  ...
+# Subtest: native silent wake ignores other pushes and paused research, uploads, and completes once on expiration
+ok 21 - native silent wake ignores other pushes and paused research, uploads, and completes once on expiration
+  ---
+  duration_ms: 27445.0195
+  ...
+# Subtest: step history enforces durable cursors, bounded catchup, pause and late callback safety
+ok 22 - step history enforces durable cursors, bounded catchup, pause and late callback safety
+  ---
+  duration_ms: 1409.687875
+  ...
+# Subtest: native timing history preserves collection boundaries, durable progress and late callback safety
+ok 23 - native timing history preserves collection boundaries, durable progress and late callback safety
+  ---
+  duration_ms: 1441.850542
+  ...
+1..23
+# tests 23
+# suites 0
+# pass 23
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 27579.120459
