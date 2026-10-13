@@ -1,0 +1,41 @@
+{
+  "bundles": [
+    {
+      "id": "com.anthonyh.fuelup.notifications",
+      "version": "1.0.0",
+      "build": "30"
+    },
+    {
+      "id": "com.anthonyh.fuelup.ExpoWidgetsTarget",
+      "version": "1.0.0",
+      "build": "30"
+    },
+    {
+      "id": "com.anthonyh.fuelup",
+      "version": "1.0.0",
+      "build": "30"
+    }
+  ],
+  "archive_signature": "deep strict verified",
+  "aps_environment": "production",
+  "ipa_sha256": "d3c62a4f9bbf46285ad5239040a344d792951ad90162f833a1e143f21e92cc0c",
+  "archive_path": "/tmp/FuelUp-TestFlight-30.xcarchive",
+  "export_path": "/tmp/FuelUp-TestFlight-30-export/FuelUp.ipa",
+  "upload_accepted_at": "2026-10-13T17:34:31Z",
+  "testflight_verified_at": "2026-10-13T17:44:00Z",
+  "testflight_groups": [
+    {
+      "name": "Fuel Up External Testing",
+      "testers": 6,
+      "build": "1.0.0 (30)",
+      "status": "Testing"
+    },
+    {
+      "name": "Fuel Up Internal Testing",
+      "testers": 1,
+      "build": "1.0.0 (30)",
+      "status": "Testing"
+    }
+  ],
+  "external_automatically_notify_testers": true
+}

@@ -1,0 +1,3 @@
+Fixes a background crash in motion activity updates.
+
+Please use Fuel Up normally, switch between it and other apps, and leave it in the background during your usual trips. Report any new crash through TestFlight feedback. This build also retains installation usage sync and the existing research permission choices.

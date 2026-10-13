@@ -42,5 +42,6 @@ No permissions, research enrollment, upload formats or raw records are changed.
 
 The regression tests use synthetic callbacks, not physical Core Motion or a
 simulator claim. Signed Release build and deep signature verification passed (118 seconds).
-TestFlight build 30 distribution is being prepared; this checkpoint does not
-claim tester availability.
+TestFlight build 30 is now Testing in both existing internal and external
+groups, verified at 2026-10-13 17:44 UTC. See
+`../../releases/testflight-2026-10-13-build-30.md` for release evidence.
