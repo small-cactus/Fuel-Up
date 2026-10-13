@@ -1,0 +1,47 @@
+{
+  "budget": {
+    "lookups": 85960,
+    "requests": 44
+  },
+  "checked_at": "2026-10-13T09:43:09.396146+00:00",
+  "city": [
+    {
+      "cooldown_active": false,
+      "status": "complete"
+    }
+  ],
+  "cooldown_active": false,
+  "db_started_at": "2026-10-13T09:39:30.259422+00:00",
+  "pending_projection": [
+    {
+      "attempts": 6,
+      "job_id": 366544,
+      "last_error": "PROJECTION_PUBLISH_FAILED",
+      "slot_at": "2026-10-05T00:00:00+00:00"
+    },
+    {
+      "attempts": 5,
+      "job_id": 366559,
+      "last_error": "PROJECTION_PUBLISH_FAILED",
+      "slot_at": "2026-10-05T00:00:00+00:00"
+    }
+  ],
+  "post_restart_cron_failures": 0,
+  "retention_runs": [
+    {
+      "end_time": "2026-10-13T09:40:00.737838+00:00",
+      "start_time": "2026-10-13T09:40:00.656935+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-13T09:30:04.313951+00:00",
+      "start_time": "2026-10-13T09:30:02.205362+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-13T09:20:15.044787+00:00",
+      "start_time": "2026-10-13T09:20:09.684602+00:00",
+      "status": "succeeded"
+    }
+  ]
+}

@@ -16,4 +16,14 @@ All 23 focused regional-routing, GraphQL-error, and retention tests passed (see 
 
 No collector activation, billing, provider budget, routing, identity, research boundary, retention policy, or raw observation was changed. No manual provider collection was invoked. No source repair or deployment was justified by the available evidence.
 
-Recovery verification is pending. Restart acknowledgment alone does not establish service recovery, completed collection, or archive integrity. The 09:00 sweep has until 10:00 UTC; it is not yet counted as a missing operational hour.
+## Recovery verification
+
+- PostgreSQL restarted at **09:39:30.259 UTC**. The dashboard subsequently reported Healthy, and protected status queries returned successfully.
+- At 09:40:42, scheduled collection had advanced from 38 to 41 successful batches, with a new observation at 09:40:31. By the 09:43 status snapshot it had reached **43/72 batches**, with a subsequent request in flight. No manual dispatch was invoked.
+- Immutable archive read-back passed SHA-256, byte size, schema, exact catalog IDs, observation timing, priced counts, and region provenance for one batch from each fixed route. The east sample was observed at **09:40:48**, after restart. Both western samples predate the incident because those routes had already completed. This is sampled archive verification, not a complete-sweep audit or verified pump truth.
+- The public Trends endpoint returned HTTP 200 from `national-cache` in 1,121 ms at 09:41:54. All ten scopes still correctly referenced the latest complete 08:00 sweep (16869); the 09:00 sweep was incomplete.
+- All five required schedules were active, with no national cron failures after database restart. Retention succeeded at 09:40, and no raw objects were currently eligible for deletion. The city campaign remained complete, continuous national collection enabled, and provider cooldown expired.
+- At 09:43, the hour had consumed 44 attempts / 85,960 lookups, below limits of 92 / 161,660. Accounted archives were 739,908,834 bytes against the 900,000,000-byte cap. All three fixed routes had zero wrong-region jobs.
+- Operational slot accounting remained 130 complete hours, four previously reported partial hours, one current running hour, and no expired absent/running slots. The two unfinished projection repair records remain confined to October 5 research data. The latest complete sweep had zero missing projections; current-run deferred serving events are not proof of a complete published 09:00 cache.
+
+One restart was used. No source deployment was needed. Protected reads, scheduled collection progress, sampled immutable archives, the Trends response, and retention were verified recovered. The current sweep still has until 10:00 UTC; **whole-hour completion is not claimed**. The underlying cause of recurring database unavailability is not established, and the restart is not a permanent fix. Monitoring continues.

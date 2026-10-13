@@ -1,0 +1,10 @@
+{
+  "checkedAt": "2026-10-13T09:41:54.174Z",
+  "httpStatus": 200,
+  "elapsedMs": 1121,
+  "source": "national-cache",
+  "scope": "national",
+  "summary": {
+    "pricePolicy": "reported-last-24-hours"
+  }
+}

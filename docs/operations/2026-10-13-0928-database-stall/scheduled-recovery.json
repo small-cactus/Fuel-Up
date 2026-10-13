@@ -1,0 +1,94 @@
+{
+  "budget": {
+    "lookups": 79960,
+    "requests": 41
+  },
+  "checked_at": "2026-10-13T09:40:42.218426+00:00",
+  "cron": [
+    {
+      "end_time": "2026-10-13T09:40:00.737838+00:00",
+      "jobname": "fuel-national-retention",
+      "message": "1 row",
+      "start_time": "2026-10-13T09:40:00.656935+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-13T09:40:00.744098+00:00",
+      "jobname": "fuel-national-dispatch",
+      "message": "1 row",
+      "start_time": "2026-10-13T09:40:00.654257+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-13T09:40:00.680892+00:00",
+      "jobname": "fuel-national-discovery",
+      "message": "1 row",
+      "start_time": "2026-10-13T09:40:00.651728+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-13T09:40:00.67293+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "message": "1 row",
+      "start_time": "2026-10-13T09:40:00.646239+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-13T09:40:00.667221+00:00",
+      "jobname": "fuel-national-watchdog",
+      "message": "1 row",
+      "start_time": "2026-10-13T09:40:00.643742+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-13T09:40:00.662112+00:00",
+      "jobname": "fuel-national-projection-repair",
+      "message": "1 row",
+      "start_time": "2026-10-13T09:40:00.639436+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-13T09:37:00.749267+00:00",
+      "jobname": "fuel-national-discovery",
+      "message": "1 row",
+      "start_time": "2026-10-13T09:37:00.717301+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-13T09:37:00.732998+00:00",
+      "jobname": "fuel-national-dispatch",
+      "message": "1 row",
+      "start_time": "2026-10-13T09:37:00.70108+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-13T09:37:00.709127+00:00",
+      "jobname": "fuel-national-trends-cache",
+      "message": "1 row",
+      "start_time": "2026-10-13T09:37:00.68521+00:00",
+      "status": "succeeded"
+    },
+    {
+      "end_time": "2026-10-13T09:37:00.660488+00:00",
+      "jobname": "fuel-national-projection-repair",
+      "message": "1 row",
+      "start_time": "2026-10-13T09:37:00.649067+00:00",
+      "status": "succeeded"
+    }
+  ],
+  "db_started_at": "2026-10-13T09:39:30.259422+00:00",
+  "jobs": [
+    {
+      "attempts": 41,
+      "count": 41,
+      "last_observed": "2026-10-13T09:40:31.165+00:00",
+      "status": "succeeded"
+    },
+    {
+      "attempts": 0,
+      "count": 31,
+      "last_observed": null,
+      "status": "queued"
+    }
+  ]
+}
