@@ -27,3 +27,11 @@ No collector activation, billing, provider budget, routing, identity, research b
 - Operational slot accounting remained 130 complete hours, four previously reported partial hours, one current running hour, and no expired absent/running slots. The two unfinished projection repair records remain confined to October 5 research data. The latest complete sweep had zero missing projections; current-run deferred serving events are not proof of a complete published 09:00 cache.
 
 One restart was used. No source deployment was needed. Protected reads, scheduled collection progress, sampled immutable archives, the Trends response, and retention were verified recovered. The current sweep still has until 10:00 UTC; **whole-hour completion is not claimed**. The underlying cause of recurring database unavailability is not established, and the restart is not a permanent fix. Monitoring continues.
+
+## Completion confirmed at 10:33 UTC
+
+The 09:00 sweep completed all **72/72 batches at 09:48:45 UTC**, before its deadline. It observed 141,660 fixed-inventory station IDs, including 88,043 with a price. Its deferred projection repairs completed automatically; the saved status includes final repair completions through 09:53. The following 10:00 sweep also completed all 72 batches at 10:15:18, with all ten Trends scopes published for that run at 10:17 and zero missing batch projections.
+
+Operational accounting now shows 132 complete hours and the same four previously reported partial hours, with zero absent or expired running slots. The incident created no new missing operational hour. All three routes have zero wrong-region jobs. Retention succeeded at 10:10, 10:20, and 10:30; eligible raw objects remain zero. Current-hour attempts were 73 requests / 143,660 lookups, within both caps, and accounted archives were 741,310,946 bytes against 900,000,000. The only unfinished projection repair entries remain the two historical October 5 entries.
+
+This completes verification of recovery from this incident, using the single restart already recorded. No additional restart, deployment, or provider request was made by the monitor. Fixed-inventory coverage and immutable archive checks do not establish verified pump prices or coverage of every actual station.
