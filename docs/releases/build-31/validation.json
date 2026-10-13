@@ -1,0 +1,25 @@
+{
+  "builds": [
+    {
+      "bundle": "com.anthonyh.fuelup",
+      "version": "1.0.0",
+      "build": "31"
+    },
+    {
+      "bundle": "com.anthonyh.fuelup.notifications",
+      "version": "1.0.0",
+      "build": "31"
+    },
+    {
+      "bundle": "com.anthonyh.fuelup.ExpoWidgetsTarget",
+      "version": "1.0.0",
+      "build": "31"
+    }
+  ],
+  "apns": "production",
+  "ipa_sha256": "323aaca563e1c5961ec56ca7df34e3079109c0a75a27c3f9f976e2942c37e5b1",
+  "ipa_bytes": 45748104,
+  "native_mileage_ledger_present": true,
+  "archive_signature_verified": true,
+  "verified_at_utc": "2026-10-13T20:56:35.361178+00:00"
+}

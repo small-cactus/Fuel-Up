@@ -21,4 +21,8 @@ These tests do not establish road-measured mileage accuracy, battery impact, or 
 
 ## Distribution
 
-Build 31 reserved and verified in EAS. Archive/upload and tester availability verification pending.
+Build 31 reserved and verified in EAS. Signed archive and strict deep signature verification succeeded. Final export verifies 1.0.0 (31) for the app and both extensions, production APNs entitlements, and native mileage ledger type metadata. Package metadata/hash: `build-31/validation.json`.
+
+Apple accepted the upload on October 13, 2026 at 20:59:49 UTC. The existing non-blocking missing Hermes framework dSYM warning remains; this upload succeeded. Tester availability verification is pending.
+
+Local archive: `/tmp/FuelUp-TestFlight-31.xcarchive`; final exported IPA: `/tmp/FuelUp-TestFlight-31-final-export/FuelUp.ipa`. Build/export/upload logs are under `/tmp/fuelup-mileage-20261013/`. All 23 related tests passed.
