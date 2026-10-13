@@ -23,6 +23,6 @@ These tests do not establish road-measured mileage accuracy, battery impact, or 
 
 Build 31 reserved and verified in EAS. Signed archive and strict deep signature verification succeeded. Final export verifies 1.0.0 (31) for the app and both extensions, production APNs entitlements, and native mileage ledger type metadata. Package metadata/hash: `build-31/validation.json`.
 
-Apple accepted the upload on October 13, 2026 at 20:59:49 UTC. The existing non-blocking missing Hermes framework dSYM warning remains; this upload succeeded. Tester availability verification is pending.
+Apple accepted the upload on October 13, 2026 at 20:59:49 UTC. The existing non-blocking missing Hermes framework dSYM warning remains; this upload succeeded. At approximately 21:11 UTC, App Store Connect showed build 31 as **Testing**, assigned to Fuel Up Internal Testing (1 tester) and Fuel Up External Testing (6 testers), with 7 invites. The external submission used the saved What to Test notes and Automatically notify testers enabled. This verifies TestFlight availability, not that each tester installed the update or received a notification.
 
 Local archive: `/tmp/FuelUp-TestFlight-31.xcarchive`; final exported IPA: `/tmp/FuelUp-TestFlight-31-final-export/FuelUp.ipa`. Build/export/upload logs are under `/tmp/fuelup-mileage-20261013/`. All 23 related tests passed.

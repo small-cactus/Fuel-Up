@@ -21,5 +21,15 @@
   "ipa_bytes": 45748104,
   "native_mileage_ledger_present": true,
   "archive_signature_verified": true,
-  "verified_at_utc": "2026-10-13T20:56:35.361178+00:00"
+  "verified_at_utc": "2026-10-13T20:56:35.361178+00:00",
+  "testflight": {
+    "build": "1.0.0 (31)",
+    "status": "Testing",
+    "internal_testers": 1,
+    "external_testers": 6,
+    "invites": 7,
+    "automatic_tester_notification": true,
+    "observed_at_utc": "2026-10-13T21:11:04.857902+00:00",
+    "source": "App Store Connect build list and build group assignment UI"
+  }
 }
