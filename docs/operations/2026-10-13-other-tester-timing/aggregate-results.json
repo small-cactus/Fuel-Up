@@ -1,0 +1,348 @@
+{
+  "checked_at_utc": "2026-10-13T16:44:29.292102+00:00",
+  "research_records_other_than_owner": 20542,
+  "cohorts": [
+    {
+      "cohort": 1,
+      "events": 13285,
+      "kinds": {
+        "consent": 1,
+        "permission": 2,
+        "lifecycle": 31,
+        "diagnostic": 798,
+        "motion": 3838,
+        "location": 3084,
+        "geofence": 5228,
+        "station_catalog": 95,
+        "visit_observation": 56,
+        "visit_departure": 54,
+        "visit_pedometer": 56,
+        "visit_candidate": 7,
+        "visit_prompt": 20,
+        "system_visit": 11,
+        "visit_gap": 2,
+        "visit_label": 2
+      },
+      "span_days": 6.94,
+      "visits": 56,
+      "answers": {
+        "fueled": 1
+      },
+      "valid_location_records": 2730,
+      "context_records": 684,
+      "linked_usage_events": 148,
+      "research_interactions": {
+        "app_foreground": 2,
+        "app_background": 2,
+        "map_gesture": 116,
+        "station_select": 1
+      },
+      "positives": [
+        {
+          "cutoffs": {
+            "5": {
+              "fresh_fix": false,
+              "moving": false,
+              "prior_fuel_answers": 0,
+              "latest_valid_fix_age_minutes": 3.88,
+              "usage_events_prior_15m": 0,
+              "context_records_before": 0
+            },
+            "15": {
+              "fresh_fix": true,
+              "moving": true,
+              "prior_fuel_answers": 0,
+              "latest_valid_fix_age_minutes": 0.0,
+              "usage_events_prior_15m": 0,
+              "context_records_before": 0
+            },
+            "30": {
+              "fresh_fix": true,
+              "moving": true,
+              "prior_fuel_answers": 0,
+              "latest_valid_fix_age_minutes": 0.52,
+              "usage_events_prior_15m": 0,
+              "context_records_before": 0
+            },
+            "60": {
+              "fresh_fix": true,
+              "moving": false,
+              "prior_fuel_answers": 0,
+              "latest_valid_fix_age_minutes": 0.0,
+              "usage_events_prior_15m": 0,
+              "context_records_before": 0
+            }
+          }
+        }
+      ],
+      "existing_timing_rules": {
+        "clock": {
+          "alerts": 0,
+          "caught": 0
+        },
+        "elapsed_cycle": {
+          "alerts": 0,
+          "caught": 0
+        },
+        "driving_cycle": {
+          "alerts": 0,
+          "caught": 0
+        },
+        "clock_and_cycle": {
+          "alerts": 0,
+          "caught": 0
+        },
+        "before_departure": {
+          "alerts": 0,
+          "caught": 0
+        }
+      },
+      "fresh_location_minutes": 856,
+      "minute_decisions": 10001,
+      "location_gap_seconds": {
+        "n": 2729,
+        "min": 5.0,
+        "median": 6.0,
+        "max": 59164.36
+      },
+      "motion_late_over3m": 146,
+      "inferred_movement_starts": 20
+    },
+    {
+      "cohort": 2,
+      "events": 4869,
+      "kinds": {
+        "consent": 1,
+        "permission": 3,
+        "lifecycle": 27,
+        "diagnostic": 586,
+        "motion": 1941,
+        "location": 1100,
+        "geofence": 1054,
+        "station_catalog": 101,
+        "visit_observation": 14,
+        "visit_departure": 13,
+        "visit_pedometer": 14,
+        "system_visit": 8,
+        "visit_gap": 1,
+        "visit_candidate": 2,
+        "visit_prompt": 4
+      },
+      "span_days": 6.91,
+      "visits": 14,
+      "answers": {},
+      "valid_location_records": 926,
+      "context_records": 1598,
+      "linked_usage_events": 310,
+      "research_interactions": {
+        "app_foreground": 6,
+        "app_background": 6,
+        "station_select": 20,
+        "map_gesture": 202,
+        "map_show_all": 3
+      },
+      "positives": [],
+      "existing_timing_rules": {
+        "clock": {
+          "alerts": 0,
+          "caught": 0
+        },
+        "elapsed_cycle": {
+          "alerts": 0,
+          "caught": 0
+        },
+        "driving_cycle": {
+          "alerts": 0,
+          "caught": 0
+        },
+        "clock_and_cycle": {
+          "alerts": 0,
+          "caught": 0
+        },
+        "before_departure": {
+          "alerts": 0,
+          "caught": 0
+        }
+      },
+      "fresh_location_minutes": 566,
+      "minute_decisions": 9946,
+      "location_gap_seconds": {
+        "n": 925,
+        "min": 0.6,
+        "median": 6.0,
+        "max": 48258.67
+      },
+      "motion_late_over3m": 138,
+      "inferred_movement_starts": 19
+    },
+    {
+      "cohort": 3,
+      "events": 2360,
+      "kinds": {
+        "consent": 1,
+        "lifecycle": 7,
+        "diagnostic": 143,
+        "motion": 1018,
+        "location": 462,
+        "geofence": 696,
+        "station_catalog": 15,
+        "visit_observation": 6,
+        "visit_departure": 6,
+        "visit_pedometer": 6
+      },
+      "span_days": 0.69,
+      "visits": 6,
+      "answers": {},
+      "valid_location_records": 416,
+      "context_records": 139,
+      "linked_usage_events": 4,
+      "research_interactions": {},
+      "positives": [],
+      "existing_timing_rules": {
+        "clock": {
+          "alerts": 0,
+          "caught": 0
+        },
+        "elapsed_cycle": {
+          "alerts": 0,
+          "caught": 0
+        },
+        "driving_cycle": {
+          "alerts": 0,
+          "caught": 0
+        },
+        "clock_and_cycle": {
+          "alerts": 0,
+          "caught": 0
+        },
+        "before_departure": {
+          "alerts": 0,
+          "caught": 0
+        }
+      },
+      "fresh_location_minutes": 131,
+      "minute_decisions": 987,
+      "location_gap_seconds": {
+        "n": 415,
+        "min": 5.0,
+        "median": 6.0,
+        "max": 7691.79
+      },
+      "motion_late_over3m": 322,
+      "inferred_movement_starts": 5
+    },
+    {
+      "cohort": 4,
+      "events": 15,
+      "kinds": {
+        "consent": 1,
+        "permission": 2,
+        "lifecycle": 1,
+        "diagnostic": 6,
+        "location": 2,
+        "motion": 3
+      },
+      "span_days": 0.0,
+      "visits": 0,
+      "answers": {},
+      "valid_location_records": 0,
+      "context_records": 15,
+      "linked_usage_events": 117,
+      "research_interactions": {
+        "app_foreground": 1,
+        "station_go": 1,
+        "station_select": 2
+      },
+      "positives": []
+    },
+    {
+      "cohort": 5,
+      "events": 9,
+      "kinds": {
+        "consent": 1,
+        "permission": 1,
+        "lifecycle": 1,
+        "diagnostic": 2,
+        "location": 1,
+        "motion": 3
+      },
+      "span_days": 0.0,
+      "visits": 0,
+      "answers": {},
+      "valid_location_records": 0,
+      "context_records": 0,
+      "linked_usage_events": 0,
+      "research_interactions": {},
+      "positives": []
+    },
+    {
+      "cohort": 6,
+      "events": 4,
+      "kinds": {
+        "consent": 1,
+        "permission": 3
+      },
+      "span_days": 0.0,
+      "visits": 0,
+      "answers": {},
+      "valid_location_records": 0,
+      "context_records": 4,
+      "linked_usage_events": 0,
+      "research_interactions": {},
+      "positives": []
+    }
+  ],
+  "other_usage": {
+    "events": 713,
+    "installations": 6,
+    "actions": {
+      "map_gesture": 368,
+      "map_show_all": 5,
+      "station_select": 31,
+      "station_go": 3,
+      "handleThemeModeChange": 2,
+      "handleResetOnboarding": 1
+    },
+    "go_actions_joined_to_research": [
+      {
+        "cohort": 4,
+        "visit_within_60m": false,
+        "lead_minutes": null,
+        "label": null
+      }
+    ]
+  },
+  "methodology": {
+    "station_features": false,
+    "server_upload_delay": false,
+    "on_device_recording_delay": true,
+    "policies": "Existing frozen backtestTiming policies; no tuning on this cohort",
+    "unanswered_visits": "Unknown outcomes, never false alerts or confirmed fuel",
+    "usage_clock": "client occurred_at; replay assumes immediate event availability as requested",
+    "scope": "Other than previously identified owner participant and installation; usage excludes simulator. Tiny research-only accounts retained separately; person identity not inferred."
+  },
+  "input_sha256": {
+    "research.json": "cfec5992433ecc151d195d2c7677da66a521274779801eb33e883fba0c03d5c0",
+    "usage.json": "3d44c695081d49e570b8e160be1e4fe22662bad6cfd7aaa6a7c06aca4c6f01a8"
+  },
+  "source_commit": "fc45395c3dc89770cd0f466461c558a7a5d372ce",
+  "moving_only_baseline": {
+    "rule": "Fresh valid location <=120 seconds old and speed >=2.5 m/s; minute replay; 4h cooldown; max 2 alerts per UTC day",
+    "alerts_by_cohort": [
+      11,
+      12,
+      2
+    ],
+    "total_alerts": 25,
+    "confirmed_stops_caught_5_to_60_minutes_ahead": 0,
+    "unanswered_encounter_windows": 15,
+    "no_observed_encounter_windows": 10,
+    "false_positives": "Not estimable: missing ground truth is not negative truth",
+    "selection": "Illustrative baseline selected this analysis; not calibrated or tuned"
+  },
+  "distinct_prompted_visits_by_main_cohort": [
+    7,
+    2,
+    0
+  ]
+}
