@@ -1,0 +1,2531 @@
+{
+  "method": {
+    "split_utc": "2026-10-11T00:00:00Z",
+    "leads_minutes": [
+      1,
+      3,
+      5,
+      10,
+      15
+    ],
+    "positive": "Observed dwell >=180 seconds; not fuel truth",
+    "negative": "Every shorter detected encounter; other known candidate stations are candidate negatives",
+    "candidate_set": "All stations observed in that account catalog/visit history by cutoff, with static coordinates, within 25 km; target never injected",
+    "availability": "Phone-recorded/received time respected; server upload delays ignored. Usage uses client occurred_at.",
+    "model": "L2 regularized, encounter weighted, class-balanced logistic regression; fixed regularization .03, threshold .5; not calibrated probability",
+    "two_stage_gate": "Separate unbalanced logistic regression on best-ranked candidate features, trained only on earlier encounters, threshold .5; ranker training scores are in-sample, so gate calibration is exploratory",
+    "analysis_sequence": "Initial ranker/geometry/baselines evaluated first. Gate and personal-route scenarios added after initial results and user steering; all are exploratory on this shared test window, not independent final validation.",
+    "limitations": [
+      "Current static station coordinates, not historical coordinate snapshots",
+      "Encounter landmarks know retrospectively an encounter is approaching; continuous evaluation reported separately",
+      "Short observation gaps can conceal longer stops; conservative sensitivity excludes these",
+      "No traffic, road network, tank level, purchase truth or future context used"
+    ]
+  },
+  "input_sha256": {
+    "research.json": "d5bbd6316790221faef6326651e2d1a9d9d675d3174cec10a5424a4f25cfcbd4",
+    "stations.json": "1014518228e4bae82d7cd1386bd09b2706731eb2447fa64834a4a217527a6d99",
+    "usage.json": "38cc699fba45bafe2880793619ba0398efebc56ac48116add2f03a174e7373e8"
+  },
+  "research_events": 66975,
+  "accounts": 8,
+  "detected_visits": 260,
+  "positive_visits": 24,
+  "short_negative_visits": 236,
+  "censored_short_visits": 2,
+  "training_candidate_rows": 148694,
+  "training_positive_rows": 43,
+  "split_visits": {
+    "train": 153,
+    "test": 107,
+    "boundary_excluded": 0
+  },
+  "test": {
+    "1": {
+      "full": {
+        "short_negative_visits": 94,
+        "short_negative_with_inputs": 86,
+        "alerts": 96,
+        "correct_destination_alerts": 8,
+        "short_negative_alerts": 86,
+        "wrong_destination_positive_alerts": 2,
+        "positive_visits": 13,
+        "positive_with_inputs": 10,
+        "positive_target_in_candidates": 9,
+        "top1_correct": 8,
+        "top3_correct": 9,
+        "abstained_no_inputs": 11,
+        "top1_fraction_all_positive": 0.6153846153846154,
+        "top1_fraction_positive_with_inputs": 0.8,
+        "exact_destination_alert_precision": 0.08333333333333333
+      },
+      "geometry_only": {
+        "short_negative_visits": 94,
+        "short_negative_with_inputs": 86,
+        "alerts": 92,
+        "correct_destination_alerts": 7,
+        "short_negative_alerts": 83,
+        "wrong_destination_positive_alerts": 2,
+        "positive_visits": 13,
+        "positive_with_inputs": 10,
+        "positive_target_in_candidates": 9,
+        "top1_correct": 8,
+        "top3_correct": 8,
+        "abstained_no_inputs": 11,
+        "top1_fraction_all_positive": 0.6153846153846154,
+        "top1_fraction_positive_with_inputs": 0.8,
+        "exact_destination_alert_precision": 0.07608695652173914
+      },
+      "nearest": {
+        "short_negative_visits": 94,
+        "short_negative_with_inputs": 86,
+        "positive_visits": 13,
+        "positive_with_inputs": 10,
+        "positive_target_in_candidates": 9,
+        "top1_correct": 6,
+        "top3_correct": 8,
+        "abstained_no_inputs": 11,
+        "top1_fraction_all_positive": 0.46153846153846156,
+        "top1_fraction_positive_with_inputs": 0.6
+      },
+      "heading": {
+        "short_negative_visits": 94,
+        "short_negative_with_inputs": 86,
+        "positive_visits": 13,
+        "positive_with_inputs": 10,
+        "positive_target_in_candidates": 9,
+        "top1_correct": 9,
+        "top3_correct": 9,
+        "abstained_no_inputs": 11,
+        "top1_fraction_all_positive": 0.6923076923076923,
+        "top1_fraction_positive_with_inputs": 0.9
+      },
+      "habit": {
+        "short_negative_visits": 94,
+        "short_negative_with_inputs": 86,
+        "positive_visits": 13,
+        "positive_with_inputs": 10,
+        "positive_target_in_candidates": 9,
+        "top1_correct": 6,
+        "top3_correct": 8,
+        "abstained_no_inputs": 11,
+        "top1_fraction_all_positive": 0.46153846153846156,
+        "top1_fraction_positive_with_inputs": 0.6
+      },
+      "two_stage": {
+        "short_negative_visits": 94,
+        "short_negative_with_inputs": 86,
+        "positive_visits": 13,
+        "positive_with_inputs": 10,
+        "positive_target_in_candidates": 9,
+        "top1_correct": 8,
+        "top3_correct": 9,
+        "abstained_no_inputs": 11,
+        "top1_fraction_all_positive": 0.6153846153846154,
+        "top1_fraction_positive_with_inputs": 0.8,
+        "exact_destination_alert_precision": null
+      },
+      "full_excluding_censored_short": {
+        "short_negative_visits": 93,
+        "short_negative_with_inputs": 85,
+        "alerts": 95,
+        "correct_destination_alerts": 8,
+        "short_negative_alerts": 85,
+        "wrong_destination_positive_alerts": 2,
+        "positive_visits": 13,
+        "positive_with_inputs": 10,
+        "positive_target_in_candidates": 9,
+        "top1_correct": 8,
+        "top3_correct": 9,
+        "abstained_no_inputs": 11,
+        "top1_fraction_all_positive": 0.6153846153846154,
+        "top1_fraction_positive_with_inputs": 0.8,
+        "exact_destination_alert_precision": 0.08421052631578947
+      }
+    },
+    "3": {
+      "full": {
+        "short_negative_visits": 93,
+        "short_negative_with_inputs": 78,
+        "alerts": 86,
+        "correct_destination_alerts": 5,
+        "short_negative_alerts": 77,
+        "wrong_destination_positive_alerts": 4,
+        "abstained_no_inputs": 18,
+        "positive_visits": 13,
+        "positive_with_inputs": 10,
+        "positive_target_in_candidates": 9,
+        "top1_correct": 6,
+        "top3_correct": 8,
+        "top1_fraction_all_positive": 0.46153846153846156,
+        "top1_fraction_positive_with_inputs": 0.6,
+        "exact_destination_alert_precision": 0.05813953488372093
+      },
+      "geometry_only": {
+        "short_negative_visits": 93,
+        "short_negative_with_inputs": 78,
+        "alerts": 84,
+        "correct_destination_alerts": 2,
+        "short_negative_alerts": 75,
+        "wrong_destination_positive_alerts": 7,
+        "abstained_no_inputs": 18,
+        "positive_visits": 13,
+        "positive_with_inputs": 10,
+        "positive_target_in_candidates": 9,
+        "top1_correct": 3,
+        "top3_correct": 4,
+        "top1_fraction_all_positive": 0.23076923076923078,
+        "top1_fraction_positive_with_inputs": 0.3,
+        "exact_destination_alert_precision": 0.023809523809523808
+      },
+      "nearest": {
+        "short_negative_visits": 93,
+        "short_negative_with_inputs": 78,
+        "abstained_no_inputs": 18,
+        "positive_visits": 13,
+        "positive_with_inputs": 10,
+        "positive_target_in_candidates": 9,
+        "top1_correct": 2,
+        "top3_correct": 3,
+        "top1_fraction_all_positive": 0.15384615384615385,
+        "top1_fraction_positive_with_inputs": 0.2
+      },
+      "heading": {
+        "short_negative_visits": 93,
+        "short_negative_with_inputs": 78,
+        "abstained_no_inputs": 18,
+        "positive_visits": 13,
+        "positive_with_inputs": 10,
+        "positive_target_in_candidates": 9,
+        "top1_correct": 2,
+        "top3_correct": 4,
+        "top1_fraction_all_positive": 0.15384615384615385,
+        "top1_fraction_positive_with_inputs": 0.2
+      },
+      "habit": {
+        "short_negative_visits": 93,
+        "short_negative_with_inputs": 78,
+        "abstained_no_inputs": 18,
+        "positive_visits": 13,
+        "positive_with_inputs": 10,
+        "positive_target_in_candidates": 9,
+        "top1_correct": 3,
+        "top3_correct": 6,
+        "top1_fraction_all_positive": 0.23076923076923078,
+        "top1_fraction_positive_with_inputs": 0.3
+      },
+      "two_stage": {
+        "short_negative_visits": 93,
+        "short_negative_with_inputs": 78,
+        "abstained_no_inputs": 18,
+        "positive_visits": 13,
+        "positive_with_inputs": 10,
+        "positive_target_in_candidates": 9,
+        "top1_correct": 6,
+        "top3_correct": 8,
+        "top1_fraction_all_positive": 0.46153846153846156,
+        "top1_fraction_positive_with_inputs": 0.6,
+        "exact_destination_alert_precision": null
+      },
+      "full_excluding_censored_short": {
+        "short_negative_visits": 92,
+        "short_negative_with_inputs": 77,
+        "alerts": 85,
+        "correct_destination_alerts": 5,
+        "short_negative_alerts": 76,
+        "wrong_destination_positive_alerts": 4,
+        "abstained_no_inputs": 18,
+        "positive_visits": 13,
+        "positive_with_inputs": 10,
+        "positive_target_in_candidates": 9,
+        "top1_correct": 6,
+        "top3_correct": 8,
+        "top1_fraction_all_positive": 0.46153846153846156,
+        "top1_fraction_positive_with_inputs": 0.6,
+        "exact_destination_alert_precision": 0.058823529411764705
+      }
+    },
+    "5": {
+      "full": {
+        "short_negative_visits": 92,
+        "short_negative_with_inputs": 73,
+        "alerts": 81,
+        "correct_destination_alerts": 3,
+        "short_negative_alerts": 72,
+        "wrong_destination_positive_alerts": 6,
+        "abstained_no_inputs": 23,
+        "positive_visits": 13,
+        "positive_with_inputs": 9,
+        "positive_target_in_candidates": 8,
+        "top1_correct": 3,
+        "top3_correct": 5,
+        "top1_fraction_all_positive": 0.23076923076923078,
+        "top1_fraction_positive_with_inputs": 0.3333333333333333,
+        "exact_destination_alert_precision": 0.037037037037037035
+      },
+      "geometry_only": {
+        "short_negative_visits": 92,
+        "short_negative_with_inputs": 73,
+        "alerts": 81,
+        "correct_destination_alerts": 1,
+        "short_negative_alerts": 72,
+        "wrong_destination_positive_alerts": 8,
+        "abstained_no_inputs": 23,
+        "positive_visits": 13,
+        "positive_with_inputs": 9,
+        "positive_target_in_candidates": 8,
+        "top1_correct": 1,
+        "top3_correct": 2,
+        "top1_fraction_all_positive": 0.07692307692307693,
+        "top1_fraction_positive_with_inputs": 0.1111111111111111,
+        "exact_destination_alert_precision": 0.012345679012345678
+      },
+      "nearest": {
+        "short_negative_visits": 92,
+        "short_negative_with_inputs": 73,
+        "abstained_no_inputs": 23,
+        "positive_visits": 13,
+        "positive_with_inputs": 9,
+        "positive_target_in_candidates": 8,
+        "top1_correct": 1,
+        "top3_correct": 1,
+        "top1_fraction_all_positive": 0.07692307692307693,
+        "top1_fraction_positive_with_inputs": 0.1111111111111111
+      },
+      "heading": {
+        "short_negative_visits": 92,
+        "short_negative_with_inputs": 73,
+        "abstained_no_inputs": 23,
+        "positive_visits": 13,
+        "positive_with_inputs": 9,
+        "positive_target_in_candidates": 8,
+        "top1_correct": 0,
+        "top3_correct": 1,
+        "top1_fraction_all_positive": 0.0,
+        "top1_fraction_positive_with_inputs": 0.0
+      },
+      "habit": {
+        "short_negative_visits": 92,
+        "short_negative_with_inputs": 73,
+        "abstained_no_inputs": 23,
+        "positive_visits": 13,
+        "positive_with_inputs": 9,
+        "positive_target_in_candidates": 8,
+        "top1_correct": 3,
+        "top3_correct": 4,
+        "top1_fraction_all_positive": 0.23076923076923078,
+        "top1_fraction_positive_with_inputs": 0.3333333333333333
+      },
+      "two_stage": {
+        "short_negative_visits": 92,
+        "short_negative_with_inputs": 73,
+        "abstained_no_inputs": 23,
+        "positive_visits": 13,
+        "positive_with_inputs": 9,
+        "positive_target_in_candidates": 8,
+        "top1_correct": 3,
+        "top3_correct": 5,
+        "top1_fraction_all_positive": 0.23076923076923078,
+        "top1_fraction_positive_with_inputs": 0.3333333333333333,
+        "exact_destination_alert_precision": null
+      },
+      "full_excluding_censored_short": {
+        "short_negative_visits": 91,
+        "short_negative_with_inputs": 72,
+        "alerts": 80,
+        "correct_destination_alerts": 3,
+        "short_negative_alerts": 71,
+        "wrong_destination_positive_alerts": 6,
+        "abstained_no_inputs": 23,
+        "positive_visits": 13,
+        "positive_with_inputs": 9,
+        "positive_target_in_candidates": 8,
+        "top1_correct": 3,
+        "top3_correct": 5,
+        "top1_fraction_all_positive": 0.23076923076923078,
+        "top1_fraction_positive_with_inputs": 0.3333333333333333,
+        "exact_destination_alert_precision": 0.0375
+      }
+    },
+    "10": {
+      "full": {
+        "short_negative_visits": 91,
+        "short_negative_with_inputs": 64,
+        "alerts": 73,
+        "correct_destination_alerts": 4,
+        "short_negative_alerts": 64,
+        "wrong_destination_positive_alerts": 5,
+        "positive_visits": 13,
+        "positive_with_inputs": 9,
+        "positive_target_in_candidates": 7,
+        "top1_correct": 4,
+        "top3_correct": 5,
+        "abstained_no_inputs": 31,
+        "top1_fraction_all_positive": 0.3076923076923077,
+        "top1_fraction_positive_with_inputs": 0.4444444444444444,
+        "exact_destination_alert_precision": 0.0547945205479452
+      },
+      "geometry_only": {
+        "short_negative_visits": 91,
+        "short_negative_with_inputs": 64,
+        "alerts": 73,
+        "correct_destination_alerts": 1,
+        "short_negative_alerts": 64,
+        "wrong_destination_positive_alerts": 8,
+        "positive_visits": 13,
+        "positive_with_inputs": 9,
+        "positive_target_in_candidates": 7,
+        "top1_correct": 1,
+        "top3_correct": 1,
+        "abstained_no_inputs": 31,
+        "top1_fraction_all_positive": 0.07692307692307693,
+        "top1_fraction_positive_with_inputs": 0.1111111111111111,
+        "exact_destination_alert_precision": 0.0136986301369863
+      },
+      "nearest": {
+        "short_negative_visits": 91,
+        "short_negative_with_inputs": 64,
+        "positive_visits": 13,
+        "positive_with_inputs": 9,
+        "positive_target_in_candidates": 7,
+        "top1_correct": 1,
+        "top3_correct": 1,
+        "abstained_no_inputs": 31,
+        "top1_fraction_all_positive": 0.07692307692307693,
+        "top1_fraction_positive_with_inputs": 0.1111111111111111
+      },
+      "heading": {
+        "short_negative_visits": 91,
+        "short_negative_with_inputs": 64,
+        "positive_visits": 13,
+        "positive_with_inputs": 9,
+        "positive_target_in_candidates": 7,
+        "top1_correct": 1,
+        "top3_correct": 1,
+        "abstained_no_inputs": 31,
+        "top1_fraction_all_positive": 0.07692307692307693,
+        "top1_fraction_positive_with_inputs": 0.1111111111111111
+      },
+      "habit": {
+        "short_negative_visits": 91,
+        "short_negative_with_inputs": 64,
+        "positive_visits": 13,
+        "positive_with_inputs": 9,
+        "positive_target_in_candidates": 7,
+        "top1_correct": 3,
+        "top3_correct": 5,
+        "abstained_no_inputs": 31,
+        "top1_fraction_all_positive": 0.23076923076923078,
+        "top1_fraction_positive_with_inputs": 0.3333333333333333
+      },
+      "two_stage": {
+        "short_negative_visits": 91,
+        "short_negative_with_inputs": 64,
+        "positive_visits": 13,
+        "positive_with_inputs": 9,
+        "positive_target_in_candidates": 7,
+        "top1_correct": 4,
+        "top3_correct": 5,
+        "abstained_no_inputs": 31,
+        "top1_fraction_all_positive": 0.3076923076923077,
+        "top1_fraction_positive_with_inputs": 0.4444444444444444,
+        "exact_destination_alert_precision": null
+      },
+      "full_excluding_censored_short": {
+        "short_negative_visits": 90,
+        "short_negative_with_inputs": 63,
+        "alerts": 72,
+        "correct_destination_alerts": 4,
+        "short_negative_alerts": 63,
+        "wrong_destination_positive_alerts": 5,
+        "positive_visits": 13,
+        "positive_with_inputs": 9,
+        "positive_target_in_candidates": 7,
+        "top1_correct": 4,
+        "top3_correct": 5,
+        "abstained_no_inputs": 31,
+        "top1_fraction_all_positive": 0.3076923076923077,
+        "top1_fraction_positive_with_inputs": 0.4444444444444444,
+        "exact_destination_alert_precision": 0.05555555555555555
+      }
+    },
+    "15": {
+      "full": {
+        "short_negative_visits": 90,
+        "short_negative_with_inputs": 56,
+        "alerts": 64,
+        "correct_destination_alerts": 3,
+        "short_negative_alerts": 56,
+        "wrong_destination_positive_alerts": 5,
+        "positive_visits": 13,
+        "positive_with_inputs": 8,
+        "positive_target_in_candidates": 6,
+        "top1_correct": 3,
+        "top3_correct": 3,
+        "abstained_no_inputs": 39,
+        "top1_fraction_all_positive": 0.23076923076923078,
+        "top1_fraction_positive_with_inputs": 0.375,
+        "exact_destination_alert_precision": 0.046875
+      },
+      "geometry_only": {
+        "short_negative_visits": 90,
+        "short_negative_with_inputs": 56,
+        "alerts": 62,
+        "correct_destination_alerts": 1,
+        "short_negative_alerts": 54,
+        "wrong_destination_positive_alerts": 7,
+        "positive_visits": 13,
+        "positive_with_inputs": 8,
+        "positive_target_in_candidates": 6,
+        "top1_correct": 1,
+        "top3_correct": 1,
+        "abstained_no_inputs": 39,
+        "top1_fraction_all_positive": 0.07692307692307693,
+        "top1_fraction_positive_with_inputs": 0.125,
+        "exact_destination_alert_precision": 0.016129032258064516
+      },
+      "nearest": {
+        "short_negative_visits": 90,
+        "short_negative_with_inputs": 56,
+        "positive_visits": 13,
+        "positive_with_inputs": 8,
+        "positive_target_in_candidates": 6,
+        "top1_correct": 1,
+        "top3_correct": 1,
+        "abstained_no_inputs": 39,
+        "top1_fraction_all_positive": 0.07692307692307693,
+        "top1_fraction_positive_with_inputs": 0.125
+      },
+      "heading": {
+        "short_negative_visits": 90,
+        "short_negative_with_inputs": 56,
+        "positive_visits": 13,
+        "positive_with_inputs": 8,
+        "positive_target_in_candidates": 6,
+        "top1_correct": 1,
+        "top3_correct": 1,
+        "abstained_no_inputs": 39,
+        "top1_fraction_all_positive": 0.07692307692307693,
+        "top1_fraction_positive_with_inputs": 0.125
+      },
+      "habit": {
+        "short_negative_visits": 90,
+        "short_negative_with_inputs": 56,
+        "positive_visits": 13,
+        "positive_with_inputs": 8,
+        "positive_target_in_candidates": 6,
+        "top1_correct": 2,
+        "top3_correct": 4,
+        "abstained_no_inputs": 39,
+        "top1_fraction_all_positive": 0.15384615384615385,
+        "top1_fraction_positive_with_inputs": 0.25
+      },
+      "two_stage": {
+        "short_negative_visits": 90,
+        "short_negative_with_inputs": 56,
+        "positive_visits": 13,
+        "positive_with_inputs": 8,
+        "positive_target_in_candidates": 6,
+        "top1_correct": 3,
+        "top3_correct": 3,
+        "abstained_no_inputs": 39,
+        "top1_fraction_all_positive": 0.23076923076923078,
+        "top1_fraction_positive_with_inputs": 0.375,
+        "exact_destination_alert_precision": null
+      },
+      "full_excluding_censored_short": {
+        "short_negative_visits": 89,
+        "short_negative_with_inputs": 55,
+        "alerts": 63,
+        "correct_destination_alerts": 3,
+        "short_negative_alerts": 55,
+        "wrong_destination_positive_alerts": 5,
+        "positive_visits": 13,
+        "positive_with_inputs": 8,
+        "positive_target_in_candidates": 6,
+        "top1_correct": 3,
+        "top3_correct": 3,
+        "abstained_no_inputs": 39,
+        "top1_fraction_all_positive": 0.23076923076923078,
+        "top1_fraction_positive_with_inputs": 0.375,
+        "exact_destination_alert_precision": 0.047619047619047616
+      }
+    }
+  },
+  "test_by_account": {
+    "1": {
+      "short_negative_visits": 64,
+      "short_negative_with_inputs": 53,
+      "alerts": 59,
+      "correct_destination_alerts": 3,
+      "short_negative_alerts": 53,
+      "wrong_destination_positive_alerts": 3,
+      "abstained_no_inputs": 12,
+      "positive_visits": 7,
+      "positive_with_inputs": 6,
+      "positive_target_in_candidates": 5,
+      "top1_correct": 3,
+      "top3_correct": 4,
+      "top1_fraction_all_positive": 0.42857142857142855,
+      "top1_fraction_positive_with_inputs": 0.5,
+      "exact_destination_alert_precision": 0.05084745762711865
+    },
+    "2": {
+      "short_negative_visits": 17,
+      "abstained_no_inputs": 6,
+      "short_negative_with_inputs": 12,
+      "alerts": 15,
+      "correct_destination_alerts": 0,
+      "short_negative_alerts": 12,
+      "wrong_destination_positive_alerts": 3,
+      "positive_visits": 4,
+      "positive_with_inputs": 3,
+      "positive_target_in_candidates": 3,
+      "top1_correct": 0,
+      "top3_correct": 1,
+      "top1_fraction_all_positive": 0.0,
+      "top1_fraction_positive_with_inputs": 0.0,
+      "exact_destination_alert_precision": 0.0
+    },
+    "3": {
+      "short_negative_visits": 5,
+      "abstained_no_inputs": 5,
+      "positive_visits": 2,
+      "short_negative_with_inputs": 2,
+      "alerts": 2,
+      "correct_destination_alerts": 0,
+      "short_negative_alerts": 2,
+      "wrong_destination_positive_alerts": 0,
+      "top1_fraction_all_positive": 0.0,
+      "top1_fraction_positive_with_inputs": 0.0,
+      "exact_destination_alert_precision": 0.0
+    },
+    "4": {
+      "short_negative_visits": 6,
+      "short_negative_with_inputs": 6,
+      "alerts": 5,
+      "correct_destination_alerts": 0,
+      "short_negative_alerts": 5,
+      "wrong_destination_positive_alerts": 0,
+      "top1_fraction_all_positive": 0.0,
+      "top1_fraction_positive_with_inputs": 0.0,
+      "exact_destination_alert_precision": 0.0
+    }
+  },
+  "feature_training_variation": {
+    "log_distance": true,
+    "heading_cos": true,
+    "heading_available": true,
+    "closing_mps": true,
+    "closing_available": true,
+    "speed": true,
+    "accuracy": true,
+    "fix_age": true,
+    "prior_station_fraction": true,
+    "prior_station_count": true,
+    "hour_sin": true,
+    "hour_cos": true,
+    "weekday_sin": true,
+    "weekday_cos": true,
+    "same_go": false,
+    "same_selection": false,
+    "motion_age": true,
+    "steps_30m": false,
+    "steps_available": false,
+    "wifi": false,
+    "network_available": false,
+    "automotive": true,
+    "stationary": true,
+    "walking": true,
+    "running": false,
+    "cycling": false,
+    "unknown": false,
+    "confidence": true,
+    "batteryLevel": false,
+    "batteryLevel_missing": false,
+    "batteryState": false,
+    "batteryState_missing": false,
+    "lowPowerMode": false,
+    "lowPowerMode_missing": false,
+    "thermalState": false,
+    "thermalState_missing": false,
+    "backgroundRefreshStatus": false,
+    "backgroundRefreshStatus_missing": false,
+    "foregroundSessionActive": false,
+    "foregroundSessionActive_missing": false,
+    "appOpenedWithin15Minutes": false,
+    "appOpenedWithin15Minutes_missing": false,
+    "appOpenedWithinHour": false,
+    "appOpenedWithinHour_missing": false,
+    "app_openAgeSeconds": false,
+    "app_openAgeSeconds_missing": false,
+    "map_gestureAgeSeconds": false,
+    "map_gestureAgeSeconds_missing": false,
+    "station_selectAgeSeconds": false,
+    "station_selectAgeSeconds_missing": false,
+    "station_goAgeSeconds": false,
+    "station_goAgeSeconds_missing": false
+  },
+  "continuous": {
+    "full": {
+      "alerts": 22,
+      "correct_destination": 1,
+      "short_negative": 9,
+      "minute_decisions": 13197,
+      "decisions_with_candidates": 150,
+      "no_observed_encounter": 12,
+      "distinct_long_stops_caught": 1,
+      "correct_lead_minutes": [
+        0.9999935150146484
+      ],
+      "by_account": {
+        "1": {
+          "alerts": 6
+        },
+        "2": {
+          "alerts": 6
+        },
+        "3": {
+          "alerts": 6,
+          "correct_destination": 1
+        },
+        "4": {
+          "alerts": 4
+        }
+      },
+      "policy": "Every minute; route memory uses nearest same-person prior approach within 300m/45deg and short-stop negative veto; others use threshold .5, >150m from candidate, 30-minute cooldown, maximum 2 alerts/account/UTC day; next encounter within 15 minutes",
+      "unobserved_outcome": "No observed encounter is not proof of no stop; report separately"
+    },
+    "geometry_only": {
+      "alerts": 21,
+      "correct_destination": 1,
+      "short_negative": 10,
+      "minute_decisions": 13197,
+      "decisions_with_candidates": 214,
+      "no_observed_encounter": 10,
+      "distinct_long_stops_caught": 1,
+      "correct_lead_minutes": [
+        0.9999935150146484
+      ],
+      "by_account": {
+        "1": {
+          "alerts": 6
+        },
+        "2": {
+          "alerts": 5
+        },
+        "3": {
+          "alerts": 6,
+          "correct_destination": 1
+        },
+        "4": {
+          "alerts": 4
+        }
+      },
+      "policy": "Every minute; route memory uses nearest same-person prior approach within 300m/45deg and short-stop negative veto; others use threshold .5, >150m from candidate, 30-minute cooldown, maximum 2 alerts/account/UTC day; next encounter within 15 minutes",
+      "unobserved_outcome": "No observed encounter is not proof of no stop; report separately"
+    },
+    "two_stage": {
+      "alerts": 0,
+      "correct_destination": 0,
+      "short_negative": 0,
+      "minute_decisions": 13197,
+      "decisions_with_candidates": 1581,
+      "distinct_long_stops_caught": 0,
+      "correct_lead_minutes": [],
+      "by_account": {},
+      "policy": "Every minute; route memory uses nearest same-person prior approach within 300m/45deg and short-stop negative veto; others use threshold .5, >150m from candidate, 30-minute cooldown, maximum 2 alerts/account/UTC day; next encounter within 15 minutes",
+      "unobserved_outcome": "No observed encounter is not proof of no stop; report separately"
+    },
+    "route_memory": {
+      "alerts": 7,
+      "correct_destination": 3,
+      "short_negative": 4,
+      "minute_decisions": 13197,
+      "decisions_with_candidates": 1230,
+      "distinct_long_stops_caught": 3,
+      "correct_lead_minutes": [
+        4.71670583486557,
+        6.133373494942983,
+        2.223710342248281
+      ],
+      "by_account": {
+        "1": {
+          "alerts": 4,
+          "correct_destination": 2
+        },
+        "2": {
+          "alerts": 2
+        },
+        "3": {
+          "alerts": 1,
+          "correct_destination": 1
+        }
+      },
+      "policy": "Every minute; route memory uses nearest same-person prior approach within 300m/45deg and short-stop negative veto; others use threshold .5, >150m from candidate, 30-minute cooldown, maximum 2 alerts/account/UTC day; next encounter within 15 minutes",
+      "unobserved_outcome": "No observed encounter is not proof of no stop; report separately"
+    },
+    "route_after_1_stops": {
+      "alerts": 7,
+      "correct_destination": 3,
+      "short_negative": 4,
+      "minute_decisions": 13197,
+      "decisions_with_candidates": 964,
+      "distinct_long_stops_caught": 3,
+      "correct_lead_minutes": [
+        4.71670583486557,
+        6.133373494942983,
+        2.223710342248281
+      ],
+      "by_account": {
+        "1": {
+          "alerts": 4,
+          "correct_destination": 2
+        },
+        "2": {
+          "alerts": 2
+        },
+        "3": {
+          "alerts": 1,
+          "correct_destination": 1
+        }
+      },
+      "policy": "Every minute; route memory uses nearest same-person prior approach within 300m/45deg and short-stop negative veto; others use threshold .5, >150m from candidate, 30-minute cooldown, maximum 2 alerts/account/UTC day; next encounter within 15 minutes",
+      "unobserved_outcome": "No observed encounter is not proof of no stop; report separately"
+    },
+    "route_after_2_stops": {
+      "alerts": 6,
+      "correct_destination": 2,
+      "short_negative": 4,
+      "minute_decisions": 13197,
+      "decisions_with_candidates": 947,
+      "distinct_long_stops_caught": 2,
+      "correct_lead_minutes": [
+        4.71670583486557,
+        6.133373494942983
+      ],
+      "by_account": {
+        "1": {
+          "alerts": 4,
+          "correct_destination": 2
+        },
+        "2": {
+          "alerts": 2
+        }
+      },
+      "policy": "Every minute; route memory uses nearest same-person prior approach within 300m/45deg and short-stop negative veto; others use threshold .5, >150m from candidate, 30-minute cooldown, maximum 2 alerts/account/UTC day; next encounter within 15 minutes",
+      "unobserved_outcome": "No observed encounter is not proof of no stop; report separately"
+    },
+    "route_after_3_stops": {
+      "alerts": 6,
+      "correct_destination": 2,
+      "short_negative": 4,
+      "minute_decisions": 13197,
+      "decisions_with_candidates": 841,
+      "distinct_long_stops_caught": 2,
+      "correct_lead_minutes": [
+        4.71670583486557,
+        6.133373494942983
+      ],
+      "by_account": {
+        "1": {
+          "alerts": 4,
+          "correct_destination": 2
+        },
+        "2": {
+          "alerts": 2
+        }
+      },
+      "policy": "Every minute; route memory uses nearest same-person prior approach within 300m/45deg and short-stop negative veto; others use threshold .5, >150m from candidate, 30-minute cooldown, maximum 2 alerts/account/UTC day; next encounter within 15 minutes",
+      "unobserved_outcome": "No observed encounter is not proof of no stop; report separately"
+    },
+    "route_after_5_stops": {
+      "alerts": 6,
+      "correct_destination": 2,
+      "short_negative": 4,
+      "minute_decisions": 13197,
+      "decisions_with_candidates": 773,
+      "distinct_long_stops_caught": 2,
+      "correct_lead_minutes": [
+        4.71670583486557,
+        6.133373494942983
+      ],
+      "by_account": {
+        "1": {
+          "alerts": 4,
+          "correct_destination": 2
+        },
+        "2": {
+          "alerts": 2
+        }
+      },
+      "policy": "Every minute; route memory uses nearest same-person prior approach within 300m/45deg and short-stop negative veto; others use threshold .5, >150m from candidate, 30-minute cooldown, maximum 2 alerts/account/UTC day; next encounter within 15 minutes",
+      "unobserved_outcome": "No observed encounter is not proof of no stop; report separately"
+    },
+    "route_after_2_stations": {
+      "alerts": 6,
+      "correct_destination": 2,
+      "short_negative": 4,
+      "minute_decisions": 13197,
+      "decisions_with_candidates": 841,
+      "distinct_long_stops_caught": 2,
+      "correct_lead_minutes": [
+        4.71670583486557,
+        6.133373494942983
+      ],
+      "by_account": {
+        "1": {
+          "alerts": 4,
+          "correct_destination": 2
+        },
+        "2": {
+          "alerts": 2
+        }
+      },
+      "policy": "Every minute; route memory uses nearest same-person prior approach within 300m/45deg and short-stop negative veto; others use threshold .5, >150m from candidate, 30-minute cooldown, maximum 2 alerts/account/UTC day; next encounter within 15 minutes",
+      "unobserved_outcome": "No observed encounter is not proof of no stop; report separately"
+    },
+    "route_after_3_stations": {
+      "alerts": 6,
+      "correct_destination": 2,
+      "short_negative": 4,
+      "minute_decisions": 13197,
+      "decisions_with_candidates": 841,
+      "distinct_long_stops_caught": 2,
+      "correct_lead_minutes": [
+        4.71670583486557,
+        6.133373494942983
+      ],
+      "by_account": {
+        "1": {
+          "alerts": 4,
+          "correct_destination": 2
+        },
+        "2": {
+          "alerts": 2
+        }
+      },
+      "policy": "Every minute; route memory uses nearest same-person prior approach within 300m/45deg and short-stop negative veto; others use threshold .5, >150m from candidate, 30-minute cooldown, maximum 2 alerts/account/UTC day; next encounter within 15 minutes",
+      "unobserved_outcome": "No observed encounter is not proof of no stop; report separately"
+    }
+  },
+  "personalization_scenarios": {
+    "1": {
+      "completed_long_stops_at_least_0": {
+        "ranker": {
+          "short_negative_visits": 94,
+          "short_negative_with_inputs": 86,
+          "alerts": 96,
+          "correct_destination_alerts": 8,
+          "short_negative_alerts": 86,
+          "wrong_destination_positive_alerts": 2,
+          "positive_visits": 13,
+          "positive_with_inputs": 10,
+          "positive_target_in_candidates": 9,
+          "top1_correct": 8,
+          "top3_correct": 9,
+          "abstained_no_inputs": 11,
+          "top1_fraction_all_positive": 0.6153846153846154,
+          "top1_fraction_positive_with_inputs": 0.8,
+          "exact_destination_alert_precision": 0.08333333333333333
+        },
+        "route_memory": {
+          "short_negative_visits": 94,
+          "positive_visits": 13,
+          "alerts": 5,
+          "short_negative_alerts": 4,
+          "correct_destination": 1,
+          "exact_destination_alert_precision": 0.2
+        }
+      },
+      "distinct_long_stop_stations_at_least_0": {
+        "ranker": {
+          "short_negative_visits": 94,
+          "short_negative_with_inputs": 86,
+          "alerts": 96,
+          "correct_destination_alerts": 8,
+          "short_negative_alerts": 86,
+          "wrong_destination_positive_alerts": 2,
+          "positive_visits": 13,
+          "positive_with_inputs": 10,
+          "positive_target_in_candidates": 9,
+          "top1_correct": 8,
+          "top3_correct": 9,
+          "abstained_no_inputs": 11,
+          "top1_fraction_all_positive": 0.6153846153846154,
+          "top1_fraction_positive_with_inputs": 0.8,
+          "exact_destination_alert_precision": 0.08333333333333333
+        },
+        "route_memory": {
+          "short_negative_visits": 94,
+          "positive_visits": 13,
+          "alerts": 5,
+          "short_negative_alerts": 4,
+          "correct_destination": 1,
+          "exact_destination_alert_precision": 0.2
+        }
+      },
+      "completed_long_stops_at_least_1": {
+        "ranker": {
+          "short_negative_visits": 86,
+          "short_negative_with_inputs": 78,
+          "alerts": 87,
+          "correct_destination_alerts": 7,
+          "short_negative_alerts": 78,
+          "wrong_destination_positive_alerts": 2,
+          "positive_visits": 12,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 7,
+          "top3_correct": 8,
+          "abstained_no_inputs": 11,
+          "top1_fraction_all_positive": 0.5833333333333334,
+          "top1_fraction_positive_with_inputs": 0.7777777777777778,
+          "exact_destination_alert_precision": 0.08045977011494253
+        },
+        "route_memory": {
+          "short_negative_visits": 86,
+          "positive_visits": 12,
+          "alerts": 5,
+          "short_negative_alerts": 4,
+          "correct_destination": 1,
+          "exact_destination_alert_precision": 0.2
+        }
+      },
+      "distinct_long_stop_stations_at_least_1": {
+        "ranker": {
+          "short_negative_visits": 86,
+          "short_negative_with_inputs": 78,
+          "alerts": 87,
+          "correct_destination_alerts": 7,
+          "short_negative_alerts": 78,
+          "wrong_destination_positive_alerts": 2,
+          "positive_visits": 12,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 7,
+          "top3_correct": 8,
+          "abstained_no_inputs": 11,
+          "top1_fraction_all_positive": 0.5833333333333334,
+          "top1_fraction_positive_with_inputs": 0.7777777777777778,
+          "exact_destination_alert_precision": 0.08045977011494253
+        },
+        "route_memory": {
+          "short_negative_visits": 86,
+          "positive_visits": 12,
+          "alerts": 5,
+          "short_negative_alerts": 4,
+          "correct_destination": 1,
+          "exact_destination_alert_precision": 0.2
+        }
+      },
+      "completed_long_stops_at_least_2": {
+        "ranker": {
+          "short_negative_visits": 85,
+          "short_negative_with_inputs": 77,
+          "alerts": 85,
+          "correct_destination_alerts": 6,
+          "short_negative_alerts": 77,
+          "wrong_destination_positive_alerts": 2,
+          "positive_visits": 11,
+          "positive_with_inputs": 8,
+          "positive_target_in_candidates": 7,
+          "top1_correct": 6,
+          "top3_correct": 7,
+          "abstained_no_inputs": 11,
+          "top1_fraction_all_positive": 0.5454545454545454,
+          "top1_fraction_positive_with_inputs": 0.75,
+          "exact_destination_alert_precision": 0.07058823529411765
+        },
+        "route_memory": {
+          "short_negative_visits": 85,
+          "positive_visits": 11,
+          "alerts": 5,
+          "short_negative_alerts": 4,
+          "correct_destination": 1,
+          "exact_destination_alert_precision": 0.2
+        }
+      },
+      "distinct_long_stop_stations_at_least_2": {
+        "ranker": {
+          "short_negative_visits": 83,
+          "short_negative_with_inputs": 75,
+          "alerts": 83,
+          "correct_destination_alerts": 6,
+          "short_negative_alerts": 75,
+          "wrong_destination_positive_alerts": 2,
+          "positive_visits": 11,
+          "positive_with_inputs": 8,
+          "positive_target_in_candidates": 7,
+          "top1_correct": 6,
+          "top3_correct": 7,
+          "abstained_no_inputs": 11,
+          "top1_fraction_all_positive": 0.5454545454545454,
+          "top1_fraction_positive_with_inputs": 0.75,
+          "exact_destination_alert_precision": 0.07228915662650602
+        },
+        "route_memory": {
+          "short_negative_visits": 83,
+          "positive_visits": 11,
+          "alerts": 5,
+          "short_negative_alerts": 4,
+          "correct_destination": 1,
+          "exact_destination_alert_precision": 0.2
+        }
+      },
+      "completed_long_stops_at_least_3": {
+        "ranker": {
+          "short_negative_visits": 83,
+          "short_negative_with_inputs": 75,
+          "alerts": 83,
+          "correct_destination_alerts": 6,
+          "short_negative_alerts": 75,
+          "wrong_destination_positive_alerts": 2,
+          "positive_visits": 11,
+          "positive_with_inputs": 8,
+          "positive_target_in_candidates": 7,
+          "top1_correct": 6,
+          "top3_correct": 7,
+          "abstained_no_inputs": 11,
+          "top1_fraction_all_positive": 0.5454545454545454,
+          "top1_fraction_positive_with_inputs": 0.75,
+          "exact_destination_alert_precision": 0.07228915662650602
+        },
+        "route_memory": {
+          "short_negative_visits": 83,
+          "positive_visits": 11,
+          "alerts": 5,
+          "short_negative_alerts": 4,
+          "correct_destination": 1,
+          "exact_destination_alert_precision": 0.2
+        }
+      },
+      "distinct_long_stop_stations_at_least_3": {
+        "ranker": {
+          "short_negative_visits": 83,
+          "short_negative_with_inputs": 75,
+          "alerts": 83,
+          "correct_destination_alerts": 6,
+          "short_negative_alerts": 75,
+          "wrong_destination_positive_alerts": 2,
+          "positive_visits": 11,
+          "positive_with_inputs": 8,
+          "positive_target_in_candidates": 7,
+          "top1_correct": 6,
+          "top3_correct": 7,
+          "abstained_no_inputs": 11,
+          "top1_fraction_all_positive": 0.5454545454545454,
+          "top1_fraction_positive_with_inputs": 0.75,
+          "exact_destination_alert_precision": 0.07228915662650602
+        },
+        "route_memory": {
+          "short_negative_visits": 83,
+          "positive_visits": 11,
+          "alerts": 5,
+          "short_negative_alerts": 4,
+          "correct_destination": 1,
+          "exact_destination_alert_precision": 0.2
+        }
+      },
+      "completed_long_stops_at_least_5": {
+        "ranker": {
+          "short_negative_visits": 79,
+          "short_negative_with_inputs": 71,
+          "alerts": 78,
+          "correct_destination_alerts": 5,
+          "short_negative_alerts": 71,
+          "wrong_destination_positive_alerts": 2,
+          "positive_visits": 9,
+          "positive_with_inputs": 7,
+          "positive_target_in_candidates": 6,
+          "top1_correct": 5,
+          "top3_correct": 6,
+          "abstained_no_inputs": 10,
+          "top1_fraction_all_positive": 0.5555555555555556,
+          "top1_fraction_positive_with_inputs": 0.7142857142857143,
+          "exact_destination_alert_precision": 0.0641025641025641
+        },
+        "route_memory": {
+          "short_negative_visits": 79,
+          "positive_visits": 9,
+          "alerts": 5,
+          "short_negative_alerts": 4,
+          "correct_destination": 1,
+          "exact_destination_alert_precision": 0.2
+        }
+      },
+      "distinct_long_stop_stations_at_least_5": {
+        "ranker": {
+          "short_negative_visits": 76,
+          "short_negative_with_inputs": 68,
+          "alerts": 74,
+          "correct_destination_alerts": 4,
+          "short_negative_alerts": 68,
+          "wrong_destination_positive_alerts": 2,
+          "positive_visits": 8,
+          "positive_with_inputs": 6,
+          "positive_target_in_candidates": 5,
+          "top1_correct": 4,
+          "top3_correct": 5,
+          "abstained_no_inputs": 10,
+          "top1_fraction_all_positive": 0.5,
+          "top1_fraction_positive_with_inputs": 0.6666666666666666,
+          "exact_destination_alert_precision": 0.05405405405405406
+        },
+        "route_memory": {
+          "short_negative_visits": 76,
+          "positive_visits": 8,
+          "alerts": 5,
+          "short_negative_alerts": 4,
+          "correct_destination": 1,
+          "exact_destination_alert_precision": 0.2
+        }
+      },
+      "repeat_station": {
+        "ranker": {
+          "positive_visits": 6,
+          "positive_with_inputs": 5,
+          "positive_target_in_candidates": 5,
+          "top1_correct": 5,
+          "top3_correct": 5,
+          "alerts": 10,
+          "correct_destination_alerts": 5,
+          "short_negative_alerts": 5,
+          "wrong_destination_positive_alerts": 0,
+          "abstained_no_inputs": 2,
+          "short_negative_visits": 6,
+          "short_negative_with_inputs": 5,
+          "top1_fraction_all_positive": 0.8333333333333334,
+          "top1_fraction_positive_with_inputs": 1.0,
+          "exact_destination_alert_precision": 0.5
+        },
+        "route_memory": {
+          "positive_visits": 6,
+          "short_negative_visits": 6,
+          "alerts": 1,
+          "correct_destination": 1,
+          "exact_destination_alert_precision": 1.0
+        }
+      },
+      "first_time_station": {
+        "ranker": {
+          "short_negative_visits": 88,
+          "short_negative_with_inputs": 81,
+          "alerts": 86,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 81,
+          "wrong_destination_positive_alerts": 2,
+          "positive_visits": 7,
+          "positive_with_inputs": 5,
+          "top1_correct": 3,
+          "top3_correct": 4,
+          "positive_target_in_candidates": 4,
+          "abstained_no_inputs": 9,
+          "top1_fraction_all_positive": 0.42857142857142855,
+          "top1_fraction_positive_with_inputs": 0.6,
+          "exact_destination_alert_precision": 0.03488372093023256
+        },
+        "route_memory": {
+          "short_negative_visits": 88,
+          "positive_visits": 7,
+          "alerts": 4,
+          "short_negative_alerts": 4,
+          "exact_destination_alert_precision": 0.0
+        }
+      }
+    },
+    "3": {
+      "completed_long_stops_at_least_0": {
+        "ranker": {
+          "short_negative_visits": 93,
+          "short_negative_with_inputs": 78,
+          "alerts": 86,
+          "correct_destination_alerts": 5,
+          "short_negative_alerts": 77,
+          "wrong_destination_positive_alerts": 4,
+          "abstained_no_inputs": 18,
+          "positive_visits": 13,
+          "positive_with_inputs": 10,
+          "positive_target_in_candidates": 9,
+          "top1_correct": 6,
+          "top3_correct": 8,
+          "top1_fraction_all_positive": 0.46153846153846156,
+          "top1_fraction_positive_with_inputs": 0.6,
+          "exact_destination_alert_precision": 0.05813953488372093
+        },
+        "route_memory": {
+          "short_negative_visits": 93,
+          "positive_visits": 13,
+          "alerts": 1,
+          "short_negative_alerts": 1,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_0": {
+        "ranker": {
+          "short_negative_visits": 93,
+          "short_negative_with_inputs": 78,
+          "alerts": 86,
+          "correct_destination_alerts": 5,
+          "short_negative_alerts": 77,
+          "wrong_destination_positive_alerts": 4,
+          "abstained_no_inputs": 18,
+          "positive_visits": 13,
+          "positive_with_inputs": 10,
+          "positive_target_in_candidates": 9,
+          "top1_correct": 6,
+          "top3_correct": 8,
+          "top1_fraction_all_positive": 0.46153846153846156,
+          "top1_fraction_positive_with_inputs": 0.6,
+          "exact_destination_alert_precision": 0.05813953488372093
+        },
+        "route_memory": {
+          "short_negative_visits": 93,
+          "positive_visits": 13,
+          "alerts": 1,
+          "short_negative_alerts": 1,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "completed_long_stops_at_least_1": {
+        "ranker": {
+          "short_negative_visits": 85,
+          "short_negative_with_inputs": 70,
+          "alerts": 79,
+          "correct_destination_alerts": 5,
+          "short_negative_alerts": 70,
+          "wrong_destination_positive_alerts": 4,
+          "abstained_no_inputs": 18,
+          "positive_visits": 12,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 5,
+          "top3_correct": 7,
+          "top1_fraction_all_positive": 0.4166666666666667,
+          "top1_fraction_positive_with_inputs": 0.5555555555555556,
+          "exact_destination_alert_precision": 0.06329113924050633
+        },
+        "route_memory": {
+          "short_negative_visits": 85,
+          "positive_visits": 12,
+          "alerts": 1,
+          "short_negative_alerts": 1,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_1": {
+        "ranker": {
+          "short_negative_visits": 85,
+          "short_negative_with_inputs": 70,
+          "alerts": 79,
+          "correct_destination_alerts": 5,
+          "short_negative_alerts": 70,
+          "wrong_destination_positive_alerts": 4,
+          "abstained_no_inputs": 18,
+          "positive_visits": 12,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 5,
+          "top3_correct": 7,
+          "top1_fraction_all_positive": 0.4166666666666667,
+          "top1_fraction_positive_with_inputs": 0.5555555555555556,
+          "exact_destination_alert_precision": 0.06329113924050633
+        },
+        "route_memory": {
+          "short_negative_visits": 85,
+          "positive_visits": 12,
+          "alerts": 1,
+          "short_negative_alerts": 1,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "completed_long_stops_at_least_2": {
+        "ranker": {
+          "short_negative_visits": 84,
+          "short_negative_with_inputs": 70,
+          "alerts": 79,
+          "correct_destination_alerts": 5,
+          "short_negative_alerts": 70,
+          "wrong_destination_positive_alerts": 4,
+          "abstained_no_inputs": 16,
+          "positive_visits": 11,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 5,
+          "top3_correct": 7,
+          "top1_fraction_all_positive": 0.45454545454545453,
+          "top1_fraction_positive_with_inputs": 0.5555555555555556,
+          "exact_destination_alert_precision": 0.06329113924050633
+        },
+        "route_memory": {
+          "short_negative_visits": 84,
+          "positive_visits": 11,
+          "alerts": 1,
+          "short_negative_alerts": 1,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_2": {
+        "ranker": {
+          "short_negative_visits": 82,
+          "short_negative_with_inputs": 69,
+          "alerts": 78,
+          "correct_destination_alerts": 5,
+          "short_negative_alerts": 69,
+          "wrong_destination_positive_alerts": 4,
+          "abstained_no_inputs": 15,
+          "positive_visits": 11,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 5,
+          "top3_correct": 7,
+          "top1_fraction_all_positive": 0.45454545454545453,
+          "top1_fraction_positive_with_inputs": 0.5555555555555556,
+          "exact_destination_alert_precision": 0.0641025641025641
+        },
+        "route_memory": {
+          "short_negative_visits": 82,
+          "positive_visits": 11,
+          "alerts": 1,
+          "short_negative_alerts": 1,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "completed_long_stops_at_least_3": {
+        "ranker": {
+          "short_negative_visits": 82,
+          "short_negative_with_inputs": 69,
+          "alerts": 78,
+          "correct_destination_alerts": 5,
+          "short_negative_alerts": 69,
+          "wrong_destination_positive_alerts": 4,
+          "abstained_no_inputs": 15,
+          "positive_visits": 11,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 5,
+          "top3_correct": 7,
+          "top1_fraction_all_positive": 0.45454545454545453,
+          "top1_fraction_positive_with_inputs": 0.5555555555555556,
+          "exact_destination_alert_precision": 0.0641025641025641
+        },
+        "route_memory": {
+          "short_negative_visits": 82,
+          "positive_visits": 11,
+          "alerts": 1,
+          "short_negative_alerts": 1,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_3": {
+        "ranker": {
+          "short_negative_visits": 82,
+          "short_negative_with_inputs": 69,
+          "alerts": 78,
+          "correct_destination_alerts": 5,
+          "short_negative_alerts": 69,
+          "wrong_destination_positive_alerts": 4,
+          "abstained_no_inputs": 15,
+          "positive_visits": 11,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 5,
+          "top3_correct": 7,
+          "top1_fraction_all_positive": 0.45454545454545453,
+          "top1_fraction_positive_with_inputs": 0.5555555555555556,
+          "exact_destination_alert_precision": 0.0641025641025641
+        },
+        "route_memory": {
+          "short_negative_visits": 82,
+          "positive_visits": 11,
+          "alerts": 1,
+          "short_negative_alerts": 1,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "completed_long_stops_at_least_5": {
+        "ranker": {
+          "short_negative_visits": 78,
+          "short_negative_with_inputs": 65,
+          "alerts": 72,
+          "correct_destination_alerts": 4,
+          "short_negative_alerts": 65,
+          "wrong_destination_positive_alerts": 3,
+          "abstained_no_inputs": 15,
+          "positive_visits": 9,
+          "positive_with_inputs": 7,
+          "positive_target_in_candidates": 6,
+          "top1_correct": 4,
+          "top3_correct": 6,
+          "top1_fraction_all_positive": 0.4444444444444444,
+          "top1_fraction_positive_with_inputs": 0.5714285714285714,
+          "exact_destination_alert_precision": 0.05555555555555555
+        },
+        "route_memory": {
+          "short_negative_visits": 78,
+          "positive_visits": 9,
+          "alerts": 1,
+          "short_negative_alerts": 1,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_5": {
+        "ranker": {
+          "short_negative_visits": 75,
+          "short_negative_with_inputs": 63,
+          "alerts": 69,
+          "correct_destination_alerts": 4,
+          "short_negative_alerts": 63,
+          "wrong_destination_positive_alerts": 2,
+          "abstained_no_inputs": 14,
+          "positive_visits": 8,
+          "positive_with_inputs": 6,
+          "positive_target_in_candidates": 5,
+          "top1_correct": 4,
+          "top3_correct": 5,
+          "top1_fraction_all_positive": 0.5,
+          "top1_fraction_positive_with_inputs": 0.6666666666666666,
+          "exact_destination_alert_precision": 0.057971014492753624
+        },
+        "route_memory": {
+          "short_negative_visits": 75,
+          "positive_visits": 8,
+          "alerts": 1,
+          "short_negative_alerts": 1,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "repeat_station": {
+        "ranker": {
+          "positive_visits": 6,
+          "positive_with_inputs": 4,
+          "positive_target_in_candidates": 4,
+          "top1_correct": 4,
+          "top3_correct": 4,
+          "alerts": 8,
+          "correct_destination_alerts": 4,
+          "short_negative_alerts": 4,
+          "wrong_destination_positive_alerts": 0,
+          "abstained_no_inputs": 4,
+          "short_negative_visits": 6,
+          "short_negative_with_inputs": 4,
+          "top1_fraction_all_positive": 0.6666666666666666,
+          "top1_fraction_positive_with_inputs": 1.0,
+          "exact_destination_alert_precision": 0.5
+        },
+        "route_memory": {
+          "positive_visits": 6,
+          "short_negative_visits": 6,
+          "exact_destination_alert_precision": null
+        }
+      },
+      "first_time_station": {
+        "ranker": {
+          "short_negative_visits": 87,
+          "short_negative_with_inputs": 74,
+          "alerts": 78,
+          "correct_destination_alerts": 1,
+          "short_negative_alerts": 73,
+          "wrong_destination_positive_alerts": 4,
+          "abstained_no_inputs": 14,
+          "positive_visits": 7,
+          "positive_with_inputs": 6,
+          "top1_correct": 2,
+          "top3_correct": 4,
+          "positive_target_in_candidates": 5,
+          "top1_fraction_all_positive": 0.2857142857142857,
+          "top1_fraction_positive_with_inputs": 0.3333333333333333,
+          "exact_destination_alert_precision": 0.01282051282051282
+        },
+        "route_memory": {
+          "short_negative_visits": 87,
+          "positive_visits": 7,
+          "alerts": 1,
+          "short_negative_alerts": 1,
+          "exact_destination_alert_precision": 0.0
+        }
+      }
+    },
+    "5": {
+      "completed_long_stops_at_least_0": {
+        "ranker": {
+          "short_negative_visits": 92,
+          "short_negative_with_inputs": 73,
+          "alerts": 81,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 72,
+          "wrong_destination_positive_alerts": 6,
+          "abstained_no_inputs": 23,
+          "positive_visits": 13,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 3,
+          "top3_correct": 5,
+          "top1_fraction_all_positive": 0.23076923076923078,
+          "top1_fraction_positive_with_inputs": 0.3333333333333333,
+          "exact_destination_alert_precision": 0.037037037037037035
+        },
+        "route_memory": {
+          "short_negative_visits": 92,
+          "positive_visits": 13,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_0": {
+        "ranker": {
+          "short_negative_visits": 92,
+          "short_negative_with_inputs": 73,
+          "alerts": 81,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 72,
+          "wrong_destination_positive_alerts": 6,
+          "abstained_no_inputs": 23,
+          "positive_visits": 13,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 3,
+          "top3_correct": 5,
+          "top1_fraction_all_positive": 0.23076923076923078,
+          "top1_fraction_positive_with_inputs": 0.3333333333333333,
+          "exact_destination_alert_precision": 0.037037037037037035
+        },
+        "route_memory": {
+          "short_negative_visits": 92,
+          "positive_visits": 13,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "completed_long_stops_at_least_1": {
+        "ranker": {
+          "short_negative_visits": 84,
+          "short_negative_with_inputs": 67,
+          "alerts": 76,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 67,
+          "wrong_destination_positive_alerts": 6,
+          "abstained_no_inputs": 20,
+          "positive_visits": 12,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 3,
+          "top3_correct": 5,
+          "top1_fraction_all_positive": 0.25,
+          "top1_fraction_positive_with_inputs": 0.3333333333333333,
+          "exact_destination_alert_precision": 0.039473684210526314
+        },
+        "route_memory": {
+          "short_negative_visits": 84,
+          "positive_visits": 12,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_1": {
+        "ranker": {
+          "short_negative_visits": 84,
+          "short_negative_with_inputs": 67,
+          "alerts": 76,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 67,
+          "wrong_destination_positive_alerts": 6,
+          "abstained_no_inputs": 20,
+          "positive_visits": 12,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 3,
+          "top3_correct": 5,
+          "top1_fraction_all_positive": 0.25,
+          "top1_fraction_positive_with_inputs": 0.3333333333333333,
+          "exact_destination_alert_precision": 0.039473684210526314
+        },
+        "route_memory": {
+          "short_negative_visits": 84,
+          "positive_visits": 12,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "completed_long_stops_at_least_2": {
+        "ranker": {
+          "short_negative_visits": 83,
+          "short_negative_with_inputs": 66,
+          "alerts": 75,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 66,
+          "wrong_destination_positive_alerts": 6,
+          "abstained_no_inputs": 19,
+          "positive_visits": 11,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 3,
+          "top3_correct": 5,
+          "top1_fraction_all_positive": 0.2727272727272727,
+          "top1_fraction_positive_with_inputs": 0.3333333333333333,
+          "exact_destination_alert_precision": 0.04
+        },
+        "route_memory": {
+          "short_negative_visits": 83,
+          "positive_visits": 11,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_2": {
+        "ranker": {
+          "short_negative_visits": 81,
+          "short_negative_with_inputs": 65,
+          "alerts": 74,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 65,
+          "wrong_destination_positive_alerts": 6,
+          "abstained_no_inputs": 18,
+          "positive_visits": 11,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 3,
+          "top3_correct": 5,
+          "top1_fraction_all_positive": 0.2727272727272727,
+          "top1_fraction_positive_with_inputs": 0.3333333333333333,
+          "exact_destination_alert_precision": 0.04054054054054054
+        },
+        "route_memory": {
+          "short_negative_visits": 81,
+          "positive_visits": 11,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "completed_long_stops_at_least_3": {
+        "ranker": {
+          "short_negative_visits": 81,
+          "short_negative_with_inputs": 65,
+          "alerts": 74,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 65,
+          "wrong_destination_positive_alerts": 6,
+          "abstained_no_inputs": 18,
+          "positive_visits": 11,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 3,
+          "top3_correct": 5,
+          "top1_fraction_all_positive": 0.2727272727272727,
+          "top1_fraction_positive_with_inputs": 0.3333333333333333,
+          "exact_destination_alert_precision": 0.04054054054054054
+        },
+        "route_memory": {
+          "short_negative_visits": 81,
+          "positive_visits": 11,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_3": {
+        "ranker": {
+          "short_negative_visits": 81,
+          "short_negative_with_inputs": 65,
+          "alerts": 74,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 65,
+          "wrong_destination_positive_alerts": 6,
+          "abstained_no_inputs": 18,
+          "positive_visits": 11,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 8,
+          "top1_correct": 3,
+          "top3_correct": 5,
+          "top1_fraction_all_positive": 0.2727272727272727,
+          "top1_fraction_positive_with_inputs": 0.3333333333333333,
+          "exact_destination_alert_precision": 0.04054054054054054
+        },
+        "route_memory": {
+          "short_negative_visits": 81,
+          "positive_visits": 11,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "completed_long_stops_at_least_5": {
+        "ranker": {
+          "short_negative_visits": 77,
+          "short_negative_with_inputs": 63,
+          "alerts": 70,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 63,
+          "wrong_destination_positive_alerts": 4,
+          "abstained_no_inputs": 16,
+          "positive_visits": 9,
+          "positive_with_inputs": 7,
+          "positive_target_in_candidates": 6,
+          "top1_correct": 3,
+          "top3_correct": 4,
+          "top1_fraction_all_positive": 0.3333333333333333,
+          "top1_fraction_positive_with_inputs": 0.42857142857142855,
+          "exact_destination_alert_precision": 0.04285714285714286
+        },
+        "route_memory": {
+          "short_negative_visits": 77,
+          "positive_visits": 9,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_5": {
+        "ranker": {
+          "short_negative_visits": 74,
+          "short_negative_with_inputs": 61,
+          "alerts": 67,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 61,
+          "wrong_destination_positive_alerts": 3,
+          "abstained_no_inputs": 15,
+          "positive_visits": 8,
+          "positive_with_inputs": 6,
+          "positive_target_in_candidates": 5,
+          "top1_correct": 3,
+          "top3_correct": 4,
+          "top1_fraction_all_positive": 0.375,
+          "top1_fraction_positive_with_inputs": 0.5,
+          "exact_destination_alert_precision": 0.04477611940298507
+        },
+        "route_memory": {
+          "short_negative_visits": 74,
+          "positive_visits": 8,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "repeat_station": {
+        "ranker": {
+          "positive_visits": 6,
+          "positive_with_inputs": 4,
+          "positive_target_in_candidates": 4,
+          "top1_correct": 3,
+          "top3_correct": 4,
+          "alerts": 8,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 4,
+          "wrong_destination_positive_alerts": 1,
+          "abstained_no_inputs": 4,
+          "short_negative_visits": 6,
+          "short_negative_with_inputs": 4,
+          "top1_fraction_all_positive": 0.5,
+          "top1_fraction_positive_with_inputs": 0.75,
+          "exact_destination_alert_precision": 0.375
+        },
+        "route_memory": {
+          "positive_visits": 6,
+          "short_negative_visits": 6,
+          "exact_destination_alert_precision": null
+        }
+      },
+      "first_time_station": {
+        "ranker": {
+          "short_negative_visits": 86,
+          "short_negative_with_inputs": 69,
+          "alerts": 73,
+          "correct_destination_alerts": 0,
+          "short_negative_alerts": 68,
+          "wrong_destination_positive_alerts": 5,
+          "abstained_no_inputs": 19,
+          "positive_visits": 7,
+          "positive_with_inputs": 5,
+          "top1_correct": 0,
+          "top3_correct": 1,
+          "positive_target_in_candidates": 4,
+          "top1_fraction_all_positive": 0.0,
+          "top1_fraction_positive_with_inputs": 0.0,
+          "exact_destination_alert_precision": 0.0
+        },
+        "route_memory": {
+          "short_negative_visits": 86,
+          "positive_visits": 7,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      }
+    },
+    "10": {
+      "completed_long_stops_at_least_0": {
+        "ranker": {
+          "short_negative_visits": 91,
+          "short_negative_with_inputs": 64,
+          "alerts": 73,
+          "correct_destination_alerts": 4,
+          "short_negative_alerts": 64,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 13,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 7,
+          "top1_correct": 4,
+          "top3_correct": 5,
+          "abstained_no_inputs": 31,
+          "top1_fraction_all_positive": 0.3076923076923077,
+          "top1_fraction_positive_with_inputs": 0.4444444444444444,
+          "exact_destination_alert_precision": 0.0547945205479452
+        },
+        "route_memory": {
+          "short_negative_visits": 91,
+          "positive_visits": 13,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_0": {
+        "ranker": {
+          "short_negative_visits": 91,
+          "short_negative_with_inputs": 64,
+          "alerts": 73,
+          "correct_destination_alerts": 4,
+          "short_negative_alerts": 64,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 13,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 7,
+          "top1_correct": 4,
+          "top3_correct": 5,
+          "abstained_no_inputs": 31,
+          "top1_fraction_all_positive": 0.3076923076923077,
+          "top1_fraction_positive_with_inputs": 0.4444444444444444,
+          "exact_destination_alert_precision": 0.0547945205479452
+        },
+        "route_memory": {
+          "short_negative_visits": 91,
+          "positive_visits": 13,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "completed_long_stops_at_least_1": {
+        "ranker": {
+          "short_negative_visits": 84,
+          "short_negative_with_inputs": 60,
+          "alerts": 69,
+          "correct_destination_alerts": 4,
+          "short_negative_alerts": 60,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 12,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 7,
+          "top1_correct": 4,
+          "top3_correct": 5,
+          "abstained_no_inputs": 27,
+          "top1_fraction_all_positive": 0.3333333333333333,
+          "top1_fraction_positive_with_inputs": 0.4444444444444444,
+          "exact_destination_alert_precision": 0.057971014492753624
+        },
+        "route_memory": {
+          "short_negative_visits": 84,
+          "positive_visits": 12,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_1": {
+        "ranker": {
+          "short_negative_visits": 84,
+          "short_negative_with_inputs": 60,
+          "alerts": 69,
+          "correct_destination_alerts": 4,
+          "short_negative_alerts": 60,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 12,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 7,
+          "top1_correct": 4,
+          "top3_correct": 5,
+          "abstained_no_inputs": 27,
+          "top1_fraction_all_positive": 0.3333333333333333,
+          "top1_fraction_positive_with_inputs": 0.4444444444444444,
+          "exact_destination_alert_precision": 0.057971014492753624
+        },
+        "route_memory": {
+          "short_negative_visits": 84,
+          "positive_visits": 12,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "completed_long_stops_at_least_2": {
+        "ranker": {
+          "short_negative_visits": 83,
+          "short_negative_with_inputs": 60,
+          "alerts": 69,
+          "correct_destination_alerts": 4,
+          "short_negative_alerts": 60,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 11,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 7,
+          "top1_correct": 4,
+          "top3_correct": 5,
+          "abstained_no_inputs": 25,
+          "top1_fraction_all_positive": 0.36363636363636365,
+          "top1_fraction_positive_with_inputs": 0.4444444444444444,
+          "exact_destination_alert_precision": 0.057971014492753624
+        },
+        "route_memory": {
+          "short_negative_visits": 83,
+          "positive_visits": 11,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_2": {
+        "ranker": {
+          "short_negative_visits": 81,
+          "short_negative_with_inputs": 60,
+          "alerts": 69,
+          "correct_destination_alerts": 4,
+          "short_negative_alerts": 60,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 11,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 7,
+          "top1_correct": 4,
+          "top3_correct": 5,
+          "abstained_no_inputs": 23,
+          "top1_fraction_all_positive": 0.36363636363636365,
+          "top1_fraction_positive_with_inputs": 0.4444444444444444,
+          "exact_destination_alert_precision": 0.057971014492753624
+        },
+        "route_memory": {
+          "short_negative_visits": 81,
+          "positive_visits": 11,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "completed_long_stops_at_least_3": {
+        "ranker": {
+          "short_negative_visits": 81,
+          "short_negative_with_inputs": 60,
+          "alerts": 69,
+          "correct_destination_alerts": 4,
+          "short_negative_alerts": 60,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 11,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 7,
+          "top1_correct": 4,
+          "top3_correct": 5,
+          "abstained_no_inputs": 23,
+          "top1_fraction_all_positive": 0.36363636363636365,
+          "top1_fraction_positive_with_inputs": 0.4444444444444444,
+          "exact_destination_alert_precision": 0.057971014492753624
+        },
+        "route_memory": {
+          "short_negative_visits": 81,
+          "positive_visits": 11,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_3": {
+        "ranker": {
+          "short_negative_visits": 81,
+          "short_negative_with_inputs": 60,
+          "alerts": 69,
+          "correct_destination_alerts": 4,
+          "short_negative_alerts": 60,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 11,
+          "positive_with_inputs": 9,
+          "positive_target_in_candidates": 7,
+          "top1_correct": 4,
+          "top3_correct": 5,
+          "abstained_no_inputs": 23,
+          "top1_fraction_all_positive": 0.36363636363636365,
+          "top1_fraction_positive_with_inputs": 0.4444444444444444,
+          "exact_destination_alert_precision": 0.057971014492753624
+        },
+        "route_memory": {
+          "short_negative_visits": 81,
+          "positive_visits": 11,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "completed_long_stops_at_least_5": {
+        "ranker": {
+          "short_negative_visits": 77,
+          "short_negative_with_inputs": 59,
+          "alerts": 66,
+          "correct_destination_alerts": 4,
+          "short_negative_alerts": 59,
+          "wrong_destination_positive_alerts": 3,
+          "positive_visits": 9,
+          "positive_with_inputs": 7,
+          "positive_target_in_candidates": 6,
+          "top1_correct": 4,
+          "top3_correct": 4,
+          "abstained_no_inputs": 20,
+          "top1_fraction_all_positive": 0.4444444444444444,
+          "top1_fraction_positive_with_inputs": 0.5714285714285714,
+          "exact_destination_alert_precision": 0.06060606060606061
+        },
+        "route_memory": {
+          "short_negative_visits": 77,
+          "positive_visits": 9,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "distinct_long_stop_stations_at_least_5": {
+        "ranker": {
+          "short_negative_visits": 74,
+          "short_negative_with_inputs": 58,
+          "alerts": 64,
+          "correct_destination_alerts": 4,
+          "short_negative_alerts": 58,
+          "wrong_destination_positive_alerts": 2,
+          "positive_visits": 8,
+          "positive_with_inputs": 6,
+          "positive_target_in_candidates": 5,
+          "top1_correct": 4,
+          "top3_correct": 4,
+          "abstained_no_inputs": 18,
+          "top1_fraction_all_positive": 0.5,
+          "top1_fraction_positive_with_inputs": 0.6666666666666666,
+          "exact_destination_alert_precision": 0.0625
+        },
+        "route_memory": {
+          "short_negative_visits": 74,
+          "positive_visits": 8,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      },
+      "repeat_station": {
+        "ranker": {
+          "positive_visits": 5,
+          "positive_with_inputs": 4,
+          "positive_target_in_candidates": 4,
+          "top1_correct": 3,
+          "top3_correct": 4,
+          "alerts": 7,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 3,
+          "wrong_destination_positive_alerts": 1,
+          "short_negative_visits": 6,
+          "short_negative_with_inputs": 3,
+          "abstained_no_inputs": 4,
+          "top1_fraction_all_positive": 0.6,
+          "top1_fraction_positive_with_inputs": 0.75,
+          "exact_destination_alert_precision": 0.42857142857142855
+        },
+        "route_memory": {
+          "positive_visits": 5,
+          "short_negative_visits": 6,
+          "exact_destination_alert_precision": null
+        }
+      },
+      "first_time_station": {
+        "ranker": {
+          "short_negative_visits": 85,
+          "short_negative_with_inputs": 61,
+          "alerts": 66,
+          "correct_destination_alerts": 1,
+          "short_negative_alerts": 61,
+          "wrong_destination_positive_alerts": 4,
+          "positive_visits": 8,
+          "positive_with_inputs": 5,
+          "top1_correct": 1,
+          "top3_correct": 1,
+          "positive_target_in_candidates": 3,
+          "abstained_no_inputs": 27,
+          "top1_fraction_all_positive": 0.125,
+          "top1_fraction_positive_with_inputs": 0.2,
+          "exact_destination_alert_precision": 0.015151515151515152
+        },
+        "route_memory": {
+          "short_negative_visits": 85,
+          "positive_visits": 8,
+          "alerts": 2,
+          "short_negative_alerts": 2,
+          "exact_destination_alert_precision": 0.0
+        }
+      }
+    },
+    "15": {
+      "completed_long_stops_at_least_0": {
+        "ranker": {
+          "short_negative_visits": 90,
+          "short_negative_with_inputs": 56,
+          "alerts": 64,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 56,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 13,
+          "positive_with_inputs": 8,
+          "positive_target_in_candidates": 6,
+          "top1_correct": 3,
+          "top3_correct": 3,
+          "abstained_no_inputs": 39,
+          "top1_fraction_all_positive": 0.23076923076923078,
+          "top1_fraction_positive_with_inputs": 0.375,
+          "exact_destination_alert_precision": 0.046875
+        },
+        "route_memory": {
+          "short_negative_visits": 90,
+          "positive_visits": 13,
+          "exact_destination_alert_precision": null
+        }
+      },
+      "distinct_long_stop_stations_at_least_0": {
+        "ranker": {
+          "short_negative_visits": 90,
+          "short_negative_with_inputs": 56,
+          "alerts": 64,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 56,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 13,
+          "positive_with_inputs": 8,
+          "positive_target_in_candidates": 6,
+          "top1_correct": 3,
+          "top3_correct": 3,
+          "abstained_no_inputs": 39,
+          "top1_fraction_all_positive": 0.23076923076923078,
+          "top1_fraction_positive_with_inputs": 0.375,
+          "exact_destination_alert_precision": 0.046875
+        },
+        "route_memory": {
+          "short_negative_visits": 90,
+          "positive_visits": 13,
+          "exact_destination_alert_precision": null
+        }
+      },
+      "completed_long_stops_at_least_1": {
+        "ranker": {
+          "short_negative_visits": 83,
+          "short_negative_with_inputs": 54,
+          "alerts": 62,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 54,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 12,
+          "positive_with_inputs": 8,
+          "positive_target_in_candidates": 6,
+          "top1_correct": 3,
+          "top3_correct": 3,
+          "abstained_no_inputs": 33,
+          "top1_fraction_all_positive": 0.25,
+          "top1_fraction_positive_with_inputs": 0.375,
+          "exact_destination_alert_precision": 0.04838709677419355
+        },
+        "route_memory": {
+          "short_negative_visits": 83,
+          "positive_visits": 12,
+          "exact_destination_alert_precision": null
+        }
+      },
+      "distinct_long_stop_stations_at_least_1": {
+        "ranker": {
+          "short_negative_visits": 83,
+          "short_negative_with_inputs": 54,
+          "alerts": 62,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 54,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 12,
+          "positive_with_inputs": 8,
+          "positive_target_in_candidates": 6,
+          "top1_correct": 3,
+          "top3_correct": 3,
+          "abstained_no_inputs": 33,
+          "top1_fraction_all_positive": 0.25,
+          "top1_fraction_positive_with_inputs": 0.375,
+          "exact_destination_alert_precision": 0.04838709677419355
+        },
+        "route_memory": {
+          "short_negative_visits": 83,
+          "positive_visits": 12,
+          "exact_destination_alert_precision": null
+        }
+      },
+      "completed_long_stops_at_least_2": {
+        "ranker": {
+          "short_negative_visits": 82,
+          "short_negative_with_inputs": 54,
+          "alerts": 62,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 54,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 11,
+          "positive_with_inputs": 8,
+          "positive_target_in_candidates": 6,
+          "top1_correct": 3,
+          "top3_correct": 3,
+          "abstained_no_inputs": 31,
+          "top1_fraction_all_positive": 0.2727272727272727,
+          "top1_fraction_positive_with_inputs": 0.375,
+          "exact_destination_alert_precision": 0.04838709677419355
+        },
+        "route_memory": {
+          "short_negative_visits": 82,
+          "positive_visits": 11,
+          "exact_destination_alert_precision": null
+        }
+      },
+      "distinct_long_stop_stations_at_least_2": {
+        "ranker": {
+          "short_negative_visits": 80,
+          "short_negative_with_inputs": 54,
+          "alerts": 62,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 54,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 11,
+          "positive_with_inputs": 8,
+          "positive_target_in_candidates": 6,
+          "top1_correct": 3,
+          "top3_correct": 3,
+          "abstained_no_inputs": 29,
+          "top1_fraction_all_positive": 0.2727272727272727,
+          "top1_fraction_positive_with_inputs": 0.375,
+          "exact_destination_alert_precision": 0.04838709677419355
+        },
+        "route_memory": {
+          "short_negative_visits": 80,
+          "positive_visits": 11,
+          "exact_destination_alert_precision": null
+        }
+      },
+      "completed_long_stops_at_least_3": {
+        "ranker": {
+          "short_negative_visits": 80,
+          "short_negative_with_inputs": 54,
+          "alerts": 62,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 54,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 11,
+          "positive_with_inputs": 8,
+          "positive_target_in_candidates": 6,
+          "top1_correct": 3,
+          "top3_correct": 3,
+          "abstained_no_inputs": 29,
+          "top1_fraction_all_positive": 0.2727272727272727,
+          "top1_fraction_positive_with_inputs": 0.375,
+          "exact_destination_alert_precision": 0.04838709677419355
+        },
+        "route_memory": {
+          "short_negative_visits": 80,
+          "positive_visits": 11,
+          "exact_destination_alert_precision": null
+        }
+      },
+      "distinct_long_stop_stations_at_least_3": {
+        "ranker": {
+          "short_negative_visits": 80,
+          "short_negative_with_inputs": 54,
+          "alerts": 62,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 54,
+          "wrong_destination_positive_alerts": 5,
+          "positive_visits": 11,
+          "positive_with_inputs": 8,
+          "positive_target_in_candidates": 6,
+          "top1_correct": 3,
+          "top3_correct": 3,
+          "abstained_no_inputs": 29,
+          "top1_fraction_all_positive": 0.2727272727272727,
+          "top1_fraction_positive_with_inputs": 0.375,
+          "exact_destination_alert_precision": 0.04838709677419355
+        },
+        "route_memory": {
+          "short_negative_visits": 80,
+          "positive_visits": 11,
+          "exact_destination_alert_precision": null
+        }
+      },
+      "completed_long_stops_at_least_5": {
+        "ranker": {
+          "short_negative_visits": 76,
+          "short_negative_with_inputs": 53,
+          "alerts": 59,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 53,
+          "wrong_destination_positive_alerts": 3,
+          "positive_visits": 9,
+          "positive_with_inputs": 6,
+          "positive_target_in_candidates": 5,
+          "top1_correct": 3,
+          "top3_correct": 3,
+          "abstained_no_inputs": 26,
+          "top1_fraction_all_positive": 0.3333333333333333,
+          "top1_fraction_positive_with_inputs": 0.5,
+          "exact_destination_alert_precision": 0.05084745762711865
+        },
+        "route_memory": {
+          "short_negative_visits": 76,
+          "positive_visits": 9,
+          "exact_destination_alert_precision": null
+        }
+      },
+      "distinct_long_stop_stations_at_least_5": {
+        "ranker": {
+          "short_negative_visits": 73,
+          "short_negative_with_inputs": 53,
+          "alerts": 58,
+          "correct_destination_alerts": 3,
+          "short_negative_alerts": 53,
+          "wrong_destination_positive_alerts": 2,
+          "positive_visits": 8,
+          "positive_with_inputs": 5,
+          "positive_target_in_candidates": 4,
+          "top1_correct": 3,
+          "top3_correct": 3,
+          "abstained_no_inputs": 23,
+          "top1_fraction_all_positive": 0.375,
+          "top1_fraction_positive_with_inputs": 0.6,
+          "exact_destination_alert_precision": 0.05172413793103448
+        },
+        "route_memory": {
+          "short_negative_visits": 73,
+          "positive_visits": 8,
+          "exact_destination_alert_precision": null
+        }
+      },
+      "repeat_station": {
+        "ranker": {
+          "positive_visits": 5,
+          "positive_with_inputs": 3,
+          "positive_target_in_candidates": 3,
+          "top1_correct": 2,
+          "top3_correct": 2,
+          "alerts": 6,
+          "correct_destination_alerts": 2,
+          "short_negative_alerts": 3,
+          "wrong_destination_positive_alerts": 1,
+          "short_negative_visits": 6,
+          "short_negative_with_inputs": 3,
+          "abstained_no_inputs": 5,
+          "top1_fraction_all_positive": 0.4,
+          "top1_fraction_positive_with_inputs": 0.6666666666666666,
+          "exact_destination_alert_precision": 0.3333333333333333
+        },
+        "route_memory": {
+          "positive_visits": 5,
+          "short_negative_visits": 6,
+          "exact_destination_alert_precision": null
+        }
+      },
+      "first_time_station": {
+        "ranker": {
+          "short_negative_visits": 84,
+          "short_negative_with_inputs": 53,
+          "alerts": 58,
+          "correct_destination_alerts": 1,
+          "short_negative_alerts": 53,
+          "wrong_destination_positive_alerts": 4,
+          "positive_visits": 8,
+          "positive_with_inputs": 5,
+          "top1_correct": 1,
+          "top3_correct": 1,
+          "positive_target_in_candidates": 3,
+          "abstained_no_inputs": 34,
+          "top1_fraction_all_positive": 0.125,
+          "top1_fraction_positive_with_inputs": 0.2,
+          "exact_destination_alert_precision": 0.017241379310344827
+        },
+        "route_memory": {
+          "short_negative_visits": 84,
+          "positive_visits": 8,
+          "exact_destination_alert_precision": null
+        }
+      }
+    }
+  },
+  "standardized_coefficients": {
+    "log_distance": -1.02114,
+    "heading_cos": 0.3527,
+    "heading_available": 0.33066,
+    "closing_mps": 0.531,
+    "closing_available": 0.08642,
+    "speed": 0.29044,
+    "accuracy": 0.1902,
+    "fix_age": 0.12737,
+    "prior_station_fraction": 0.29542,
+    "prior_station_count": 0.16081,
+    "hour_sin": 0.52516,
+    "hour_cos": 0.15076,
+    "weekday_sin": -0.34333,
+    "weekday_cos": 0.04394,
+    "same_go": 0.0,
+    "same_selection": 0.0,
+    "motion_age": -0.21968,
+    "steps_30m": 0.0,
+    "steps_available": 0.0,
+    "wifi": 0.0,
+    "network_available": 0.0,
+    "automotive": 0.15796,
+    "stationary": -0.09334,
+    "walking": -0.04498,
+    "running": 0.0,
+    "cycling": 0.0,
+    "unknown": 0.0,
+    "confidence": -0.05308,
+    "batteryLevel": 0.0,
+    "batteryLevel_missing": 0.0,
+    "batteryState": 0.0,
+    "batteryState_missing": 0.0,
+    "lowPowerMode": 0.0,
+    "lowPowerMode_missing": 0.0,
+    "thermalState": 0.0,
+    "thermalState_missing": 0.0,
+    "backgroundRefreshStatus": 0.0,
+    "backgroundRefreshStatus_missing": 0.0,
+    "foregroundSessionActive": 0.0,
+    "foregroundSessionActive_missing": 0.0,
+    "appOpenedWithin15Minutes": 0.0,
+    "appOpenedWithin15Minutes_missing": 0.0,
+    "appOpenedWithinHour": 0.0,
+    "appOpenedWithinHour_missing": 0.0,
+    "app_openAgeSeconds": 0.0,
+    "app_openAgeSeconds_missing": 0.0,
+    "map_gestureAgeSeconds": 0.0,
+    "map_gestureAgeSeconds_missing": 0.0,
+    "station_selectAgeSeconds": 0.0,
+    "station_selectAgeSeconds_missing": 0.0,
+    "station_goAgeSeconds": 0.0,
+    "station_goAgeSeconds_missing": 0.0
+  },
+  "split_summary": {
+    "train": {
+      "visits": 153,
+      "long_stops": 11,
+      "short_stops": 142
+    },
+    "test": {
+      "visits": 107,
+      "long_stops": 13,
+      "short_stops": 94
+    }
+  },
+  "completed_at_utc": "2026-10-13T19:09:08.069467+00:00"
+}
