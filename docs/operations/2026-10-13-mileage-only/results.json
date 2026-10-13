@@ -1,0 +1,447 @@
+{
+  "method": "Mileage only: after two known confirmed fills, learn their captured travel interval. Update to the median of the latest three completed intervals; subtract accumulated miles after the latest known fill. One alert per confirmed-fill anchor.",
+  "evaluation": "An alert with lead L miles is scored against the next confirmed fill in (0, 2L] captured miles. This distance-window score is not short-term notification precision or proof of imminent intent. Missing/unconfirmed purchases and GPS gaps remain unknown coverage.",
+  "limitations": "Frozen exploratory snapshot, no prospective validation; no tank capacity, gallons, full-tank confirmation, odometer or complete travel coverage. At least two confirmed purchases are required, and only one account has repeated confirmed fills.",
+  "research_sha256": "89dcbffc9837a17637fcde04c2911ab7354e7630b972bded5db3fd0897499d71",
+  "source_hashes": {
+    "backtestMileageOnly.py": "7f25772eadc265ba1803afec9c3c9abf2abd8b47ff2e64a3376091a61299847e",
+    "mileageReadiness.py": "f70ca923810090ba1de40aacceb40fe9856ef0da2c1a427f904e22dab23af39c",
+    "timingFeatures.py": "f5d8d56618f137811bb1e13d386b2365356e182a4520cc46be3ae9af6662ad26",
+    "backtestAnticipation.py": "f010f0a15d800ab3bee28dbc124851023599994fbc6f2c0edde8d64b6cce96b8"
+  },
+  "accounts": [
+    {
+      "account": 1,
+      "confirmed_fills": 7,
+      "observed_cycle_miles": [
+        119.48453500871594,
+        214.89632079964116,
+        125.19441384249234,
+        115.4259750609165,
+        150.20143111183242,
+        119.31847572320497
+      ],
+      "forecasts": {
+        "last_interval": [
+          {
+            "prior_completed_cycles": 1,
+            "predicted_cycle_miles": 119.48453500871594,
+            "observed_cycle_miles": 214.89632079964116,
+            "error_miles": -95.41178579092522
+          },
+          {
+            "prior_completed_cycles": 2,
+            "predicted_cycle_miles": 214.89632079964116,
+            "observed_cycle_miles": 125.19441384249234,
+            "error_miles": 89.70190695714882
+          },
+          {
+            "prior_completed_cycles": 3,
+            "predicted_cycle_miles": 125.19441384249234,
+            "observed_cycle_miles": 115.4259750609165,
+            "error_miles": 9.768438781575838
+          },
+          {
+            "prior_completed_cycles": 4,
+            "predicted_cycle_miles": 115.4259750609165,
+            "observed_cycle_miles": 150.20143111183242,
+            "error_miles": -34.77545605091592
+          },
+          {
+            "prior_completed_cycles": 5,
+            "predicted_cycle_miles": 150.20143111183242,
+            "observed_cycle_miles": 119.31847572320497,
+            "error_miles": 30.88295538862745
+          }
+        ],
+        "last_three_median": [
+          {
+            "prior_completed_cycles": 1,
+            "predicted_cycle_miles": 119.48453500871594,
+            "observed_cycle_miles": 214.89632079964116,
+            "error_miles": -95.41178579092522
+          },
+          {
+            "prior_completed_cycles": 2,
+            "predicted_cycle_miles": 167.19042790417853,
+            "observed_cycle_miles": 125.19441384249234,
+            "error_miles": 41.996014061686196
+          },
+          {
+            "prior_completed_cycles": 3,
+            "predicted_cycle_miles": 125.19441384249234,
+            "observed_cycle_miles": 115.4259750609165,
+            "error_miles": 9.768438781575838
+          },
+          {
+            "prior_completed_cycles": 4,
+            "predicted_cycle_miles": 125.19441384249234,
+            "observed_cycle_miles": 150.20143111183242,
+            "error_miles": -25.007017269340082
+          },
+          {
+            "prior_completed_cycles": 5,
+            "predicted_cycle_miles": 125.19441384249234,
+            "observed_cycle_miles": 119.31847572320497,
+            "error_miles": 5.875938119287369
+          }
+        ]
+      },
+      "policies": {
+        "minimum_1_cycles_lead_5_miles": {
+          "alerts": 3,
+          "next_fill_observed": 3,
+          "inside_distance_window": 0,
+          "outside_distance_window": 3,
+          "unknown": 0,
+          "details": [
+            {
+              "known_mileage_cycles": 1,
+              "observed_miles_since_fill": 114.5728718945637,
+              "predicted_cycle_miles": 119.48453500871594,
+              "observed_miles_until_next_confirmed_fill": 100.32344890507743,
+              "within_evaluation_distance_window": false
+            },
+            {
+              "known_mileage_cycles": 3,
+              "observed_miles_since_fill": 120.2409959899046,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 145.38641018284432,
+              "within_evaluation_distance_window": false
+            },
+            {
+              "known_mileage_cycles": 4,
+              "observed_miles_since_fill": 120.19844176791521,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 30.00298934391721,
+              "within_evaluation_distance_window": false
+            }
+          ]
+        },
+        "minimum_1_cycles_lead_10_miles": {
+          "alerts": 4,
+          "next_fill_observed": 4,
+          "inside_distance_window": 2,
+          "outside_distance_window": 2,
+          "unknown": 0,
+          "details": [
+            {
+              "known_mileage_cycles": 1,
+              "observed_miles_since_fill": 109.61551869779741,
+              "predicted_cycle_miles": 119.48453500871594,
+              "observed_miles_until_next_confirmed_fill": 105.28080210184372,
+              "within_evaluation_distance_window": false
+            },
+            {
+              "known_mileage_cycles": 3,
+              "observed_miles_since_fill": 115.2765105265116,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 0.14946453440490745,
+              "within_evaluation_distance_window": true
+            },
+            {
+              "known_mileage_cycles": 4,
+              "observed_miles_since_fill": 115.20451032369854,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 34.99692078813388,
+              "within_evaluation_distance_window": false
+            },
+            {
+              "known_mileage_cycles": 5,
+              "observed_miles_since_fill": 115.21846949133648,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 4.100006231868492,
+              "within_evaluation_distance_window": true
+            }
+          ]
+        },
+        "minimum_1_cycles_lead_20_miles": {
+          "alerts": 4,
+          "next_fill_observed": 4,
+          "inside_distance_window": 2,
+          "outside_distance_window": 2,
+          "unknown": 0,
+          "details": [
+            {
+              "known_mileage_cycles": 1,
+              "observed_miles_since_fill": 99.51156990275433,
+              "predicted_cycle_miles": 119.48453500871594,
+              "observed_miles_until_next_confirmed_fill": 115.3847508968868,
+              "within_evaluation_distance_window": false
+            },
+            {
+              "known_mileage_cycles": 3,
+              "observed_miles_since_fill": 105.23414516262581,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 10.19182989829069,
+              "within_evaluation_distance_window": true
+            },
+            {
+              "known_mileage_cycles": 4,
+              "observed_miles_since_fill": 105.28128332712508,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 44.92014778470735,
+              "within_evaluation_distance_window": false
+            },
+            {
+              "known_mileage_cycles": 5,
+              "observed_miles_since_fill": 105.36640125097678,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 13.952074472228187,
+              "within_evaluation_distance_window": true
+            }
+          ]
+        },
+        "minimum_2_cycles_lead_5_miles": {
+          "alerts": 2,
+          "next_fill_observed": 2,
+          "inside_distance_window": 0,
+          "outside_distance_window": 2,
+          "unknown": 0,
+          "details": [
+            {
+              "known_mileage_cycles": 3,
+              "observed_miles_since_fill": 120.2409959899046,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 145.38641018284432,
+              "within_evaluation_distance_window": false
+            },
+            {
+              "known_mileage_cycles": 4,
+              "observed_miles_since_fill": 120.19844176791521,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 30.00298934391721,
+              "within_evaluation_distance_window": false
+            }
+          ]
+        },
+        "minimum_2_cycles_lead_10_miles": {
+          "alerts": 3,
+          "next_fill_observed": 3,
+          "inside_distance_window": 2,
+          "outside_distance_window": 1,
+          "unknown": 0,
+          "details": [
+            {
+              "known_mileage_cycles": 3,
+              "observed_miles_since_fill": 115.2765105265116,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 0.14946453440490745,
+              "within_evaluation_distance_window": true
+            },
+            {
+              "known_mileage_cycles": 4,
+              "observed_miles_since_fill": 115.20451032369854,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 34.99692078813388,
+              "within_evaluation_distance_window": false
+            },
+            {
+              "known_mileage_cycles": 5,
+              "observed_miles_since_fill": 115.21846949133648,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 4.100006231868492,
+              "within_evaluation_distance_window": true
+            }
+          ]
+        },
+        "minimum_2_cycles_lead_20_miles": {
+          "alerts": 3,
+          "next_fill_observed": 3,
+          "inside_distance_window": 2,
+          "outside_distance_window": 1,
+          "unknown": 0,
+          "details": [
+            {
+              "known_mileage_cycles": 3,
+              "observed_miles_since_fill": 105.23414516262581,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 10.19182989829069,
+              "within_evaluation_distance_window": true
+            },
+            {
+              "known_mileage_cycles": 4,
+              "observed_miles_since_fill": 105.28128332712508,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 44.92014778470735,
+              "within_evaluation_distance_window": false
+            },
+            {
+              "known_mileage_cycles": 5,
+              "observed_miles_since_fill": 105.36640125097678,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 13.952074472228187,
+              "within_evaluation_distance_window": true
+            }
+          ]
+        },
+        "minimum_3_cycles_lead_5_miles": {
+          "alerts": 2,
+          "next_fill_observed": 2,
+          "inside_distance_window": 0,
+          "outside_distance_window": 2,
+          "unknown": 0,
+          "details": [
+            {
+              "known_mileage_cycles": 3,
+              "observed_miles_since_fill": 120.2409959899046,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 145.38641018284432,
+              "within_evaluation_distance_window": false
+            },
+            {
+              "known_mileage_cycles": 4,
+              "observed_miles_since_fill": 120.19844176791521,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 30.00298934391721,
+              "within_evaluation_distance_window": false
+            }
+          ]
+        },
+        "minimum_3_cycles_lead_10_miles": {
+          "alerts": 3,
+          "next_fill_observed": 3,
+          "inside_distance_window": 2,
+          "outside_distance_window": 1,
+          "unknown": 0,
+          "details": [
+            {
+              "known_mileage_cycles": 3,
+              "observed_miles_since_fill": 115.2765105265116,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 0.14946453440490745,
+              "within_evaluation_distance_window": true
+            },
+            {
+              "known_mileage_cycles": 4,
+              "observed_miles_since_fill": 115.20451032369854,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 34.99692078813388,
+              "within_evaluation_distance_window": false
+            },
+            {
+              "known_mileage_cycles": 5,
+              "observed_miles_since_fill": 115.21846949133648,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 4.100006231868492,
+              "within_evaluation_distance_window": true
+            }
+          ]
+        },
+        "minimum_3_cycles_lead_20_miles": {
+          "alerts": 3,
+          "next_fill_observed": 3,
+          "inside_distance_window": 2,
+          "outside_distance_window": 1,
+          "unknown": 0,
+          "details": [
+            {
+              "known_mileage_cycles": 3,
+              "observed_miles_since_fill": 105.23414516262581,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 10.19182989829069,
+              "within_evaluation_distance_window": true
+            },
+            {
+              "known_mileage_cycles": 4,
+              "observed_miles_since_fill": 105.28128332712508,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 44.92014778470735,
+              "within_evaluation_distance_window": false
+            },
+            {
+              "known_mileage_cycles": 5,
+              "observed_miles_since_fill": 105.36640125097678,
+              "predicted_cycle_miles": 125.19441384249234,
+              "observed_miles_until_next_confirmed_fill": 13.952074472228187,
+              "within_evaluation_distance_window": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "account": 2,
+      "confirmed_fills": 1,
+      "observed_cycle_miles": [],
+      "forecasts": {
+        "last_interval": [],
+        "last_three_median": []
+      },
+      "policies": {
+        "minimum_1_cycles_lead_5_miles": {
+          "alerts": 0,
+          "next_fill_observed": 0,
+          "inside_distance_window": 0,
+          "outside_distance_window": 0,
+          "unknown": 0,
+          "details": []
+        },
+        "minimum_1_cycles_lead_10_miles": {
+          "alerts": 0,
+          "next_fill_observed": 0,
+          "inside_distance_window": 0,
+          "outside_distance_window": 0,
+          "unknown": 0,
+          "details": []
+        },
+        "minimum_1_cycles_lead_20_miles": {
+          "alerts": 0,
+          "next_fill_observed": 0,
+          "inside_distance_window": 0,
+          "outside_distance_window": 0,
+          "unknown": 0,
+          "details": []
+        },
+        "minimum_2_cycles_lead_5_miles": {
+          "alerts": 0,
+          "next_fill_observed": 0,
+          "inside_distance_window": 0,
+          "outside_distance_window": 0,
+          "unknown": 0,
+          "details": []
+        },
+        "minimum_2_cycles_lead_10_miles": {
+          "alerts": 0,
+          "next_fill_observed": 0,
+          "inside_distance_window": 0,
+          "outside_distance_window": 0,
+          "unknown": 0,
+          "details": []
+        },
+        "minimum_2_cycles_lead_20_miles": {
+          "alerts": 0,
+          "next_fill_observed": 0,
+          "inside_distance_window": 0,
+          "outside_distance_window": 0,
+          "unknown": 0,
+          "details": []
+        },
+        "minimum_3_cycles_lead_5_miles": {
+          "alerts": 0,
+          "next_fill_observed": 0,
+          "inside_distance_window": 0,
+          "outside_distance_window": 0,
+          "unknown": 0,
+          "details": []
+        },
+        "minimum_3_cycles_lead_10_miles": {
+          "alerts": 0,
+          "next_fill_observed": 0,
+          "inside_distance_window": 0,
+          "outside_distance_window": 0,
+          "unknown": 0,
+          "details": []
+        },
+        "minimum_3_cycles_lead_20_miles": {
+          "alerts": 0,
+          "next_fill_observed": 0,
+          "inside_distance_window": 0,
+          "outside_distance_window": 0,
+          "unknown": 0,
+          "details": []
+        }
+      }
+    }
+  ]
+}

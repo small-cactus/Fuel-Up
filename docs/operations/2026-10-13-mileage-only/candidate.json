@@ -1,0 +1,16 @@
+{
+  "model": "personal_captured_mileage_only",
+  "status": "offline_research_does_not_meet_zero_false_alert_goal",
+  "deployed": false,
+  "prospectively_validated": false,
+  "minimum_completed_intervals": 1,
+  "cycle_estimator": "median_of_last_three_completed_positive_distance_intervals",
+  "cold_start": "abstain_until_two_known_confirmed_fills_with_positive_captured_distance",
+  "predicted_remaining_miles": "predicted_cycle_miles_minus_captured_miles_since_latest_known_confirmed_fill",
+  "experimental_warning_lead_miles": 10,
+  "maximum_alerts_per_confirmed_fill_anchor": 1,
+  "time_predictors": [],
+  "route_predictors": [],
+  "zero_observed_errors_is_not_accuracy_guarantee": true,
+  "next_validation": "Freeze mileage rules and evaluate future confirmed purchases with distance coverage reported; do not interpret captured travel as tank capacity or promise imminent filling from mileage readiness alone."
+}
