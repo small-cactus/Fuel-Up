@@ -1,0 +1,140 @@
+{
+  "snapshot_research_events": 66996,
+  "feature_rows": 2080,
+  "lead_minutes": [
+    0.5,
+    1,
+    3,
+    5,
+    10,
+    15,
+    30,
+    60
+  ],
+  "input_hashes": {
+    "research.json": "89dcbffc9837a17637fcde04c2911ab7354e7630b972bded5db3fd0897499d71",
+    "stations.json": "1014518228e4bae82d7cd1386bd09b2706731eb2447fa64834a4a217527a6d99",
+    "usage.json": "4dd6f0b343acc8335a5ad4dca780015bb8a26fd9b700ac10c4069d72c020ea46"
+  },
+  "tank_related_payload_keys": {},
+  "cycles": [
+    {
+      "account": 1,
+      "confirmed_fills": 7,
+      "dwell_minutes": [
+        3.8500025510787963,
+        9.499999515215556,
+        3.683330289522807,
+        4.233339174588521,
+        8.8000075618426,
+        3.766667091846466,
+        4.200048840045929
+      ],
+      "intervals": [
+        {
+          "hours": 69.73027716067102,
+          "observed_km": 192.29171950906695,
+          "observed_driving_hours": 3.238614819116072,
+          "largest_location_gap_hours": 23.47855723718802
+        },
+        {
+          "hours": 28.045554967721305,
+          "observed_km": 345.8421045009777,
+          "observed_driving_hours": 5.313340009517171,
+          "largest_location_gap_hours": 8.249269809391764
+        },
+        {
+          "hours": 21.39805884361267,
+          "observed_km": 201.480878750932,
+          "observed_driving_hours": 3.6186022949881256,
+          "largest_location_gap_hours": 15.15403856979476
+        },
+        {
+          "hours": 24.341109162370365,
+          "observed_km": 185.76010040843562,
+          "observed_driving_hours": 2.8527378457784707,
+          "largest_location_gap_hours": 17.002991596460344
+        },
+        {
+          "hours": 22.784166107906234,
+          "observed_km": 241.72577195124086,
+          "observed_driving_hours": 3.7275842193762116,
+          "largest_location_gap_hours": 14.160247558289104
+        },
+        {
+          "hours": 24.856111686428388,
+          "observed_km": 192.0244729942856,
+          "observed_driving_hours": 3.294168616599599,
+          "largest_location_gap_hours": 8.475494409468439
+        }
+      ],
+      "forecasts": [
+        {
+          "rule": "all_prior_median",
+          "prior_fills": 3,
+          "error_hours": 27.48985722058349,
+          "lead_from_decision_hours": 21.333589658472274
+        },
+        {
+          "rule": "last_three_median",
+          "prior_fills": 3,
+          "error_hours": 27.48985722058349,
+          "lead_from_decision_hours": 21.333589658472274
+        },
+        {
+          "rule": "all_prior_median",
+          "prior_fills": 4,
+          "error_hours": 3.7044458053509395,
+          "lead_from_decision_hours": 24.26802611503336
+        },
+        {
+          "rule": "last_three_median",
+          "prior_fills": 4,
+          "error_hours": 3.7044458053509395,
+          "lead_from_decision_hours": 24.26802611503336
+        },
+        {
+          "rule": "all_prior_median",
+          "prior_fills": 5,
+          "error_hours": 3.4091659571727115,
+          "lead_from_decision_hours": 22.13658992316988
+        },
+        {
+          "rule": "last_three_median",
+          "prior_fills": 5,
+          "error_hours": 1.5569430544641283,
+          "lead_from_decision_hours": 22.13658992316988
+        },
+        {
+          "rule": "all_prior_median",
+          "prior_fills": 6,
+          "error_hours": -0.515002524058024,
+          "lead_from_decision_hours": 24.790527323815557
+        },
+        {
+          "rule": "last_three_median",
+          "prior_fills": 6,
+          "error_hours": -2.0719455785221523,
+          "lead_from_decision_hours": 24.790527323815557
+        }
+      ],
+      "label_counts": {
+        "fueled": 7,
+        "not_fueling": 5,
+        "not_a_stop": 9
+      }
+    },
+    {
+      "account": 2,
+      "confirmed_fills": 1,
+      "dwell_minutes": [
+        3.378769874572754
+      ],
+      "intervals": [],
+      "forecasts": [],
+      "label_counts": {
+        "fueled": 1
+      }
+    }
+  ]
+}
