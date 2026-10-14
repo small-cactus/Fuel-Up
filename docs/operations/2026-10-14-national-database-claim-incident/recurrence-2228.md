@@ -34,3 +34,13 @@ Current regional completion, projection backlog, cron execution, archive capacit
 No repair, deployment, re-enable, schedule mutation, provider replay, raw overwrite, billing change, research deletion, or phone interaction was performed. New-incident repair attempts: zero. The earlier incident's sole index attempt was rejected for lack of Storage table ownership and was not retried.
 
 On the next check, reconcile the 22:00 deadline and subsequent slots including absent rows, verify all three routes and maintenance checks, and require scheduled recovery plus immutable archive read-back before reporting recovery. Fixed-inventory observations are not verified pump truth.
+
+## 23:27 heartbeat: one new incomplete hour confirmed
+
+The 22:00 run 18987 became partial at 23:00:00 UTC. Reconciliation now shows 173 expected operational slots, 161 complete, 11 partial, zero expired absent rows and zero expired running rows. This is one newly confirmed incomplete hour beyond the ten previously reported. The current 23:00 run 19019 remains running and is allowed until October 15 at 00:00 UTC; it is not counted as missed yet.
+
+Collection remains enabled and continuous. Dispatch advanced to 23:27:03 UTC, but the last recorded provider request remains 22:06:23 UTC. The shared cooldown expired at 22:04:16 UTC. No re-enable or cooldown override is appropriate. The full status query again returned HTTP 524 (23:29:38 UTC); the combined diagnostic query exceeded its 60-second bound, and a narrower job-count query failed during login-role creation with HTTP 544 database connection timeout. Current successful/missed batch counts, regional execution, budgets, projection backlog, capacity and retention execution remain unverified. The earlier budget result was 21 requests and 39,960 lookups for the 22:00 run; it is not a fresh count.
+
+A cache-only public regular-grade Trends request returned HTTP 200 in 5,478 ms with no history error. Its latest point remains the complete 21:00 sweep (68,928 eligible priced stations). The database cache still contains ten scopes for run 18927 published at 21:20 UTC. This establishes public response recovery for that request only, not resumed scheduled collection or a fresh 22:00 sweep. No immutable read-back was performed because scheduled recovery has not been established.
+
+No repair attempt or production mutation was made. The recurrence still has zero repair attempts; the prior rejected Storage index attempt was not repeated. Sanitized evidence is in `followup-2327.json`. Continue monitoring for additional expired gaps and obtain scheduled collection plus archive read-back before reporting full recovery.
