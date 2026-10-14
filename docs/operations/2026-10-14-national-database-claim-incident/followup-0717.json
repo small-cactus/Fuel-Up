@@ -1,0 +1,168 @@
+{
+  "heartbeat_at": "2026-10-14T07:17:23.135Z",
+  "additional_repair_attempts": 0,
+  "state_and_slots": [
+    {
+      "checks": {
+        "cache": [
+          {
+            "published_at": "2026-10-14T02:19:00.248989+00:00",
+            "run_id": 17935
+          }
+        ],
+        "config": {
+          "approved_lookups_per_hour": 161660,
+          "archive_budget_bytes": 900000000,
+          "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+          "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+          "continuous": true,
+          "enabled": true,
+          "ends_at": "2026-10-07T18:19:00+00:00",
+          "halt_reason": "UPSTREAM_HTTP_503",
+          "id": true,
+          "last_dispatch_at": "2026-10-14T07:17:02.065927+00:00",
+          "last_request_at": "2026-10-14T03:04:00.722983+00:00",
+          "max_requests_per_hour": 92,
+          "operational_raw_hours": 48,
+          "operational_starts_at": "2026-10-07T19:00:00+00:00",
+          "provider_backoff_until": "2026-10-14T02:16:48.547933+00:00",
+          "request_interval_seconds": 10,
+          "starts_at": "2026-09-30T22:00:00+00:00"
+        },
+        "http": [
+          {
+            "created": "2026-10-14T07:17:04.041964+00:00",
+            "id": 7404,
+            "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+            "status_code": 503
+          },
+          {
+            "created": "2026-10-14T07:16:12.453284+00:00",
+            "id": 7403,
+            "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+            "status_code": 503
+          },
+          {
+            "created": "2026-10-14T07:14:04.208634+00:00",
+            "id": 7402,
+            "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+            "status_code": 503
+          }
+        ],
+        "runs": [
+          {
+            "completed_at": null,
+            "id": 18142,
+            "slot_at": "2026-10-14T07:00:00+00:00",
+            "status": "running"
+          },
+          {
+            "completed_at": "2026-10-14T07:01:00.244468+00:00",
+            "id": 18107,
+            "slot_at": "2026-10-14T06:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-10-14T06:02:03.346448+00:00",
+            "id": 18069,
+            "slot_at": "2026-10-14T05:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-10-14T05:00:07.443395+00:00",
+            "id": 18027,
+            "slot_at": "2026-10-14T04:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-10-14T04:02:01.818664+00:00",
+            "id": 17995,
+            "slot_at": "2026-10-14T03:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-10-14T02:18:04.91661+00:00",
+            "id": 17935,
+            "slot_at": "2026-10-14T02:00:00+00:00",
+            "status": "complete"
+          }
+        ],
+        "slots": {
+          "complete": 148,
+          "expected": 157,
+          "expired_absent": 0,
+          "expired_running": 0,
+          "partial": 8
+        }
+      }
+    }
+  ],
+  "controls": [
+    {
+      "checks": {
+        "budgets": [
+          {
+            "jobs": 72,
+            "lookups": 0,
+            "requests": 0,
+            "slot_at": "2026-10-14T07:00:00+00:00",
+            "status": "queued"
+          },
+          {
+            "jobs": 72,
+            "lookups": 0,
+            "requests": 0,
+            "slot_at": "2026-10-14T06:00:00+00:00",
+            "status": "missed"
+          }
+        ],
+        "city": [
+          {
+            "provider_backoff_until": "2026-10-07T18:12:54.381439+00:00",
+            "status": "complete"
+          }
+        ],
+        "cron": [
+          {
+            "active": true,
+            "jobname": "fuel-national-dispatch",
+            "schedule": "* * * * *"
+          },
+          {
+            "active": true,
+            "jobname": "fuel-national-watchdog",
+            "schedule": "*/5 * * * *"
+          },
+          {
+            "active": true,
+            "jobname": "fuel-national-trends-cache",
+            "schedule": "* * * * *"
+          },
+          {
+            "active": true,
+            "jobname": "fuel-national-projection-repair",
+            "schedule": "* * * * *"
+          },
+          {
+            "active": true,
+            "jobname": "fuel-national-retention",
+            "schedule": "*/10 * * * *"
+          }
+        ],
+        "projection_missing": 0,
+        "retention_runs": [
+          {
+            "end_time": "2026-10-14T07:10:12.207419+00:00",
+            "start_time": "2026-10-14T07:10:00.000477+00:00",
+            "status": "failed"
+          },
+          {
+            "end_time": "2026-10-14T07:00:08.303907+00:00",
+            "start_time": "2026-10-14T07:00:01.287978+00:00",
+            "status": "succeeded"
+          }
+        ]
+      }
+    }
+  ]
+}

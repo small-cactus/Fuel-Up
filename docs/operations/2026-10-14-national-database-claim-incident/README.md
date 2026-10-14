@@ -35,3 +35,13 @@ The full status query now returned PostgreSQL 57014 statement timeout. A read-on
 One scoped repair attempt requested a concurrent covering partial index on `storage.objects(bucket_id) INCLUDE(metadata)` for the national bucket. It would leave the exact byte calculation, conservative malformed-size fallback, budget, and all raw objects unchanged. PostgreSQL rejected creation with SQLSTATE 42501, `must be owner of table objects`. No index was created. The unapplied migration was removed. No ownership/role changes, alternate privileged credentials, capacity bypass, or timeout increase to production functions was attempted. Total repair attempts for this incident: one, rejected before modification.
 
 Resolving the managed Storage scan/index issue requires authorized table-owner or Supabase support intervention, unless another independently tested fix is found. Current retention execution, archive capacity, and projection backlog remain unverified because the full diagnostic path times out. No scheduled collection recovery or archive read-back is claimed.
+
+## 07:17 heartbeat follow-up
+
+The 06:00 sweep also missed all 72 batches with zero attempts, bringing this incident to four incomplete hours (03:00–06:00). Reconciliation found 157 expected operational slots: 148 complete, eight partial (four old plus four incident slots), zero expired absent rows, zero expired running rows, and the current 07:00 running slot. That current slot still had 72 queued jobs and zero attempts; it was not yet due. Last provider request remains 03:04 UTC.
+
+All three fixed regional workers still return the database-claim HTTP 503 error with matching expected/actual regions. Collection remains enabled, its shared cooldown expired, and dispatch/watchdog/cache/projection-repair/retention schedules remain active. The city campaign remains complete. The public Trends cache still references run 17935 (02:00), published at 02:19 UTC, with zero missing projection batches for that completed run. The latest two operational request/lookup budgets are zero because no jobs were claimed.
+
+The 07:10 retention cron execution failed after about 12 seconds; its 07:00 predecessor succeeded. A succeeded dispatch cron alone does not verify downstream object deletion. Current archive capacity and retention eligibility are not revalidated through the slow Storage scan. No recovery is claimed. No additional repair attempts, production mutations, or ownership changes were made.
+
+A targeted read of retention cron error details subsequently returned HTTP 524. The failed execution is confirmed, but its precise error remains unverified.
