@@ -45,3 +45,15 @@ All three fixed regional workers still return the database-claim HTTP 503 error 
 The 07:10 retention cron execution failed after about 12 seconds; its 07:00 predecessor succeeded. A succeeded dispatch cron alone does not verify downstream object deletion. Current archive capacity and retention eligibility are not revalidated through the slow Storage scan. No recovery is claimed. No additional repair attempts, production mutations, or ownership changes were made.
 
 A targeted read of retention cron error details subsequently returned HTTP 524. The failed execution is confirmed, but its precise error remains unverified.
+
+## 08:12 heartbeat follow-up
+
+The 07:00 sweep missed all 72 batches with zero attempts, bringing this incident to five incomplete hours (03:00–07:00). Operational reconciliation found 158 expected slots: 148 complete, nine partial (four previously known plus five incident slots), zero expired absent rows, zero expired running rows, and the current 08:00 running slot. The current slot had 72 queued jobs with zero attempts; its deadline is 09:00 UTC and it is not counted as missed.
+
+Dispatch continues with collection enabled and continuous. The last provider request remains 03:04 UTC; the shared cooldown is expired. All three fixed routes still return the database-claim HTTP 503 failure with matching regions. All national schedules remain active. Trends still references the complete 02:00 run, published at 02:19, and that run has zero missing projection batches. The latest two runs consumed zero request/lookup budget because no jobs were claimed.
+
+The retention error text is now available: both the 07:50 and 08:10 cron executions failed with `job startup timeout`; the 08:00 execution succeeded. This shows another database execution problem beyond the measured slow capacity scan, without establishing a shared root cause. Successful cron dispatch does not establish downstream retention completion. Current archive usage and retention eligibility remain unverified.
+
+A read-only role configuration query confirmed `service_role` has no role-level settings and `authenticator` has eight-second statement and lock timeouts. A preceding combined settings query failed with HTTP 544 while creating its temporary login role. These role settings alone do not establish the effective failing request timeout or its underlying PostgreSQL exception. Supabase documents function-scoped statement timeouts (https://supabase.com/docs/guides/database/postgres/timeouts), but no production timeout was changed: increasing one deadline is not a demonstrated repair for the concurrent login and cron startup failures. The exact Storage accounting and capacity stop remain intact.
+
+No additional repair attempts, provider requests, production mutations, or research-data changes were made. The incident still has one rejected index repair attempt. No resumed scheduled collection or immutable archive read-back is claimed. Owner/Supabase investigation of the managed database/Storage performance remains necessary unless a separately validated scoped repair becomes available.

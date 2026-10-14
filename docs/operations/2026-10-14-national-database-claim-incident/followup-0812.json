@@ -1,0 +1,216 @@
+{
+  "heartbeat_at": "2026-10-14T08:12:53.328Z",
+  "service": [
+    {
+      "checks": {
+        "cache": [
+          {
+            "published_at": "2026-10-14T02:19:00.248989+00:00",
+            "run_id": 17935
+          }
+        ],
+        "config": {
+          "approved_lookups_per_hour": 161660,
+          "archive_budget_bytes": 900000000,
+          "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+          "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+          "continuous": true,
+          "enabled": true,
+          "ends_at": "2026-10-07T18:19:00+00:00",
+          "halt_reason": "UPSTREAM_HTTP_503",
+          "id": true,
+          "last_dispatch_at": "2026-10-14T08:13:04.645087+00:00",
+          "last_request_at": "2026-10-14T03:04:00.722983+00:00",
+          "max_requests_per_hour": 92,
+          "operational_raw_hours": 48,
+          "operational_starts_at": "2026-10-07T19:00:00+00:00",
+          "provider_backoff_until": "2026-10-14T02:16:48.547933+00:00",
+          "request_interval_seconds": 10,
+          "starts_at": "2026-09-30T22:00:00+00:00"
+        },
+        "cron": [
+          {
+            "active": true,
+            "jobid": 7,
+            "jobname": "fuel-national-discovery",
+            "schedule": "* * * * *"
+          },
+          {
+            "active": true,
+            "jobid": 15,
+            "jobname": "fuel-national-trends-cache",
+            "schedule": "* * * * *"
+          },
+          {
+            "active": true,
+            "jobid": 20,
+            "jobname": "fuel-national-projection-repair",
+            "schedule": "* * * * *"
+          },
+          {
+            "active": true,
+            "jobid": 4,
+            "jobname": "fuel-national-dispatch",
+            "schedule": "* * * * *"
+          },
+          {
+            "active": true,
+            "jobid": 12,
+            "jobname": "fuel-national-watchdog",
+            "schedule": "*/5 * * * *"
+          },
+          {
+            "active": true,
+            "jobid": 23,
+            "jobname": "fuel-national-retention",
+            "schedule": "*/10 * * * *"
+          }
+        ],
+        "http": [
+          {
+            "created": "2026-10-14T08:12:01.876475+00:00",
+            "id": 7440,
+            "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+            "status_code": 503
+          },
+          {
+            "created": "2026-10-14T08:11:08.219975+00:00",
+            "id": 7439,
+            "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+            "status_code": 503
+          },
+          {
+            "created": "2026-10-14T08:08:22.491049+00:00",
+            "id": 7438,
+            "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+            "status_code": 503
+          }
+        ],
+        "runs": [
+          {
+            "completed_at": null,
+            "id": 18179,
+            "slot_at": "2026-10-14T08:00:00+00:00",
+            "status": "running"
+          },
+          {
+            "completed_at": "2026-10-14T08:00:00.38037+00:00",
+            "id": 18142,
+            "slot_at": "2026-10-14T07:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-10-14T07:01:00.244468+00:00",
+            "id": 18107,
+            "slot_at": "2026-10-14T06:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-10-14T06:02:03.346448+00:00",
+            "id": 18069,
+            "slot_at": "2026-10-14T05:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-10-14T05:00:07.443395+00:00",
+            "id": 18027,
+            "slot_at": "2026-10-14T04:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-10-14T04:02:01.818664+00:00",
+            "id": 17995,
+            "slot_at": "2026-10-14T03:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-10-14T02:18:04.91661+00:00",
+            "id": 17935,
+            "slot_at": "2026-10-14T02:00:00+00:00",
+            "status": "complete"
+          }
+        ],
+        "slots": {
+          "complete": 148,
+          "expected": 158,
+          "expired_absent": 0,
+          "expired_running": 0,
+          "partial": 9
+        }
+      }
+    }
+  ],
+  "controls": [
+    {
+      "checks": {
+        "jobs": [
+          {
+            "jobs": 72,
+            "requests": 0,
+            "run_id": 18142,
+            "status": "missed"
+          },
+          {
+            "jobs": 72,
+            "requests": 0,
+            "run_id": 18179,
+            "status": "queued"
+          }
+        ],
+        "projection_missing": 0,
+        "retention": [
+          {
+            "end_time": "2026-10-14T08:10:53.50406+00:00",
+            "message": "job startup timeout",
+            "start_time": "2026-10-14T08:10:00.005918+00:00",
+            "status": "failed"
+          },
+          {
+            "end_time": "2026-10-14T08:00:35.956911+00:00",
+            "message": "1 row",
+            "start_time": "2026-10-14T08:00:02.904368+00:00",
+            "status": "succeeded"
+          },
+          {
+            "end_time": "2026-10-14T07:50:10.125547+00:00",
+            "message": "job startup timeout",
+            "start_time": "2026-10-14T07:50:00.001017+00:00",
+            "status": "failed"
+          }
+        ]
+      }
+    }
+  ],
+  "role_timeout_configuration": [
+    {
+      "rolconfig": null,
+      "rolname": "service_role"
+    },
+    {
+      "rolconfig": [
+        "session_preload_libraries=safeupdate",
+        "statement_timeout=8s",
+        "lock_timeout=8s"
+      ],
+      "rolname": "authenticator"
+    }
+  ],
+  "diagnostic_limitations": [
+    "A preceding combined role/function configuration query failed with HTTP 544: Failed to create login role: Connection terminated due to connection timeout.",
+    "Current archive byte usage and retention eligibility were not revalidated through the slow Storage scan.",
+    "Role configuration is not a measurement of effective request settings or proof of the exact claim exception."
+  ],
+  "incident_incomplete_hours": [
+    "2026-10-14T03:00:00Z",
+    "2026-10-14T04:00:00Z",
+    "2026-10-14T05:00:00Z",
+    "2026-10-14T06:00:00Z",
+    "2026-10-14T07:00:00Z"
+  ],
+  "prior_known_partial_hours": 4,
+  "current_hour_deadline": "2026-10-14T09:00:00Z",
+  "repair_attempts_total": 1,
+  "new_repair_attempts": 0,
+  "production_mutations": [],
+  "recovery_verified": false
+}
