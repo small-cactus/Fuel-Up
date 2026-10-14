@@ -1,0 +1,396 @@
+{
+  "checked_at": "2026-10-14T06:21:39Z",
+  "repair_attempts": 1,
+  "repair_result": "Rejected with PostgreSQL 42501: must be owner of table objects. No index created; unapplied migration removed.",
+  "read_only_probe_errors": {
+    "status": "57014 statement timeout",
+    "archive_function_10_seconds": "57014 statement timeout in fuel_national_archive_bytes",
+    "storage_sum_10_seconds": "57014 statement timeout"
+  },
+  "state": [
+    {
+      "checks": {
+        "config": {
+          "approved_lookups_per_hour": 161660,
+          "archive_budget_bytes": 900000000,
+          "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+          "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+          "continuous": true,
+          "enabled": true,
+          "ends_at": "2026-10-07T18:19:00+00:00",
+          "halt_reason": "UPSTREAM_HTTP_503",
+          "id": true,
+          "last_dispatch_at": "2026-10-14T06:12:00.242915+00:00",
+          "last_request_at": "2026-10-14T03:04:00.722983+00:00",
+          "max_requests_per_hour": 92,
+          "operational_raw_hours": 48,
+          "operational_starts_at": "2026-10-07T19:00:00+00:00",
+          "provider_backoff_until": "2026-10-14T02:16:48.547933+00:00",
+          "request_interval_seconds": 10,
+          "starts_at": "2026-09-30T22:00:00+00:00"
+        },
+        "runs": [
+          {
+            "completed_at": null,
+            "id": 18107,
+            "slot_at": "2026-10-14T06:00:00+00:00",
+            "status": "running"
+          },
+          {
+            "completed_at": "2026-10-14T06:02:03.346448+00:00",
+            "id": 18069,
+            "slot_at": "2026-10-14T05:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-10-14T05:00:07.443395+00:00",
+            "id": 18027,
+            "slot_at": "2026-10-14T04:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-10-14T04:02:01.818664+00:00",
+            "id": 17995,
+            "slot_at": "2026-10-14T03:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-10-14T02:18:04.91661+00:00",
+            "id": 17935,
+            "slot_at": "2026-10-14T02:00:00+00:00",
+            "status": "complete"
+          }
+        ]
+      }
+    }
+  ],
+  "gaps": [
+    {
+      "checks": {
+        "http": [
+          {
+            "created": "2026-10-14T06:12:02.346573+00:00",
+            "id": 7361,
+            "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+            "status_code": 503
+          },
+          {
+            "created": "2026-10-14T06:09:01.421275+00:00",
+            "id": 7360,
+            "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+            "status_code": 503
+          },
+          {
+            "created": "2026-10-14T06:08:04.848844+00:00",
+            "id": 7359,
+            "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+            "status_code": 503
+          }
+        ],
+        "jobs": [
+          {
+            "attempts": 0,
+            "jobs": 72,
+            "run_id": 18107,
+            "status": "queued"
+          },
+          {
+            "attempts": 0,
+            "jobs": 72,
+            "run_id": 18069,
+            "status": "missed"
+          }
+        ],
+        "slots": {
+          "complete": 148,
+          "expected": 156,
+          "expired_absent": 0,
+          "expired_running": 0,
+          "partial": 7
+        }
+      }
+    }
+  ],
+  "table_stats_and_indexes": [
+    {
+      "diagnostic": {
+        "indexes": [
+          {
+            "indexdef": "CREATE UNIQUE INDEX fuel_national_jobs_pkey ON public.fuel_national_jobs USING btree (id)",
+            "indexname": "fuel_national_jobs_pkey",
+            "schemaname": "public",
+            "tablename": "fuel_national_jobs"
+          },
+          {
+            "indexdef": "CREATE UNIQUE INDEX fuel_national_jobs_run_id_ordinal_key ON public.fuel_national_jobs USING btree (run_id, ordinal)",
+            "indexname": "fuel_national_jobs_run_id_ordinal_key",
+            "schemaname": "public",
+            "tablename": "fuel_national_jobs"
+          },
+          {
+            "indexdef": "CREATE INDEX fuel_national_pending ON public.fuel_national_jobs USING btree (next_attempt_at) WHERE (status = ANY (ARRAY['queued'::text, 'running'::text]))",
+            "indexname": "fuel_national_pending",
+            "schemaname": "public",
+            "tablename": "fuel_national_jobs"
+          },
+          {
+            "indexdef": "CREATE UNIQUE INDEX objects_pkey ON storage.objects USING btree (id)",
+            "indexname": "objects_pkey",
+            "schemaname": "storage",
+            "tablename": "objects"
+          },
+          {
+            "indexdef": "CREATE INDEX name_prefix_search ON storage.objects USING btree (name text_pattern_ops)",
+            "indexname": "name_prefix_search",
+            "schemaname": "storage",
+            "tablename": "objects"
+          },
+          {
+            "indexdef": "CREATE INDEX idx_objects_bucket_id_name ON storage.objects USING btree (bucket_id, name COLLATE \"C\")",
+            "indexname": "idx_objects_bucket_id_name",
+            "schemaname": "storage",
+            "tablename": "objects"
+          },
+          {
+            "indexdef": "CREATE INDEX idx_objects_bucket_id_name_lower ON storage.objects USING btree (bucket_id, lower(name) COLLATE \"C\")",
+            "indexname": "idx_objects_bucket_id_name_lower",
+            "schemaname": "storage",
+            "tablename": "objects"
+          },
+          {
+            "indexdef": "CREATE UNIQUE INDEX objects_bucket_id_name_version_key ON storage.objects USING btree (bucket_id, name COLLATE \"C\", version) NULLS NOT DISTINCT",
+            "indexname": "objects_bucket_id_name_version_key",
+            "schemaname": "storage",
+            "tablename": "objects"
+          },
+          {
+            "indexdef": "CREATE UNIQUE INDEX idx_objects_current_version ON storage.objects USING btree (bucket_id, name COLLATE \"C\") WHERE (archived_at IS NULL)",
+            "indexname": "idx_objects_current_version",
+            "schemaname": "storage",
+            "tablename": "objects"
+          },
+          {
+            "indexdef": "CREATE UNIQUE INDEX idx_objects_null_version ON storage.objects USING btree (bucket_id, name COLLATE \"C\") WHERE (NOT is_versioned)",
+            "indexname": "idx_objects_null_version",
+            "schemaname": "storage",
+            "tablename": "objects"
+          },
+          {
+            "indexdef": "CREATE INDEX idx_objects_delete_markers ON storage.objects USING btree (bucket_id, name COLLATE \"C\") WHERE is_delete_marker",
+            "indexname": "idx_objects_delete_markers",
+            "schemaname": "storage",
+            "tablename": "objects"
+          }
+        ],
+        "stats": [
+          {
+            "last_analyze": null,
+            "last_autoanalyze": "2026-10-13T21:08:50.152301+00:00",
+            "last_autovacuum": "2026-10-13T12:07:25.647157+00:00",
+            "n_dead_tup": 2151,
+            "n_live_tup": 14611,
+            "relname": "objects",
+            "schemaname": "storage"
+          },
+          {
+            "last_analyze": null,
+            "last_autoanalyze": "2026-10-13T21:00:49.430838+00:00",
+            "last_autovacuum": "2026-10-13T08:10:18.206252+00:00",
+            "n_dead_tup": 4049,
+            "n_live_tup": 22752,
+            "relname": "fuel_national_jobs",
+            "schemaname": "public"
+          }
+        ],
+        "tables": [
+          {
+            "nspname": "storage",
+            "relname": "objects",
+            "relpages": 1140,
+            "reltuples": 14634
+          },
+          {
+            "nspname": "public",
+            "relname": "fuel_national_jobs",
+            "relpages": 868,
+            "reltuples": 22104
+          }
+        ]
+      }
+    }
+  ],
+  "job_scan": [
+    {
+      "QUERY PLAN": [
+        {
+          "Execution Time": 8.221,
+          "Plan": {
+            "Actual Loops": 1,
+            "Actual Rows": 1,
+            "Actual Startup Time": 8.085,
+            "Actual Total Time": 8.086,
+            "Async Capable": false,
+            "Local Dirtied Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Written Blocks": 0,
+            "Node Type": "Aggregate",
+            "Parallel Aware": false,
+            "Partial Mode": "Simple",
+            "Plan Rows": 1,
+            "Plan Width": 32,
+            "Plans": [
+              {
+                "Actual Loops": 1,
+                "Actual Rows": 15288,
+                "Actual Startup Time": 0.017,
+                "Actual Total Time": 6.893,
+                "Alias": "fuel_national_jobs",
+                "Async Capable": false,
+                "Filter": "(archive_deleted_at IS NULL)",
+                "Local Dirtied Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Written Blocks": 0,
+                "Node Type": "Seq Scan",
+                "Parallel Aware": false,
+                "Parent Relationship": "Outer",
+                "Plan Rows": 15522,
+                "Plan Width": 8,
+                "Relation Name": "fuel_national_jobs",
+                "Rows Removed by Filter": 7464,
+                "Shared Dirtied Blocks": 0,
+                "Shared Hit Blocks": 894,
+                "Shared Read Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Startup Cost": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Total Cost": 1121.66
+              }
+            ],
+            "Shared Dirtied Blocks": 0,
+            "Shared Hit Blocks": 894,
+            "Shared Read Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Startup Cost": 1160.47,
+            "Strategy": "Plain",
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Total Cost": 1160.48
+          },
+          "Planning": {
+            "Local Dirtied Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Written Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Hit Blocks": 111,
+            "Shared Read Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.544,
+          "Triggers": []
+        }
+      ]
+    }
+  ],
+  "storage_scan": [
+    {
+      "QUERY PLAN": [
+        {
+          "Execution Time": 20795.166,
+          "Plan": {
+            "Actual Loops": 1,
+            "Actual Rows": 1,
+            "Actual Startup Time": 20795.002,
+            "Actual Total Time": 20795.003,
+            "Async Capable": false,
+            "Local Dirtied Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Written Blocks": 0,
+            "Node Type": "Aggregate",
+            "Parallel Aware": false,
+            "Partial Mode": "Simple",
+            "Plan Rows": 1,
+            "Plan Width": 32,
+            "Plans": [
+              {
+                "Actual Loops": 1,
+                "Actual Rows": 14595,
+                "Actual Startup Time": 58.875,
+                "Actual Total Time": 20773.405,
+                "Alias": "objects",
+                "Async Capable": false,
+                "Filter": "(bucket_id = 'fuel-national'::text)",
+                "Local Dirtied Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Written Blocks": 0,
+                "Node Type": "Seq Scan",
+                "Parallel Aware": false,
+                "Parent Relationship": "Outer",
+                "Plan Rows": 14619,
+                "Plan Width": 255,
+                "Relation Name": "objects",
+                "Rows Removed by Filter": 15,
+                "Shared Dirtied Blocks": 0,
+                "Shared Hit Blocks": 1140,
+                "Shared Read Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Startup Cost": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Total Cost": 1322.92
+              }
+            ],
+            "Shared Dirtied Blocks": 0,
+            "Shared Hit Blocks": 1140,
+            "Shared Read Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Startup Cost": 1542.21,
+            "Strategy": "Plain",
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Total Cost": 1542.22
+          },
+          "Planning": {
+            "Local Dirtied Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Written Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Hit Blocks": 258,
+            "Shared Read Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.981,
+          "Triggers": []
+        }
+      ]
+    }
+  ],
+  "active_query": [
+    {
+      "age": "00:00:06.20321",
+      "pid": 93710,
+      "query_prefix": "set statement_timeout='60s'; explain (analyze,buffers,format json) select coalesce(sum(case when metadata->>'size' ~ '^[0-9]+$' then (metadata->>'size')::bigint else 8000000 end),0",
+      "state": "active",
+      "wait_event": null,
+      "wait_event_type": null
+    }
+  ],
+  "storage_locks_and_function": [
+    {
+      "diagnostic": {
+        "function": "CREATE OR REPLACE FUNCTION public.fuel_national_archive_bytes()\n RETURNS bigint\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\n select greatest(\n   (select coalesce(sum(archive_bytes),0) from public.fuel_national_jobs where archive_deleted_at is null),\n   (select coalesce(sum(case when metadata->>'size' ~ '^[0-9]+$' then (metadata->>'size')::bigint else 8000000 end),0)\n    from storage.objects where bucket_id='fuel-national')\n )::bigint;\n$function$\n",
+        "locks": null
+      }
+    }
+  ]
+}

@@ -23,3 +23,15 @@ The administrative full status query repeatedly times out with HTTP 524. Some sm
 No speculative deployment, collection replay, re-enable, database restart, deletion, routing change, or billing change was attempted. The existing enabled schedule continues to retry through its normal controls. Repair attempts: zero. No recovery or immutable archive read-back is claimed. On recovery, verify scheduled collection, all operational slots, the latest complete cache, projection backlog, retention, budgets, and a stored immutable archive before reporting recovery.
 
 Coverage remains observations of the fixed station inventory, not verified pump truth. Evidence excludes credentials and user telemetry.
+
+## 06:12 heartbeat follow-up
+
+At 06:21 UTC the incident remains unresolved. Full reconciliation from the operational start found 156 expected hourly slots: 148 complete, seven partial (four previously known plus 03:00, 04:00, 05:00 from this incident), zero expired absent rows, zero expired running rows, and the current 06:00 running slot. The 05:00 slot missed all 72 batches with zero attempts; 06:00 still had 72 queued jobs and was not yet due. Last provider request remains 03:04 UTC. Recent saved worker HTTP 503 responses retain the database-claim failure and correct execution region in all three regions.
+
+### Narrowed failure and repair boundary
+
+The full status query now returned PostgreSQL 57014 statement timeout. A read-only call to `fuel_national_archive_bytes()` also exceeded a 10-second timeout. Its two unchanged accounting components were measured independently: the manifest sum took 8.221 ms; the Storage metadata sum exceeded ten seconds, then completed in 20,795.166 ms under a bounded 60-second diagnostic timeout. EXPLAIN ANALYZE showed 14,595 matching Storage rows, 1,140 shared buffer hits, and zero shared reads. No Storage relation locks appeared in a separate snapshot. These measurements identify the slow Storage scan but do not establish its underlying platform cause; disk I/O exhaustion is not proven.
+
+One scoped repair attempt requested a concurrent covering partial index on `storage.objects(bucket_id) INCLUDE(metadata)` for the national bucket. It would leave the exact byte calculation, conservative malformed-size fallback, budget, and all raw objects unchanged. PostgreSQL rejected creation with SQLSTATE 42501, `must be owner of table objects`. No index was created. The unapplied migration was removed. No ownership/role changes, alternate privileged credentials, capacity bypass, or timeout increase to production functions was attempted. Total repair attempts for this incident: one, rejected before modification.
+
+Resolving the managed Storage scan/index issue requires authorized table-owner or Supabase support intervention, unless another independently tested fix is found. Current retention execution, archive capacity, and projection backlog remain unverified because the full diagnostic path times out. No scheduled collection recovery or archive read-back is claimed.
