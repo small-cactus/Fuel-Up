@@ -47,3 +47,17 @@ Official guidance:
 - https://developer.apple.com/help/app-review/after-submitting-for-review/review-status
 - https://developer.apple.com/help/app-review/after-submitting-for-review/contact-app-review
 - https://developer.apple.com/contact/topic/select
+
+## October 14 live follow-up — prepared, not sent
+
+Authenticated Safari inspection again showed version 1.0 with build 1.0.0 (27) Waiting for Review, submitted October 7 at 9:24 AM Eastern, submission a52dabb2-077a-4f3c-bbc2-c936965936af. No reviewer messages or action-required issue was displayed on its review detail page. The submission, build and manual release setting were not changed.
+
+Read-only searches of the connected Apple-account mailbox, including spam/trash, located the October 11 support acknowledgement for case 102992893008 and no substantive case reply. The official support portal still lists that case under Related open cases. Its Get more help path offers email; phone support is temporarily unavailable due to high call volume.
+
+Prepared the exact text in review-status-followup-2026-10-14.txt in the existing case's email form, with the app name, numeric App ID and iOS platform. Full draft read-back was verified. Send message has NOT been clicked; a new follow-up awaits explicit sending authorization. This is a prepared escalation request, not a submitted follow-up or review advancement.
+
+A separate Apple Developer agreement-update email arrived October 14 UTC with an acceptance deadline of November 13. It does not establish the cause of this review delay. No legal agreement was accepted.
+
+Verified URLs:
+- https://appstoreconnect.apple.com/apps/6759831421/distribution/reviewsubmissions/details/a52dabb2-077a-4f3c-bbc2-c936965936af
+- https://developer.apple.com/contact/case/102992893008/solution/CONTACT.EML.GEN/details
