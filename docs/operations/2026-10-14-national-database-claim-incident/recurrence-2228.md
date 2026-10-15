@@ -104,3 +104,15 @@ Accounted archive usage is 722,646,481 bytes against 900,000,000. Retention cand
 Latest-complete projection backlog is zero. Cache remains ten scopes for run 18927 (October 14, 21:00), published at 21:20 UTC. The public cache-only Trends request timed out at 25,008 ms. No resumed scheduled collection or immutable recovery read-back is claimed.
 
 No repair or production mutation was attempted; recurrence repair attempts remain zero. Existing permission and capacity safeguards remain intact. Sanitized evidence is in `followup-0431.json`. Managed database/Storage investigation is still needed; the failed owner-only index action was not repeated.
+
+## October 15, 05:37 heartbeat: seventh incomplete hour
+
+The 04:00 run 19217 became partial at 05:02:06 UTC, missing all 72 jobs with zero attempts. Reconciliation shows 179 expected operational slots, 161 complete, 17 partial, zero expired absent rows and zero expired running rows. Seven incomplete hours belong to this recurrence (22:00–04:00); ten predate it. Current 05:00 run 19249 has 72 queued jobs with zero attempts and is allowed until 06:00 UTC. Both latest runs consumed zero request/lookup budget. The current hour is not yet a missed hour.
+
+Collection remains enabled and continuous. Dispatch advanced to 05:38:00 UTC, but the last provider request remains October 14 at 22:06:23 UTC and the shared cooldown remains expired. Saved worker responses at 05:33–05:36 show HTTP 503 database job-claim failures on all three fixed regional routes, with matching expected/actual regions. All five required schedules are active. The 05:10, 05:20 and 05:30 retention cron dispatches succeeded; this does not independently prove asynchronous deletion completion or a cleared backlog.
+
+The full status read failed with SQLSTATE 57014 inside `fuel_national_archive_bytes` (management API HTTP 400). Current archive usage and retention eligibility remain unverified; the prior 722,646,481-byte usage and capped 200-candidate result are historical measurements, not fresh values. No capacity stop, retention rule, research/evaluation protection or permission boundary was changed.
+
+Latest-complete projection backlog is zero. The database cache still has ten scopes for complete run 18927 (October 14, 21:00), published at 21:20 UTC. The public cache-only Trends request timed out at 25,009 ms. There is no scheduled recovery or immutable recovery read-back to report.
+
+No repair attempt or production mutation was made; recurrence repair attempts remain zero. Managed database/Storage investigation or an independently proven scoped repair is still necessary. The previously rejected owner-only index action was not retried. Sanitized evidence is in `followup-0537.json`; no provider collection, city restart, raw overwrite, billing change or phone interaction was performed by the monitor.
