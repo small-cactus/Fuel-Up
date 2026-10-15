@@ -162,3 +162,19 @@ Fresh accounted archive usage was 713,081,103 bytes against 900,000,000. Retenti
 Latest-complete projection backlog is zero. Cache still contains ten scopes for complete run 18927 (October 14, 21:00), published at 21:20. A public cache-only request returned HTTP 200 in 774 ms with the same old 21:00 history point and no history error. No fresh published sweep or full service recovery is claimed.
 
 No repair attempt, production mutation, re-enable, deployment, manual provider collection, replay, billing/routing change, raw overwrite, research deletion, city restart or phone interaction was performed. Recurrence repair attempts remain zero. Sanitized evidence, including both limited and three-route archive read-back reports, is in `followup-0939.json`. The new confirmed gaps warrant notification; current-hour progress remains explicitly incomplete.
+
+## October 15, 10:41 heartbeat: scheduled recovery verified
+
+Normal scheduled collection completed the 09:00 run 19399 at 09:57:03 UTC and the 10:00 run 19444 at 10:16:48 UTC. Both succeeded on all 72 batches across the unchanged 141,660-station inventory. Each covered northwest 4/4, southwest 9/9 and east 59/59 batches, with zero wrong-region jobs. This establishes two complete sweeps, unlike the partial batch progress observed at 09:39. It does not establish verified pump truth or a permanent infrastructure fix.
+
+Reconciliation from the operational start now shows 184 expected slots, 163 complete, 21 partial, no absent rows and no expired running rows. Eleven partial hours belong to this recurrence (October 14 22:00–October 15 08:00); ten predate it. Those gaps remain incomplete and were not replayed. No new overdue gap appeared since the preceding verified check.
+
+The 10:00 cache published at 10:17:00 UTC across all ten scopes, with zero latest-complete projection backlog. A cache-only public request returned HTTP 200 in 916 ms and the 10:00 regular-grade history point (69,231 eligible priced stations; average $4.3322523147145064) with no history error. Grade-specific cache coverage differs from all-grade observed coverage.
+
+All required cron schedules and three fixed regional routes remain enabled. The 09:00 and 10:00 sweeps used 73/143,660 and 74/145,660 request/lookup attempts, below 92/161,660 limits. Saved transient provider failures imposed shared cooldowns at 10:04 and 10:14, and scheduled work subsequently completed; no cooldown was overridden. The latest cooldown expired at 10:14:52. No database-claim failure response was found in the checked last-15-minute window.
+
+Fresh exact archive accounting is 687,820,864 bytes against the unchanged 900,000,000-byte limit. Retention candidate count is zero. The 10:20, 10:30 and 10:40 retention cron dispatches succeeded. The configured 48-hour operational raw retention, eight-day derived metadata policy, original research/evaluation protection and latest published cache protection were not modified; the city campaign remains closed.
+
+`auditRegionalSample.mjs 19444` successfully downloaded one immutable successful archive per fixed region and verified byte counts, SHA-256 hashes, exact station IDs, schema and provenance. All three passed with the run marked complete. This is sample integrity verification; full-sweep completeness is separately established by the 72 successful job rows. The audit made zero provider collection requests.
+
+The service recovered without any repair, re-enable, deployment or production mutation by this monitor. Recurrence repair attempts remain zero. The underlying managed database/Storage slowdown cause is still undetermined, and recurrence remains possible. No billing/routing change, manual provider replay, raw overwrite, research deletion or phone interaction occurred. Recovery evidence is preserved in `recovery-20261015-1041.json`.
