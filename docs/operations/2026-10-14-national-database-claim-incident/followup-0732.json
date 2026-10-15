@@ -1,0 +1,160 @@
+{
+  "checked_at": "2026-10-15T07:34:39.849573+00:00",
+  "repair_attempts_this_recurrence": 0,
+  "provider_requests_by_monitor": 0,
+  "small_status": {
+    "cache": {
+      "published_at": "2026-10-14T21:20:00.248584+00:00",
+      "run_id": 18927,
+      "scopes": 10
+    },
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "id": true,
+      "last_dispatch_at": "2026-10-15T07:32:00.35197+00:00",
+      "last_request_at": "2026-10-14T22:06:23.756515+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-10-14T22:04:16.424978+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "runs": [
+      {
+        "completed_at": null,
+        "id": 19323,
+        "slot_at": "2026-10-15T07:00:00+00:00",
+        "status": "running"
+      },
+      {
+        "completed_at": "2026-10-15T07:00:00.663517+00:00",
+        "id": 19283,
+        "slot_at": "2026-10-15T06:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-15T06:00:00.663424+00:00",
+        "id": 19249,
+        "slot_at": "2026-10-15T05:00:00+00:00",
+        "status": "partial"
+      }
+    ],
+    "slots": {
+      "complete": 161,
+      "expected": 181,
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 19
+    }
+  },
+  "public_cache": {
+    "status": 200,
+    "milliseconds": 20642,
+    "historyError": null,
+    "latest": {
+      "date": "2026-10-14T21:00:00+00:00",
+      "price": 4.325107503481894,
+      "stationCount": 68928
+    },
+    "source": "national-cache"
+  },
+  "worker_responses": {
+    "responses": [
+      {
+        "created": "2026-10-15T07:33:05.224296+00:00",
+        "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+        "status_code": 503
+      },
+      {
+        "created": "2026-10-15T07:32:05.799699+00:00",
+        "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+        "status_code": 503
+      },
+      {
+        "created": "2026-10-15T07:27:06.561862+00:00",
+        "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "status_code": 503
+      }
+    ]
+  },
+  "maintenance": {
+    "backlog": 0,
+    "cron": [
+      {
+        "active": true,
+        "name": "fuel-national-discovery",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-trends-cache",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-projection-repair",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-dispatch",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-watchdog",
+        "schedule": "*/5 * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-retention",
+        "schedule": "*/10 * * * *"
+      }
+    ],
+    "jobs": [
+      {
+        "attempts": 0,
+        "jobs": 72,
+        "run_id": 19283,
+        "status": "missed"
+      },
+      {
+        "attempts": 0,
+        "jobs": 72,
+        "run_id": 19323,
+        "status": "queued"
+      }
+    ],
+    "retention": [
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-15T07:30:00.000443+00:00",
+        "status": "failed"
+      },
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-15T07:20:07.071391+00:00",
+        "status": "succeeded"
+      },
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-15T07:10:05.375925+00:00",
+        "status": "succeeded"
+      }
+    ]
+  },
+  "full_status_error": {
+    "http_status": 400,
+    "sqlstate": "57014",
+    "message": "canceling statement due to statement timeout",
+    "context": "SQL function fuel_national_archive_bytes statement 1"
+  }
+}
