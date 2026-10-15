@@ -78,3 +78,15 @@ The full status read failed with management API HTTP 544, `Failed to run sql que
 The public cache-only Trends request timed out at 25,007 ms. Database cache rows remain tied to complete run 18927 (21:00), ten scopes published at 21:20 UTC. A separate narrow query verified zero missing projection batches for that latest complete run. No new complete sweep or immutable archive recovery read-back is claimed.
 
 No repair attempt, deployment, re-enable, provider replay, billing change, raw overwrite, research deletion or phone interaction was performed. Recurrence repair attempts remain zero. Sanitized evidence is in `followup-0232.json`; current diagnostics do not justify retrying the earlier rejected Storage-owner index change or weakening exact archive accounting.
+
+## October 15, 03:33 heartbeat: fifth incomplete hour
+
+The 02:00 run 19139 became partial at 03:00:07 UTC, with all 72 jobs missed and zero attempts. Reconciliation shows 177 expected operational slots, 161 complete, 15 partial, zero expired absent rows and zero expired running rows. Five incomplete hours belong to this recurrence (22:00–02:00); ten predate it. Current 03:00 run 19181 has 72 queued jobs with zero attempts and has until 04:00 UTC. Both latest runs consumed zero request/lookup budget; the current hour is not yet missed.
+
+Collection remains enabled and continuous. Dispatch advanced to 03:33:00 UTC; last provider request remains October 14 at 22:06:23 UTC and the shared cooldown remains expired. Saved 03:31–03:33 responses show HTTP 503 `DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED` on all three fixed routes with matching expected/actual regions. All required national schedules remain active; there is no missing main schedule to restore.
+
+Retention cron dispatches at 03:10 and 03:30 failed with `job startup timeout`; 03:20 succeeded. Successful dispatch does not establish worker completion or zero eligible objects. The full status query again failed with SQLSTATE 57014 inside `fuel_national_archive_bytes` (management API HTTP 400). Current archive capacity and retention eligibility remain unverified. Exact capacity protections were not weakened.
+
+Latest-complete projection backlog is zero. Database cache remains ten scopes for run 18927 (October 14, 21:00), published at 21:20 UTC. A cache-only public request returned that same history point with HTTP 200 and no history error, taking 21,786 ms. This slow response does not constitute collection recovery or fresh data. No immutable recovery read-back is claimed.
+
+No new repair attempt or production mutation was made. Recurrence repair attempts remain zero. The persistent managed database/Storage performance failure still needs owner/platform investigation or an independently proven scoped repair; the prior Storage-owner permission rejection was not retried. Evidence is in `followup-0333.json`. Research/evaluation archives and city collection remain untouched by this monitor.
