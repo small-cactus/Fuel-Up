@@ -116,3 +116,15 @@ The full status read failed with SQLSTATE 57014 inside `fuel_national_archive_by
 Latest-complete projection backlog is zero. The database cache still has ten scopes for complete run 18927 (October 14, 21:00), published at 21:20 UTC. The public cache-only Trends request timed out at 25,009 ms. There is no scheduled recovery or immutable recovery read-back to report.
 
 No repair attempt or production mutation was made; recurrence repair attempts remain zero. Managed database/Storage investigation or an independently proven scoped repair is still necessary. The previously rejected owner-only index action was not retried. Sanitized evidence is in `followup-0537.json`; no provider collection, city restart, raw overwrite, billing change or phone interaction was performed by the monitor.
+
+## October 15, 06:37 heartbeat: eighth incomplete hour
+
+The 05:00 run 19249 became partial at 06:00:00 UTC, missing all 72 jobs with zero attempts. Reconciliation shows 180 expected operational slots, 161 complete, 18 partial, zero expired absent rows and zero expired running rows. Eight incomplete hours belong to this recurrence (22:00–05:00); ten predate it. Current 06:00 run 19283 has 72 queued jobs with zero attempts and is allowed until 07:00 UTC. Both latest runs consumed zero request/lookup budget. The current hour is not counted as missed.
+
+Collection remains enabled and continuous. Dispatch advanced to 06:38:09 UTC; the last provider request remains October 14 at 22:06:23 UTC and the shared cooldown remains expired. Saved 06:39–06:41 worker responses show HTTP 503 database job-claim failures on all three fixed routes with matching expected/actual regions. All five required schedules remain active. Retention cron dispatches at 06:20, 06:30 and 06:40 succeeded; dispatch success does not establish asynchronous cleanup completion.
+
+The full status request failed with management HTTP 502 after login-role initialization. Current archive capacity and retention eligibility remain unverified; prior capacity measurements are not represented as current. No capacity guard, retention policy, permission boundary or original research/evaluation archive was changed.
+
+Latest-complete projection backlog is zero. Cache remains ten scopes for complete run 18927 (October 14, 21:00), published at 21:20 UTC. The public cache-only Trends request returned HTTP 200 after 20,996 ms with the same old 21:00 history point and no history error. A successful stale-cache response is not resumed collection. No immutable recovery read-back is claimed.
+
+No repair attempt or production mutation was made; recurrence repair attempts remain zero. Managed database/Storage investigation or a separately proven scoped repair remains necessary. The prior rejected Storage-owner index action was not retried. Sanitized evidence is in `followup-0637.json`. The monitor made no provider collection requests, city restart, billing change, raw overwrite, research deletion or phone interaction. Coverage remains fixed-inventory observations, not verified pump truth.
