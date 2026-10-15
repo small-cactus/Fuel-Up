@@ -1,0 +1,31 @@
+{
+  "checked_at": "2026-10-15T08:41:05.382270+00:00",
+  "repair_attempts_this_recurrence": 0,
+  "provider_requests_by_monitor": 0,
+  "full_status_error": {
+    "http_status": 544,
+    "stage": "login role initialization",
+    "message": "Failed to create login role: Connection terminated due to connection timeout"
+  },
+  "verification_limit": "Current gaps, schedules, budgets, cache rows, backlog, capacity and retention could not be verified. Do not increment prior gap counts from elapsed time alone.",
+  "small_status": {
+    "error": "bounded_read_failed",
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "public_cache": {
+    "error": "TimeoutError",
+    "milliseconds": 25007
+  },
+  "worker_responses": {
+    "error": "bounded_read_failed",
+    "code": 1,
+    "signal": null,
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "maintenance": {
+    "error": "bounded_read_failed",
+    "code": 1,
+    "signal": null,
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  }
+}
