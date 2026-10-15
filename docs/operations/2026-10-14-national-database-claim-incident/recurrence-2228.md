@@ -90,3 +90,17 @@ Retention cron dispatches at 03:10 and 03:30 failed with `job startup timeout`; 
 Latest-complete projection backlog is zero. Database cache remains ten scopes for run 18927 (October 14, 21:00), published at 21:20 UTC. A cache-only public request returned that same history point with HTTP 200 and no history error, taking 21,786 ms. This slow response does not constitute collection recovery or fresh data. No immutable recovery read-back is claimed.
 
 No new repair attempt or production mutation was made. Recurrence repair attempts remain zero. The persistent managed database/Storage performance failure still needs owner/platform investigation or an independently proven scoped repair; the prior Storage-owner permission rejection was not retried. Evidence is in `followup-0333.json`. Research/evaluation archives and city collection remain untouched by this monitor.
+
+## October 15, 04:31 heartbeat: sixth incomplete hour; capacity read succeeds
+
+The 03:00 run 19181 became partial at 04:01:08 UTC, missing all 72 batches with zero attempts. Reconciliation shows 178 expected operational slots, 161 complete, 16 partial, zero expired absent rows and zero expired running rows. Six incomplete hours belong to this recurrence (22:00–03:00). Current 04:00 run 19217 has 72 queued jobs and zero attempts and is allowed until 05:00 UTC. Both latest runs consumed zero request/lookup budget; the current hour is not counted as missed.
+
+Continuous collection remains enabled. Last dispatch advanced to 04:31:00 UTC, while last provider request remains October 14 at 22:06:23 UTC. The shared cooldown expired at 22:04:16 UTC; the latest stored provider event remains the old transient GraphQL failure, with no newer provider denial in the returned events. All three fixed routes remain enabled, with zero completed batches in the two latest hours and no wrong-region jobs. All five required schedules, including main dispatch, watchdog and retention, remain active.
+
+The worker-response query and initial maintenance query both failed during login-role creation with management API HTTP 544 database connection timeout. They do not provide fresh saved worker error bodies. However, the full status query eventually completed, and a narrower maintenance query subsequently succeeded. This is improved diagnostic access, not collection recovery.
+
+Accounted archive usage is 722,646,481 bytes against 900,000,000. Retention candidates returned 200, the function's capped batch size, so at least 200 eligible objects were waiting at that snapshot; this is not an exact total backlog. The 04:30 retention cron dispatch failed with `job startup timeout`; 04:10 and 04:20 dispatches succeeded. Successful dispatch does not prove asynchronous cleanup completion. No manual deletion, capacity bypass, retention-policy change or research/evaluation-data mutation was performed.
+
+Latest-complete projection backlog is zero. Cache remains ten scopes for run 18927 (October 14, 21:00), published at 21:20 UTC. The public cache-only Trends request timed out at 25,008 ms. No resumed scheduled collection or immutable recovery read-back is claimed.
+
+No repair or production mutation was attempted; recurrence repair attempts remain zero. Existing permission and capacity safeguards remain intact. Sanitized evidence is in `followup-0431.json`. Managed database/Storage investigation is still needed; the failed owner-only index action was not repeated.
