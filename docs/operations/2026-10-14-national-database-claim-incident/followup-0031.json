@@ -1,0 +1,80 @@
+{
+  "checked_at": "2026-10-15T00:33:00Z",
+  "small_status": {
+    "cache": {
+      "published_at": "2026-10-14T21:20:00.248584+00:00",
+      "run_id": 18927,
+      "scopes": 10
+    },
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "id": true,
+      "last_dispatch_at": "2026-10-15T00:31:00.194685+00:00",
+      "last_request_at": "2026-10-14T22:06:23.756515+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-10-14T22:04:16.424978+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "runs": [
+      {
+        "completed_at": null,
+        "id": 19057,
+        "slot_at": "2026-10-15T00:00:00+00:00",
+        "status": "running"
+      },
+      {
+        "completed_at": "2026-10-15T00:00:00.445577+00:00",
+        "id": 19019,
+        "slot_at": "2026-10-14T23:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-14T23:00:00.773415+00:00",
+        "id": 18987,
+        "slot_at": "2026-10-14T22:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-14T21:16:05.118351+00:00",
+        "id": 18927,
+        "slot_at": "2026-10-14T21:00:00+00:00",
+        "status": "complete"
+      }
+    ],
+    "slots": {
+      "complete": 161,
+      "expected": 174,
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 12
+    }
+  },
+  "public_cache": {
+    "error": "TimeoutError",
+    "milliseconds": 25006
+  },
+  "narrow_diagnostic": {
+    "error": "bounded_read_failed",
+    "status": 130,
+    "code": "ETIMEDOUT",
+    "diagnostic": "Initialising login role...\n"
+  },
+  "full_status_error": {
+    "http_status": 400,
+    "sqlstate": "57014",
+    "message": "canceling statement due to statement timeout",
+    "context": "SQL function fuel_national_retention_candidates statement 1"
+  },
+  "repair_attempts_this_recurrence": 0,
+  "provider_requests_by_monitor": 0
+}
