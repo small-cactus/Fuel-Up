@@ -66,3 +66,15 @@ The full status query failed with SQLSTATE 57014 inside `fuel_national_archive_b
 The public cache-only Trends request succeeded with HTTP 200 in 9,219 ms and no history error, but still returned the complete 21:00 UTC point. All ten database cache scopes remain tied to run 18927, published 21:20 UTC. This is availability evidence for one request, not scheduled collection recovery. No immutable archive read-back or full recovery is claimed.
 
 No new repair attempt or production mutation was made; recurrence repair attempts remain zero. The managed database/Storage performance problem needs owner/platform investigation or an independently proven scoped fix. Sanitized evidence is in `followup-0129.json`. Original research/evaluation data and city collection were not changed.
+
+## October 15, 02:32 heartbeat: fourth incomplete hour
+
+The 01:00 run 19101 became partial at 02:00:09 UTC. All 72 batches are missed with zero attempts. Reconciliation now shows 176 expected operational slots, 161 complete, 14 partial, zero expired absent rows and zero expired running rows. This recurrence has four incomplete hours (22:00–01:00). Current 02:00 run 19139 has 72 queued batches with zero attempts and is allowed until 03:00 UTC. Both runs therefore consumed zero request/lookup budget; the current run is not yet a missed hour.
+
+Collection remains enabled and continuous. Dispatch advanced to 02:32:09 UTC, while the last provider request remains October 14 at 22:06:23 UTC and the shared cooldown remains expired. Saved worker responses at 02:31–02:33 again show HTTP 503 database job-claim failures on all three fixed routes, with matching expected/actual regions. The main dispatch, watchdog, Trends cache, projection repair and retention schedules are all present and active, so schedule restoration is not applicable.
+
+The full status read failed with management API HTTP 544, `Failed to run sql query`; the broader diagnostic exceeded its 60-second bound. Narrower queries succeeded: retention cron dispatch at 02:20 failed with `job startup timeout`, while 02:10 and 02:30 succeeded. A successful cron dispatch does not prove the asynchronous retention worker completed or that deletion eligibility is zero. Current archive capacity and retention eligibility remain unverified; capacity controls were not bypassed.
+
+The public cache-only Trends request timed out at 25,007 ms. Database cache rows remain tied to complete run 18927 (21:00), ten scopes published at 21:20 UTC. A separate narrow query verified zero missing projection batches for that latest complete run. No new complete sweep or immutable archive recovery read-back is claimed.
+
+No repair attempt, deployment, re-enable, provider replay, billing change, raw overwrite, research deletion or phone interaction was performed. Recurrence repair attempts remain zero. Sanitized evidence is in `followup-0232.json`; current diagnostics do not justify retrying the earlier rejected Storage-owner index change or weakening exact archive accounting.

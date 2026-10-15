@@ -1,0 +1,179 @@
+{
+  "checked_at": "2026-10-15T02:35:59.668030+00:00",
+  "repair_attempts_this_recurrence": 0,
+  "provider_requests_by_monitor": 0,
+  "full_status_error": {
+    "http_status": 544,
+    "message": "Failed to run sql query"
+  },
+  "small_status": {
+    "cache": {
+      "published_at": "2026-10-14T21:20:00.248584+00:00",
+      "run_id": 18927,
+      "scopes": 10
+    },
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "id": true,
+      "last_dispatch_at": "2026-10-15T02:32:09.306239+00:00",
+      "last_request_at": "2026-10-14T22:06:23.756515+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-10-14T22:04:16.424978+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "runs": [
+      {
+        "completed_at": null,
+        "id": 19139,
+        "slot_at": "2026-10-15T02:00:00+00:00",
+        "status": "running"
+      },
+      {
+        "completed_at": "2026-10-15T02:00:09.21165+00:00",
+        "id": 19101,
+        "slot_at": "2026-10-15T01:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-15T01:00:02.940443+00:00",
+        "id": 19057,
+        "slot_at": "2026-10-15T00:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-15T00:00:00.445577+00:00",
+        "id": 19019,
+        "slot_at": "2026-10-14T23:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-14T23:00:00.773415+00:00",
+        "id": 18987,
+        "slot_at": "2026-10-14T22:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-14T21:16:05.118351+00:00",
+        "id": 18927,
+        "slot_at": "2026-10-14T21:00:00+00:00",
+        "status": "complete"
+      }
+    ],
+    "slots": {
+      "complete": 161,
+      "expected": 176,
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 14
+    }
+  },
+  "public_cache": {
+    "error": "TimeoutError",
+    "milliseconds": 25007
+  },
+  "narrow_diagnostic": {
+    "error": "bounded_read_failed",
+    "status": 130,
+    "code": "ETIMEDOUT",
+    "diagnostic": "Initialising login role...\n"
+  },
+  "worker_responses": {
+    "responses": [
+      {
+        "created": "2026-10-15 02:33:01.862679+00",
+        "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+        "status_code": 503
+      },
+      {
+        "created": "2026-10-15 02:32:17.726212+00",
+        "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "status_code": 503
+      },
+      {
+        "created": "2026-10-15 02:31:07.401633+00",
+        "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+        "status_code": 503
+      }
+    ]
+  },
+  "schedules": {
+    "cron": [
+      {
+        "active": true,
+        "jobname": "fuel-national-discovery",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "jobname": "fuel-national-trends-cache",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "jobname": "fuel-national-projection-repair",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "jobname": "fuel-national-dispatch",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "jobname": "fuel-national-watchdog",
+        "schedule": "*/5 * * * *"
+      },
+      {
+        "active": true,
+        "jobname": "fuel-national-retention",
+        "schedule": "*/10 * * * *"
+      }
+    ]
+  },
+  "maintenance": {
+    "jobs": [
+      {
+        "attempts": 0,
+        "jobs": 72,
+        "run_id": 19139,
+        "status": "queued"
+      },
+      {
+        "attempts": 0,
+        "jobs": 72,
+        "run_id": 19101,
+        "status": "missed"
+      }
+    ],
+    "retention": [
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-15T02:30:00.345302+00:00",
+        "status": "succeeded"
+      },
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-15T02:20:00.000323+00:00",
+        "status": "failed"
+      },
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-15T02:10:08.568061+00:00",
+        "status": "succeeded"
+      }
+    ]
+  },
+  "latest_complete_projection_backlog": {
+    "missing_batches": 0
+  }
+}
