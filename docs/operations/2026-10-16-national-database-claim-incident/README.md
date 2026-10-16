@@ -24,3 +24,15 @@ No production repair was attempted in this recurrence (zero attempts). The Octob
 No provider collection, replay, re-enable, billing change, restart, route change, raw overwrite, deletion or research-window mutation was performed by this monitor. The original research window and city campaign remain closed. Existing retention policy remains 48 hours for operational raw objects and eight days for operational metadata, preserving original research, evaluation data and the latest published cache archive. No recovery or new immutable archive read-back is claimed; verify both on a new scheduled recovery.
 
 The inventory assumption remains 141,660 catalog stations in 72 batches across three fixed routes. These are provider observations, not verified pump truth. snapshot-1630.json contains sanitized read-only evidence and excludes credentials and tester telemetry.
+
+## 17:23 UTC follow-up — first newly incomplete hour
+
+The 16:00 run closed partial at 17:01:04 with 23 succeeded and 49 missed batches. Its 43,960 observed catalog stations include 29,051 with some reported price; this is neither a complete nationwide sweep nor verified pump truth. The all-retained operational reconciliation now has 215 expected slots, 192 complete, 22 partial, zero expired absent slots and zero expired running slots. The eight-day rolling status window separately contains 192 expected slots, 169 complete, 22 partial and the current running slot. Both views agree on the new incomplete hour; older retained rows outside the rolling window are not additional gaps.
+
+The current 17:00 run (21307) has 72 queued jobs, zero attempts and no successful batches. Its deadline is 18:00 UTC, so it is not counted as missed yet. The last provider request remains 16:05:01. Saved HTTP 503 database-claim failures now cover all three fixed routes (us-east-1, us-west-1 and us-west-2), with matching expected/actual regions. All six schedules and three routes remain enabled, dispatch timestamps advance, and the shared cooldown remains expired with no newer saved provider denial.
+
+The complete 15:00 Trends cache remains the latest published cache across ten scopes and has zero missing projection batches. The public cache-only request now succeeded (HTTP 200, 6,071 ms, no history error) and returned the 15:00 regular-grade point. This verifies cache access only, not collection recovery.
+
+The full status read succeeded this time: accounted archive usage is 761,415,871 of 900,000,000 bytes (84.6%), with 72 eligible retention objects. A separate ten-second bounded retention diagnostic still timed out. Retention cron dispatches at 17:00 and 17:10 failed startup; 17:20 succeeded, but dispatch success does not prove deletion completed. The observed eligible-object backlog remains unresolved in this snapshot.
+
+No speculative production repair, provider replay, re-enable or policy change was attempted. Repair attempts for this incident remain zero. Database performance is intermittent, the underlying cause remains unproven, and scheduled collection has not recovered. The evidence is saved in followup-1723.json. Existing research and retention protections remain unchanged.
