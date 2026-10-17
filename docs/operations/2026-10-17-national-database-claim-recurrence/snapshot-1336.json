@@ -1,0 +1,163 @@
+{
+  "captured_at": "2026-10-17T13:37:55.975Z",
+  "heartbeat_at": "2026-10-17T12:21:42.759Z",
+  "actual_successful_read_at": "2026-10-17T13:36:27.956655+00:00",
+  "repair_attempts": 0,
+  "manual_provider_requests": 0,
+  "maintenance": {
+    "error": "bounded_read_failed",
+    "code": 130,
+    "signal": null,
+    "diagnostic": "Initialising login role...\n"
+  },
+  "worker_responses": {
+    "error": "bounded_read_failed",
+    "code": 1,
+    "signal": null,
+    "diagnostic": "Initialising login role...\nfailed to initialise login role: request timed out\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "retention": {
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\n"
+  },
+  "public": {
+    "error": "TimeoutError",
+    "ms": 62499
+  },
+  "followup": {
+    "checked_at": "2026-10-17T13:36:27.956655+00:00",
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_HTTP_503",
+      "id": true,
+      "last_dispatch_at": "2026-10-17T13:35:00.600761+00:00",
+      "last_request_at": "2026-10-17T10:15:31.529798+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-10-17T09:09:29.908058+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "runs": [
+      {
+        "archive_bytes": 0,
+        "completed_at": null,
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 22296,
+        "missed_batches": 0,
+        "observed_stations": 0,
+        "priced_stations": 0,
+        "slot_at": "2026-10-17T13:00:00+00:00",
+        "status": "running",
+        "succeeded_batches": 0
+      },
+      {
+        "archive_bytes": 0,
+        "completed_at": "2026-10-17T13:01:07.080664+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 22263,
+        "missed_batches": 72,
+        "observed_stations": 0,
+        "priced_stations": 0,
+        "slot_at": "2026-10-17T12:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 0
+      },
+      {
+        "archive_bytes": 0,
+        "completed_at": "2026-10-17T12:00:09.280341+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 22243,
+        "missed_batches": 72,
+        "observed_stations": 0,
+        "priced_stations": 0,
+        "slot_at": "2026-10-17T11:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 0
+      },
+      {
+        "archive_bytes": 3586260,
+        "completed_at": "2026-10-17T11:00:08.368675+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 22206,
+        "missed_batches": 1,
+        "observed_stations": 139960,
+        "priced_stations": 90476,
+        "slot_at": "2026-10-17T10:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 71
+      },
+      {
+        "archive_bytes": 3627312,
+        "completed_at": "2026-10-17T09:16:22.054989+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 22146,
+        "missed_batches": 0,
+        "observed_stations": 141660,
+        "priced_stations": 91544,
+        "slot_at": "2026-10-17T09:00:00+00:00",
+        "status": "complete",
+        "succeeded_batches": 72
+      }
+    ],
+    "slots": {
+      "complete": 161,
+      "expected": 192,
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 30
+    }
+  },
+  "later_maintenance": {
+    "error": "bounded_read_failed",
+    "code": 1,
+    "signal": null,
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "later_worker_responses": {
+    "error": "bounded_read_failed",
+    "code": 1,
+    "signal": null,
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "later_diagnostic": {
+    "error": "bounded_read_failed",
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "full_status_error": "Initialising login role...\nfailed to initialise login role: request timed out\nTry rerunning the command with --debug to troubleshoot the error.",
+  "assessment": {
+    "new_incomplete_hours": [
+      "2026-10-17T10:00:00Z",
+      "2026-10-17T11:00:00Z",
+      "2026-10-17T12:00:00Z"
+    ],
+    "new_missed_batches": 145,
+    "total_rolling_partial_hours": 30,
+    "current_hour": "13:00 running; deadline 14:00 UTC; not counted as missed",
+    "expired_absent_slots": 0,
+    "expired_running_slots": 0,
+    "latest_confirmed_complete": "09:00 UTC run 22146",
+    "unverified": [
+      "current capacity",
+      "retention backlog and outcomes",
+      "all cron schedules",
+      "regional routing state",
+      "actual budgets",
+      "current published cache and projection backlog",
+      "new saved worker errors"
+    ],
+    "safe_repair": "unproven; no changes or retries of provider collection"
+  }
+}
