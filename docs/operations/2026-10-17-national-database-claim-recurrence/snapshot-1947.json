@@ -1,0 +1,164 @@
+{
+  "captured_at": "2026-10-17T20:21:23.546Z",
+  "heartbeat_at": "2026-10-17T19:29:26.771Z",
+  "repair_attempts": 0,
+  "manual_provider_requests": 0,
+  "state": {
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\n"
+  },
+  "responses": {
+    "checked_at": "2026-10-17T19:47:17.559592+00:00",
+    "retention": null,
+    "retention_cron": [
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-17T19:40:00.000691+00:00",
+        "status": "failed"
+      },
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-17T19:30:00.003426+00:00",
+        "status": "failed"
+      },
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-17T19:20:00.000927+00:00",
+        "status": "failed"
+      }
+    ],
+    "workers": [
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+        "created": "2026-10-17T19:44:05.936968+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "created": "2026-10-17T19:42:06.808326+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+        "created": "2026-10-17T19:41:04.819798+00:00",
+        "status_code": 503
+      }
+    ]
+  },
+  "capacity": {
+    "checked_at": "2026-10-17T19:46:53.323Z",
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\n"
+  },
+  "public": {
+    "checked_at": "2026-10-17T19:29:57.530Z",
+    "error": "TimeoutError",
+    "ms": 25012
+  },
+  "followup": {
+    "checked_at": "2026-10-17T19:47:41.646057+00:00",
+    "runs": [
+      {
+        "completed_at": null,
+        "id": 22498,
+        "slot_at": "2026-10-17T19:00:00+00:00",
+        "status": "running"
+      },
+      {
+        "completed_at": "2026-10-17T19:03:00.65682+00:00",
+        "id": 22462,
+        "slot_at": "2026-10-17T18:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T18:01:02.608695+00:00",
+        "id": 22431,
+        "slot_at": "2026-10-17T17:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T17:00:07.976669+00:00",
+        "id": 22400,
+        "slot_at": "2026-10-17T16:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T16:01:00.593182+00:00",
+        "id": 22370,
+        "slot_at": "2026-10-17T15:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T15:01:05.196877+00:00",
+        "id": 22332,
+        "slot_at": "2026-10-17T14:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T14:00:08.596958+00:00",
+        "id": 22296,
+        "slot_at": "2026-10-17T13:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T13:01:07.080664+00:00",
+        "id": 22263,
+        "slot_at": "2026-10-17T12:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T12:00:09.280341+00:00",
+        "id": 22243,
+        "slot_at": "2026-10-17T11:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T11:00:08.368675+00:00",
+        "id": 22206,
+        "slot_at": "2026-10-17T10:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T09:16:22.054989+00:00",
+        "id": 22146,
+        "slot_at": "2026-10-17T09:00:00+00:00",
+        "status": "complete"
+      },
+      {
+        "completed_at": "2026-10-17T08:18:26.470464+00:00",
+        "id": 22086,
+        "slot_at": "2026-10-17T08:00:00+00:00",
+        "status": "complete"
+      }
+    ],
+    "slots": {
+      "complete": 155,
+      "expected": 192,
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 36
+    }
+  },
+  "targeted": {
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\n"
+  },
+  "assessment": {
+    "newly_confirmed_incomplete_hours": [
+      "2026-10-17T17:00:00Z",
+      "2026-10-17T18:00:00Z"
+    ],
+    "incident_incomplete_hours": 9,
+    "rolling_partial_hours": 36,
+    "new_missed_batch_counts": "unverified; targeted job read failed",
+    "current_hour_at_snapshot": "19:00 running at 19:47; deadline 20:00 UTC; not counted as missed",
+    "unverified": [
+      "current capacity and retention candidates",
+      "current configuration and regional enablement",
+      "all cron schedules",
+      "job counts and request budgets",
+      "fresh cache publication and projection backlog"
+    ],
+    "safe_repair": "not established"
+  }
+}
