@@ -1,0 +1,211 @@
+{
+  "checked_at": "2026-10-17T10:24:28.685301+00:00",
+  "repair_attempts_this_incident": 0,
+  "provider_requests_by_monitor": 0,
+  "full_status_error": {
+    "http_status": 524,
+    "message": "Management API status request timed out; raw HTML omitted"
+  },
+  "maintenance": {
+    "backlog": 0,
+    "budgets": [
+      {
+        "lookups": 141660,
+        "requests": 72,
+        "run_id": 22206
+      },
+      {
+        "lookups": 143660,
+        "requests": 73,
+        "run_id": 22146
+      }
+    ],
+    "cron": [
+      {
+        "active": true,
+        "name": "fuel-national-discovery",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-trends-cache",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-projection-repair",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-dispatch",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-watchdog",
+        "schedule": "*/5 * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-retention",
+        "schedule": "*/10 * * * *"
+      }
+    ],
+    "jobs": [
+      {
+        "attempts": 73,
+        "jobs": 72,
+        "run_id": 22146,
+        "status": "succeeded"
+      },
+      {
+        "attempts": 74,
+        "jobs": 72,
+        "run_id": 22086,
+        "status": "succeeded"
+      },
+      {
+        "attempts": 1,
+        "jobs": 1,
+        "run_id": 22206,
+        "status": "running"
+      },
+      {
+        "attempts": 71,
+        "jobs": 71,
+        "run_id": 22206,
+        "status": "succeeded"
+      }
+    ],
+    "retention": [
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-17T10:20:00.000548+00:00",
+        "status": "failed"
+      },
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-17T10:10:00.311243+00:00",
+        "status": "succeeded"
+      },
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-17T10:00:00.10837+00:00",
+        "status": "succeeded"
+      }
+    ]
+  },
+  "worker_responses": {
+    "responses": [
+      {
+        "created": "2026-10-17T10:21:12.259275+00:00",
+        "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "status_code": 503
+      },
+      {
+        "created": "2026-10-17T10:19:06.034276+00:00",
+        "response_body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "status_code": 503
+      }
+    ]
+  },
+  "retention": {
+    "checked_at": "2026-10-17T10:21:49.237885+00:00",
+    "responses": [
+      {
+        "created": "2026-10-17T10:10:00.396979+00:00",
+        "response_body": "{\"status\":\"idle\",\"removedObjects\":0,\"marked_archives\":0,\"removed_operational_hours\":0,\"providerRequests\":0}",
+        "status_code": 200
+      },
+      {
+        "created": "2026-10-17T10:00:00.184604+00:00",
+        "response_body": "{\"status\":\"retained\",\"removedObjects\":72,\"marked_archives\":72,\"removed_operational_hours\":1,\"providerRequests\":0}",
+        "status_code": 200
+      },
+      {
+        "created": "2026-10-17T09:50:00.148499+00:00",
+        "response_body": "{\"status\":\"idle\",\"removedObjects\":0,\"marked_archives\":0,\"removed_operational_hours\":0,\"providerRequests\":0}",
+        "status_code": 200
+      }
+    ]
+  },
+  "public": {
+    "status": 200,
+    "milliseconds": 14208,
+    "historyError": null,
+    "latest": {
+      "date": "2026-10-17T09:00:00+00:00",
+      "price": 4.310728536308623,
+      "stationCount": 63456
+    },
+    "source": "national-cache"
+  },
+  "small": {
+    "error": "bounded_read_failed",
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "followup": {
+    "checked_at": "2026-10-17T10:23:59.378505+00:00",
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_HTTP_503",
+      "id": true,
+      "last_dispatch_at": "2026-10-17T10:22:06.459842+00:00",
+      "last_request_at": "2026-10-17T10:15:31.529798+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-10-17T09:09:29.908058+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "regions": [
+      {
+        "enabled": true,
+        "function_name": "fuel-national-northwest",
+        "last_dispatch_at": "2026-10-17T10:00:00.094125+00:00",
+        "region": "us-west-2"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-southwest",
+        "last_dispatch_at": "2026-10-17T10:03:00.336312+00:00",
+        "region": "us-west-1"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-east",
+        "last_dispatch_at": "2026-10-17T10:22:06.459842+00:00",
+        "region": "us-east-1"
+      }
+    ],
+    "runs": [
+      {
+        "completed_at": null,
+        "id": 22206,
+        "slot_at": "2026-10-17T10:00:00+00:00",
+        "status": "running"
+      },
+      {
+        "completed_at": "2026-10-17T09:16:22.054989+00:00",
+        "id": 22146,
+        "slot_at": "2026-10-17T09:00:00+00:00",
+        "status": "complete"
+      }
+    ],
+    "slots": {
+      "absent_expired": 0,
+      "complete": 164,
+      "expected": 192,
+      "expired_running": 0,
+      "partial": 27
+    }
+  }
+}
