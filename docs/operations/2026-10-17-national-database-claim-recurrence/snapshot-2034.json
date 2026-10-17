@@ -1,0 +1,218 @@
+{
+  "captured_at": "2026-10-17T20:34:39.398Z",
+  "heartbeat_at": "2026-10-17T20:32:40.610Z",
+  "repair_attempts": 0,
+  "manual_provider_requests": 0,
+  "state": {
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\n"
+  },
+  "responses": {
+    "checked_at": "2026-10-17T20:33:38.194408+00:00",
+    "retention": [
+      {
+        "body": "{\"error\":\"NATIONAL_RETENTION_FAILED\"}",
+        "created": "2026-10-17T20:30:10.029713+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"NATIONAL_RETENTION_FAILED\"}",
+        "created": "2026-10-17T20:00:08.087756+00:00",
+        "status_code": 503
+      }
+    ],
+    "retention_cron": [
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-17T20:30:05.141361+00:00",
+        "status": "succeeded"
+      },
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-17T20:20:00.007317+00:00",
+        "status": "failed"
+      },
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-17T20:10:00.006921+00:00",
+        "status": "failed"
+      }
+    ],
+    "workers": [
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "created": "2026-10-17T20:32:04.658252+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+        "created": "2026-10-17T20:31:13.573889+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+        "created": "2026-10-17T20:30:26.017708+00:00",
+        "status_code": 503
+      }
+    ]
+  },
+  "capacity": {
+    "checked_at": "2026-10-17T20:32:58.028Z",
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\nunexpected status 400: {\"message\":\"Failed to run sql query: ERROR:  57014: canceling statement due to statement timeout\\nCONTEXT:  SQL function \\\"fuel_national_archive_bytes\\\" statement 1\\n\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "public": {
+    "checked_at": "2026-10-17T20:33:04.943Z",
+    "status": 200,
+    "ms": 17522,
+    "historyError": null,
+    "latest": {
+      "date": "2026-10-17T09:00:00+00:00",
+      "price": 4.310728536308623,
+      "stationCount": 63456
+    }
+  },
+  "followup": {
+    "checked_at": "2026-10-17T20:34:15.796615+00:00",
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_HTTP_503",
+      "id": true,
+      "last_dispatch_at": "2026-10-17T20:33:09.626814+00:00",
+      "last_request_at": "2026-10-17T10:15:31.529798+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-10-17T09:09:29.908058+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "jobs": [
+      {
+        "attempts": 0,
+        "batches": 72,
+        "run_id": 22525,
+        "status": "queued"
+      },
+      {
+        "attempts": 0,
+        "batches": 72,
+        "run_id": 22462,
+        "status": "missed"
+      },
+      {
+        "attempts": 0,
+        "batches": 72,
+        "run_id": 22431,
+        "status": "missed"
+      },
+      {
+        "attempts": 0,
+        "batches": 72,
+        "run_id": 22498,
+        "status": "missed"
+      }
+    ],
+    "runs": [
+      {
+        "completed_at": null,
+        "id": 22525,
+        "slot_at": "2026-10-17T20:00:00+00:00",
+        "status": "running"
+      },
+      {
+        "completed_at": "2026-10-17T20:00:04.983974+00:00",
+        "id": 22498,
+        "slot_at": "2026-10-17T19:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T19:03:00.65682+00:00",
+        "id": 22462,
+        "slot_at": "2026-10-17T18:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T18:01:02.608695+00:00",
+        "id": 22431,
+        "slot_at": "2026-10-17T17:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T17:00:07.976669+00:00",
+        "id": 22400,
+        "slot_at": "2026-10-17T16:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T16:01:00.593182+00:00",
+        "id": 22370,
+        "slot_at": "2026-10-17T15:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T15:01:05.196877+00:00",
+        "id": 22332,
+        "slot_at": "2026-10-17T14:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T14:00:08.596958+00:00",
+        "id": 22296,
+        "slot_at": "2026-10-17T13:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T13:01:07.080664+00:00",
+        "id": 22263,
+        "slot_at": "2026-10-17T12:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T12:00:09.280341+00:00",
+        "id": 22243,
+        "slot_at": "2026-10-17T11:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T11:00:08.368675+00:00",
+        "id": 22206,
+        "slot_at": "2026-10-17T10:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-17T09:16:22.054989+00:00",
+        "id": 22146,
+        "slot_at": "2026-10-17T09:00:00+00:00",
+        "status": "complete"
+      }
+    ],
+    "slots": {
+      "complete": 154,
+      "expected": 192,
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 37
+    }
+  },
+  "assessment": {
+    "newly_confirmed_incomplete_hour": "2026-10-17T19:00:00Z",
+    "incident_incomplete_hours": 10,
+    "incident_missed_batches": 649,
+    "rolling_partial_hours": 37,
+    "current_hour": "20:00 run 22525 queued 72, zero attempts; deadline 21:00 UTC; not counted as missed",
+    "unverified": [
+      "exact archive capacity",
+      "retention candidates",
+      "fresh all-schedule and regional enablement snapshot",
+      "latest-complete projection backlog"
+    ],
+    "safe_repair": "not established"
+  }
+}
