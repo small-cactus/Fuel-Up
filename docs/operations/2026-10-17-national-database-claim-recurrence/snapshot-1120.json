@@ -1,0 +1,41 @@
+{
+  "checked_at": "2026-10-17T11:21:49.019Z",
+  "heartbeat_at": "2026-10-17T11:20:23.221Z",
+  "repair_attempts": 0,
+  "manual_provider_requests": 0,
+  "full_status_error": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.",
+  "maintenance": {
+    "error": "bounded_read_failed",
+    "code": 1,
+    "signal": null,
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "worker_responses": {
+    "error": "bounded_read_failed",
+    "code": 1,
+    "signal": null,
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "retention": {
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "public": {
+    "error": "TimeoutError",
+    "ms": 25009
+  },
+  "followup": {
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "assessment": {
+    "new_collection_gap": "unverified; 10:00 deadline has passed but current run state cannot be read",
+    "latest_confirmed_complete_slot": "2026-10-17T09:00:00Z (previous check)",
+    "historical_partial_hours_last_verified": 27,
+    "current_capacity": "unverified",
+    "current_retention": "unverified",
+    "current_routes_cooldowns_budgets_schedules_backlog": "unverified",
+    "public_probe": "one cache-only request timed out after 25 seconds; broader availability not established",
+    "safe_repair": "not established; no mutations performed"
+  }
+}
