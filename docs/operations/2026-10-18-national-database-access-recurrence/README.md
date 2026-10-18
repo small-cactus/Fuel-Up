@@ -1,0 +1,11 @@
+# October 18 database access recurrence
+
+Observed 11:27–11:30 UTC after verified complete sweeps through 10:00. Full status failed with SQLSTATE 57014 in fuel_national_retention_candidates. Bounded state and saved-response queries, including a retry, failed while creating the administrative login role with HTTP 544 connection timeout. These failures do not establish that scheduled retention or all regional collectors failed; their current outcomes could not be read.
+
+The first cache-only public Trends probe timed out after 25,008 ms. A second returned HTTP 200 in 24,736 ms with no history error and the complete 10:00 UTC point. This shows degraded response latency and one failed probe, not a proven total outage. Both requests used the serving endpoint without initiating provider collection.
+
+The last verified snapshot at 10:31:36 UTC had 10:00 run 23316 complete at 72/72 batches, all three fixed routes correct, current cache, zero projection backlog, 72 requests / 141,660 lookups, and all six schedules active. Earlier exact archive accounting was 688,850,002 / 900,000,000 bytes. The retained eight-day reconciliation had 192 slots: 155 complete, 37 previously reported partial, zero expired absent and zero expired running. These are previous observations, not current verification. The current 11:00 slot remains within its deadline until 12:00; no new missing hour is asserted without evidence.
+
+Current collection progress, cooldowns, routes, budgets, projection backlog, archive capacity and retention outcomes remain unverified. The October 18 correlated-reference migration addressed a different metadata-pruning query; this status error names the raw-retention candidate function. No evidence supports claiming that earlier fix caused or resolves this recurrence.
+
+No production repair attempted (zero attempts). Repeated database access failures prevent a supported diagnosis and safe scoped repair. No provider replay, identity/routing change, cooldown/capacity override, billing change, raw overwrite, manual cleanup, re-enable or schedule mutation occurred. Original research/evaluation protections and existing retention settings were preserved. No recovery or new immutable archive read-back is claimed. Fixed-inventory observations are not verified pump truth.

@@ -1,0 +1,67 @@
+{
+  "captured_at": "2026-10-18T11:30:05.951Z",
+  "project_ref": "vjindchxfebaltbslqwc",
+  "state_retry": {
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "responses_retry": {
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "public_probe": {
+    "error": "TimeoutError",
+    "ms": 25008
+  },
+  "public_retry": {
+    "status": 200,
+    "ms": 24736,
+    "historyError": null,
+    "latest": {
+      "date": "2026-10-18T10:00:00+00:00",
+      "price": 4.2884283433841786,
+      "stationCount": 56380
+    },
+    "checked_at": "2026-10-18T11:29:49.167Z"
+  },
+  "last_verified": {
+    "snapshot_at": "2026-10-18T10:31:36.6636Z",
+    "complete_run": {
+      "archive_bytes": 3410886,
+      "completed_at": "2026-10-18T10:14:45.563096+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 23316,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 83802,
+      "slot_at": "2026-10-18T10:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    "slots": {
+      "complete": 155,
+      "current_absent": 0,
+      "expected": 192,
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 37
+    },
+    "capacity_bytes": 688850002,
+    "cache": {
+      "age_minutes": 15.7074521,
+      "behind_latest_complete": false,
+      "published_at": "2026-10-18T10:15:00.382207+00:00",
+      "run_id": 23316,
+      "scopes": 10
+    },
+    "backlog": {
+      "completed_at": "2026-10-18T10:14:45.563096+00:00",
+      "missing_batches": 0,
+      "run_id": 23316,
+      "slot_at": "2026-10-18T10:00:00+00:00"
+    }
+  },
+  "repair_attempts": 0,
+  "full_status_error": "Initialising login role...\nunexpected status 400: {\"message\":\"Failed to run sql query: ERROR:  57014: canceling statement due to statement timeout\\nCONTEXT:  SQL function \\\"fuel_national_retention_candidates\\\" statement 1\\n\"}\nTry rerunning the command with --debug to troubleshoot the error."
+}
