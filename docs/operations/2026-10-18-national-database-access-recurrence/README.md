@@ -83,3 +83,13 @@ The initial state and capacity requests timed out during administrative login in
 The latest published cache remains 10:00 run 23316 across ten scopes. The cache-only public probe timed out after 25,004 ms. Retention cron starts at 18:20, 18:30 and 18:40 all failed with job startup timeout; no matching actual retention response was present in the bounded window. Current exact capacity and retention candidates remain unverified.
 
 No new evidence establishes a safe internal repair; production repair attempts remain zero. No provider replay, identity/routing change, capacity/denial override, billing change, raw overwrite, manual cleanup or protected research/evaluation mutation occurred. No recovery or new immutable archive read-back is claimed. Evidence is in snapshot-1839.json.
+
+## 19:39 UTC: eighth incomplete hour confirmed
+
+18:00 run 23595 finished partial with zero successful batches, 72 missed and zero attempts. The incident now spans 11:00–18:00: eight incomplete hours and 512 missed batches (15 + 72 + 72 + 72 + 65 + 72 + 72 + 72). Current 19:00 run 23627 has zero successful batches and zero attempts; its deadline is 20:00 and it is not counted as missed yet. The rolling eight-day reconciliation has 192 expected slots: 146 complete, 45 partial, zero expired absent and zero expired running, plus the current running slot. Intentional older metadata expiry is excluded.
+
+All six schedules and three fixed routes remain enabled. Config remains enabled/continuous and the recorded shared cooldown is expired. Dispatch advanced to 19:36 while the last provider request remains 15:34:12. Current-hour request/lookup usage is zero. Saved responses show continuing HTTP 503 database-claim failures on all three routes, with matching expected and actual regions. No re-enable or watchdog schedule restoration is indicated.
+
+The published cache remains 10:00 run 23316 across ten scopes, with zero projection backlog for that complete run. The public cache-only probe timed out after 25,009 ms. Actual retention workers at 19:10, 19:20 and 19:30 all returned HTTP 503 NATIONAL_RETENTION_FAILED despite successful cron dispatch. Exact archive accounting exceeded its session-local eight-second timeout in fuel_national_archive_bytes, leaving capacity and candidate backlog unverified.
+
+No new evidence supports a safe internal repair; production repair attempts remain zero. No provider replay, routing/identity change, capacity/denial override, billing change, raw overwrite, manual cleanup or protected research/evaluation mutation occurred. No recovery or new immutable archive read-back is claimed. These fixed-inventory observations are not verified pump truth. Evidence is in snapshot-1938.json.
