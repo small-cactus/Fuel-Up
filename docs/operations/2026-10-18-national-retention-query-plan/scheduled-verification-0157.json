@@ -1,0 +1,196 @@
+{
+  "checked_at": "2026-10-18T01:58:07.073Z",
+  "repair_attempts": 1,
+  "state": {
+    "backlog": 0,
+    "budget": {
+      "lookups": 141660,
+      "requests": 72
+    },
+    "cache": {
+      "published_at": "2026-10-18T01:17:00.234431+00:00",
+      "run_id": 22776,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-18T01:57:33.063281+00:00",
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "id": true,
+      "last_dispatch_at": "2026-10-18T01:15:00.399613+00:00",
+      "last_request_at": "2026-10-18T01:15:01.087559+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-10-18T00:10:14.855069+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "cron": [
+      {
+        "active": true,
+        "name": "fuel-national-discovery"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-trends-cache"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-projection-repair"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-dispatch"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-watchdog"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-retention"
+      }
+    ],
+    "regions": [
+      {
+        "enabled": true,
+        "function_name": "fuel-national-northwest",
+        "last_dispatch_at": "2026-10-18T01:00:00.074249+00:00",
+        "region": "us-west-2"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-southwest",
+        "last_dispatch_at": "2026-10-18T01:03:00.293697+00:00",
+        "region": "us-west-1"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-east",
+        "last_dispatch_at": "2026-10-18T01:15:00.399613+00:00",
+        "region": "us-east-1"
+      }
+    ],
+    "runs": [
+      {
+        "completed_at": "2026-10-18T01:15:04.828348+00:00",
+        "expected_batches": 72,
+        "id": 22776,
+        "slot_at": "2026-10-18T01:00:00+00:00",
+        "status": "complete"
+      },
+      {
+        "completed_at": "2026-10-18T00:17:15.907788+00:00",
+        "expected_batches": 72,
+        "id": 22716,
+        "slot_at": "2026-10-18T00:00:00+00:00",
+        "status": "complete"
+      },
+      {
+        "completed_at": "2026-10-17T23:16:19.462152+00:00",
+        "expected_batches": 72,
+        "id": 22656,
+        "slot_at": "2026-10-17T23:00:00+00:00",
+        "status": "complete"
+      },
+      {
+        "completed_at": "2026-10-17T22:16:37.692534+00:00",
+        "expected_batches": 72,
+        "id": 22596,
+        "slot_at": "2026-10-17T22:00:00+00:00",
+        "status": "complete"
+      }
+    ],
+    "slots": {
+      "complete": 154,
+      "expected": 192,
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 38
+    }
+  },
+  "responses": {
+    "checked_at": "2026-10-18T01:57:35.196659+00:00",
+    "retention": [
+      {
+        "body": "{\"status\":\"idle\",\"removedObjects\":0,\"marked_archives\":0,\"removed_operational_hours\":0,\"providerRequests\":0}",
+        "created": "2026-10-18T01:50:00.141815+00:00",
+        "status_code": 200
+      },
+      {
+        "body": "{\"status\":\"idle\",\"removedObjects\":0,\"marked_archives\":0,\"removed_operational_hours\":0,\"providerRequests\":0}",
+        "created": "2026-10-18T01:40:00.131333+00:00",
+        "status_code": 200
+      },
+      {
+        "body": "{\"status\":\"idle\",\"removedObjects\":0,\"marked_archives\":0,\"removed_operational_hours\":0,\"providerRequests\":0}",
+        "created": "2026-10-18T01:30:00.190563+00:00",
+        "status_code": 200
+      }
+    ],
+    "retention_cron": [
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-18T01:50:00.091105+00:00",
+        "status": "succeeded"
+      },
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-18T01:40:00.07616+00:00",
+        "status": "succeeded"
+      },
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-18T01:30:00.120417+00:00",
+        "status": "succeeded"
+      }
+    ],
+    "workers": null
+  },
+  "capacity": {
+    "archive_bytes": 690729338,
+    "checked_at": "2026-10-18T01:57:52.222341+00:00",
+    "retention_candidates_capped_200": 0
+  },
+  "public": {
+    "checked_at": "2026-10-18T01:57:51.796Z",
+    "status": 200,
+    "ms": 818,
+    "historyError": null,
+    "latest": {
+      "date": "2026-10-18T01:00:00+00:00",
+      "price": 4.299996108742947,
+      "stationCount": 56537
+    }
+  },
+  "protected_after_schedule": {
+    "checked_at": "2026-10-18T01:57:33.789826+00:00",
+    "latest_cache_objects": {
+      "count": 72,
+      "fingerprint": "fcf8146ee628ae69f67cc9e01352544e",
+      "run_id": 22716
+    },
+    "research_jobs": {
+      "count": 11520,
+      "fingerprint": "bacf476eca6e90dbcaece3d6bdc68c65"
+    },
+    "research_objects": {
+      "count": 11121,
+      "fingerprint": "5b5097b78af6063d6af0cc4838a31857"
+    }
+  },
+  "archive_audit": {
+    "verified": true,
+    "auditedAt": "2026-10-18T01:37:54.797Z",
+    "runId": 22776,
+    "samples": 3,
+    "providerRequests": 0
+  }
+}
