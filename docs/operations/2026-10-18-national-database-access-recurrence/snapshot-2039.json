@@ -1,0 +1,202 @@
+{
+  "captured_at": "2026-10-18T20:40:28.239Z",
+  "state": {
+    "backlog": 0,
+    "budget": {
+      "lookups": 6000,
+      "requests": 3
+    },
+    "cache": {
+      "published_at": "2026-10-18T10:15:00.382207+00:00",
+      "run_id": 23316,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-18T20:39:51.983952+00:00",
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "id": true,
+      "last_dispatch_at": "2026-10-18T20:35:01.596076+00:00",
+      "last_request_at": "2026-10-18T20:11:50.326642+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-10-18T08:07:27.191857+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "cron": [
+      {
+        "active": true,
+        "name": "fuel-national-discovery"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-trends-cache"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-projection-repair"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-dispatch"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-watchdog"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-retention"
+      }
+    ],
+    "regions": [
+      {
+        "enabled": true,
+        "function_name": "fuel-national-east",
+        "last_dispatch_at": "2026-10-18T20:33:07.955118+00:00",
+        "region": "us-east-1"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-northwest",
+        "last_dispatch_at": "2026-10-18T20:34:00.57148+00:00",
+        "region": "us-west-2"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-southwest",
+        "last_dispatch_at": "2026-10-18T20:35:01.596076+00:00",
+        "region": "us-west-1"
+      }
+    ],
+    "runs": [
+      {
+        "completed_at": null,
+        "expected_batches": 72,
+        "id": 23661,
+        "slot_at": "2026-10-18T20:00:00+00:00",
+        "status": "running"
+      },
+      {
+        "completed_at": "2026-10-18T20:01:01.689439+00:00",
+        "expected_batches": 72,
+        "id": 23627,
+        "slot_at": "2026-10-18T19:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-18T19:00:02.457826+00:00",
+        "expected_batches": 72,
+        "id": 23595,
+        "slot_at": "2026-10-18T18:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-18T18:02:00.952568+00:00",
+        "expected_batches": 72,
+        "id": 23556,
+        "slot_at": "2026-10-18T17:00:00+00:00",
+        "status": "partial"
+      }
+    ],
+    "slots": {
+      "complete": 145,
+      "expected": 192,
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 46
+    }
+  },
+  "responses": {
+    "checked_at": "2026-10-18T20:40:13.181757+00:00",
+    "retention": [
+      {
+        "body": "{\"error\":\"NATIONAL_RETENTION_FAILED\"}",
+        "created": "2026-10-18T20:20:10.597047+00:00",
+        "status_code": 503
+      }
+    ],
+    "retention_cron": [
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-18T20:40:00.000283+00:00",
+        "status": "failed"
+      },
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-18T20:30:00.000153+00:00",
+        "status": "failed"
+      },
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-18T20:20:03.885327+00:00",
+        "status": "succeeded"
+      }
+    ],
+    "workers": [
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+        "created": "2026-10-18T20:35:06.735974+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+        "created": "2026-10-18T20:34:01.867481+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "created": "2026-10-18T20:33:22.030934+00:00",
+        "status_code": 503
+      }
+    ]
+  },
+  "counts": {
+    "checked_at": "2026-10-18T20:39:57.317187+00:00",
+    "runs": [
+      {
+        "expected_batches": 72,
+        "id": 23627,
+        "missed_batches": 72,
+        "requests": 0,
+        "slot_at": "2026-10-18T19:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 0
+      },
+      {
+        "expected_batches": 72,
+        "id": 23661,
+        "missed_batches": 0,
+        "requests": 3,
+        "slot_at": "2026-10-18T20:00:00+00:00",
+        "status": "running",
+        "succeeded_batches": 3
+      }
+    ]
+  },
+  "capacity": {
+    "checked_at": "2026-10-18T20:40:01.091Z",
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\nunexpected status 400: {\"message\":\"Failed to run sql query: ERROR:  57014: canceling statement due to statement timeout\\nCONTEXT:  SQL function \\\"fuel_national_archive_bytes\\\" statement 1\\n\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "public_probe": {
+    "checked_at": "2026-10-18T20:39:51.488Z",
+    "status": 200,
+    "ms": 5695,
+    "historyError": null,
+    "latest": {
+      "date": "2026-10-18T10:00:00+00:00",
+      "price": 4.2884283433841786,
+      "stationCount": 56380
+    }
+  },
+  "repair_attempts": 0
+}
