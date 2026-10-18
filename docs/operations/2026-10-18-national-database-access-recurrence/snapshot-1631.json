@@ -1,0 +1,172 @@
+{
+  "captured_at": "2026-10-18T16:33:25.389Z",
+  "state": {
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\nunexpected status 544: {\"message\":\"Failed to run sql query: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "responses": {
+    "checked_at": "2026-10-18T16:32:18.897722+00:00",
+    "retention": [
+      {
+        "body": "{\"error\":\"NATIONAL_RETENTION_FAILED\"}",
+        "created": "2026-10-18T16:30:01.984091+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"NATIONAL_RETENTION_FAILED\"}",
+        "created": "2026-10-18T16:20:06.847735+00:00",
+        "status_code": 503
+      }
+    ],
+    "retention_cron": [
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-18T16:30:00.851666+00:00",
+        "status": "succeeded"
+      },
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-18T16:20:01.831991+00:00",
+        "status": "succeeded"
+      },
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-18T16:10:00.000011+00:00",
+        "status": "failed"
+      }
+    ],
+    "workers": [
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+        "created": "2026-10-18T16:31:03.487701+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+        "created": "2026-10-18T16:30:01.984091+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "created": "2026-10-18T16:29:06.527348+00:00",
+        "status_code": 503
+      }
+    ]
+  },
+  "counts": {
+    "checked_at": "2026-10-18T16:32:44.08413+00:00",
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "id": true,
+      "last_dispatch_at": "2026-10-18T16:31:01.851836+00:00",
+      "last_request_at": "2026-10-18T15:34:12.446394+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-10-18T08:07:27.191857+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "runs": [
+      {
+        "expected_batches": 72,
+        "id": 23493,
+        "missed_batches": 65,
+        "requests": 7,
+        "slot_at": "2026-10-18T15:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 7
+      },
+      {
+        "expected_batches": 72,
+        "id": 23525,
+        "missed_batches": 0,
+        "requests": 0,
+        "slot_at": "2026-10-18T16:00:00+00:00",
+        "status": "running",
+        "succeeded_batches": 0
+      }
+    ],
+    "slots": {
+      "complete": 149,
+      "expected": 192,
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 42
+    }
+  },
+  "maintenance": {
+    "backlog": 0,
+    "checked_at": "2026-10-18T16:33:05.101935+00:00",
+    "cron": [
+      {
+        "active": true,
+        "name": "fuel-national-discovery"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-trends-cache"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-projection-repair"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-dispatch"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-watchdog"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-retention"
+      }
+    ],
+    "regions": [
+      {
+        "enabled": true,
+        "function_name": "fuel-national-east",
+        "last_dispatch_at": "2026-10-18T16:29:03.48148+00:00",
+        "region": "us-east-1"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-northwest",
+        "last_dispatch_at": "2026-10-18T16:30:00.8677+00:00",
+        "region": "us-west-2"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-southwest",
+        "last_dispatch_at": "2026-10-18T16:31:01.851836+00:00",
+        "region": "us-west-1"
+      }
+    ]
+  },
+  "capacity": {
+    "checked_at": "2026-10-18T16:32:14.598Z",
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\nunexpected status 544: {\"message\":\"Failed to run sql query: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "public_probe": {
+    "checked_at": "2026-10-18T16:32:02.923Z",
+    "status": 200,
+    "ms": 16349,
+    "historyError": null,
+    "latest": {
+      "date": "2026-10-18T10:00:00+00:00",
+      "price": 4.2884283433841786,
+      "stationCount": 56380
+    }
+  },
+  "repair_attempts": 0
+}
