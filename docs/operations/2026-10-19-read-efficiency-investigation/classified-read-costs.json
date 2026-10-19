@@ -1,0 +1,138 @@
+{
+  "ok": true,
+  "ms": 4571,
+  "rows": [
+    {
+      "jsonb_agg": [
+        {
+          "calls": 4533,
+          "function_names": [
+            "publish_fuel_station_batch"
+          ],
+          "queryid": "-418426432983161343",
+          "shared_blks_read": 5486432,
+          "total_exec_time": 8945874.459798
+        },
+        {
+          "calls": 4607,
+          "function_names": [
+            "fuel_station_metadata_needed"
+          ],
+          "queryid": "8287076551700581678",
+          "shared_blks_read": 5254597,
+          "total_exec_time": 4137709.012928
+        },
+        {
+          "calls": 4741,
+          "function_names": [
+            "claim_fuel_national_region_job"
+          ],
+          "queryid": "-8826223861888258425",
+          "shared_blks_read": 4086648,
+          "total_exec_time": 3351629.10222
+        },
+        {
+          "calls": 18,
+          "function_names": [
+            "attach_fuel_station_observation_batch"
+          ],
+          "queryid": "8305572735219906278",
+          "shared_blks_read": 1009221,
+          "total_exec_time": 136503.225959
+        },
+        {
+          "calls": 4564,
+          "function_names": [
+            "publish_completed_national_trends"
+          ],
+          "queryid": "5175005624797353213",
+          "shared_blks_read": 882540,
+          "total_exec_time": 3759123.613143
+        },
+        {
+          "calls": 4601,
+          "function_names": [
+            "dispatch_fuel_national"
+          ],
+          "queryid": "-1065206138625326377",
+          "shared_blks_read": 95955,
+          "total_exec_time": 9117368.30471499
+        },
+        {
+          "calls": 351,
+          "function_names": [
+            "fuel_national_retention_candidates"
+          ],
+          "queryid": "-8985058319524498870",
+          "shared_blks_read": 83963,
+          "total_exec_time": 253267.125462
+        },
+        {
+          "calls": 18,
+          "function_names": [
+            "prepare_fuel_station_collection_state"
+          ],
+          "queryid": "1432732398488167307",
+          "shared_blks_read": 72308,
+          "total_exec_time": 51888.084473
+        },
+        {
+          "calls": 14,
+          "function_names": null,
+          "queryid": "2901997967638774190",
+          "shared_blks_read": 60253,
+          "total_exec_time": 14072.423755
+        },
+        {
+          "calls": 7,
+          "function_names": [
+            "import_fuel_e85_source"
+          ],
+          "queryid": "6393335161868653964",
+          "shared_blks_read": 59957,
+          "total_exec_time": 121405.955382
+        },
+        {
+          "calls": 65,
+          "function_names": [
+            "fuel_national_archive_bytes",
+            "fuel_national_retention_candidates"
+          ],
+          "queryid": "-6414989222773141915",
+          "shared_blks_read": 53223,
+          "total_exec_time": 316836.039127
+        },
+        {
+          "calls": 231,
+          "function_names": [
+            "reconcile_fuel_national_retention"
+          ],
+          "queryid": "-1527960710827300241",
+          "shared_blks_read": 42658,
+          "total_exec_time": 109267.095067
+        },
+        {
+          "calls": 1,
+          "function_names": null,
+          "queryid": "7513623450009420382",
+          "shared_blks_read": 39851,
+          "total_exec_time": 1878.622052
+        },
+        {
+          "calls": 5862,
+          "function_names": null,
+          "queryid": "3850728481664018602",
+          "shared_blks_read": 39156,
+          "total_exec_time": 872050.470342002
+        },
+        {
+          "calls": 1,
+          "function_names": null,
+          "queryid": "-1354301125190841170",
+          "shared_blks_read": 38249,
+          "total_exec_time": 3122.150608
+        }
+      ]
+    }
+  ]
+}

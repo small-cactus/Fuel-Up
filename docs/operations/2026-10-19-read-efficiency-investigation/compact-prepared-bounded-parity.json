@@ -1,0 +1,114 @@
+{
+  "complete": true,
+  "checked": 141660,
+  "results": [
+    {
+      "ordinalFrom": 0,
+      "ordinalTo": 3,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 4,
+      "ordinalTo": 7,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 8,
+      "ordinalTo": 11,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 12,
+      "ordinalTo": 15,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 16,
+      "ordinalTo": 19,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 20,
+      "ordinalTo": 23,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 24,
+      "ordinalTo": 27,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 28,
+      "ordinalTo": 31,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 32,
+      "ordinalTo": 35,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 36,
+      "ordinalTo": 39,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 40,
+      "ordinalTo": 43,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 44,
+      "ordinalTo": 47,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 48,
+      "ordinalTo": 51,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 52,
+      "ordinalTo": 55,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 56,
+      "ordinalTo": 59,
+      "checked": 7700,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 60,
+      "ordinalTo": 63,
+      "checked": 8000,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 64,
+      "ordinalTo": 67,
+      "checked": 7747,
+      "mismatches": 0
+    },
+    {
+      "ordinalFrom": 68,
+      "ordinalTo": 71,
+      "checked": 6213,
+      "mismatches": 0
+    }
+  ]
+}

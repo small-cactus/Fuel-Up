@@ -1,0 +1,59 @@
+{
+  "checkedAt": "2026-10-19T19:18:33.787Z",
+  "checks": [
+    {
+      "region": "east",
+      "status": 200,
+      "executionRegion": "us-east-1",
+      "ms": 2534,
+      "quotes": 33,
+      "summary": {
+        "stationCount": 66,
+        "quoteCount": 33,
+        "oldestObservedAt": "2026-10-19T19:02:06.863+00:00",
+        "newestObservedAt": "2026-10-19T19:15:26.222+00:00",
+        "pricePolicy": "reported-last-24-hours"
+      }
+    },
+    {
+      "region": "southwest",
+      "status": 200,
+      "executionRegion": "us-west-1",
+      "ms": 967,
+      "quotes": 83,
+      "summary": {
+        "stationCount": 171,
+        "quoteCount": 83,
+        "oldestObservedAt": "2026-10-01T19:32:34.638+00:00",
+        "newestObservedAt": "2026-10-19T19:03:36.943+00:00",
+        "pricePolicy": "reported-last-24-hours"
+      }
+    },
+    {
+      "region": "northwest",
+      "status": 200,
+      "executionRegion": "us-west-2",
+      "ms": 1044,
+      "quotes": 34,
+      "summary": {
+        "stationCount": 81,
+        "quoteCount": 34,
+        "oldestObservedAt": "2026-10-19T19:00:10.241+00:00",
+        "newestObservedAt": "2026-10-19T19:00:37.231+00:00",
+        "pricePolicy": "reported-last-24-hours"
+      }
+    },
+    {
+      "scope": "national",
+      "status": 200,
+      "ms": 613,
+      "scanId": 24770,
+      "latest": {
+        "date": "2026-10-19T19:00:00+00:00",
+        "price": 4.261226262063541,
+        "stationCount": 61031
+      }
+    }
+  ],
+  "providerRequests": 0
+}

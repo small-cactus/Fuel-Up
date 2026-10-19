@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "ms": 4721,
+  "rows": [
+    {
+      "compact_state": "fuel_station_collection_state",
+      "deployed_at": "2026-10-19 19:18:05.257293+00"
+    }
+  ]
+}

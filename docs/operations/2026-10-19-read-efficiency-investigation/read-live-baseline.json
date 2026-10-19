@@ -1,0 +1,286 @@
+{
+  "ok": true,
+  "ms": 2555,
+  "rows": [
+    {
+      "reads": {
+        "backends": [
+          {
+            "backend_type": "logical replication launcher",
+            "count": 1,
+            "state": null
+          },
+          {
+            "backend_type": "client backend",
+            "count": 1,
+            "state": "active"
+          },
+          {
+            "backend_type": "pg_cron launcher",
+            "count": 1,
+            "state": null
+          },
+          {
+            "backend_type": "client backend",
+            "count": 8,
+            "state": "idle"
+          },
+          {
+            "backend_type": "checkpointer",
+            "count": 1,
+            "state": null
+          },
+          {
+            "backend_type": "archiver",
+            "count": 1,
+            "state": null
+          },
+          {
+            "backend_type": "autovacuum launcher",
+            "count": 1,
+            "state": null
+          },
+          {
+            "backend_type": "walwriter",
+            "count": 1,
+            "state": null
+          },
+          {
+            "backend_type": "pg_net 0.19.5 worker",
+            "count": 1,
+            "state": null
+          },
+          {
+            "backend_type": "background writer",
+            "count": 1,
+            "state": null
+          }
+        ],
+        "checked_at": "2026-10-19T19:22:33.933219+00:00",
+        "settings": {
+          "effective_cache_size": "49152",
+          "maintenance_work_mem": "32768",
+          "max_connections": "60",
+          "pg_stat_statements.track": "top",
+          "shared_buffers": "12288",
+          "work_mem": "2184"
+        },
+        "statements": [
+          {
+            "calls": 4533,
+            "fuel_references": [
+              "fuel_station_batch"
+            ],
+            "queryid": -418426432983161340,
+            "shared_blks_hit": 372084894,
+            "shared_blks_read": 5486432,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 8945874.459798,
+            "wal_bytes": 19335314692
+          },
+          {
+            "calls": 4607,
+            "fuel_references": [
+              "fuel_station_metadata_needed"
+            ],
+            "queryid": 8287076551700581000,
+            "shared_blks_hit": 31253178,
+            "shared_blks_read": 5254597,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 4137709.012928,
+            "wal_bytes": 171158797
+          },
+          {
+            "calls": 4741,
+            "fuel_references": [
+              "fuel_national_region_job"
+            ],
+            "queryid": -8826223861888258000,
+            "shared_blks_hit": 9905674,
+            "shared_blks_read": 4086648,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 3351629.10222,
+            "wal_bytes": 7244520
+          },
+          {
+            "calls": 18,
+            "fuel_references": [
+              "fuel_station_observation_batch"
+            ],
+            "queryid": 8305572735219907000,
+            "shared_blks_hit": 3906550,
+            "shared_blks_read": 1009221,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 136503.225959,
+            "wal_bytes": 233588945
+          },
+          {
+            "calls": 4564,
+            "fuel_references": null,
+            "queryid": 5175005624797353000,
+            "shared_blks_hit": 56549400,
+            "shared_blks_read": 882540,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 3759123.613143,
+            "wal_bytes": 65502331
+          },
+          {
+            "calls": 4601,
+            "fuel_references": [
+              "fuel_national"
+            ],
+            "queryid": -1065206138625326300,
+            "shared_blks_hit": 9518215,
+            "shared_blks_read": 95955,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 9117368.30471499,
+            "wal_bytes": 10317076
+          },
+          {
+            "calls": 351,
+            "fuel_references": [
+              "fuel_national_retention_candidates"
+            ],
+            "queryid": -8985058319524498000,
+            "shared_blks_hit": 910604,
+            "shared_blks_read": 83963,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 253267.125462,
+            "wal_bytes": 24967
+          },
+          {
+            "calls": 18,
+            "fuel_references": [
+              "fuel_national_config",
+              "fuel_station_collection_state",
+              "fuel_station_latest"
+            ],
+            "queryid": 2901997967638774300,
+            "shared_blks_hit": 97813,
+            "shared_blks_read": 77656,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 18033.784641,
+            "wal_bytes": 0
+          },
+          {
+            "calls": 18,
+            "fuel_references": [
+              "fuel_station_collection_state"
+            ],
+            "queryid": 1432732398488167400,
+            "shared_blks_hit": 1924614,
+            "shared_blks_read": 72308,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 51888.084473,
+            "wal_bytes": 102324655
+          },
+          {
+            "calls": 7,
+            "fuel_references": [
+              "fuel_e85_source"
+            ],
+            "queryid": 6393335161868654000,
+            "shared_blks_hit": 4766981,
+            "shared_blks_read": 59957,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 121405.955382,
+            "wal_bytes": 96953979
+          },
+          {
+            "calls": 65,
+            "fuel_references": [
+              "fuel_national_archive_bytes",
+              "fuel_national_config",
+              "fuel_national_events",
+              "fuel_national_health",
+              "fuel_national_jobs",
+              "fuel_national_regional_health",
+              "fuel_national_regions",
+              "fuel_national_retention_candidates",
+              "fuel_national_runs",
+              "fuel_national_trend_batches",
+              "fuel_national_trends_cache",
+              "fuel_projection_repairs"
+            ],
+            "queryid": -6414989222773142000,
+            "shared_blks_hit": 6631384,
+            "shared_blks_read": 53223,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 316836.039127,
+            "wal_bytes": 69110
+          },
+          {
+            "calls": 231,
+            "fuel_references": [
+              "fuel_national_retention"
+            ],
+            "queryid": -1527960710827300400,
+            "shared_blks_hit": 1814176,
+            "shared_blks_read": 42658,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 109267.095067,
+            "wal_bytes": 11572650
+          },
+          {
+            "calls": 1,
+            "fuel_references": [
+              "fuel_station_latest",
+              "fuel_station_latest_job_id"
+            ],
+            "queryid": 7513623450009421000,
+            "shared_blks_hit": 3473,
+            "shared_blks_read": 39851,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 1878.622052,
+            "wal_bytes": 393010
+          },
+          {
+            "calls": 5862,
+            "fuel_references": null,
+            "queryid": 3850728481664018400,
+            "shared_blks_hit": 258224,
+            "shared_blks_read": 39156,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 872050.470342002,
+            "wal_bytes": 0
+          },
+          {
+            "calls": 1,
+            "fuel_references": [
+              "fuel_national_batches",
+              "fuel_station_latest",
+              "fuel_station_observation_batch_fk",
+              "fuel_station_observation_pair"
+            ],
+            "queryid": -1354301125190841000,
+            "shared_blks_hit": 5549,
+            "shared_blks_read": 38249,
+            "temp_blks_read": 0,
+            "temp_blks_written": 0,
+            "total_exec_time": 3122.150608,
+            "wal_bytes": 45260
+          }
+        ],
+        "station_sizes": {
+          "indexes_bytes": 25509888,
+          "rows": 141660,
+          "table_bytes": 174899200
+        }
+      }
+    }
+  ]
+}
