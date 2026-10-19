@@ -8,7 +8,7 @@ create table fuel_research_campaigns(status text,provider_backoff_until timestam
 create table fuel_discovery_jobs(status text,lease_until timestamptz);
 create table test_archive_capacity(bytes bigint);
 insert into test_archive_capacity values(0);
-create function fuel_national_archive_bytes() returns bigint language sql as $$select bytes from test_archive_capacity$$;
+create or replace function fuel_national_archive_bytes() returns bigint language sql as $$select bytes from test_archive_capacity$$;
 -- INSERT_ALLOWANCE_MIGRATION
 
 do $$

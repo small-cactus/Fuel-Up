@@ -1,0 +1,206 @@
+TAP version 13
+# nearby-cache TRANSPORT_ERROR undefined
+# Subtest: fresh DB reads are cache-only, including forceRefresh; preserve payment and observation times
+ok 1 - fresh DB reads are cache-only, including forceRefresh; preserve payment and observation times
+  ---
+  duration_ms: 3.049791
+  ...
+# Subtest: exact radius, requested grade, and E85 restrictions survive DB normalization
+ok 2 - exact radius, requested grade, and E85 restrictions survive DB normalization
+  ---
+  duration_ms: 0.546584
+  ...
+# Subtest: empty cache and failed DB never invoke a fallback or write
+ok 3 - empty cache and failed DB never invoke a fallback or write
+  ---
+  duration_ms: 0.703084
+  ...
+# Subtest: serving returns raw reported prices only, with a 24-hour cutoff for the selected payment and grade
+ok 4 - serving returns raw reported prices only, with a 24-hour cutoff for the selected payment and grade
+  ---
+  duration_ms: 0.693791
+  ...
+# Subtest: E85 access survives old, empty and omitted quotes without filling a price
+ok 5 - E85 access survives old, empty and omitted quotes without filling a price
+  ---
+  duration_ms: 1.742542
+  ...
+# Subtest: independent AFDC stations appear only for E85 and never inherit another grade price
+ok 6 - independent AFDC stations appear only for E85 and never inherit another grade price
+  ---
+  duration_ms: 0.413875
+  ...
+# Subtest: supplemental E85 sources preserve provenance, no price, and exact radius
+ok 7 - supplemental E85 sources preserve provenance, no price, and exact radius
+  ---
+  duration_ms: 0.369584
+  ...
+# Subtest: read-back audit verifies real bytes, exact IDs, region, window, and unpriced coverage
+ok 8 - read-back audit verifies real bytes, exact IDs, region, window, and unpriced coverage
+  ---
+  duration_ms: 2.992708
+  ...
+# Subtest: validly hashed stale or wrong-region snapshots still fail the audit
+ok 9 - validly hashed stale or wrong-region snapshots still fail the audit
+  ---
+  duration_ms: 1.687792
+  ...
+# Subtest: national serving uses only the protected cache RPC and preserves fresh reported values
+ok 10 - national serving uses only the protected cache RPC and preserves fresh reported values
+  ---
+  duration_ms: 3.03225
+  ...
+# Subtest: national requests reject invalid grades and filters before reading the database
+ok 11 - national requests reject invalid grades and filters before reading the database
+  ---
+  duration_ms: 0.282458
+  ...
+# Subtest: national empty data stays empty and failures do not use a provider fallback
+ok 12 - national empty data stays empty and failures do not use a provider fallback
+  ---
+  duration_ms: 0.109834
+  ...
+# Subtest: history failures preserve the fresh leaderboard without inventing a chart
+ok 13 - history failures preserve the fresh leaderboard without inventing a chart
+  ---
+  duration_ms: 0.127834
+  ...
+# Subtest: metadata hanging RPC aborts before the research lease expires
+ok 14 - metadata hanging RPC aborts before the research lease expires
+  ---
+  duration_ms: 7.663416
+  ...
+# Subtest: serving hanging RPC aborts before the research lease expires
+ok 15 - serving hanging RPC aborts before the research lease expires
+  ---
+  duration_ms: 5.59075
+  ...
+# Subtest: replay preserves original prices and timestamps
+ok 16 - replay preserves original prices and timestamps
+  ---
+  duration_ms: 12.687625
+  ...
+# Subtest: corrupt or swapped archive is rejected before publishing
+ok 17 - corrupt or swapped archive is rejected before publishing
+  ---
+  duration_ms: 3.708167
+  ...
+# Subtest: only Storage and serving RPCs are used; original research job is never recollected
+ok 18 - only Storage and serving RPCs are used; original research job is never recollected
+  ---
+  duration_ms: 1.283167
+  ...
+# Subtest: failed archive verification records a bounded retry, never publishes
+ok 19 - failed archive verification records a bounded retry, never publishes
+  ---
+  duration_ms: 0.993291
+  ...
+# Subtest: public app credentials cannot start repair
+ok 20 - public app credentials cannot start repair
+  ---
+  duration_ms: 8.807833
+  ...
+# Subtest: all 50 states plus DC have exactly one fixed regional owner
+ok 21 - all 50 states plus DC have exactly one fixed regional owner
+  ---
+  duration_ms: 1.425917
+  ...
+# Subtest: regional batches never mix owners and counts reconcile across the US
+ok 22 - regional batches never mix owners and counts reconcile across the US
+  ---
+  duration_ms: 2.5135
+  ...
+# Subtest: ambiguous cross-region station identity stops catalog publishing
+ok 23 - ambiguous cross-region station identity stops catalog publishing
+  ---
+  duration_ms: 0.764666
+  ...
+# Subtest: same-region cross-state duplicates deduplicate, without double charging provider work
+ok 24 - same-region cross-state duplicates deduplicate, without double charging provider work
+  ---
+  duration_ms: 0.36425
+  ...
+# Subtest: every wrong or missing execution region is rejected before collection
+ok 25 - every wrong or missing execution region is rejected before collection
+  ---
+  duration_ms: 14.98375
+  ...
+# Subtest: unauthorized regional invocation never touches database or provider
+ok 26 - unauthorized regional invocation never touches database or provider
+  ---
+  duration_ms: 0.20825
+  ...
+# Subtest: health verifies runtime geography without claiming jobs; collect passes only the verified runtime region
+ok 27 - health verifies runtime geography without claiming jobs; collect passes only the verified runtime region
+  ---
+  duration_ms: 2.463959
+  ...
+# Subtest: worker rejects a wrong-region job before making any provider request
+ok 28 - worker rejects a wrong-region job before making any provider request
+  ---
+  duration_ms: 0.267959
+  ...
+# Subtest: generic worker cannot run without a known execution region
+ok 29 - generic worker cannot run without a known execution region
+  ---
+  duration_ms: 0.395
+  ...
+# Subtest: expires only eligible operational objects then reconciles manifests
+ok 30 - expires only eligible operational objects then reconciles manifests
+  ---
+  duration_ms: 1.758833
+  ...
+# Subtest: preserves research, recent snapshots, future boundaries, and invalid paths
+ok 31 - preserves research, recent snapshots, future boundaries, and invalid paths
+  ---
+  duration_ms: 0.603916
+  ...
+# Subtest: Storage failure never marks archives as removed
+ok 32 - Storage failure never marks archives as removed
+  ---
+  duration_ms: 0.127417
+  ...
+# Subtest: empty retry still reconciles deletion committed before a prior crash
+ok 33 - empty retry still reconciles deletion committed before a prior crash
+  ---
+  duration_ms: 0.146125
+  ...
+# Subtest: reconciliation failure is surfaced for scheduled retry
+ok 34 - reconciliation failure is surfaced for scheduled retry
+  ---
+  duration_ms: 0.150958
+  ...
+# Subtest: public callers cannot delete or run maintenance
+ok 35 - public callers cannot delete or run maintenance
+  ---
+  duration_ms: 14.720542
+  ...
+# Subtest: 24-hour eligibility uses the price posting time and rejects missing, future, or non-positive data
+ok 36 - 24-hour eligibility uses the price posting time and rejects missing, future, or non-positive data
+  ---
+  duration_ms: 2.3135
+  ...
+# Subtest: grade/payment ages are independent and filtering does not overwrite the archive object
+ok 37 - grade/payment ages are independent and filtering does not overwrite the archive object
+  ---
+  duration_ms: 0.252
+  ...
+# Subtest: local snapshots cannot revive old corrections or keep an expired cheapest price
+ok 38 - local snapshots cannot revive old corrections or keep an expired cheapest price
+  ---
+  duration_ms: 0.974416
+  ...
+# Subtest: E85 expiry removes every price fallback but preserves a navigable availability record
+ok 39 - E85 expiry removes every price fallback but preserves a navigable availability record
+  ---
+  duration_ms: 0.105833
+  ...
+1..39
+# tests 39
+# suites 0
+# pass 39
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 136.140041

@@ -1,0 +1,36 @@
+{
+  "start": "2026-10-19T18:55:18.767773+00:00",
+  "end": "2026-10-19T19:17:05.461842+00:00",
+  "deltas": [
+    {
+      "function_references": [
+        "fuel_station_batch"
+      ],
+      "calls": 72,
+      "total_exec_time": 74629.85463599116,
+      "shared_blks_read": 28561,
+      "shared_blks_hit": 1827567,
+      "wal_bytes": 61252425
+    },
+    {
+      "function_references": [
+        "fuel_station_metadata_needed"
+      ],
+      "calls": 72,
+      "total_exec_time": 94283.3778370102,
+      "shared_blks_read": 85755,
+      "shared_blks_hit": 481567,
+      "wal_bytes": 1429876
+    },
+    {
+      "function_references": [
+        "fuel_national_region_job"
+      ],
+      "calls": 74,
+      "total_exec_time": 12967.371291999705,
+      "shared_blks_read": 46,
+      "shared_blks_hit": 214316,
+      "wal_bytes": 81225
+    }
+  ]
+}

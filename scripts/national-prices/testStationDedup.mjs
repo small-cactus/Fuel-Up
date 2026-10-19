@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:net';
 import { archiveReplaySql } from './stationDedupReplay.mjs';
+import { collectionReadBenchmark } from './collectionReadBenchmark.mjs';
 const root = new URL('../../', import.meta.url);
 const read = path => readFileSync(new URL(path, root), 'utf8');
 const migration = name => read(`supabase/migrations/${name}.sql`);
@@ -38,7 +39,9 @@ ${migration('20261005152000_narrow_national_trend_aggregation')}
 ${functionSql('national_fuel_trend_history','20261001170000_national_trend_history')}
 ${functionSql('publish_fuel_station_batch','20261001170000_national_trend_history').replace('public.publish_fuel_station_batch','public.baseline_publish_fuel_station_batch')}
 ${migration('20261019190000_deduplicate_station_publication')}
+${process.env.FUELUP_TEST_COMPACT_COLLECTION === '1' ? functionSql('nearby_fuel_station_cache','20261019190000_deduplicate_station_publication').replace('public.nearby_fuel_station_cache','public.wide_nearby_fuel_station_cache') + '\n' + functionSql('record_fuel_national_trend_batch','20261005152000_narrow_national_trend_aggregation').replace('public.record_fuel_national_trend_batch','public.wide_record_fuel_national_trend_batch') + '\n' + functionSql('publish_fuel_station_batch','20261019190000_deduplicate_station_publication').replace('public.publish_fuel_station_batch','public.wide_publish_fuel_station_batch').replace('perform record_fuel_national_trend_batch','perform wide_record_fuel_national_trend_batch') + '\n' + migration('20261019193000_compact_station_collection_state') : ''}
 ${read('tests/sql/stationPublicationDedup.sql')}
+${process.env.FUELUP_TEST_COMPACT_COLLECTION === '1' ? read('tests/sql/stationCollectionState.sql') + '\n' + read('tests/sql/stationGeographicBounds.sql') : ''}
 ${process.argv[2] ? archiveReplaySql(JSON.parse(readFileSync(process.argv[2], 'utf8'))) : ''}
 ${read('tests/sql/verificationAllowance.sql').replace('-- INSERT_ALLOWANCE_MIGRATION',migration('20261019190100_bounded_verification_sweeps'))}`;
 const server = createServer();
@@ -53,6 +56,10 @@ try {
   started = true;
   writeFileSync(join(dir,'test.sql'), initial);
   console.log(execFileSync('psql',['-X','-q','-A','-t','-v','ON_ERROR_STOP=1','-h',dir,'-p',String(port),'-d','postgres','-f',join(dir,'test.sql')],{encoding:'utf8',maxBuffer:4_000_000}));
+  if (process.env.FUELUP_TEST_READ_BENCHMARK === '1') {
+    if (process.env.FUELUP_TEST_COMPACT_COLLECTION !== '1') throw Error('Read benchmark requires compact collection tests');
+    console.log(JSON.stringify(collectionReadBenchmark({dir,port})));
+  }
 } finally {
   if (started) execFileSync('pg_ctl',['-D',join(dir,'data'),'-m','fast','stop'],{stdio:'pipe'});
   rmSync(dir,{recursive:true,force:true});
