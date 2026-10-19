@@ -20,4 +20,4 @@ Six immutable archives from 17:00/18:00 UTC, one batch from each of the three re
 
 The user requested an additional live nationwide sweep, explicitly allowing repeated provider requests for this test. The extra sweep must use the existing three regional functions, shared pacing/cooldowns, archive capacity and immutable uploads. A separate admin-only allowance expires at the hour boundary, caps the verification run independently, includes its requests in aggregate hourly accounting, and does not increase the regular run's own limit. Installing the allowance migration alone starts no collection.
 
-At this checkpoint the changes have passed local tests; deployment and the live nationwide verification are pending. No billing or hosting migration is involved.
+The two migrations deployed atomically at 18:34:58 UTC. Existing membership preparation attached all 141,660 stations without provider requests or price/timestamp changes. Public cached-serving checks passed in all three configured regions. The extra live sweep was queued at 18:39:16 UTC with a 19:00 UTC deadline; completion and live resource results remain pending. No billing or hosting migration is involved.

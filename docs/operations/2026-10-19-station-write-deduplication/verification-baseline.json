@@ -1,0 +1,73 @@
+{
+  "ok": true,
+  "ms": 2542,
+  "data": {
+    "rows": [
+      {
+        "status": {
+          "cache": {
+            "published_at": "2026-10-19T18:23:00.215128+00:00",
+            "run_id": 24709,
+            "scopes": 10
+          },
+          "checked_at": "2026-10-19T18:39:07.206274+00:00",
+          "config": {
+            "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+            "enabled": true,
+            "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+            "last_request_at": "2026-10-19T18:17:00.981129+00:00"
+          },
+          "events": [
+            {
+              "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+              "created_at": "2026-10-19T18:15:04.223934+00:00",
+              "job_id": 1774925
+            },
+            {
+              "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+              "created_at": "2026-10-19T18:14:43.316243+00:00",
+              "job_id": 1774924
+            },
+            {
+              "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+              "created_at": "2026-10-19T18:14:21.530297+00:00",
+              "job_id": 1774923
+            },
+            {
+              "code": "METADATA_DEFERRED_CLIENT_TIMEOUT",
+              "created_at": "2026-10-19T18:14:11.513694+00:00",
+              "job_id": 1774923
+            },
+            {
+              "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+              "created_at": "2026-10-19T18:13:57.444268+00:00",
+              "job_id": 1774922
+            },
+            {
+              "code": "UPSTREAM_TRANSIENT_GRAPHQL",
+              "created_at": "2026-10-19T18:08:26.155568+00:00",
+              "job_id": 1774903
+            },
+            {
+              "code": "PROVIDER_RESPONSE",
+              "created_at": "2026-10-19T18:08:26.033863+00:00",
+              "job_id": 1774903
+            },
+            {
+              "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+              "created_at": "2026-10-19T18:04:55.920287+00:00",
+              "job_id": 1774886
+            }
+          ],
+          "station_stats": {
+            "last_autovacuum": "2026-10-19T18:39:01.231365+00:00",
+            "n_dead_tup": 0,
+            "n_tup_hot_upd": 1117881,
+            "n_tup_upd": 8963616
+          },
+          "verification": null
+        }
+      }
+    ]
+  }
+}
