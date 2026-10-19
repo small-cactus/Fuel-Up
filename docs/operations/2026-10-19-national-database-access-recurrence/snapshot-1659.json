@@ -1,0 +1,414 @@
+{
+  "incident": "2026-10-19 database access recurrence",
+  "production_repair_attempts": 0,
+  "state": {
+    "backlog": 0,
+    "budget": {
+      "lookups": 0,
+      "requests": 0
+    },
+    "cache": {
+      "published_at": "2026-10-19T09:16:00.307217+00:00",
+      "run_id": 24385,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T17:00:07.987844+00:00",
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_HTTP_503",
+      "id": true,
+      "last_dispatch_at": "2026-10-19T16:58:02.533958+00:00",
+      "last_request_at": "2026-10-19T10:14:44.482347+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-10-19T10:06:53.151895+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "cron": [
+      {
+        "active": true,
+        "name": "fuel-national-discovery"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-trends-cache"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-projection-repair"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-dispatch"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-watchdog"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-retention"
+      }
+    ],
+    "incident_batches": [
+      {
+        "id": 24445,
+        "missed_batches": 24,
+        "requests": 51,
+        "slot_at": "2026-10-19T10:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 48
+      },
+      {
+        "id": 24483,
+        "missed_batches": 72,
+        "requests": 0,
+        "slot_at": "2026-10-19T11:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 0
+      },
+      {
+        "id": 24502,
+        "missed_batches": 72,
+        "requests": 0,
+        "slot_at": "2026-10-19T12:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 0
+      },
+      {
+        "id": 24533,
+        "missed_batches": 72,
+        "requests": 0,
+        "slot_at": "2026-10-19T13:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 0
+      },
+      {
+        "id": 24572,
+        "missed_batches": 72,
+        "requests": 0,
+        "slot_at": "2026-10-19T14:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 0
+      },
+      {
+        "id": 24607,
+        "missed_batches": 72,
+        "requests": 0,
+        "slot_at": "2026-10-19T15:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 0
+      },
+      {
+        "id": 24640,
+        "missed_batches": 0,
+        "requests": 0,
+        "slot_at": "2026-10-19T16:00:00+00:00",
+        "status": "running",
+        "succeeded_batches": 0
+      }
+    ],
+    "regions": [
+      {
+        "enabled": true,
+        "function_name": "fuel-national-southwest",
+        "last_dispatch_at": "2026-10-19T16:58:02.533958+00:00",
+        "region": "us-west-1"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-east",
+        "last_dispatch_at": "2026-10-19T16:53:02.448301+00:00",
+        "region": "us-east-1"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-northwest",
+        "last_dispatch_at": "2026-10-19T16:54:07.064799+00:00",
+        "region": "us-west-2"
+      }
+    ],
+    "runs": [
+      {
+        "completed_at": null,
+        "expected_batches": 72,
+        "id": 24640,
+        "slot_at": "2026-10-19T16:00:00+00:00",
+        "status": "running"
+      },
+      {
+        "completed_at": "2026-10-19T16:01:01.871132+00:00",
+        "expected_batches": 72,
+        "id": 24607,
+        "slot_at": "2026-10-19T15:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-19T15:01:06.092919+00:00",
+        "expected_batches": 72,
+        "id": 24572,
+        "slot_at": "2026-10-19T14:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-19T14:02:00.531668+00:00",
+        "expected_batches": 72,
+        "id": 24533,
+        "slot_at": "2026-10-19T13:00:00+00:00",
+        "status": "partial"
+      }
+    ],
+    "slots": {
+      "complete": 137,
+      "expected": 192,
+      "expired_absent": 0,
+      "expired_running": 1,
+      "partial": 53
+    }
+  },
+  "state_followup": {
+    "backlog": 0,
+    "budget": {
+      "lookups": 0,
+      "requests": 0
+    },
+    "cache": {
+      "published_at": "2026-10-19T09:16:00.307217+00:00",
+      "run_id": 24385,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T17:00:45.321891+00:00",
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_HTTP_503",
+      "id": true,
+      "last_dispatch_at": "2026-10-19T16:58:02.533958+00:00",
+      "last_request_at": "2026-10-19T10:14:44.482347+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-10-19T10:06:53.151895+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "cron": [
+      {
+        "active": true,
+        "name": "fuel-national-discovery"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-trends-cache"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-projection-repair"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-dispatch"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-watchdog"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-retention"
+      }
+    ],
+    "incident_batches": [
+      {
+        "id": 24445,
+        "missed_batches": 24,
+        "requests": 51,
+        "slot_at": "2026-10-19T10:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 48
+      },
+      {
+        "id": 24483,
+        "missed_batches": 72,
+        "requests": 0,
+        "slot_at": "2026-10-19T11:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 0
+      },
+      {
+        "id": 24502,
+        "missed_batches": 72,
+        "requests": 0,
+        "slot_at": "2026-10-19T12:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 0
+      },
+      {
+        "id": 24533,
+        "missed_batches": 72,
+        "requests": 0,
+        "slot_at": "2026-10-19T13:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 0
+      },
+      {
+        "id": 24572,
+        "missed_batches": 72,
+        "requests": 0,
+        "slot_at": "2026-10-19T14:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 0
+      },
+      {
+        "id": 24607,
+        "missed_batches": 72,
+        "requests": 0,
+        "slot_at": "2026-10-19T15:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 0
+      },
+      {
+        "id": 24640,
+        "missed_batches": 0,
+        "requests": 0,
+        "slot_at": "2026-10-19T16:00:00+00:00",
+        "status": "running",
+        "succeeded_batches": 0
+      }
+    ],
+    "regions": [
+      {
+        "enabled": true,
+        "function_name": "fuel-national-southwest",
+        "last_dispatch_at": "2026-10-19T16:58:02.533958+00:00",
+        "region": "us-west-1"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-east",
+        "last_dispatch_at": "2026-10-19T16:53:02.448301+00:00",
+        "region": "us-east-1"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-northwest",
+        "last_dispatch_at": "2026-10-19T16:54:07.064799+00:00",
+        "region": "us-west-2"
+      }
+    ],
+    "runs": [
+      {
+        "completed_at": null,
+        "expected_batches": 72,
+        "id": 24640,
+        "slot_at": "2026-10-19T16:00:00+00:00",
+        "status": "running"
+      },
+      {
+        "completed_at": "2026-10-19T16:01:01.871132+00:00",
+        "expected_batches": 72,
+        "id": 24607,
+        "slot_at": "2026-10-19T15:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-19T15:01:06.092919+00:00",
+        "expected_batches": 72,
+        "id": 24572,
+        "slot_at": "2026-10-19T14:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-19T14:02:00.531668+00:00",
+        "expected_batches": 72,
+        "id": 24533,
+        "slot_at": "2026-10-19T13:00:00+00:00",
+        "status": "partial"
+      }
+    ],
+    "slots": {
+      "complete": 137,
+      "expected": 192,
+      "expired_absent": 0,
+      "expired_running": 1,
+      "partial": 53
+    }
+  },
+  "saved_responses": {
+    "checked_at": "2026-10-19T17:00:37.410979+00:00",
+    "retention": [
+      {
+        "body": "{\"error\":\"NATIONAL_RETENTION_FAILED\"}",
+        "created": "2026-10-19T16:50:09.250614+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"NATIONAL_RETENTION_FAILED\"}",
+        "created": "2026-10-19T16:40:11.341911+00:00",
+        "status_code": 503
+      }
+    ],
+    "retention_cron": [
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-19T17:00:00.000542+00:00",
+        "status": "failed"
+      },
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-19T16:50:04.722898+00:00",
+        "status": "succeeded"
+      },
+      {
+        "return_message": "1 row",
+        "start_time": "2026-10-19T16:40:02.362066+00:00",
+        "status": "succeeded"
+      }
+    ],
+    "workers": [
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+        "created": "2026-10-19T16:58:11.781767+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+        "created": "2026-10-19T16:54:12.740674+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "created": "2026-10-19T16:53:10.320091+00:00",
+        "status_code": 503
+      }
+    ]
+  },
+  "capacity": {
+    "checked_at": "2026-10-19T17:00:08.765Z",
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\nnpm notice\nnpm notice New major version of npm available! 10.9.0 -> 12.2.0\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0\nnpm notice To update run: npm install -g npm@12.2.0\nnpm notice\n"
+  },
+  "public_cache_probe": {
+    "checked_at": "2026-10-19T17:00:16.384Z",
+    "error": "TimeoutError",
+    "ms": 25006
+  },
+  "finalized_incomplete_hours": 6,
+  "finalized_missed_batches": 384,
+  "overdue_running_hours": 1,
+  "overdue_unsuccessful_batches": 72,
+  "assessment": "Six finalized partial hours plus one overdue running hour through 16:00 UTC. 384 batches are marked missed; 72 additional batches remained unsuccessful after deadline, not yet finalized. Current 17:00 row is absent but within its deadline."
+}
