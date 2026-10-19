@@ -1,0 +1,29 @@
+{
+  "incident": "2026-10-19 database access recurrence",
+  "production_repair_attempts": 0,
+  "state": {
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "state_retry": {
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "saved_responses": {
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "capacity": {
+    "checked_at": "2026-10-19T13:59:10.478Z",
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "public_cache_probe": {
+    "checked_at": "2026-10-19T13:59:18.253Z",
+    "error": "TimeoutError",
+    "ms": 25006
+  },
+  "previously_confirmed_incomplete_hours": 2,
+  "previously_confirmed_missed_batches": 96,
+  "assessment": "Unchanged database access failure. Current collection and final counts after 11:00 UTC are unverified; no additional measured gap or recovery asserted."
+}
