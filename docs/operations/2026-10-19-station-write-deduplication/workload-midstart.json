@@ -1,0 +1,70 @@
+{
+  "ok": true,
+  "ms": 2878,
+  "data": {
+    "rows": [
+      {
+        "workload": {
+          "active": null,
+          "checked_at": "2026-10-19T18:42:51.190551+00:00",
+          "database": {
+            "blocks_hit": 557225335,
+            "blocks_read": 58162501,
+            "deadlocks": 0,
+            "read_ms": 0,
+            "temp_bytes": 25403392,
+            "write_ms": 0
+          },
+          "table_updates": [
+            {
+              "n_dead_tup": 4764,
+              "n_tup_del": 8712,
+              "n_tup_ins": 6768,
+              "n_tup_upd": 95417,
+              "relname": "fuel_national_jobs"
+            },
+            {
+              "n_dead_tup": 1852,
+              "n_tup_del": 0,
+              "n_tup_ins": 0,
+              "n_tup_upd": 8965468,
+              "relname": "fuel_station_latest"
+            },
+            {
+              "n_dead_tup": 4391,
+              "n_tup_del": 168923,
+              "n_tup_ins": 120907,
+              "n_tup_upd": 2293683,
+              "relname": "fuel_station_price_lookup"
+            },
+            {
+              "n_dead_tup": 2292,
+              "n_tup_del": 8686,
+              "n_tup_ins": 4402,
+              "n_tup_upd": 0,
+              "relname": "fuel_national_trend_batches"
+            },
+            {
+              "n_dead_tup": 0,
+              "n_tup_del": 0,
+              "n_tup_ins": 13,
+              "n_tup_upd": 0,
+              "relname": "fuel_station_batch_checks"
+            }
+          ],
+          "wal": {
+            "stats_reset": "2026-10-15T21:53:21.07599+00:00",
+            "wal_buffers_full": 3178732,
+            "wal_bytes": 25243035687,
+            "wal_fpi": 6636165,
+            "wal_records": 89383661,
+            "wal_sync": 326041,
+            "wal_sync_time": 0,
+            "wal_write": 3505028,
+            "wal_write_time": 0
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "sampledAt": "2026-10-19T18:40:27.790Z",
+  "project": "vjindchxfebaltbslqwc",
+  "elapsedSeconds": 60.961,
+  "rebooted": false,
+  "countersAdvanced": true,
+  "limitation": null,
+  "memoryBytes": {
+    "total": 431308800,
+    "available": 112463872,
+    "swapTotal": 1073737728,
+    "swapFree": 819699712
+  },
+  "swapInPages": 15450,
+  "swapOutPages": 5975,
+  "swapInBytesAt4KiB": 63283200,
+  "swapOutBytesAt4KiB": 24473600,
+  "majorFaults": 10055,
+  "oomKills": 0,
+  "cpuIoWaitPercent": 6.937226759053,
+  "disks": {
+    "nvme0n1": {
+      "written_bytes": 56524800,
+      "read_bytes": 62394368,
+      "io_time_seconds": 2.859999999999957
+    },
+    "nvme1n1": {
+      "written_bytes": 25399296,
+      "read_bytes": 176062464,
+      "io_time_seconds": 5.491999999999962
+    }
+  }
+}
