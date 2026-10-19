@@ -1,0 +1,134 @@
+{
+  "metadata": {
+    "before": {
+      "calls": 72,
+      "shared_blks_read": 85755,
+      "shared_blks_hit": 481567,
+      "total_exec_time": 94283.3778370102,
+      "wal_bytes": 1429876,
+      "readMiB": 669.9609375,
+      "executionSeconds": 94.28337783701019
+    },
+    "after": {
+      "calls": 72,
+      "shared_blks_read": 2444,
+      "shared_blks_hit": 565271,
+      "total_exec_time": 5905.550093999598,
+      "wal_bytes": 3286,
+      "readMiB": 19.09375,
+      "executionSeconds": 5.905550093999598
+    },
+    "readReductionPercent": 97.15002040697335,
+    "executionTimeReductionPercent": 93.73638256341573
+  },
+  "publication": {
+    "before": {
+      "calls": 72,
+      "shared_blks_read": 28561,
+      "shared_blks_hit": 1827567,
+      "total_exec_time": 74629.85463599116,
+      "wal_bytes": 61252425,
+      "readMiB": 223.1328125,
+      "executionSeconds": 74.62985463599115
+    },
+    "after": {
+      "calls": 72,
+      "shared_blks_read": 19316,
+      "shared_blks_hit": 1693936,
+      "total_exec_time": 89043.1968439985,
+      "wal_bytes": 47006229,
+      "readMiB": 150.90625,
+      "executionSeconds": 89.0431968439985
+    },
+    "readReductionPercent": 32.36931479990196,
+    "executionTimeReductionPercent": -19.313105027885634
+  },
+  "combined": {
+    "beforeReadMiB": 893.09375,
+    "afterReadMiB": 170.0,
+    "readReductionPercent": 80.96504426327023,
+    "beforeExecutionSeconds": 168.91323247300136,
+    "afterExecutionSeconds": 94.9487469379981
+  },
+  "verification": {
+    "runId": 24793,
+    "slotAt": "2026-10-19T19:22:42.243758+00:00",
+    "completedAt": "2026-10-19T19:37:44.829373+00:00",
+    "publishedAt": "2026-10-19T19:38:00.215231+00:00",
+    "attempts": 72,
+    "publishedBatches": 72,
+    "summarizedBatches": 72,
+    "observedStations": 141660,
+    "stationRowsChanged": 4038,
+    "stationUpdateReductionAgainstRewritingEveryStationPercent": 97.14951291825497,
+    "regional": [
+      {
+        "execution_region": "us-west-1",
+        "succeeded": 9,
+        "total": 9
+      },
+      {
+        "execution_region": "us-east-1",
+        "succeeded": 59,
+        "total": 59
+      },
+      {
+        "execution_region": "us-west-2",
+        "succeeded": 4,
+        "total": 4
+      }
+    ],
+    "publicationTimeoutsRecovered": 4
+  },
+  "resources": {
+    "samplePolicy": "Only advancing samples ending before collection completed; post-run archive audit excluded",
+    "validSamples": 13,
+    "ioWaitPercent": {
+      "min": 9.146148989898965,
+      "median": 12.38756509389302,
+      "max": 35.90447852292675
+    },
+    "swapInBytes": 3397038080,
+    "swapOutBytes": 3407302656,
+    "oomKills": 0,
+    "sampledElapsedSeconds": 798.534,
+    "diskTotals": {
+      "nvme0n1": {
+        "read_bytes": 1059270656,
+        "written_bytes": 651608064,
+        "io_time_seconds": 28.156999999999925
+      },
+      "nvme1n1": {
+        "read_bytes": 6568046592,
+        "written_bytes": 3430780928,
+        "io_time_seconds": 199.98599999999988
+      }
+    },
+    "lastCpuModes": {
+      "idle": 81.39297225060933,
+      "iowait": 14.912349658045619,
+      "irq": 0,
+      "nice": 0,
+      "softirq": 0.047166103293765985,
+      "steal": 0.015722034431255423,
+      "system": 1.4621492021067657,
+      "user": 2.1696407515132643
+    },
+    "lastMemoryBytes": {
+      "total": 431308800,
+      "available": 135577600,
+      "free": 5152768,
+      "cached": 146399232,
+      "buffers": 327680,
+      "swapTotal": 1073737728,
+      "swapFree": 612577280
+    }
+  },
+  "limitations": [
+    "Sequential complete live sweeps with fresh provider responses; quote changes, cache warmth and background maintenance differ.",
+    "PostgreSQL block reads are not total physical disk IO.",
+    "Pressure samples are not a matched complete before/after hardware benchmark; swapping persisted.",
+    "The earlier normal scheduled sweep used write deduplication, before the compact-read deployment. No subsequent scheduled compact-read sweep is claimed here.",
+    "Fixed-inventory provider observations are not verified pump truth."
+  ]
+}

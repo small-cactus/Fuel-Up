@@ -1,0 +1,127 @@
+{
+  "verifiedAt": "2026-10-19T19:39:24.015Z",
+  "providerRequests": 0,
+  "checks": [
+    {
+      "fuelType": "regular",
+      "requiresE85": false,
+      "verifiedPoints": 114,
+      "latest": {
+        "date": "2026-10-19T19:22:42.243758+00:00",
+        "observationEnd": "2026-10-19T19:37:44.606+00:00",
+        "observationStart": "2026-10-19T19:23:02.168+00:00",
+        "price": 4.260917661332634,
+        "stationCount": 60992
+      }
+    },
+    {
+      "fuelType": "regular",
+      "requiresE85": true,
+      "verifiedPoints": 114,
+      "latest": {
+        "date": "2026-10-19T19:22:42.243758+00:00",
+        "observationEnd": "2026-10-19T19:37:44.606+00:00",
+        "observationStart": "2026-10-19T19:23:02.168+00:00",
+        "price": 4.276767590618337,
+        "stationCount": 4690
+      }
+    },
+    {
+      "fuelType": "midgrade",
+      "requiresE85": false,
+      "verifiedPoints": 114,
+      "latest": {
+        "date": "2026-10-19T19:22:42.243758+00:00",
+        "observationEnd": "2026-10-19T19:37:44.606+00:00",
+        "observationStart": "2026-10-19T19:23:02.168+00:00",
+        "price": 4.765520875888553,
+        "stationCount": 36717
+      }
+    },
+    {
+      "fuelType": "midgrade",
+      "requiresE85": true,
+      "verifiedPoints": 114,
+      "latest": {
+        "date": "2026-10-19T19:22:42.243758+00:00",
+        "observationEnd": "2026-10-19T19:37:44.606+00:00",
+        "observationStart": "2026-10-19T19:23:02.168+00:00",
+        "price": 4.756445684279619,
+        "stationCount": 3047
+      }
+    },
+    {
+      "fuelType": "premium",
+      "requiresE85": false,
+      "verifiedPoints": 114,
+      "latest": {
+        "date": "2026-10-19T19:22:42.243758+00:00",
+        "observationEnd": "2026-10-19T19:37:44.606+00:00",
+        "observationStart": "2026-10-19T19:23:02.168+00:00",
+        "price": 5.14403585579416,
+        "stationCount": 40886
+      }
+    },
+    {
+      "fuelType": "premium",
+      "requiresE85": true,
+      "verifiedPoints": 114,
+      "latest": {
+        "date": "2026-10-19T19:22:42.243758+00:00",
+        "observationEnd": "2026-10-19T19:37:44.606+00:00",
+        "observationStart": "2026-10-19T19:23:02.168+00:00",
+        "price": 5.147762685802153,
+        "stationCount": 3902
+      }
+    },
+    {
+      "fuelType": "diesel",
+      "requiresE85": false,
+      "verifiedPoints": 114,
+      "latest": {
+        "date": "2026-10-19T19:22:42.243758+00:00",
+        "observationEnd": "2026-10-19T19:37:44.606+00:00",
+        "observationStart": "2026-10-19T19:23:02.168+00:00",
+        "price": 6.3081714986560895,
+        "stationCount": 38321
+      }
+    },
+    {
+      "fuelType": "diesel",
+      "requiresE85": true,
+      "verifiedPoints": 114,
+      "latest": {
+        "date": "2026-10-19T19:22:42.243758+00:00",
+        "observationEnd": "2026-10-19T19:37:44.606+00:00",
+        "observationStart": "2026-10-19T19:23:02.168+00:00",
+        "price": 6.309914173614517,
+        "stationCount": 4078
+      }
+    },
+    {
+      "fuelType": "e85",
+      "requiresE85": false,
+      "verifiedPoints": 114,
+      "latest": {
+        "date": "2026-10-19T19:22:42.243758+00:00",
+        "observationEnd": "2026-10-19T19:37:44.606+00:00",
+        "observationStart": "2026-10-19T19:23:02.168+00:00",
+        "price": 3.31541156462585,
+        "stationCount": 2940
+      }
+    },
+    {
+      "fuelType": "e85",
+      "requiresE85": true,
+      "verifiedPoints": 114,
+      "latest": {
+        "date": "2026-10-19T19:22:42.243758+00:00",
+        "observationEnd": "2026-10-19T19:37:44.606+00:00",
+        "observationStart": "2026-10-19T19:23:02.168+00:00",
+        "price": 3.31541156462585,
+        "stationCount": 2940
+      }
+    }
+  ],
+  "independentArchiveCheck": null
+}

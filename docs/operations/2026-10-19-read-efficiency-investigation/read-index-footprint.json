@@ -1,0 +1,200 @@
+{
+  "ok": true,
+  "ms": 2564,
+  "rows": [
+    {
+      "footprint": {
+        "at": "2026-10-19T19:33:42.379728+00:00",
+        "connections": [
+          {
+            "application_name": "",
+            "backend_type": "autovacuum launcher",
+            "count": 1,
+            "oldest_state": null,
+            "state": null,
+            "usename": null
+          },
+          {
+            "application_name": "",
+            "backend_type": "background writer",
+            "count": 1,
+            "oldest_state": null,
+            "state": null,
+            "usename": null
+          },
+          {
+            "application_name": "",
+            "backend_type": "logical replication launcher",
+            "count": 1,
+            "oldest_state": null,
+            "state": null,
+            "usename": "supabase_admin"
+          },
+          {
+            "application_name": "Supabase Storage API",
+            "backend_type": "client backend",
+            "count": 1,
+            "oldest_state": "00:00:08.420245",
+            "state": "idle",
+            "usename": "pgbouncer"
+          },
+          {
+            "application_name": "mgmt-api",
+            "backend_type": "client backend",
+            "count": 1,
+            "oldest_state": "-00:00:00.000002",
+            "state": "active",
+            "usename": "postgres"
+          },
+          {
+            "application_name": "pg_cron scheduler",
+            "backend_type": "pg_cron launcher",
+            "count": 1,
+            "oldest_state": null,
+            "state": null,
+            "usename": "supabase_admin"
+          },
+          {
+            "application_name": "",
+            "backend_type": "checkpointer",
+            "count": 1,
+            "oldest_state": null,
+            "state": null,
+            "usename": null
+          },
+          {
+            "application_name": "postgres_exporter",
+            "backend_type": "client backend",
+            "count": 1,
+            "oldest_state": "00:00:02.558177",
+            "state": "idle",
+            "usename": "supabase_admin"
+          },
+          {
+            "application_name": "pg_net 0.19.5",
+            "backend_type": "pg_net 0.19.5 worker",
+            "count": 1,
+            "oldest_state": null,
+            "state": null,
+            "usename": "supabase_admin"
+          },
+          {
+            "application_name": "",
+            "backend_type": "archiver",
+            "count": 1,
+            "oldest_state": null,
+            "state": null,
+            "usename": null
+          },
+          {
+            "application_name": "PostgREST 14.5",
+            "backend_type": "client backend",
+            "count": 6,
+            "oldest_state": "01:54:08.949686",
+            "state": "idle",
+            "usename": "authenticator"
+          },
+          {
+            "application_name": "Supabase Storage API",
+            "backend_type": "client backend",
+            "count": 1,
+            "oldest_state": "00:00:08.3513",
+            "state": "idle",
+            "usename": "supabase_storage_admin"
+          },
+          {
+            "application_name": "",
+            "backend_type": "walwriter",
+            "count": 1,
+            "oldest_state": null,
+            "state": null,
+            "usename": null
+          }
+        ],
+        "indexes": [
+          {
+            "bytes": 47849472,
+            "estimated_entries": 269162,
+            "idx_scan": 1096,
+            "idx_tup_fetch": 13670911,
+            "idx_tup_read": 29887035,
+            "indexrelname": "fuel_national_price_order",
+            "relname": "fuel_station_price_lookup"
+          },
+          {
+            "bytes": 28942336,
+            "estimated_entries": 269162,
+            "idx_scan": 3731605,
+            "idx_tup_fetch": 5773992,
+            "idx_tup_read": 5785830,
+            "indexrelname": "fuel_station_price_lookup_pkey",
+            "relname": "fuel_station_price_lookup"
+          },
+          {
+            "bytes": 8953856,
+            "estimated_entries": 142052,
+            "idx_scan": 81086,
+            "idx_tup_fetch": 253207,
+            "idx_tup_read": 323033,
+            "indexrelname": "fuel_station_latest_location",
+            "relname": "fuel_station_latest"
+          },
+          {
+            "bytes": 6389760,
+            "estimated_entries": 142052,
+            "idx_scan": 38948378,
+            "idx_tup_fetch": 39036848,
+            "idx_tup_read": 48567814,
+            "indexrelname": "fuel_station_latest_pkey",
+            "relname": "fuel_station_latest"
+          },
+          {
+            "bytes": 4251648,
+            "estimated_entries": 141660,
+            "idx_scan": 480883,
+            "idx_tup_fetch": 470696,
+            "idx_tup_read": 853784,
+            "indexrelname": "fuel_station_collection_state_pkey",
+            "relname": "fuel_station_collection_state"
+          },
+          {
+            "bytes": 4120576,
+            "estimated_entries": 142052,
+            "idx_scan": 0,
+            "idx_tup_fetch": 0,
+            "idx_tup_read": 0,
+            "indexrelname": "fuel_station_latest_state",
+            "relname": "fuel_station_latest"
+          },
+          {
+            "bytes": 3227648,
+            "estimated_entries": 142052,
+            "idx_scan": 25880,
+            "idx_tup_fetch": 300866,
+            "idx_tup_read": 637647,
+            "indexrelname": "fuel_station_latest_job_id",
+            "relname": "fuel_station_latest"
+          },
+          {
+            "bytes": 2736128,
+            "estimated_entries": 142052,
+            "idx_scan": 131,
+            "idx_tup_fetch": 1701986,
+            "idx_tup_read": 2812100,
+            "indexrelname": "fuel_station_observation_batch",
+            "relname": "fuel_station_latest"
+          },
+          {
+            "bytes": 40960,
+            "estimated_entries": 1473,
+            "idx_scan": 0,
+            "idx_tup_fetch": 0,
+            "idx_tup_read": 0,
+            "indexrelname": "fuel_station_latest_membership_state",
+            "relname": "fuel_station_latest"
+          }
+        ]
+      }
+    }
+  ]
+}

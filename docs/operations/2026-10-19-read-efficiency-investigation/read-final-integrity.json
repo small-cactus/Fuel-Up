@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "ms": 7740,
+  "rows": [
+    {
+      "integrity": {
+        "at": "2026-10-19T19:39:00.959187+00:00",
+        "changed_station_signature_mismatches": 0,
+        "config": {
+          "approved_lookups_per_hour": 161660,
+          "continuous": true,
+          "enabled": true,
+          "max_requests_per_hour": 92,
+          "shared_cooldown_until": "2026-10-19T18:09:26.155568+00:00"
+        },
+        "events": [
+          {
+            "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+            "count": 4
+          }
+        ],
+        "freshness_receipt_mismatches": 0,
+        "manifest_summary_hash_mismatches": 0
+      }
+    }
+  ]
+}

@@ -14,6 +14,8 @@ test('reports interval activity without double-counting guest CPU; absent counte
  assert.equal(r.swapOutPages, null);
  assert.equal(r.oomKills, null);
  assert.equal(r.cpuIoWaitPercent, 25);
+ assert.deepEqual(r.cpuModePercent, { user:75, iowait:25 });
+ assert.equal(r.memoryBytes.free, null);
  assert.equal(r.disks.nvme0n1.read_bytes, 100);
 });
 test('reboots invalidate deltas even when a new counter exceeds its old value', () => {
@@ -21,6 +23,7 @@ test('reboots invalidate deltas even when a new counter exceeds its old value', 
  assert.equal(r.rebooted, true);
  assert.equal(r.swapInPages, null);
  assert.equal(r.cpuIoWaitPercent, null);
+ assert.equal(r.cpuModePercent, null);
  assert.equal(r.disks.nvme0n1.read_bytes, null);
 });
 
@@ -28,6 +31,7 @@ test('cached samples cannot be mistaken for no swap activity', () => {
  const sample = metrics(1, 10, 20, 10);
  const r = summarizePressure(sample, sample, 30);
  assert.equal(r.countersAdvanced, false);
+ assert.equal(r.cpuModePercent, null);
  assert.equal(r.swapInPages, null);
  assert.equal(r.disks.nvme0n1.read_bytes, null);
 });

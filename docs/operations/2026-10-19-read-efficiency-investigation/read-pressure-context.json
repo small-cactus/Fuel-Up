@@ -1,0 +1,201 @@
+{
+  "ok": true,
+  "ms": 2847,
+  "rows": [
+    {
+      "context": {
+        "activity": [
+          {
+            "backend_type": "walwriter",
+            "count": 1,
+            "state": null,
+            "wait_event": "WalWriterMain",
+            "wait_event_type": "Activity"
+          },
+          {
+            "backend_type": "checkpointer",
+            "count": 1,
+            "state": null,
+            "wait_event": "CheckpointerMain",
+            "wait_event_type": "Activity"
+          },
+          {
+            "backend_type": "client backend",
+            "count": 11,
+            "state": "idle",
+            "wait_event": "ClientRead",
+            "wait_event_type": "Client"
+          },
+          {
+            "backend_type": "pg_net 0.19.5 worker",
+            "count": 1,
+            "state": null,
+            "wait_event": "Extension",
+            "wait_event_type": "Extension"
+          },
+          {
+            "backend_type": "archiver",
+            "count": 1,
+            "state": null,
+            "wait_event": "ArchiverMain",
+            "wait_event_type": "Activity"
+          },
+          {
+            "backend_type": "pg_cron launcher",
+            "count": 1,
+            "state": null,
+            "wait_event": "Extension",
+            "wait_event_type": "Extension"
+          },
+          {
+            "backend_type": "background writer",
+            "count": 1,
+            "state": null,
+            "wait_event": "BgwriterMain",
+            "wait_event_type": "Activity"
+          },
+          {
+            "backend_type": "autovacuum launcher",
+            "count": 1,
+            "state": null,
+            "wait_event": "AutovacuumMain",
+            "wait_event_type": "Activity"
+          },
+          {
+            "backend_type": "client backend",
+            "count": 1,
+            "state": "active",
+            "wait_event": null,
+            "wait_event_type": null
+          },
+          {
+            "backend_type": "logical replication launcher",
+            "count": 1,
+            "state": null,
+            "wait_event": "LogicalLauncherMain",
+            "wait_event_type": "Activity"
+          }
+        ],
+        "at": "2026-10-19T19:25:50.00041+00:00",
+        "database": {
+          "blk_read_time": 0,
+          "blk_write_time": 0,
+          "deadlocks": 0,
+          "numbackends": 14,
+          "temp_bytes": 25403392,
+          "temp_files": 7
+        },
+        "largest_relations": [
+          {
+            "index_bytes": 21323776,
+            "last_autovacuum": "2026-10-17T23:23:42.356392+00:00",
+            "n_dead_tup": 1360,
+            "n_tup_hot_upd": 0,
+            "n_tup_upd": 0,
+            "relname": "driving_research_events",
+            "table_bytes": 242884608
+          },
+          {
+            "index_bytes": 25509888,
+            "last_autovacuum": "2026-10-19T19:25:04.741112+00:00",
+            "n_dead_tup": 560,
+            "n_tup_hot_upd": 1117881,
+            "n_tup_upd": 8979908,
+            "relname": "fuel_station_latest",
+            "table_bytes": 174899200
+          },
+          {
+            "index_bytes": 655360,
+            "last_autovacuum": "2026-10-18T10:01:11.364001+00:00",
+            "n_dead_tup": 2364,
+            "n_tup_hot_upd": 0,
+            "n_tup_upd": 0,
+            "relname": "fuel_national_trend_batches",
+            "table_bytes": 43548672
+          },
+          {
+            "index_bytes": 76824576,
+            "last_autovacuum": "2026-10-19T19:23:56.580323+00:00",
+            "n_dead_tup": 1743,
+            "n_tup_hot_upd": 0,
+            "n_tup_upd": 2331208,
+            "relname": "fuel_station_price_lookup",
+            "table_bytes": 27762688
+          },
+          {
+            "index_bytes": 2850816,
+            "last_autovacuum": "2026-10-19T17:39:46.716366+00:00",
+            "n_dead_tup": 0,
+            "n_tup_hot_upd": 84501,
+            "n_tup_upd": 85830,
+            "relname": "job_run_details",
+            "table_bytes": 19980288
+          },
+          {
+            "index_bytes": 4251648,
+            "last_autovacuum": "2026-10-19T19:19:50.858001+00:00",
+            "n_dead_tup": 694,
+            "n_tup_hot_upd": 694,
+            "n_tup_upd": 694,
+            "relname": "fuel_station_collection_state",
+            "table_bytes": 19382272
+          },
+          {
+            "index_bytes": 4612096,
+            "last_autovacuum": "2026-10-19T06:46:31.44749+00:00",
+            "n_dead_tup": 0,
+            "n_tup_hot_upd": 261,
+            "n_tup_upd": 197426,
+            "relname": "fuel_e85_directory",
+            "table_bytes": 11526144
+          },
+          {
+            "index_bytes": 147456,
+            "last_autovacuum": null,
+            "n_dead_tup": 0,
+            "n_tup_hot_upd": 0,
+            "n_tup_upd": 0,
+            "relname": "fuel_research_snapshots",
+            "table_bytes": 10264576
+          },
+          {
+            "index_bytes": 2867200,
+            "last_autovacuum": "2026-10-18T22:10:07.776006+00:00",
+            "n_dead_tup": 5126,
+            "n_tup_hot_upd": 3425,
+            "n_tup_upd": 95707,
+            "relname": "fuel_national_jobs",
+            "table_bytes": 9904128
+          },
+          {
+            "index_bytes": 23027712,
+            "last_autovacuum": "2026-10-18T23:00:10.788265+00:00",
+            "n_dead_tup": 2077,
+            "n_tup_hot_upd": 0,
+            "n_tup_upd": 0,
+            "relname": "objects",
+            "table_bytes": 9379840
+          },
+          {
+            "index_bytes": 32768,
+            "last_autovacuum": null,
+            "n_dead_tup": 0,
+            "n_tup_hot_upd": 0,
+            "n_tup_upd": 0,
+            "relname": "fuel_discovery_jobs",
+            "table_bytes": 6881280
+          },
+          {
+            "index_bytes": 49152,
+            "last_autovacuum": "2026-10-19T17:39:47.169483+00:00",
+            "n_dead_tup": 0,
+            "n_tup_hot_upd": 0,
+            "n_tup_upd": 0,
+            "relname": "_http_response",
+            "table_bytes": 3825664
+          }
+        ]
+      }
+    }
+  ]
+}

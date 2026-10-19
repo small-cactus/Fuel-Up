@@ -28,13 +28,19 @@ export function summarizePressure(first, last, elapsedSeconds) {
     (disks[device] ||= {})[name.replace('node_disk_', '').replace('_total', '')] = !rebooted && Number.isFinite(a) && b >= a ? b - a : null;
   }
   let totalCpu = 0, ioWaitCpu = 0;
+  const cpuByMode = {};
   for (const [key, b] of last) {
     if (!key.startsWith('node_cpu_seconds_total|')) continue;
     // Linux guest times are already included in user/nice time.
     const mode = key.split('|')[3];
     if (mode.startsWith('guest')) continue;
     const a = first.get(key);
-    if (Number.isFinite(a) && b >= a) { totalCpu += b - a; if (mode === 'iowait') ioWaitCpu += b - a; }
+    if (Number.isFinite(a) && b >= a) {
+      const change = b - a;
+      totalCpu += change;
+      cpuByMode[mode] = (cpuByMode[mode] || 0) + change;
+      if (mode === 'iowait') ioWaitCpu += change;
+    }
   }
   const swapInPages = counterDelta('node_vmstat_pswpin');
   const swapOutPages = counterDelta('node_vmstat_pswpout');
@@ -42,6 +48,8 @@ export function summarizePressure(first, last, elapsedSeconds) {
     elapsedSeconds, rebooted, countersAdvanced: totalCpu > 0,
     limitation: totalCpu > 0 ? null : 'Metrics did not advance; cached samples cannot establish an idle or healthy interval.',
     memoryBytes: { total: get(last, 'node_memory_MemTotal_bytes') ?? null, available: get(last, 'node_memory_MemAvailable_bytes') ?? null,
+      free: get(last, 'node_memory_MemFree_bytes') ?? null, cached: get(last, 'node_memory_Cached_bytes') ?? null,
+      buffers: get(last, 'node_memory_Buffers_bytes') ?? null,
       swapTotal: get(last, 'node_memory_SwapTotal_bytes') ?? null, swapFree: get(last, 'node_memory_SwapFree_bytes') ?? null },
     swapInPages, swapOutPages,
     // This Supabase x86 host uses 4 KiB pages. Keep page counts too so this
@@ -49,6 +57,7 @@ export function summarizePressure(first, last, elapsedSeconds) {
     swapInBytesAt4KiB: swapInPages === null ? null : swapInPages * 4096,
     swapOutBytesAt4KiB: swapOutPages === null ? null : swapOutPages * 4096,
     majorFaults: counterDelta('node_vmstat_pgmajfault'), oomKills: counterDelta('node_vmstat_oom_kill'),
+    cpuModePercent: !rebooted && totalCpu > 0 ? Object.fromEntries(Object.entries(cpuByMode).map(([mode, seconds]) => [mode, 100 * seconds / totalCpu])) : null,
     cpuIoWaitPercent: !rebooted && totalCpu > 0 ? 100 * ioWaitCpu / totalCpu : null,
     disks: totalCpu > 0 ? disks : Object.fromEntries(Object.entries(disks).map(([k,v]) => [k, Object.fromEntries(Object.keys(v).map(name => [name, null]))])),
   };

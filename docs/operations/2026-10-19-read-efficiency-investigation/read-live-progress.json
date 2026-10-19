@@ -1,0 +1,1750 @@
+[
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:22:51.195763+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:15:42.733668+00:00"
+    },
+    "events": [
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:41:47.311333+00:00",
+        "job_id": 1777820
+      },
+      {
+        "code": "USER_AUTHORIZED_DEDUP_LIVE_VERIFICATION",
+        "created_at": "2026-10-19T18:39:16.05143+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:15:04.223934+00:00",
+        "job_id": 1774925
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:14:43.316243+00:00",
+        "job_id": 1774924
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:08:58.201052+00:00",
+      "n_dead_tup": 2551,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8979214
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 0,
+      "jobs": {
+        "queued": 72
+      },
+      "observed_stations": null,
+      "published_batches": 0,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 0,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 0,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 0,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": null,
+      "summarized_batches": 0
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:23:56.093231+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:23:32.156523+00:00"
+    },
+    "events": [
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:41:47.311333+00:00",
+        "job_id": 1777820
+      },
+      {
+        "code": "USER_AUTHORIZED_DEDUP_LIVE_VERIFICATION",
+        "created_at": "2026-10-19T18:39:16.05143+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:15:04.223934+00:00",
+        "job_id": 1774925
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:14:43.316243+00:00",
+        "job_id": 1774924
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:08:58.201052+00:00",
+      "n_dead_tup": 2675,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8979338
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 4,
+      "jobs": {
+        "queued": 68,
+        "succeeded": 4
+      },
+      "observed_stations": 6213,
+      "published_batches": 4,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 0,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 0,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": 124,
+      "summarized_batches": 4
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:25:00.411488+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:24:44.906871+00:00"
+    },
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:24:11.531196+00:00",
+        "job_id": 1780985
+      },
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:41:47.311333+00:00",
+        "job_id": 1777820
+      },
+      {
+        "code": "USER_AUTHORIZED_DEDUP_LIVE_VERIFICATION",
+        "created_at": "2026-10-19T18:39:16.05143+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:15:04.223934+00:00",
+        "job_id": 1774925
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:08:58.201052+00:00",
+      "n_dead_tup": 3067,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8979730
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 9,
+      "jobs": {
+        "queued": 63,
+        "succeeded": 9
+      },
+      "observed_stations": 16213,
+      "published_batches": 9,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 5,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 0,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": 516,
+      "summarized_batches": 9
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:26:02.980499+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:26:00.760026+00:00"
+    },
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:24:11.531196+00:00",
+        "job_id": 1780985
+      },
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:41:47.311333+00:00",
+        "job_id": 1777820
+      },
+      {
+        "code": "USER_AUTHORIZED_DEDUP_LIVE_VERIFICATION",
+        "created_at": "2026-10-19T18:39:16.05143+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:15:04.223934+00:00",
+        "job_id": 1774925
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:25:04.741112+00:00",
+      "n_dead_tup": 560,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8979908
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 15,
+      "jobs": {
+        "queued": 57,
+        "running": 1,
+        "succeeded": 14
+      },
+      "observed_stations": 26213,
+      "published_batches": 14,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 5,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 5,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": 694,
+      "summarized_batches": 14
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:27:05.746787+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:27:01.046943+00:00"
+    },
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:24:11.531196+00:00",
+        "job_id": 1780985
+      },
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:41:47.311333+00:00",
+        "job_id": 1777820
+      },
+      {
+        "code": "USER_AUTHORIZED_DEDUP_LIVE_VERIFICATION",
+        "created_at": "2026-10-19T18:39:16.05143+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:15:04.223934+00:00",
+        "job_id": 1774925
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:25:04.741112+00:00",
+      "n_dead_tup": 811,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8980159
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 19,
+      "jobs": {
+        "queued": 53,
+        "running": 1,
+        "succeeded": 18
+      },
+      "observed_stations": 33960,
+      "published_batches": 18,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 9,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 5,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": 945,
+      "summarized_batches": 18
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:28:08.450296+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:28:00.832365+00:00"
+    },
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:24:11.531196+00:00",
+        "job_id": 1780985
+      },
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:41:47.311333+00:00",
+        "job_id": 1777820
+      },
+      {
+        "code": "USER_AUTHORIZED_DEDUP_LIVE_VERIFICATION",
+        "created_at": "2026-10-19T18:39:16.05143+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:15:04.223934+00:00",
+        "job_id": 1774925
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:25:04.741112+00:00",
+      "n_dead_tup": 1086,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8980434
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 24,
+      "jobs": {
+        "queued": 48,
+        "succeeded": 24
+      },
+      "observed_stations": 45960,
+      "published_batches": 24,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 9,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 11,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": 1220,
+      "summarized_batches": 24
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:29:11.129317+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:29:00.986213+00:00"
+    },
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:24:11.531196+00:00",
+        "job_id": 1780985
+      },
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:41:47.311333+00:00",
+        "job_id": 1777820
+      },
+      {
+        "code": "USER_AUTHORIZED_DEDUP_LIVE_VERIFICATION",
+        "created_at": "2026-10-19T18:39:16.05143+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:15:04.223934+00:00",
+        "job_id": 1774925
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:25:04.741112+00:00",
+      "n_dead_tup": 1244,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8980592
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 29,
+      "jobs": {
+        "queued": 43,
+        "succeeded": 29
+      },
+      "observed_stations": 55960,
+      "published_batches": 29,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 9,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 16,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": 1378,
+      "summarized_batches": 29
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:30:13.898505+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:30:13.731734+00:00"
+    },
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:24:11.531196+00:00",
+        "job_id": 1780985
+      },
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:41:47.311333+00:00",
+        "job_id": 1777820
+      },
+      {
+        "code": "USER_AUTHORIZED_DEDUP_LIVE_VERIFICATION",
+        "created_at": "2026-10-19T18:39:16.05143+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:15:04.223934+00:00",
+        "job_id": 1774925
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:25:04.741112+00:00",
+      "n_dead_tup": 1425,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8980773
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 35,
+      "jobs": {
+        "queued": 37,
+        "running": 1,
+        "succeeded": 34
+      },
+      "observed_stations": 65960,
+      "published_batches": 34,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 9,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 21,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": 1559,
+      "summarized_batches": 34
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:31:17.03193+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:31:11.198674+00:00"
+    },
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:24:11.531196+00:00",
+        "job_id": 1780985
+      },
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:41:47.311333+00:00",
+        "job_id": 1777820
+      },
+      {
+        "code": "USER_AUTHORIZED_DEDUP_LIVE_VERIFICATION",
+        "created_at": "2026-10-19T18:39:16.05143+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:15:04.223934+00:00",
+        "job_id": 1774925
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:25:04.741112+00:00",
+      "n_dead_tup": 1819,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8981167
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 40,
+      "jobs": {
+        "queued": 32,
+        "succeeded": 40
+      },
+      "observed_stations": 77960,
+      "published_batches": 40,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 9,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 27,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": 1953,
+      "summarized_batches": 40
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:32:20.786124+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:32:13.369686+00:00"
+    },
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:24:11.531196+00:00",
+        "job_id": 1780985
+      },
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:41:47.311333+00:00",
+        "job_id": 1777820
+      },
+      {
+        "code": "USER_AUTHORIZED_DEDUP_LIVE_VERIFICATION",
+        "created_at": "2026-10-19T18:39:16.05143+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:15:04.223934+00:00",
+        "job_id": 1774925
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:25:04.741112+00:00",
+      "n_dead_tup": 2120,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8981468
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 45,
+      "jobs": {
+        "queued": 27,
+        "running": 1,
+        "succeeded": 44
+      },
+      "observed_stations": 85960,
+      "published_batches": 44,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 9,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 31,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": 2254,
+      "summarized_batches": 44
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:33:24.103066+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:33:21.951314+00:00"
+    },
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:48.018657+00:00",
+        "job_id": 1780959
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:37.218496+00:00",
+        "job_id": 1780958
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:27.622827+00:00",
+        "job_id": 1780957
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:24:11.531196+00:00",
+        "job_id": 1780985
+      },
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:25:04.741112+00:00",
+      "n_dead_tup": 2498,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8981846
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 50,
+      "jobs": {
+        "queued": 22,
+        "running": 1,
+        "succeeded": 49
+      },
+      "observed_stations": 95960,
+      "published_batches": 49,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 9,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 36,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": 2632,
+      "summarized_batches": 49
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:34:27.386553+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:34:21.648709+00:00"
+    },
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:48.018657+00:00",
+        "job_id": 1780959
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:37.218496+00:00",
+        "job_id": 1780958
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:27.622827+00:00",
+        "job_id": 1780957
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:24:11.531196+00:00",
+        "job_id": 1780985
+      },
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:25:04.741112+00:00",
+      "n_dead_tup": 2907,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8982255
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 55,
+      "jobs": {
+        "queued": 17,
+        "succeeded": 55
+      },
+      "observed_stations": 107960,
+      "published_batches": 55,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 9,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 42,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": 3041,
+      "summarized_batches": 55
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:35:31.270317+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:35:21.629237+00:00"
+    },
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:48.018657+00:00",
+        "job_id": 1780959
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:37.218496+00:00",
+        "job_id": 1780958
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:27.622827+00:00",
+        "job_id": 1780957
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:24:11.531196+00:00",
+        "job_id": 1780985
+      },
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:25:04.741112+00:00",
+      "n_dead_tup": 3165,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8982513
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 60,
+      "jobs": {
+        "queued": 12,
+        "succeeded": 60
+      },
+      "observed_stations": 117960,
+      "published_batches": 60,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 9,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 47,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": 3299,
+      "summarized_batches": 60
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:36:34.621267+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:36:32.976668+00:00"
+    },
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:48.018657+00:00",
+        "job_id": 1780959
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:37.218496+00:00",
+        "job_id": 1780958
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:27.622827+00:00",
+        "job_id": 1780957
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:24:11.531196+00:00",
+        "job_id": 1780985
+      },
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:35:57.950058+00:00",
+      "n_dead_tup": 195,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8982835
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 66,
+      "jobs": {
+        "queued": 6,
+        "running": 1,
+        "succeeded": 65
+      },
+      "observed_stations": 127960,
+      "published_batches": 65,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 9,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 52,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": 3621,
+      "summarized_batches": 65
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:16:00.220685+00:00",
+      "run_id": 24770,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:37:38.096835+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:37:32.881706+00:00"
+    },
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:48.018657+00:00",
+        "job_id": 1780959
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:37.218496+00:00",
+        "job_id": 1780958
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:27.622827+00:00",
+        "job_id": 1780957
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:24:11.531196+00:00",
+        "job_id": 1780985
+      },
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:35:57.950058+00:00",
+      "n_dead_tup": 560,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8983200
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 71,
+      "jobs": {
+        "queued": 1,
+        "succeeded": 71
+      },
+      "observed_stations": 139960,
+      "published_batches": 71,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 9,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 58,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": null,
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "running"
+      },
+      "station_rows_changed": 3986,
+      "summarized_batches": 71
+    }
+  },
+  {
+    "cache": {
+      "published_at": "2026-10-19T19:38:00.215231+00:00",
+      "run_id": 24793,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T19:38:41.287341+00:00",
+    "config": {
+      "cooldown_until": "2026-10-19T18:09:26.155568+00:00",
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_request_at": "2026-10-19T19:37:43.02818+00:00"
+    },
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:48.018657+00:00",
+        "job_id": 1780959
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:37.218496+00:00",
+        "job_id": 1780958
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:32:27.622827+00:00",
+        "job_id": 1780957
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:24:11.531196+00:00",
+        "job_id": 1780985
+      },
+      {
+        "code": "USER_AUTHORIZED_COMPACT_READ_VERIFICATION",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "job_id": null
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:10:48.020468+00:00",
+        "job_id": 1779307
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T19:02:46.066442+00:00",
+        "job_id": 1779273
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-10-19T18:52:42.540014+00:00",
+        "job_id": 1777806
+      }
+    ],
+    "station_stats": {
+      "last_autovacuum": "2026-10-19T19:35:57.950058+00:00",
+      "n_dead_tup": 612,
+      "n_tup_hot_upd": 1117881,
+      "n_tup_upd": 8983252
+    },
+    "verification": {
+      "allowance": {
+        "expires_at": "2026-10-19T20:00:00+00:00",
+        "hour_at": "2026-10-19T19:00:00+00:00",
+        "max_lookups": 161660,
+        "max_requests": 92,
+        "reason": "2026-10-19 user-authorized compact-read live verification",
+        "run_id": 24793
+      },
+      "attempts": 72,
+      "jobs": {
+        "succeeded": 72
+      },
+      "observed_stations": 141660,
+      "published_batches": 72,
+      "regional": [
+        {
+          "execution_region": "us-west-1",
+          "succeeded": 9,
+          "total": 9
+        },
+        {
+          "execution_region": "us-east-1",
+          "succeeded": 59,
+          "total": 59
+        },
+        {
+          "execution_region": "us-west-2",
+          "succeeded": 4,
+          "total": 4
+        }
+      ],
+      "run": {
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "completed_at": "2026-10-19T19:37:44.829373+00:00",
+        "created_at": "2026-10-19T19:22:42.240082+00:00",
+        "deadline_at": "2026-10-19T20:00:00+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 24793,
+        "slot_at": "2026-10-19T19:22:42.243758+00:00",
+        "status": "complete"
+      },
+      "station_rows_changed": 4038,
+      "summarized_batches": 72
+    }
+  }
+]
