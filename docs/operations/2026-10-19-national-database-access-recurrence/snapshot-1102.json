@@ -1,0 +1,212 @@
+{
+  "incident": "2026-10-19 database access recurrence",
+  "production_repair_attempts": 0,
+  "state": {
+    "backlog": 0,
+    "budget": {
+      "lookups": 0,
+      "requests": 0
+    },
+    "cache": {
+      "published_at": "2026-10-19T09:16:00.307217+00:00",
+      "run_id": 24385,
+      "scopes": 10
+    },
+    "checked_at": "2026-10-19T11:02:24.407439+00:00",
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_HTTP_503",
+      "id": true,
+      "last_dispatch_at": "2026-10-19T11:02:00.419399+00:00",
+      "last_request_at": "2026-10-19T10:14:44.482347+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-10-19T10:06:53.151895+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "cron": [
+      {
+        "active": true,
+        "name": "fuel-national-discovery"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-trends-cache"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-projection-repair"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-dispatch"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-watchdog"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-retention"
+      }
+    ],
+    "regions": [
+      {
+        "enabled": true,
+        "function_name": "fuel-national-east",
+        "last_dispatch_at": "2026-10-19T10:59:04.338043+00:00",
+        "region": "us-east-1"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-northwest",
+        "last_dispatch_at": "2026-10-19T11:02:00.419399+00:00",
+        "region": "us-west-2"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-southwest",
+        "last_dispatch_at": "2026-10-19T10:10:00.329392+00:00",
+        "region": "us-west-1"
+      }
+    ],
+    "runs": [
+      {
+        "completed_at": null,
+        "expected_batches": 72,
+        "id": 24483,
+        "slot_at": "2026-10-19T11:00:00+00:00",
+        "status": "running"
+      },
+      {
+        "completed_at": "2026-10-19T11:02:00.419399+00:00",
+        "expected_batches": 72,
+        "id": 24445,
+        "slot_at": "2026-10-19T10:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-10-19T09:15:47.443232+00:00",
+        "expected_batches": 72,
+        "id": 24385,
+        "slot_at": "2026-10-19T09:00:00+00:00",
+        "status": "complete"
+      },
+      {
+        "completed_at": "2026-10-19T08:16:16.793413+00:00",
+        "expected_batches": 72,
+        "id": 24325,
+        "slot_at": "2026-10-19T08:00:00+00:00",
+        "status": "complete"
+      }
+    ],
+    "slots": {
+      "complete": 143,
+      "expected": 192,
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 48
+    }
+  },
+  "saved_responses": {
+    "checked_at": "2026-10-19T11:02:40.917923+00:00",
+    "retention": null,
+    "retention_cron": [
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-19T11:00:00.000693+00:00",
+        "status": "failed"
+      },
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-19T10:50:00.000878+00:00",
+        "status": "failed"
+      },
+      {
+        "return_message": "job startup timeout",
+        "start_time": "2026-10-19T10:40:00.000405+00:00",
+        "status": "failed"
+      }
+    ],
+    "workers": [
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "created": "2026-10-19T10:59:13.91404+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "created": "2026-10-19T10:58:10.481714+00:00",
+        "status_code": 503
+      },
+      {
+        "body": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "created": "2026-10-19T10:57:08.029152+00:00",
+        "status_code": 503
+      }
+    ]
+  },
+  "initial_counts": {
+    "error": "read_failed",
+    "diagnostic": "Initialising login role...\nunexpected login role status 544: {\"message\":\"Failed to create login role: Connection terminated due to connection timeout\"}\nTry rerunning the command with --debug to troubleshoot the error.\n"
+  },
+  "counts_retry": {
+    "batches": [
+      {
+        "batches": 35,
+        "execution_region": "us-east-1",
+        "requests": 35,
+        "run_id": 24445,
+        "status": "succeeded"
+      },
+      {
+        "batches": 9,
+        "execution_region": "us-west-1",
+        "requests": 11,
+        "run_id": 24445,
+        "status": "succeeded"
+      },
+      {
+        "batches": 4,
+        "execution_region": "us-west-2",
+        "requests": 5,
+        "run_id": 24445,
+        "status": "succeeded"
+      },
+      {
+        "batches": 24,
+        "execution_region": null,
+        "requests": 0,
+        "run_id": 24445,
+        "status": "missed"
+      },
+      {
+        "batches": 72,
+        "execution_region": null,
+        "requests": 0,
+        "run_id": 24483,
+        "status": "queued"
+      }
+    ],
+    "checked_at": "2026-10-19T11:04:19.486504+00:00"
+  },
+  "public_cache_probe": {
+    "checked_at": "2026-10-19T11:03:28.616Z",
+    "error": "TimeoutError",
+    "ms": 25010
+  },
+  "full_status_error": "Initialising login role...\nunexpected status 400: {\"message\":\"Failed to run sql query: ERROR:  57014: canceling statement due to statement timeout\\nCONTEXT:  SQL function \\\"fuel_national_retention_candidates\\\" statement 1\\n\"}\nTry rerunning the command with --debug to troubleshoot the error.",
+  "limitations": [
+    "Current exact archive capacity and retention candidate backlog unavailable after full status timeout.",
+    "11:00 UTC remains within its deadline until 12:00 UTC; queued batches are not counted as an expired gap.",
+    "Fixed-inventory observations are not verified pump truth."
+  ]
+}
