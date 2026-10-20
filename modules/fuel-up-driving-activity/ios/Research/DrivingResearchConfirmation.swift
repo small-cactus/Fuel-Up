@@ -17,6 +17,8 @@ enum ResearchConfirmation {
     return station.isEmpty || station == "Gas station" ? NSLocalizedString("got something at the gas station? 👀", comment: "") : NSLocalizedString("got something at {station}? 👀", comment: "").replacingOccurrences(of: "{station}", with: station)
   }
   static func shouldPrompt(event: String, visit: ResearchVisit) -> Bool {
+    // Legacy v2 replay eligibility only. Live collection additionally requires
+    // ResearchStopEvidence; this helper must not schedule a notification.
     // Keep short observations for research, but do not turn a traffic-light
     // stop into a notification. Duration applies to every real-stop prompt,
     // including a restored visit created by an older detector version.

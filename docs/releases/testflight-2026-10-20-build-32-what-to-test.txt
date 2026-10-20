@@ -1,0 +1,7 @@
+Fewer unnecessary gas-stop questions.
+
+Fuel Up now checks recent location accuracy and proximity to the station before asking whether you stopped. Being nearby for three minutes alone is no longer enough. If you move closer during the same visit, the question may appear later; unanswered questions are not repeated after reopening the app.
+
+Please answer “Not a stop” if a question appears while you are only nearby. For real stops, distinguish “Got fuel” from “Stopped, no fuel.” You can also review visits in Driving Research. Some real stops may no longer trigger a question, especially at larger stations or when location accuracy is poor.
+
+This update does not automatically label a fuel purchase. Existing research consent and permissions still apply.

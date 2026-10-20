@@ -73,7 +73,7 @@ struct ResearchVisit: Codable, Identifiable {
 // A detector of possible stops, never a fuel-purchase label. All thresholds are
 // versioned with the uploaded events so offline training can re-evaluate them.
 enum ResearchStopPolicy {
-  static let version = "station-stop-v2"
+  static let version = "station-stop-v3-core65"
   // Confirmed development stops lasted over three minutes. Short stationary
   // traffic near a station produced false prompts, including a two-minute stop.
   static let minimumPromptDwell: Double = 180

@@ -48,6 +48,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
   private var identity:ResearchIdentity?
   private var stations:[ResearchStation]=[]
   private var detector=ResearchVisitDetector()
+  private var stopEvidence=ResearchStopEvidence()
   private var lastMotionCheck=Date.distantPast
   private var lastDrive=Date.distantPast
   private var lastPersistedFix:Double=0
@@ -283,6 +284,7 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     detector=ResearchVisitDetector();saveDetector()
   }
   private func stopSensors() {
+    stopEvidence=ResearchStopEvidence()
     if running {
       mileageNeedsBoundary=true
       // Persist the break so a process restart cannot bridge paused collection.
@@ -377,7 +379,17 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
           visits.removeAll{$0.id==visit.id};visits.insert(visit,at:0);visits=Array(visits.prefix(30))
           UserDefaults.standard.set(try? JSONEncoder().encode(visits),forKey:"research.visits")
         }
-        if ResearchConfirmation.shouldPrompt(event:kind,visit:visit) {prompt(visit)}
+      }
+      // Reevaluate deferred notifications on every fix, including after the
+      // one-shot candidate event. Departures/gaps cannot bypass this gate.
+      if let decision=stopEvidence.process(fix,visit:detector.active,now:now),
+         let visit=detector.active,
+         !promptedVisitIDs.contains(visit.id),visitLabels[visit.id]==nil {
+        if stopEvidence.shouldRecord(decision) {
+          guard record("diagnostic",["visitId":visit.id,"stationId":visit.station.id,
+            "stopPromptEvidence":decision.payload]) else {return}
+        }
+        if decision.eligible {prompt(visit)}
       }
       if !changes.isEmpty {refreshConfirmations()}
       if changes.contains(where:{$0.0 == "visit_departure" || $0.0 == "visit_gap"}) {crossChecks.drain()}
@@ -468,9 +480,9 @@ final class DrivingResearchCollector: NSObject, ObservableObject, @preconcurrenc
     guard record("visit_prompt",fields) else{return}
     promptedVisitIDs.insert(visit.id)
     Task {
-      guard enabled,consented,visitLabels[visit.id]==nil else{return}
+      guard enabled,consented,visitLabels[visit.id]==nil,detector.active?.id==visit.id else{return}
       let result=await DrivingResearchNotifications.shared.schedule(visit)
-      if !enabled || !consented || visitLabels[visit.id] != nil {DrivingResearchNotifications.shared.remove(visit.id);return}
+      if !enabled || !consented || visitLabels[visit.id] != nil || detector.active?.id != visit.id {DrivingResearchNotifications.shared.remove(visit.id);return}
       var outcome=fields;outcome["status"]=result;record("visit_prompt",outcome);refreshConfirmations()
     }
   }
