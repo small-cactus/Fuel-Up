@@ -1,0 +1,1735 @@
+{
+  "exportedAt": "2026-10-20T17:34:54.443606+00:00",
+  "descriptive_period_cutoff_utc": "2026-10-14T00:00:00Z",
+  "excluded": {
+    "unlabeled_visits": 432
+  },
+  "labeled_visits": 38,
+  "participants_with_labels": 3,
+  "window_truncations": 2,
+  "pedometer_available_by_three_minutes": 0,
+  "no_saved_accepted_fixes": 0,
+  "actual_scheduled_prompts": {
+    "not_a_stop": 13,
+    "fueled": 16,
+    "not_fueling": 7
+  },
+  "past_correction_matches_by_radius_m": {
+    "20": {
+      "fueled": 0,
+      "not_fueling": 0,
+      "not_a_stop": 0
+    },
+    "30": {
+      "fueled": 0,
+      "not_fueling": 0,
+      "not_a_stop": 0
+    },
+    "50": {
+      "fueled": 0,
+      "not_fueling": 0,
+      "not_a_stop": 0
+    }
+  },
+  "all": {
+    "v2": {
+      "labels": {
+        "fueled": {
+          "total": 17,
+          "prompted": 15,
+          "silent": 2
+        },
+        "not_fueling": {
+          "total": 8,
+          "prompted": 6,
+          "silent": 2
+        },
+        "not_a_stop": {
+          "total": 13,
+          "prompted": 7,
+          "silent": 6
+        }
+      },
+      "additional_delay_seconds": {
+        "median": 0.0,
+        "max": 0.0
+      }
+    },
+    "continuous_90": {
+      "labels": {
+        "fueled": {
+          "total": 17,
+          "prompted": 6,
+          "silent": 11
+        },
+        "not_fueling": {
+          "total": 8,
+          "prompted": 3,
+          "silent": 5
+        },
+        "not_a_stop": {
+          "total": 13,
+          "prompted": 5,
+          "silent": 8
+        }
+      },
+      "additional_delay_seconds": {
+        "median": 24.0,
+        "max": 139.1
+      }
+    },
+    "continuous_120": {
+      "labels": {
+        "fueled": {
+          "total": 17,
+          "prompted": 5,
+          "silent": 12
+        },
+        "not_fueling": {
+          "total": 8,
+          "prompted": 3,
+          "silent": 5
+        },
+        "not_a_stop": {
+          "total": 13,
+          "prompted": 5,
+          "silent": 8
+        }
+      },
+      "additional_delay_seconds": {
+        "median": 61.0,
+        "max": 192.0
+      }
+    },
+    "stable_90": {
+      "labels": {
+        "fueled": {
+          "total": 17,
+          "prompted": 5,
+          "silent": 12
+        },
+        "not_fueling": {
+          "total": 8,
+          "prompted": 2,
+          "silent": 6
+        },
+        "not_a_stop": {
+          "total": 13,
+          "prompted": 5,
+          "silent": 8
+        }
+      },
+      "additional_delay_seconds": {
+        "median": 24.0,
+        "max": 139.1
+      }
+    },
+    "walking": {
+      "labels": {
+        "fueled": {
+          "total": 17,
+          "prompted": 4,
+          "silent": 13
+        },
+        "not_fueling": {
+          "total": 8,
+          "prompted": 5,
+          "silent": 3
+        },
+        "not_a_stop": {
+          "total": 13,
+          "prompted": 3,
+          "silent": 10
+        }
+      },
+      "additional_delay_seconds": {
+        "median": 29.0,
+        "max": 85.0
+      }
+    },
+    "stable_90_or_walking": {
+      "labels": {
+        "fueled": {
+          "total": 17,
+          "prompted": 6,
+          "silent": 11
+        },
+        "not_fueling": {
+          "total": 8,
+          "prompted": 5,
+          "silent": 3
+        },
+        "not_a_stop": {
+          "total": 13,
+          "prompted": 6,
+          "silent": 7
+        }
+      },
+      "additional_delay_seconds": {
+        "median": 10.0,
+        "max": 139.1
+      }
+    },
+    "stable_90_and_motion": {
+      "labels": {
+        "fueled": {
+          "total": 17,
+          "prompted": 2,
+          "silent": 15
+        },
+        "not_fueling": {
+          "total": 8,
+          "prompted": 1,
+          "silent": 7
+        },
+        "not_a_stop": {
+          "total": 13,
+          "prompted": 2,
+          "silent": 11
+        }
+      },
+      "additional_delay_seconds": {
+        "median": 47.0,
+        "max": 95.0
+      }
+    },
+    "core_50": {
+      "labels": {
+        "fueled": {
+          "total": 17,
+          "prompted": 11,
+          "silent": 6
+        },
+        "not_fueling": {
+          "total": 8,
+          "prompted": 4,
+          "silent": 4
+        },
+        "not_a_stop": {
+          "total": 13,
+          "prompted": 0,
+          "silent": 13
+        }
+      },
+      "additional_delay_seconds": {
+        "median": 0.0,
+        "max": 160.0
+      }
+    },
+    "core_65": {
+      "labels": {
+        "fueled": {
+          "total": 17,
+          "prompted": 14,
+          "silent": 3
+        },
+        "not_fueling": {
+          "total": 8,
+          "prompted": 6,
+          "silent": 2
+        },
+        "not_a_stop": {
+          "total": 13,
+          "prompted": 2,
+          "silent": 11
+        }
+      },
+      "additional_delay_seconds": {
+        "median": 0.0,
+        "max": 92.0
+      }
+    },
+    "core_80": {
+      "labels": {
+        "fueled": {
+          "total": 17,
+          "prompted": 14,
+          "silent": 3
+        },
+        "not_fueling": {
+          "total": 8,
+          "prompted": 6,
+          "silent": 2
+        },
+        "not_a_stop": {
+          "total": 13,
+          "prompted": 4,
+          "silent": 9
+        }
+      },
+      "additional_delay_seconds": {
+        "median": 0.0,
+        "max": 62.0
+      }
+    },
+    "core_50_or_walking": {
+      "labels": {
+        "fueled": {
+          "total": 17,
+          "prompted": 11,
+          "silent": 6
+        },
+        "not_fueling": {
+          "total": 8,
+          "prompted": 6,
+          "silent": 2
+        },
+        "not_a_stop": {
+          "total": 13,
+          "prompted": 3,
+          "silent": 10
+        }
+      },
+      "additional_delay_seconds": {
+        "median": 0.0,
+        "max": 160.0
+      }
+    },
+    "core_65_or_walking": {
+      "labels": {
+        "fueled": {
+          "total": 17,
+          "prompted": 14,
+          "silent": 3
+        },
+        "not_fueling": {
+          "total": 8,
+          "prompted": 6,
+          "silent": 2
+        },
+        "not_a_stop": {
+          "total": 13,
+          "prompted": 5,
+          "silent": 8
+        }
+      },
+      "additional_delay_seconds": {
+        "median": 0.0,
+        "max": 47.0
+      }
+    }
+  },
+  "partitions": {
+    "earlier": {
+      "visits": 23,
+      "people": 3,
+      "policies": {
+        "v2": {
+          "labels": {
+            "fueled": {
+              "total": 8,
+              "prompted": 8,
+              "silent": 0
+            },
+            "not_fueling": {
+              "total": 6,
+              "prompted": 5,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 9,
+              "prompted": 3,
+              "silent": 6
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        },
+        "continuous_90": {
+          "labels": {
+            "fueled": {
+              "total": 8,
+              "prompted": 3,
+              "silent": 5
+            },
+            "not_fueling": {
+              "total": 6,
+              "prompted": 2,
+              "silent": 4
+            },
+            "not_a_stop": {
+              "total": 9,
+              "prompted": 1,
+              "silent": 8
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 24.0,
+            "max": 95.0
+          }
+        },
+        "continuous_120": {
+          "labels": {
+            "fueled": {
+              "total": 8,
+              "prompted": 3,
+              "silent": 5
+            },
+            "not_fueling": {
+              "total": 6,
+              "prompted": 2,
+              "silent": 4
+            },
+            "not_a_stop": {
+              "total": 9,
+              "prompted": 1,
+              "silent": 8
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 122.0,
+            "max": 184.0
+          }
+        },
+        "stable_90": {
+          "labels": {
+            "fueled": {
+              "total": 8,
+              "prompted": 2,
+              "silent": 6
+            },
+            "not_fueling": {
+              "total": 6,
+              "prompted": 1,
+              "silent": 5
+            },
+            "not_a_stop": {
+              "total": 9,
+              "prompted": 1,
+              "silent": 8
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 24.0,
+            "max": 95.0
+          }
+        },
+        "walking": {
+          "labels": {
+            "fueled": {
+              "total": 8,
+              "prompted": 1,
+              "silent": 7
+            },
+            "not_fueling": {
+              "total": 6,
+              "prompted": 4,
+              "silent": 2
+            },
+            "not_a_stop": {
+              "total": 9,
+              "prompted": 2,
+              "silent": 7
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 16.0,
+            "max": 85.0
+          }
+        },
+        "stable_90_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 8,
+              "prompted": 2,
+              "silent": 6
+            },
+            "not_fueling": {
+              "total": 6,
+              "prompted": 4,
+              "silent": 2
+            },
+            "not_a_stop": {
+              "total": 9,
+              "prompted": 2,
+              "silent": 7
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 13.0,
+            "max": 85.0
+          }
+        },
+        "stable_90_and_motion": {
+          "labels": {
+            "fueled": {
+              "total": 8,
+              "prompted": 1,
+              "silent": 7
+            },
+            "not_fueling": {
+              "total": 6,
+              "prompted": 0,
+              "silent": 6
+            },
+            "not_a_stop": {
+              "total": 9,
+              "prompted": 1,
+              "silent": 8
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 95.0,
+            "max": 95.0
+          }
+        },
+        "core_50": {
+          "labels": {
+            "fueled": {
+              "total": 8,
+              "prompted": 5,
+              "silent": 3
+            },
+            "not_fueling": {
+              "total": 6,
+              "prompted": 4,
+              "silent": 2
+            },
+            "not_a_stop": {
+              "total": 9,
+              "prompted": 0,
+              "silent": 9
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 160.0
+          }
+        },
+        "core_65": {
+          "labels": {
+            "fueled": {
+              "total": 8,
+              "prompted": 8,
+              "silent": 0
+            },
+            "not_fueling": {
+              "total": 6,
+              "prompted": 5,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 9,
+              "prompted": 0,
+              "silent": 9
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 92.0
+          }
+        },
+        "core_80": {
+          "labels": {
+            "fueled": {
+              "total": 8,
+              "prompted": 8,
+              "silent": 0
+            },
+            "not_fueling": {
+              "total": 6,
+              "prompted": 5,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 9,
+              "prompted": 2,
+              "silent": 7
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 62.0
+          }
+        },
+        "core_50_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 8,
+              "prompted": 5,
+              "silent": 3
+            },
+            "not_fueling": {
+              "total": 6,
+              "prompted": 5,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 9,
+              "prompted": 2,
+              "silent": 7
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 160.0
+          }
+        },
+        "core_65_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 8,
+              "prompted": 8,
+              "silent": 0
+            },
+            "not_fueling": {
+              "total": 6,
+              "prompted": 5,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 9,
+              "prompted": 2,
+              "silent": 7
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 16.0
+          }
+        }
+      }
+    },
+    "later": {
+      "visits": 15,
+      "people": 2,
+      "policies": {
+        "v2": {
+          "labels": {
+            "fueled": {
+              "total": 9,
+              "prompted": 7,
+              "silent": 2
+            },
+            "not_fueling": {
+              "total": 2,
+              "prompted": 1,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 4,
+              "prompted": 4,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        },
+        "continuous_90": {
+          "labels": {
+            "fueled": {
+              "total": 9,
+              "prompted": 3,
+              "silent": 6
+            },
+            "not_fueling": {
+              "total": 2,
+              "prompted": 1,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 4,
+              "prompted": 4,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 15.0,
+            "max": 139.1
+          }
+        },
+        "continuous_120": {
+          "labels": {
+            "fueled": {
+              "total": 9,
+              "prompted": 2,
+              "silent": 7
+            },
+            "not_fueling": {
+              "total": 2,
+              "prompted": 1,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 4,
+              "prompted": 4,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 192.0
+          }
+        },
+        "stable_90": {
+          "labels": {
+            "fueled": {
+              "total": 9,
+              "prompted": 3,
+              "silent": 6
+            },
+            "not_fueling": {
+              "total": 2,
+              "prompted": 1,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 4,
+              "prompted": 4,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 15.0,
+            "max": 139.1
+          }
+        },
+        "walking": {
+          "labels": {
+            "fueled": {
+              "total": 9,
+              "prompted": 3,
+              "silent": 6
+            },
+            "not_fueling": {
+              "total": 2,
+              "prompted": 1,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 4,
+              "prompted": 1,
+              "silent": 3
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 30.0,
+            "max": 47.0
+          }
+        },
+        "stable_90_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 9,
+              "prompted": 4,
+              "silent": 5
+            },
+            "not_fueling": {
+              "total": 2,
+              "prompted": 1,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 4,
+              "prompted": 4,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 139.1
+          }
+        },
+        "stable_90_and_motion": {
+          "labels": {
+            "fueled": {
+              "total": 9,
+              "prompted": 1,
+              "silent": 8
+            },
+            "not_fueling": {
+              "total": 2,
+              "prompted": 1,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 4,
+              "prompted": 1,
+              "silent": 3
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 38.5,
+            "max": 47.0
+          }
+        },
+        "core_50": {
+          "labels": {
+            "fueled": {
+              "total": 9,
+              "prompted": 6,
+              "silent": 3
+            },
+            "not_fueling": {
+              "total": 2,
+              "prompted": 0,
+              "silent": 2
+            },
+            "not_a_stop": {
+              "total": 4,
+              "prompted": 0,
+              "silent": 4
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 30.0
+          }
+        },
+        "core_65": {
+          "labels": {
+            "fueled": {
+              "total": 9,
+              "prompted": 6,
+              "silent": 3
+            },
+            "not_fueling": {
+              "total": 2,
+              "prompted": 1,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 4,
+              "prompted": 2,
+              "silent": 2
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 85.0
+          }
+        },
+        "core_80": {
+          "labels": {
+            "fueled": {
+              "total": 9,
+              "prompted": 6,
+              "silent": 3
+            },
+            "not_fueling": {
+              "total": 2,
+              "prompted": 1,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 4,
+              "prompted": 2,
+              "silent": 2
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        },
+        "core_50_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 9,
+              "prompted": 6,
+              "silent": 3
+            },
+            "not_fueling": {
+              "total": 2,
+              "prompted": 1,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 4,
+              "prompted": 1,
+              "silent": 3
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 47.0
+          }
+        },
+        "core_65_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 9,
+              "prompted": 6,
+              "silent": 3
+            },
+            "not_fueling": {
+              "total": 2,
+              "prompted": 1,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 4,
+              "prompted": 3,
+              "silent": 1
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 47.0
+          }
+        }
+      }
+    }
+  },
+  "participant_groups": [
+    {
+      "group": 1,
+      "visits": 30,
+      "policies": {
+        "v2": {
+          "labels": {
+            "fueled": {
+              "total": 13,
+              "prompted": 12,
+              "silent": 1
+            },
+            "not_fueling": {
+              "total": 5,
+              "prompted": 4,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 12,
+              "prompted": 6,
+              "silent": 6
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        },
+        "continuous_90": {
+          "labels": {
+            "fueled": {
+              "total": 13,
+              "prompted": 4,
+              "silent": 9
+            },
+            "not_fueling": {
+              "total": 5,
+              "prompted": 2,
+              "silent": 3
+            },
+            "not_a_stop": {
+              "total": 12,
+              "prompted": 4,
+              "silent": 8
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 27.0,
+            "max": 95.0
+          }
+        },
+        "continuous_120": {
+          "labels": {
+            "fueled": {
+              "total": 13,
+              "prompted": 4,
+              "silent": 9
+            },
+            "not_fueling": {
+              "total": 5,
+              "prompted": 2,
+              "silent": 3
+            },
+            "not_a_stop": {
+              "total": 12,
+              "prompted": 4,
+              "silent": 8
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 123.5,
+            "max": 192.0
+          }
+        },
+        "stable_90": {
+          "labels": {
+            "fueled": {
+              "total": 13,
+              "prompted": 4,
+              "silent": 9
+            },
+            "not_fueling": {
+              "total": 5,
+              "prompted": 1,
+              "silent": 4
+            },
+            "not_a_stop": {
+              "total": 12,
+              "prompted": 4,
+              "silent": 8
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 24.0,
+            "max": 95.0
+          }
+        },
+        "walking": {
+          "labels": {
+            "fueled": {
+              "total": 13,
+              "prompted": 4,
+              "silent": 9
+            },
+            "not_fueling": {
+              "total": 5,
+              "prompted": 3,
+              "silent": 2
+            },
+            "not_a_stop": {
+              "total": 12,
+              "prompted": 3,
+              "silent": 9
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 16.0,
+            "max": 85.0
+          }
+        },
+        "stable_90_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 13,
+              "prompted": 5,
+              "silent": 8
+            },
+            "not_fueling": {
+              "total": 5,
+              "prompted": 3,
+              "silent": 2
+            },
+            "not_a_stop": {
+              "total": 12,
+              "prompted": 5,
+              "silent": 7
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 5.0,
+            "max": 85.0
+          }
+        },
+        "stable_90_and_motion": {
+          "labels": {
+            "fueled": {
+              "total": 13,
+              "prompted": 2,
+              "silent": 11
+            },
+            "not_fueling": {
+              "total": 5,
+              "prompted": 0,
+              "silent": 5
+            },
+            "not_a_stop": {
+              "total": 12,
+              "prompted": 2,
+              "silent": 10
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 62.5,
+            "max": 95.0
+          }
+        },
+        "core_50": {
+          "labels": {
+            "fueled": {
+              "total": 13,
+              "prompted": 9,
+              "silent": 4
+            },
+            "not_fueling": {
+              "total": 5,
+              "prompted": 3,
+              "silent": 2
+            },
+            "not_a_stop": {
+              "total": 12,
+              "prompted": 0,
+              "silent": 12
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 160.0
+          }
+        },
+        "core_65": {
+          "labels": {
+            "fueled": {
+              "total": 13,
+              "prompted": 12,
+              "silent": 1
+            },
+            "not_fueling": {
+              "total": 5,
+              "prompted": 4,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 12,
+              "prompted": 1,
+              "silent": 11
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 92.0
+          }
+        },
+        "core_80": {
+          "labels": {
+            "fueled": {
+              "total": 13,
+              "prompted": 12,
+              "silent": 1
+            },
+            "not_fueling": {
+              "total": 5,
+              "prompted": 4,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 12,
+              "prompted": 3,
+              "silent": 9
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 62.0
+          }
+        },
+        "core_50_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 13,
+              "prompted": 9,
+              "silent": 4
+            },
+            "not_fueling": {
+              "total": 5,
+              "prompted": 4,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 12,
+              "prompted": 3,
+              "silent": 9
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 160.0
+          }
+        },
+        "core_65_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 13,
+              "prompted": 12,
+              "silent": 1
+            },
+            "not_fueling": {
+              "total": 5,
+              "prompted": 4,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 12,
+              "prompted": 4,
+              "silent": 8
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 16.0
+          }
+        }
+      }
+    },
+    {
+      "group": 2,
+      "visits": 7,
+      "policies": {
+        "v2": {
+          "labels": {
+            "fueled": {
+              "total": 3,
+              "prompted": 2,
+              "silent": 1
+            },
+            "not_fueling": {
+              "total": 3,
+              "prompted": 2,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        },
+        "continuous_90": {
+          "labels": {
+            "fueled": {
+              "total": 3,
+              "prompted": 1,
+              "silent": 2
+            },
+            "not_fueling": {
+              "total": 3,
+              "prompted": 1,
+              "silent": 2
+            },
+            "not_a_stop": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 69.5,
+            "max": 139.1
+          }
+        },
+        "continuous_120": {
+          "labels": {
+            "fueled": {
+              "total": 3,
+              "prompted": 0,
+              "silent": 3
+            },
+            "not_fueling": {
+              "total": 3,
+              "prompted": 1,
+              "silent": 2
+            },
+            "not_a_stop": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        },
+        "stable_90": {
+          "labels": {
+            "fueled": {
+              "total": 3,
+              "prompted": 1,
+              "silent": 2
+            },
+            "not_fueling": {
+              "total": 3,
+              "prompted": 1,
+              "silent": 2
+            },
+            "not_a_stop": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 69.5,
+            "max": 139.1
+          }
+        },
+        "walking": {
+          "labels": {
+            "fueled": {
+              "total": 3,
+              "prompted": 0,
+              "silent": 3
+            },
+            "not_fueling": {
+              "total": 3,
+              "prompted": 2,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 1,
+              "prompted": 0,
+              "silent": 1
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 38.0,
+            "max": 47.0
+          }
+        },
+        "stable_90_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 3,
+              "prompted": 1,
+              "silent": 2
+            },
+            "not_fueling": {
+              "total": 3,
+              "prompted": 2,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 29.0,
+            "max": 139.1
+          }
+        },
+        "stable_90_and_motion": {
+          "labels": {
+            "fueled": {
+              "total": 3,
+              "prompted": 0,
+              "silent": 3
+            },
+            "not_fueling": {
+              "total": 3,
+              "prompted": 1,
+              "silent": 2
+            },
+            "not_a_stop": {
+              "total": 1,
+              "prompted": 0,
+              "silent": 1
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 47.0,
+            "max": 47.0
+          }
+        },
+        "core_50": {
+          "labels": {
+            "fueled": {
+              "total": 3,
+              "prompted": 1,
+              "silent": 2
+            },
+            "not_fueling": {
+              "total": 3,
+              "prompted": 1,
+              "silent": 2
+            },
+            "not_a_stop": {
+              "total": 1,
+              "prompted": 0,
+              "silent": 1
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 8.5,
+            "max": 12.0
+          }
+        },
+        "core_65": {
+          "labels": {
+            "fueled": {
+              "total": 3,
+              "prompted": 1,
+              "silent": 2
+            },
+            "not_fueling": {
+              "total": 3,
+              "prompted": 2,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 6.0,
+            "max": 85.0
+          }
+        },
+        "core_80": {
+          "labels": {
+            "fueled": {
+              "total": 3,
+              "prompted": 1,
+              "silent": 2
+            },
+            "not_fueling": {
+              "total": 3,
+              "prompted": 2,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        },
+        "core_50_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 3,
+              "prompted": 1,
+              "silent": 2
+            },
+            "not_fueling": {
+              "total": 3,
+              "prompted": 2,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 1,
+              "prompted": 0,
+              "silent": 1
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 12.0,
+            "max": 47.0
+          }
+        },
+        "core_65_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 3,
+              "prompted": 1,
+              "silent": 2
+            },
+            "not_fueling": {
+              "total": 3,
+              "prompted": 2,
+              "silent": 1
+            },
+            "not_a_stop": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 6.0,
+            "max": 47.0
+          }
+        }
+      }
+    },
+    {
+      "group": 3,
+      "visits": 1,
+      "policies": {
+        "v2": {
+          "labels": {
+            "fueled": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            },
+            "not_fueling": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            },
+            "not_a_stop": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        },
+        "continuous_90": {
+          "labels": {
+            "fueled": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            },
+            "not_fueling": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            },
+            "not_a_stop": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        },
+        "continuous_120": {
+          "labels": {
+            "fueled": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            },
+            "not_fueling": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            },
+            "not_a_stop": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        },
+        "stable_90": {
+          "labels": {
+            "fueled": {
+              "total": 1,
+              "prompted": 0,
+              "silent": 1
+            },
+            "not_fueling": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            },
+            "not_a_stop": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": null,
+            "max": null
+          }
+        },
+        "walking": {
+          "labels": {
+            "fueled": {
+              "total": 1,
+              "prompted": 0,
+              "silent": 1
+            },
+            "not_fueling": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            },
+            "not_a_stop": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": null,
+            "max": null
+          }
+        },
+        "stable_90_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 1,
+              "prompted": 0,
+              "silent": 1
+            },
+            "not_fueling": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            },
+            "not_a_stop": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": null,
+            "max": null
+          }
+        },
+        "stable_90_and_motion": {
+          "labels": {
+            "fueled": {
+              "total": 1,
+              "prompted": 0,
+              "silent": 1
+            },
+            "not_fueling": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            },
+            "not_a_stop": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": null,
+            "max": null
+          }
+        },
+        "core_50": {
+          "labels": {
+            "fueled": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            },
+            "not_fueling": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            },
+            "not_a_stop": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        },
+        "core_65": {
+          "labels": {
+            "fueled": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            },
+            "not_fueling": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            },
+            "not_a_stop": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        },
+        "core_80": {
+          "labels": {
+            "fueled": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            },
+            "not_fueling": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            },
+            "not_a_stop": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        },
+        "core_50_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            },
+            "not_fueling": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            },
+            "not_a_stop": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        },
+        "core_65_or_walking": {
+          "labels": {
+            "fueled": {
+              "total": 1,
+              "prompted": 1,
+              "silent": 0
+            },
+            "not_fueling": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            },
+            "not_a_stop": {
+              "total": 0,
+              "prompted": 0,
+              "silent": 0
+            }
+          },
+          "additional_delay_seconds": {
+            "median": 0.0,
+            "max": 0.0
+          }
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "Small, self-selected participant labels; unconfirmed visits are not negatives.",
+    "Replays downsampled saved fixes at original station associations and current station coordinates.",
+    "No full callback stream, full catalog-selection replay, or unseen-stop recall claim.",
+    "Exploratory development comparison; geometry gates were added after inspecting first-stage outcomes. Neither period is an untouched holdout.",
+    "Motion history is available only at receipt; post-departure pedometer evidence cannot justify earlier prompts.",
+    "Confirmed non-fuel stops are positives for stop detection."
+  ],
+  "input_sha256": "ea349b1814ff480e4812fd60f5e4135b92f96ff3f93c12380b44de917cb81736"
+}
