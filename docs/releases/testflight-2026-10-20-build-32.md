@@ -30,10 +30,8 @@ prompt times with zero mismatches (22 prompts). Private replay inputs remain
 outside Git. Compiled synthetic tests cover deferral after the one-shot
 candidate, duration, uncertainty, stale/future/invalid inputs, duplicate fixes,
 moving fixes, departures, gaps, relaunch coverage, and durable notification
-claims. Diagnostic metadata round-trips through the existing backend validator.
+claims. Diagnostic metadata round-trips through the existing backend validator. All 41 related Node tests passed, along with the compiled native detector/store suite. No physical phone or road test was performed.
 
 ## Distribution
 
-Build preparation is in progress. Upload acceptance, processing, and tester
-availability will be recorded separately after verification. The public App
-Store submission is outside this task's scope.
+EAS reserved build 32, but the cloud build stopped before compilation because the notification-service extension has no signing credentials configured there. The existing local App Store provisioning profile includes the same distribution certificate already configured for the app and widget. Further interaction with EAS signing setup was blocked by automatic approval review (approval required with approvals disabled); user clarification is pending. No archive, Apple upload acceptance, or TestFlight availability is claimed. The public App Store submission was not changed.
