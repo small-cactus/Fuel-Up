@@ -34,4 +34,10 @@ claims. Diagnostic metadata round-trips through the existing backend validator. 
 
 ## Distribution
 
-EAS reserved build 32, but the cloud build stopped before compilation because the notification-service extension has no signing credentials configured there. The existing local App Store provisioning profile includes the same distribution certificate already configured for the app and widget. Further interaction with EAS signing setup was blocked by automatic approval review (approval required with approvals disabled); user clarification is pending. No archive, Apple upload acceptance, or TestFlight availability is claimed. The public App Store submission was not changed.
+EAS reserved build 32, but its cloud build stopped before compilation because the notification-service extension had no signing credentials configured there. Signing setup through EAS was blocked by automatic approval review. The release instead used the existing local Xcode signing setup; no EAS credential change was needed.
+
+The final local archive and App Store Connect export succeeded. Strict deep archive signature verification passed. The app and both extensions report 1.0.0 (32), and the compiled app contains `station-stop-v3-core65`. The first archive's notification-extension version mismatch was corrected before export or upload. Package metadata and SHA-256 are saved in `build-32/export-validation.json`.
+
+Local archive: `/tmp/FuelUp-TestFlight-32.xcarchive`; exported package: `/tmp/FuelUp-TestFlight-32-export/FuelUp.ipa`. Build, export, and upload logs are under `/tmp/fuelup-core65-20261020/`. To make room, older Fuel Up archives below build 22 were losslessly compressed in their existing Archives folders; every archived regular file was SHA-256 checked against its compressed copy before replacing the uncompressed directory. Their apps, metadata, and crash symbols remain preserved, and active build caches were retained.
+
+Apple accepted the upload on October 20, 2026 at 21:41:12 UTC. Safari shows build 32 processing. TestFlight group distribution remains pending processing. The exported app passed strict deep signature verification with production APNs and debugging disabled. The existing missing Hermes framework dSYM warning did not block upload. The public App Store submission remains unchanged.

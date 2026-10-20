@@ -1,0 +1,21 @@
+{
+  "versions": [
+    {
+      "CFBundleIdentifier": "com.anthonyh.fuelup",
+      "CFBundleShortVersionString": "1.0.0",
+      "CFBundleVersion": "32"
+    },
+    {
+      "CFBundleIdentifier": "com.anthonyh.fuelup.notifications",
+      "CFBundleShortVersionString": "1.0.0",
+      "CFBundleVersion": "32"
+    },
+    {
+      "CFBundleIdentifier": "com.anthonyh.fuelup.ExpoWidgetsTarget",
+      "CFBundleShortVersionString": "1.0.0",
+      "CFBundleVersion": "32"
+    }
+  ],
+  "policyInBinary": true,
+  "strictDeepSignature": true
+}
