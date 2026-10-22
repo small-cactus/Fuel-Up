@@ -102,7 +102,9 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   func setStations(_ values: [[String: Any]]) {
     var seen = Set<String>()
     let next = values.compactMap(ClusterLabStation.init).filter { seen.insert($0.id).inserted }
-    if next != latestStations { needsCameraFit = true }
+    // Background price/location refreshes update pins without taking the camera
+    // away from the user. Only the initial station presentation needs a fit.
+    if !hasPresentedStations && next != latestStations { needsCameraFit = true }
     latestStations = next
     guard probe == nil else { return }
     renderer.setStations(latestStations)
@@ -121,9 +123,10 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     latestOriginValue = value
     guard probe == nil else { return }
     if let origin, abs(origin.latitude - latitude) < 0.00001 && abs(origin.longitude - longitude) < 0.00001 { return }
+    let firstOrigin = origin == nil
     origin = .init(latitude: latitude, longitude: longitude)
-    needsCameraFit = true
-    if latestStations.isEmpty {
+    if !hasPresentedStations && !reportedMapReady { needsCameraFit = true }
+    if firstOrigin && latestStations.isEmpty && !reportedMapReady {
       setRegion(.init(center: origin!, span: .init(latitudeDelta: 0.06, longitudeDelta: 0.06)),
                 animated: revealed && !UIAccessibility.isReduceMotionEnabled)
     }
@@ -197,9 +200,10 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   }
 
   func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
-    // A delayed first GPS fix can arrive after stations. Keep it visible in
-    // overview, but never interrupt a user's pan, station focus, or camera flight.
-    if overview && !cameraMoving && probe == nil, let coordinate = framingLocation {
+    // The location dot moves independently after the initial presentation.
+    // Explicit station selection and Show All remain the camera controls.
+    if !hasPresentedStations && !reportedMapReady && overview && !cameraMoving && probe == nil,
+       let coordinate = framingLocation {
       let point = map.convert(coordinate, toPointTo: map)
       if !fitBounds.insetBy(dx: 16, dy: 16).contains(point) { needsCameraFit = true }
     }
@@ -248,7 +252,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   func setOverlayBottomInset(_ value: CGFloat) {
     guard value.isFinite, abs(value - overlayBottomInset) > 1 else { return }
     overlayBottomInset = max(0, value)
-    needsCameraFit = true
+    if !hasPresentedStations || overviewDestination != nil || probe != nil { needsCameraFit = true }
     refresh()
   }
 
@@ -453,6 +457,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     reportReadyIfNeeded()
     #if DEBUG
     launchProbe.sample(map: map, visible: ready, ready: reportedMapReady, count: latestStations.count, inset: overlayBottomInset)
+    launchProbe.verifyCameraIfRequested(view: self, ready: reportedMapReady, inset: overlayBottomInset)
     #endif
   }
 

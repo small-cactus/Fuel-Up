@@ -20,6 +20,8 @@ struct DrivingResearchVisitTimeline: View {
             DrivingResearchStationLogo(name:visit.station.name)
             VStack(alignment:.leading,spacing:4) {
               Text(visit.station.name).foregroundStyle(.primary)
+              Text(Date(timeIntervalSince1970:visit.startedAt).formatted(date:.abbreviated,time:.shortened))
+                .font(.caption).foregroundStyle(.secondary)
               Text(LocalizedStringKey(ResearchConfirmation.title(for:labels[visit.id]))).font(.caption).foregroundStyle(.secondary)
             }
             Spacer(minLength:8)
@@ -42,7 +44,7 @@ struct DrivingResearchVisitTimeline: View {
     }
   }
   private func event(_ title:String,at time:Double,top:Bool,bottom:Bool)->some View {
-    Text("\(title) · \(Date(timeIntervalSince1970:time).formatted(date:.omitted,time:.shortened))")
+    Text("\(title) · \(Date(timeIntervalSince1970:time).formatted(date:.abbreviated,time:.shortened))")
       .font(.caption).foregroundStyle(.secondary)
       .frame(maxWidth:.infinity,alignment:.leading)
       .padding(.vertical,8).padding(.leading,22)
