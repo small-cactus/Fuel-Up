@@ -470,7 +470,9 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   }
 
   private func startPendingProbe() {
-    guard active, window != nil, hasValidLayout, let token = pendingProbe, probe == nil else { return }
+    // Use the same readiness signal as the live map: the card must have
+    // reported its height before the first-frame fixture is fitted/recorded.
+    guard active, contentReady, window != nil, hasValidLayout, let token = pendingProbe, probe == nil else { return }
     pendingProbe = nil; lastProbe = token
     probe = ClusterLabProbe(view: self, token: token)
     probe?.start()

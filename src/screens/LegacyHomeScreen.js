@@ -32,7 +32,7 @@ import {
     INITIAL_STATIONS_FIT_MAX_ATTEMPTS,
     INITIAL_STATIONS_FIT_RETRY_DELAY_MS,
     LAUNCH_MOVEMENT_RECOVERY_TIMEOUT_MS,
-    ENABLE_CLUSTER_MERGE_TRANSITIONS,
+    ENABLE_CLUSTER_MERGE_TRANSITIONS as DEFAULT_CLUSTER_MERGE_TRANSITIONS,
     HOME_DARK_GLASS_TINT,
     TRACKING_IDLE_GRACE_MS,
     LIVE_TRACKING_DISTANCE_INTERVAL_METERS,
@@ -168,6 +168,9 @@ export default function HomeScreen() {
     const autoClusterProbeRequested = Boolean(resolvedAutoClusterProbeRequest) || Boolean(isClusterProbeSessionActive);
     const autoClusterProbeRequestKey = resolvedAutoClusterProbeRequest?.token || '';
     const autoClusterProbeRequestSource = resolvedAutoClusterProbeRequest?.source || '';
+    // The retained live probe must exercise the real merge renderer even when
+    // ordinary legacy screens use the single-marker fallback.
+    const ENABLE_CLUSTER_MERGE_TRANSITIONS = DEFAULT_CLUSTER_MERGE_TRANSITIONS || (__DEV__ && autoClusterProbeRequested);
     const debugClusterAnimations = __DEV__ && (
         Boolean(preferences.debugClusterAnimations) ||
         autoClusterProbeRequested
@@ -1806,6 +1809,8 @@ export default function HomeScreen() {
     handleLiveLocationUpdateRef.current = handleLiveLocationUpdate;
 
     const runLiveTrackingDriverTick = () => {
+        // The live probe owns the camera until it restores its starting view.
+        if (autoClusterProbeRequested) return;
         if (!isMountedRef.current || manualLocationOverride || hasUserRecentlyPannedRef.current ||
             activeIndexRef.current !== 0 || Date.now() - lastUserInteractionAtRef.current < TRACKING_IDLE_GRACE_MS) return;
         animateToTrackingOverview({ force: false });
@@ -2278,7 +2283,7 @@ export default function HomeScreen() {
             screenWidth: width,
             screenHeight: height,
         });
-    }, [stationQuotes, mapRegion, width, height]);
+    }, [stationQuotes, mapRegion, width, height, ENABLE_CLUSTER_MERGE_TRANSITIONS]);
     const rawSuppressedOverlapStationIds = useMemo(() => {
         if (ENABLE_CLUSTER_MERGE_TRANSITIONS) {
             return new Set();
@@ -2298,7 +2303,7 @@ export default function HomeScreen() {
             previousSuppressedStationIds,
             activeStationId
         );
-    }, [activeIndex, stationQuotes, stationQuotesSignature, suppressionRegion, width, height, hasLocationPermission, userLocationBubble]);
+    }, [activeIndex, stationQuotes, stationQuotesSignature, suppressionRegion, width, height, hasLocationPermission, userLocationBubble, ENABLE_CLUSTER_MERGE_TRANSITIONS]);
     useEffect(() => {
         if (ENABLE_CLUSTER_MERGE_TRANSITIONS) {
             setEffectiveSuppressedStationIds(currentValue => (
@@ -2447,6 +2452,8 @@ export default function HomeScreen() {
     ]);
 
     useEffect(() => {
+        // Do not race the probe sequence with startup fit retries.
+        if (autoClusterProbeRequested) return;
         const pendingHomeRefitRequest = pendingHomeRefitRequestRef.current;
         const currentHash = stationQuotesSignature;
         const isNewData = currentHash !== lastDataHashRef.current;
@@ -2552,7 +2559,7 @@ export default function HomeScreen() {
 
             runInitialFitAttempt();
         })();
-    }, [homeRefitRequestVersion, isFocused, isMapLoaded, stationQuotesSignature]);
+    }, [homeRefitRequestVersion, isFocused, isMapLoaded, stationQuotesSignature, autoClusterProbeRequested]);
 
     useEffect(() => {
         if (
@@ -2957,6 +2964,8 @@ export default function HomeScreen() {
     }, [isFocused]);
 
     useEffect(() => {
+        // Do not race the probe sequence with startup fit retries.
+        if (autoClusterProbeRequested) return;
         const pendingHomeRefitRequest = pendingHomeRefitRequestRef.current;
 
         if (
@@ -3050,7 +3059,7 @@ export default function HomeScreen() {
             });
             commitSettledHomeLayout(currentHash);
         })();
-    }, [fitMapToStations, homeRefitRequestVersion, isFocused, isMapLoaded, stationQuotes.length, stationQuotesSignature]);
+    }, [fitMapToStations, homeRefitRequestVersion, isFocused, isMapLoaded, stationQuotes.length, stationQuotesSignature, autoClusterProbeRequested]);
 
     const resolveCardIndexFromOffset = (offsetX) => {
         return resolveHomeCardIndexFromOffset({

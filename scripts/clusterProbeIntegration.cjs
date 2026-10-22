@@ -129,6 +129,8 @@ function triggerProbe(token) {
 async function waitForProbeReport(reportFilePath, token) {
     const deadline = Date.now() + PROBE_TIMEOUT_MS;
     const expectedTrigger = `automation:${token}`;
+    let lastTriggerAt = Date.now();
+    let acknowledged = false;
 
     while (Date.now() < deadline) {
         if (fs.existsSync(reportFilePath)) {
@@ -136,6 +138,7 @@ async function waitForProbeReport(reportFilePath, token) {
                 const parsedReport = JSON.parse(fs.readFileSync(reportFilePath, 'utf8'));
 
                 if (parsedReport.trigger === expectedTrigger) {
+                    acknowledged = true;
                     if (parsedReport.status === 'completed') {
                         return parsedReport;
                     }
@@ -158,6 +161,13 @@ async function waitForProbeReport(reportFilePath, token) {
             }
         }
 
+        // A cold Metro bundle can finish after iOS delivers the launch URL.
+        // Retry only until the app acknowledges this exact token; never restart
+        // a running/failed probe or extend its deadline.
+        if (!acknowledged && Date.now() - lastTriggerAt >= 10000) {
+            triggerProbe(token);
+            lastTriggerAt = Date.now();
+        }
         await sleep(POLL_INTERVAL_MS);
     }
 

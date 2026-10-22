@@ -1,0 +1,5 @@
+Research visits now show the date alongside the time, including arrival and departure entries.
+
+The Home map keeps your chosen position and zoom when your location or nearby prices update. Swipe to a different station card to focus that station as before; Show All still returns to the overview.
+
+Please check the map while moving as a passenger, and check visits from different days in Settings > Driving Research.

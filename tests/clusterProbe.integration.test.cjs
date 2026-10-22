@@ -239,7 +239,7 @@ function collectFailures(report, smoothness) {
 
 test('cluster probe integration enforces strict smoothness, continuity, and transition coverage', {
   timeout: 180000,
-}, async () => {
+}, async (t) => {
   const {
     report,
     reportFilePath,
@@ -256,15 +256,15 @@ test('cluster probe integration enforces strict smoothness, continuity, and tran
   const smoothness = computeSmoothness(report);
   const failures = collectFailures(report, smoothness);
 
-  test.diagnostic(`probe token=${token}`);
-  test.diagnostic(`probe report file=${reportFilePath}`);
-  test.diagnostic(`samples=${report.sampleCount} transitions=${report.transitionCount} maxFrameDelta=${formatMetric(report.maxFrameDelta, 3)}px`);
-  test.diagnostic(`visible p95=${formatMetric(smoothness.visibleP95, 3)}px p99=${formatMetric(smoothness.visibleP99, 3)}px max=${formatMetric(smoothness.maxVisibleDelta, 3)}px`);
-  test.diagnostic(`mode coverage: ${JSON.stringify(smoothness.modeCounts)}`);
-  test.diagnostic(`phase coverage: ${JSON.stringify(smoothness.phaseCounts)}`);
-  test.diagnostic(`transition coverage: ${JSON.stringify(smoothness.transitionCounts)}`);
-  test.diagnostic(`layer coverage: ${JSON.stringify(smoothness.visibleByLayer)}`);
-  test.diagnostic(`layer travel: ${JSON.stringify(smoothness.travelByLayer)}`);
+  t.diagnostic(`probe token=${token}`);
+  t.diagnostic(`probe report file=${reportFilePath}`);
+  t.diagnostic(`samples=${report.sampleCount} transitions=${report.transitionCount} maxFrameDelta=${formatMetric(report.maxFrameDelta, 3)}px`);
+  t.diagnostic(`visible p95=${formatMetric(smoothness.visibleP95, 3)}px p99=${formatMetric(smoothness.visibleP99, 3)}px max=${formatMetric(smoothness.maxVisibleDelta, 3)}px`);
+  t.diagnostic(`mode coverage: ${JSON.stringify(smoothness.modeCounts)}`);
+  t.diagnostic(`phase coverage: ${JSON.stringify(smoothness.phaseCounts)}`);
+  t.diagnostic(`transition coverage: ${JSON.stringify(smoothness.transitionCounts)}`);
+  t.diagnostic(`layer coverage: ${JSON.stringify(smoothness.visibleByLayer)}`);
+  t.diagnostic(`layer travel: ${JSON.stringify(smoothness.travelByLayer)}`);
 
   if (failures.length > 0) {
     assert.fail(`Cluster probe quality gates failed:\n${failures.map((failure, index) => `${index + 1}. ${failure}`).join('\n')}`);
