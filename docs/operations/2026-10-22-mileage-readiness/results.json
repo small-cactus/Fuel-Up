@@ -1,0 +1,691 @@
+{
+  "frozen_server_received_before": "2026-10-22T14:10:00Z",
+  "research_events": 184733,
+  "kinds": {
+    "geofence": 62942,
+    "motion": 53943,
+    "location": 44654,
+    "diagnostic": 20164,
+    "station_catalog": 858,
+    "visit_observation": 531,
+    "visit_departure": 510,
+    "visit_pedometer": 497,
+    "lifecycle": 221,
+    "visit_prompt": 143,
+    "system_visit": 100,
+    "visit_candidate": 62,
+    "visit_label": 43,
+    "permission": 23,
+    "visit_gap": 21,
+    "consent": 21
+  },
+  "comparison_to_oct13": {
+    "baseline_sha256": "ad95e49916beb7aa3a7cc46dfb44f496e61d8a4234f3988a403b7f6f938efcbb",
+    "confirmed_purchases_before": 8,
+    "confirmed_purchases_now": 18,
+    "purchase_intervals_before": 6,
+    "purchase_intervals_now": 15,
+    "repeat_purchase_accounts_before": 1,
+    "repeat_purchase_accounts_now": 2
+  },
+  "paired_distance_comparison": {
+    "intervals": 8,
+    "ledger_miles": 1319.0595688865687,
+    "legacy_saved_fix_miles": 1311.1783308287593,
+    "additional_captured_percent": 0.6010805603253067,
+    "interpretation": "Same receipt endpoints. Difference is not an accuracy score; neither measurement was validated against a vehicle odometer."
+  },
+  "methods": {
+    "ledger": "Differences at first visit-observation receipt; not backdated to arrival. Gaps may be parked time. Zero gaps do not prove odometer completeness.",
+    "legacy": "Unchanged October 13 replay, three prior cycles and 10 captured mile lead. Latest labels score outcomes; only then-known labels train forecasts.",
+    "forecast": "Prior three ledger cycle median, frozen at prior purchase answer. Exploratory, permits recorded gaps; not a production qualification.",
+    "target": "Confirmed purchases only. No measured low-fuel, full-tank, fuel quantity or vehicle-specific odometer ground truth."
+  },
+  "input_hashes": {
+    "visits.json": "875e5fd42c9f4593857e59e1ebcab79734892db9ec4a6c89d4884d75ff077cb2",
+    "locations-04.json": "931c409ef1725b782cbaf3954a44d4b2be510c9decdf2e16c1f8373ab90a0eae",
+    "locations-05.json": "6390eb04f49606d0c91751b6333451ec20ebc8b183b9e38fe17200f865f4aab8",
+    "locations-06.json": "3e253b76d19779d2ec1db316522dbf05985edde629fa504f6c876bb74e83b788",
+    "locations-07.json": "23ee1f9ae7390df14b62b4c830228533b38efb94484cd50d2fa3e5cdfb617c07",
+    "locations-08.json": "7f5f2fbd6d5bc76e8bcd5da0254f4aeb8b7146ee1f48c295888e96afafcd9c87",
+    "locations-09.json": "84667b3a68e0e1fba72af504ee1fe86199d33d085b807689b8f18fecd2022f9e",
+    "locations-10.json": "2436132ca209988792f4a0691421179cdc275fc91828c1ec73be6869e15fac4e",
+    "locations-11.json": "35b7f0869f4a1f6cebf546621b1257fd78e615a3e11d1747a20416f56da2d12e",
+    "locations-12.json": "792fed4f7f94fd06369c8d0a6c6028dffdba7da8a1f9dec85417dc352aec774f",
+    "locations-13.json": "30d2adee6024615711d9206bb7f2bc7f264fcec297594a5ef2ccd018ff4db3b2",
+    "locations-14.json": "c51260d87607007c68587b7a3b6c7ca3b29bc9ab405e2962ac9474509f0ea5e3",
+    "locations-15.json": "9d44b484fcd6eaea2ae974c038540f66f985d9ff20a87c256f0fbf54ab982e5d",
+    "locations-16.json": "59e0aff65d239175bfac081bed8101bb5592b4c17ff296e76a8395a2ad0f8eae",
+    "locations-17.json": "8a470f7df00c48058d431ad8fbff3371d72f0846fb07eb6bd6a1d8764845e96f",
+    "locations-18.json": "b63921411424188acc619abe947e52bc9ad47c46426411561ba528b669429ef9",
+    "locations-19.json": "ce366582064a0a7bc56ec809de2d296fe1b8cf81d507e1c2db8e8b9a81205785",
+    "locations-20.json": "865c2905fd071734eda3cd28556c47c8f5d10fe5e3635a2ef249b1a4ad71e226",
+    "locations-21.json": "25aa7c898e3cede548b7b624c3092510a6b68e26f5bbcfa0f88d7b15c38af871",
+    "locations-22.json": "b13649c1fd66f40b4094989c0c4d8653ef512631680befece353e645f0ff9918",
+    "kinds.json": "01fd124cab1406d996a1420ac5a5a523f8ee378ddbb21da5b3fa3a7ed61671e9"
+  },
+  "source_hashes": {
+    "auditMileageCoverage.py": "7225e849015a84c2d016ec4618dd10865c53741913ca7aa5e4c0ba82831587c1",
+    "backtestMileageOnly.py": "7f25772eadc265ba1803afec9c3c9abf2abd8b47ff2e64a3376091a61299847e",
+    "timingFeatures.py": "f5d8d56618f137811bb1e13d386b2365356e182a4520cc46be3ae9af6662ad26",
+    "mileageReadiness.py": "f70ca923810090ba1de40aacceb40fe9856ef0da2c1a427f904e22dab23af39c",
+    "backtestAnticipation.py": "f010f0a15d800ab3bee28dbc124851023599994fbc6f2c0edde8d64b6cce96b8"
+  },
+  "accounts": [
+    {
+      "account": 1,
+      "observed_visits": 329,
+      "confirmed_purchases": 14,
+      "labels": {
+        "fueled": 14,
+        "not_fueling": 7,
+        "not_a_stop": 12
+      },
+      "unanswered_observed_visits": 296,
+      "saved_locations": 24931,
+      "legacy_valid_locations": 24815,
+      "ledger_snapshots": 12562,
+      "ledger_epochs": 1,
+      "latest_ledger": {
+        "capturedMeters": 1819322.4614527477,
+        "acceptedSamples": 62829,
+        "gapCount": 114,
+        "unmeasuredGapSeconds": 522288.2447447777,
+        "collectionBoundaryCount": 0,
+        "completeOdometer": false
+      },
+      "comparable_ledger_cycles": 6,
+      "purchases_with_ledger": 7,
+      "purchases_answered_over_one_hour_later": 1,
+      "cycles_without_recorded_gaps_or_boundaries": 0,
+      "purchase_observation_delay_seconds": {
+        "n": 14,
+        "minimum": 0.06846141815185547,
+        "median": 0.09713542461395264,
+        "maximum": 0.15010786056518555
+      },
+      "purchase_answer_delay_minutes": {
+        "n": 14,
+        "minimum": 3.092778758207957,
+        "median": 4.583018565177918,
+        "maximum": 1594.592110021909
+      },
+      "cycles": [
+        {
+          "cycle": 1,
+          "legacy_captured_miles": 119.48453500871594,
+          "ledger": {
+            "status": "missing_endpoint",
+            "legacy_miles_between_receipts": 119.48453500871594
+          },
+          "unanswered_observed_visits_between": 20
+        },
+        {
+          "cycle": 2,
+          "legacy_captured_miles": 214.89632079964116,
+          "ledger": {
+            "status": "missing_endpoint",
+            "legacy_miles_between_receipts": 214.89632079964116
+          },
+          "unanswered_observed_visits_between": 39
+        },
+        {
+          "cycle": 3,
+          "legacy_captured_miles": 125.19441384249234,
+          "ledger": {
+            "status": "missing_endpoint",
+            "legacy_miles_between_receipts": 125.20582555456076
+          },
+          "unanswered_observed_visits_between": 24
+        },
+        {
+          "cycle": 4,
+          "legacy_captured_miles": 115.4259750609165,
+          "ledger": {
+            "status": "missing_endpoint",
+            "legacy_miles_between_receipts": 115.42678508890198
+          },
+          "unanswered_observed_visits_between": 13
+        },
+        {
+          "cycle": 5,
+          "legacy_captured_miles": 150.20143111183242,
+          "ledger": {
+            "status": "missing_endpoint",
+            "legacy_miles_between_receipts": 150.18920937177853
+          },
+          "unanswered_observed_visits_between": 23
+        },
+        {
+          "cycle": 6,
+          "legacy_captured_miles": 119.31847572320497,
+          "ledger": {
+            "status": "missing_endpoint",
+            "legacy_miles_between_receipts": 119.31847572320497
+          },
+          "unanswered_observed_visits_between": 30
+        },
+        {
+          "cycle": 7,
+          "legacy_captured_miles": 168.80037089279205,
+          "ledger": {
+            "status": "missing_endpoint",
+            "legacy_miles_between_receipts": 168.80037089279205
+          },
+          "unanswered_observed_visits_between": 22
+        },
+        {
+          "cycle": 8,
+          "legacy_captured_miles": 138.8858533583206,
+          "ledger": {
+            "status": "comparable_receipt_endpoints",
+            "captured_miles": 139.72468447026557,
+            "gap_hours": 22.695342550939984,
+            "gap_count": 16,
+            "collection_boundaries": 0,
+            "accepted_samples": 8948,
+            "complete_odometer": false,
+            "legacy_miles_between_receipts": 138.89954244618727
+          },
+          "unanswered_observed_visits_between": 14
+        },
+        {
+          "cycle": 9,
+          "legacy_captured_miles": 336.6997323463697,
+          "ledger": {
+            "status": "comparable_receipt_endpoints",
+            "captured_miles": 339.6046729385489,
+            "gap_hours": 29.893126798669496,
+            "gap_count": 42,
+            "collection_boundaries": 0,
+            "accepted_samples": 15390,
+            "complete_odometer": false,
+            "legacy_miles_between_receipts": 336.686043258503
+          },
+          "unanswered_observed_visits_between": 35
+        },
+        {
+          "cycle": 10,
+          "legacy_captured_miles": 174.4269361991084,
+          "ledger": {
+            "status": "comparable_receipt_endpoints",
+            "captured_miles": 175.00261271722889,
+            "gap_hours": 2.434391606781218,
+            "gap_count": 8,
+            "collection_boundaries": 0,
+            "accepted_samples": 6196,
+            "complete_odometer": false,
+            "legacy_miles_between_receipts": 174.4269361991084
+          },
+          "unanswered_observed_visits_between": 5
+        },
+        {
+          "cycle": 11,
+          "legacy_captured_miles": 125.6319707389034,
+          "ledger": {
+            "status": "comparable_receipt_endpoints",
+            "captured_miles": 125.99190562162256,
+            "gap_hours": 19.97718087348673,
+            "gap_count": 11,
+            "collection_boundaries": 0,
+            "accepted_samples": 8672,
+            "complete_odometer": false,
+            "legacy_miles_between_receipts": 125.6319707389034
+          },
+          "unanswered_observed_visits_between": 10
+        },
+        {
+          "cycle": 12,
+          "legacy_captured_miles": 103.15735997123853,
+          "ledger": {
+            "status": "comparable_receipt_endpoints",
+            "captured_miles": 103.82253232333272,
+            "gap_hours": 24.378105816907354,
+            "gap_count": 12,
+            "collection_boundaries": 0,
+            "accepted_samples": 5597,
+            "complete_odometer": false,
+            "legacy_miles_between_receipts": 103.15735997123853
+          },
+          "unanswered_observed_visits_between": 13
+        },
+        {
+          "cycle": 13,
+          "legacy_captured_miles": 124.00769014615923,
+          "ledger": {
+            "status": "comparable_receipt_endpoints",
+            "captured_miles": 124.94063253515105,
+            "gap_hours": 41.22589735580815,
+            "gap_count": 18,
+            "collection_boundaries": 0,
+            "accepted_samples": 8178,
+            "complete_odometer": false,
+            "legacy_miles_between_receipts": 124.00769014615923
+          },
+          "unanswered_observed_visits_between": 21
+        }
+      ],
+      "ledger_last_three_median_forecasts": [
+        {
+          "cycle": 11,
+          "known_prior_ledger_cycles": 3,
+          "predicted_miles": 175.00261271722889,
+          "observed_miles": 125.99190562162256,
+          "error_miles": 49.01070709560632
+        },
+        {
+          "cycle": 12,
+          "known_prior_ledger_cycles": 4,
+          "predicted_miles": 175.00261271722889,
+          "observed_miles": 103.82253232333272,
+          "error_miles": 71.18008039389616
+        },
+        {
+          "cycle": 13,
+          "known_prior_ledger_cycles": 5,
+          "predicted_miles": 125.99190562162256,
+          "observed_miles": 124.94063253515105,
+          "error_miles": 1.051273086471511
+        }
+      ],
+      "legacy_fixed_policy": {
+        "minimum_cycles": 3,
+        "lead_miles": 10,
+        "alerts": 7,
+        "within_0_to_20_captured_miles": 4,
+        "outside_window": 3,
+        "unknown_next_purchase": 0,
+        "observed_miles_until_next_confirmed_purchase": [
+          0.14946453440490745,
+          34.99692078813388,
+          4.100006231868492,
+          59.47016388399616,
+          207.7979476257765,
+          15.62427182343825,
+          8.326956445360288
+        ]
+      }
+    },
+    {
+      "account": 2,
+      "observed_visits": 67,
+      "confirmed_purchases": 3,
+      "labels": {
+        "fueled": 3,
+        "not_fueling": 3,
+        "not_a_stop": 1
+      },
+      "unanswered_observed_visits": 60,
+      "saved_locations": 9774,
+      "legacy_valid_locations": 9457,
+      "ledger_snapshots": 8979,
+      "ledger_epochs": 1,
+      "latest_ledger": {
+        "capturedMeters": 687648.8313378162,
+        "acceptedSamples": 40112,
+        "gapCount": 245,
+        "unmeasuredGapSeconds": 641447.4385685921,
+        "collectionBoundaryCount": 0,
+        "completeOdometer": false
+      },
+      "comparable_ledger_cycles": 2,
+      "purchases_with_ledger": 3,
+      "purchases_answered_over_one_hour_later": 2,
+      "cycles_without_recorded_gaps_or_boundaries": 1,
+      "purchase_observation_delay_seconds": {
+        "n": 3,
+        "minimum": 0.10024857521057129,
+        "median": 0.10414552688598633,
+        "maximum": 0.20395278930664062
+      },
+      "purchase_answer_delay_minutes": {
+        "n": 3,
+        "minimum": 6.886562724908193,
+        "median": 1064.8828383604684,
+        "maximum": 1129.0837564110757
+      },
+      "cycles": [
+        {
+          "cycle": 1,
+          "legacy_captured_miles": 272.3096373121828,
+          "ledger": {
+            "status": "comparable_receipt_endpoints",
+            "captured_miles": 273.8816277735936,
+            "gap_hours": 86.31135417885251,
+            "gap_count": 142,
+            "collection_boundaries": 0,
+            "accepted_samples": 30629,
+            "complete_odometer": false,
+            "legacy_miles_between_receipts": 272.3096373121828
+          },
+          "unanswered_observed_visits_between": 40
+        },
+        {
+          "cycle": 2,
+          "legacy_captured_miles": 36.05915075647662,
+          "ledger": {
+            "status": "comparable_receipt_endpoints",
+            "captured_miles": 36.090900506825506,
+            "gap_hours": 0.0,
+            "gap_count": 0,
+            "collection_boundaries": 0,
+            "accepted_samples": 1731,
+            "complete_odometer": false,
+            "legacy_miles_between_receipts": 36.05915075647662
+          },
+          "unanswered_observed_visits_between": 0
+        }
+      ],
+      "ledger_last_three_median_forecasts": [],
+      "legacy_fixed_policy": {
+        "minimum_cycles": 3,
+        "lead_miles": 10,
+        "alerts": 0,
+        "within_0_to_20_captured_miles": 0,
+        "outside_window": 0,
+        "unknown_next_purchase": 0,
+        "observed_miles_until_next_confirmed_purchase": []
+      }
+    },
+    {
+      "account": 3,
+      "observed_visits": 116,
+      "confirmed_purchases": 1,
+      "labels": {
+        "fueled": 1
+      },
+      "unanswered_observed_visits": 115,
+      "saved_locations": 8377,
+      "legacy_valid_locations": 7845,
+      "ledger_snapshots": 5285,
+      "ledger_epochs": 1,
+      "latest_ledger": {
+        "capturedMeters": 730099.757592514,
+        "acceptedSamples": 25089,
+        "gapCount": 191,
+        "unmeasuredGapSeconds": 667584.2632322311,
+        "collectionBoundaryCount": 0,
+        "completeOdometer": false
+      },
+      "comparable_ledger_cycles": 0,
+      "purchases_with_ledger": 0,
+      "purchases_answered_over_one_hour_later": 0,
+      "cycles_without_recorded_gaps_or_boundaries": 0,
+      "purchase_observation_delay_seconds": {
+        "n": 1,
+        "minimum": 0.08648371696472168,
+        "median": 0.08648371696472168,
+        "maximum": 0.08648371696472168
+      },
+      "purchase_answer_delay_minutes": {
+        "n": 1,
+        "minimum": 3.4597549120585125,
+        "median": 3.4597549120585125,
+        "maximum": 3.4597549120585125
+      },
+      "cycles": [],
+      "ledger_last_three_median_forecasts": [],
+      "legacy_fixed_policy": {
+        "minimum_cycles": 3,
+        "lead_miles": 10,
+        "alerts": 0,
+        "within_0_to_20_captured_miles": 0,
+        "outside_window": 0,
+        "unknown_next_purchase": 0,
+        "observed_miles_until_next_confirmed_purchase": []
+      }
+    },
+    {
+      "account": 4,
+      "observed_visits": 19,
+      "confirmed_purchases": 0,
+      "labels": {},
+      "unanswered_observed_visits": 19,
+      "saved_locations": 1564,
+      "legacy_valid_locations": 1357,
+      "ledger_snapshots": 434,
+      "ledger_epochs": 1,
+      "latest_ledger": {
+        "capturedMeters": 98981.95447089827,
+        "acceptedSamples": 1906,
+        "gapCount": 7,
+        "unmeasuredGapSeconds": 10686.424254894257,
+        "collectionBoundaryCount": 0,
+        "completeOdometer": false
+      },
+      "comparable_ledger_cycles": 0,
+      "purchases_with_ledger": 0,
+      "purchases_answered_over_one_hour_later": 0,
+      "cycles_without_recorded_gaps_or_boundaries": 0,
+      "purchase_observation_delay_seconds": {
+        "n": 0
+      },
+      "purchase_answer_delay_minutes": {
+        "n": 0
+      },
+      "cycles": [],
+      "ledger_last_three_median_forecasts": [],
+      "legacy_fixed_policy": {
+        "minimum_cycles": 3,
+        "lead_miles": 10,
+        "alerts": 0,
+        "within_0_to_20_captured_miles": 0,
+        "outside_window": 0,
+        "unknown_next_purchase": 0,
+        "observed_miles_until_next_confirmed_purchase": []
+      }
+    },
+    {
+      "account": 5,
+      "observed_visits": 0,
+      "confirmed_purchases": 0,
+      "labels": {},
+      "unanswered_observed_visits": 0,
+      "saved_locations": 2,
+      "legacy_valid_locations": 0,
+      "ledger_snapshots": 0,
+      "ledger_epochs": 0,
+      "latest_ledger": null,
+      "comparable_ledger_cycles": 0,
+      "purchases_with_ledger": 0,
+      "purchases_answered_over_one_hour_later": 0,
+      "cycles_without_recorded_gaps_or_boundaries": 0,
+      "purchase_observation_delay_seconds": {
+        "n": 0
+      },
+      "purchase_answer_delay_minutes": {
+        "n": 0
+      },
+      "cycles": [],
+      "ledger_last_three_median_forecasts": [],
+      "legacy_fixed_policy": {
+        "minimum_cycles": 3,
+        "lead_miles": 10,
+        "alerts": 0,
+        "within_0_to_20_captured_miles": 0,
+        "outside_window": 0,
+        "unknown_next_purchase": 0,
+        "observed_miles_until_next_confirmed_purchase": []
+      }
+    },
+    {
+      "account": 6,
+      "observed_visits": 0,
+      "confirmed_purchases": 0,
+      "labels": {},
+      "unanswered_observed_visits": 0,
+      "saved_locations": 2,
+      "legacy_valid_locations": 0,
+      "ledger_snapshots": 0,
+      "ledger_epochs": 0,
+      "latest_ledger": null,
+      "comparable_ledger_cycles": 0,
+      "purchases_with_ledger": 0,
+      "purchases_answered_over_one_hour_later": 0,
+      "cycles_without_recorded_gaps_or_boundaries": 0,
+      "purchase_observation_delay_seconds": {
+        "n": 0
+      },
+      "purchase_answer_delay_minutes": {
+        "n": 0
+      },
+      "cycles": [],
+      "ledger_last_three_median_forecasts": [],
+      "legacy_fixed_policy": {
+        "minimum_cycles": 3,
+        "lead_miles": 10,
+        "alerts": 0,
+        "within_0_to_20_captured_miles": 0,
+        "outside_window": 0,
+        "unknown_next_purchase": 0,
+        "observed_miles_until_next_confirmed_purchase": []
+      }
+    },
+    {
+      "account": 7,
+      "observed_visits": 0,
+      "confirmed_purchases": 0,
+      "labels": {},
+      "unanswered_observed_visits": 0,
+      "saved_locations": 1,
+      "legacy_valid_locations": 0,
+      "ledger_snapshots": 0,
+      "ledger_epochs": 0,
+      "latest_ledger": null,
+      "comparable_ledger_cycles": 0,
+      "purchases_with_ledger": 0,
+      "purchases_answered_over_one_hour_later": 0,
+      "cycles_without_recorded_gaps_or_boundaries": 0,
+      "purchase_observation_delay_seconds": {
+        "n": 0
+      },
+      "purchase_answer_delay_minutes": {
+        "n": 0
+      },
+      "cycles": [],
+      "ledger_last_three_median_forecasts": [],
+      "legacy_fixed_policy": {
+        "minimum_cycles": 3,
+        "lead_miles": 10,
+        "alerts": 0,
+        "within_0_to_20_captured_miles": 0,
+        "outside_window": 0,
+        "unknown_next_purchase": 0,
+        "observed_miles_until_next_confirmed_purchase": []
+      }
+    },
+    {
+      "account": 8,
+      "observed_visits": 0,
+      "confirmed_purchases": 0,
+      "labels": {},
+      "unanswered_observed_visits": 0,
+      "saved_locations": 1,
+      "legacy_valid_locations": 0,
+      "ledger_snapshots": 0,
+      "ledger_epochs": 0,
+      "latest_ledger": null,
+      "comparable_ledger_cycles": 0,
+      "purchases_with_ledger": 0,
+      "purchases_answered_over_one_hour_later": 0,
+      "cycles_without_recorded_gaps_or_boundaries": 0,
+      "purchase_observation_delay_seconds": {
+        "n": 0
+      },
+      "purchase_answer_delay_minutes": {
+        "n": 0
+      },
+      "cycles": [],
+      "ledger_last_three_median_forecasts": [],
+      "legacy_fixed_policy": {
+        "minimum_cycles": 3,
+        "lead_miles": 10,
+        "alerts": 0,
+        "within_0_to_20_captured_miles": 0,
+        "outside_window": 0,
+        "unknown_next_purchase": 0,
+        "observed_miles_until_next_confirmed_purchase": []
+      }
+    },
+    {
+      "account": 9,
+      "observed_visits": 0,
+      "confirmed_purchases": 0,
+      "labels": {},
+      "unanswered_observed_visits": 0,
+      "saved_locations": 1,
+      "legacy_valid_locations": 0,
+      "ledger_snapshots": 1,
+      "ledger_epochs": 1,
+      "latest_ledger": {
+        "capturedMeters": 0,
+        "acceptedSamples": 0,
+        "gapCount": 0,
+        "unmeasuredGapSeconds": 0,
+        "collectionBoundaryCount": 0,
+        "completeOdometer": false
+      },
+      "comparable_ledger_cycles": 0,
+      "purchases_with_ledger": 0,
+      "purchases_answered_over_one_hour_later": 0,
+      "cycles_without_recorded_gaps_or_boundaries": 0,
+      "purchase_observation_delay_seconds": {
+        "n": 0
+      },
+      "purchase_answer_delay_minutes": {
+        "n": 0
+      },
+      "cycles": [],
+      "ledger_last_three_median_forecasts": [],
+      "legacy_fixed_policy": {
+        "minimum_cycles": 3,
+        "lead_miles": 10,
+        "alerts": 0,
+        "within_0_to_20_captured_miles": 0,
+        "outside_window": 0,
+        "unknown_next_purchase": 0,
+        "observed_miles_until_next_confirmed_purchase": []
+      }
+    },
+    {
+      "account": 10,
+      "observed_visits": 0,
+      "confirmed_purchases": 0,
+      "labels": {},
+      "unanswered_observed_visits": 0,
+      "saved_locations": 1,
+      "legacy_valid_locations": 0,
+      "ledger_snapshots": 1,
+      "ledger_epochs": 1,
+      "latest_ledger": {
+        "capturedMeters": 0,
+        "acceptedSamples": 0,
+        "gapCount": 0,
+        "unmeasuredGapSeconds": 0,
+        "collectionBoundaryCount": 0,
+        "completeOdometer": false
+      },
+      "comparable_ledger_cycles": 0,
+      "purchases_with_ledger": 0,
+      "purchases_answered_over_one_hour_later": 0,
+      "cycles_without_recorded_gaps_or_boundaries": 0,
+      "purchase_observation_delay_seconds": {
+        "n": 0
+      },
+      "purchase_answer_delay_minutes": {
+        "n": 0
+      },
+      "cycles": [],
+      "ledger_last_three_median_forecasts": [],
+      "legacy_fixed_policy": {
+        "minimum_cycles": 3,
+        "lead_miles": 10,
+        "alerts": 0,
+        "within_0_to_20_captured_miles": 0,
+        "outside_window": 0,
+        "unknown_next_purchase": 0,
+        "observed_miles_until_next_confirmed_purchase": []
+      }
+    }
+  ]
+}
