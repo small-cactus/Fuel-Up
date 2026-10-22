@@ -1,0 +1,14 @@
+{
+  "verifiedAt": "2026-10-22T23:11:00Z",
+  "version": "1.0.0",
+  "build": "33",
+  "status": "Testing",
+  "groups": [
+    {"name": "Fuel Up Internal Testing", "testers": 1},
+    {"name": "Fuel Up External Testing", "testers": 6}
+  ],
+  "testingNotesSaved": true,
+  "externalSubmissionCompleted": true,
+  "testerInstallationVerified": false,
+  "verificationMethod": "App Store Connect in Safari"
+}

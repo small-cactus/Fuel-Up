@@ -23,6 +23,6 @@ The retained legacy React Native cluster gate is NOT passing. Repairs to debug a
 
 Version 1.0.0 build 33 archived and exported successfully. The exported app, widget, and notification extension all have build 33 and valid signatures, debug entitlement disabled; app APNs entitlement is production. IPA SHA-256 and bundle validation are in export-validation.json.
 
-Apple accepted the upload on October 22, 2026 at 18:29 EDT and reported that the package is processing. Safari independently showed build 33 in Build Uploads as Processing. Tester availability is pending verification. Upload emitted a non-blocking missing Hermes dSYM warning, so Hermes crash symbolication may be incomplete.
+Apple accepted the upload on October 22, 2026 at 18:29 EDT. At the subsequent 23:08 UTC monitoring check, processing had completed. Testing notes were saved, the existing external group was added, and Submit for Review completed. App Store Connect then showed build 33 as Testing with both Fuel Up Internal Testing (1 tester) and Fuel Up External Testing (6 testers). Tester installation has not been independently verified. Upload emitted a non-blocking missing Hermes dSYM warning, so Hermes crash symbolication may be incomplete.
 
 Local archive: /tmp/FuelUp-TestFlight-33.xcarchive. Export: /tmp/FuelUp-TestFlight-33-export/FuelUp.ipa. Detailed local logs: /tmp/fuelup-map-date-20261022/.
