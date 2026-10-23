@@ -454,7 +454,9 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     animationMoving = renderer.render(map: map, deltaTime: elapsed)
     #if DEBUG
     performanceProbe.record(time: time, reconcile: reconcileEnd - performanceStart,
-                            render: CACurrentMediaTime() - reconcileEnd)
+                            render: CACurrentMediaTime() - reconcileEnd,
+                            projectionRequests: renderer.projectionRequests,
+                            projectionConversions: renderer.projectionConversions)
     #endif
     updatePresentation()
     probe?.recordAnchor(mapAnchor.sample(map: map))

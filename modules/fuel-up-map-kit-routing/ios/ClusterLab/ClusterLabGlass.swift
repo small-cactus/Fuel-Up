@@ -61,6 +61,8 @@ final class ClusterLabPill {
   private let countLabel = UILabel()
   private let icon = UIImageView(image: UIImage(systemName: "fuelpump.fill"))
   private var lastScale: CGFloat = 1
+  private var lastWidth: CGFloat?
+  private var lastPriceMix: CGFloat?
   private var lastCount = 0
   private var marketDescription = "Price comparison unavailable"
   private var lastCheapestPrice: Double?
@@ -94,13 +96,57 @@ final class ClusterLabPill {
     for label in [priceLabel, countLabel] {
       label.font = .systemFont(ofSize: 15, weight: .bold)
       label.textAlignment = .center
+      // Keep the dynamic UIColor itself; UIKit resolves light/dark changes.
+      label.textColor = .label
       content.addSubview(label)
     }
     content.addSubview(icon)
     icon.contentMode = .scaleAspectFit
+    icon.tintColor = .label
     view.isAccessibilityElement = true
     view.accessibilityLabel = name
   }
+
+  #if DEBUG
+  static func verifyPresentationUpdates() -> Bool {
+    let pill = ClusterLabPill(stationID: "presentation", price: 3.25, name: "Station")
+    pill.render(center: .zero, width: 84, priceMix: 1, count: 1, market: nil, dark: false)
+    let labelFrame = pill.priceLabel.frame
+    let value = pill.view.accessibilityValue
+    pill.render(center: CGPoint(x: 70, y: 90), width: 84, priceMix: 1, count: 1, market: nil, dark: false)
+    guard pill.view.center == CGPoint(x: 70, y: 90), pill.priceLabel.frame == labelFrame,
+          pill.view.accessibilityValue == value, pill.priceLabel.alpha == 1,
+          pill.countLabel.alpha == 0 else { return false }
+    pill.render(center: .zero, width: 44, priceMix: 0.25, count: 4, market: nil, dark: false, scale: 1.2)
+    guard pill.view.bounds.size == CGSize(width: 44 * 1.2, height: 32 * 1.2),
+          pill.countLabel.frame == pill.view.bounds, pill.priceLabel.alpha == 0.25,
+          pill.countLabel.alpha == 0.75, pill.view.accessibilityValue == "+4" else { return false }
+    pill.render(center: .zero, width: 84, priceMix: 0.25, count: 4, market: nil, dark: false, scale: 1.2)
+    guard pill.view.bounds.width == 84 * 1.2, pill.icon.frame.width == 14 * 1.2 else { return false }
+    pill.render(center: .zero, width: 84, priceMix: 1, count: 1, market: nil, dark: false)
+    guard pill.priceLabel.frame == labelFrame, pill.icon.frame == CGRect(x: 9, y: 9, width: 14, height: 14),
+          pill.icon.alpha == 1, pill.countLabel.font.pointSize == 15 else { return false }
+    pill.adoptCluster(stationID: "updated", price: 4.75, name: "Updated", highlightE85: true)
+    pill.render(center: .zero, width: 84, priceMix: 1, count: 1, market: nil, dark: true)
+    guard pill.priceLabel.frame == labelFrame, pill.priceLabel.text == "$4.75",
+          pill.view.accessibilityLabel == "Updated",
+          pill.view.accessibilityValue?.contains("E85 available") == true,
+          pill.priceLabel.font.pointSize == 15, pill.view.alpha == 1 else { return false }
+    let recommendation = LabMarketAssessment(median: 4, peerCount: 3, cheapestPrice: 3,
+      cheapestStationID: "other", recommendedStationID: "updated", score: 1)
+    pill.render(center: .zero, width: 84, priceMix: 1, count: 1, market: recommendation, dark: true)
+    guard pill.view.accessibilityValue?.contains("Recommended station") == true else { return false }
+    // UIKit resolves the retained dynamic color for both trait environments.
+    for style in [UIUserInterfaceStyle.light, .dark] {
+      let traits = UITraitCollection(userInterfaceStyle: style)
+      let expected = UIColor.label.resolvedColor(with: traits)
+      guard pill.priceLabel.textColor.resolvedColor(with: traits).isEqual(expected),
+            pill.countLabel.textColor.resolvedColor(with: traits).isEqual(expected),
+            pill.icon.tintColor.resolvedColor(with: traits).isEqual(expected) else { return false }
+    }
+    return true
+  }
+  #endif
 
   func matches(_ station: ClusterLabStation) -> Bool {
     stationID == station.id && price == station.price && highlightE85 == station.highlightE85 &&
@@ -162,31 +208,38 @@ final class ClusterLabPill {
 
   func render(center: CGPoint, width: CGFloat, priceMix: CGFloat, count: Int, market: LabMarketAssessment?, dark: Bool, scale: CGFloat = 1) {
     if let market { applyMarket(market) }
-    view.bounds = CGRect(x: 0, y: 0, width: width * scale, height: 32 * scale)
-    view.center = center
+    let layoutChanged = lastWidth != width || lastScale != scale
+    if layoutChanged {
+      view.bounds = CGRect(x: 0, y: 0, width: width * scale, height: 32 * scale)
+    }
+    if view.center != center { view.center = center }
     if lastCount != count {
       countLabel.text = "+\(max(1, count))"
       lastCount = count
     }
-    // Onboarding's adaptive foreground stays readable over these lighter tints.
-    let color: UIColor = .label
-    priceLabel.textColor = color
-    icon.tintColor = color
-    countLabel.textColor = color
-    // Only text fades. The effect and every glass ancestor stay at alpha 1.
-    priceLabel.alpha = priceMix
-    icon.alpha = priceMix
-    countLabel.alpha = 1 - priceMix
+    // Only text fades. Unchanged assignments still invoke UIKit work, so a
+    // camera-only movement updates position without restyling the native pill.
+    // The effect and every glass ancestor stay at alpha 1.
+    if lastPriceMix != priceMix {
+      lastPriceMix = priceMix
+      priceLabel.alpha = priceMix
+      icon.alpha = priceMix
+      countLabel.alpha = 1 - priceMix
+    }
     if scale != lastScale {
       lastScale = scale
       priceLabel.font = .systemFont(ofSize: 15 * scale, weight: .bold)
       countLabel.font = .systemFont(ofSize: 15 * scale, weight: .bold)
       if !(view is UIVisualEffectView) { view.layer.cornerRadius = 16 * scale }
     }
-    icon.frame = CGRect(x: (width - 66) / 2 * scale, y: 9 * scale, width: 14 * scale, height: 14 * scale)
-    priceLabel.frame = CGRect(x: ((width - 66) / 2 + 16) * scale, y: 0, width: 50 * scale, height: 32 * scale)
-    countLabel.frame = view.bounds
-    view.accessibilityValue = priceMix > 0.5 ? "\(priceLabel.text ?? ""), \(highlightE85 ? "E85 available, " : "")\(marketDescription)" : countLabel.text
+    if layoutChanged {
+      lastWidth = width
+      icon.frame = CGRect(x: (width - 66) / 2 * scale, y: 9 * scale, width: 14 * scale, height: 14 * scale)
+      priceLabel.frame = CGRect(x: ((width - 66) / 2 + 16) * scale, y: 0, width: 50 * scale, height: 32 * scale)
+      countLabel.frame = view.bounds
+    }
+    let accessibilityValue = priceMix > 0.5 ? "\(priceLabel.text ?? ""), \(highlightE85 ? "E85 available, " : "")\(marketDescription)" : countLabel.text
+    if view.accessibilityValue != accessibilityValue { view.accessibilityValue = accessibilityValue }
   }
 }
 

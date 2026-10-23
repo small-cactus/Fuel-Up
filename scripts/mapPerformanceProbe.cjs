@@ -24,6 +24,7 @@ function summarize(report) {
   if (report.baseline !== true && (report.reuseChecksPassed !== true || report.liveCacheValid !== true)) {
     throw new Error('Native effect reuse invariants failed');
   }
+  if (report.baseline !== true && report.presentationChecksPassed !== true) throw new Error('Native pill presentation checks failed');
   if (report.stages.length !== 13 || !report.frames.length) throw new Error('Incomplete performance workload');
   return [0, 1, 2].map(cycle => {
     const frames = report.frames.filter(frame => Math.floor(frame.phase / 4) === cycle);
@@ -53,7 +54,7 @@ function summarize(report) {
         if (process.argv[2]) writeFileSync(process.argv[2], JSON.stringify(report, null, 2) + '\n');
         console.log(JSON.stringify({
           stationCount: report.stationCount, reuseChecksPassed: report.reuseChecksPassed,
-          liveCacheValid: report.liveCacheValid, summary: report.summary,
+          liveCacheValid: report.liveCacheValid, presentationChecksPassed: report.presentationChecksPassed, summary: report.summary,
         }, null, 2));
         return;
       }

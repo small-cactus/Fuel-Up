@@ -1,0 +1,45 @@
+TAP version 13
+# Subtest: clearFuelPriceCache prevents an in-flight DB read from repopulating cache
+ok 1 - clearFuelPriceCache prevents an in-flight DB read from repopulating cache
+  ---
+  duration_ms: 15.297792
+  ...
+# Subtest: empty nationwide DB results clear an old winner without fetching the provider
+ok 2 - empty nationwide DB results clear an old winner without fetching the provider
+  ---
+  duration_ms: 1.371167
+  ...
+# Subtest: refresh persists the exact reported price locally, without prediction or history writes
+ok 3 - refresh persists the exact reported price locally, without prediction or history writes
+  ---
+  duration_ms: 0.845875
+  ...
+# Subtest: uniform multi-grade prices exclude unsupported higher grades
+ok 4 - uniform multi-grade prices exclude unsupported higher grades
+  ---
+  duration_ms: 0.519041
+  ...
+# Subtest: duplicate higher grades stay suppressed in the local cache
+ok 5 - duplicate higher grades stay suppressed in the local cache
+  ---
+  duration_ms: 0.906958
+  ...
+# Subtest: a requested duplicate higher grade does not reappear via the client cache
+ok 6 - a requested duplicate higher grade does not reappear via the client cache
+  ---
+  duration_ms: 0.819333
+  ...
+# Subtest: Trends can join the exact Home station request without another database read
+ok 7 - Trends can join the exact Home station request without another database read
+  ---
+  duration_ms: 0.796959
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 78.988208

@@ -1,0 +1,189 @@
+{
+  "baselineCommit": "6194ee59143f01464dcd0c411dc40db88dbd529b",
+  "before": [
+    [
+      {
+        "cycle": 0,
+        "frames": 187,
+        "cpuMedianMs": 2.1150833345018327,
+        "cpuP95Ms": 8.192291667000973,
+        "cpuMaxMs": 17.68433333381836,
+        "intervalP95Ms": 16.666666668243124,
+        "intervalsOver33ms": 0,
+        "newContainers": 3,
+        "newPills": 46
+      },
+      {
+        "cycle": 1,
+        "frames": 193,
+        "cpuMedianMs": 2.576999999291729,
+        "cpuP95Ms": 7.831333334252122,
+        "cpuMaxMs": 17.295166666372097,
+        "intervalP95Ms": 16.666666668243124,
+        "intervalsOver33ms": 0,
+        "newContainers": 0,
+        "newPills": 20
+      },
+      {
+        "cycle": 2,
+        "frames": 192,
+        "cpuMedianMs": 2.463416667524143,
+        "cpuP95Ms": 7.529541666372097,
+        "cpuMaxMs": 17.73312499972235,
+        "intervalP95Ms": 16.666666668243124,
+        "intervalsOver33ms": 0,
+        "newContainers": 1,
+        "newPills": 21
+      }
+    ],
+    [
+      {
+        "cycle": 0,
+        "frames": 186,
+        "cpuMedianMs": 2.5574999999662396,
+        "cpuP95Ms": 7.972708332090406,
+        "cpuMaxMs": 17.763750000085565,
+        "intervalP95Ms": 16.666666668243124,
+        "intervalsOver33ms": 0,
+        "newContainers": 3,
+        "newPills": 45
+      },
+      {
+        "cycle": 1,
+        "frames": 186,
+        "cpuMedianMs": 2.7498333329276647,
+        "cpuP95Ms": 7.76183333255176,
+        "cpuMaxMs": 17.69429166597547,
+        "intervalP95Ms": 16.666666668243124,
+        "intervalsOver33ms": 0,
+        "newContainers": 0,
+        "newPills": 20
+      },
+      {
+        "cycle": 2,
+        "frames": 183,
+        "cpuMedianMs": 2.6297083331883186,
+        "cpuP95Ms": 8.011958334463998,
+        "cpuMaxMs": 17.69566666735045,
+        "intervalP95Ms": 16.666666668243124,
+        "intervalsOver33ms": 0,
+        "newContainers": 0,
+        "newPills": 20
+      }
+    ]
+  ],
+  "after": [
+    [
+      {
+        "cycle": 0,
+        "frames": 189,
+        "cpuMedianMs": 2.13274999987334,
+        "cpuP95Ms": 7.260791668159072,
+        "cpuMaxMs": 16.815999999380438,
+        "intervalP95Ms": 16.666666668243124,
+        "intervalsOver33ms": 0,
+        "newContainers": 4,
+        "newPills": 47
+      },
+      {
+        "cycle": 1,
+        "frames": 192,
+        "cpuMedianMs": 2.2854583330627065,
+        "cpuP95Ms": 6.950791666895384,
+        "cpuMaxMs": 17.80404166674998,
+        "intervalP95Ms": 16.666666668243124,
+        "intervalsOver33ms": 0,
+        "newContainers": 0,
+        "newPills": 18
+      },
+      {
+        "cycle": 2,
+        "frames": 191,
+        "cpuMedianMs": 1.8225000003440073,
+        "cpuP95Ms": 7.3374999992665835,
+        "cpuMaxMs": 17.810708333854564,
+        "intervalP95Ms": 16.666666668243124,
+        "intervalsOver33ms": 0,
+        "newContainers": 0,
+        "newPills": 20
+      }
+    ],
+    [
+      {
+        "cycle": 0,
+        "frames": 188,
+        "cpuMedianMs": 2.056583332887385,
+        "cpuP95Ms": 7.639791665496887,
+        "cpuMaxMs": 17.866541666080593,
+        "intervalP95Ms": 16.666666668243124,
+        "intervalsOver33ms": 0,
+        "newContainers": 3,
+        "newPills": 45
+      },
+      {
+        "cycle": 1,
+        "frames": 194,
+        "cpuMedianMs": 1.7357083343085833,
+        "cpuP95Ms": 7.69929166744987,
+        "cpuMaxMs": 16.836958333442453,
+        "intervalP95Ms": 16.666666668243124,
+        "intervalsOver33ms": 0,
+        "newContainers": 0,
+        "newPills": 21
+      },
+      {
+        "cycle": 2,
+        "frames": 190,
+        "cpuMedianMs": 2.3689999998168787,
+        "cpuP95Ms": 7.057416667521466,
+        "cpuMaxMs": 16.9810833340307,
+        "intervalP95Ms": 16.666666668243124,
+        "intervalsOver33ms": 0,
+        "newContainers": 0,
+        "newPills": 20
+      }
+    ]
+  ],
+  "first": {
+    "before": {
+      "cpuMedianMs": 2.336291667234036,
+      "cpuP95Ms": 8.08249999954569,
+      "cpuMaxMs": 17.724041666951962,
+      "newPills": 45.5,
+      "newContainers": 3
+    },
+    "after": {
+      "cpuMedianMs": 2.0946666663803626,
+      "cpuP95Ms": 7.4502916668279795,
+      "cpuMaxMs": 17.341270832730515,
+      "newPills": 46,
+      "newContainers": 3.5
+    }
+  },
+  "repeat": {
+    "before": {
+      "cpuMedianMs": 2.604989583232964,
+      "cpuP95Ms": 7.783666666909994,
+      "cpuMaxMs": 17.604562499855092,
+      "newPills": 20.25,
+      "newContainers": 0.25
+    },
+    "after": {
+      "cpuMedianMs": 2.053166666883044,
+      "cpuP95Ms": 7.261250000283326,
+      "cpuMaxMs": 17.358197917019424,
+      "newPills": 19.75,
+      "newContainers": 0
+    }
+  },
+  "projections": {
+    "requested": 169503,
+    "converted": 24034
+  },
+  "fixtures": [
+    "16c3db8f05670b7b43f62994c9b06921817373527089b768d7bfce359338fdc6",
+    "16c3db8f05670b7b43f62994c9b06921817373527089b768d7bfce359338fdc6",
+    "16c3db8f05670b7b43f62994c9b06921817373527089b768d7bfce359338fdc6",
+    "16c3db8f05670b7b43f62994c9b06921817373527089b768d7bfce359338fdc6"
+  ]
+}

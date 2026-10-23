@@ -125,10 +125,10 @@ final class ClusterLabPerformanceProbe {
   private var lastTime: Double?
   private(set) var ownsStations = false
 
-  func record(time: Double, reconcile: Double, render: Double) {
+  func record(time: Double, reconcile: Double, render: Double, projectionRequests: Int, projectionConversions: Int) {
     guard token != nil, phase >= 0, phase < 12, frames.count < 5000 else { return }
     frames.append(["phase": phase, "reconcileMs": reconcile * 1000,
-      "renderMs": render * 1000, "intervalMs": lastTime.map { (time - $0) * 1000 } ?? 0])
+      "renderMs": render * 1000, "projectionRequests": projectionRequests, "projectionConversions": projectionConversions, "intervalMs": lastTime.map { (time - $0) * 1000 } ?? 0])
     lastTime = time
   }
 
@@ -170,6 +170,7 @@ final class ClusterLabPerformanceProbe {
         let report: [String: Any] = ["token": token!, "stationCount": view.renderer.stations.count,
           "fixture": fixture, "frames": frames, "stages": stages,
           "reuseChecksPassed": ClusterLabGlassGroups.verifyReuse() && ClusterLabRenderer.verifyPillReuse(),
+          "presentationChecksPassed": ClusterLabPill.verifyPresentationUpdates(),
           "liveCacheValid": view.renderer.validIdlePills]
         if let data = try? JSONSerialization.data(withJSONObject: report, options: [.sortedKeys]),
            let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {

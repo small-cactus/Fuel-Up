@@ -1,0 +1,3 @@
+Further map performance improvements for panning and zooming. Price pills avoid repeating unchanged native layout/style updates, and identical map-point conversions are reused within each frame. Native glass, station colors, cluster animations, camera persistence, and station-card focus behavior remain unchanged.
+
+Please test the first few pans/zooms after opening the map, repeated gestures, tapping/swiping station cards, light/dark appearance, and location updates while browsing away from your current position.

@@ -31,6 +31,12 @@ struct ClusterLabStation: Equatable {
   }
 }
 
+private struct LabProjectionKey: Hashable {
+  let x: Double
+  let y: Double
+  init(_ point: MKMapPoint) { x = point.x; y = point.y }
+}
+
 private struct LabPendingRelease {
   let parent: String
   let direction: LabVector
@@ -492,8 +498,33 @@ final class ClusterLabRenderer {
     owners = nextOwners
   }
 
+  #if DEBUG
+  private(set) var projectionRequests = 0
+  private(set) var projectionConversions = 0
+  #endif
+
   @discardableResult
   func render(map: MKMapView, deltaTime: Double) -> Bool {
+    // Many merged children share their owner's point. Cache exact projections
+    // only for this synchronous render; never reuse across camera/layout frames.
+    var projections: [LabProjectionKey: CGPoint] = [:]
+    #if DEBUG
+    projectionRequests = 0
+    projectionConversions = 0
+    #endif
+    func project(_ point: MKMapPoint, map: MKMapView) -> CGPoint {
+      #if DEBUG
+      projectionRequests += 1
+      #endif
+      let key = LabProjectionKey(point)
+      if let existing = projections[key] { return existing }
+      let projected = self.project(point, map: map)
+      projections[key] = projected
+      #if DEBUG
+      projectionConversions += 1
+      #endif
+      return projected
+    }
     var animating = false
     var samples: [[String: Any]] = []
     var previousRenderedCenters: [ObjectIdentifier: CGPoint] = [:]
