@@ -1,0 +1,234 @@
+{
+  "baselineCommit": "90a2279",
+  "stationCount": 53,
+  "fixtureSha256": "16c3db8f05670b7b43f62994c9b06921817373527089b768d7bfce359338fdc6",
+  "runs": {
+    "baseline-1": {
+      "summary": [
+        {
+          "cycle": 0,
+          "frames": 187,
+          "cpuMedianMs": 2.588875000583357,
+          "cpuP95Ms": 8.026708334000432,
+          "cpuMaxMs": 17.34220833350264,
+          "intervalP95Ms": 16.666666668243124,
+          "intervalsOver33ms": 0,
+          "newContainers": 15,
+          "newPills": 88
+        },
+        {
+          "cycle": 1,
+          "frames": 189,
+          "cpuMedianMs": 2.8318333334027557,
+          "cpuP95Ms": 9.427541666809702,
+          "cpuMaxMs": 22.876375000123517,
+          "intervalP95Ms": 16.666666668243124,
+          "intervalsOver33ms": 0,
+          "newContainers": 14,
+          "newPills": 90
+        },
+        {
+          "cycle": 2,
+          "frames": 190,
+          "cpuMedianMs": 2.848041667675716,
+          "cpuP95Ms": 8.184333333701943,
+          "cpuMaxMs": 22.62420833358192,
+          "intervalP95Ms": 16.666666668243124,
+          "intervalsOver33ms": 0,
+          "newContainers": 15,
+          "newPills": 91
+        }
+      ],
+      "reuseChecksPassed": null,
+      "liveCacheValid": null
+    },
+    "baseline-2": {
+      "summary": [
+        {
+          "cycle": 0,
+          "frames": 191,
+          "cpuMedianMs": 2.6151666661462514,
+          "cpuP95Ms": 9.05024999883608,
+          "cpuMaxMs": 21.435666667457554,
+          "intervalP95Ms": 16.666666668243124,
+          "intervalsOver33ms": 0,
+          "newContainers": 17,
+          "newPills": 91
+        },
+        {
+          "cycle": 1,
+          "frames": 190,
+          "cpuMedianMs": 2.917874999184278,
+          "cpuP95Ms": 8.458541666186647,
+          "cpuMaxMs": 20.965249999790103,
+          "intervalP95Ms": 16.666666668243124,
+          "intervalsOver33ms": 0,
+          "newContainers": 16,
+          "newPills": 91
+        },
+        {
+          "cycle": 2,
+          "frames": 186,
+          "cpuMedianMs": 2.457833332300652,
+          "cpuP95Ms": 8.017791666134144,
+          "cpuMaxMs": 21.0929999993823,
+          "intervalP95Ms": 16.666666668243124,
+          "intervalsOver33ms": 0,
+          "newContainers": 13,
+          "newPills": 93
+        }
+      ],
+      "reuseChecksPassed": null,
+      "liveCacheValid": null
+    },
+    "optimized-1": {
+      "summary": [
+        {
+          "cycle": 0,
+          "frames": 190,
+          "cpuMedianMs": 2.3965416658029426,
+          "cpuP95Ms": 7.837874998585903,
+          "cpuMaxMs": 18.45708333348739,
+          "intervalP95Ms": 16.666666668243124,
+          "intervalsOver33ms": 0,
+          "newContainers": 3,
+          "newPills": 57
+        },
+        {
+          "cycle": 1,
+          "frames": 194,
+          "cpuMedianMs": 2.671541666131816,
+          "cpuP95Ms": 7.2859583342506085,
+          "cpuMaxMs": 18.309375000171713,
+          "intervalP95Ms": 16.666666668243124,
+          "intervalsOver33ms": 0,
+          "newContainers": 0,
+          "newPills": 20
+        },
+        {
+          "cycle": 2,
+          "frames": 189,
+          "cpuMedianMs": 2.3624999994353857,
+          "cpuP95Ms": 7.3970416669908445,
+          "cpuMaxMs": 16.993749999528518,
+          "intervalP95Ms": 16.666666668243124,
+          "intervalsOver33ms": 0,
+          "newContainers": 1,
+          "newPills": 21
+        }
+      ],
+      "reuseChecksPassed": true,
+      "liveCacheValid": true
+    },
+    "optimized-2": {
+      "summary": [
+        {
+          "cycle": 0,
+          "frames": 182,
+          "cpuMedianMs": 2.2190833333297633,
+          "cpuP95Ms": 7.548625000708853,
+          "cpuMaxMs": 20.065499998963787,
+          "intervalP95Ms": 16.666666668243124,
+          "intervalsOver33ms": 0,
+          "newContainers": 3,
+          "newPills": 36
+        },
+        {
+          "cycle": 1,
+          "frames": 187,
+          "cpuMedianMs": 2.5737500000104774,
+          "cpuP95Ms": 7.354791665420635,
+          "cpuMaxMs": 17.536583332912414,
+          "intervalP95Ms": 16.666666668243124,
+          "intervalsOver33ms": 0,
+          "newContainers": 0,
+          "newPills": 19
+        },
+        {
+          "cycle": 2,
+          "frames": 188,
+          "cpuMedianMs": 2.3363333330053138,
+          "cpuP95Ms": 7.913333332908223,
+          "cpuMaxMs": 17.74745833245106,
+          "intervalP95Ms": 16.666666668243124,
+          "intervalsOver33ms": 0,
+          "newContainers": 0,
+          "newPills": 21
+        }
+      ],
+      "reuseChecksPassed": true,
+      "liveCacheValid": true
+    }
+  },
+  "comparisons": {
+    "firstCycle": {
+      "baseline": {
+        "newContainers": 16,
+        "newPills": 89.5,
+        "cpuP95Ms": 8.538479166418256,
+        "cpuMedianMs": 2.6020208333648043,
+        "cpuMaxMs": 19.388937500480097
+      },
+      "optimized": {
+        "newContainers": 3,
+        "newPills": 46.5,
+        "cpuP95Ms": 7.693249999647378,
+        "cpuMedianMs": 2.307812499566353,
+        "cpuMaxMs": 19.26129166622559
+      },
+      "reductionPercent": {
+        "newContainers": 81.25,
+        "newPills": 48.044692737430175,
+        "cpuP95Ms": 9.899059894590534,
+        "cpuMedianMs": 11.30691691726371,
+        "cpuMaxMs": 0.6583436263660536
+      }
+    },
+    "repeatCycles": {
+      "baseline": {
+        "newContainers": 14.5,
+        "newPills": 91.25,
+        "cpuP95Ms": 8.52205208320811,
+        "cpuMedianMs": 2.7638958331408503,
+        "cpuMaxMs": 21.88970833321946
+      },
+      "optimized": {
+        "newContainers": 0.25,
+        "newPills": 20.25,
+        "cpuP95Ms": 7.487781249892578,
+        "cpuMedianMs": 2.486031249645748,
+        "cpuMaxMs": 17.646791666265926
+      },
+      "reductionPercent": {
+        "newContainers": 98.27586206896551,
+        "newPills": 77.8082191780822,
+        "cpuP95Ms": 12.136405917460458,
+        "cpuMedianMs": 10.053366706636735,
+        "cpuMaxMs": 19.38315761162771
+      }
+    },
+    "allCycles": {
+      "baseline": {
+        "newContainers": 15,
+        "newPills": 90.66666666666667,
+        "cpuP95Ms": 8.52752777761149,
+        "cpuMedianMs": 2.709937499882168,
+        "cpuMaxMs": 21.056118055639672
+      },
+      "optimized": {
+        "newContainers": 1.1666666666666667,
+        "newPills": 29,
+        "cpuP95Ms": 7.556270833144178,
+        "cpuMedianMs": 2.4266249996192832,
+        "cpuMaxMs": 18.184958332919148
+      },
+      "reductionPercent": {
+        "newContainers": 92.22222222222223,
+        "newPills": 68.01470588235294,
+        "cpuP95Ms": 11.389666147054822,
+        "cpuMedianMs": 10.454576914604253,
+        "cpuMaxMs": 13.635750498423482
+      }
+    }
+  }
+}

@@ -3,7 +3,14 @@ import UIKit
 // Use Apple's effect views directly so UIKit owns their material and layout.
 // No masks, custom blur, borders, or replicated glass.
 enum ClusterLabGlass {
+  #if DEBUG
+  static var containersCreated = 0
+  static var pillsCreated = 0
+  #endif
   static func container() -> UIView {
+    #if DEBUG
+    containersCreated += 1
+    #endif
     if #available(iOS 26.0, *), NSClassFromString("UIGlassContainerEffect") != nil {
       // The library's container rebuilds its effect on every layout, causing
       // material/tint settling flashes when membership changes. UIKit's native
@@ -23,6 +30,9 @@ enum ClusterLabGlass {
   }
 
   static func pill() -> UIView {
+    #if DEBUG
+    pillsCreated += 1
+    #endif
     if #available(iOS 26.0, *), NSClassFromString("UIGlassEffect") != nil {
       // The library subclass returns from layoutSubviews without calling
       // super once an effect exists. That skips UIKit's native material layout
@@ -90,6 +100,11 @@ final class ClusterLabPill {
     icon.contentMode = .scaleAspectFit
     view.isAccessibilityElement = true
     view.accessibilityLabel = name
+  }
+
+  func matches(_ station: ClusterLabStation) -> Bool {
+    stationID == station.id && price == station.price && highlightE85 == station.highlightE85 &&
+      view.accessibilityLabel == station.name
   }
 
   // An arriving view may be reused as the attached cluster count. That is the

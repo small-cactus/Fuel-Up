@@ -1,0 +1,52 @@
+# Raw map gestures deliberately preserve the measured pivot, speed and no-momentum pan.
+# The card wait remains raw: AX sees its label but the runner hierarchy does not.
+steps:
+  - echo: On native Home map, zoom in/out and pan right/left. Fixed map-centered
+      gestures test cold glass and tile rendering; expect Home and station cards
+      retained.
+  - tool: run-sequence
+    args:
+      steps:
+        - tool: gesture-pinch
+          args:
+            centerX: 0.5
+            centerY: 0.35
+            startDistance: 0.18
+            endDistance: 0.6
+            durationMs: 700
+          delayMs: 500
+        - tool: gesture-pinch
+          args:
+            centerX: 0.5
+            centerY: 0.35
+            startDistance: 0.6
+            endDistance: 0.18
+            durationMs: 700
+          delayMs: 500
+        - tool: gesture-swipe
+          args:
+            fromX: 0.25
+            fromY: 0.4
+            toX: 0.75
+            toY: 0.4
+            durationMs: 700
+            momentum: false
+          delayMs: 500
+        - tool: gesture-swipe
+          args:
+            fromX: 0.75
+            fromY: 0.4
+            toX: 0.25
+            toY: 0.4
+            durationMs: 700
+            momentum: false
+          delayMs: 500
+  - tool: await-ui-element
+    args:
+      condition: visible
+      selector:
+        text: Navigate to Shell
+      timeoutMs: 5000
+executionPrerequisite: iOS Home native map loaded at initial Tampa overview with
+  station cards visible, simulator portrait, no modal. Run immediately after launch
+  for cold overlay; repeat for warm overlay.

@@ -1,0 +1,3 @@
+Map panning and zooming performance improvements. Native glass station markers and containers are now reused instead of repeatedly rebuilt, and normal gestures avoid an unnecessary diagnostic clustering pass.
+
+Please try panning and zooming immediately after opening Fuel Up, then repeat the same movements. Check station prices and recommendation colors, switch between station cards, and confirm location updates do not reset your chosen map position. Existing research fill-up dates and station-card camera behavior are retained.

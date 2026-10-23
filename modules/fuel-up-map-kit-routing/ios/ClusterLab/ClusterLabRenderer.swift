@@ -110,6 +110,77 @@ final class ClusterLabRenderer {
   var container: UIView { glassGroups.root }
   private var motions: [String: LabStationMotion] = [:]
   private var badges: [String: ClusterLabPill] = [:]
+  private var stationsByID: [String: ClusterLabStation] = [:]
+  private var idlePills: [String: ClusterLabPill] = [:]
+  private var idlePillOrder: [String] = []
+  private var memoryObserver: NSObjectProtocol?
+
+  private func clearIdlePills() { idlePills.removeAll(); idlePillOrder.removeAll() }
+
+  #if DEBUG
+  var validIdlePills: Bool {
+    let active = motions.values.compactMap(\.pill) + Array(badges.values)
+    let activeIDs = Set(active.map { ObjectIdentifier($0.view) })
+    return activeIDs.count == active.count && idlePills.count <= 64 &&
+      idlePillOrder.count == idlePills.count && Set(idlePillOrder) == Set(idlePills.keys) &&
+      idlePills.values.allSatisfy { pill in
+        pill.view.superview == nil && !activeIDs.contains(ObjectIdentifier(pill.view)) &&
+          stationsByID[pill.stationID].map(pill.matches) == true
+      }
+  }
+
+  static func verifyPillReuse() -> Bool {
+    let renderer = ClusterLabRenderer()
+    func station(_ id: Int, price: Double = 3, name: String = "Station", yellow: Bool = false) -> ClusterLabStation {
+      ClusterLabStation(["id": "test-\(id)", "latitude": 28.0, "longitude": -82.0,
+        "price": price, "name": name, "highlightE85": yellow])!
+    }
+    let stations = (0..<70).map { station($0) }
+    renderer.setStations(stations)
+    for s in stations { renderer.retire(renderer.acquirePill(s)) }
+    guard renderer.validIdlePills, renderer.idlePills.count == 64,
+          renderer.idlePills["test-0"] == nil, let old = renderer.idlePills["test-69"] else { return false }
+    old.view.transform = CGAffineTransform(translationX: 0, y: 20)
+    old.view.accessibilityTraits = [.selected]
+    let reused = renderer.acquirePill(stations[69])
+    guard reused === old, reused.view.transform == .identity,
+          reused.view.accessibilityTraits.isEmpty else { return false }
+    renderer.retire(reused)
+    let changed = station(69, price: 4, name: "Changed", yellow: true)
+    renderer.setStations([changed])
+    renderer.retire(old) // A late retirement must not reintroduce stale content.
+    let fresh = renderer.acquirePill(changed)
+    guard fresh !== old, fresh.matches(changed), renderer.idlePills.isEmpty else { return false }
+    renderer.retire(fresh)
+    renderer.setStations([])
+    renderer.retire(fresh)
+    renderer.setStations([changed])
+    guard renderer.acquirePill(changed) !== fresh else { return false }
+    renderer.retire(renderer.acquirePill(changed))
+    renderer.clearIdlePills()
+    return renderer.validIdlePills && renderer.idlePills.isEmpty
+  }
+  #endif
+
+  private func retire(_ pill: ClusterLabPill?) {
+    guard let pill else { return }
+    pill.view.removeFromSuperview()
+    guard let station = stationsByID[pill.stationID], pill.matches(station) else { return }
+    idlePills[pill.stationID] = pill
+    idlePillOrder.removeAll { $0 == pill.stationID }
+    idlePillOrder.append(pill.stationID)
+    while idlePillOrder.count > 64 { idlePills.removeValue(forKey: idlePillOrder.removeFirst()) }
+  }
+
+  private func acquirePill(_ station: ClusterLabStation) -> ClusterLabPill {
+    idlePillOrder.removeAll { $0 == station.id }
+    if let pill = idlePills.removeValue(forKey: station.id), pill.matches(station) {
+      pill.view.transform = .identity
+      pill.view.accessibilityTraits = []
+      return pill
+    }
+    return ClusterLabPill(stationID: station.id, price: station.price, name: station.name, highlightE85: station.highlightE85)
+  }
   private var owners: [String: String] = [:]
   private var badgeOffsetTargets: [String: CGFloat] = [:]
   private var badgeOffsetCarries: [String: (delta: CGFloat, startedAt: Double)] = [:]
@@ -153,8 +224,8 @@ final class ClusterLabRenderer {
     overviewTransition = false
     canonicalOverview = true
     emphasis.reset()
-    for motion in motions.values { motion.pill?.view.removeFromSuperview() }
-    for badge in badges.values { badge.view.removeFromSuperview() }
+    for motion in motions.values { retire(motion.pill) }
+    for badge in badges.values { retire(badge) }
     motions.removeAll(); badges.removeAll(); owners.removeAll()
     badgeOffsetTargets.removeAll(); badgeOffsetCarries.removeAll(); renderedBadgeOffsets.removeAll()
     previousProjection.removeAll(); projectionTime = 0; cameraSpeed = 0; cameraStarted = nil
@@ -175,11 +246,19 @@ final class ClusterLabRenderer {
     }
   }
 
-  init() { container.isUserInteractionEnabled = false }
+  init() {
+    container.isUserInteractionEnabled = false
+    memoryObserver = NotificationCenter.default.addObserver(forName: UIApplication.didReceiveMemoryWarningNotification,
+      object: nil, queue: .main) { [weak self] _ in self?.clearIdlePills() }
+  }
+
+  deinit { if let memoryObserver { NotificationCenter.default.removeObserver(memoryObserver) } }
 
   func setStations(_ next: [ClusterLabStation]) {
     let snapshot = next.sorted { $0.comparisonPrice == $1.comparisonPrice ? $0.id < $1.id : $0.comparisonPrice < $1.comparisonPrice }
     guard snapshot != stations else { return }
+    clearIdlePills()
+    stationsByID = Dictionary(uniqueKeysWithValues: snapshot.map { ($0.id, $0) })
     // Keep the full search's identity-to-color table, independent of the culled
     // views and current cluster owners. Only new station data can replace it.
     markets = ClusterLabMarket.assess(snapshot.map {
@@ -231,7 +310,7 @@ final class ClusterLabRenderer {
   }
 
   private func makePill(_ motion: LabStationMotion) -> ClusterLabPill {
-    let pill = ClusterLabPill(stationID: motion.station.id, price: motion.station.price, name: motion.station.name, highlightE85: motion.station.highlightE85)
+    let pill = acquirePill(motion.station)
     addFocusAction(pill, id: motion.station.id)
     motion.pill = pill
     return pill
@@ -322,7 +401,7 @@ final class ClusterLabRenderer {
         motions[station.id] = motion
         if ownerId == station.id { _ = makePill(motion) }
         else if badges[ownerId] == nil {
-          let badge = ClusterLabPill(stationID: owner.id, price: owner.price, name: owner.name, highlightE85: owner.highlightE85)
+          let badge = acquirePill(owner)
           addFocusAction(badge, id: ownerId)
           badges[ownerId] = badge
         }
@@ -334,7 +413,7 @@ final class ClusterLabRenderer {
     let previousCounts = Dictionary(grouping: motions.values.filter { $0.settled && $0.owner != $0.station.id }, by: \.owner)
       .mapValues(\.count)
     for id in Array(motions.keys) where nextOwners[id] == nil {
-      motions.removeValue(forKey: id)?.pill?.view.removeFromSuperview()
+      retire(motions.removeValue(forKey: id)?.pill)
     }
     for station in stations where nextOwners[station.id] != nil {
       let motion = motions[station.id] ?? LabStationMotion(station)
@@ -380,7 +459,7 @@ final class ClusterLabRenderer {
           event("split-spawn", id: station.id, delta: hypot(pill.view.center.x - source.x, pill.view.center.y - source.y),
                 details: ["renderedDelta": hypot(pill.view.frame.midX - sourceFrame.midX, pill.view.frame.midY - sourceFrame.midY)])
         }
-        let destination = stations.first { $0.id == nextOwner }!.mapPoint
+        let destination = stationsByID[nextOwner]!.mapPoint
         let start = project(motion.point, map: map)
         let end = project(destination, map: map)
         let nextOffset = nextOwner == station.id ? 0 : badgeOffset(for: nextOwner, at: now)
@@ -419,7 +498,7 @@ final class ClusterLabRenderer {
     var samples: [[String: Any]] = []
     var previousRenderedCenters: [ObjectIdentifier: CGPoint] = [:]
     if recording {
-      for pill in motions.values.compactMap(\.pill) + Array(badges.values) {
+      for pill in motions.values.compactMap(\.pill) + Array(badges.values) where pill.view.superview != nil {
         previousRenderedCenters[ObjectIdentifier(pill.view)] = CGPoint(x: pill.view.frame.midX, y: pill.view.frame.midY)
       }
     }
@@ -550,13 +629,15 @@ final class ClusterLabRenderer {
       let basePoint = point
       point.x += reaction.x; point.y += reaction.y
       if let pill = motion.pill {
-        let previousCenter = pill.view.bounds.isEmpty ? point : pill.view.center
-        let marketId = tintOwner(for: id)
+        // Detached cached geometry was not visible on the previous frame.
+        // Existing on-screen objects retain the full continuity measurement.
+        let previousCenter = pill.view.superview == nil ? point : pill.view.center
         pill.view.accessibilityTraits = emphasis.selectedId == id && motion.priceMix > 0.5 ? [.selected] : []
         pill.render(center: point, width: motion.width, priceMix: motion.priceMix, count: motion.count,
                     market: nil, dark: dark, scale: emphasis.scale(for: id, priceMix: motion.priceMix))
         if arrived && merged { pill.view.transform = CGAffineTransform(translationX: 0, y: owner.clearance) }
         if recording {
+          let marketId = tintOwner(for: id)
           // Compare the actual view with the original trajectory in the same
           // map projection, so the probe proves visible resistance at contact.
           let unresistedMapPoint = MKMapPoint(
@@ -595,7 +676,7 @@ final class ClusterLabRenderer {
 
     let joined = Dictionary(grouping: motions.values.filter { $0.settled && $0.owner != $0.station.id }, by: \.owner)
     for ownerId in Array(badges.keys) where joined[ownerId] == nil {
-      badges.removeValue(forKey: ownerId)?.view.removeFromSuperview()
+      retire(badges.removeValue(forKey: ownerId))
     }
     for (ownerId, members) in joined {
       guard let owner = motions[ownerId] else { continue }
@@ -623,7 +704,8 @@ final class ClusterLabRenderer {
         member.pill?.view.transform = badge.view.transform
         let renderedDelta = hypot(member.pill!.view.frame.midX - badge.view.frame.midX,
                                   member.pill!.view.frame.midY - badge.view.frame.midY)
-        member.pill?.view.removeFromSuperview(); member.pill = nil
+        let retired = member.pill; member.pill = nil
+        retire(retired)
         event("merge-handoff", id: member.station.id, delta: handoffDelta, details: ["renderedDelta": renderedDelta])
       }
       if recording {
@@ -744,7 +826,6 @@ final class ClusterLabRenderer {
     // Tint is locked to the station identity stored on the native pill. A
     // moving +N copy never borrows the parent's winning ID. Only the attached
     // accumulator represents its parent (bound when created or adopted).
-    let visibleTints = renderedPills.mapValues { $0.stationID }
     for pill in renderedPills.values { pill.applyMarket(markets[pill.stationID] ?? .unknown) }
     let anchors = Dictionary(uniqueKeysWithValues: stations.enumerated().compactMap { rank, station -> (String, Int)? in
       guard let motion = motions[station.id], motion.owner == station.id, motion.settled else { return nil }
@@ -756,7 +837,8 @@ final class ClusterLabRenderer {
     })
     let connections = glassGroups.update(renderedViews, families: families, anchors: anchors,
                                          highlightedFamilies: highlightedFamilies,
-                                         yellowIDs: Set(renderedPills.filter { $0.value.highlightE85 }.keys))
+                                         yellowIDs: Set(renderedPills.filter { $0.value.highlightE85 }.keys),
+                                         recordConnections: recording)
     for pill in renderedPills.values {
       pill.didAssignGlassContainer(highlighted: glassGroups.containsHighlight(pill.view),
                                    market: markets[pill.stationID] ?? .unknown)
@@ -769,7 +851,7 @@ final class ClusterLabRenderer {
           if let pill = renderedPills[id], let connection = connections[id] {
             samples[index]["logicalTintOwner"] = logicalTints[id]
             samples[index]["glassConnection"] = connection
-            samples[index]["tintOwner"] = visibleTints[id]
+            samples[index]["tintOwner"] = pill.stationID
             if let family = logicalTints[id], let anchor = familyFrames[family] {
               samples[index]["glassFamily"] = previews[family] ?? family
               samples[index]["familyAnchor"] = ["x": anchor.midX, "y": anchor.midY,

@@ -41,6 +41,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   var probe: ClusterLabProbe?
   #if DEBUG
   private let launchProbe = ClusterLabLaunchProbe()
+  private let performanceProbe = ClusterLabPerformanceProbe()
   #endif
 
   required init(appContext: AppContext? = nil) {
@@ -107,6 +108,9 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     if !hasPresentedStations && next != latestStations { needsCameraFit = true }
     latestStations = next
     guard probe == nil else { return }
+    #if DEBUG
+    guard !performanceProbe.ownsStations else { return }
+    #endif
     renderer.setStations(latestStations)
     refresh()
   }
@@ -436,12 +440,22 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     let elapsed = lastTimestamp == 0 ? 1.0 / Double(window?.screen.maximumFramesPerSecond ?? 60) : max(0, time - lastTimestamp)
     lastTimestamp = time
     probe?.tick(time: time)
+    #if DEBUG
+    let performanceStart = CACurrentMediaTime()
+    #endif
     mapAnchor.layout(map: map)
     if needsReconcile || cameraMoving {
       needsReconcile = false
       renderer.reconcile(map: map)
     }
+    #if DEBUG
+    let reconcileEnd = CACurrentMediaTime()
+    #endif
     animationMoving = renderer.render(map: map, deltaTime: elapsed)
+    #if DEBUG
+    performanceProbe.record(time: time, reconcile: reconcileEnd - performanceStart,
+                            render: CACurrentMediaTime() - reconcileEnd)
+    #endif
     updatePresentation()
     probe?.recordAnchor(mapAnchor.sample(map: map))
     let continuous = needsReconcile || cameraMoving || animationMoving || mapAnchor.needsPlacementUpdate || probe != nil
@@ -456,6 +470,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     if ready && !latestStations.isEmpty { hasPresentedStations = true }
     reportReadyIfNeeded()
     #if DEBUG
+    performanceProbe.startIfRequested(view: self, ready: reportedMapReady)
     launchProbe.sample(map: map, visible: ready, ready: reportedMapReady, count: latestStations.count, inset: overlayBottomInset)
     launchProbe.verifyCameraIfRequested(view: self, ready: reportedMapReady, inset: overlayBottomInset)
     #endif
