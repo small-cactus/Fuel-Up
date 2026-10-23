@@ -16,6 +16,6 @@ Research fill-up dates and stable camera behavior from build 33 are retained: lo
 
 Build 34 archived and exported successfully. The exported app and both extensions have valid distribution signatures, build 34, and debugging disabled. The app has production APNs entitlement. See export-validation.json.
 
-Apple accepted the upload on October 23, 2026 at 10:55 EDT and started processing it. TestFlight distribution is not yet verified. Upload reported the same non-blocking missing Hermes dSYM warning as build 33; Hermes crash symbolication may be incomplete.
+Apple accepted the upload on October 23, 2026 at 10:55 EDT and started processing it. After processing, testing notes were saved and the external submission completed. App Store Connect shows build 34 as **Testing**, with the existing internal group (1 tester) and external group (6 testers), 7 invites total. Tester installation has not been independently verified. See testflight-distribution.json. Upload reported the same non-blocking missing Hermes dSYM warning as build 33; Hermes crash symbolication may be incomplete.
 
 Archive: `/Users/anthonyh/Library/Developer/Xcode/Archives/2026-10-23/FuelUp-34.xcarchive`. Export: `/tmp/FuelUp-TestFlight-34-export/FuelUp.ipa`.
