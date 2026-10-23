@@ -1,0 +1,25 @@
+{
+  "observedAt": "2026-10-23T17:21:13.716228+00:00",
+  "source": "Safari App Store Connect UI",
+  "version": "1.0.0",
+  "build": "35",
+  "status": "Testing",
+  "groups": [
+    {
+      "name": "Fuel Up Internal Testing",
+      "type": "Internal",
+      "testers": 1
+    },
+    {
+      "name": "Fuel Up External Testing",
+      "type": "External",
+      "testers": 6
+    }
+  ],
+  "invites": 7,
+  "whatToTestSaved": true,
+  "automaticallyNotifyTesters": true,
+  "externalSubmissionCompleted": true,
+  "testerInstallationVerified": false,
+  "url": "https://appstoreconnect.apple.com/teams/3bf3ccbf-7c6c-471f-a30e-7ced4e800679/apps/6759831421/testflight/ios/477cbb7d-f7a5-402a-a8ba-d64965ac4f0f"
+}

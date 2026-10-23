@@ -1,0 +1,4 @@
+2026-10-23 13:17:20.612 xcodebuild[74374:350509] Progress 100%: Upload succeeded.
+warning: exportArchive Upload Symbols Failed. The archive did not include a dSYM for the hermesvm.framework with the UUIDs [B99B4F0D-1B56-3D94-940F-383F4F00C905]. Ensure that the archive's dSYM folder includes a DWARF file for hermesvm.framework with the expected UUIDs.
+Uploaded FuelUp
+** EXPORT SUCCEEDED **
