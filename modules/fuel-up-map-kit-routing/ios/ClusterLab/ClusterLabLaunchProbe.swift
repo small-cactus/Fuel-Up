@@ -8,6 +8,7 @@ final class ClusterLabLaunchProbe {
   private var samples: [[String: Any]] = []
   private var fits: [[String: Any]] = []
   private var finished = false
+  private var frames: [[String: Any]] = []
   private var cameraProbeStarted = false
 
   init() {
@@ -18,14 +19,24 @@ final class ClusterLabLaunchProbe {
   func fit(animated: Bool, visible: Bool, contentReady: Bool, inset: CGFloat) {
     guard token != nil, !finished else { return }
     fits.append(["time": CACurrentMediaTime() - started, "animated": animated,
-                 "alreadyVisible": visible, "contentReady": contentReady, "inset": inset])
+                 "alreadyVisible": visible, "contentReady": contentReady, "inset": inset,
+                 "pillsCreated": ClusterLabGlass.pillsCreated, "mapPillsCreated": ClusterLabPill.createdCount,
+                    "containersCreated": ClusterLabGlass.containersCreated])
   }
 
-  func sample(map: MKMapView, visible: Bool, ready: Bool, count: Int, inset: CGFloat) {
+  func sample(map: MKMapView, visible: Bool, ready: Bool, count: Int, inset: CGFloat, contentReady: Bool, needsFit: Bool) {
     guard token != nil, !finished, samples.count < 2400 else { return }
     samples.append(["time": CACurrentMediaTime() - started, "visible": visible,
                     "ready": ready, "count": count, "inset": inset,
-                    "distance": map.camera.centerCoordinateDistance])
+                    "distance": map.camera.centerCoordinateDistance, "contentReady": contentReady, "needsFit": needsFit,
+                    "pillsCreated": ClusterLabGlass.pillsCreated, "mapPillsCreated": ClusterLabPill.createdCount,
+                    "containersCreated": ClusterLabGlass.containersCreated])
+  }
+
+  func record(reconcile: Double, render: Double, contentReady: Bool, needsFit: Bool) {
+    guard token != nil, !finished, frames.count < 2400 else { return }
+    frames.append(["time": CACurrentMediaTime() - started, "reconcileMs": reconcile * 1000,
+                   "renderMs": render * 1000, "contentReady": contentReady, "needsFit": needsFit])
   }
 
   // Separate opt-in regression on the real MKMapView. Location and station
@@ -107,7 +118,7 @@ final class ClusterLabLaunchProbe {
   private func finish() {
     guard let token, !finished else { return }
     finished = true
-    let report: [String: Any] = ["token": token, "samples": samples, "fits": fits]
+    let report: [String: Any] = ["token": token, "samples": samples, "fits": fits, "frames": frames]
     guard let data = try? JSONSerialization.data(withJSONObject: report, options: [.sortedKeys]),
           let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
     try? data.write(to: documents.appendingPathComponent("map-launch-probe.json"), options: .atomic)

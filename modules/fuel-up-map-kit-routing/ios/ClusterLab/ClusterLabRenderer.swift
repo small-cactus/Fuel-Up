@@ -223,7 +223,9 @@ final class ClusterLabRenderer {
   private var previousProjection: [String: CGPoint] = [:]
   private var projectionTime: Double = 0
   private var cameraSpeed: CGFloat = 0
-  private var needsInitialLayout = false
+  // The first camera can be an animated fit or an early card selection.
+  // Those paths also need the compact initial layout, not a merge animation.
+  private var needsInitialLayout = true
   private let locationClearance = ClusterLabLocationClearance()
 
   func prepareForCameraFit() {

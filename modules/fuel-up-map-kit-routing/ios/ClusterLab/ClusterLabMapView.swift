@@ -408,13 +408,29 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     // update as a fallback; modern iOS coalesces all updates into one frame.
     if frameClock?.synchronizesWithCommit == false {
       fitIfNeeded()
-      mapAnchor.layout(map: map)
-      renderer.reconcile(map: map)
-      needsReconcile = false
-      animationMoving = renderer.render(map: map, deltaTime: 0)
-      updatePresentation()
+      if !deferInitialOverlayIfNeeded() {
+        mapAnchor.layout(map: map)
+        renderer.reconcile(map: map)
+        needsReconcile = false
+        animationMoving = renderer.render(map: map, deltaTime: 0)
+        updatePresentation()
+      }
     }
     startPendingProbe()
+  }
+
+  private func deferInitialOverlayIfNeeded() -> Bool {
+    // Stations may arrive before the carousel reports its height. Building pills
+    // against that provisional camera wastes native glass work and then retires
+    // it at the initial fit. MapKit keeps loading; build only the settled layout.
+    guard probe == nil, !hasPresentedStations,
+          !contentReady || needsCameraFit || cameraMoving else { return false }
+    // Empty results can become ready without a station fit. Keep readiness and
+    // delegate callbacks alive, but don't spin a display loop awaiting JS/tiles.
+    updatePresentation()
+    frameClock?.requestContinuous(false)
+    lastTimestamp = 0
+    return true
   }
 
   private func startFrames() {
@@ -432,6 +448,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
   private func tick(_ time: CFTimeInterval) {
     guard active, window != nil, hasValidLayout, UIApplication.shared.applicationState != .background else { return }
     fitIfNeeded()
+    guard !deferInitialOverlayIfNeeded() else { return }
     guard needsReconcile || cameraMoving || animationMoving || mapAnchor.needsPlacementUpdate || probe != nil else {
       frameClock?.requestContinuous(false)
       lastTimestamp = 0
@@ -453,6 +470,9 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     #endif
     animationMoving = renderer.render(map: map, deltaTime: elapsed)
     #if DEBUG
+    launchProbe.record(reconcile: reconcileEnd - performanceStart,
+                       render: CACurrentMediaTime() - reconcileEnd,
+                       contentReady: contentReady, needsFit: needsCameraFit)
     performanceProbe.record(time: time, reconcile: reconcileEnd - performanceStart,
                             render: CACurrentMediaTime() - reconcileEnd,
                             projectionRequests: renderer.projectionRequests,
@@ -473,7 +493,8 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     reportReadyIfNeeded()
     #if DEBUG
     performanceProbe.startIfRequested(view: self, ready: reportedMapReady)
-    launchProbe.sample(map: map, visible: ready, ready: reportedMapReady, count: latestStations.count, inset: overlayBottomInset)
+    launchProbe.sample(map: map, visible: ready, ready: reportedMapReady, count: latestStations.count, inset: overlayBottomInset,
+                       contentReady: contentReady, needsFit: needsCameraFit)
     launchProbe.verifyCameraIfRequested(view: self, ready: reportedMapReady, inset: overlayBottomInset)
     #endif
   }

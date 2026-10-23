@@ -56,6 +56,9 @@ enum ClusterLabGlass {
 }
 
 final class ClusterLabPill {
+  #if DEBUG
+  static private(set) var createdCount = 0
+  #endif
   let view = ClusterLabGlass.pill()
   private let priceLabel = UILabel()
   private let countLabel = UILabel()
@@ -86,6 +89,9 @@ final class ClusterLabPill {
   }
 
   init(stationID: String, price: Double, name: String, highlightE85: Bool = false) {
+    #if DEBUG
+    Self.createdCount += 1
+    #endif
     self.stationID = stationID
     self.price = price
     self.highlightE85 = highlightE85

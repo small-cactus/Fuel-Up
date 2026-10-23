@@ -29,10 +29,16 @@ test('cold launch presents chips only after the measured card and initial camera
     const first = report.fits[0];
     assert.equal(first.alreadyVisible, false);
     assert.equal(first.contentReady, true);
+    assert.equal(first.mapPillsCreated, 0, 'Allocated glass pills before the initial station fit');
+    assert.equal(first.containersCreated, 0, 'Allocated glass parents before the initial station fit');
+    assert.ok(report.frames.length > 0, 'Missing real renderer timing coverage');
     assert.ok(first.inset > 100, 'Initial fit ignored the measured station card');
     const visible = report.samples.filter(sample => sample.visible && sample.count > 0);
     assert.ok(visible.length > 0, 'Chips never appeared');
     assert.ok(visible[0].time >= first.time, 'Chips appeared before fitting');
+    assert.equal(report.frames.filter(frame => frame.time <= visible[0].time &&
+        (!frame.contentReady || frame.needsFit)).length, 0,
+        'Rendered the hidden provisional station layout');
     assert.ok(report.samples.some(sample => sample.ready), 'Map never became launch-ready');
     for (const fit of report.fits.filter(fit => fit.alreadyVisible)) {
         assert.equal(fit.animated, true, 'Visible chips followed by a nonanimated camera jump');
