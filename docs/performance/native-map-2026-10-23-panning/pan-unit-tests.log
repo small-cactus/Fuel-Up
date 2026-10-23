@@ -1,0 +1,15 @@
+TAP version 13
+# Subtest: settled pan reuse rejects zoom, changing membership, clearance and stale state
+ok 1 - settled pan reuse rejects zoom, changing membership, clearance and stale state
+  ---
+  duration_ms: 783.680416
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 835.94025

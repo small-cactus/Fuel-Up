@@ -99,8 +99,64 @@ private final class LabStationMotion {
 final class ClusterLabRenderer {
   private var overviewTransition = false
   private var canonicalOverview = false
+  private var panLayout: ClusterLabPanLayout?
+  private var appliedPanTranslation = CGPoint.zero
+  private var projectedPoints: [String: CGPoint] = [:]
+  private var contactOffsets: [String: CGFloat] = [:]
+  private(set) var reusedPanLayout = false
+
+  func panTranslation(map: MKMapView) -> CGPoint? {
+    reusedPanLayout = false
+    #if DEBUG
+    ClusterLabPanLayout.lastFailure = "no-snapshot"
+    if ProcessInfo.processInfo.environment["FUELUP_MAP_DISABLE_PAN_REUSE"] == "1" { return nil }
+    #endif
+    guard !recording, let panLayout else { return nil }
+    let dot = map.showsUserLocation && map.userLocation.location != nil ?
+      map.convert(map.userLocation.coordinate, toPointTo: map) : nil
+    let delta = panLayout.translation(points: projectedPoints, owners: owners, contacts: contactOffsets,
+      dot: dot, map: map, selected: emphasis.selectedId, dark: dark)
+    reusedPanLayout = delta != nil
+    if let delta { appliedPanTranslation = delta }
+    return delta
+  }
+
+  private func materializePanTranslation() {
+    guard appliedPanTranslation != .zero else { return }
+    for pill in motions.values.compactMap(\.pill) + Array(badges.values) {
+      pill.view.center.x += appliedPanTranslation.x
+      pill.view.center.y += appliedPanTranslation.y
+    }
+    appliedPanTranslation = .zero
+    panLayout = nil
+  }
+
+  #if DEBUG
+  // Fresh geographic projections independently check cached layout positions;
+  // hierarchy error additionally includes MapKit's annotation placement timing.
+  func panErrors(map: MKMapView, translation: CGPoint) -> (geometry: CGFloat, screen: CGFloat) {
+    var geometry: CGFloat = 0, screen: CGFloat = 0
+    let padding = ClusterLabGeometry.containerPadding
+    func check(_ pill: ClusterLabPill, _ motion: LabStationMotion, extra: CGFloat = 0) {
+      var expected = map.convert(motion.point.coordinate, toPointTo: map)
+      expected.x += motion.offset + motion.displayedReaction.x + extra
+      expected.y += motion.displayedReaction.y + motion.clearance
+      let local = CGPoint(x: pill.view.frame.midX - padding + translation.x,
+                          y: pill.view.frame.midY - padding + translation.y)
+      let actual = pill.view.convert(CGPoint(x: pill.view.bounds.midX, y: pill.view.bounds.midY), to: map)
+      geometry = max(geometry, hypot(local.x - expected.x, local.y - expected.y))
+      screen = max(screen, hypot(actual.x - expected.x, actual.y - expected.y))
+    }
+    for motion in motions.values { if let pill = motion.pill { check(pill, motion) } }
+    for (id, badge) in badges {
+      if let owner = motions[id] { check(badge, owner, extra: renderedBadgeOffsets[id] ?? ClusterLabGeometry.badgeOffset) }
+    }
+    return (geometry, screen)
+  }
+  #endif
 
   func beginOverview() {
+    panLayout = nil
     overviewTransition = true
     canonicalOverview = true
     for motion in motions.values where !motion.settled {
@@ -110,7 +166,7 @@ final class ClusterLabRenderer {
     }
   }
 
-  func endOverview() { overviewTransition = false; canonicalOverview = false }
+  func endOverview() { panLayout = nil; overviewTransition = false; canonicalOverview = false }
   let emphasis = ClusterLabEmphasis()
   private let glassGroups = ClusterLabGlassGroups()
   var container: UIView { glassGroups.root }
@@ -229,6 +285,7 @@ final class ClusterLabRenderer {
   private let locationClearance = ClusterLabLocationClearance()
 
   func prepareForCameraFit() {
+    panLayout = nil
     overviewTransition = false
     canonicalOverview = true
     emphasis.reset()
@@ -265,6 +322,7 @@ final class ClusterLabRenderer {
   func setStations(_ next: [ClusterLabStation]) {
     let snapshot = next.sorted { $0.comparisonPrice == $1.comparisonPrice ? $0.id < $1.id : $0.comparisonPrice < $1.comparisonPrice }
     guard snapshot != stations else { return }
+    panLayout = nil
     clearIdlePills()
     stationsByID = Dictionary(uniqueKeysWithValues: snapshot.map { ($0.id, $0) })
     // Keep the full search's identity-to-color table, independent of the culled
@@ -376,6 +434,8 @@ final class ClusterLabRenderer {
       map.convert(map.userLocation.coordinate, toPointTo: map) : nil
     let contactOffsets = ClusterLabLocationClearance.targets(frames: contactFrames, dot: dot,
       bounds: map.bounds.inset(by: map.safeAreaInsets).insetBy(dx: 15, dy: 15))
+    self.contactOffsets = contactOffsets
+    projectedPoints = Dictionary(uniqueKeysWithValues: candidates.map { ($0.id, $0.point) })
     let nextOwners = ClusterLabGeometry.owners(candidates, previous: canonicalOverview ? [:] : owners,
                                               selectedId: emphasis.selectedId, displayOffsets: contactOffsets)
     let nextMasses = Dictionary(grouping: nextOwners.keys, by: { nextOwners[$0]! }).mapValues(\.count)
@@ -389,6 +449,10 @@ final class ClusterLabRenderer {
       nextBadgeOffsets[owner] = max(nextBadgeOffsets[owner] ?? ClusterLabGeometry.badgeOffset,
                                    ClusterLabGeometry.badgeOffset + stretch)
     }
+    // Transition constructors read the last displayed badge/pill centers. When
+    // leaving native transport, first restore those viewport coordinates in the
+    // same commit, before spawning a split duplicate or calculating its travel.
+    if panLayout == nil || nextOwners != owners { materializePanTranslation() }
     let changedGroups = Set(Set(nextOwners.keys).union(owners.keys).filter { nextOwners[$0] != owners[$0] }
       .flatMap { [nextOwners[$0], owners[$0]].compactMap { $0 } })
     for owner in changedGroups {
@@ -507,6 +571,9 @@ final class ClusterLabRenderer {
 
   @discardableResult
   func render(map: MKMapView, deltaTime: Double) -> Bool {
+    materializePanTranslation()
+    reusedPanLayout = false
+    panLayout = nil
     // Many merged children share their owner's point. Cache exact projections
     // only for this synchronous render; never reuse across camera/layout frames.
     var projections: [LabProjectionKey: CGPoint] = [:]
@@ -822,10 +889,12 @@ final class ClusterLabRenderer {
       let target = clearance.offsets[motion.owner] ?? 0
       motion.clearance = motion.settled || reducedMotion ? target :
         motion.startClearance + (target - motion.startClearance) * motion.clearanceProgress
-      motion.pill?.view.transform = CGAffineTransform(translationX: 0, y: motion.clearance)
+      let transform = CGAffineTransform(translationX: 0, y: motion.clearance)
+      if let view = motion.pill?.view, view.transform != transform { view.transform = transform }
     }
     for (id, badge) in badges {
-      badge.view.transform = CGAffineTransform(translationX: 0, y: motions[id]?.clearance ?? 0)
+      let transform = CGAffineTransform(translationX: 0, y: motions[id]?.clearance ?? 0)
+      if badge.view.transform != transform { badge.view.transform = transform }
     }
     // A departing duplicate stays in its original glass family through the
     // native neck's remaining reach, independently of the recoil trigger.
@@ -922,6 +991,18 @@ final class ClusterLabRenderer {
                            "cheapestStationID": cheapestStationID ?? "",
                            "recommendedStationID": recommendedStationID ?? "",
                            "userLocation": dot.map { ["x": $0.x, "y": $0.y] } ?? [:]])
+    }
+    if !animating, !recording, map.camera.pitch == 0, projectedPoints.count >= 3,
+       motions.values.allSatisfy({ $0.settled && $0.glassParent == nil }) {
+      let padding = ClusterLabGeometry.containerPadding
+      panLayout = ClusterLabPanLayout(points: projectedPoints, owners: owners, contacts: contactOffsets,
+        groupFrames: groupFrames.mapValues { $0.offsetBy(dx: -padding, dy: -padding) },
+        // The clearance solver retains sub-0.05pt target changes. Snapshot
+        // its raw targets separately from the intentionally retained pose.
+        clearanceTargets: ClusterLabLocationClearance.targets(frames: groupFrames, dot: dot, bounds: safeBounds),
+        dot: dot.map { CGPoint(x: $0.x - padding, y: $0.y - padding) }, bounds: map.bounds,
+        safeBounds: safeBounds.offsetBy(dx: -padding, dy: -padding), mapSize: map.visibleMapRect.size, heading: map.camera.heading,
+        selected: emphasis.selectedId, dark: dark, reducedMotion: reducedMotion)
     }
     return animating
   }

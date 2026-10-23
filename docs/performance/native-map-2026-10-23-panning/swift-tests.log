@@ -1,0 +1,45 @@
+TAP version 13
+# Subtest: camera fit maximizes separation while fitting every price and count across phone sizes
+ok 1 - camera fit maximizes separation while fitting every price and count across phone sizes
+  ---
+  duration_ms: 14049.767416
+  ...
+# Subtest: native cluster masses exchange momentum and return stably at different frame rates
+ok 2 - native cluster masses exchange momentum and return stably at different frame rates
+  ---
+  duration_ms: 1213.454833
+  ...
+# Subtest: focus solves separate membership and glass without unnecessary zoom or unbounded coincident zoom
+ok 3 - focus solves separate membership and glass without unnecessary zoom or unbounded coincident zoom
+  ---
+  duration_ms: 1694.827583
+  ...
+# Subtest: native clustering preserves identities, boundary hysteresis, and gesture-timed motion
+ok 4 - native clustering preserves identities, boundary hysteresis, and gesture-timed motion
+  ---
+  duration_ms: 1335.040375
+  ...
+# Subtest: native glass groups preserve horizontal chains and isolate separated rows with shared effects
+ok 5 - native glass groups preserve horizontal chains and isolate separated rows with shared effects
+  ---
+  duration_ms: 1722.827125
+  ...
+# Subtest: location clearance stays small, clears capsules, respects edges, and settles without rebound
+ok 6 - location clearance stays small, clears capsules, respects edges, and settles without rebound
+  ---
+  duration_ms: 1212.956834
+  ...
+# Subtest: native market assessment identifies one cheapest station and scores alternatives
+ok 7 - native market assessment identifies one cheapest station and scores alternatives
+  ---
+  duration_ms: 1235.309417
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 14117.484417

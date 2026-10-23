@@ -9,6 +9,7 @@ final class ClusterLabMapAnchor {
   private(set) var rebaseCount = 0
   private var placementDeadline: CFTimeInterval = 0
   private var cameraJumpDeadline: CFTimeInterval = 0
+  private var translation = CGPoint.zero
   var needsPlacementUpdate: Bool { CACurrentMediaTime() < placementDeadline }
 
   init(container: UIView) {
@@ -42,11 +43,12 @@ final class ClusterLabMapAnchor {
     let padding = ClusterLabGeometry.containerPadding
     return ["attached": view.window != nil && view.isDescendant(of: map),
             "visible": !view.isHidden && view.alpha == 1,
-            "originError": hypot(origin.x + padding, origin.y + padding),
+            "originError": hypot(origin.x + padding - translation.x, origin.y + padding - translation.y),
             "rebaseCount": rebaseCount]
   }
 
-  func layout(map: MKMapView) {
+  func layout(map: MKMapView, translation: CGPoint? = nil) {
+    if let translation { self.translation = translation }
     guard map.bounds.width > 0, map.bounds.height > 0 else { return }
     UIView.performWithoutAnimation {
       var point = map.convert(annotation.coordinate, toPointTo: map)
@@ -76,10 +78,86 @@ final class ClusterLabMapAnchor {
       let padding = ClusterLabGeometry.containerPadding
       let size = CGSize(width: map.bounds.width + padding * 2,
                         height: map.bounds.height + padding * 2)
-      view.bounds = CGRect(origin: .zero, size: size)
-      container.frame = CGRect(x: size.width / 2 - point.x - padding,
-                               y: size.height / 2 - point.y - padding,
-                               width: size.width, height: size.height)
+      let bounds = CGRect(origin: .zero, size: size)
+      if view.bounds != bounds { view.bounds = bounds }
+      let frame = CGRect(x: size.width / 2 - point.x - padding + self.translation.x,
+                         y: size.height / 2 - point.y - padding + self.translation.y,
+                         width: size.width, height: size.height)
+      // A settled pan is carried by MapKit's annotation. Do not invalidate the
+      // glass hierarchy for subpixel cancellation noise in coordinate conversion.
+      if container.frame.size != frame.size ||
+          hypot(container.frame.minX - frame.minX, container.frame.minY - frame.minY) > 0.01 {
+        container.frame = frame
+      }
     }
+  }
+}
+
+// Immutable geometry from the last fully rendered frame. Reconciliation still
+// checks exact live ownership on every camera frame; only UIKit rendering is
+// reused. The reference never advances during reuse, so error cannot accumulate.
+struct ClusterLabPanLayout {
+  #if DEBUG
+  static var lastFailure = "not-attempted"
+  #endif
+  let points: [String: CGPoint]
+  let owners: [String: String]
+  let contacts: [String: CGFloat]
+  let groupFrames: [String: CGRect]
+  let clearanceTargets: [String: CGFloat]
+  let dot: CGPoint?
+  let bounds: CGRect
+  let safeBounds: CGRect
+  let mapSize: MKMapSize
+  let heading: Double
+  let selected: String?
+  let dark: Bool
+  let reducedMotion: Bool
+
+  func translation(points next: [String: CGPoint], owners: [String: String], contacts: [String: CGFloat],
+                   dot: CGPoint?, map: MKMapView, selected: String?, dark: Bool) -> CGPoint? {
+    #if DEBUG
+    Self.lastFailure = "camera-or-state"
+    #endif
+    guard map.camera.pitch == 0, map.camera.heading == heading,
+          abs(map.visibleMapRect.size.width / mapSize.width - 1) * bounds.width < 0.000001,
+          abs(map.visibleMapRect.size.height / mapSize.height - 1) * bounds.height < 0.000001,
+          map.bounds == bounds, map.bounds.inset(by: map.safeAreaInsets).insetBy(dx: 15, dy: 15) == safeBounds,
+          self.selected == selected, self.dark == dark, reducedMotion == UIAccessibility.isReduceMotionEnabled,
+          self.owners == owners,
+          self.contacts.count == contacts.count, self.contacts.allSatisfy({ abs($0.value - (contacts[$0.key] ?? .infinity)) < 0.00001 }),
+          points.count == next.count,
+          let first = points.first, let current = next[first.key] else { return nil }
+    #if DEBUG
+    Self.lastFailure = "projection"
+    #endif
+    let delta = CGPoint(x: current.x - first.value.x, y: current.y - first.value.y)
+    // Bound residual against the original render, including every member, not
+    // just cluster owners. Zoom/rotation/perspective always take the full path.
+    for (id, point) in points {
+      guard let p = next[id],
+            hypot(p.x - point.x - delta.x, p.y - point.y - delta.y) < 0.00001 else { return nil }
+    }
+    #if DEBUG
+    Self.lastFailure = "dot"
+    #endif
+    if let old = self.dot, let dot {
+      guard hypot(dot.x - old.x - delta.x, dot.y - old.y - delta.y) < 0.00001 else { return nil }
+    } else if (self.dot == nil) != (dot == nil) { return nil }
+    #if DEBUG
+    Self.lastFailure = "clearance"
+    #endif
+    let frames = groupFrames.mapValues { $0.offsetBy(dx: delta.x, dy: delta.y) }
+    let targets = ClusterLabLocationClearance.targets(frames: frames, dot: dot, bounds: safeBounds)
+    if let failed = targets.first(where: { abs($0.value - (clearanceTargets[$0.key] ?? 0)) >= 0.00001 }) {
+      #if DEBUG
+      Self.lastFailure = "clearance:\(failed.key):\(failed.value):\(clearanceTargets[failed.key] ?? 0)"
+      #endif
+      return nil
+    }
+    #if DEBUG
+    Self.lastFailure = "reused"
+    #endif
+    return delta
   }
 }

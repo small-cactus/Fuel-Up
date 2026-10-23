@@ -1,0 +1,39 @@
+TAP version 13
+# Subtest: cluster probe integration enforces strict smoothness, continuity, and transition coverage
+not ok 1 - cluster probe integration enforces strict smoothness, continuity, and transition coverage
+  ---
+  duration_ms: 54793.565375
+  location: '/Users/anthonyh/Desktop/Fuel Up/tests/clusterProbe.integration.test.cjs:240:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Cluster probe quality gates failed:
+    1. visible frame delta p95 too high: expected <= 1.25px, received 4.029px.
+    2. visible frame delta p99 too high: expected <= 1.75px, received 21.086px.
+    3. maxFrameDelta too high: expected <= 2px, received 47.616px.
+    4. outside layer coverage too low: expected >= 100, received 2.
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'fail'
+  stack: |-
+    TestContext.<anonymous> (/Users/anthonyh/Desktop/Fuel Up/tests/clusterProbe.integration.test.cjs:270:12)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# probe token=probe-test-1792789486258
+# probe report file=/Users/anthonyh/Library/Developer/CoreSimulator/Devices/CF633DAA-2BCF-47EA-BEA8-6E4547633A5F/data/Containers/Data/Application/234E3EC6-9D88-4681-B337-A1F6AA1CB2BF/Documents/cluster-debug-probe.json
+# samples=1247 transitions=135 maxFrameDelta=47.616px
+# visible p95=4.029px p99=21.086px max=47.616px
+# mode coverage: {"warmup":1,"stepped":1217,"one-shot":28}
+# phase coverage: {"merge_active":90,"merge_complete":5,"live":1122,"split_active":27,"split_handoff":2}
+# transition coverage: {"split-sequence-start":10,"split-duplicate-spawn":20,"split-duplicate-arrive":16,"split-handoff-complete":6,"merge-sequence-start":16,"merge-duplicate-spawn":29,"merge-accumulator-increment":26,"merge-sequence-complete":12}
+# layer coverage: {"outside":2,"accumulator":326,"mergeMover":89,"splitMover":27}
+# layer travel: {"outside":0,"accumulator":0,"mergeMover":256.81638907516447,"splitMover":101.58979529067788}
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 54866.6425

@@ -131,14 +131,17 @@ final class ClusterLabPerformanceProbe {
   private let token = ProcessInfo.processInfo.environment["FUELUP_MAP_PERFORMANCE_PROBE"]
   private var started = false
   private var phase = -1
+  private let manualPan = ProcessInfo.processInfo.environment["FUELUP_MAP_PAN_PROBE"] == "1"
+  private var recordingStart: Double = 0
+  var isManualPan: Bool { manualPan && token != nil }
   private var frames: [[String: Any]] = []
   private var stages: [[String: Any]] = []
   private var lastTime: Double?
   private(set) var ownsStations = false
 
-  func record(time: Double, reconcile: Double, render: Double, projectionRequests: Int, projectionConversions: Int) {
+  func record(time: Double, reconcile: Double, render: Double, projectionRequests: Int, projectionConversions: Int, cameraMoving: Bool, panReused: Bool = false, panError: CGFloat = 0, geometryError: CGFloat = 0) {
     guard token != nil, phase >= 0, phase < 12, frames.count < 5000 else { return }
-    frames.append(["phase": phase, "reconcileMs": reconcile * 1000,
+    frames.append(["phase": phase, "time": CACurrentMediaTime() - recordingStart, "cameraMoving": cameraMoving, "panReused": panReused, "panFailure": ClusterLabPanLayout.lastFailure, "panError": panError, "geometryError": geometryError, "reconcileMs": reconcile * 1000,
       "renderMs": render * 1000, "projectionRequests": projectionRequests, "projectionConversions": projectionConversions, "intervalMs": lastTime.map { (time - $0) * 1000 } ?? 0])
     lastTime = time
   }
@@ -179,7 +182,7 @@ final class ClusterLabPerformanceProbe {
         phase = 12
         stages.append(["phase": 12, "containers": ClusterLabGlass.containersCreated, "pills": ClusterLabGlass.pillsCreated])
         let report: [String: Any] = ["token": token!, "stationCount": view.renderer.stations.count,
-          "fixture": fixture, "frames": frames, "stages": stages,
+          "fixture": fixture, "manualPan": manualPan, "frames": frames, "stages": stages,
           "reuseChecksPassed": ClusterLabGlassGroups.verifyReuse() && ClusterLabRenderer.verifyPillReuse(),
           "presentationChecksPassed": ClusterLabPill.verifyPresentationUpdates(),
           "liveCacheValid": view.renderer.validIdlePills]
@@ -203,7 +206,17 @@ final class ClusterLabPerformanceProbe {
       view.map.setCamera(camera, animated: true)
       DispatchQueue.main.asyncAfter(deadline: .now() + 2) { step(index + 1) }
     }
-    DispatchQueue.main.asyncAfter(deadline: .now() + 1) { step(0) }
+    recordingStart = CACurrentMediaTime()
+    if manualPan {
+      phase = 0
+      let ready: [String: Any] = ["token": token!, "stationCount": view.renderer.stations.count]
+      if let data = try? JSONSerialization.data(withJSONObject: ready) {
+        try? data.write(to: documents.appendingPathComponent("map-pan-ready.json"), options: .atomic)
+      }
+      DispatchQueue.main.asyncAfter(deadline: .now() + 40) { step(12) }
+    } else {
+      DispatchQueue.main.asyncAfter(deadline: .now() + 1) { step(0) }
+    }
   }
 }
 #endif

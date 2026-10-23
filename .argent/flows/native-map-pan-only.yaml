@@ -1,0 +1,70 @@
+steps:
+  - echo: Pan the Home map right/left three times at fixed speed with no zoom or
+      momentum; keep station navigation available. Raw gestures preserve the
+      measured velocity and map-relative path.
+  - tool: run-sequence
+    args:
+      steps:
+        - tool: gesture-swipe
+          args:
+            fromX: 0.25
+            fromY: 0.4
+            toX: 0.75
+            toY: 0.4
+            durationMs: 1500
+            momentum: false
+          delayMs: 300
+        - tool: gesture-swipe
+          args:
+            fromX: 0.75
+            fromY: 0.4
+            toX: 0.25
+            toY: 0.4
+            durationMs: 1500
+            momentum: false
+          delayMs: 300
+        - tool: gesture-swipe
+          args:
+            fromX: 0.25
+            fromY: 0.4
+            toX: 0.75
+            toY: 0.4
+            durationMs: 1500
+            momentum: false
+          delayMs: 300
+        - tool: gesture-swipe
+          args:
+            fromX: 0.75
+            fromY: 0.4
+            toX: 0.25
+            toY: 0.4
+            durationMs: 1500
+            momentum: false
+          delayMs: 300
+        - tool: gesture-swipe
+          args:
+            fromX: 0.25
+            fromY: 0.4
+            toX: 0.75
+            toY: 0.4
+            durationMs: 1500
+            momentum: false
+          delayMs: 300
+        - tool: gesture-swipe
+          args:
+            fromX: 0.75
+            fromY: 0.4
+            toX: 0.25
+            toY: 0.4
+            durationMs: 1500
+            momentum: false
+          delayMs: 300
+  - tool: await-ui-element
+    args:
+      condition: visible
+      selector:
+        text: Navigate to Shell
+      timeoutMs: 5000
+executionPrerequisite: iOS native Home map at Tampa overview, portrait, station
+  cards visible; no zoom or modal. Pan-only workload with fixed velocity and no
+  momentum.

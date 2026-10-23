@@ -409,7 +409,7 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     if frameClock?.synchronizesWithCommit == false {
       fitIfNeeded()
       if !deferInitialOverlayIfNeeded() {
-        mapAnchor.layout(map: map)
+        mapAnchor.layout(map: map, translation: .zero)
         renderer.reconcile(map: map)
         needsReconcile = false
         animationMoving = renderer.render(map: map, deltaTime: 0)
@@ -460,7 +460,9 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     #if DEBUG
     let performanceStart = CACurrentMediaTime()
     #endif
-    mapAnchor.layout(map: map)
+    CATransaction.begin()
+    CATransaction.setDisableActions(true)
+    defer { CATransaction.commit() }
     if needsReconcile || cameraMoving {
       needsReconcile = false
       renderer.reconcile(map: map)
@@ -468,15 +470,20 @@ final class ClusterLabMapView: ExpoView, MKMapViewDelegate {
     #if DEBUG
     let reconcileEnd = CACurrentMediaTime()
     #endif
-    animationMoving = renderer.render(map: map, deltaTime: elapsed)
+    let panTranslation = cameraMoving && !animationMoving && probe == nil ? renderer.panTranslation(map: map) : nil
+    mapAnchor.layout(map: map, translation: panTranslation ?? .zero)
+    if panTranslation == nil { animationMoving = renderer.render(map: map, deltaTime: elapsed) }
     #if DEBUG
     launchProbe.record(reconcile: reconcileEnd - performanceStart,
                        render: CACurrentMediaTime() - reconcileEnd,
                        contentReady: contentReady, needsFit: needsCameraFit)
+    let panErrors = performanceProbe.isManualPan ? renderer.panErrors(map: map, translation: panTranslation ?? .zero) : (geometry: CGFloat(0), screen: CGFloat(0))
     performanceProbe.record(time: time, reconcile: reconcileEnd - performanceStart,
                             render: CACurrentMediaTime() - reconcileEnd,
-                            projectionRequests: renderer.projectionRequests,
-                            projectionConversions: renderer.projectionConversions)
+                            projectionRequests: panTranslation == nil ? renderer.projectionRequests : 0,
+                            projectionConversions: panTranslation == nil ? renderer.projectionConversions : 0, cameraMoving: cameraMoving,
+                            panReused: panTranslation != nil,
+                            panError: panErrors.screen, geometryError: panErrors.geometry)
     #endif
     updatePresentation()
     probe?.recordAnchor(mapAnchor.sample(map: map))

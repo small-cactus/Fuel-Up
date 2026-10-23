@@ -1,0 +1,156 @@
+{
+  "runs": [
+    {
+      "run": "control-1",
+      "stationCount": 53,
+      "fixtureSha256": "85ea6755c3a0f94ce7d5c1369b13c0e4e052bb1b6d5f6be5f38e6b8aecfb00b7",
+      "cameraFrames": 595,
+      "reusedFrames": 0,
+      "overlayCpuMs": {
+        "mean": 2.230566876597787,
+        "p50": 2.206124998338055,
+        "p95": 2.580333333753515,
+        "p99": 3.0387499973585363,
+        "max": 3.3405000031052623
+      },
+      "renderPhaseCpuMs": {
+        "mean": 1.3753398458772739,
+        "p50": 1.3629583336296491,
+        "p95": 1.6009166647563688,
+        "p99": 1.8549999986134935,
+        "max": 2.067541667202022
+      },
+      "modelIntervalMs": {
+        "mean": 16.666666666674818,
+        "p50": 16.666666666424135,
+        "p95": 16.666666670062114,
+        "p99": 16.666666670062114,
+        "max": 16.666666670062114
+      },
+      "maxGeographicLayoutErrorPt": 1.2710574864626038e-13,
+      "maxPreCommitHierarchyErrorPt": 12.001157310178424
+    },
+    {
+      "run": "control-2",
+      "stationCount": 53,
+      "fixtureSha256": "85ea6755c3a0f94ce7d5c1369b13c0e4e052bb1b6d5f6be5f38e6b8aecfb00b7",
+      "cameraFrames": 597,
+      "reusedFrames": 0,
+      "overlayCpuMs": {
+        "mean": 2.253984715301324,
+        "p50": 2.229749999969499,
+        "p95": 2.6422083319630474,
+        "p99": 3.0871249982737936,
+        "max": 3.3272083346673753
+      },
+      "renderPhaseCpuMs": {
+        "mean": 1.390247208342113,
+        "p50": 1.3719583330384921,
+        "p95": 1.6426250003860332,
+        "p99": 1.9058333346038125,
+        "max": 2.0814999988942873
+      },
+      "modelIntervalMs": {
+        "mean": 16.66666666667398,
+        "p50": 16.666666666424135,
+        "p95": 16.666666670062114,
+        "p99": 16.666666670062114,
+        "max": 16.666666670062114
+      },
+      "maxGeographicLayoutErrorPt": 1.2710574864626038e-13,
+      "maxPreCommitHierarchyErrorPt": 6.276863168452238
+    },
+    {
+      "run": "optimized-1",
+      "stationCount": 53,
+      "fixtureSha256": "85ea6755c3a0f94ce7d5c1369b13c0e4e052bb1b6d5f6be5f38e6b8aecfb00b7",
+      "cameraFrames": 597,
+      "reusedFrames": 597,
+      "overlayCpuMs": {
+        "mean": 1.119648241214696,
+        "p50": 1.1295416661596391,
+        "p95": 1.3472499995259568,
+        "p99": 1.4603750023525208,
+        "max": 1.5434583328897133
+      },
+      "renderPhaseCpuMs": {
+        "mean": 0.19896314919014987,
+        "p50": 0.1952500024344772,
+        "p95": 0.277416667813668,
+        "p99": 0.34125000092899427,
+        "max": 0.35745833520195447
+      },
+      "modelIntervalMs": {
+        "mean": 16.66666666666179,
+        "p50": 16.666666666424135,
+        "p95": 16.666666670062114,
+        "p99": 16.666666670062114,
+        "max": 16.666666670062114
+      },
+      "maxGeographicLayoutErrorPt": 2.8421709430404007e-13,
+      "maxPreCommitHierarchyErrorPt": 6.276863168452238
+    },
+    {
+      "run": "optimized-2",
+      "stationCount": 53,
+      "fixtureSha256": "85ea6755c3a0f94ce7d5c1369b13c0e4e052bb1b6d5f6be5f38e6b8aecfb00b7",
+      "cameraFrames": 596,
+      "reusedFrames": 596,
+      "overlayCpuMs": {
+        "mean": 1.1566189178122555,
+        "p50": 1.1595833348110318,
+        "p95": 1.3454166692099534,
+        "p99": 1.4399583342310507,
+        "max": 1.5464999996765982
+      },
+      "renderPhaseCpuMs": {
+        "mean": 0.20916939311003158,
+        "p50": 0.20404166571097448,
+        "p95": 0.27262500225333497,
+        "p99": 0.32054166513262317,
+        "max": 0.3714166668942198
+      },
+      "modelIntervalMs": {
+        "mean": 16.6666666666744,
+        "p50": 16.666666666424135,
+        "p95": 16.666666670062114,
+        "p99": 16.666666670062114,
+        "max": 16.666666670062114
+      },
+      "maxGeographicLayoutErrorPt": 2.3437142008433856e-13,
+      "maxPreCommitHierarchyErrorPt": 6.276863168452238
+    },
+    {
+      "run": "pan-zoom-qa",
+      "stationCount": 53,
+      "fixtureSha256": "85ea6755c3a0f94ce7d5c1369b13c0e4e052bb1b6d5f6be5f38e6b8aecfb00b7",
+      "cameraFrames": 750,
+      "reusedFrames": 641,
+      "overlayCpuMs": {
+        "mean": 1.5647071666753618,
+        "p50": 1.1735833322745748,
+        "p95": 4.307166665967088,
+        "p99": 6.979458332352806,
+        "max": 8.285541665827623
+      },
+      "renderPhaseCpuMs": {
+        "mean": 0.6281237222137861,
+        "p50": 0.2024583336606156,
+        "p95": 3.6113749993091915,
+        "p99": 5.20824999694014,
+        "max": 6.929541665158467
+      },
+      "modelIntervalMs": {
+        "mean": 16.666666666671517,
+        "p50": 16.666666666424135,
+        "p95": 16.666666670062114,
+        "p99": 16.666666670062114,
+        "max": 16.666666670062114
+      },
+      "maxGeographicLayoutErrorPt": 3.4224270219716276e-13,
+      "maxPreCommitHierarchyErrorPt": 12.643427868190765
+    }
+  ],
+  "meanOverlayCpuReductionPercent": 49.24203429527273,
+  "scope": "Same Debug binary, identical 53-station fixture, fixed recorded pan gestures. Control disables only layout reuse. No compilation or sampling profiler overlapped these runs. Model callback cadence is not presented GPU FPS."
+}

@@ -1,0 +1,1 @@
+Improved map panning performance by reusing settled gas-price glass layouts during movement. Please check smooth scrolling in dense areas, pinch zoom, cluster split/merge, and swiping station cards. Map position still stays where you leave it during location updates.

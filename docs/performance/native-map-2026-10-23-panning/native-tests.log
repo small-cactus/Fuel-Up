@@ -1,0 +1,176 @@
+
+> fuel-up@1.0.0 test:cluster:native
+> node --test --test-concurrency=1 ./tests/mapProbeRoute.test.cjs ./tests/mapCameraPersistence.integration.test.cjs ./tests/mapLaunch.integration.test.cjs ./tests/clusterLabProbe.integration.test.cjs
+
+TAP version 13
+# Subtest: Swift Glass Lab renders timely transitions and preserves native container geometry
+ok 1 - Swift Glass Lab renders timely transitions and preserves native container geometry
+  ---
+  duration_ms: 28175.410416
+  ...
+# 27 native connection frames during committed merges; no false parent bridges
+# Visible contact resistance 4.17pt over 12 samples
+# Native stretch: 15 separated samples before recoil; release gaps 27.6, 42.4, 73.4, 39.4, 45.2, 29.2, 79.2, 77.9, 41.9, 39.5pt
+# Main price recoil 19.07pt; 55 identity-bound outward copies
+# Maximum rendered rebound 18.00pt
+# Longest transition 281ms; maximum measured travel 81.95pt/frame
+# 1650 native frames; 112 transitions; /Users/anthonyh/Library/Developer/CoreSimulator/Devices/CF633DAA-2BCF-47EA-BEA8-6E4547633A5F/data/Containers/Data/Application/234E3EC6-9D88-4681-B337-A1F6AA1CB2BF/Documents/cluster-lab-probe.json
+# Subtest: connected +1 moves outward before its split is triggered
+ok 2 - connected +1 moves outward before its split is triggered
+  ---
+  duration_ms: 28152.771042
+  ...
+# Connected +1 travelled 17.99pt; 148 intact intermediate frames before split
+# Subtest: native map carrier stays attached across long pans and camera jumps
+ok 3 - native map carrier stays attached across long pans and camera jumps
+  ---
+  duration_ms: 28485.759167
+  ...
+# 17 native carrier rebases; maximum surface offset 0.373pt
+# Subtest: stacked stations split without an intermediate connected count stretch
+ok 4 - stacked stations split without an intermediate connected count stretch
+  ---
+  duration_ms: 28349.9375
+  ...
+# 403 close vertical frames in separate native effects
+# 912 connected vertical frames without count stretch; 2 splits
+# Subtest: initial camera fit shows every station and count within safe margins on its first rendered frame
+ok 5 - initial camera fit shows every station and count within safe margins on its first rendered frame
+  ---
+  duration_ms: 2433.019334
+  ...
+# 120 fitted frames; minimum side clearance beyond 17pt inset: -0.00pt
+# Subtest: native user location stays visible with a nearby price and count gently displaced
+ok 6 - native user location stays visible with a nearby price and count gently displaced
+  ---
+  duration_ms: 2602.774792
+  ...
+# 120 frames with a native blue dot and bounded shared price/count clearance
+# Subtest: stacked price/count rows do not reconnect diagonally through their badges
+ok 7 - stacked price/count rows do not reconnect diagonally through their badges
+  ---
+  duration_ms: 28108.495333
+  ...
+# 283 close stacked row frames with horizontal glass intact and vertical effects isolated
+# Subtest: staggered neighboring clusters stay independent while their own price and count blend
+ok 8 - staggered neighboring clusters stay independent while their own price and count blend
+  ---
+  duration_ms: 28225.648208
+  ...
+# 390 close diagonal frames with independent clusters and intact native price/count blending
+# Subtest: native focus isolates a chip with north camera heading
+ok 9 - native focus isolates a chip with north camera heading
+  ---
+  duration_ms: 4685.445292
+  ...
+# Focus calculation and camera request: 9.93ms
+# 47 intermediate map frames; largest zoom step 6.2%
+# Native zoom 8.07x; center error 0.001pt
+# Subtest: native focus isolates a chip with rotated camera heading
+ok 10 - native focus isolates a chip with rotated camera heading
+  ---
+  duration_ms: 4473.247291
+  ...
+# Focus calculation and camera request: 8.10ms
+# 47 intermediate map frames; largest zoom step 4.5%
+# Native zoom 8.10x; center error 0.001pt
+# Subtest: focused pill size retargets continuously without moving its map anchor or adding views
+ok 11 - focused pill size retargets continuously without moving its map anchor or adding views
+  ---
+  duration_ms: 3734.281333
+  ...
+# 29 intermediate sizes; maximum width step 3.68pt
+# Subtest: Show all restores the fitted overview after north focus and interruption
+ok 12 - Show all restores the fitted overview after north focus and interruption
+  ---
+  duration_ms: 6517.922334
+  ...
+# 54 intermediate overview camera frames; all six stations visible and normal-sized
+# Subtest: Show all restores the fitted overview after rotated focus and interruption
+ok 13 - Show all restores the fitted overview after rotated focus and interruption
+  ---
+  duration_ms: 6401.661458
+  ...
+# 54 intermediate overview camera frames; all six stations visible and normal-sized
+# Subtest: Show all restores the fitted overview after layout focus and interruption
+ok 14 - Show all restores the fitted overview after layout focus and interruption
+  ---
+  duration_ms: 6398.390209
+  ...
+# 54 intermediate overview camera frames; all six stations visible and normal-sized
+# Subtest: Show all restores identical cluster membership and glass after repeated focus, zoom-out and rotation
+ok 15 - Show all restores identical cluster membership and glass after repeated focus, zoom-out and rotation
+  ---
+  duration_ms: 16761.759833
+  ...
+# Six overview returns preserved membership, native glass connections, tint and geometry
+# Subtest: one station ID owns green through 50 rapid zoom cycles and a changed cheapest quote
+ok 16 - one station ID owns green through 50 rapid zoom cycles and a changed cheapest quote
+  ---
+  duration_ms: 37807.459917
+  ...
+# 2220 native frames; 121 splits; 182 merges; green remained exclusive to the current cheapest ID
+# Subtest: touching price capsules combine while nearby independent counts cannot form false necks
+ok 17 - touching price capsules combine while nearby independent counts cannot form false necks
+  ---
+  duration_ms: 7709.911458
+  ...
+# Both contact arrangements combined on each return; independent count neighbor remained isolated
+# Subtest: overview fits the live user dot outside the station envelope
+ok 18 - overview fits the live user dot outside the station envelope
+  ---
+  duration_ms: 2390.692375
+  ...
+# 120 live frames include the outside user dot and all six stations
+# Subtest: personalized recommendation exclusively owns green across 50 zoom cycles and a ranking change
+ok 19 - personalized recommendation exclusively owns green across 50 zoom cycles and a ranking change
+  ---
+  duration_ms: 38132.399125
+  ...
+# 2220 live frames; 171 splits and 205 merges; recommendation stayed green
+# Subtest: E85 glass stays yellow through live split and merge without tinting other stations
+ok 20 - E85 glass stays yellow through live split and merge without tinting other stations
+  ---
+  duration_ms: 28194.797209
+  ...
+# {"samples":[{"distance":91821.62124689491,"heading":0,"latitude":27.89072425321954,"longitude":-82.44969680434292,"phase":"overview_before","pitch":0},{"distance":91821.62124689491,"heading":0,"latitude":27.89072425321954,"longitude":-82.44969680434292,"phase":"overview_after","pitch":0},{"distance":55092.97274813694,"heading":24.999999999999996,"latitude":27.910724253219538,"longitude":-82.46969680434292,"phase":"panned_before","pitch":0},{"distance":55092.97274813694,"heading":24.999999999999996,"latitude":27.910724253219538,"longitude":-82.46969680434292,"phase":"panned_after","pitch":0},{"distance":40818.58204168317,"heading":24.99999999999997,"latitude":27.925641682062327,"longitude":-82.41534930019192,"phase":"selected_before","pitch":0},{"distance":40818.58204168317,"heading":24.99999999999997,"latitude":27.925641682062327,"longitude":-82.41534930019192,"phase":"selected_after","pitch":0},{"distance":91825.86290913109,"heading":0,"latitude":27.885643529262637,"longitude":-82.44969680434292,"phase":"show_all","pitch":0}],"selected":true,"showAll":true,"token":"camera-1792789436332"}
+# Subtest: live map preserves camera through location and station updates, while explicit selection still moves it
+ok 21 - live map preserves camera through location and station updates, while explicit selection still moves it
+  ---
+  duration_ms: 26627.667667
+  ...
+# Live startup: 1 fits, first inset 393pt, 8 visible frames
+# Subtest: cold launch presents chips only after the measured card and initial camera fit
+ok 22 - cold launch presents chips only after the measured card and initial camera fit
+  ---
+  duration_ms: 19070.256834
+  ...
+# Subtest: standard iOS probe stays on native MapKit and forwards its token
+ok 23 - standard iOS probe stays on native MapKit and forwards its token
+  ---
+  duration_ms: 0.395458
+  ...
+# Subtest: explicit legacy runner retains its original live map and cannot also start native probe
+ok 24 - explicit legacy runner retains its original live map and cannot also start native probe
+  ---
+  duration_ms: 0.058792
+  ...
+# Subtest: existing native bookmarks work, and release cannot run debug fixtures
+ok 25 - existing native bookmarks work, and release cannot run debug fixtures
+  ---
+  duration_ms: 0.104
+  ...
+# Subtest: native probe flags preserve route normalization for shared and repeated links
+ok 26 - native probe flags preserve route normalization for shared and repeated links
+  ---
+  duration_ms: 0.067375
+  ...
+1..26
+# tests 26
+# suites 0
+# pass 26
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 383710.235666

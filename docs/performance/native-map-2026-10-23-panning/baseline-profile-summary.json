@@ -1,0 +1,187 @@
+{
+  "mainThreadSamples": 3032,
+  "rawTraceSha256": "1b8858ccfa47383e912b9233cd0bb4d52ff250983f9b46004d3203bb181bcbcd",
+  "inclusiveTopFrames": [
+    [
+      "_CFRunLoopRunSpecificWithOptions",
+      3008
+    ],
+    [
+      "static UIApplicationDelegate.main()",
+      3008
+    ],
+    [
+      "__CFRunLoopRun",
+      3008
+    ],
+    [
+      "start",
+      3008
+    ],
+    [
+      "UIApplicationMain",
+      3008
+    ],
+    [
+      "-[UIApplication _run]",
+      3008
+    ],
+    [
+      "GSEventRunModal",
+      3008
+    ],
+    [
+      "static AppDelegate.$main()",
+      3008
+    ],
+    [
+      "__debug_main_executable_dylib_entry_point",
+      3008
+    ],
+    [
+      "0x18564a7bc",
+      3008
+    ],
+    [
+      "start_sim",
+      3008
+    ],
+    [
+      "__CFRunLoopDoSource1",
+      2699
+    ],
+    [
+      "__CFRUNLOOP_IS_CALLING_OUT_TO_A_SOURCE1_PERFORM_FUNCTION__",
+      2698
+    ],
+    [
+      "UC::DriverCore::continueProcessing()",
+      2639
+    ],
+    [
+      "schedulerStepScheduledMainSectionContinue",
+      2635
+    ],
+    [
+      "_UIUpdateSequenceRunNext",
+      2630
+    ],
+    [
+      "__CFMachPortPerform",
+      2572
+    ],
+    [
+      "thunk for @escaping @callee_guaranteed (@guaranteed UIUpdateLink, @guaranteed UIUpdateInfo) -> ()",
+      1275
+    ],
+    [
+      "__activateActionListItem_block_invoke",
+      1275
+    ],
+    [
+      "closure #1 in ClusterLabFrameClock.init(view:tick:)",
+      1275
+    ],
+    [
+      "closure #1 in ClusterLabMapView.startFrames()",
+      1273
+    ],
+    [
+      "ClusterLabMapView.tick(_:)",
+      1272
+    ],
+    [
+      "CA::Display::DisplayLink::dispatch_deferred_display_links(unsigned int)",
+      984
+    ],
+    [
+      "CA::Display::DisplayLinkItem::dispatch_(CA::SignPost::Interval<(CA::SignPost::CAEventCode)835322056>&)",
+      983
+    ],
+    [
+      "CA::Display::DisplayLink::dispatch_items(unsigned long long, unsigned long long, unsigned long long)",
+      983
+    ],
+    [
+      "std::__1::__function::__func<md::MapEngine::MapEngineDisplayLinkCaller, void (double)>::operator()(double&&)",
+      921
+    ],
+    [
+      "-[_GGLDisplayLinkTarget displayLinkFired:]",
+      921
+    ],
+    [
+      "ggl::DisplayLink::onTimerFired(double)",
+      921
+    ],
+    [
+      "md::MapEngine::onRenderTimerFired(double, std::__1::function<void ()>)",
+      920
+    ],
+    [
+      "md::MapEngine::renderSceneSync(double)",
+      918
+    ],
+    [
+      "md::MapEngine::renderScene(double, std::__1::function<void ()>, std::__1::function<void ()>)",
+      918
+    ],
+    [
+      "ClusterLabRenderer.render(map:deltaTime:)",
+      649
+    ],
+    [
+      "ecs2::FlowExecutor::run()",
+      586
+    ],
+    [
+      "gdc::tf::Executor::_runWithContext(geo::IntrusiveNodeGraph<gdc::tf::TaskData> const&, gdc::Context*)",
+      586
+    ],
+    [
+      "gdc::tf::Executor::invokeNode(geo::WrappedIntrusiveNode<gdc::tf::TaskData>)",
+      584
+    ],
+    [
+      "std::__1::__function::__func<RuntimeTaskRunner, void (gdc::Context&)>::operator()(gdc::Context&)",
+      577
+    ],
+    [
+      "_dispatch_client_callout",
+      558
+    ],
+    [
+      "ClusterLabRenderer.reconcile(map:)",
+      535
+    ],
+    [
+      "md::MapEngineFrameService::dispatch(geo::handle<void>, std::__1::function<void ()>)",
+      534
+    ],
+    [
+      "<deduplicated_symbol>",
+      402
+    ],
+    [
+      "geo::TaskQueue::barrierSync(std::__1::function<void ()>)",
+      383
+    ],
+    [
+      "_dispatch_async_and_wait_f",
+      382
+    ],
+    [
+      "_dispatch_async_and_wait_recurse",
+      382
+    ],
+    [
+      "md::MapEngine::runUpdatePhase(double, bool)",
+      382
+    ],
+    [
+      "_dispatch_async_and_wait_invoke_and_complete_recurse",
+      377
+    ]
+  ],
+  "method": "Inclusive stack occurrence counts, unweighted samples. Discovery trace includes idle time and profiling overhead; not timing comparison. React 28.35s trace recorded 2 commits and 114 fiber renders. Automated native analyzer missed app attribution; raw trace was resolved by id/ref and filtered to app main thread."
+}
