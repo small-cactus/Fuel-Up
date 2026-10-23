@@ -1,0 +1,74 @@
+TAP version 13
+# (node:15914) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/screens/home/mapCamera.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: fit bounds include the user and every station, discarding invalid locations
+ok 1 - fit bounds include the user and every station, discarding invalid locations
+  ---
+  duration_ms: 0.6705
+  ...
+# Subtest: unchanged targets and GPS jitter do not restart native animation
+ok 2 - unchanged targets and GPS jitter do not restart native animation
+  ---
+  duration_ms: 0.320667
+  ...
+# Subtest: camera padding reserves measured cards, tab bar and header
+ok 3 - camera padding reserves measured cards, tab bar and header
+  ---
+  duration_ms: 0.364084
+  ...
+# Subtest: standard iOS probe stays on native MapKit and forwards its token
+ok 4 - standard iOS probe stays on native MapKit and forwards its token
+  ---
+  duration_ms: 0.498042
+  ...
+# Subtest: explicit legacy runner retains its original live map and cannot also start native probe
+ok 5 - explicit legacy runner retains its original live map and cannot also start native probe
+  ---
+  duration_ms: 0.161125
+  ...
+# Subtest: existing native bookmarks work, and release cannot run debug fixtures
+ok 6 - existing native bookmarks work, and release cannot run debug fixtures
+  ---
+  duration_ms: 0.201542
+  ...
+# Subtest: native probe flags preserve route normalization for shared and repeated links
+ok 7 - native probe flags preserve route normalization for shared and repeated links
+  ---
+  duration_ms: 0.208417
+  ...
+# Subtest: iOS production excludes legacy screens while development retains the real map probe
+ok 8 - iOS production excludes legacy screens while development retains the real map probe
+  ---
+  duration_ms: 374.708542
+  ...
+# Subtest: native Release configurations optimize widgets without changing Debug
+ok 9 - native Release configurations optimize widgets without changing Debug
+  ---
+  duration_ms: 1.24375
+  ...
+# Subtest: Release packaging prunes only generated assets and respects skipped bundling
+ok 10 - Release packaging prunes only generated assets and respects skipped bundling
+  ---
+  duration_ms: 27.81625
+  ...
+# Subtest: station tap preserves exact selected station and timing, without serializing unrelated provider data
+ok 11 - station tap preserves exact selected station and timing, without serializing unrelated provider data
+  ---
+  duration_ms: 1.385208
+  ...
+# Subtest: map events are bounded and malformed numeric values are omitted
+ok 12 - map events are bounded and malformed numeric values are omitted
+  ---
+  duration_ms: 0.952
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 586.851625

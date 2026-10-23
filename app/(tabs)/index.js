@@ -5,7 +5,7 @@ import HomeScreen from '../../src/screens/cluster-lab/ClusterLabScreen';
 
 export default function HomeRoute() {
     const { isClusterProbeSessionActive, hideRootReveal } = useAppState();
-    // Retain the original live probe and non-iOS fallback. Normal iOS launches
+    // Retain the explicit legacy live probe and non-iOS fallback. Normal iOS launches
     // use the native glass map without mounting the previous map or its fetches.
     const useLegacyMap = Platform.OS !== 'ios' || (__DEV__ && isClusterProbeSessionActive);
     useEffect(() => {

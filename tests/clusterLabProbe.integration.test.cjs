@@ -87,7 +87,9 @@ test('Swift Glass Lab renders timely transitions and preserves native container 
     const token = `native-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    // Exercise the standard Home probe route, which must use native MapKit on
+    // iOS rather than mounting the retained React Native regression screen.
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 75000;
     while (Date.now() < deadline) {
@@ -237,7 +239,7 @@ test('connected +1 moves outward before its split is triggered', { timeout: 9000
     const token = `pair-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 75000;
     while (Date.now() < deadline) {
@@ -282,7 +284,7 @@ test('native map carrier stays attached across long pans and camera jumps', { ti
     const token = `anchor-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 75000;
     while (Date.now() < deadline) {
@@ -318,7 +320,7 @@ test('stacked stations split without an intermediate connected count stretch', {
     const token = `vertical-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 75000;
     while (Date.now() < deadline) {
@@ -366,7 +368,7 @@ test('initial camera fit shows every station and count within safe margins on it
     const token = `fit-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 20000;
     while (Date.now() < deadline) {
@@ -406,7 +408,7 @@ test('native user location stays visible with a nearby price and count gently di
     const token = `location-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 20000;
     while (Date.now() < deadline) {
@@ -445,7 +447,7 @@ test('stacked price/count rows do not reconnect diagonally through their badges'
     const token = `rows-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 75000;
     while (Date.now() < deadline) {
@@ -482,7 +484,7 @@ test('staggered neighboring clusters stay independent while their own price and 
     const token = `islands-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 75000;
     while (Date.now() < deadline) {
@@ -519,7 +521,7 @@ for (const orientation of ['north', 'rotated']) {
         const token = `focus-${orientation}-${Date.now()}`;
         const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
         const file = path.join(container, 'Documents/cluster-lab-probe.json');
-        execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+        execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
         let report;
         const deadline = Date.now() + 20000;
         while (Date.now() < deadline) {
@@ -577,7 +579,7 @@ test('focused pill size retargets continuously without moving its map anchor or 
     const token = `emphasis-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 20000;
     while (Date.now() < deadline) {
@@ -623,7 +625,7 @@ for (const heading of ['north', 'rotated', 'layout']) {
         const token = `overview-${heading}-${Date.now()}`;
         const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
         const file = path.join(container, 'Documents/cluster-lab-probe.json');
-        execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+        execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
         let report;
         const deadline = Date.now() + 20000;
         while (Date.now() < deadline) {
@@ -691,7 +693,7 @@ test('Show all restores identical cluster membership and glass after repeated fo
     const token = `roundtrip-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 35000;
     while (Date.now() < deadline) {
@@ -727,7 +729,7 @@ test('one station ID owns green through 50 rapid zoom cycles and a changed cheap
     const token = `rapid-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 50000;
     while (Date.now() < deadline) {
@@ -776,7 +778,7 @@ test('touching price capsules combine while nearby independent counts cannot for
     const token = `contact-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 20000;
     while (Date.now() < deadline) {
@@ -817,7 +819,7 @@ test('overview fits the live user dot outside the station envelope', { timeout: 
     const token = `fit-user-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 20000;
     while (Date.now() < deadline) {
@@ -856,7 +858,7 @@ test('personalized recommendation exclusively owns green across 50 zoom cycles a
     const token = `rapid-recommended-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 50000;
     while (Date.now() < deadline) {
@@ -893,7 +895,7 @@ test('E85 glass stays yellow through live split and merge without tinting other 
     const token = `yellow-${Date.now()}`;
     const container = execFileSync('xcrun', ['simctl', 'get_app_container', device, 'com.anthonyh.fuelup', 'data'], { encoding: 'utf8' }).trim();
     const file = path.join(container, 'Documents/cluster-lab-probe.json');
-    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///cluster-lab?clusterLabProbe=${token}`]);
+    execFileSync('xcrun', ['simctl', 'openurl', device, `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`]);
     let report;
     const deadline = Date.now() + 75000;
     while (Date.now() < deadline) {

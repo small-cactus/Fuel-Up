@@ -17,6 +17,7 @@ import StationCardCarousel from './StationCardCarousel';
 import FuelUpHeaderLogo from '../../components/FuelUpHeaderLogo';
 import TopCanopy from '../../components/TopCanopy';
 import useNetworkStatus from '../../lib/useNetworkStatus';
+import { nativeMapProbeToken } from './mapProbeRoute.cjs';
 
 const NativeMap = Platform.OS === 'ios' ? requireNativeViewManager('FuelUpMapKitRouting') : null;
 const EMPTY_ORIGIN = {};
@@ -35,7 +36,7 @@ export default function HomeScreen() {
     const { origin, stations, loaded, error } = useClusterLabStations(active);
     useEffect(() => { if (error) onboardingHandoff.fail(new Error('Could not load nearby prices. Check your connection and try Save again.')); }, [error]);
     const mapReady = useCallback(() => { finishLaunch(); onboardingHandoff.mapReady(); }, []);
-    const { clusterLabProbe } = useLocalSearchParams();
+    const probeParams = useLocalSearchParams();
     const map = useRef(null);
     const carousel = useRef(null);
     const [selectedId, setSelectedId] = useState(null);
@@ -104,7 +105,7 @@ export default function HomeScreen() {
             onStationSelect={mapSelected}
             onResearchMapInteraction={event => { void recordResearchInteraction('map_gesture', event.nativeEvent); }}
             onOverviewChange={overviewChanged}
-            probeToken={__DEV__ && typeof clusterLabProbe === 'string' ? clusterLabProbe : null}
+            probeToken={nativeMapProbeToken(probeParams, __DEV__)}
         />
         {stations.length > 0 && <StationCardCarousel ref={carousel} stations={stations} selectedId={selection}
             active={active} bottom={insets.bottom + 12} fuelGrade={preferences.preferredOctane}

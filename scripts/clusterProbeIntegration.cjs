@@ -122,7 +122,7 @@ function triggerProbe(token) {
         'simctl',
         'openurl',
         SIMULATOR_UDID,
-        `fuelup:///?clusterProbe=1&clusterProbeToken=${token}`,
+        `fuelup:///?clusterProbe=1&legacyClusterProbe=1&clusterProbeToken=${token}`,
     ]);
 }
 

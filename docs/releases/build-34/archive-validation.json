@@ -1,0 +1,28 @@
+{
+  "bundles": [
+    {
+      "bundle": "com.anthonyh.fuelup",
+      "version": "1.0.0",
+      "build": "34",
+      "signatureValid": true,
+      "aps": "development",
+      "debugAllowed": true
+    },
+    {
+      "bundle": "com.anthonyh.fuelup.notifications",
+      "version": "1.0.0",
+      "build": "34",
+      "signatureValid": true,
+      "aps": null,
+      "debugAllowed": true
+    },
+    {
+      "bundle": "com.anthonyh.fuelup.ExpoWidgetsTarget",
+      "version": "1.0.0",
+      "build": "34",
+      "signatureValid": true,
+      "aps": null,
+      "debugAllowed": true
+    }
+  ]
+}

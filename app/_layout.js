@@ -16,6 +16,7 @@ import ProgressiveBlurReveal from '../src/components/ProgressiveBlurReveal';
 import '../src/lib/predictiveLocation';
 import LaunchSplash, { useLaunchReady } from '../src/components/LaunchSplash';
 import { finishLaunch } from '../src/lib/launchReadiness';
+import { usesLegacyMapProbe } from '../src/screens/cluster-lab/mapProbeRoute.cjs';
 import {
     resetLocationProbeLaunchOverrides,
     setLocationProbeLaunchOverrides,
@@ -99,6 +100,7 @@ function AppGate() {
         clusterProbeRequest,
         isClusterProbeSessionActive,
         requestClusterProbe,
+        finishClusterProbeSession,
         rootRevealPhase,
         rootRevealVersion,
         hideRootReveal,
@@ -208,6 +210,14 @@ function AppGate() {
             );
 
             if (!isProbeUrl) {
+                return;
+            }
+
+            // The usual iOS probe link now stays on native MapKit. Only the
+            // explicit legacy regression runner may mount the older map.
+            if (!usesLegacyMapProbe(queryParams, Platform.OS)) {
+                lastClusterProbeUrlRef.current = url;
+                finishClusterProbeSession();
                 return;
             }
 
@@ -345,7 +355,7 @@ function AppGate() {
             urlSubscription.remove();
             clearInterval(intervalId);
         };
-    }, [requestClusterProbe]);
+    }, [requestClusterProbe, finishClusterProbeSession]);
 
     const predictiveBackendPreferences = useMemo(() => ({
         searchRadiusMiles: preferences.searchRadiusMiles,
