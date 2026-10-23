@@ -1,0 +1,11 @@
+# Build 36 — less repeated map frame work
+
+Avoids unchanged native pill layout/style assignments and reuses exact MapKit projections within each rendered frame. Camera behavior, glass, grouping and motion trajectories are retained.
+
+Compared with build 35 in the matched Debug simulator workload, repeat-cycle median overlay CPU fell 21.2%, repeat p95 fell 6.7%, and first-cycle p95 fell 7.8%. Render-path map conversions fell 85.82%. Peak CPU was nearly unchanged. These are not physical-phone FPS measurements. See the [performance report](../../performance/native-map-2026-10-23-followup/README.md).
+
+Validation: all 26 native integration/routing checks, 165 standard tests on final rerun, and seven native unit runners passed. Touch pan/zoom replay and one-off Light/Dark/Light UI inspection passed. The unchanged legacy debug renderer gate still fails; that renderer is excluded from shipping Release. No gate was weakened.
+
+The first export was rejected by our local validation because the notification extension retained build 35. Its generated Info.plist was corrected to 36 before a fresh archive/export; no mismatched package was uploaded. A fresh archive and export succeeded; all three bundles passed strict distribution-signature and version checks. Debugging is disabled, APNs is production, and native benchmark code is absent from the release executable. Apple accepted the upload on October 23, 2026 at 14:59 EDT. The existing non-blocking missing Hermes dSYM warning remains; Hermes crash symbolication may be incomplete. Safari App Store Connect confirms **Testing**, assigned to Fuel Up Internal Testing (1 tester) and Fuel Up External Testing (6 testers), with seven invites. Testing notes were saved, external submission completed, and Automatically notify testers was enabled. This confirms tester availability, not installation or notification delivery on each phone. See `testflight-distribution.json`. Source checkpoint: `1afb53c` on `master`.
+
+Archive: `/Users/anthonyh/Library/Developer/Xcode/Archives/2026-10-23/FuelUp-36.xcarchive`. Export: `/tmp/FuelUp-TestFlight-36-export/FuelUp.ipa`. Logs: `/tmp/fuelup-map-build36/`. The failed first package was removed after successful validation; active caches and final archive are preserved. Session-owned Metro and Argent simulator services were stopped.
