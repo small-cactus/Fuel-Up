@@ -1,0 +1,44 @@
+Prerequisite: iOS Home native map loaded at initial Tampa overview with station cards visible, simulator portrait, no modal. Run immediately after launch for cold overlay; repeat for warm overlay.
+Running flow "native-map-cold-pan-zoom" on CF633DAA-2BCF-47EA-BEA8-6E4547633A5F (3 steps)
+[1] ✓ On native Home map, zoom in/out and pan right/left. Fixed map-centered gestures test cold glass and tile rendering; expect Home and station cards retained.
+[2] ✓ run-sequence (7.0s)
+{
+  "completed": 4,
+  "total": 4,
+  "steps": [
+    {
+      "tool": "gesture-pinch",
+      "result": {
+        "pinched": true,
+        "timestampMs": 1792785491017
+      }
+    },
+    {
+      "tool": "gesture-pinch",
+      "result": {
+        "pinched": true,
+        "timestampMs": 1792785493149
+      }
+    },
+    {
+      "tool": "gesture-swipe",
+      "result": {
+        "swiped": true,
+        "timestampMs": 1792785494760
+      }
+    },
+    {
+      "tool": "gesture-swipe",
+      "result": {
+        "swiped": true,
+        "timestampMs": 1792785496332
+      }
+    }
+  ]
+}
+[3] ✓ await-ui-element (0.3s)
+{
+  "success": true,
+  "elapsed": 251
+}
+PASS — 2 passed, 0 failed, 0 errored, 0 skipped (8.1s)

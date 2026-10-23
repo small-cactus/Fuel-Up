@@ -1,0 +1,851 @@
+
+<repo>/app/(tabs)/_layout.js
+  20:25  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+
+<repo>/app/(tabs)/settings.js
+   73:32  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+   79:35  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+   85:39  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  108:36  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  128:35  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  148:45  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  201:26  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  204:28  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  216:25  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  217:25  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  217:37  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  221:25  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  221:48  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  223:25  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  225:25  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  227:25  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  228:25  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  228:44  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  229:25  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  230:25  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  236:30  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+
+<repo>/app/(tabs)/trends.js
+  357:26   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  361:24   warning  JSX attribute values should not contain objects created in the same scope                       react-perf/jsx-no-new-object-as-prop
+  362:22   warning  JSX attribute values should not contain objects created in the same scope                       react-perf/jsx-no-new-object-as-prop
+  368:28   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  368:58   warning  Inline style: { zIndex: 2 }                                                                     react-native/no-inline-styles
+  373:32   warning  JSX attribute values should not contain objects created in the same scope                       react-perf/jsx-no-new-object-as-prop
+  374:30   warning  JSX attribute values should not contain objects created in the same scope                       react-perf/jsx-no-new-object-as-prop
+  382:44   warning  JSX attribute values should not contain objects created in the same scope                       react-perf/jsx-no-new-object-as-prop
+  386:25   warning  JSX attribute values should not contain other JSX                                               react-perf/jsx-no-jsx-as-prop
+  390:37   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  398:42   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  402:119  warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  405:98   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  409:54   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  409:84   warning  Inline style: {
+  backgroundColor: "isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'"
+}   react-native/no-inline-styles
+  409:84   warning  Color literal: {
+  backgroundColor: "isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'"
+}  react-native/no-color-literals
+  410:54   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  410:84   warning  Inline style: {
+  backgroundColor: "isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'"
+}   react-native/no-inline-styles
+  410:84   warning  Color literal: {
+  backgroundColor: "isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'"
+}  react-native/no-color-literals
+  411:56   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  429:54   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  436:54   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  448:54   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  448:84   warning  Inline style: {
+  backgroundColor: "isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'"
+}   react-native/no-inline-styles
+  448:84   warning  Color literal: {
+  backgroundColor: "isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'"
+}  react-native/no-color-literals
+  451:54   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  451:79   warning  Inline style: {
+  backgroundColor: "isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'"
+}   react-native/no-inline-styles
+  451:79   warning  Color literal: {
+  backgroundColor: "isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'"
+}  react-native/no-color-literals
+  452:54   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  452:79   warning  Inline style: {
+  backgroundColor: "isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'"
+}   react-native/no-inline-styles
+  452:79   warning  Color literal: {
+  backgroundColor: "isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'"
+}  react-native/no-color-literals
+  458:85   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  475:54   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+  483:30   warning  JSX attribute values should not contain Arrays created in the same scope                        react-perf/jsx-no-new-array-as-prop
+
+<repo>/app/_layout.js
+  408:29  warning  JSX attribute values should not contain objects created in the same scope                               react-perf/jsx-no-new-object-as-prop
+  408:29  warning  Inline style: { flex: 1 }                                                                               react-native/no-inline-styles
+  417:49  warning  JSX attribute values should not contain objects created in the same scope                               react-perf/jsx-no-new-object-as-prop
+  426:30  warning  JSX attribute values should not contain objects created in the same scope                               react-perf/jsx-no-new-object-as-prop
+  433:45  warning  JSX attribute values should not contain objects created in the same scope                               react-perf/jsx-no-new-object-as-prop
+  433:45  warning  Inline style: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  zIndex: 1000
+}  react-native/no-inline-styles
+  455:34  warning  JSX attribute values should not contain objects created in the same scope                               react-perf/jsx-no-new-object-as-prop
+  455:34  warning  Inline style: { flex: 1 }                                                                               react-native/no-inline-styles
+
+<repo>/app/cluster-lab.js
+  7:28  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+
+<repo>/app/driving-research.js
+  15:25  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  16:32  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+
+<repo>/app/prices-sheet.js
+  34:50  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+  43:34  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  44:34  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/components/BottomCanopy.js
+  16:43  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  22:24  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+
+<repo>/src/components/BrandPreferences.js
+  33:55  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  33:70  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  45:33  warning  JSX attribute values should not contain other JSX                            react-perf/jsx-no-jsx-as-prop
+  48:33  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  48:47  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+
+<repo>/src/components/ClusterDebugCard.js
+   48:26  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   49:26  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   75:35  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+   75:35  warning  Inline style: { style: 'regular', animate: true, animationDuration: 0.2 }  react-native/no-inline-styles
+   82:30  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   88:38  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  112:38  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  120:42  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  126:34  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  135:32  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  146:32  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  157:32  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  222:19  warning  Color literal: { backgroundColor: '#34C759' }                              react-native/no-color-literals
+  225:17  warning  Color literal: { backgroundColor: '#FF3B30' }                              react-native/no-color-literals
+  228:18  warning  Color literal: { backgroundColor: '#007AFF' }                              react-native/no-color-literals
+  234:23  warning  Color literal: { color: '#FFFFFF' }                                        react-native/no-color-literals
+
+<repo>/src/components/FuelSummaryCard.js
+  9:59  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+
+<repo>/src/components/FuelSummaryCardFallback.js
+  119:45  warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+  123:25  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  123:32  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  139:50  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  140:54  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  144:44  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  156:52  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  174:40  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  183:40  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  198:36  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  205:42  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  210:32  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  219:40  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  231:48  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  243:48  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  257:38  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  271:11  warning  Color literal: { shadowColor: 'transparent' }                                react-native/no-color-literals
+  421:19  warning  Color literal: { color: '#FFFFFF' }                                          react-native/no-color-literals
+
+<repo>/src/components/FuelUpHeaderLogo.js
+  17:20  warning  JSX attribute values should not contain Arrays created in the same scope  react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/components/LaunchSplash.js
+  52:50  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  52:60  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  55:16  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  55:31  warning  Inline style: { backgroundColor: "isDark ? '#000000' : '#FFFFFF'" }          react-native/no-inline-styles
+  55:31  warning  Color literal: { backgroundColor: "isDark ? '#000000' : '#FFFFFF'" }         react-native/no-color-literals
+  57:13  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  57:24  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  58:20  warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+  58:20  warning  Inline style: { width: '100%', height: '100%' }                              react-native/no-inline-styles
+
+<repo>/src/components/PredictedPriceFlag.js
+  23:25  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  47:17  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  60:13  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  65:26  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/components/ProgressiveBlurReveal.js
+  258:20  warning  JSX attribute values should not contain Arrays created in the same scope  react-perf/jsx-no-new-array-as-prop
+  267:26  warning  Do not use Array index in keys                                            react/no-array-index-key
+
+<repo>/src/components/TopCanopy.js
+  21:43  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  27:24  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+
+<repo>/src/components/cluster/ClusterMarkerOverlay.js
+   69:31  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                                                                           react-perf/jsx-no-new-array-as-prop
+   71:26  warning  JSX attribute values should not contain objects created in the same scope                                                                                                                                                                                          react-perf/jsx-no-new-object-as-prop
+   71:26  warning  Inline style: {
+  color: "isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)'",
+  fontSize: 12,
+  marginRight: 4
+}                                                                                                                                                react-native/no-inline-styles
+   71:26  warning  Color literal: { color: "isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)'" }                                                                                                                                                                                   react-native/no-color-literals
+   73:32  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                                                                           react-perf/jsx-no-new-array-as-prop
+   78:31  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                                                                           react-perf/jsx-no-new-array-as-prop
+   85:24  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                                                                           react-perf/jsx-no-new-array-as-prop
+  275:6   warning  React Hook useEffect has a missing dependency: 'invalidateTransitionWork'. Either include it or remove the dependency array                                                                                                                                        react-hooks/exhaustive-deps
+  497:6   warning  React Hook useEffect has missing dependencies: 'applyLiveClusterPresentation', 'emitTransitionEvent', 'invalidateTransitionWork', 'mapRegion', 'outsideTargets', 'runMergeQueueStep', and 'runSplitQueueStep'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  587:6   warning  React Hook useEffect has missing dependencies: 'mergeProgress.value' and 'splitProgress.value'. Either include them or remove the dependency array                                                                                                                 react-hooks/exhaustive-deps
+  616:14  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                                                                           react-perf/jsx-no-new-array-as-prop
+  618:9   warning  Inline style: { zIndex: 'isActive ? 3 : isBest ? 2 : 1' }                                                                                                                                                                                                          react-native/no-inline-styles
+  630:16  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                                                                           react-perf/jsx-no-new-array-as-prop
+  640:18  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                                                                           react-perf/jsx-no-new-array-as-prop
+  663:20  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                                                                           react-perf/jsx-no-new-array-as-prop
+  690:20  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                                                                           react-perf/jsx-no-new-array-as-prop
+  716:20  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                                                                           react-perf/jsx-no-new-array-as-prop
+  741:54  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                                                                           react-perf/jsx-no-new-array-as-prop
+  756:54  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                                                                           react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/components/cluster/StationMarker.js
+   83:19  warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+   87:15  warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+   88:7   warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+   88:48  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+   92:67  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  102:28  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/components/dev/NativeDevForm.js
+    60:23  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+    88:24  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   278:20  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+   278:20  warning  Inline style: { flex: 1 }                                                  react-native/no-inline-styles
+   284:50  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   292:25  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   299:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   309:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   319:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   329:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   343:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   351:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   359:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   369:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   379:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   391:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   399:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   412:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   422:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   432:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   447:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   459:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   467:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   475:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   483:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   493:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   505:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   517:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   525:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   533:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   541:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   552:59  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   552:78  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   559:25  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   721:25  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   728:44  warning  Do not use Array index in keys                                             react/no-array-index-key
+   747:25  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   756:67  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   756:86  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   764:25  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   773:33  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   791:25  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   800:36  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   804:63  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   814:36  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   818:63  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   826:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   842:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   876:25  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   886:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   909:38  warning  Do not use Array index in keys                                             react/no-array-index-key
+   911:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   927:25  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   940:62  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   940:81  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   947:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   956:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   963:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   976:25  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+   985:36  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   989:63  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1006:75  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1006:94  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1014:63  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1014:82  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1021:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1030:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1039:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1048:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1062:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1069:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1076:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1089:25  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1096:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1109:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1136:25  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1143:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1160:71  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1160:76  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1167:71  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1167:76  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1189:29  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1201:40  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1205:67  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1213:33  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1235:41  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1242:41  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1251:41  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1265:41  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1272:41  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1279:41  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1333:39  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1334:39  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1344:25  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1353:36  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1357:63  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1367:36  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1371:63  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1394:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1411:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1418:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1440:25  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1449:36  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1453:63  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1463:36  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1467:63  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  1489:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1496:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1503:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1515:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1522:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1529:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1536:37  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+  1549:44  warning  Do not use Array index in keys                                             react/no-array-index-key
+  1558:25  warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+
+<repo>/src/components/memberships/MembershipSection.js
+  18:21  warning  JSX attribute values should not contain other JSX                            react-perf/jsx-no-jsx-as-prop
+  25:17  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  25:31  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+
+<repo>/src/components/native/GlassActionButton.js
+  13:29  warning  JSX attribute values should not contain objects created in the same scope                                                                                                  react-perf/jsx-no-new-object-as-prop
+  13:60  warning  JSX attribute values should not contain objects created in the same scope                                                                                                  react-perf/jsx-no-new-object-as-prop
+  13:60  warning  Inline style: {
+  minHeight: 44,
+  padding: 12,
+  borderRadius: 22,
+  backgroundColor: "prominent ? '#007AFF' : isDark ? '#333333' : '#EEEEEE'",
+  alignItems: 'center'
+}  react-native/no-inline-styles
+  13:60  warning  Color literal: {
+  backgroundColor: "prominent ? '#007AFF' : isDark ? '#333333' : '#EEEEEE'"
+}                                                                             react-native/no-color-literals
+  14:24  warning  JSX attribute values should not contain objects created in the same scope                                                                                                  react-perf/jsx-no-new-object-as-prop
+  14:24  warning  Inline style: { fontSize: 16, fontWeight: '600' }                                                                                                                          react-native/no-inline-styles
+  16:66  warning  JSX attribute values should not contain objects created in the same scope                                                                                                  react-perf/jsx-no-new-object-as-prop
+  17:68  warning  JSX attribute values should not contain objects created in the same scope                                                                                                  react-perf/jsx-no-new-object-as-prop
+  17:68  warning  Inline style: { width: '100%' }                                                                                                                                            react-native/no-inline-styles
+  19:67  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                   react-perf/jsx-no-new-array-as-prop
+  25:58  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                   react-perf/jsx-no-new-array-as-prop
+  28:34  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                   react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/components/native/NativeStationCard.js
+  28:54  warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+  29:16  warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+  29:16  warning  Inline style: { width: '100%' }                                              react-native/no-inline-styles
+  29:35  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  29:52  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  30:56  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  34:74  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  47:48  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  49:29  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  49:38  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  52:80  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  63:46  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  69:34  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/components/settings/BrandPreferencesSheet.js
+  12:26  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  13:38  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+  14:40  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  15:42  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/components/settings/NativeSettingsForm.js
+   67:5   warning  preferredBrands has a/an array literal as default prop. This could lead to potential infinite render loop in React. Use a variable reference instead of array literal  react/no-object-type-as-default-prop
+   68:5   warning  fuelMemberships has a/an array literal as default prop. This could lead to potential infinite render loop in React. Use a variable reference instead of array literal  react/no-object-type-as-default-prop
+   88:20  warning  JSX attribute values should not contain objects created in the same scope                                                                                              react-perf/jsx-no-new-object-as-prop
+   88:20  warning  Inline style: { flex: 1 }                                                                                                                                              react-native/no-inline-styles
+   97:29  warning  JSX attribute values should not contain other JSX                                                                                                                      react-perf/jsx-no-jsx-as-prop
+  101:40  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                               react-perf/jsx-no-new-array-as-prop
+  116:29  warning  JSX attribute values should not contain other JSX                                                                                                                      react-perf/jsx-no-jsx-as-prop
+  117:44  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                               react-perf/jsx-no-new-array-as-prop
+  126:29  warning  JSX attribute values should not contain other JSX                                                                                                                      react-perf/jsx-no-jsx-as-prop
+  127:44  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                               react-perf/jsx-no-new-array-as-prop
+  135:25  warning  JSX props should not use arrow functions                                                                                                                               react/jsx-no-bind
+  135:40  warning  JSX attribute values should not contain functions created in the same scope                                                                                            react-perf/jsx-no-new-function-as-prop
+  156:25  warning  JSX props should not use arrow functions                                                                                                                               react/jsx-no-bind
+  156:44  warning  JSX attribute values should not contain functions created in the same scope                                                                                            react-perf/jsx-no-new-function-as-prop
+  163:63  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                               react-perf/jsx-no-new-array-as-prop
+  172:25  warning  JSX props should not use arrow functions                                                                                                                               react/jsx-no-bind
+  172:34  warning  JSX attribute values should not contain functions created in the same scope                                                                                            react-perf/jsx-no-new-function-as-prop
+  177:25  warning  JSX props should not use arrow functions                                                                                                                               react/jsx-no-bind
+  177:44  warning  JSX attribute values should not contain functions created in the same scope                                                                                            react-perf/jsx-no-new-function-as-prop
+  184:63  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                               react-perf/jsx-no-new-array-as-prop
+  194:25  warning  JSX attribute values should not contain other JSX                                                                                                                      react-perf/jsx-no-jsx-as-prop
+  195:40  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                               react-perf/jsx-no-new-array-as-prop
+  206:25  warning  JSX props should not use arrow functions                                                                                                                               react/jsx-no-bind
+  206:34  warning  JSX attribute values should not contain functions created in the same scope                                                                                            react-perf/jsx-no-new-function-as-prop
+  224:25  warning  JSX props should not use arrow functions                                                                                                                               react/jsx-no-bind
+  224:34  warning  JSX attribute values should not contain functions created in the same scope                                                                                            react-perf/jsx-no-new-function-as-prop
+  233:25  warning  JSX props should not use arrow functions                                                                                                                               react/jsx-no-bind
+  233:34  warning  JSX attribute values should not contain functions created in the same scope                                                                                            react-perf/jsx-no-new-function-as-prop
+  243:25  warning  JSX props should not use arrow functions                                                                                                                               react/jsx-no-bind
+  243:34  warning  JSX attribute values should not contain functions created in the same scope                                                                                            react-perf/jsx-no-new-function-as-prop
+  246:25  warning  JSX props should not use arrow functions                                                                                                                               react/jsx-no-bind
+  246:34  warning  JSX attribute values should not contain functions created in the same scope                                                                                            react-perf/jsx-no-new-function-as-prop
+  257:32  warning  JSX attribute values should not contain other JSX                                                                                                                      react-perf/jsx-no-jsx-as-prop
+  259:43  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                               react-perf/jsx-no-new-array-as-prop
+  261:32  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                               react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/lib/PriceDropActivityLivePreview.jsx
+  129:28  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  150:24  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  165:24  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  180:28  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  189:40  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  199:44  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  222:32  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  231:44  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  233:32  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  241:32  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  257:32  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  263:28  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  268:32  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  278:32  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  290:28  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  297:36  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  311:36  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  322:36  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  345:22  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  367:22  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  397:22  warning  JSX attribute values should not contain Arrays created in the same scope        react-perf/jsx-no-new-array-as-prop
+  399:30  warning  JSX attribute values should not contain objects created in the same scope       react-perf/jsx-no-new-object-as-prop
+  399:30  warning  Inline style: { width: '100%', height: 24 }                                     react-native/no-inline-styles
+  405:30  warning  JSX attribute values should not contain objects created in the same scope       react-perf/jsx-no-new-object-as-prop
+  405:30  warning  Inline style: { width: '100%', height: 24 }                                     react-native/no-inline-styles
+  414:22  warning  Color literal: { backgroundColor: 'rgba(28,28,30,0.92)', shadowColor: '#000' }  react-native/no-color-literals
+  431:37  warning  Color literal: { backgroundColor: '#000000' }                                   react-native/no-color-literals
+  452:36  warning  Color literal: { backgroundColor: '#000000' }                                   react-native/no-color-literals
+
+<repo>/src/screens/LegacyHomeScreen.js
+   355:8   warning  React Hook useEffect has a missing dependency: 'queueHomeRefitRequest'. Either include it or remove the dependency array                                                                                               react-hooks/exhaustive-deps
+   695:8   warning  React Hook useEffect has a missing dependency: 'applyResolvedRegion'. Either include it or remove the dependency array                                                                                                 react-hooks/exhaustive-deps
+  2050:8   warning  React Hook useEffect has missing dependencies: 'cancelInitialHomeFitRetries' and 'resetMapMotionTracking'. Either include them or remove the dependency array                                                          react-hooks/exhaustive-deps
+  2063:8   warning  React Hook useEffect has a missing dependency: 'clearVisibleFuelState'. Either include it or remove the dependency array                                                                                               react-hooks/exhaustive-deps
+  2128:8   warning  React Hook useEffect has missing dependencies: 'location', 'queueHomeRefitRequest', 'refreshForCurrentView', and 'resetHomeSelectionToBest'. Either include them or remove the dependency array                        react-hooks/exhaustive-deps
+  2363:8   warning  React Hook useEffect has a missing dependency: 'stationQuotesSignature'. Either include it or remove the dependency array                                                                                              react-hooks/exhaustive-deps
+  2562:8   warning  React Hook useEffect has missing dependencies: 'commitSettledHomeLayout', 'fitMapToStations', 'requestLaunchVisualReadyAfterIdle', and 'triggerRevealOnMapLoaded'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  2577:8   warning  React Hook useEffect has a missing dependency: 'requestLaunchVisualReadyAfterIdle'. Either include it or remove the dependency array                                                                                   react-hooks/exhaustive-deps
+  2675:8   warning  React Hook useCallback has a missing dependency: 'cameraPadding'. Either include it or remove the dependency array                                                                                                     react-hooks/exhaustive-deps
+  2715:8   warning  React Hook useCallback has missing dependencies: 'animateToTrackingOverview' and 'primeCommittedSelectionMapMotion'. Either include them or remove the dependency array                                                react-hooks/exhaustive-deps
+  2746:8   warning  React Hook useCallback has missing dependencies: 'animateToTrackingOverview' and 'primeCommittedSelectionMapMotion'. Either include them or remove the dependency array                                                react-hooks/exhaustive-deps
+  2957:8   warning  React Hook useEffect has a missing dependency: 'triggerRevealOnMapLoaded'. Either include it or remove the dependency array                                                                                            react-hooks/exhaustive-deps
+  2964:8   warning  React Hook useEffect has missing dependencies: 'cancelInitialHomeFitRetries' and 'resetMapMotionTracking'. Either include them or remove the dependency array                                                          react-hooks/exhaustive-deps
+  3062:8   warning  React Hook useEffect has missing dependencies: 'commitSettledHomeLayout', 'resetHomeSelectionToBest', and 'resetMapMotionTracking'. Either include them or remove the dependency array                                 react-hooks/exhaustive-deps
+  3158:22  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                               react-perf/jsx-no-new-array-as-prop
+  3166:21  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3166:33  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3169:21  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3169:34  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3172:21  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3172:43  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3194:21  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3194:32  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3198:21  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3198:37  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3205:21  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3205:45  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3291:24  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                               react-perf/jsx-no-new-array-as-prop
+  3301:21  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3301:30  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3309:32  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                               react-perf/jsx-no-new-array-as-prop
+  3319:36  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                               react-perf/jsx-no-new-array-as-prop
+  3333:24  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                               react-perf/jsx-no-new-array-as-prop
+  3346:17  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3346:27  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3350:24  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                               react-perf/jsx-no-new-array-as-prop
+  3352:21  warning  Inline style: { justifyContent: 'center', alignItems: 'center' }                                                                                                                                                       react-native/no-inline-styles
+  3361:25  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3361:34  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3372:32  warning  JSX attribute values should not contain objects created in the same scope                                                                                                                                              react-perf/jsx-no-new-object-as-prop
+  3379:42  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                               react-perf/jsx-no-new-array-as-prop
+  3386:34  warning  JSX attribute values should not contain objects created in the same scope                                                                                                                                              react-perf/jsx-no-new-object-as-prop
+  3395:29  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3395:41  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3410:25  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3410:39  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3411:48  warning  JSX attribute values should not contain objects created in the same scope                                                                                                                                              react-perf/jsx-no-new-object-as-prop
+  3411:48  warning  Inline style: { alignItems: 'center' }                                                                                                                                                                                 react-native/no-inline-styles
+  3418:25  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3418:44  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3419:25  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3419:46  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3422:25  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3422:42  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3431:25  warning  JSX props should not use arrow functions                                                                                                                                                                               react/jsx-no-bind
+  3431:37  warning  JSX attribute values should not contain functions created in the same scope                                                                                                                                            react-perf/jsx-no-new-function-as-prop
+  3449:34  warning  JSX attribute values should not contain objects created in the same scope                                                                                                                                              react-perf/jsx-no-new-object-as-prop
+  3469:28  warning  JSX attribute values should not contain Arrays created in the same scope                                                                                                                                               react-perf/jsx-no-new-array-as-prop
+  3550:5   warning  Unused style detected: styles.priceOverlay                                                                                                                                                                             react-native/no-unused-styles
+  3559:5   warning  Unused style detected: styles.clusterContainer                                                                                                                                                                         react-native/no-unused-styles
+  3564:5   warning  Unused style detected: styles.bubbleBase                                                                                                                                                                               react-native/no-unused-styles
+  3572:5   warning  Unused style detected: styles.primaryBubbleShell                                                                                                                                                                       react-native/no-unused-styles
+  3576:5   warning  Unused style detected: styles.bubblePositioner                                                                                                                                                                         react-native/no-unused-styles
+  3585:5   warning  Unused style detected: styles.rowItem                                                                                                                                                                                  react-native/no-unused-styles
+  3589:5   warning  Unused style detected: styles.bubbleContentRow                                                                                                                                                                         react-native/no-unused-styles
+  3592:5   warning  Unused style detected: styles.bubbleFillRow                                                                                                                                                                            react-native/no-unused-styles
+  3597:5   warning  Unused style detected: styles.priceText                                                                                                                                                                                react-native/no-unused-styles
+  3601:5   warning  Unused style detected: styles.bestPriceText                                                                                                                                                                            react-native/no-unused-styles
+  3604:5   warning  Unused style detected: styles.priceIcon                                                                                                                                                                                react-native/no-unused-styles
+
+<repo>/src/screens/OnboardingScreen.js
+  24:18   warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  47:105  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  47:179  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  47:195  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+
+<repo>/src/screens/OnboardingScreen.legacy.js
+   86:26  warning  JSX attribute values should not contain functions created in the same scope                                                      react-perf/jsx-no-new-function-as-prop
+  190:28  warning  JSX attribute values should not contain functions created in the same scope                                                      react-perf/jsx-no-new-function-as-prop
+  226:34  warning  JSX attribute values should not contain functions created in the same scope                                                      react-perf/jsx-no-new-function-as-prop
+  241:22  warning  JSX attribute values should not contain Arrays created in the same scope                                                         react-perf/jsx-no-new-array-as-prop
+  250:21  warning  JSX props should not use arrow functions                                                                                         react/jsx-no-bind
+  281:26  warning  JSX attribute values should not contain Arrays created in the same scope                                                         react-perf/jsx-no-new-array-as-prop
+  285:34  warning  Do not use Array index in keys                                                                                                   react/no-array-index-key
+  286:36  warning  JSX attribute values should not contain Arrays created in the same scope                                                         react-perf/jsx-no-new-array-as-prop
+  289:33  warning  Inline style: {
+  backgroundColor: "i === currentStep ? '#007AFF' : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')"
+}   react-native/no-inline-styles
+  289:33  warning  Color literal: {
+  backgroundColor: "i === currentStep ? '#007AFF' : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')"
+}  react-native/no-color-literals
+  298:25  warning  JSX props should not use arrow functions                                                                                         react/jsx-no-bind
+  312:49  warning  JSX attribute values should not contain objects created in the same scope                                                        react-perf/jsx-no-new-object-as-prop
+  313:29  warning  JSX props should not use arrow functions                                                                                         react/jsx-no-bind
+  314:42  warning  JSX attribute values should not contain Arrays created in the same scope                                                         react-perf/jsx-no-new-array-as-prop
+  322:24  warning  JSX attribute values should not contain Arrays created in the same scope                                                         react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/screens/cluster-lab/ClusterLabScreen.js
+  106:13  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  106:39  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+
+<repo>/src/screens/cluster-lab/StationCardCarousel.js
+   73:47  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+   74:13  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+   74:23  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+   76:17  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+   76:27  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+   78:24  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+   84:24  warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+   84:24  warning  Inline style: { flexGrow: 0 }                                                react-native/no-inline-styles
+   85:56  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+   85:70  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+   86:17  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+   86:32  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+   88:17  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+   88:36  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+   89:17  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+   89:38  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+   90:17  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+   90:34  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+   94:17  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+   94:29  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+   94:69  warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+   94:69  warning  Inline style: { paddingHorizontal: 16 }                                      react-native/no-inline-styles
+   97:25  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+   97:35  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  108:17  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  108:31  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+
+<repo>/src/screens/home/AnimatedCardItem.js
+  37:22  warning  JSX attribute values should not contain objects created in the same scope                                   react-perf/jsx-no-new-object-as-prop
+  37:22  warning  Inline style: { paddingHorizontal: 4 }                                                                      react-native/no-inline-styles
+  53:28  warning  JSX attribute values should not contain Arrays created in the same scope                                    react-perf/jsx-no-new-array-as-prop
+  53:29  warning  Inline style: {
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  left: 4,
+  right: 4,
+  borderRadius: 32
+}  react-native/no-inline-styles
+
+<repo>/src/screens/home/useClusterProbe.js
+  592:8  warning  React Hook useEffect has missing dependencies: 'isAnimatingRef', 'mapRef', and 'setMapMotionState'. Either include them or remove the dependency array. If 'setMapMotionState' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+  651:8  warning  React Hook useEffect has missing dependencies: 'handleRunClusterDebugProbe', 'location', 'mapRef', and 'mapRegion'. Either include them or remove the dependency array                                                                                                               react-hooks/exhaustive-deps
+  678:8  warning  React Hook useEffect has a missing dependency: 'flushMapIdleWaiters'. Either include it or remove the dependency array. If 'flushMapIdleWaiters' changes too often, find the parent component that defines it and wrap that definition in useCallback                                react-hooks/exhaustive-deps
+
+<repo>/src/screens/onboarding/BrandStep.js
+   7:22  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+   7:22  warning  Inline style: { flex: 1 }                                                  react-native/no-inline-styles
+   8:26  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+   9:30  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  10:30  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/screens/onboarding/ExamplePricePill.js
+  10:52  warning  JSX attribute values should not contain objects created in the same scope                                   react-perf/jsx-no-new-object-as-prop
+  10:52  warning  Inline style: {
+  padding: 10,
+  borderRadius: 20,
+  backgroundColor: "cheapest ? '#A8EBAE' : '#F4BDB4'"
+}  react-native/no-inline-styles
+  10:52  warning  Color literal: { backgroundColor: "cheapest ? '#A8EBAE' : '#F4BDB4'" }                                      react-native/no-color-literals
+  11:24  warning  JSX attribute values should not contain objects created in the same scope                                   react-perf/jsx-no-new-object-as-prop
+  11:24  warning  Inline style: { fontWeight: '700', color: '#111111' }                                                       react-native/no-inline-styles
+  11:24  warning  Color literal: { color: '#111111' }                                                                         react-native/no-color-literals
+  14:40  warning  JSX attribute values should not contain Arrays created in the same scope                                    react-perf/jsx-no-new-array-as-prop
+  18:34  warning  JSX attribute values should not contain Arrays created in the same scope                                    react-perf/jsx-no-new-array-as-prop
+  20:40  warning  JSX attribute values should not contain Arrays created in the same scope                                    react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/screens/onboarding/FuelGradeStep.js
+  11:22   warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+  11:22   warning  Inline style: { flex: 1 }                                                  react-native/no-inline-styles
+  12:26   warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  14:30   warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  15:30   warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  17:26   warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+  17:26   warning  Inline style: { flex: 1 }                                                  react-native/no-inline-styles
+  20:109  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  22:105  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  26:38   warning  JSX attribute values should not contain other JSX                          react-perf/jsx-no-jsx-as-prop
+
+<repo>/src/screens/onboarding/LiveActivityPreview.js
+  17:52   warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+  17:52   warning  Inline style: { backgroundColor: '#252525', padding: 20, borderRadius: 24 }  react-native/no-inline-styles
+  17:52   warning  Color literal: { backgroundColor: '#252525' }                                react-native/no-color-literals
+  18:24   warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+  18:24   warning  Inline style: { color: '#FFFFFF' }                                           react-native/no-inline-styles
+  18:24   warning  Color literal: { color: '#FFFFFF' }                                          react-native/no-color-literals
+  22:54   warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+  22:100  warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+  22:100  warning  Inline style: { width: '100%' }                                              react-native/no-inline-styles
+  23:61   warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  26:58   warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  33:38   warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/screens/onboarding/LocationStep.js
+   18:57   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+   18:149  warning  JSX attribute values should not contain objects created in the same scope                      react-perf/jsx-no-new-object-as-prop
+   18:149  warning  Inline style: { paddingBottom: 24 }                                                            react-native/no-inline-styles
+   20:26   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+   22:30   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+   23:30   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+   28:26   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+   28:47   warning  Inline style: { justifyContent: 'flex-start', marginTop: 32 }                                  react-native/no-inline-styles
+   31:36   warning  Do not use Array index in keys                                                                 react/no-array-index-key
+   32:98   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+   32:138  warning  Inline style: {
+  backgroundColor: "isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'"
+}   react-native/no-inline-styles
+   32:138  warning  Color literal: {
+  backgroundColor: "isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'"
+}  react-native/no-color-literals
+   35:42   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+   44:28   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+   58:34   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+   66:18   warning  Color literal: { backgroundColor: 'transparent' }                                              react-native/no-color-literals
+  121:15   warning  Color literal: { backgroundColor: 'rgba(0, 122, 255, 0.1)' }                                   react-native/no-color-literals
+
+<repo>/src/screens/onboarding/NativeOnboarding.js
+  15:58   warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+  15:58   warning  Inline style: { flex: 1, display: "visible ? 'flex' : 'none'" }              react-native/no-inline-styles
+  16:106  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  16:116  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+
+<repo>/src/screens/onboarding/NotificationStep.js
+  15:62   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+  15:154  warning  JSX attribute values should not contain objects created in the same scope                      react-perf/jsx-no-new-object-as-prop
+  15:154  warning  Inline style: { paddingBottom: 24 }                                                            react-native/no-inline-styles
+  17:26   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+  19:30   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+  20:30   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+  25:26   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+  25:47   warning  Inline style: { gap: 24, justifyContent: 'flex-start', marginTop: 32 }                         react-native/no-inline-styles
+  30:30   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+  30:67   warning  Inline style: { paddingBottom: 0 }                                                             react-native/no-inline-styles
+  32:36   warning  Do not use Array index in keys                                                                 react/no-array-index-key
+  33:98   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+  33:138  warning  Inline style: {
+  backgroundColor: "isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'"
+}   react-native/no-inline-styles
+  33:138  warning  Color literal: {
+  backgroundColor: "isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'"
+}  react-native/no-color-literals
+  36:42   warning  JSX attribute values should not contain Arrays created in the same scope                       react-perf/jsx-no-new-array-as-prop
+  48:18   warning  Color literal: { backgroundColor: 'transparent' }                                              react-native/no-color-literals
+
+<repo>/src/screens/onboarding/RadiusControl.js
+  12:20   warning  JSX attribute values should not contain functions created in the same scope                               react-perf/jsx-no-new-function-as-prop
+  12:20   warning  JSX attribute values should not contain functions created in the same scope                               react-perf/jsx-no-new-function-as-prop
+  13:52   warning  JSX attribute values should not contain objects created in the same scope                                 react-perf/jsx-no-new-object-as-prop
+  13:52   warning  Inline style: {
+  padding: 20,
+  borderRadius: 24,
+  backgroundColor: "isDark ? '#252525' : '#EEEEEE'"
+}  react-native/no-inline-styles
+  13:52   warning  Color literal: { backgroundColor: "isDark ? '#252525' : '#EEEEEE'" }                                      react-native/no-color-literals
+  14:24   warning  JSX attribute values should not contain objects created in the same scope                                 react-perf/jsx-no-new-object-as-prop
+  14:24   warning  Inline style: { fontSize: 32, textAlign: 'center' }                                                       react-native/no-inline-styles
+  16:75   warning  JSX props should not use arrow functions                                                                  react/jsx-no-bind
+  18:54   warning  JSX attribute values should not contain objects created in the same scope                                 react-perf/jsx-no-new-object-as-prop
+  18:121  warning  JSX attribute values should not contain objects created in the same scope                                 react-perf/jsx-no-new-object-as-prop
+  18:121  warning  Inline style: { width: '100%' }                                                                           react-native/no-inline-styles
+  19:40   warning  JSX attribute values should not contain Arrays created in the same scope                                  react-perf/jsx-no-new-array-as-prop
+  21:30   warning  JSX attribute values should not contain Arrays created in the same scope                                  react-perf/jsx-no-new-array-as-prop
+  23:31   warning  JSX props should not use arrow functions                                                                  react/jsx-no-bind
+  23:54   warning  JSX props should not use arrow functions                                                                  react/jsx-no-bind
+  23:72   warning  JSX attribute values should not contain functions created in the same scope                               react-perf/jsx-no-new-function-as-prop
+  24:28   warning  JSX attribute values should not contain Arrays created in the same scope                                  react-perf/jsx-no-new-array-as-prop
+  25:32   warning  JSX attribute values should not contain Arrays created in the same scope                                  react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/screens/onboarding/RadiusStep.js
+  19:28  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+  19:28  warning  Inline style: { flex: 1 }                                                  react-native/no-inline-styles
+  20:36  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+  20:36  warning  Inline style: { flexGrow: 1 }                                              react-native/no-inline-styles
+  21:26  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  22:30  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  23:30  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  33:34  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  33:52  warning  Inline style: { padding: 24 }                                              react-native/no-inline-styles
+  36:26  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+  36:26  warning  Inline style: { margin: 24 }                                               react-native/no-inline-styles
+
+<repo>/src/screens/onboarding/WelcomeStep.js
+   26:24  warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+   26:24  warning  Inline style: { position: 'absolute' }                                       react-native/no-inline-styles
+   35:17  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+   35:30  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+   38:17  warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+   38:41  warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+   54:34  warning  Do not use Array index in keys                                               react/no-array-index-key
+   55:41  warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+   74:26  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+   77:28  warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+   77:28  warning  Inline style: { width: 64, height: 64, borderRadius: 14 }                    react-native/no-inline-styles
+   81:30  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  111:18  warning  Color literal: { backgroundColor: 'transparent' }                            react-native/no-color-literals
+
+<repo>/src/screens/onboarding/predictive/PredictiveFuelingStep.js
+  22:59  warning  JSX attribute values should not contain objects created in the same scope           react-perf/jsx-no-new-object-as-prop
+  22:59  warning  Inline style: { backgroundColor: "isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND" }   react-native/no-inline-styles
+  22:59  warning  Color literal: { backgroundColor: "isDark ? '#000000' : LIGHT_SCREEN_BACKGROUND" }  react-native/no-color-literals
+  23:36  warning  JSX attribute values should not contain Arrays created in the same scope            react-perf/jsx-no-new-array-as-prop
+  27:30  warning  JSX attribute values should not contain Arrays created in the same scope            react-perf/jsx-no-new-array-as-prop
+  28:30  warning  JSX attribute values should not contain Arrays created in the same scope            react-perf/jsx-no-new-array-as-prop
+  37:84  warning  JSX attribute values should not contain objects created in the same scope           react-perf/jsx-no-new-object-as-prop
+  43:26  warning  JSX attribute values should not contain Arrays created in the same scope            react-perf/jsx-no-new-array-as-prop
+  47:34  warning  JSX attribute values should not contain Arrays created in the same scope            react-perf/jsx-no-new-array-as-prop
+  48:34  warning  JSX attribute values should not contain Arrays created in the same scope            react-perf/jsx-no-new-array-as-prop
+  54:34  warning  JSX attribute values should not contain Arrays created in the same scope            react-perf/jsx-no-new-array-as-prop
+  55:34  warning  JSX attribute values should not contain Arrays created in the same scope            react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/screens/trends/NationalTrendPrices.js
+  19:94  warning  JSX attribute values should not contain Arrays created in the same scope  react-perf/jsx-no-new-array-as-prop
+  29:3   warning  Unused style detected: styles.loading                                     react-native/no-unused-styles
+
+<repo>/src/screens/trends/NativeTrendLeaderboard.js
+  23:51   warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+  23:118  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+  23:118  warning  Inline style: { width: '100%' }                                            react-native/no-inline-styles
+  24:64   warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  29:109  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  47:106  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  51:72   warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  60:76   warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  69:127  warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/screens/trends/ObservedPriceChart.js
+  45:43  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+
+<repo>/src/screens/trends/TrendLeaderboardFallback.js
+  14:26   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  15:83   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  15:109  warning  Inline style: { fontWeight: "isDark ? '700' : '800'" }                                       react-native/no-inline-styles
+  16:30   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  24:58   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  27:38   warning  Inline style: { borderTopColor: "isDark ? '#333' : '#EEE'" }                                 react-native/no-inline-styles
+  27:38   warning  Color literal: { borderTopColor: "isDark ? '#333' : '#EEE'" }                                react-native/no-color-literals
+  29:38   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  30:42   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  31:46   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  31:71   warning  Inline style: { fontWeight: "isDark ? '600' : '700'" }                                       react-native/no-inline-styles
+  34:50   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  34:67   warning  Inline style: {
+  fontSize: 'index < 3 ? 18 : 13',
+  fontWeight: "isDark ? '600' : '700'"
+}  react-native/no-inline-styles
+  38:42   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  39:46   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  42:67   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  44:54   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  49:38   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  50:42   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  50:84   warning  Inline style: { fontWeight: "isDark ? '700' : '800'" }                                       react-native/no-inline-styles
+  51:151  warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  52:54   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  54:46   warning  JSX attribute values should not contain Arrays created in the same scope                     react-perf/jsx-no-new-array-as-prop
+  54:63   warning  Inline style: { fontSize: 13, fontWeight: '600' }                                            react-native/no-inline-styles
+
+<repo>/src/screens/trends/TrendLeaderboardSkeleton.js
+   7:139  warning  JSX attribute values should not contain objects created in the same scope  react-perf/jsx-no-new-object-as-prop
+   9:26   warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  14:30   warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  14:50   warning  Inline style: { width: "index === 1 ? '65%' : '80%'" }                     react-native/no-inline-styles
+  15:30   warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+  17:26   warning  JSX attribute values should not contain Arrays created in the same scope   react-perf/jsx-no-new-array-as-prop
+
+<repo>/src/screens/trends/TrendScopeControl.js
+  13:24   warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  14:9    warning  JSX attribute values should not contain other JSX                            react-perf/jsx-no-jsx-as-prop
+  14:40   warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  15:34   warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  21:101  warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  22:34   warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  23:34   warning  JSX attribute values should not contain Arrays created in the same scope     react-perf/jsx-no-new-array-as-prop
+  27:146  warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+  29:8    warning  JSX props should not use arrow functions                                     react/jsx-no-bind
+  29:17   warning  JSX attribute values should not contain functions created in the same scope  react-perf/jsx-no-new-function-as-prop
+  30:26   warning  JSX attribute values should not contain objects created in the same scope    react-perf/jsx-no-new-object-as-prop
+  30:26   warning  Inline style: { fontWeight: "value === scope ? '700' : '400'" }              react-native/no-inline-styles
+
+<repo>/src/screens/trends/useNationalLeaderboard.js
+  50:6  warning  React Hook useCallback has a missing dependency: 'resetToken'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+<repo>/src/screens/trends/useTrendData.js
+  156:15  warning  React Hook useMemo has unnecessary dependencies: 'enabled' and 'freshnessTick'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+
+<repo>/src/services/fuel/index.js
+  463:5  warning  Unused eslint-disable directive (no problems were reported from 'no-unused-vars')
+
+✖ 672 problems (0 errors, 672 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

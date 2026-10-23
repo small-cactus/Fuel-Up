@@ -1,0 +1,3 @@
+Reduces initial map setup work by waiting for the measured station card and fitted camera before creating station glass.
+
+Please test the first launch after updating, immediate map panning and zooming, swiping between station cards, Show All, and returning from the background. Station coverage and camera behavior should remain unchanged.
