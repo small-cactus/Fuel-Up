@@ -1,0 +1,5 @@
+2026-10-23 21:14:58 UTC: xcodebuild upload succeeded.
+2026-10-23 21:22 UTC: Safari App Store Connect, Fuel Up iOS Build Uploads, version 1.0.0 build 38: Processing. No new tester group assignment or external review submission is available yet. Build 37 remains Testing in both existing groups.
+2026-10-23 21:25 UTC: Processing completed. What to Test notes saved. Fuel Up Internal Testing (1 tester) and Fuel Up External Testing (6 testers) attached. Submitted for external review with Automatically notify testers checked.
+2026-10-23 21:26 UTC: App Store Connect iOS Builds visibly shows Build 38 Testing, expires in 90 days, Fuel Up Internal Testing and Fuel Up External Testing, seven invites. Tester installation is not verified.
+Build URL: https://appstoreconnect.apple.com/teams/3bf3ccbf-7c6c-471f-a30e-7ced4e800679/apps/6759831421/testflight/ios/81c7bc59-a58a-4274-a267-b2380dae31d8
