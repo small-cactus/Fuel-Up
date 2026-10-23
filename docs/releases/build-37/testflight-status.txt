@@ -1,0 +1,26 @@
+Observed 2026-10-23 20:13 UTC in Safari App Store Connect
+Build detail: https://appstoreconnect.apple.com/teams/3bf3ccbf-7c6c-471f-a30e-7ced4e800679/apps/6759831421/testflight/ios/bdeae681-81b3-44ff-95ae-ab790f3c493c
+
+									90 row (selectable) Build 37
+										91 cell (selectable, settable) Build 37, Value: Build
+37
+										92 cell (selectable, settable) Testing
+Expires in 90 days
+										93 cell (selectable, settable) Add Group, Value: Fuel Up Internal Testing
+Fuel Up External Testing
+										94 cell (selectable, settable) 7
+										95 cell (selectable, settable) –
+										96 cell (selectable, settable) –
+										97 cell (selectable, settable) –
+										98 cell (selectable, settable) –
+
+Saved build details:
+						26 heading 1.0.0 (37), Value: 2
+						29 button (disabled) Saved
+						43 heading Groups (2), Value: 3
+							44 text Groups (2)
+						47 table (settable) Groups (2)
+							56 row (selectable) Fuel Up External Testing External 6
+							61 row (selectable) Fuel Up Internal Testing Internal 1
+
+Automatically notify testers was checked when Submit for Review was clicked.

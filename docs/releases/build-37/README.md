@@ -8,4 +8,10 @@ Validation: 165 standard tests, seven native unit runners, and all 26 native int
 
 Release archive and App Store Connect export succeeded. Strict distribution signature verification passed for the app, widget and notification-service extension at build 37. Debugging is disabled, APNs is production, and startup/performance benchmark code is absent from the executable. `export-validation.json` records the IPA digest.
 
-TestFlight upload is in progress; final processing/group availability will be recorded after verification. Release notes are in `test-notes.txt`.
+TestFlight upload succeeded at 2026-10-23 20:07:38 UTC. At 20:13 UTC, App Store Connect showed **1.0.0 (37) Testing**, with Fuel Up Internal Testing and Fuel Up External Testing attached and seven invites (one internal tester and six external testers). What to Test notes were saved; Automatically notify testers was checked on external submission. `testflight-status.txt` records the observed state. This verifies group availability, not that a tester has installed the build.
+
+[Build in App Store Connect](https://appstoreconnect.apple.com/teams/3bf3ccbf-7c6c-471f-a30e-7ced4e800679/apps/6759831421/testflight/ios/bdeae681-81b3-44ff-95ae-ab790f3c493c). Release notes are in `test-notes.txt`.
+
+The two disposable fresh-cache simulators were deleted, the tested simulator app was terminated, and the task-owned Metro/Argent helper services were stopped. Existing build caches and archives were preserved.
+
+Xcode reported a nonblocking missing-symbol warning for the bundled `hermesvm.framework` dSYM (UUID `B99B4F0D-1B56-3D94-940F-383F4F00C905`); upload completed successfully. This affects symbolication for that framework, not acceptance of the binary.
