@@ -1,0 +1,303 @@
+{
+  "cutoff": "2026-10-27T15:42:00Z",
+  "checkpoint": "google/timesfm-3.0-pytorch",
+  "checkpoint_revision": "43046b85ec22d584a13f8098c2ed39c889e129c2",
+  "upstream_code_commit": "e51928e27119cb17bebc005be2696b75e0a9e688",
+  "backend": "official MLX Apple Silicon backend",
+  "trained_on_this_dataset": false,
+  "target": "Captured miles in the next purchase cycle; irregular calendar intervals indexed by purchase order.",
+  "configuration": {
+    "horizon": 1,
+    "compile": true,
+    "symmetric_averaging": false,
+    "znorm": false,
+    "padding": "none"
+  },
+  "model_load_seconds": 0.4797799590160139,
+  "forecast_batch_seconds": 0.17885812500026077,
+  "all_forecasts": {
+    "median_baseline": {
+      "n": 8,
+      "mae_miles": 50.166392719015164
+    },
+    "timesfm3": {
+      "n": 8,
+      "mae_miles": 47.19348951190977
+    }
+  },
+  "new_period": {
+    "median_baseline": {
+      "n": 4,
+      "mae_miles": 68.76875733488295
+    },
+    "timesfm3": {
+      "n": 4,
+      "mae_miles": 65.54454773278664
+    }
+  },
+  "same_targets_as_trained_ml": {
+    "median_baseline": {
+      "n": 4,
+      "mae_miles": 68.76875733488295
+    },
+    "timesfm3": {
+      "n": 4,
+      "mae_miles": 65.54454773278664
+    }
+  },
+  "details": [
+    {
+      "account": 1,
+      "context_cycles": 3,
+      "new_period": false,
+      "matches_trained_ml_targets": false,
+      "actual": 125.99190562162256,
+      "median_baseline": 175.00261271722889,
+      "timesfm3": 182.89137268066406,
+      "raw_forecast": 182.89137268066406,
+      "quantiles": [
+        -151.77084350585938,
+        16.960189819335938,
+        94.13854217529297,
+        139.67291259765625,
+        182.89137268066406,
+        226.98768615722656,
+        275.6044921875,
+        342.38360595703125,
+        489.96710205078125
+      ],
+      "gap_count": 11,
+      "boundaries": 0
+    },
+    {
+      "account": 1,
+      "context_cycles": 4,
+      "new_period": false,
+      "matches_trained_ml_targets": false,
+      "actual": 103.82253232333272,
+      "median_baseline": 175.00261271722889,
+      "timesfm3": 146.95217895507812,
+      "raw_forecast": 146.95217895507812,
+      "quantiles": [
+        -9.704666137695312,
+        56.94795227050781,
+        93.30155944824219,
+        121.60447692871094,
+        146.95217895507812,
+        173.97731018066406,
+        203.29074096679688,
+        243.79415893554688,
+        328.73992919921875
+      ],
+      "gap_count": 12,
+      "boundaries": 0
+    },
+    {
+      "account": 1,
+      "context_cycles": 5,
+      "new_period": false,
+      "matches_trained_ml_targets": false,
+      "actual": 124.94063253515105,
+      "median_baseline": 125.99190562162256,
+      "timesfm3": 133.31809997558594,
+      "raw_forecast": 133.31809997558594,
+      "quantiles": [
+        31.357620239257812,
+        73.12657165527344,
+        95.66981506347656,
+        113.83838653564453,
+        133.31809997558594,
+        154.65402221679688,
+        176.45501708984375,
+        205.1686248779297,
+        264.6246337890625
+      ],
+      "gap_count": 18,
+      "boundaries": 0
+    },
+    {
+      "account": 1,
+      "context_cycles": 6,
+      "new_period": false,
+      "matches_trained_ml_targets": false,
+      "actual": 119.92658069853552,
+      "median_baseline": 124.94063253515105,
+      "timesfm3": 126.88972473144531,
+      "raw_forecast": 126.88972473144531,
+      "quantiles": [
+        62.11521911621094,
+        90.12701416015625,
+        104.65630340576172,
+        116.48880004882812,
+        126.88972473144531,
+        137.9442138671875,
+        151.92843627929688,
+        172.9886474609375,
+        222.76170349121094
+      ],
+      "gap_count": 8,
+      "boundaries": 0
+    },
+    {
+      "account": 1,
+      "context_cycles": 7,
+      "new_period": true,
+      "matches_trained_ml_targets": true,
+      "actual": 165.51200085528743,
+      "median_baseline": 119.92658069853552,
+      "timesfm3": 119.62621307373047,
+      "raw_forecast": 119.62621307373047,
+      "quantiles": [
+        82.31768035888672,
+        97.89923095703125,
+        106.17926025390625,
+        113.21286010742188,
+        119.62621307373047,
+        126.49685668945312,
+        135.02383422851562,
+        148.09585571289062,
+        183.85353088378906
+      ],
+      "gap_count": 16,
+      "boundaries": 0
+    },
+    {
+      "account": 1,
+      "context_cycles": 8,
+      "new_period": true,
+      "matches_trained_ml_targets": true,
+      "actual": 152.89177361656172,
+      "median_baseline": 124.94063253515105,
+      "timesfm3": 155.642822265625,
+      "raw_forecast": 155.642822265625,
+      "quantiles": [
+        106.67829895019531,
+        124.3144302368164,
+        135.96726989746094,
+        146.01405334472656,
+        155.642822265625,
+        166.0552215576172,
+        178.16873168945312,
+        196.97068786621094,
+        246.45257568359375
+      ],
+      "gap_count": 36,
+      "boundaries": 0
+    },
+    {
+      "account": 1,
+      "context_cycles": 9,
+      "new_period": true,
+      "matches_trained_ml_targets": true,
+      "actual": 324.3422700334544,
+      "median_baseline": 152.89177361656172,
+      "timesfm3": 144.6518096923828,
+      "raw_forecast": 144.6518096923828,
+      "quantiles": [
+        100.97746276855469,
+        116.3731460571289,
+        127.06396484375,
+        136.02435302734375,
+        144.6518096923828,
+        153.704345703125,
+        164.22018432617188,
+        179.1890411376953,
+        213.49415588378906
+      ],
+      "gap_count": 24,
+      "boundaries": 0
+    },
+    {
+      "account": 1,
+      "context_cycles": 10,
+      "new_period": true,
+      "matches_trained_ml_targets": true,
+      "actual": 195.59997253976397,
+      "median_baseline": 165.51200085528743,
+      "timesfm3": 229.45086669921875,
+      "raw_forecast": 229.45086669921875,
+      "quantiles": [
+        158.35482788085938,
+        178.25816345214844,
+        194.9591522216797,
+        210.8461151123047,
+        229.45086669921875,
+        250.27764892578125,
+        277.47479248046875,
+        321.5503845214844,
+        422.9024963378906
+      ],
+      "gap_count": 16,
+      "boundaries": 0
+    }
+  ],
+  "limitations": [
+    "Only a handful of purchase intervals per person; context is much shorter than typical foundation-model workloads.",
+    "Zero-shot inference, not fine-tuning and not a station-classification model.",
+    "No actual fuel quantity, full-tank status or complete odometer target. Quantiles are not calibrated here.",
+    "Local research evaluation only; no app deployment. Checkpoint has a separate non-commercial license."
+  ],
+  "source_sha256": "1835a26be3b952a3090394868f5c06938aeb69d3eff628911905e9e05494ec94",
+  "dependency_sha256": {
+    "trainMileageModels.py": "f333c010cd540266a721cd4cc8e53f520a2ef09417ffab85d17a5dc585035d65",
+    "auditMileageCoverage.py": "06ecc3b4a4cb85b1c812e071d61daa84f75aebf6c141ef2f0c30e09a9f75a71f",
+    "inferMileageConfidence.py": "01aeb17a49803b0488287d9b5baa70219b62dcff34276a08f4c2f15244d2afe7"
+  },
+  "checkpoint_sha256": {
+    "model.safetensors": "a7592b0a8432baee54483254e5647856911ce69e09d09a9bb65904b2d98f17da",
+    "LICENSE": "3e36db7240d23adb6ac6d7d931892dcc5706a14a7d31581f08c35d2f25736dfd",
+    "config.json": "ff17bbc07b792c5a904cca265b8468579d736a4fe84981da25eb871b0a125bc6",
+    "README.md": "eb66e35dd67cc44dc711b18bc2b833d8f0fcd48892b7341042a5b4a36fc37228"
+  },
+  "input_sha256": {
+    "visits.json": "d264597686c2b0b05305943bd0873fe362438da41c34bf180d575db4529eaf48",
+    "locations-2026-10-04.json": "61195e0ff8010d7ba8261144bdb62d917d1b4de694da1b22659fc01d32a7befc",
+    "locations-2026-10-05.json": "f0b95edda0dbe4631f46efacdb25500f5e50d4063b6cd5acf042a5299a8fd30b",
+    "locations-2026-10-06.json": "eb96ce65efe856ffccf89e73cbaf64aa52dbbc6719270345374a0fec13273be8",
+    "locations-2026-10-07.json": "444bfe546a6596ad29280543a882c8a019387952af228fda255f3a3d12339419",
+    "locations-2026-10-08.json": "b74dfad4824e56cec8c9d4fb1f5c96bdbcba4ff4a1e7f2bc619613a320262459",
+    "locations-2026-10-09.json": "21dd91fb114ffeadf079102e97886835fb222606e3ed02f5bdf56528e72b3c29",
+    "locations-2026-10-10.json": "8c96360c6f1094dbeca744742b3687af797909a6bfeef15a43c7f523199b78a4",
+    "locations-2026-10-11.json": "ed1863d685a6a32107babe9f79ab161d977fd124b5b601e9d929cf09ff2a389f",
+    "locations-2026-10-12.json": "407f5c4e0eecbd26afc16865b2763e2a52ecf5c335b11fc3b08186b7551d20f7",
+    "locations-2026-10-13.json": "b5ee296e3867a23090eba58170bae7216850bca528738202a9d8fc02fe73d519",
+    "locations-2026-10-14.json": "abf969460bdbdff4dd099a749472a1b3be632fac268183f346fc37a224c0ceac",
+    "locations-2026-10-15.json": "7b8334a58cee287b90dc0c505e1742727311c20de4dc7827da02ddf291de20a7",
+    "locations-2026-10-16.json": "08b728b71229474666dc6976575e7e7eed8bb14a7345ec7b6c273b033c420345",
+    "locations-2026-10-17.json": "994a921888eb889cf3ec05a4777fbc4ee56e0d99025690b140e04d17dbb2ea93",
+    "locations-2026-10-18.json": "249c27fe3625de51c3e11a59a34a97f32667027a1a50e7c399e9789c0a9bd999",
+    "locations-2026-10-19.json": "a5dfd592438bf59bd7e9847e581f809ebb4222987aac8c987cd41981848becbe",
+    "locations-2026-10-20.json": "26e701cdc555ac5344e705b568baae20464bb665103e14997c5d7ae217ba3762",
+    "locations-2026-10-21.json": "36ab605576e084f55a18f635aad71339ddee29d672b7a9b7c9fac35fb6047160",
+    "locations-2026-10-22.json": "18a8ce080d157276232661f95fcab99224b93576c53fead250433af3fa672f0b",
+    "locations-2026-10-23.json": "cf2c9d8a650386200ccb2893561cf0805beb7c6595e34c4db7edde5bfd77c185",
+    "locations-2026-10-24.json": "03ce2e2534f9b75319f7a5a6365e0f14ebf217472f05373da2003252eba1c8c6",
+    "locations-2026-10-25.json": "25bb08876dd264c0534d7cb902f20bc4ce3365ddeaaea2671d7507261dd8dacb",
+    "locations-2026-10-26.json": "af453e10e74195891b59e95fade3955a4148b4ed69a69f474a38169354c0723e",
+    "locations-2026-10-27.json": "b28c29f176ff95e24a6a6a90a27a22b5dbb64349d5a18faebb543c71743283b9",
+    "aux-2026-10-04.json": "e8ce30acf41ef2c2faa161fef4034bc00584950f2c24e5d6b86f2c34170e13a1",
+    "aux-2026-10-05.json": "11cd605c103a9a967d028a849cd3e9a98b0015c86da234b9bdeefbffaa6338c3",
+    "aux-2026-10-06.json": "87614f16ce3d6939d0dd9b4d6c76e151d2d82d17982323ed49900fc29c5cbd96",
+    "aux-2026-10-07.json": "9ab6806dd5e458ab3ab8427392cbc9d6cf176d501d0595644c4cc97e8af15b3e",
+    "aux-2026-10-08.json": "c6e803bacfef0944740f0652bbc27637bcbb9c50ec095ca192c6eb6c905ec0f2",
+    "aux-2026-10-09.json": "94c703b84198c0901f109fbb1437ea3a1ae66dd471144d601d492c7fcd56ff52",
+    "aux-2026-10-10.json": "171aa654d0ee3a298903bba0cac9c0f3f01cda10281ef195f3d0475097523355",
+    "aux-2026-10-11.json": "19ff72ca7f97daac864ec42a92df731e49f6144323ecdaca05b63ec6fe89a3b7",
+    "aux-2026-10-12.json": "e6019bb1f7ece0ffeb115a74863506c7083f81fcfff19e0910543dcb3c97fdaa",
+    "aux-2026-10-13.json": "ffd6ad442763c9c15fd83e4029abc8a8f5fe47654083250349821577762ccb6b",
+    "aux-2026-10-14.json": "c09f4a0b8a3e4f9c691fdb470031601ca54cf614435b567a4c4969f2f116e411",
+    "aux-2026-10-15.json": "8b74e6058704257aa412f386db89a17b3b8b96b032f8615fa2157dd181a32351",
+    "aux-2026-10-16.json": "4effde8882bfed5a594f97639cbc63d73dffb01c9811aee46ad118059a2cfeb1",
+    "aux-2026-10-17.json": "2f9ff57646452c82b29964194a7120c86ddbeba1b0a175f6f47bdfd4d9c4076b",
+    "aux-2026-10-18.json": "21cda2d45dc83996af2a9b77e7a3b7d319f375dd718aa21c220fd05ffa3526d5",
+    "aux-2026-10-19.json": "0f4bf45b5c6d3b62978995f72ba1e09c30adb4213ab540ad0b13c054ea972e90",
+    "aux-2026-10-20.json": "c0c3e9aac4975a669d85e779f7deab37a214fd7f5dd918617ed57089f4e7afc6",
+    "aux-2026-10-21.json": "73e6c06a3e22d5f0ab0e61f305a2f42dadd7e790c0f0928b65c21a6da7ce1da0",
+    "aux-2026-10-22.json": "47cfeeba0684873e0aa2985707937e52906ff14f3fd1ce7649fa7b1716ae5e50",
+    "aux-2026-10-23.json": "2e71c05140cc11b394fad906099b3d32bf74ebf9d1caa24a58c62fba6e9fe60e",
+    "aux-2026-10-24.json": "fb6b4f0b387db7acd3e08d697e38c11b294072024cebf56bbb423cc526df05a9",
+    "aux-2026-10-25.json": "8261ccabb75ffdc2a8a130094e4526dd85ee9f4dd2162b995d3d35479f73b4ce",
+    "aux-2026-10-26.json": "9c5a92c24aed6e09968de026556d923bbdb3f2b895869c23f4c0ee0998dfc536",
+    "aux-2026-10-27.json": "6bacebbd313bf758da2535b34c6ed6f1fe9f9791b0db4e99942847da6353c096"
+  }
+}

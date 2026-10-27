@@ -1,0 +1,721 @@
+{
+  "cutoff": "2026-10-27T15:42:00Z",
+  "train_end": "2026-10-18T00:00:00Z",
+  "test_start": "2026-10-22T14:10:00Z",
+  "sklearn_version": "1.7.2",
+  "features": [
+    "captured_miles_since_purchase",
+    "recent_cycle_min",
+    "recent_cycle_max",
+    "recent_cycle_median",
+    "mileage_ratio",
+    "hours_since_purchase",
+    "prior_purchases",
+    "prior_stations",
+    "candidate_prior_purchases",
+    "candidate_purchase_share",
+    "habit_agrees",
+    "point_route_agrees",
+    "sequence_agrees",
+    "sequence_150m_agrees",
+    "sequence_100m_agrees",
+    "stable_cycle_sequence_agrees",
+    "prior_clock_sequence_agrees",
+    "speed",
+    "gps_accuracy",
+    "fix_age_seconds",
+    "hour_sin",
+    "hour_cos",
+    "nearest_historical_approach_meters"
+  ],
+  "target": "Confirmed purchase at the chosen familiar station within 15 minutes, next observed encounter only. All unanswered or absent outcomes are zero.",
+  "candidate": "Sequence station, else single-point route station, else habitual station; only moving minutes inside the established mileage bracket.",
+  "limitations": [
+    "Exploratory local training; no randomized GPS split, no new-person validation, no probability calibration claim.",
+    "Training answers must be available before Oct18; validation answers before Oct22 cutoff; test answers before final cutoff.",
+    "Outcome windows embargoed at split boundaries. Minute rows are correlated; alert cooldown and distinct purchases are also reported.",
+    "No fuel level or full tank ground truth. Negative class includes missing answers by user scoring convention.",
+    "Candidate rules may have been informed by earlier inspected data; chronological replay is not a pristine independent study."
+  ],
+  "partitions": {
+    "train": {
+      "rows": 440,
+      "positive_minutes": 30,
+      "accounts": 1,
+      "positive_accounts": 1,
+      "distinct_positive_purchases": 4
+    },
+    "validation": {
+      "rows": 93,
+      "positive_minutes": 8,
+      "accounts": 1,
+      "positive_accounts": 1,
+      "distinct_positive_purchases": 1
+    },
+    "test": {
+      "rows": 582,
+      "positive_minutes": 14,
+      "accounts": 2,
+      "positive_accounts": 1,
+      "distinct_positive_purchases": 2
+    }
+  },
+  "rules": {
+    "train": {
+      "habit": {
+        "predictions": 25,
+        "correct": 1,
+        "wrong": 24,
+        "correct_prediction_rate": 0.04,
+        "outcomes": {
+          "correct_purchase_station": 1,
+          "no_observed_encounter": 8,
+          "unanswered_encounter": 15,
+          "wrong_purchase_station": 1
+        },
+        "distinct_purchases_caught": 1,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          5.72
+        ]
+      },
+      "route": {
+        "predictions": 13,
+        "correct": 1,
+        "wrong": 12,
+        "correct_prediction_rate": 0.07692307692307693,
+        "outcomes": {
+          "correct_purchase_station": 1,
+          "no_observed_encounter": 3,
+          "unanswered_encounter": 9
+        },
+        "distinct_purchases_caught": 1,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          5.72
+        ]
+      },
+      "sequence": {
+        "predictions": 7,
+        "correct": 3,
+        "wrong": 4,
+        "correct_prediction_rate": 0.42857142857142855,
+        "outcomes": {
+          "correct_purchase_station": 3,
+          "unanswered_encounter": 4
+        },
+        "distinct_purchases_caught": 3,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          5.72,
+          6.38,
+          5.1
+        ]
+      },
+      "sequence_150m": {
+        "predictions": 6,
+        "correct": 3,
+        "wrong": 3,
+        "correct_prediction_rate": 0.5,
+        "outcomes": {
+          "correct_purchase_station": 3,
+          "unanswered_encounter": 3
+        },
+        "distinct_purchases_caught": 3,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          5.72,
+          6.38,
+          5.1
+        ]
+      },
+      "sequence_100m": {
+        "predictions": 6,
+        "correct": 3,
+        "wrong": 3,
+        "correct_prediction_rate": 0.5,
+        "outcomes": {
+          "correct_purchase_station": 3,
+          "unanswered_encounter": 3
+        },
+        "distinct_purchases_caught": 3,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          5.72,
+          6.38,
+          5.1
+        ]
+      },
+      "sequence_two_prior": {
+        "predictions": 7,
+        "correct": 3,
+        "wrong": 4,
+        "correct_prediction_rate": 0.42857142857142855,
+        "outcomes": {
+          "correct_purchase_station": 3,
+          "unanswered_encounter": 4
+        },
+        "distinct_purchases_caught": 3,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          5.72,
+          6.38,
+          5.1
+        ]
+      },
+      "sequence_stable_cycles": {
+        "predictions": 4,
+        "correct": 1,
+        "wrong": 3,
+        "correct_prediction_rate": 0.25,
+        "outcomes": {
+          "unanswered_encounter": 3,
+          "correct_purchase_station": 1
+        },
+        "distinct_purchases_caught": 1,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          5.1
+        ]
+      },
+      "sequence_clock": {
+        "predictions": 6,
+        "correct": 3,
+        "wrong": 3,
+        "correct_prediction_rate": 0.5,
+        "outcomes": {
+          "correct_purchase_station": 3,
+          "unanswered_encounter": 3
+        },
+        "distinct_purchases_caught": 3,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          5.72,
+          6.38,
+          5.1
+        ]
+      }
+    },
+    "validation": {
+      "habit": {
+        "predictions": 6,
+        "correct": 0,
+        "wrong": 6,
+        "correct_prediction_rate": 0.0,
+        "outcomes": {
+          "no_observed_encounter": 4,
+          "unanswered_encounter": 2
+        },
+        "distinct_purchases_caught": 0,
+        "correct_accounts": 0,
+        "correct_personal_stations": 0,
+        "correct_lead_minutes": []
+      },
+      "route": {
+        "predictions": 3,
+        "correct": 0,
+        "wrong": 3,
+        "correct_prediction_rate": 0.0,
+        "outcomes": {
+          "no_observed_encounter": 1,
+          "unanswered_encounter": 2
+        },
+        "distinct_purchases_caught": 0,
+        "correct_accounts": 0,
+        "correct_personal_stations": 0,
+        "correct_lead_minutes": []
+      },
+      "sequence": {
+        "predictions": 2,
+        "correct": 1,
+        "wrong": 1,
+        "correct_prediction_rate": 0.5,
+        "outcomes": {
+          "unanswered_encounter": 1,
+          "correct_purchase_station": 1
+        },
+        "distinct_purchases_caught": 1,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          3.36
+        ]
+      },
+      "sequence_150m": {
+        "predictions": 2,
+        "correct": 1,
+        "wrong": 1,
+        "correct_prediction_rate": 0.5,
+        "outcomes": {
+          "unanswered_encounter": 1,
+          "correct_purchase_station": 1
+        },
+        "distinct_purchases_caught": 1,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          3.36
+        ]
+      },
+      "sequence_100m": {
+        "predictions": 2,
+        "correct": 1,
+        "wrong": 1,
+        "correct_prediction_rate": 0.5,
+        "outcomes": {
+          "unanswered_encounter": 1,
+          "correct_purchase_station": 1
+        },
+        "distinct_purchases_caught": 1,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          3.36
+        ]
+      },
+      "sequence_two_prior": {
+        "predictions": 2,
+        "correct": 1,
+        "wrong": 1,
+        "correct_prediction_rate": 0.5,
+        "outcomes": {
+          "unanswered_encounter": 1,
+          "correct_purchase_station": 1
+        },
+        "distinct_purchases_caught": 1,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          3.36
+        ]
+      },
+      "sequence_stable_cycles": {
+        "predictions": 0,
+        "correct": 0,
+        "wrong": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "distinct_purchases_caught": 0,
+        "correct_accounts": 0,
+        "correct_personal_stations": 0,
+        "correct_lead_minutes": []
+      },
+      "sequence_clock": {
+        "predictions": 2,
+        "correct": 1,
+        "wrong": 1,
+        "correct_prediction_rate": 0.5,
+        "outcomes": {
+          "unanswered_encounter": 1,
+          "correct_purchase_station": 1
+        },
+        "distinct_purchases_caught": 1,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          3.36
+        ]
+      }
+    },
+    "test": {
+      "habit": {
+        "predictions": 42,
+        "correct": 0,
+        "wrong": 42,
+        "correct_prediction_rate": 0.0,
+        "outcomes": {
+          "no_observed_encounter": 23,
+          "unanswered_encounter": 18,
+          "end_censored": 1
+        },
+        "distinct_purchases_caught": 0,
+        "correct_accounts": 0,
+        "correct_personal_stations": 0,
+        "correct_lead_minutes": []
+      },
+      "route": {
+        "predictions": 20,
+        "correct": 0,
+        "wrong": 20,
+        "correct_prediction_rate": 0.0,
+        "outcomes": {
+          "no_observed_encounter": 7,
+          "unanswered_encounter": 13
+        },
+        "distinct_purchases_caught": 0,
+        "correct_accounts": 0,
+        "correct_personal_stations": 0,
+        "correct_lead_minutes": []
+      },
+      "sequence": {
+        "predictions": 9,
+        "correct": 1,
+        "wrong": 8,
+        "correct_prediction_rate": 0.1111111111111111,
+        "outcomes": {
+          "correct_purchase_station": 1,
+          "no_observed_encounter": 5,
+          "unanswered_encounter": 2,
+          "wrong_purchase_station": 1
+        },
+        "distinct_purchases_caught": 1,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          6.13
+        ]
+      },
+      "sequence_150m": {
+        "predictions": 8,
+        "correct": 1,
+        "wrong": 7,
+        "correct_prediction_rate": 0.125,
+        "outcomes": {
+          "correct_purchase_station": 1,
+          "no_observed_encounter": 5,
+          "unanswered_encounter": 1,
+          "wrong_purchase_station": 1
+        },
+        "distinct_purchases_caught": 1,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          6.13
+        ]
+      },
+      "sequence_100m": {
+        "predictions": 7,
+        "correct": 1,
+        "wrong": 6,
+        "correct_prediction_rate": 0.14285714285714285,
+        "outcomes": {
+          "correct_purchase_station": 1,
+          "no_observed_encounter": 4,
+          "unanswered_encounter": 1,
+          "wrong_purchase_station": 1
+        },
+        "distinct_purchases_caught": 1,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          6.13
+        ]
+      },
+      "sequence_two_prior": {
+        "predictions": 5,
+        "correct": 1,
+        "wrong": 4,
+        "correct_prediction_rate": 0.2,
+        "outcomes": {
+          "correct_purchase_station": 1,
+          "unanswered_encounter": 2,
+          "no_observed_encounter": 1,
+          "wrong_purchase_station": 1
+        },
+        "distinct_purchases_caught": 1,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          6.13
+        ]
+      },
+      "sequence_stable_cycles": {
+        "predictions": 4,
+        "correct": 1,
+        "wrong": 3,
+        "correct_prediction_rate": 0.25,
+        "outcomes": {
+          "correct_purchase_station": 1,
+          "unanswered_encounter": 2,
+          "no_observed_encounter": 1
+        },
+        "distinct_purchases_caught": 1,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          6.13
+        ]
+      },
+      "sequence_clock": {
+        "predictions": 3,
+        "correct": 1,
+        "wrong": 2,
+        "correct_prediction_rate": 0.3333333333333333,
+        "outcomes": {
+          "correct_purchase_station": 1,
+          "unanswered_encounter": 2
+        },
+        "distinct_purchases_caught": 1,
+        "correct_accounts": 1,
+        "correct_personal_stations": 1,
+        "correct_lead_minutes": [
+          6.13
+        ]
+      }
+    }
+  },
+  "models": {
+    "logistic_l2": {
+      "selected_validation_threshold": null,
+      "selected_validation_alerts": null,
+      "model_sha256": "528f30b73ac55022a826b1f1adefe54c02774792225630cf13330c89a2a4fd7a",
+      "evaluation": {
+        "train": {
+          "average_precision": 0.783093535147165,
+          "roc_auc": 0.970650406504065,
+          "positive_prevalence": 0.06818181818181818,
+          "fixed_threshold_05": {
+            "predictions": 7,
+            "correct": 1,
+            "wrong": 6,
+            "correct_prediction_rate": 0.14285714285714285,
+            "outcomes": {
+              "correct_purchase_station": 1,
+              "unanswered_encounter": 6
+            },
+            "distinct_purchases_caught": 1,
+            "correct_accounts": 1,
+            "correct_personal_stations": 1,
+            "correct_lead_minutes": [
+              5.72
+            ]
+          },
+          "validation_selected": null
+        },
+        "validation": {
+          "average_precision": 0.45883997538409305,
+          "roc_auc": 0.8632352941176471,
+          "positive_prevalence": 0.08602150537634409,
+          "fixed_threshold_05": {
+            "predictions": 2,
+            "correct": 1,
+            "wrong": 1,
+            "correct_prediction_rate": 0.5,
+            "outcomes": {
+              "no_observed_encounter": 1,
+              "correct_purchase_station": 1
+            },
+            "distinct_purchases_caught": 1,
+            "correct_accounts": 1,
+            "correct_personal_stations": 1,
+            "correct_lead_minutes": [
+              3.36
+            ]
+          },
+          "validation_selected": null
+        },
+        "test": {
+          "average_precision": 0.03635747815676607,
+          "roc_auc": 0.6675050301810866,
+          "positive_prevalence": 0.024054982817869417,
+          "fixed_threshold_05": {
+            "predictions": 17,
+            "correct": 1,
+            "wrong": 16,
+            "correct_prediction_rate": 0.058823529411764705,
+            "outcomes": {
+              "no_observed_encounter": 14,
+              "correct_purchase_station": 1,
+              "unanswered_encounter": 1,
+              "end_censored": 1
+            },
+            "distinct_purchases_caught": 1,
+            "correct_accounts": 1,
+            "correct_personal_stations": 1,
+            "correct_lead_minutes": [
+              6.13
+            ]
+          },
+          "validation_selected": null
+        }
+      },
+      "feature_weights_not_causal_explanations": {
+        "captured_miles_since_purchase": 0.11856794002241278,
+        "recent_cycle_min": -0.26702661101229924,
+        "recent_cycle_max": -0.23934065607080582,
+        "recent_cycle_median": 0.3586887171880383,
+        "mileage_ratio": -0.23666612843585177,
+        "hours_since_purchase": 0.39285740203016856,
+        "prior_purchases": -0.5585101254590222,
+        "prior_stations": -0.006019841172855749,
+        "candidate_prior_purchases": -0.5909833957003825,
+        "candidate_purchase_share": 0.006019841172854785,
+        "habit_agrees": 0.0,
+        "point_route_agrees": 0.7669877670051702,
+        "sequence_agrees": -0.02586864355208551,
+        "sequence_150m_agrees": 0.1376356619946264,
+        "sequence_100m_agrees": 0.22010192566021752,
+        "stable_cycle_sequence_agrees": -0.04408399601088049,
+        "prior_clock_sequence_agrees": 0.330064722876634,
+        "speed": -0.026869809855310383,
+        "gps_accuracy": 0.30946505139573716,
+        "fix_age_seconds": -0.11050467189638565,
+        "hour_sin": 0.5219316321831331,
+        "hour_cos": 0.8078796503710998,
+        "nearest_historical_approach_meters": -0.654238624844194
+      }
+    },
+    "random_forest": {
+      "selected_validation_threshold": null,
+      "selected_validation_alerts": null,
+      "model_sha256": "3f01b94c7d1f5fcef228df7ab57ca6765c51bddc26df59bfc0268ddefa56f26f",
+      "evaluation": {
+        "train": {
+          "average_precision": 0.9364066797377024,
+          "roc_auc": 0.994308943089431,
+          "positive_prevalence": 0.06818181818181818,
+          "fixed_threshold_05": {
+            "predictions": 5,
+            "correct": 2,
+            "wrong": 3,
+            "correct_prediction_rate": 0.4,
+            "outcomes": {
+              "correct_purchase_station": 2,
+              "unanswered_encounter": 3
+            },
+            "distinct_purchases_caught": 2,
+            "correct_accounts": 1,
+            "correct_personal_stations": 1,
+            "correct_lead_minutes": [
+              5.72,
+              6.38
+            ]
+          },
+          "validation_selected": null
+        },
+        "validation": {
+          "average_precision": 0.562081571529246,
+          "roc_auc": 0.8602941176470589,
+          "positive_prevalence": 0.08602150537634409,
+          "fixed_threshold_05": {
+            "predictions": 2,
+            "correct": 0,
+            "wrong": 2,
+            "correct_prediction_rate": 0.0,
+            "outcomes": {
+              "unanswered_encounter": 2
+            },
+            "distinct_purchases_caught": 0,
+            "correct_accounts": 0,
+            "correct_personal_stations": 0,
+            "correct_lead_minutes": []
+          },
+          "validation_selected": null
+        },
+        "test": {
+          "average_precision": 0.681633578424185,
+          "roc_auc": 0.972082494969819,
+          "positive_prevalence": 0.024054982817869417,
+          "fixed_threshold_05": {
+            "predictions": 5,
+            "correct": 1,
+            "wrong": 4,
+            "correct_prediction_rate": 0.2,
+            "outcomes": {
+              "correct_purchase_station": 1,
+              "no_observed_encounter": 3,
+              "unanswered_encounter": 1
+            },
+            "distinct_purchases_caught": 1,
+            "correct_accounts": 1,
+            "correct_personal_stations": 1,
+            "correct_lead_minutes": [
+              6.13
+            ]
+          },
+          "validation_selected": null
+        }
+      },
+      "feature_weights_not_causal_explanations": {
+        "captured_miles_since_purchase": 0.014178922286235771,
+        "recent_cycle_min": 0.0015401672357094737,
+        "recent_cycle_max": 0.004681229848093584,
+        "recent_cycle_median": 0.025703362787351854,
+        "mileage_ratio": 0.0422544741418248,
+        "hours_since_purchase": 0.1358144607160735,
+        "prior_purchases": 0.036761057156405284,
+        "prior_stations": 0.00047394642714596453,
+        "candidate_prior_purchases": 0.03821971490450766,
+        "candidate_purchase_share": 3.4473253415065237e-16,
+        "habit_agrees": 0.0,
+        "point_route_agrees": 0.1924439358955272,
+        "sequence_agrees": 0.044073272138501846,
+        "sequence_150m_agrees": 0.04179082980878335,
+        "sequence_100m_agrees": 0.026863568915672376,
+        "stable_cycle_sequence_agrees": 1.5494745957729788e-05,
+        "prior_clock_sequence_agrees": 0.06309784585217355,
+        "speed": 0.022301010704474065,
+        "gps_accuracy": 0.007278455381033528,
+        "fix_age_seconds": 0.013052955376450391,
+        "hour_sin": 0.046770159938465075,
+        "hour_cos": 0.08938730880737794,
+        "nearest_historical_approach_meters": 0.1532978269322346
+      }
+    }
+  },
+  "input_sha256": {
+    "visits.json": "d264597686c2b0b05305943bd0873fe362438da41c34bf180d575db4529eaf48",
+    "locations-2026-10-04.json": "61195e0ff8010d7ba8261144bdb62d917d1b4de694da1b22659fc01d32a7befc",
+    "locations-2026-10-05.json": "f0b95edda0dbe4631f46efacdb25500f5e50d4063b6cd5acf042a5299a8fd30b",
+    "locations-2026-10-06.json": "eb96ce65efe856ffccf89e73cbaf64aa52dbbc6719270345374a0fec13273be8",
+    "locations-2026-10-07.json": "444bfe546a6596ad29280543a882c8a019387952af228fda255f3a3d12339419",
+    "locations-2026-10-08.json": "b74dfad4824e56cec8c9d4fb1f5c96bdbcba4ff4a1e7f2bc619613a320262459",
+    "locations-2026-10-09.json": "21dd91fb114ffeadf079102e97886835fb222606e3ed02f5bdf56528e72b3c29",
+    "locations-2026-10-10.json": "8c96360c6f1094dbeca744742b3687af797909a6bfeef15a43c7f523199b78a4",
+    "locations-2026-10-11.json": "ed1863d685a6a32107babe9f79ab161d977fd124b5b601e9d929cf09ff2a389f",
+    "locations-2026-10-12.json": "407f5c4e0eecbd26afc16865b2763e2a52ecf5c335b11fc3b08186b7551d20f7",
+    "locations-2026-10-13.json": "b5ee296e3867a23090eba58170bae7216850bca528738202a9d8fc02fe73d519",
+    "locations-2026-10-14.json": "abf969460bdbdff4dd099a749472a1b3be632fac268183f346fc37a224c0ceac",
+    "locations-2026-10-15.json": "7b8334a58cee287b90dc0c505e1742727311c20de4dc7827da02ddf291de20a7",
+    "locations-2026-10-16.json": "08b728b71229474666dc6976575e7e7eed8bb14a7345ec7b6c273b033c420345",
+    "locations-2026-10-17.json": "994a921888eb889cf3ec05a4777fbc4ee56e0d99025690b140e04d17dbb2ea93",
+    "locations-2026-10-18.json": "249c27fe3625de51c3e11a59a34a97f32667027a1a50e7c399e9789c0a9bd999",
+    "locations-2026-10-19.json": "a5dfd592438bf59bd7e9847e581f809ebb4222987aac8c987cd41981848becbe",
+    "locations-2026-10-20.json": "26e701cdc555ac5344e705b568baae20464bb665103e14997c5d7ae217ba3762",
+    "locations-2026-10-21.json": "36ab605576e084f55a18f635aad71339ddee29d672b7a9b7c9fac35fb6047160",
+    "locations-2026-10-22.json": "18a8ce080d157276232661f95fcab99224b93576c53fead250433af3fa672f0b",
+    "locations-2026-10-23.json": "cf2c9d8a650386200ccb2893561cf0805beb7c6595e34c4db7edde5bfd77c185",
+    "locations-2026-10-24.json": "03ce2e2534f9b75319f7a5a6365e0f14ebf217472f05373da2003252eba1c8c6",
+    "locations-2026-10-25.json": "25bb08876dd264c0534d7cb902f20bc4ce3365ddeaaea2671d7507261dd8dacb",
+    "locations-2026-10-26.json": "af453e10e74195891b59e95fade3955a4148b4ed69a69f474a38169354c0723e",
+    "locations-2026-10-27.json": "b28c29f176ff95e24a6a6a90a27a22b5dbb64349d5a18faebb543c71743283b9",
+    "aux-2026-10-04.json": "e8ce30acf41ef2c2faa161fef4034bc00584950f2c24e5d6b86f2c34170e13a1",
+    "aux-2026-10-05.json": "11cd605c103a9a967d028a849cd3e9a98b0015c86da234b9bdeefbffaa6338c3",
+    "aux-2026-10-06.json": "87614f16ce3d6939d0dd9b4d6c76e151d2d82d17982323ed49900fc29c5cbd96",
+    "aux-2026-10-07.json": "9ab6806dd5e458ab3ab8427392cbc9d6cf176d501d0595644c4cc97e8af15b3e",
+    "aux-2026-10-08.json": "c6e803bacfef0944740f0652bbc27637bcbb9c50ec095ca192c6eb6c905ec0f2",
+    "aux-2026-10-09.json": "94c703b84198c0901f109fbb1437ea3a1ae66dd471144d601d492c7fcd56ff52",
+    "aux-2026-10-10.json": "171aa654d0ee3a298903bba0cac9c0f3f01cda10281ef195f3d0475097523355",
+    "aux-2026-10-11.json": "19ff72ca7f97daac864ec42a92df731e49f6144323ecdaca05b63ec6fe89a3b7",
+    "aux-2026-10-12.json": "e6019bb1f7ece0ffeb115a74863506c7083f81fcfff19e0910543dcb3c97fdaa",
+    "aux-2026-10-13.json": "ffd6ad442763c9c15fd83e4029abc8a8f5fe47654083250349821577762ccb6b",
+    "aux-2026-10-14.json": "c09f4a0b8a3e4f9c691fdb470031601ca54cf614435b567a4c4969f2f116e411",
+    "aux-2026-10-15.json": "8b74e6058704257aa412f386db89a17b3b8b96b032f8615fa2157dd181a32351",
+    "aux-2026-10-16.json": "4effde8882bfed5a594f97639cbc63d73dffb01c9811aee46ad118059a2cfeb1",
+    "aux-2026-10-17.json": "2f9ff57646452c82b29964194a7120c86ddbeba1b0a175f6f47bdfd4d9c4076b",
+    "aux-2026-10-18.json": "21cda2d45dc83996af2a9b77e7a3b7d319f375dd718aa21c220fd05ffa3526d5",
+    "aux-2026-10-19.json": "0f4bf45b5c6d3b62978995f72ba1e09c30adb4213ab540ad0b13c054ea972e90",
+    "aux-2026-10-20.json": "c0c3e9aac4975a669d85e779f7deab37a214fd7f5dd918617ed57089f4e7afc6",
+    "aux-2026-10-21.json": "73e6c06a3e22d5f0ab0e61f305a2f42dadd7e790c0f0928b65c21a6da7ce1da0",
+    "aux-2026-10-22.json": "47cfeeba0684873e0aa2985707937e52906ff14f3fd1ce7649fa7b1716ae5e50",
+    "aux-2026-10-23.json": "2e71c05140cc11b394fad906099b3d32bf74ebf9d1caa24a58c62fba6e9fe60e",
+    "aux-2026-10-24.json": "fb6b4f0b387db7acd3e08d697e38c11b294072024cebf56bbb423cc526df05a9",
+    "aux-2026-10-25.json": "8261ccabb75ffdc2a8a130094e4526dd85ee9f4dd2162b995d3d35479f73b4ce",
+    "aux-2026-10-26.json": "9c5a92c24aed6e09968de026556d923bbdb3f2b895869c23f4c0ee0998dfc536",
+    "aux-2026-10-27.json": "6bacebbd313bf758da2535b34c6ed6f1fe9f9791b0db4e99942847da6353c096"
+  },
+  "source_sha256": {
+    "trainRouteModels.py": "4f3095221e732267d1989a1672484edac47471537e2a24042a7bfea2fc7bf553",
+    "auditRouteWindow.py": "5a93870cd99c432d4f1afcad6e093d64a06be32fd14584831133830c3ddfdaea",
+    "timingFeatures.py": "f5d8d56618f137811bb1e13d386b2365356e182a4520cc46be3ae9af6662ad26",
+    "mileageReadiness.py": "f70ca923810090ba1de40aacceb40fe9856ef0da2c1a427f904e22dab23af39c"
+  }
+}

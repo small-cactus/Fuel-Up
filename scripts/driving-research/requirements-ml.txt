@@ -1,0 +1,6 @@
+# Isolated local research environment; no app runtime dependency.
+numpy==2.2.6
+scipy==1.16.3
+scikit-learn==1.7.2
+# TimesFM optional: install google-research/timesfm at the report's pinned commit
+# with its [mlx] extra on Apple Silicon. Keep model weights outside the repository.

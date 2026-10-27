@@ -163,6 +163,8 @@ def replay(events, provisional=None):
     policies = {}
     for name, alerts in results.items():
         policies[name] = dict(alerts=len(alerts),
+            wrong_including_unknown=sum(a['within_window'] is not True for a in alerts),
+            correct_prediction_rate=sum(a['within_window'] is True for a in alerts)/len(alerts) if alerts else None,
             near_purchase=sum(a['within_window'] is True for a in alerts),
             outside_window=sum(a['within_window'] is False for a in alerts),
             unknown=sum(a['within_window'] is None for a in alerts),

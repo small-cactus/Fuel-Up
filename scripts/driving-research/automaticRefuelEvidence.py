@@ -49,6 +49,9 @@ def infer(events):
             lead_before_answer_minutes=(available(answer)-now)/60 if answer else None,
             delay_after_arrival_seconds=now-p['startedAt']))
     report = dict(**counts, predictions=len(predictions),
+        correct=sum(p['later_answer'] == 'fueled' for p in predictions),
+        wrong_including_unanswered=sum(p['later_answer'] != 'fueled' for p in predictions),
+        correct_prediction_rate=sum(p['later_answer'] == 'fueled' for p in predictions)/len(predictions) if predictions else None,
         outcomes=dict(collections.Counter(p['later_answer'] for p in predictions)),
         details=[{k: v for k, v in p.items() if k not in ('visit', 'arrival', 'known_at')} for p in predictions])
     return predictions, report

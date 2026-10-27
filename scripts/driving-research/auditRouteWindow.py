@@ -6,6 +6,7 @@ Raw locations, identities, station IDs and timestamps are not exported.
 """
 import bisect
 import collections
+import datetime
 import hashlib
 import json
 import math
@@ -17,6 +18,17 @@ from backtestAnticipation import available, distance, valid_fix
 from inferMileageConfidence import load
 from mileageReadiness import MileageReadiness
 from timingFeatures import TimingFeatures
+
+POLICIES = ('habit', 'route', 'sequence', 'sequence_150m', 'sequence_100m',
+            'sequence_two_prior', 'sequence_stable_cycles', 'sequence_clock')
+
+
+def strict_score(counts):
+    """Every emitted prediction needs a confirmed match; abstention is not success."""
+    total = counts.get('predictions', 0)
+    correct = counts.get('correct_purchase_station', 0)
+    return dict(correct=correct, wrong=total-correct,
+                correct_prediction_rate=correct/total if total else None)
 
 
 def inside_bracket(snapshot):
@@ -64,6 +76,7 @@ class RouteWindow:
         snapshot = self.mileage.snapshot(now, minimum_cycles=3)
         result = dict(habit=habit, route=None, sequence=None, bracket=inside_bracket(snapshot),
                       fresh=False, moving=False, prior_station_count=len(counts))
+        result.update({p: None for p in POLICIES if p not in result})
         fix = self.timing.fix(now)
         if not fix:
             return result
@@ -85,6 +98,7 @@ class RouteWindow:
             live = []
         matches = []
         sequence_matches = []
+        tight_matches = {100: [], 150: []}
         for v in history:
             template = [f for f in self.templates[v['id']] if available(f) <= now]
             sid = self.visits[v['id']]['station']
@@ -103,15 +117,34 @@ class RouteWindow:
                         break
                     if 15 <= dt <= 90 and match(live[1], q['payload']) is not None:
                         prior.append(q)
-                if any(any(45 <= f['payload']['timestamp']-a['payload']['timestamp'] <= 180
-                               and a['payload']['timestamp'] < b['payload']['timestamp']
-                               and match(live[0], a['payload']) is not None
-                           for a in template[:index]) for b in prior):
+                errors = []
+                for b in prior:
+                    for a in template[:index]:
+                        if (45 <= f['payload']['timestamp']-a['payload']['timestamp'] <= 180
+                                and a['payload']['timestamp'] < b['payload']['timestamp']):
+                            first_distance = match(live[0], a['payload'])
+                            if first_distance is not None:
+                                errors.append(max(d, match(live[1], b['payload']), first_distance))
+                if errors:
                     sequence_matches.append((d, -v['arrival'], sid))
+                    for threshold, candidates in tight_matches.items():
+                        if min(errors) <= threshold:
+                            candidates.append((d, -v['arrival'], sid))
         if matches:
             result['route'] = min(matches)[2]
         if sequence_matches:
-            result['sequence'] = min(sequence_matches)[2]
+            sid = result['sequence'] = min(sequence_matches)[2]
+            if counts[sid] >= 2:
+                result['sequence_two_prior'] = sid
+            if (snapshot['recent_cycle_min_miles'] > 0 and
+                    snapshot['recent_cycle_max_miles']/snapshot['recent_cycle_min_miles'] <= 1.5):
+                result['sequence_stable_cycles'] = sid
+            if any(self.visits[v['id']]['station'] == sid
+                   and abs((v['arrival']-now+43200) % 86400-43200) <= 3600 for v in history):
+                result['sequence_clock'] = sid
+        for threshold, candidates in tight_matches.items():
+            if candidates:
+                result[f'sequence_{threshold}m'] = min(candidates)[2]
         return result
 
     def outcome(self, now, station, end):
@@ -127,10 +160,13 @@ class RouteWindow:
         return ('end_censored' if now+900 > end else 'no_observed_encounter'), None
 
 
-def evaluate(base, cutoff):
+def evaluate(base, cutoff, new_period_start=None):
     groups, files = load(base, cutoff)
     report = dict(method=dict(
-        upload_cutoff_utc='2026-10-22T14:10:00Z',
+        upload_cutoff_utc=datetime.datetime.fromtimestamp(cutoff, datetime.timezone.utc).isoformat(),
+        strict_scoring='Unanswered, no encounter, wrong station, explicit nonpurchase and end-censored predictions all count as wrong. Raw outcomes remain unchanged. Zero predictions has no rate.',
+        new_period_start_utc=datetime.datetime.fromtimestamp(new_period_start, datetime.timezone.utc).isoformat() if new_period_start else None,
+        candidates='Predeclared exploratory sequence gates: all three matched points <=150m or <=100m; at least two prior purchases at chosen station; recent cycle max/min <=1.5; any prior purchase at chosen station within one hour of time of day (UTC). Separate cooldown per policy.',
         bracket='Last three positive captured-mile intervals min to max, padded by 10 miles each side; at least three prior intervals. Exploratory envelope, not learned multimodal brackets or measured tank range.',
         route='Same-person previously confirmed purchase approach, 1-15 minutes before arrival; current fix within 300m and course within 45 degrees; nearest match wins.',
         sequence='Same route rule plus three ordered fixes over at least 60 seconds, compared to an ordered historical approach. No road-network map matching.',
@@ -142,7 +178,8 @@ def evaluate(base, cutoff):
                 'Predicting a familiar station conditional on a purchase does not establish that a purchase is imminent.',
                 'This evaluates familiar stations only; it cannot discover an unseen preferred station.']),
         accounts=[], continuous={}, landmarks={})
-    aggregates = {p: collections.Counter() for p in ('habit', 'route', 'sequence')}
+    aggregates = {p: collections.Counter() for p in POLICIES}
+    periods = {name: {p: collections.Counter() for p in POLICIES} for name in ('earlier', 'new')}
     leads = {p: [] for p in aggregates}
     caught = {p: set() for p in aggregates}
     correct_accounts = {p: set() for p in aggregates}
@@ -195,6 +232,9 @@ def evaluate(base, cutoff):
                 outcome, v = engine.outcome(now, sid, end)
                 c['predictions'] += 1
                 c[outcome] += 1
+                period = 'new' if new_period_start is not None and now >= new_period_start else 'earlier'
+                periods[period][policy]['predictions'] += 1
+                periods[period][policy][outcome] += 1
                 ac['continuous'].setdefault(policy, collections.Counter())[outcome] += 1
                 if outcome == 'correct_purchase_station':
                     caught[policy].add((account, v['id']))
@@ -202,16 +242,20 @@ def evaluate(base, cutoff):
                     correct_stations[policy].add((account, sid))
                     leads[policy].append(round((v['arrival']-now)/60, 2))
     report['landmarks'] = {k: dict(v) for k, v in landmarks.items()}
-    report['continuous'] = {p: dict(c, distinct_purchases_caught=len(caught[p]),
+    report['continuous'] = {p: dict(c, **strict_score(c), distinct_purchases_caught=len(caught[p]),
                                   accounts_with_correct_predictions=len(correct_accounts[p]),
                                   personal_stations_correctly_predicted=len(correct_stations[p]),
                                   correct_lead_minutes=leads[p])
                             for p, c in aggregates.items()}
+    report['periods'] = {name: {p: dict(c, **strict_score(c)) for p, c in policies.items()}
+                         for name, policies in periods.items()}
     report['input_sha256'] = {f.name: hashlib.sha256(f.read_bytes()).hexdigest() for f in files}
+    report['source_sha256'] = {name: hashlib.sha256((Path(__file__).parent/name).read_bytes()).hexdigest()
+                               for name in ('auditRouteWindow.py', 'timingFeatures.py', 'mileageReadiness.py', 'backtestAnticipation.py')}
     return report
 
 
 if __name__ == '__main__':
-    result = evaluate(Path(sys.argv[1]), epoch('2026-10-22T14:10:00Z'))
+    result = evaluate(Path(sys.argv[1]), epoch(sys.argv[3]), epoch(sys.argv[4]) if len(sys.argv) > 4 else None)
     Path(sys.argv[2]).write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps({k: result[k] for k in ('accounts', 'landmarks', 'continuous')}, indent=2))

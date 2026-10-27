@@ -1,0 +1,154 @@
+{
+  "cutoff": "2026-10-27T15:42:00Z",
+  "features": [
+    "last_cycle_miles",
+    "previous_cycle_miles",
+    "third_previous_cycle_miles",
+    "median_three",
+    "spread_three",
+    "last_minus_previous"
+  ],
+  "eligible_examples": 8,
+  "examples_per_account": {
+    "1": 8
+  },
+  "methods": "Per-person expanding-window training, minimum four prior labeled examples; fixed Ridge alpha=10 and 200-tree forest depth2 leaf2. Compare on identical forecast targets; no hyperparameter tuning.",
+  "limitations": [
+    "Very small correlated cycles, not sufficient to validate generalization.",
+    "Target is captured mileage between purchases, not true odometer distance or miles since a full tank.",
+    "Recorded gaps retained and disclosed. A clean ledger still does not verify complete travel.",
+    "New-period means forecast issued on/after Oct22 cutoff. Online models may learn from earlier new-period answers only after receipt."
+  ],
+  "all_evaluated": {
+    "median_baseline": {
+      "n": 4,
+      "mae_miles": 68.76875733488295,
+      "median_absolute_error_miles": 37.836695920614225
+    },
+    "ridge": {
+      "n": 4,
+      "mae_miles": 70.35084889602234,
+      "median_absolute_error_miles": 37.32413407270229
+    },
+    "random_forest": {
+      "n": 4,
+      "mae_miles": 76.3072513919919,
+      "median_absolute_error_miles": 48.9692773150836
+    }
+  },
+  "new_period": {
+    "median_baseline": {
+      "n": 4,
+      "mae_miles": 68.76875733488295,
+      "median_absolute_error_miles": 37.836695920614225
+    },
+    "ridge": {
+      "n": 4,
+      "mae_miles": 70.35084889602234,
+      "median_absolute_error_miles": 37.32413407270229
+    },
+    "random_forest": {
+      "n": 4,
+      "mae_miles": 76.3072513919919,
+      "median_absolute_error_miles": 48.9692773150836
+    }
+  },
+  "details": [
+    {
+      "account": 1,
+      "new_period": true,
+      "training_examples": 4,
+      "actual": 165.51200085528743,
+      "median_baseline": 119.92658069853552,
+      "gap_count": 16,
+      "boundaries": 0,
+      "ridge": 121.86058486061293,
+      "random_forest": 119.96566436011744
+    },
+    {
+      "account": 1,
+      "new_period": true,
+      "training_examples": 5,
+      "actual": 152.89177361656172,
+      "median_baseline": 124.94063253515105,
+      "gap_count": 36,
+      "boundaries": 0,
+      "ridge": 134.05904661758186,
+      "random_forest": 127.51770192454941
+    },
+    {
+      "account": 1,
+      "new_period": true,
+      "training_examples": 6,
+      "actual": 324.3422700334544,
+      "median_baseline": 152.89177361656172,
+      "gap_count": 24,
+      "boundaries": 0,
+      "ridge": 136.41986959374944,
+      "random_forest": 142.4258907876663
+    },
+    {
+      "account": 1,
+      "new_period": true,
+      "training_examples": 7,
+      "actual": 195.59997253976397,
+      "median_baseline": 165.51200085528743,
+      "gap_count": 16,
+      "boundaries": 0,
+      "ridge": 226.59682469049406,
+      "random_forest": 143.20775440476675
+    }
+  ],
+  "input_sha256": {
+    "visits.json": "d264597686c2b0b05305943bd0873fe362438da41c34bf180d575db4529eaf48",
+    "locations-2026-10-04.json": "61195e0ff8010d7ba8261144bdb62d917d1b4de694da1b22659fc01d32a7befc",
+    "locations-2026-10-05.json": "f0b95edda0dbe4631f46efacdb25500f5e50d4063b6cd5acf042a5299a8fd30b",
+    "locations-2026-10-06.json": "eb96ce65efe856ffccf89e73cbaf64aa52dbbc6719270345374a0fec13273be8",
+    "locations-2026-10-07.json": "444bfe546a6596ad29280543a882c8a019387952af228fda255f3a3d12339419",
+    "locations-2026-10-08.json": "b74dfad4824e56cec8c9d4fb1f5c96bdbcba4ff4a1e7f2bc619613a320262459",
+    "locations-2026-10-09.json": "21dd91fb114ffeadf079102e97886835fb222606e3ed02f5bdf56528e72b3c29",
+    "locations-2026-10-10.json": "8c96360c6f1094dbeca744742b3687af797909a6bfeef15a43c7f523199b78a4",
+    "locations-2026-10-11.json": "ed1863d685a6a32107babe9f79ab161d977fd124b5b601e9d929cf09ff2a389f",
+    "locations-2026-10-12.json": "407f5c4e0eecbd26afc16865b2763e2a52ecf5c335b11fc3b08186b7551d20f7",
+    "locations-2026-10-13.json": "b5ee296e3867a23090eba58170bae7216850bca528738202a9d8fc02fe73d519",
+    "locations-2026-10-14.json": "abf969460bdbdff4dd099a749472a1b3be632fac268183f346fc37a224c0ceac",
+    "locations-2026-10-15.json": "7b8334a58cee287b90dc0c505e1742727311c20de4dc7827da02ddf291de20a7",
+    "locations-2026-10-16.json": "08b728b71229474666dc6976575e7e7eed8bb14a7345ec7b6c273b033c420345",
+    "locations-2026-10-17.json": "994a921888eb889cf3ec05a4777fbc4ee56e0d99025690b140e04d17dbb2ea93",
+    "locations-2026-10-18.json": "249c27fe3625de51c3e11a59a34a97f32667027a1a50e7c399e9789c0a9bd999",
+    "locations-2026-10-19.json": "a5dfd592438bf59bd7e9847e581f809ebb4222987aac8c987cd41981848becbe",
+    "locations-2026-10-20.json": "26e701cdc555ac5344e705b568baae20464bb665103e14997c5d7ae217ba3762",
+    "locations-2026-10-21.json": "36ab605576e084f55a18f635aad71339ddee29d672b7a9b7c9fac35fb6047160",
+    "locations-2026-10-22.json": "18a8ce080d157276232661f95fcab99224b93576c53fead250433af3fa672f0b",
+    "locations-2026-10-23.json": "cf2c9d8a650386200ccb2893561cf0805beb7c6595e34c4db7edde5bfd77c185",
+    "locations-2026-10-24.json": "03ce2e2534f9b75319f7a5a6365e0f14ebf217472f05373da2003252eba1c8c6",
+    "locations-2026-10-25.json": "25bb08876dd264c0534d7cb902f20bc4ce3365ddeaaea2671d7507261dd8dacb",
+    "locations-2026-10-26.json": "af453e10e74195891b59e95fade3955a4148b4ed69a69f474a38169354c0723e",
+    "locations-2026-10-27.json": "b28c29f176ff95e24a6a6a90a27a22b5dbb64349d5a18faebb543c71743283b9",
+    "aux-2026-10-04.json": "e8ce30acf41ef2c2faa161fef4034bc00584950f2c24e5d6b86f2c34170e13a1",
+    "aux-2026-10-05.json": "11cd605c103a9a967d028a849cd3e9a98b0015c86da234b9bdeefbffaa6338c3",
+    "aux-2026-10-06.json": "87614f16ce3d6939d0dd9b4d6c76e151d2d82d17982323ed49900fc29c5cbd96",
+    "aux-2026-10-07.json": "9ab6806dd5e458ab3ab8427392cbc9d6cf176d501d0595644c4cc97e8af15b3e",
+    "aux-2026-10-08.json": "c6e803bacfef0944740f0652bbc27637bcbb9c50ec095ca192c6eb6c905ec0f2",
+    "aux-2026-10-09.json": "94c703b84198c0901f109fbb1437ea3a1ae66dd471144d601d492c7fcd56ff52",
+    "aux-2026-10-10.json": "171aa654d0ee3a298903bba0cac9c0f3f01cda10281ef195f3d0475097523355",
+    "aux-2026-10-11.json": "19ff72ca7f97daac864ec42a92df731e49f6144323ecdaca05b63ec6fe89a3b7",
+    "aux-2026-10-12.json": "e6019bb1f7ece0ffeb115a74863506c7083f81fcfff19e0910543dcb3c97fdaa",
+    "aux-2026-10-13.json": "ffd6ad442763c9c15fd83e4029abc8a8f5fe47654083250349821577762ccb6b",
+    "aux-2026-10-14.json": "c09f4a0b8a3e4f9c691fdb470031601ca54cf614435b567a4c4969f2f116e411",
+    "aux-2026-10-15.json": "8b74e6058704257aa412f386db89a17b3b8b96b032f8615fa2157dd181a32351",
+    "aux-2026-10-16.json": "4effde8882bfed5a594f97639cbc63d73dffb01c9811aee46ad118059a2cfeb1",
+    "aux-2026-10-17.json": "2f9ff57646452c82b29964194a7120c86ddbeba1b0a175f6f47bdfd4d9c4076b",
+    "aux-2026-10-18.json": "21cda2d45dc83996af2a9b77e7a3b7d319f375dd718aa21c220fd05ffa3526d5",
+    "aux-2026-10-19.json": "0f4bf45b5c6d3b62978995f72ba1e09c30adb4213ab540ad0b13c054ea972e90",
+    "aux-2026-10-20.json": "c0c3e9aac4975a669d85e779f7deab37a214fd7f5dd918617ed57089f4e7afc6",
+    "aux-2026-10-21.json": "73e6c06a3e22d5f0ab0e61f305a2f42dadd7e790c0f0928b65c21a6da7ce1da0",
+    "aux-2026-10-22.json": "47cfeeba0684873e0aa2985707937e52906ff14f3fd1ce7649fa7b1716ae5e50",
+    "aux-2026-10-23.json": "2e71c05140cc11b394fad906099b3d32bf74ebf9d1caa24a58c62fba6e9fe60e",
+    "aux-2026-10-24.json": "fb6b4f0b387db7acd3e08d697e38c11b294072024cebf56bbb423cc526df05a9",
+    "aux-2026-10-25.json": "8261ccabb75ffdc2a8a130094e4526dd85ee9f4dd2162b995d3d35479f73b4ce",
+    "aux-2026-10-26.json": "9c5a92c24aed6e09968de026556d923bbdb3f2b895869c23f4c0ee0998dfc536",
+    "aux-2026-10-27.json": "6bacebbd313bf758da2535b34c6ed6f1fe9f9791b0db4e99942847da6353c096"
+  },
+  "source_sha256": "f333c010cd540266a721cd4cc8e53f520a2ef09417ffab85d17a5dc585035d65"
+}

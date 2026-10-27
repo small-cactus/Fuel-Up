@@ -4,7 +4,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'scripts/driving-research'))
-from auditRouteWindow import RouteWindow, inside_bracket, match
+from auditRouteWindow import RouteWindow, inside_bracket, match, strict_score
 
 
 def fix(time, longitude, course=90):
@@ -30,6 +30,27 @@ def trip():
 
 
 class RouteWindowTests(unittest.TestCase):
+    def test_unanswered_and_missing_outcomes_count_as_wrong(self):
+        c = dict(predictions=9, correct_purchase_station=4, unanswered_encounter=3,
+                 no_observed_encounter=1, end_censored=1)
+        self.assertEqual(strict_score(c), dict(correct=4, wrong=5, correct_prediction_rate=4/9))
+        self.assertIsNone(strict_score({})['correct_prediction_rate'])
+
+    def test_tighter_sequence_requires_every_point_close(self):
+        es = trip()
+        # About 190m offset only at the first point: endpoint-only gating would leak through.
+        es[5]['payload']['longitude'] -= .002
+        pred = RouteWindow(es).predict(1060)
+        self.assertEqual(pred['sequence'], 'a')
+        self.assertIsNone(pred['sequence_150m'])
+        self.assertIsNone(pred['sequence_100m'])
+
+    def test_extra_gates_cannot_invent_prior_purchases(self):
+        pred = RouteWindow(trip()).predict(1060)
+        self.assertEqual(pred['sequence_100m'], 'a')
+        self.assertIsNone(pred['sequence_two_prior'])
+        self.assertIsNone(pred['sequence_stable_cycles'])
+
     def test_bracket_needs_three_cycles_and_has_upper_bound(self):
         s = dict(known_mileage_cycles=3, recent_cycle_min_miles=100,
                  recent_cycle_max_miles=150, observed_miles_since_fill=90)

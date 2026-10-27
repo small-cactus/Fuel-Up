@@ -120,6 +120,11 @@ def account_report(events, account):
     snapshots = [e for e in events if e['payload'].get('mileageAtReceipt')]
     latest = max(snapshots, key=lambda e: e['recordedAt'])['payload']['mileageAtReceipt'] if snapshots else None
     comparables = [c['ledger'] for c in cycles if c['ledger']['status'] == 'comparable_receipt_endpoints']
+    latest_event = max(snapshots, key=available) if snapshots else None
+    since_purchase = ledger_interval(fuels[-1], latest_event) if fuels and latest_event else dict(status='missing_endpoint')
+    if fuels and latest_event:
+        since_purchase['receipt_hours_since_purchase'] = (available(latest_event)-available(fuels[-1]))/3600
+        since_purchase['is_since_full_tank'] = False
     return dict(account=account, observed_visits=len(observations), confirmed_purchases=len(fuels),
                 labels=dict(collections.Counter(e['payload']['label'] for e in labels.values())),
                 unanswered_observed_visits=sum(vid not in labels for vid in observations),
@@ -128,6 +133,7 @@ def account_report(events, account):
                 latest_ledger={k: latest[k] for k in ('capturedMeters', 'acceptedSamples', 'gapCount',
                               'unmeasuredGapSeconds', 'collectionBoundaryCount', 'completeOdometer')} if latest else None,
                 comparable_ledger_cycles=len(comparables),
+                latest_captured_distance_since_confirmed_purchase=since_purchase,
                 purchases_with_ledger=sum(bool(e['payload'].get('mileageAtReceipt')) for e in fuels),
                 purchases_answered_over_one_hour_later=sum(
                     available(labels[e['payload']['visitId']])-e['payload']['startedAt'] > 3600 for e in fuels),

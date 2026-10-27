@@ -1,0 +1,3007 @@
+{
+  "frozen_server_received_before": "2026-10-27T15:42:00Z",
+  "analyzed_event_counts": {
+    "visit_observation": 691,
+    "visit_departure": 669,
+    "visit_candidate": 69,
+    "visit_label": 53,
+    "visit_prompt": 157,
+    "visit_pedometer": 657,
+    "visit_gap": 22,
+    "location": 59552,
+    "lifecycle": 283,
+    "consent": 29,
+    "diagnostic": 30885,
+    "motion": 70305,
+    "permission": 33,
+    "system_visit": 117
+  },
+  "analyzed_events": 163522,
+  "method": "Same mileage predictor, three prior cycles, ten-mile lead, one warning per confirmed-purchase anchor. Gates use only already-received evidence. Stable means last three cycle max/min <=1.5. Substantial unknown stop means >=180 seconds and >=3 observed samples, without a definitive answer.",
+  "limitations": [
+    "Exploratory reuse of an inspected dataset; no untouched holdout or production precision claim.",
+    "0-20 captured miles to next confirmed purchase is the score, not low-tank truth.",
+    "Suppressing every warning is not a successful predictor. Report retained coverage.",
+    "Unknown substantial stops suppress confidence only; they never reset mileage or become inferred purchases.",
+    "Separate habitual-stop what-if moves a provisional anchor only; original confirmed answers remain the training and scoring truth. Ten guesses from one person would not establish general precision.",
+    "Gap analysis requires exact ledger-counter endpoints and complete motion-history chunks. Interior excludes 120 seconds at each endpoint and requires >=60 seconds of automotive classification; it estimates no missing miles.",
+    "Post-stop walking and recovered motion cannot justify earlier alerts before those responses arrived."
+  ],
+  "input_hashes": {
+    "visits.json": "d264597686c2b0b05305943bd0873fe362438da41c34bf180d575db4529eaf48",
+    "locations-2026-10-04.json": "61195e0ff8010d7ba8261144bdb62d917d1b4de694da1b22659fc01d32a7befc",
+    "locations-2026-10-05.json": "f0b95edda0dbe4631f46efacdb25500f5e50d4063b6cd5acf042a5299a8fd30b",
+    "locations-2026-10-06.json": "eb96ce65efe856ffccf89e73cbaf64aa52dbbc6719270345374a0fec13273be8",
+    "locations-2026-10-07.json": "444bfe546a6596ad29280543a882c8a019387952af228fda255f3a3d12339419",
+    "locations-2026-10-08.json": "b74dfad4824e56cec8c9d4fb1f5c96bdbcba4ff4a1e7f2bc619613a320262459",
+    "locations-2026-10-09.json": "21dd91fb114ffeadf079102e97886835fb222606e3ed02f5bdf56528e72b3c29",
+    "locations-2026-10-10.json": "8c96360c6f1094dbeca744742b3687af797909a6bfeef15a43c7f523199b78a4",
+    "locations-2026-10-11.json": "ed1863d685a6a32107babe9f79ab161d977fd124b5b601e9d929cf09ff2a389f",
+    "locations-2026-10-12.json": "407f5c4e0eecbd26afc16865b2763e2a52ecf5c335b11fc3b08186b7551d20f7",
+    "locations-2026-10-13.json": "b5ee296e3867a23090eba58170bae7216850bca528738202a9d8fc02fe73d519",
+    "locations-2026-10-14.json": "abf969460bdbdff4dd099a749472a1b3be632fac268183f346fc37a224c0ceac",
+    "locations-2026-10-15.json": "7b8334a58cee287b90dc0c505e1742727311c20de4dc7827da02ddf291de20a7",
+    "locations-2026-10-16.json": "08b728b71229474666dc6976575e7e7eed8bb14a7345ec7b6c273b033c420345",
+    "locations-2026-10-17.json": "994a921888eb889cf3ec05a4777fbc4ee56e0d99025690b140e04d17dbb2ea93",
+    "locations-2026-10-18.json": "249c27fe3625de51c3e11a59a34a97f32667027a1a50e7c399e9789c0a9bd999",
+    "locations-2026-10-19.json": "a5dfd592438bf59bd7e9847e581f809ebb4222987aac8c987cd41981848becbe",
+    "locations-2026-10-20.json": "26e701cdc555ac5344e705b568baae20464bb665103e14997c5d7ae217ba3762",
+    "locations-2026-10-21.json": "36ab605576e084f55a18f635aad71339ddee29d672b7a9b7c9fac35fb6047160",
+    "locations-2026-10-22.json": "18a8ce080d157276232661f95fcab99224b93576c53fead250433af3fa672f0b",
+    "locations-2026-10-23.json": "cf2c9d8a650386200ccb2893561cf0805beb7c6595e34c4db7edde5bfd77c185",
+    "locations-2026-10-24.json": "03ce2e2534f9b75319f7a5a6365e0f14ebf217472f05373da2003252eba1c8c6",
+    "locations-2026-10-25.json": "25bb08876dd264c0534d7cb902f20bc4ce3365ddeaaea2671d7507261dd8dacb",
+    "locations-2026-10-26.json": "af453e10e74195891b59e95fade3955a4148b4ed69a69f474a38169354c0723e",
+    "locations-2026-10-27.json": "b28c29f176ff95e24a6a6a90a27a22b5dbb64349d5a18faebb543c71743283b9",
+    "aux-2026-10-04.json": "e8ce30acf41ef2c2faa161fef4034bc00584950f2c24e5d6b86f2c34170e13a1",
+    "aux-2026-10-05.json": "11cd605c103a9a967d028a849cd3e9a98b0015c86da234b9bdeefbffaa6338c3",
+    "aux-2026-10-06.json": "87614f16ce3d6939d0dd9b4d6c76e151d2d82d17982323ed49900fc29c5cbd96",
+    "aux-2026-10-07.json": "9ab6806dd5e458ab3ab8427392cbc9d6cf176d501d0595644c4cc97e8af15b3e",
+    "aux-2026-10-08.json": "c6e803bacfef0944740f0652bbc27637bcbb9c50ec095ca192c6eb6c905ec0f2",
+    "aux-2026-10-09.json": "94c703b84198c0901f109fbb1437ea3a1ae66dd471144d601d492c7fcd56ff52",
+    "aux-2026-10-10.json": "171aa654d0ee3a298903bba0cac9c0f3f01cda10281ef195f3d0475097523355",
+    "aux-2026-10-11.json": "19ff72ca7f97daac864ec42a92df731e49f6144323ecdaca05b63ec6fe89a3b7",
+    "aux-2026-10-12.json": "e6019bb1f7ece0ffeb115a74863506c7083f81fcfff19e0910543dcb3c97fdaa",
+    "aux-2026-10-13.json": "ffd6ad442763c9c15fd83e4029abc8a8f5fe47654083250349821577762ccb6b",
+    "aux-2026-10-14.json": "c09f4a0b8a3e4f9c691fdb470031601ca54cf614435b567a4c4969f2f116e411",
+    "aux-2026-10-15.json": "8b74e6058704257aa412f386db89a17b3b8b96b032f8615fa2157dd181a32351",
+    "aux-2026-10-16.json": "4effde8882bfed5a594f97639cbc63d73dffb01c9811aee46ad118059a2cfeb1",
+    "aux-2026-10-17.json": "2f9ff57646452c82b29964194a7120c86ddbeba1b0a175f6f47bdfd4d9c4076b",
+    "aux-2026-10-18.json": "21cda2d45dc83996af2a9b77e7a3b7d319f375dd718aa21c220fd05ffa3526d5",
+    "aux-2026-10-19.json": "0f4bf45b5c6d3b62978995f72ba1e09c30adb4213ab540ad0b13c054ea972e90",
+    "aux-2026-10-20.json": "c0c3e9aac4975a669d85e779f7deab37a214fd7f5dd918617ed57089f4e7afc6",
+    "aux-2026-10-21.json": "73e6c06a3e22d5f0ab0e61f305a2f42dadd7e790c0f0928b65c21a6da7ce1da0",
+    "aux-2026-10-22.json": "47cfeeba0684873e0aa2985707937e52906ff14f3fd1ce7649fa7b1716ae5e50",
+    "aux-2026-10-23.json": "2e71c05140cc11b394fad906099b3d32bf74ebf9d1caa24a58c62fba6e9fe60e",
+    "aux-2026-10-24.json": "fb6b4f0b387db7acd3e08d697e38c11b294072024cebf56bbb423cc526df05a9",
+    "aux-2026-10-25.json": "8261ccabb75ffdc2a8a130094e4526dd85ee9f4dd2162b995d3d35479f73b4ce",
+    "aux-2026-10-26.json": "9c5a92c24aed6e09968de026556d923bbdb3f2b895869c23f4c0ee0998dfc536",
+    "aux-2026-10-27.json": "6bacebbd313bf758da2535b34c6ed6f1fe9f9791b0db4e99942847da6353c096",
+    "kinds.json": "9a8e074a304260650397219c5aab47fee8fb59fe1cbe564664e85142502b037c"
+  },
+  "source_hashes": {
+    "inferMileageConfidence.py": "01aeb17a49803b0488287d9b5baa70219b62dcff34276a08f4c2f15244d2afe7",
+    "mileageGapEvidence.py": "ee7b93a18d19cda9e306617e56f24eccaf63805b238c9a6f066c881c31d48dd2",
+    "automaticRefuelEvidence.py": "60e7c5be236ae3710da29511d000aa7802f2c4d98a326f76ff1e607142284cf8",
+    "auditMileageCoverage.py": "06ecc3b4a4cb85b1c812e071d61daa84f75aebf6c141ef2f0c30e09a9f75a71f",
+    "backtestMileageOnly.py": "7f25772eadc265ba1803afec9c3c9abf2abd8b47ff2e64a3376091a61299847e",
+    "mileageReadiness.py": "f70ca923810090ba1de40aacceb40fe9856ef0da2c1a427f904e22dab23af39c",
+    "timingFeatures.py": "f5d8d56618f137811bb1e13d386b2365356e182a4520cc46be3ae9af6662ad26",
+    "backtestAnticipation.py": "f010f0a15d800ab3bee28dbc124851023599994fbc6f2c0edde8d64b6cce96b8"
+  },
+  "accounts": [
+    {
+      "account": 1,
+      "purchases": 19,
+      "policies": {
+        "baseline": {
+          "alerts": 12,
+          "wrong_including_unknown": 7,
+          "correct_prediction_rate": 0.4166666666666667,
+          "near_purchase": 5,
+          "outside_window": 7,
+          "unknown": 0,
+          "distinct_near_purchases": 5,
+          "details": [
+            {
+              "miles_until_next_purchase": 0.14946453440490745,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.7985283265651517,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "through_oct13"
+            },
+            {
+              "miles_until_next_purchase": 34.99692078813388,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.8617674287458157,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "through_oct13"
+            },
+            {
+              "miles_until_next_purchase": 4.100006231868492,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3012792920533098,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "through_oct13"
+            },
+            {
+              "miles_until_next_purchase": 59.47016388399616,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3012792920533098,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 207.7979476257765,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.414704385634084,
+              "detected_gap_driving": 4,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 15.62427182343825,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 2.42429105776307,
+              "detected_gap_driving": 1,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 8.326956445360288,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.6908821265660605,
+              "detected_gap_driving": 2,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 4.681624251857965,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.217867254202037,
+              "detected_gap_driving": 1,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 55.52407476097542,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.2021215954027324,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 36.72480196180603,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3835689023604607,
+              "detected_gap_driving": 2,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 180.21601259348483,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3835689023604607,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 40.10135285004485,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 2.1270851967229327,
+              "detected_gap_driving": 1,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            }
+          ]
+        },
+        "stable_cycles": {
+          "alerts": 7,
+          "wrong_including_unknown": 5,
+          "correct_prediction_rate": 0.2857142857142857,
+          "near_purchase": 2,
+          "outside_window": 5,
+          "unknown": 0,
+          "distinct_near_purchases": 2,
+          "details": [
+            {
+              "miles_until_next_purchase": 4.100006231868492,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3012792920533098,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "through_oct13"
+            },
+            {
+              "miles_until_next_purchase": 59.47016388399616,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3012792920533098,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 207.7979476257765,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.414704385634084,
+              "detected_gap_driving": 4,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 4.681624251857965,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.217867254202037,
+              "detected_gap_driving": 1,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 55.52407476097542,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.2021215954027324,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 36.72480196180603,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3835689023604607,
+              "detected_gap_driving": 2,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 180.21601259348483,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3835689023604607,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            }
+          ]
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 12,
+          "wrong_including_unknown": 7,
+          "correct_prediction_rate": 0.4166666666666667,
+          "near_purchase": 5,
+          "outside_window": 7,
+          "unknown": 0,
+          "distinct_near_purchases": 5,
+          "details": [
+            {
+              "miles_until_next_purchase": 0.14946453440490745,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.7985283265651517,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "through_oct13"
+            },
+            {
+              "miles_until_next_purchase": 34.99692078813388,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.8617674287458157,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "through_oct13"
+            },
+            {
+              "miles_until_next_purchase": 4.100006231868492,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3012792920533098,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "through_oct13"
+            },
+            {
+              "miles_until_next_purchase": 59.47016388399616,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3012792920533098,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 207.7979476257765,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.414704385634084,
+              "detected_gap_driving": 4,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 15.62427182343825,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 2.42429105776307,
+              "detected_gap_driving": 1,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 8.326956445360288,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.6908821265660605,
+              "detected_gap_driving": 2,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 4.681624251857965,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.217867254202037,
+              "detected_gap_driving": 1,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 55.52407476097542,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.2021215954027324,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 36.72480196180603,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3835689023604607,
+              "detected_gap_driving": 2,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 180.21601259348483,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3835689023604607,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 40.10135285004485,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 2.1270851967229327,
+              "detected_gap_driving": 1,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            }
+          ]
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 7,
+          "wrong_including_unknown": 5,
+          "correct_prediction_rate": 0.2857142857142857,
+          "near_purchase": 2,
+          "outside_window": 5,
+          "unknown": 0,
+          "distinct_near_purchases": 2,
+          "details": [
+            {
+              "miles_until_next_purchase": 4.100006231868492,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3012792920533098,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "through_oct13"
+            },
+            {
+              "miles_until_next_purchase": 59.47016388399616,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3012792920533098,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 207.7979476257765,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.414704385634084,
+              "detected_gap_driving": 4,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 4.681624251857965,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.217867254202037,
+              "detected_gap_driving": 1,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 55.52407476097542,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.2021215954027324,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 36.72480196180603,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3835689023604607,
+              "detected_gap_driving": 2,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 180.21601259348483,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3835689023604607,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            }
+          ]
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 6,
+          "wrong_including_unknown": 4,
+          "correct_prediction_rate": 0.3333333333333333,
+          "near_purchase": 2,
+          "outside_window": 4,
+          "unknown": 0,
+          "distinct_near_purchases": 2,
+          "details": [
+            {
+              "miles_until_next_purchase": 0.14946453440490745,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.7985283265651517,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "through_oct13"
+            },
+            {
+              "miles_until_next_purchase": 34.99692078813388,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.8617674287458157,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "through_oct13"
+            },
+            {
+              "miles_until_next_purchase": 4.100006231868492,
+              "within_window": true,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3012792920533098,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "through_oct13"
+            },
+            {
+              "miles_until_next_purchase": 59.47016388399616,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3012792920533098,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": false,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 55.52407476097542,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.2021215954027324,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 180.21601259348483,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3835689023604607,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            }
+          ]
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 2,
+          "wrong_including_unknown": 2,
+          "correct_prediction_rate": 0.0,
+          "near_purchase": 0,
+          "outside_window": 2,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": [
+            {
+              "miles_until_next_purchase": 55.52407476097542,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.2021215954027324,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            },
+            {
+              "miles_until_next_purchase": 180.21601259348483,
+              "within_window": false,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 1.3835689023604607,
+              "detected_gap_driving": 0,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            }
+          ]
+        }
+      },
+      "signals": {
+        "context_snapshots": 65937,
+        "audio_port_observations": {
+          "Speaker": 23958,
+          "CarAudio": 41890,
+          "BluetoothA2DPOutput": 9,
+          "Receiver": 73
+        },
+        "unique_actions": {
+          "app_open": 24,
+          "station_select": 17
+        },
+        "pre_purchase_context": {
+          "purchases": 19,
+          "missing_fresh_context_five_minutes_before": 7,
+          "fresh_context_five_minutes_before": 12
+        },
+        "post_stop_steps": {
+          "fueled": {
+            "n": 18,
+            "minimum": 0,
+            "median": 22.0,
+            "maximum": 295
+          },
+          "not_fueling": {
+            "n": 7,
+            "minimum": 78,
+            "median": 336,
+            "maximum": 688
+          },
+          "not_a_stop": {
+            "n": 6,
+            "minimum": 0,
+            "median": 52.0,
+            "maximum": 157
+          }
+        },
+        "motion_history_responses": 491
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 219,
+        "exact_gap_windows": 184,
+        "queries": 351,
+        "complete_queries": 351,
+        "interior_checkable": 76,
+        "too_short_for_interior_check": 108,
+        "automotive_interior_at_least_60_seconds": 16
+      },
+      "habitual_stop_inference": {
+        "unanswered_at_eligibility": 32,
+        "already_answered_at_eligibility": 1,
+        "predictions": 13,
+        "correct": 13,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": 1.0,
+        "outcomes": {
+          "fueled": 13
+        },
+        "details": [
+          {
+            "prior_confirmed_purchases": 2,
+            "later_answer": "fueled",
+            "lead_before_answer_minutes": 0.07424130042394002,
+            "delay_after_arrival_seconds": 181.11224746704102
+          },
+          {
+            "prior_confirmed_purchases": 3,
+            "later_answer": "fueled",
+            "lead_before_answer_minutes": 0.143573264280955,
+            "delay_after_arrival_seconds": 186.09190249443054
+          },
+          {
+            "prior_confirmed_purchases": 4,
+            "later_answer": "fueled",
+            "lead_before_answer_minutes": 35.85324573516846,
+            "delay_after_arrival_seconds": 180.07952094078064
+          },
+          {
+            "prior_confirmed_purchases": 5,
+            "later_answer": "fueled",
+            "lead_before_answer_minutes": 0.23987418015797932,
+            "delay_after_arrival_seconds": 181.10306453704834
+          },
+          {
+            "prior_confirmed_purchases": 6,
+            "later_answer": "fueled",
+            "lead_before_answer_minutes": 1590.407336485386,
+            "delay_after_arrival_seconds": 251.086412191391
+          },
+          {
+            "prior_confirmed_purchases": 7,
+            "later_answer": "fueled",
+            "lead_before_answer_minutes": 1.3857274651527405,
+            "delay_after_arrival_seconds": 181.1028356552124
+          },
+          {
+            "prior_confirmed_purchases": 8,
+            "later_answer": "fueled",
+            "lead_before_answer_minutes": 0.09808845122655233,
+            "delay_after_arrival_seconds": 180.09207773208618
+          },
+          {
+            "prior_confirmed_purchases": 9,
+            "later_answer": "fueled",
+            "lead_before_answer_minutes": 6.415603180726369,
+            "delay_after_arrival_seconds": 180.09781527519226
+          },
+          {
+            "prior_confirmed_purchases": 10,
+            "later_answer": "fueled",
+            "lead_before_answer_minutes": 0.6820419351259868,
+            "delay_after_arrival_seconds": 180.08384943008423
+          },
+          {
+            "prior_confirmed_purchases": 11,
+            "later_answer": "fueled",
+            "lead_before_answer_minutes": 1.7101178328196207,
+            "delay_after_arrival_seconds": 183.10867428779602
+          },
+          {
+            "prior_confirmed_purchases": 12,
+            "later_answer": "fueled",
+            "lead_before_answer_minutes": 0.7074728012084961,
+            "delay_after_arrival_seconds": 240.0916724205017
+          },
+          {
+            "prior_confirmed_purchases": 13,
+            "later_answer": "fueled",
+            "lead_before_answer_minutes": 96.99501036802927,
+            "delay_after_arrival_seconds": 180.21225500106812
+          },
+          {
+            "prior_confirmed_purchases": 14,
+            "later_answer": "fueled",
+            "lead_before_answer_minutes": 0.5151304165522258,
+            "delay_after_arrival_seconds": 180.2375111579895
+          }
+        ]
+      },
+      "provisional_anchor_replay": {
+        "alerts": 12,
+        "wrong_including_unknown": 7,
+        "correct_prediction_rate": 0.4166666666666667,
+        "near_purchase": 5,
+        "outside_window": 7,
+        "unknown": 0,
+        "distinct_near_purchases": 5,
+        "details": [
+          {
+            "miles_until_next_purchase": 0.14946453440490745,
+            "within_window": true,
+            "unresolved_substantial_stops": 0,
+            "recent_cycle_ratio": 1.7985283265651517,
+            "detected_gap_driving": 0,
+            "comparable_ledger_anchor": false,
+            "partition": "through_oct13"
+          },
+          {
+            "miles_until_next_purchase": 34.99692078813388,
+            "within_window": false,
+            "unresolved_substantial_stops": 0,
+            "recent_cycle_ratio": 1.8617674287458157,
+            "detected_gap_driving": 0,
+            "comparable_ledger_anchor": false,
+            "partition": "through_oct13"
+          },
+          {
+            "miles_until_next_purchase": 4.100006231868492,
+            "within_window": true,
+            "unresolved_substantial_stops": 0,
+            "recent_cycle_ratio": 1.3012792920533098,
+            "detected_gap_driving": 0,
+            "comparable_ledger_anchor": false,
+            "partition": "through_oct13"
+          },
+          {
+            "miles_until_next_purchase": 59.47016388399616,
+            "within_window": false,
+            "unresolved_substantial_stops": 0,
+            "recent_cycle_ratio": 1.3012792920533098,
+            "detected_gap_driving": 0,
+            "comparable_ledger_anchor": false,
+            "partition": "after_oct13"
+          },
+          {
+            "miles_until_next_purchase": 207.7979476257765,
+            "within_window": false,
+            "unresolved_substantial_stops": 0,
+            "recent_cycle_ratio": 1.414704385634084,
+            "detected_gap_driving": 4,
+            "comparable_ledger_anchor": true,
+            "partition": "after_oct13"
+          },
+          {
+            "miles_until_next_purchase": 15.62427182343825,
+            "within_window": true,
+            "unresolved_substantial_stops": 0,
+            "recent_cycle_ratio": 2.42429105776307,
+            "detected_gap_driving": 1,
+            "comparable_ledger_anchor": true,
+            "partition": "after_oct13"
+          },
+          {
+            "miles_until_next_purchase": 8.326956445360288,
+            "within_window": true,
+            "unresolved_substantial_stops": 0,
+            "recent_cycle_ratio": 1.6908821265660605,
+            "detected_gap_driving": 2,
+            "comparable_ledger_anchor": true,
+            "partition": "after_oct13"
+          },
+          {
+            "miles_until_next_purchase": 4.681624251857965,
+            "within_window": true,
+            "unresolved_substantial_stops": 0,
+            "recent_cycle_ratio": 1.217867254202037,
+            "detected_gap_driving": 1,
+            "comparable_ledger_anchor": true,
+            "partition": "after_oct13"
+          },
+          {
+            "miles_until_next_purchase": 55.52407476097542,
+            "within_window": false,
+            "unresolved_substantial_stops": 0,
+            "recent_cycle_ratio": 1.2021215954027324,
+            "detected_gap_driving": 0,
+            "comparable_ledger_anchor": true,
+            "partition": "after_oct13"
+          },
+          {
+            "miles_until_next_purchase": 36.72480196180603,
+            "within_window": false,
+            "unresolved_substantial_stops": 0,
+            "recent_cycle_ratio": 1.3835689023604607,
+            "detected_gap_driving": 2,
+            "comparable_ledger_anchor": true,
+            "partition": "after_oct13"
+          },
+          {
+            "miles_until_next_purchase": 180.21601259348483,
+            "within_window": false,
+            "unresolved_substantial_stops": 0,
+            "recent_cycle_ratio": 1.3835689023604607,
+            "detected_gap_driving": 0,
+            "comparable_ledger_anchor": true,
+            "partition": "after_oct13"
+          },
+          {
+            "miles_until_next_purchase": 40.10135285004485,
+            "within_window": false,
+            "unresolved_substantial_stops": 0,
+            "recent_cycle_ratio": 2.1270851967229327,
+            "detected_gap_driving": 1,
+            "comparable_ledger_anchor": true,
+            "partition": "after_oct13"
+          }
+        ]
+      }
+    },
+    {
+      "account": 2,
+      "purchases": 4,
+      "policies": {
+        "baseline": {
+          "alerts": 1,
+          "wrong_including_unknown": 1,
+          "correct_prediction_rate": 0.0,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 1,
+          "distinct_near_purchases": 0,
+          "details": [
+            {
+              "miles_until_next_purchase": null,
+              "within_window": null,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 7.551748491006073,
+              "detected_gap_driving": 11,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            }
+          ]
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 1,
+          "wrong_including_unknown": 1,
+          "correct_prediction_rate": 0.0,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 1,
+          "distinct_near_purchases": 0,
+          "details": [
+            {
+              "miles_until_next_purchase": null,
+              "within_window": null,
+              "unresolved_substantial_stops": 0,
+              "recent_cycle_ratio": 7.551748491006073,
+              "detected_gap_driving": 11,
+              "comparable_ledger_anchor": true,
+              "partition": "after_oct13"
+            }
+          ]
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 36728,
+        "audio_port_observations": {
+          "Speaker": 28529,
+          "BluetoothHFP": 517,
+          "BluetoothA2DPOutput": 7466,
+          "Receiver": 202
+        },
+        "unique_actions": {
+          "app_open": 6
+        },
+        "pre_purchase_context": {
+          "purchases": 4,
+          "fresh_context_five_minutes_before": 3,
+          "missing_fresh_context_five_minutes_before": 1
+        },
+        "post_stop_steps": {
+          "fueled": {
+            "n": 4,
+            "minimum": 26,
+            "median": 104.0,
+            "maximum": 163
+          },
+          "not_fueling": {
+            "n": 4,
+            "minimum": 25,
+            "median": 92.0,
+            "maximum": 249
+          },
+          "not_a_stop": {
+            "n": 2,
+            "minimum": 102,
+            "median": 116.5,
+            "maximum": 131
+          }
+        },
+        "motion_history_responses": 530
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 413,
+        "exact_gap_windows": 380,
+        "queries": 412,
+        "complete_queries": 412,
+        "interior_checkable": 298,
+        "fully_stationary_classified_interior": 108,
+        "too_short_for_interior_check": 82,
+        "automotive_interior_at_least_60_seconds": 35
+      },
+      "habitual_stop_inference": {
+        "unanswered_at_eligibility": 17,
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 1,
+        "wrong_including_unknown": 1,
+        "correct_prediction_rate": 0.0,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 1,
+        "distinct_near_purchases": 0,
+        "details": [
+          {
+            "miles_until_next_purchase": null,
+            "within_window": null,
+            "unresolved_substantial_stops": 0,
+            "recent_cycle_ratio": 7.551748491006073,
+            "detected_gap_driving": 11,
+            "comparable_ledger_anchor": true,
+            "partition": "after_oct13"
+          }
+        ]
+      }
+    },
+    {
+      "account": 3,
+      "purchases": 1,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 22714,
+        "audio_port_observations": {
+          "Speaker": 13934,
+          "BluetoothA2DPOutput": 6885,
+          "Receiver": 57,
+          "BluetoothHFP": 10,
+          "CarAudio": 1798
+        },
+        "unique_actions": {
+          "app_open": 8,
+          "station_select": 28,
+          "station_go": 1
+        },
+        "pre_purchase_context": {
+          "purchases": 1,
+          "missing_fresh_context_five_minutes_before": 1
+        },
+        "post_stop_steps": {
+          "fueled": {
+            "n": 1,
+            "minimum": 217,
+            "median": 217,
+            "maximum": 217
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 422
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 319,
+        "exact_gap_windows": 278,
+        "queries": 307,
+        "complete_queries": 307,
+        "interior_checkable": 210,
+        "fully_stationary_classified_interior": 134,
+        "too_short_for_interior_check": 68,
+        "automotive_interior_at_least_60_seconds": 4
+      },
+      "habitual_stop_inference": {
+        "unanswered_at_eligibility": 15,
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    },
+    {
+      "account": 4,
+      "purchases": 0,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 2581,
+        "audio_port_observations": {
+          "BluetoothA2DPOutput": 1686,
+          "Speaker": 879,
+          "Receiver": 13
+        },
+        "unique_actions": {
+          "app_open": 6,
+          "station_select": 20
+        },
+        "pre_purchase_context": {},
+        "post_stop_steps": {
+          "fueled": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 55
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 7,
+        "exact_gap_windows": 3,
+        "queries": 38,
+        "complete_queries": 38,
+        "too_short_for_interior_check": 3
+      },
+      "habitual_stop_inference": {
+        "unanswered_at_eligibility": 3,
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    },
+    {
+      "account": 5,
+      "purchases": 0,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 18,
+        "audio_port_observations": {
+          "Speaker": 14
+        },
+        "unique_actions": {
+          "app_open": 2
+        },
+        "pre_purchase_context": {},
+        "post_stop_steps": {
+          "fueled": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 0
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 0,
+        "exact_gap_windows": 0,
+        "queries": 0,
+        "complete_queries": 0
+      },
+      "habitual_stop_inference": {
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    },
+    {
+      "account": 6,
+      "purchases": 0,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 18,
+        "audio_port_observations": {
+          "Speaker": 14
+        },
+        "unique_actions": {
+          "app_open": 2,
+          "station_select": 1,
+          "station_go": 1
+        },
+        "pre_purchase_context": {},
+        "post_stop_steps": {
+          "fueled": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 0
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 0,
+        "exact_gap_windows": 0,
+        "queries": 0,
+        "complete_queries": 0
+      },
+      "habitual_stop_inference": {
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    },
+    {
+      "account": 7,
+      "purchases": 0,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 16,
+        "audio_port_observations": {
+          "Speaker": 13
+        },
+        "unique_actions": {
+          "app_open": 1,
+          "station_go": 2,
+          "station_select": 3
+        },
+        "pre_purchase_context": {},
+        "post_stop_steps": {
+          "fueled": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 0
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 0,
+        "exact_gap_windows": 0,
+        "queries": 0,
+        "complete_queries": 0
+      },
+      "habitual_stop_inference": {
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    },
+    {
+      "account": 8,
+      "purchases": 0,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 16,
+        "audio_port_observations": {
+          "Speaker": 13
+        },
+        "unique_actions": {
+          "app_open": 1,
+          "station_go": 2,
+          "station_select": 3
+        },
+        "pre_purchase_context": {},
+        "post_stop_steps": {
+          "fueled": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 0
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 0,
+        "exact_gap_windows": 0,
+        "queries": 0,
+        "complete_queries": 0
+      },
+      "habitual_stop_inference": {
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    },
+    {
+      "account": 9,
+      "purchases": 0,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 16,
+        "audio_port_observations": {
+          "Speaker": 13
+        },
+        "unique_actions": {
+          "app_open": 1,
+          "station_select": 3,
+          "station_go": 1
+        },
+        "pre_purchase_context": {},
+        "post_stop_steps": {
+          "fueled": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 0
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 0,
+        "exact_gap_windows": 0,
+        "queries": 0,
+        "complete_queries": 0
+      },
+      "habitual_stop_inference": {
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    },
+    {
+      "account": 10,
+      "purchases": 0,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 15,
+        "audio_port_observations": {
+          "Speaker": 12
+        },
+        "unique_actions": {
+          "app_open": 1,
+          "station_go": 1,
+          "station_select": 2
+        },
+        "pre_purchase_context": {},
+        "post_stop_steps": {
+          "fueled": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 0
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 0,
+        "exact_gap_windows": 0,
+        "queries": 0,
+        "complete_queries": 0
+      },
+      "habitual_stop_inference": {
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    },
+    {
+      "account": 11,
+      "purchases": 0,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 11,
+        "audio_port_observations": {
+          "Speaker": 8
+        },
+        "unique_actions": {
+          "app_open": 1
+        },
+        "pre_purchase_context": {},
+        "post_stop_steps": {
+          "fueled": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 0
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 0,
+        "exact_gap_windows": 0,
+        "queries": 0,
+        "complete_queries": 0
+      },
+      "habitual_stop_inference": {
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    },
+    {
+      "account": 12,
+      "purchases": 0,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 11,
+        "audio_port_observations": {
+          "Speaker": 8
+        },
+        "unique_actions": {
+          "app_open": 1
+        },
+        "pre_purchase_context": {},
+        "post_stop_steps": {
+          "fueled": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 0
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 0,
+        "exact_gap_windows": 0,
+        "queries": 0,
+        "complete_queries": 0
+      },
+      "habitual_stop_inference": {
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    },
+    {
+      "account": 13,
+      "purchases": 0,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 10,
+        "audio_port_observations": {
+          "Speaker": 7
+        },
+        "unique_actions": {
+          "app_open": 1
+        },
+        "pre_purchase_context": {},
+        "post_stop_steps": {
+          "fueled": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 0
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 0,
+        "exact_gap_windows": 0,
+        "queries": 0,
+        "complete_queries": 0
+      },
+      "habitual_stop_inference": {
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    },
+    {
+      "account": 14,
+      "purchases": 0,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 0,
+        "audio_port_observations": {},
+        "unique_actions": {},
+        "pre_purchase_context": {},
+        "post_stop_steps": {
+          "fueled": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 0
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 0,
+        "exact_gap_windows": 0,
+        "queries": 0,
+        "complete_queries": 0
+      },
+      "habitual_stop_inference": {
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    },
+    {
+      "account": 15,
+      "purchases": 0,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 8,
+        "audio_port_observations": {
+          "Speaker": 6
+        },
+        "unique_actions": {
+          "app_open": 1
+        },
+        "pre_purchase_context": {},
+        "post_stop_steps": {
+          "fueled": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 0
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 0,
+        "exact_gap_windows": 0,
+        "queries": 0,
+        "complete_queries": 0
+      },
+      "habitual_stop_inference": {
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    },
+    {
+      "account": 16,
+      "purchases": 0,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 8,
+        "audio_port_observations": {
+          "Speaker": 6
+        },
+        "unique_actions": {
+          "app_open": 1
+        },
+        "pre_purchase_context": {},
+        "post_stop_steps": {
+          "fueled": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 0
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 0,
+        "exact_gap_windows": 0,
+        "queries": 0,
+        "complete_queries": 0
+      },
+      "habitual_stop_inference": {
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    },
+    {
+      "account": 17,
+      "purchases": 0,
+      "policies": {
+        "baseline": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_cycles": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_unanswered_substantial_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "stable_and_no_unanswered_stop": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "recent_navigation": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        },
+        "ledger_and_no_detected_gap_driving": {
+          "alerts": 0,
+          "wrong_including_unknown": 0,
+          "correct_prediction_rate": null,
+          "near_purchase": 0,
+          "outside_window": 0,
+          "unknown": 0,
+          "distinct_near_purchases": 0,
+          "details": []
+        }
+      },
+      "signals": {
+        "context_snapshots": 4,
+        "audio_port_observations": {},
+        "unique_actions": {},
+        "pre_purchase_context": {},
+        "post_stop_steps": {
+          "fueled": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_fueling": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          },
+          "not_a_stop": {
+            "n": 0,
+            "minimum": null,
+            "median": null,
+            "maximum": null
+          }
+        },
+        "motion_history_responses": 0
+      },
+      "gap_evidence": {
+        "recorded_gap_increments": 0,
+        "exact_gap_windows": 0,
+        "queries": 0,
+        "complete_queries": 0
+      },
+      "habitual_stop_inference": {
+        "predictions": 0,
+        "correct": 0,
+        "wrong_including_unanswered": 0,
+        "correct_prediction_rate": null,
+        "outcomes": {},
+        "details": []
+      },
+      "provisional_anchor_replay": {
+        "alerts": 0,
+        "wrong_including_unknown": 0,
+        "correct_prediction_rate": null,
+        "near_purchase": 0,
+        "outside_window": 0,
+        "unknown": 0,
+        "distinct_near_purchases": 0,
+        "details": []
+      }
+    }
+  ]
+}
