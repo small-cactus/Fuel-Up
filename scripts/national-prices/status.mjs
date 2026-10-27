@@ -12,6 +12,15 @@ const sql = `select jsonb_build_object(
    'expired_running',count(*) filter(where r.status='running' and deadline<=now()))
    from slots left join fuel_national_runs r on r.slot_at=s),
  'retention',(select jsonb_build_object('eligible_objects',count(*)) from fuel_national_retention_candidates()),
+ 'retention_metadata',(select jsonb_build_object('past_age_threshold_runs',count(*),
+   'oldest_deadline',min(r.deadline_at)) from fuel_national_runs r cross join fuel_national_config c
+   where c.continuous and r.slot_at>=c.operational_starts_at and r.slot_at>='2026-10-07T19:00:00Z'
+    and r.deadline_at<now()-interval '8 days' and r.status in ('complete','partial')),
+ 'retention_worker',(select jsonb_agg(w) from (
+   select created,status_code,timed_out,content::jsonb as result from net._http_response
+   where created>now()-interval '2 hours'
+    and (content like '%"removedObjects"%' or content like '%NATIONAL_RETENTION_FAILED%')
+   order by created desc limit 12) w),
  'trends_cache',(select jsonb_build_object('scopes',count(*),'run_id',min(run_id),'published_at',min(published_at),
    'age_minutes',extract(epoch from now()-min(published_at))/60,
    'behind_latest_complete',min(run_id) is distinct from (select id from fuel_national_runs where status='complete' order by slot_at desc limit 1)) from public.fuel_national_trends_cache),

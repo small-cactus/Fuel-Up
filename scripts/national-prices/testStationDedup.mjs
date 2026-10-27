@@ -41,8 +41,12 @@ ${migration('20261005152000_narrow_national_trend_aggregation')}
 ${functionSql('national_fuel_trend_history','20261001170000_national_trend_history')}
 ${functionSql('publish_fuel_station_batch','20261001170000_national_trend_history').replace('public.publish_fuel_station_batch','public.baseline_publish_fuel_station_batch')}
 ${migration('20261019190000_deduplicate_station_publication')}
+${migration('20261027202000_national_retention_covering_reference')}
+${migration('20261027202500_national_retention_bounded_references')}
+${migration('20261027203000_national_retention_bounded_eligibility')}
 ${compactCollection ? functionSql('nearby_fuel_station_cache','20261019190000_deduplicate_station_publication').replace('public.nearby_fuel_station_cache','public.wide_nearby_fuel_station_cache') + '\n' + functionSql('record_fuel_national_trend_batch','20261005152000_narrow_national_trend_aggregation').replace('public.record_fuel_national_trend_batch','public.wide_record_fuel_national_trend_batch') + '\n' + functionSql('publish_fuel_station_batch','20261019190000_deduplicate_station_publication').replace('public.publish_fuel_station_batch','public.wide_publish_fuel_station_batch').replace('perform record_fuel_national_trend_batch','perform wide_record_fuel_national_trend_batch') + '\n' + migration('20261019193000_compact_station_collection_state') : ''}
 ${read('tests/sql/stationPublicationDedup.sql')}
+${read('tests/sql/nationalRetentionBounded.sql')}
 ${compactCollection ? read('tests/sql/stationCollectionState.sql') + '\n' + read('tests/sql/stationGeographicBounds.sql') : ''}
 ${process.argv[2] ? archiveReplaySql(JSON.parse(readFileSync(process.argv[2], 'utf8'))) : ''}
 ${read('tests/sql/verificationAllowance.sql').replace('-- INSERT_ALLOWANCE_MIGRATION',migration('20261019190100_bounded_verification_sweeps'))}`;
