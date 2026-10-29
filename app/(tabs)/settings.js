@@ -205,12 +205,12 @@ export default function SettingsScreen() {
                         styles.formSlot,
                         {
                             paddingTop: topCanopyHeight,
-                            paddingBottom: insets.bottom,
                         },
                     ]}
                 >
                     <NativeSettingsForm
                         isDark={isDark}
+                        bottomContentInset={insets.bottom + 16}
                         searchRadiusMiles={preferences.searchRadiusMiles}
                         preferredOctane={preferences.preferredOctane}
                         onRadiusChange={handleRadiusChange}

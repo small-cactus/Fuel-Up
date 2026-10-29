@@ -23,6 +23,7 @@ struct GlassSectionModifier: ViewModifier {
 }
 
 struct GlassFormModifier: ViewModifier {
+  var bottomContentInset: Double = 0
   private func extendedBounds(_ bounds: CGRect, viewportHeight: CGFloat) -> CGRect {
     guard !bounds.isNull else { return bounds }
     let top = bounds.minY <= 0 ? min(bounds.minY, -52) : bounds.minY
@@ -33,6 +34,10 @@ struct GlassFormModifier: ViewModifier {
   func body(content: Content) -> some View {
     if #available(iOS 26.0, *) {
       content
+        // Keep the viewport behind the floating tab bar while allowing the final
+        // rows to scroll clear of it. Outer padding would leave an opaque strip.
+        .contentMargins(.bottom, bottomContentInset > 0 ? bottomContentInset : nil, for: .scrollContent)
+        .contentMargins(.bottom, bottomContentInset > 0 ? bottomContentInset : nil, for: .scrollIndicators)
         .scrollContentBackground(.hidden)
         .backgroundPreferenceValue(GlassRowBounds.self) { sections in
           GeometryReader { geometry in

@@ -10,6 +10,7 @@ async function setup() {
     const read = deferred(); const review = deferred(); const alerts = [];
     let form; const routes = []; let foreground; let reviewCalls = 0; const updates = [];
     const Screen = load('app/(tabs)/settings.js', {
+        '../../src/lib/installationTelemetry': { trackInstallationEvent: async () => {} },
         'react-native': { View: 'View', StyleSheet: { create: value => value }, Alert: { alert: (...args) => alerts.push(args) },
             AppState: { addEventListener: (_, callback) => { foreground = callback; return { remove() {} }; } } },
         'expo-router': { useRouter: () => ({ push: route => routes.push(route) }) },

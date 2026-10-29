@@ -38,7 +38,7 @@ export default function TabLayout() {
                 <NativeTabs.Trigger.Label>{t("Trends")}</NativeTabs.Trigger.Label>
             </NativeTabs.Trigger>
 
-            <NativeTabs.Trigger name="settings">
+            <NativeTabs.Trigger name="settings" disableAutomaticContentInsets>
                 <NativeTabs.Trigger.Icon sf="gearshape" md="settings" />
                 <NativeTabs.Trigger.Label>{t("Settings")}</NativeTabs.Trigger.Label>
             </NativeTabs.Trigger>

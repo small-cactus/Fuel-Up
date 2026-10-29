@@ -8,8 +8,8 @@ import { createModifier } from '@expo/ui/swift-ui/modifiers';
 const supportsNativeGlass = Platform.OS === 'ios';
 if (supportsNativeGlass) requireNativeModule('FuelUpGlass');
 
-export function GlassForm({ modifiers = [], ...props }) {
-    return <Form {...props} modifiers={supportsNativeGlass ? [...modifiers, createModifier('fuelGlassForm')] : modifiers} />;
+export function GlassForm({ modifiers = [], bottomContentInset = 0, ...props }) {
+    return <Form {...props} modifiers={supportsNativeGlass ? [...modifiers, createModifier('fuelGlassForm', { bottomContentInset })] : modifiers} />;
 }
 
 export function GlassSection({ modifiers = [], ...props }) {

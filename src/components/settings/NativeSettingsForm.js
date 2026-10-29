@@ -58,6 +58,7 @@ function formatRadiusValue(miles) {
 
 export default function NativeSettingsForm({
     isDark,
+    bottomContentInset = 0,
     // Preferences
     searchRadiusMiles,
     preferredOctane,
@@ -90,7 +91,7 @@ export default function NativeSettingsForm({
             useViewportSizeMeasurement
             ignoreSafeArea="all"
         >
-            <Form>
+            <Form bottomContentInset={bottomContentInset}>
                 <Section title={t("Fuel Preferences")}>
                     <LabeledContent
                         label={(

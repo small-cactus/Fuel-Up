@@ -6,7 +6,9 @@ public final class FuelUpGlassModule: Module {
     Name("FuelUpGlass")
     Function("getAppLanguage") { Bundle.main.preferredLocalizations.first ?? "en" }
     OnCreate {
-      ViewModifierRegistry.register("fuelGlassForm") { _, _, _ in GlassFormModifier() }
+      ViewModifierRegistry.register("fuelGlassForm") { params, _, _ in
+        GlassFormModifier(bottomContentInset: params["bottomContentInset"] as? Double ?? 0)
+      }
       ViewModifierRegistry.register("fuelGlassSection") { params, _, _ in
         GlassSectionModifier(id: params["id"] as? String ?? "section")
       }
