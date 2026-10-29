@@ -32,3 +32,9 @@ The recent-events query orders all events by `recorded` with `LIMIT 12`. The pre
 `store-read-benchmark.md` records the real SQLite legacy-store regression and local synthetic benchmark. `trace-summary.json` retains app-only aggregates. The raw trace is local at `/private/tmp/fuelup-map-live-20261029-1430.trace`; app-filtered raw logs and XML exports use the same filename prefix. Instruments required explicit SIGINT after its automatic stop began, then saved successfully. Its closed, consumed 22 GB raw intermediate was removed during final save to prevent disk exhaustion; final trace export succeeded.
 
 ESLint: zero errors, 672 existing warnings across 185 files. Existing research, interaction, permission, and quiet-mode tests passed. Device before/after validation remains pending at this checkpoint.
+
+## Device deployment checkpoint
+
+Commit `0fd082e` was pushed to `master`. The signed Release build succeeded in 276 seconds through `npm run ios:device -- <device> --install`, passed the script's strict code-signature verification, and installed over the existing app. Device inventory confirmed version 1.0.0/build 38. The standard suite passed 165/165 tests; targeted research suites passed 19/19 in addition to the new migration/cross-check coverage.
+
+The first post-install launch was blocked by iOS because the phone had locked (`FBSOpenApplicationErrorDomain`, Locked). The user was asked to unlock and open the map. No post-fix device performance result is claimed at this checkpoint. Trends first-launch loading is the next requested repair, after the map performance validation.
