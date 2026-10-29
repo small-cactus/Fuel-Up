@@ -1,0 +1,154 @@
+{
+  "app_build": "38",
+  "duration_seconds": 91.137314,
+  "start_time": "2026-10-29T10:31:55.234-04:00",
+  "template": "Animation Hitches",
+  "target": "all processes, filtered to FuelUp for this summary",
+  "matched_app_dsym_uuid": "9B47B3D9-2DF3-3695-B3F5-D3776DF2A887",
+  "cpu_sample_counts": {
+    "main": 25914,
+    "other": 1169,
+    "javascript": 248
+  },
+  "main_thread_leaf_libraries": {
+    "libsystem_kernel.dylib": 15128,
+    "libsqlite3.dylib": 4304,
+    "libsystem_platform.dylib": 2927,
+    "libsystem_malloc.dylib": 1104,
+    "VectorKit": 641,
+    "libswiftCore.dylib": 272,
+    "unknown": 266,
+    "libobjc.A.dylib": 195,
+    "FuelUp": 193,
+    "QuartzCore": 177,
+    "UIKitCore": 134,
+    "libobjcMsgSend.dylib": 120,
+    "CoreFoundation": 117,
+    "AGXMetalG19P": 79,
+    "Foundation": 31
+  },
+  "top_inclusive_app_frames": [
+    {
+      "symbol": "DrivingResearchCollector.refreshCounts() (in FuelUp) (DrivingResearchCollector.swift:610)",
+      "samples": 23115,
+      "fraction_of_main_samples": 0.89199
+    },
+    {
+      "symbol": "partial apply for closure #1 in DrivingResearchStore.events(pending:limit:) (in FuelUp) (/<compiler-generated>:0)",
+      "samples": 22970,
+      "fraction_of_main_samples": 0.88639
+    },
+    {
+      "symbol": "closure #1 in DrivingResearchStore.events(pending:limit:) (in FuelUp) (DrivingResearchStore.swift:69)",
+      "samples": 22969,
+      "fraction_of_main_samples": 0.88635
+    },
+    {
+      "symbol": "<deduplicated_symbol> (in FuelUp) + 0",
+      "samples": 15952,
+      "fraction_of_main_samples": 0.61557
+    },
+    {
+      "symbol": "closure #1 in ConcurrentFunctionDefinition.call(by:withArguments:appContext:callback:) (in FuelUp) (ConcurrentFunctionDefinition.swift:91)",
+      "samples": 15944,
+      "fraction_of_main_samples": 0.61527
+    },
+    {
+      "symbol": "thunk for @escaping @callee_guaranteed @async (@in_guaranteed B, @pack_guaranteed @indirect Pack{repeat C}) -> (@out A, @error @owned Error) (in FuelUp) (/<compiler-generated>:0)",
+      "samples": 15944,
+      "fraction_of_main_samples": 0.61527
+    },
+    {
+      "symbol": "DrivingResearchCollector.recordInteraction(_:) (in FuelUp) (DrivingResearchCollector.swift:548)",
+      "samples": 15923,
+      "fraction_of_main_samples": 0.61446
+    },
+    {
+      "symbol": "closure #8 in FuelUpDrivingActivityModule.definition() (in FuelUp) (FuelUpDrivingActivityModule.swift:55)",
+      "samples": 15923,
+      "fraction_of_main_samples": 0.61446
+    },
+    {
+      "symbol": "DrivingResearchCollector.record(_:_:) (in FuelUp) (DrivingResearchCollector.swift:560)",
+      "samples": 15909,
+      "fraction_of_main_samples": 0.61392
+    },
+    {
+      "symbol": "<deduplicated_symbol> (in FuelUp) + 0",
+      "samples": 7304,
+      "fraction_of_main_samples": 0.28186
+    },
+    {
+      "symbol": "<deduplicated_symbol> (in FuelUp) + 0",
+      "samples": 7304,
+      "fraction_of_main_samples": 0.28186
+    },
+    {
+      "symbol": "closure #1 in DrivingResearchCollector.prepare() (in FuelUp) (DrivingResearchCollector.swift:115)",
+      "samples": 7244,
+      "fraction_of_main_samples": 0.27954
+    },
+    {
+      "symbol": "closure #1 in DrivingResearchSync.start() (in FuelUp) (DrivingResearchSync.swift:105)",
+      "samples": 7036,
+      "fraction_of_main_samples": 0.27151
+    },
+    {
+      "symbol": "main",
+      "samples": 2666,
+      "fraction_of_main_samples": 0.10288
+    },
+    {
+      "symbol": "$defer #1 () in closure #1 in DrivingResearchSync.start() (in FuelUp) (DrivingResearchSync.swift:84)",
+      "samples": 875,
+      "fraction_of_main_samples": 0.03377
+    },
+    {
+      "symbol": "thunk for @escaping @callee_guaranteed (@guaranteed UIUpdateLink, @guaranteed UIUpdateInfo) -> () (in FuelUp) (/<compiler-generated>:0)",
+      "samples": 773,
+      "fraction_of_main_samples": 0.02983
+    },
+    {
+      "symbol": "partial apply for closure #1 in ClusterLabFrameClock.init(view:tick:) (in FuelUp) (/<compiler-generated>:0)",
+      "samples": 773,
+      "fraction_of_main_samples": 0.02983
+    },
+    {
+      "symbol": "closure #1 in ClusterLabMapView.startFrames() (in FuelUp) (ClusterLabMapView.swift:439)",
+      "samples": 772,
+      "fraction_of_main_samples": 0.02979
+    },
+    {
+      "symbol": "ClusterLabMapView.tick(_:) (in FuelUp) (ClusterLabMapView.swift:448)",
+      "samples": 770,
+      "fraction_of_main_samples": 0.02971
+    },
+    {
+      "symbol": "ClusterLabRenderer.render(map:deltaTime:) (in FuelUp) (ClusterLabRenderer.swift:573)",
+      "samples": 467,
+      "fraction_of_main_samples": 0.01802
+    }
+  ],
+  "instruments": [
+    {
+      "instrument": "animation_hitches",
+      "count": 239,
+      "max_seconds": 0.591666666,
+      "sum_seconds": 22.979167877,
+      "note": "Different instruments use different definitions; do not combine counts or infer FPS."
+    },
+    {
+      "instrument": "potential_hangs",
+      "count": 101,
+      "max_seconds": 9.348371333,
+      "sum_seconds": 69.865032169,
+      "note": "Different instruments use different definitions; do not combine counts or infer FPS."
+    }
+  ],
+  "limitations": [
+    "CPU samples are statistical, not wall time. Inclusive frames overlap.",
+    "Manual gestures were not separately marked; no matched before/after yet.",
+    "App symbols match exact build; many system symbols remain unresolved.",
+    "Raw trace includes other processes; only FuelUp aggregates are saved here."
+  ]
+}

@@ -14,6 +14,10 @@ final class DrivingResearchStore {
     url = directory.appendingPathComponent("research.sqlite")
     guard sqlite3_open(url.path, &db) == SQLITE_OK else { throw failure() }
     try execute("PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS events(id TEXT PRIMARY KEY, kind TEXT NOT NULL, recorded REAL NOT NULL, body BLOB NOT NULL, uploaded INTEGER NOT NULL DEFAULT 0); CREATE INDEX IF NOT EXISTS pending ON events(uploaded,recorded); CREATE INDEX IF NOT EXISTS event_kind_time ON events(kind,recorded);")
+    // The recent-events view has no uploaded/kind predicate, so neither of the
+    // composite indexes can serve its ORDER BY. Migrate existing outboxes too:
+    // every recorded interaction must not scan and sort a month of raw events.
+    try execute("CREATE INDEX IF NOT EXISTS event_recorded_time ON events(recorded)")
     #if os(iOS)
     try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication], ofItemAtPath: directory.path)
     for suffix in ["", "-wal", "-shm"] where FileManager.default.fileExists(atPath: url.path + suffix) {

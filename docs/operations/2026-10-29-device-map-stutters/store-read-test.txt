@@ -1,0 +1,31 @@
+TAP version 13
+# {
+#   "afterMedianMilliseconds" : 0.04150002496317029,
+#   "afterPlan" : [
+#     "SCAN events USING INDEX event_recorded_time"
+#   ],
+#   "beforeMedianMilliseconds" : 22.347624995745718,
+#   "beforePlan" : [
+#     "SCAN events",
+#     "USE TEMP B-TREE FOR ORDER BY"
+#   ],
+#   "preservedRawFingerprint" : "6125b43caec31021380cc018f571d9dfbf65e91e94e8c661344fbc3484b488b1",
+#   "rows" : 100000,
+#   "scope" : "Local macOS synthetic recent-12 read; no device FPS claim",
+#   "warmReadRepetitions" : 9
+# }
+# PASS: populated legacy migration, immutable rows, recent/pending ordering, indexed query plan, reopen
+# Subtest: legacy research outboxes migrate to indexed recent-event reads without changing records
+ok 1 - legacy research outboxes migrate to indexed recent-event reads without changing records
+  ---
+  duration_ms: 4009.512541
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4058.761792

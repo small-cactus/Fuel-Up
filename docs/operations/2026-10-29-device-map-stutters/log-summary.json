@@ -1,0 +1,237 @@
+{
+  "capture_date": "2026-10-29",
+  "timezone": "America/New_York",
+  "app_version": "1.0.0",
+  "app_build": "38",
+  "device_model": "iPhone 18 Pro Max",
+  "os_version": "27.0.1",
+  "source": "FuelUp-filtered idevicesyslog; one always-on hang reporting line per event",
+  "raw_log_sha256": "c3ac2e7af7fadda4a710a0e67b9dd5f5e6911f29676beb6286948398c27214c8",
+  "hang_reports": [
+    {
+      "local_time": "10:31:30",
+      "duration_seconds": 0.59
+    },
+    {
+      "local_time": "10:31:32",
+      "duration_seconds": 0.71
+    },
+    {
+      "local_time": "10:31:33",
+      "duration_seconds": 0.33
+    },
+    {
+      "local_time": "10:31:56",
+      "duration_seconds": 0.53
+    },
+    {
+      "local_time": "10:32:00",
+      "duration_seconds": 0.26
+    },
+    {
+      "local_time": "10:32:01",
+      "duration_seconds": 0.26
+    },
+    {
+      "local_time": "10:32:07",
+      "duration_seconds": 0.51
+    },
+    {
+      "local_time": "10:32:08",
+      "duration_seconds": 0.27
+    },
+    {
+      "local_time": "10:32:09",
+      "duration_seconds": 0.25
+    },
+    {
+      "local_time": "10:32:13",
+      "duration_seconds": 0.64
+    },
+    {
+      "local_time": "10:32:18",
+      "duration_seconds": 0.29
+    },
+    {
+      "local_time": "10:32:18",
+      "duration_seconds": 0.55
+    },
+    {
+      "local_time": "10:32:18",
+      "duration_seconds": 0.34
+    },
+    {
+      "local_time": "10:32:19",
+      "duration_seconds": 0.28
+    },
+    {
+      "local_time": "10:32:20",
+      "duration_seconds": 0.25
+    },
+    {
+      "local_time": "10:32:21",
+      "duration_seconds": 0.33
+    },
+    {
+      "local_time": "10:32:24",
+      "duration_seconds": 0.47
+    },
+    {
+      "local_time": "10:32:24",
+      "duration_seconds": 0.36
+    },
+    {
+      "local_time": "10:32:26",
+      "duration_seconds": 0.41
+    },
+    {
+      "local_time": "10:32:26",
+      "duration_seconds": 0.51
+    },
+    {
+      "local_time": "10:32:28",
+      "duration_seconds": 0.28
+    },
+    {
+      "local_time": "10:32:29",
+      "duration_seconds": 0.27
+    },
+    {
+      "local_time": "10:32:29",
+      "duration_seconds": 0.48
+    },
+    {
+      "local_time": "10:32:30",
+      "duration_seconds": 0.62
+    },
+    {
+      "local_time": "10:32:31",
+      "duration_seconds": 0.34
+    },
+    {
+      "local_time": "10:32:35",
+      "duration_seconds": 0.4
+    },
+    {
+      "local_time": "10:32:35",
+      "duration_seconds": 0.25
+    },
+    {
+      "local_time": "10:32:36",
+      "duration_seconds": 0.3
+    },
+    {
+      "local_time": "10:32:36",
+      "duration_seconds": 0.25
+    },
+    {
+      "local_time": "10:32:37",
+      "duration_seconds": 0.25
+    },
+    {
+      "local_time": "10:32:39",
+      "duration_seconds": 0.3
+    },
+    {
+      "local_time": "10:32:41",
+      "duration_seconds": 0.73
+    },
+    {
+      "local_time": "10:32:41",
+      "duration_seconds": 0.57
+    },
+    {
+      "local_time": "10:32:42",
+      "duration_seconds": 0.53
+    },
+    {
+      "local_time": "10:32:49",
+      "duration_seconds": 2.44
+    },
+    {
+      "local_time": "10:32:49",
+      "duration_seconds": 0.32
+    },
+    {
+      "local_time": "10:32:50",
+      "duration_seconds": 0.92
+    },
+    {
+      "local_time": "10:32:52",
+      "duration_seconds": 0.25
+    },
+    {
+      "local_time": "10:32:54",
+      "duration_seconds": 0.32
+    },
+    {
+      "local_time": "10:32:58",
+      "duration_seconds": 1.26
+    },
+    {
+      "local_time": "10:32:59",
+      "duration_seconds": 0.28
+    },
+    {
+      "local_time": "10:33:02",
+      "duration_seconds": 0.65
+    },
+    {
+      "local_time": "10:33:05",
+      "duration_seconds": 0.25
+    },
+    {
+      "local_time": "10:33:08",
+      "duration_seconds": 0.59
+    },
+    {
+      "local_time": "10:33:09",
+      "duration_seconds": 0.28
+    },
+    {
+      "local_time": "10:33:14",
+      "duration_seconds": 0.53
+    },
+    {
+      "local_time": "10:33:14",
+      "duration_seconds": 0.34
+    },
+    {
+      "local_time": "10:33:17",
+      "duration_seconds": 0.25
+    },
+    {
+      "local_time": "10:33:17",
+      "duration_seconds": 0.26
+    },
+    {
+      "local_time": "10:33:19",
+      "duration_seconds": 1.63
+    },
+    {
+      "local_time": "10:33:20",
+      "duration_seconds": 0.31
+    },
+    {
+      "local_time": "10:33:20",
+      "duration_seconds": 0.35
+    },
+    {
+      "local_time": "10:33:22",
+      "duration_seconds": 0.48
+    },
+    {
+      "local_time": "10:33:23",
+      "duration_seconds": 0.59
+    }
+  ],
+  "hang_report_count": 54,
+  "maximum_reported_hang_seconds": 2.44,
+  "core_location_ui_unresponsiveness_warning_count": 271,
+  "limitations": [
+    "Includes startup and manual interaction; gesture intervals were not separately marked.",
+    "Instrumentation and logging can affect performance.",
+    "Hang reports do not measure average FPS or prove a source-level cause.",
+    "Duplicate threshold classification lines excluded."
+  ]
+}
