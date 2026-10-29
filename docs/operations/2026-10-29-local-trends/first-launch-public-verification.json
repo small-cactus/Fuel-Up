@@ -1,0 +1,101 @@
+{
+  "verifiedAt": "2026-10-29T15:23:53.641Z",
+  "authentication": "public app key only; no user session",
+  "initialCaches": "empty",
+  "providerRequests": 0,
+  "areas": [
+    {
+      "area": "Tampa",
+      "history": [
+        {
+          "date": "2026-10-27T00:00:00.000Z",
+          "price": 4.026280991735537
+        },
+        {
+          "date": "2026-10-28T00:00:00.000Z",
+          "price": 4.008500000000001
+        },
+        {
+          "date": "2026-10-29T00:00:00.000Z",
+          "price": 3.949324324324325
+        }
+      ],
+      "leaderboard": 5,
+      "historyStations": 163,
+      "timings": [
+        {
+          "scope": "nearby",
+          "ms": 1675,
+          "quotes": 170
+        },
+        {
+          "scope": "local-history",
+          "ms": 2658,
+          "rows": 470
+        }
+      ]
+    },
+    {
+      "area": "Los Angeles",
+      "history": [
+        {
+          "date": "2026-10-27T00:00:00.000Z",
+          "price": 6.102266666666671
+        },
+        {
+          "date": "2026-10-28T00:00:00.000Z",
+          "price": 6.105892116182576
+        },
+        {
+          "date": "2026-10-29T00:00:00.000Z",
+          "price": 6.061509433962267
+        }
+      ],
+      "leaderboard": 5,
+      "historyStations": 304,
+      "timings": [
+        {
+          "scope": "nearby",
+          "ms": 1215,
+          "quotes": 320
+        },
+        {
+          "scope": "local-history",
+          "ms": 1428,
+          "rows": 981
+        }
+      ]
+    },
+    {
+      "area": "Des Moines",
+      "history": [
+        {
+          "date": "2026-10-27T00:00:00.000Z",
+          "price": 4.028469387755104
+        },
+        {
+          "date": "2026-10-28T00:00:00.000Z",
+          "price": 4.002842105263161
+        },
+        {
+          "date": "2026-10-29T00:00:00.000Z",
+          "price": 3.9537000000000018
+        }
+      ],
+      "leaderboard": 5,
+      "historyStations": 107,
+      "timings": [
+        {
+          "scope": "nearby",
+          "ms": 515,
+          "quotes": 111
+        },
+        {
+          "scope": "local-history",
+          "ms": 754,
+          "rows": 346
+        }
+      ]
+    }
+  ]
+}

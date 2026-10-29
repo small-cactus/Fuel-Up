@@ -1,0 +1,30 @@
+{
+  "database_bytes": 1231801491,
+  "days": [
+    {
+      "day": "2026-10-27",
+      "rows": 74594
+    },
+    {
+      "day": "2026-10-28",
+      "rows": 73531
+    },
+    {
+      "day": "2026-10-29",
+      "rows": 75175
+    }
+  ],
+  "local_history_bytes": 84869120,
+  "retention": [
+    {
+      "end_time": "2026-10-29T15:17:00.390548+00:00",
+      "return_message": "1 row",
+      "start_time": "2026-10-29T15:17:00.32256+00:00",
+      "status": "succeeded"
+    }
+  ],
+  "rows": 223300,
+  "estimatedSevenDaysBytes": 198027947,
+  "estimatedEightDayRetentionBytes": 226317653,
+  "estimateLimit": "Three sampled days, with index overhead; row availability and bloat vary. Provision headroom above the estimate."
+}

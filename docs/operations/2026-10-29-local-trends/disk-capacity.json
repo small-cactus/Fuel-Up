@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-29T15:19:59.008Z",
+  "filesystem": [
+    "node_filesystem_free_bytes{supabase_project_ref=\"vjindchxfebaltbslqwc\",supabase_identifier=\"vjindchxfebaltbslqwc\",service_type=\"db\",device=\"/dev/nvme0n1\",device_error=\"\",fstype=\"ext4\",mountpoint=\"/data\"} 6.936461312e+09",
+    "node_filesystem_free_bytes{supabase_project_ref=\"vjindchxfebaltbslqwc\",supabase_identifier=\"vjindchxfebaltbslqwc\",service_type=\"db\",device=\"/dev/nvme1n1p2\",device_error=\"\",fstype=\"ext4\",mountpoint=\"/\"} 3.21957888e+09",
+    "node_filesystem_size_bytes{supabase_project_ref=\"vjindchxfebaltbslqwc\",supabase_identifier=\"vjindchxfebaltbslqwc\",service_type=\"db\",device=\"/dev/nvme0n1\",device_error=\"\",fstype=\"ext4\",mountpoint=\"/data\"} 8.350298112e+09",
+    "node_filesystem_size_bytes{supabase_project_ref=\"vjindchxfebaltbslqwc\",supabase_identifier=\"vjindchxfebaltbslqwc\",service_type=\"db\",device=\"/dev/nvme1n1p2\",device_error=\"\",fstype=\"ext4\",mountpoint=\"/\"} 1.0359754752e+10",
+    "node_filesystem_avail_bytes{supabase_project_ref=\"vjindchxfebaltbslqwc\",supabase_identifier=\"vjindchxfebaltbslqwc\",service_type=\"db\",device=\"/dev/nvme0n1\",device_error=\"\",fstype=\"ext4\",mountpoint=\"/data\"} 6.814826496e+09",
+    "node_filesystem_avail_bytes{supabase_project_ref=\"vjindchxfebaltbslqwc\",supabase_identifier=\"vjindchxfebaltbslqwc\",service_type=\"db\",device=\"/dev/nvme1n1p2\",device_error=\"\",fstype=\"ext4\",mountpoint=\"/\"} 3.192172544e+09"
+  ]
+}

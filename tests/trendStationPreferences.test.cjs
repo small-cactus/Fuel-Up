@@ -17,10 +17,14 @@ async function setup(options = {}) {
         provider_id: 'gasbuddy', all_prices: { ...quote.allPrices, _payment: { regular: { credit: quote.price } } }, updated_at_source: new Date(Date.now() - hours * 3600000).toISOString(), latitude: quote.latitude, longitude: quote.longitude,
         created_at: new Date(Date.now() - hours * 3600000).toISOString(),
     })));
-    const db = { select(columns) { options.onSelect?.(columns); return this; }, eq(key, value) { options.onFilter?.(key, value); return this; }, gte() { return this; }, order() { return this; },
-        limit: async () => { options.onHistory?.(); return { data: options.noHistory ? [] : rows, error: options.historyError }; } };
+    const functions = { invoke: async (name, { body }) => {
+        assert.equal(name, 'gas-prices');
+        assert.equal(body.scope, 'local-history');
+        options.onHistory?.(body);
+        return { data: { scope: 'local-history', rows: options.noHistory ? [] : rows }, error: options.historyError };
+    } };
     return load('src/services/fuel/trends.js', {
-        '../../lib/supabase.js': { supabase: { from: () => db } },
+        '../../lib/supabase.js': { supabase: { functions } },
         '../../lib/fuelGrade.js': grades,
         '../../lib/homeState.js': home,
         '../../lib/stationPreferences.js': preferences,
@@ -115,15 +119,14 @@ test('Trends joins Home in flight instead of using an older cached snapshot or i
 test('local results restore into a new session and failed refreshes preserve them', async () => {
     const saved=new Map();
     const store={get:async key=>saved.get(key),set:async(key,value)=>saved.set(key,value),clear:async()=>saved.clear()};
-    let selected,filters=[],historyRequests=0;
+    let request,historyRequests=0;
     const params={latitude:27.95,longitude:-82.45,fuelType:'regular',radiusMiles:6};
-    const first=await setup({store,onSelect:v=>{selected=v},onFilter:(...v)=>filters.push(v),onHistory:()=>historyRequests++});
+    const first=await setup({store,onHistory:body=>{request=body;historyRequests++}});
     const data=await first.prefetchTrendData(params);
     await first.prefetchTrendData({...params,maxAgeMs:2000});
     assert.equal(historyRequests,1,'opening the tab just after prefetch does not download history twice');
-    assert.ok(!selected.includes('*'));
-    assert.ok(selected.includes('all_prices'),'preserve the original payment price evidence');
-    assert.ok(filters.some(([key,value])=>key==='provider_id'&&value==='gasbuddy'),'query matches the existing partial index');
+    assert.deepEqual(request,{scope:'local-history',latitude:27.95,longitude:-82.45,radiusMiles:6,fuelType:'regular',requiresE85:false});
+    assert(data.averagePricesByDay.length >= 2, 'an empty installation gets existing local history on its first request');
     const second=await setup({store,historyError:{message:'offline'}});
     const key=second.buildTrendRequestKey(params);
     await second.restoreTrendData(key);

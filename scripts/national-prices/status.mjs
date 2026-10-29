@@ -21,6 +21,9 @@ const sql = `select jsonb_build_object(
    where created>now()-interval '2 hours'
     and (content like '%"removedObjects"%' or content like '%NATIONAL_RETENTION_FAILED%')
    order by created desc limit 12) w),
+ 'local_trends_history',(select jsonb_build_object('rows',count(*),'oldest_day',min(day),'newest_day',max(day),
+   'past_retention_rows',count(*) filter(where day<(now() at time zone 'UTC')::date-7),
+   'bytes',pg_total_relation_size('public.fuel_local_daily_prices')) from public.fuel_local_daily_prices),
  'trends_cache',(select jsonb_build_object('scopes',count(*),'run_id',min(run_id),'published_at',min(published_at),
    'age_minutes',extract(epoch from now()-min(published_at))/60,
    'behind_latest_complete',min(run_id) is distinct from (select id from fuel_national_runs where status='complete' order by slot_at desc limit 1)) from public.fuel_national_trends_cache),
@@ -33,7 +36,7 @@ const sql = `select jsonb_build_object(
  'storage_bytes',(select coalesce(sum((metadata->>'size')::bigint),0) from storage.objects),
  'regions',(select jsonb_agg(r) from public.fuel_national_regions r),
  'regional_hours',(select jsonb_agg(h) from (select * from public.fuel_national_regional_health order by slot_at desc limit 72) h),
- 'cron',(select jsonb_agg(jsonb_build_object('name',jobname,'active',active,'schedule',schedule)) from cron.job where jobname in ('fuel-national-dispatch','fuel-national-watchdog','fuel-national-trends-cache','fuel-national-projection-repair','fuel-national-retention')),
+ 'cron',(select jsonb_agg(jsonb_build_object('name',jobname,'active',active,'schedule',schedule)) from cron.job where jobname in ('fuel-national-dispatch','fuel-national-watchdog','fuel-national-trends-cache','fuel-national-projection-repair','fuel-national-retention','fuel-local-history-retention')),
  'hours',(select jsonb_agg(h) from (select * from public.fuel_national_health order by slot_at desc limit 24) h),
  'events',(select jsonb_agg(e) from (select created_at,job_id,code,retry_after_seconds from public.fuel_national_events order by id desc limit 20) e)
 ) as status;`;

@@ -50,6 +50,7 @@ test('a gradient target starts once and superseded/unmounted animation work is s
     let renderer;
     await act(async () => { renderer = create(React.createElement(Screen)); });
     assert.equal(animations.length, 0);
+    assert.equal(renderer.root.findByType('ScopeControl').props.value, 'local');
     data = snapshot([4, 3]);
     await act(async () => renderer.update(React.createElement(Screen)));
     assert.equal(animations.length, 1, 'updating incoming colors must not restart its own animation');

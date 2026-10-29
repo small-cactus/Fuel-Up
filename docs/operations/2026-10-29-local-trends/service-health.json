@@ -1,0 +1,66 @@
+{
+  "checkedAt": "2026-10-29T15:22:53.764Z",
+  "operational": {
+    "complete": 192,
+    "current_absent": 0,
+    "expected": 192,
+    "expired_absent": 0,
+    "expired_running": 0,
+    "partial": 0
+  },
+  "projection": {
+    "completed_at": "2026-10-29T15:17:07.360529+00:00",
+    "missing_batches": 0,
+    "run_id": 38931,
+    "slot_at": "2026-10-29T15:00:00+00:00"
+  },
+  "cache": {
+    "age_minutes": 4.79007725,
+    "behind_latest_complete": false,
+    "published_at": "2026-10-29T15:18:00.273004+00:00",
+    "run_id": 38931,
+    "scopes": 10
+  },
+  "local": {
+    "bytes": 83787776,
+    "newest_day": "2026-10-29",
+    "oldest_day": "2026-10-27",
+    "past_retention_rows": 0,
+    "rows": 219446
+  },
+  "cron": [
+    {
+      "active": true,
+      "name": "fuel-national-dispatch",
+      "schedule": "* * * * *"
+    },
+    {
+      "active": true,
+      "name": "fuel-national-watchdog",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "active": true,
+      "name": "fuel-national-trends-cache",
+      "schedule": "* * * * *"
+    },
+    {
+      "active": true,
+      "name": "fuel-national-projection-repair",
+      "schedule": "* * * * *"
+    },
+    {
+      "active": true,
+      "name": "fuel-national-retention",
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "active": true,
+      "name": "fuel-local-history-retention",
+      "schedule": "17 * * * *"
+    }
+  ],
+  "archiveBytes": 748320202,
+  "archiveBudget": 900000000,
+  "databaseBytes": 1231015059
+}

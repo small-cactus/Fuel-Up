@@ -5,7 +5,7 @@ import { buildFuelSearchRequestKey } from '../../lib/fuelSearchState.js';
 const { refreshFuelPriceSnapshot, getCachedFuelPriceSnapshot, getInFlightFuelPriceSnapshot } = require('./index');
 const { publishTrendCacheChange } = require('./trendCacheEvents');
 const { trendSnapshotStore } = require('./trendSnapshotStore');
-const { buildRawTrendRows } = require('./rawTrendRows');
+const { isFreshReportedPrice } = require('./reportedPrices');
 const { buildAveragePriceTrendSeries } = require('./trendAggregation');
 const { buildTrendLeaderboard } = require('./trendLeaderboard');
 
@@ -14,8 +14,6 @@ const lastResolvedTrendDataByRequestKey = {};
 const lastTrendsScreenViewedAtMsByRequestKey = {};
 const inFlightTrendDataRequestsByRequestKey = {};
 let trendCacheGeneration = 0;
-const TREND_HISTORY_LOOKBACK_MS = 14 * 24 * 60 * 60 * 1000;
-const TREND_HISTORY_MAX_ROWS = 1500;
 // Helper: Calculate distance between two coords in miles
 function getDistanceMiles(lat1, lon1, lat2, lon2) {
     const R = 3958.8; // Radius of the earth in miles
@@ -99,10 +97,6 @@ export async function fetchTrendData({
     fuelMemberships = [],
     requiresE85 = false,
 }) {
-    const searchLat = Math.round(latitude * 10) / 10;
-    const searchLng = Math.round(longitude * 10) / 10;
-    const lookbackStartIso = new Date(Date.now() - TREND_HISTORY_LOOKBACK_MS).toISOString();
-
     const query = { latitude, longitude, radiusMiles, fuelType, requiresE85 };
     // Home has just loaded this exact area. Reuse that snapshot instead of
     // independently selecting from a second response on a tab switch.
@@ -114,24 +108,22 @@ export async function fetchTrendData({
         if (cached && age >= 0 && age < 5 * 60000) return cached;
         return (await refreshFuelPriceSnapshot(query)).snapshot;
     };
-    const [history, snapshot] = await Promise.all([supabase
-        .from('station_prices')
-        .select('station_id,provider_id,fuel_type,all_prices,station_name,address,latitude,longitude,created_at,updated_at_source')
-        .eq('provider_id', 'gasbuddy')
-        .eq('search_latitude_rounded', searchLat)
-        .eq('search_longitude_rounded', searchLng)
-        .eq('fuel_type', fuelType)
-        .gte('created_at', lookbackStartIso)
-        .order('created_at', { ascending: false })
-        .limit(TREND_HISTORY_MAX_ROWS),
+    const [history, snapshot] = await Promise.all([
+        supabase.functions.invoke('gas-prices', {
+            body: { scope: 'local-history', ...query }, region: 'us-east-2',
+        }),
         latestSnapshot(),
     ]);
-    const { data: descendingRows, error } = history;
-    if (error) throw new Error('Unable to refresh trend history.');
-
-    const rows = Array.isArray(descendingRows) ? descendingRows.slice().reverse() : descendingRows;
-
-    const rawRows = !error && Array.isArray(rows) ? buildRawTrendRows(rows, fuelType) : [];
+    if (history.error || history.data?.scope !== 'local-history' || !Array.isArray(history.data.rows)) {
+        throw new Error('Unable to refresh trend history.');
+    }
+    // The server projects original, fresh-at-observation payment prices from
+    // complete archived sweeps. Never use adjusted legacy station_prices values.
+    const rawRows = history.data.rows.filter(row => row.provider_id === 'gasbuddy' && row.fuel_type === fuelType &&
+        Number.isFinite(Date.parse(row.created_at)) && Date.parse(row.created_at) <= Date.now() &&
+        isFreshReportedPrice(row.price, row.updated_at_source, Date.parse(row.created_at)))
+        .map(row => ({ ...row, timestampMs: Date.parse(row.created_at) }))
+        .sort((a, b) => a.timestampMs - b.timestampMs);
     const rankedLatestQuotes = buildVisibleStations(snapshot, {
         origin: { latitude, longitude }, radiusMiles, minimumRating, fuelGrade: fuelType, requiresE85, preferredBrands, fuelMemberships,
     }).filter(quote => Number.isFinite(quote.price) && quote.price > 0);

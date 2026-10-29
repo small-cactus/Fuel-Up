@@ -1,6 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.98.0';
 import { ServiceError } from '../_shared/gasPrices.mjs';
 import { getNationalLeaderboard } from '../_shared/nationalLeaderboard.mjs';
+import { getLocalTrends } from '../_shared/localTrends.mjs';
 import { getCachedGasPrices } from '../_shared/cachedGasPrices.mjs';
 const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, x-region',
@@ -17,7 +18,9 @@ Deno.serve(async (request: Request) => {
     let input;
     try { input = JSON.parse(raw); } catch { throw new ServiceError('INVALID_INPUT', 400); }
     const result = input?.scope === 'national'
-      ? await getNationalLeaderboard({ input, db }) : await getCachedGasPrices({ input, db });
+      ? await getNationalLeaderboard({ input, db })
+      : input?.scope === 'local-history' ? await getLocalTrends({ input, db })
+      : await getCachedGasPrices({ input, db });
     return new Response(JSON.stringify(result), { headers });
   } catch (error) {
     const status = error instanceof ServiceError ? error.status : 500;
