@@ -1,5 +1,8 @@
 # Fuel Up Plus design preview
 
+Superseded by the [Super Saver redesign](../2026-10-29-super-saver/README.md).
+This document preserves the first concept and its verification evidence.
+
 Preview-only annual paywall for price-drop alerts, route-aware fuel reminders,
 and following one favorite station. Display price: **$19.99 / year**.
 

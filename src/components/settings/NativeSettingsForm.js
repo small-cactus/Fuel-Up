@@ -95,7 +95,7 @@ export default function NativeSettingsForm({
         >
             <Form bottomContentInset={bottomContentInset}>
                 {PAYWALL_PREVIEW_ENABLED && <Section title="Design Preview">
-                    <SettingsLink title="Fuel Up Plus" systemImage="sparkles"
+                    <SettingsLink title="Fuel Up Super Saver" systemImage="sparkles"
                         value="Preview" onPress={onPreviewPlus} testID="settings-plus-preview" />
                 </Section>}
                 <Section title={t("Fuel Preferences")}>
