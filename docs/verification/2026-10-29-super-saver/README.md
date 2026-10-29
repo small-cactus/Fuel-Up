@@ -1,5 +1,8 @@
 # Fuel Up Super Saver — revised paywall preview
 
+Superseded by [native close, accordion, and Metal area-light transport](native-close-accordion/README.md).
+The screenshots and shader description below document the earlier version.
+
 Replaces the initial Plus concept. This is still a local, flag-gated design preview
 at **$19.99/year**, with no StoreKit transaction or entitlement change.
 
