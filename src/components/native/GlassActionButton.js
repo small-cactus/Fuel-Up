@@ -5,19 +5,19 @@ import { accessibilityLabel, accessibilityHint, accessibilityValue, buttonStyle,
 
 // The button owns both its label and its glass. No transparent RN touch overlay.
 export default function GlassActionButton({ title, icon, onPress, isDark, prominent = false,
-    fullWidth = false, disabled: inactive = false, label = title, hint, value, testID }) {
+    fullWidth = false, disabled: inactive = false, label = title, hint, value, testID, tintColor = '#007AFF' }) {
     const { fontScale } = useWindowDimensions();
     const color = prominent ? '#FFFFFF' : isDark ? '#FFFFFF' : '#000000';
     if (Platform.OS !== 'ios') return <Pressable testID={testID} onPress={onPress} disabled={inactive}
         accessibilityRole="button" accessibilityLabel={label} accessibilityHint={hint}
-        accessibilityState={{ disabled: inactive }} style={{ minHeight: 44, padding: 12, borderRadius: 22, backgroundColor: prominent ? '#007AFF' : isDark ? '#333333' : '#EEEEEE', alignItems: 'center' }}>
+        accessibilityState={{ disabled: inactive }} style={{ minHeight: 44, padding: 12, borderRadius: 22, backgroundColor: prominent ? tintColor : isDark ? '#333333' : '#EEEEEE', alignItems: 'center' }}>
         <RNText style={{ color, fontSize: 16, fontWeight: '600' }}>{title}</RNText>
     </Pressable>;
     return <Host ignoreSafeArea="all" matchContents={fullWidth ? { vertical: true } : true}
         colorScheme={isDark ? 'dark' : 'light'} style={fullWidth ? { width: '100%' } : undefined}>
         <Button testID={testID} onPress={onPress} label={fullWidth ? undefined : title}
             systemImage={fullWidth ? undefined : icon} modifiers={[
-            buttonStyle(prominent ? 'glassProminent' : 'glass'), controlSize('large'), tint('#007AFF'),
+            buttonStyle(prominent ? 'glassProminent' : 'glass'), controlSize('large'), tint(tintColor),
             fixedSize({ horizontal: !fullWidth, vertical: true }), font({ size: (prominent ? 18 : 14) * Math.min(fontScale, 2), weight: 'semibold' }), foregroundStyle(color),
             disabled(inactive), accessibilityLabel(label), ...(hint ? [accessibilityHint(hint)] : []),
             ...(value ? [accessibilityValue(value)] : []),

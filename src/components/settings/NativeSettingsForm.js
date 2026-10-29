@@ -19,6 +19,7 @@ import { GlassForm as Form, GlassSection as Section } from '../../../modules/fue
 import React from 'react';
 import { Linking } from 'react-native';
 import { nativeResearchOwnsTracking } from '../../lib/drivingResearchPolicy';
+import { PAYWALL_PREVIEW_ENABLED } from '../../lib/previewFeatures';
 import {
     Button,
     Host,
@@ -78,6 +79,7 @@ export default function NativeSettingsForm({
     trackingReady,
     onReviewTracking,
     onDrivingResearch,
+    onPreviewPlus,
     // Data actions
     onResetFuelCache,
     onResetOnboarding,
@@ -92,6 +94,10 @@ export default function NativeSettingsForm({
             ignoreSafeArea="all"
         >
             <Form bottomContentInset={bottomContentInset}>
+                {PAYWALL_PREVIEW_ENABLED && <Section title="Design Preview">
+                    <SettingsLink title="Fuel Up Plus" systemImage="sparkles"
+                        value="Preview" onPress={onPreviewPlus} testID="settings-plus-preview" />
+                </Section>}
                 <Section title={t("Fuel Preferences")}>
                     <LabeledContent
                         label={(

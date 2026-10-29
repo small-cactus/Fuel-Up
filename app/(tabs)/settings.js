@@ -209,6 +209,7 @@ export default function SettingsScreen() {
                     ]}
                 >
                     <NativeSettingsForm
+                        onPreviewPlus={() => router.push('/plus-preview')}
                         isDark={isDark}
                         bottomContentInset={insets.bottom + 16}
                         searchRadiusMiles={preferences.searchRadiusMiles}
