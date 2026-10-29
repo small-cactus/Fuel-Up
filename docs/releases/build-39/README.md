@@ -22,7 +22,10 @@ Release prepared 2026-10-29 for production App Review.
 - App Store Connect draft version 1.0.1 created; manual release retained.
 - What's New saved for English (U.S.), Simplified Chinese, Traditional Chinese, French, Spanish (Mexico), and Vietnamese.
 - Review notes describe onboarding, map, Local Trends, Settings, optional research consent, and existing installation analytics.
-- At 15:55 UTC, build 39 was still Processing and had not yet been attached or submitted for review.
+- Processing completed, build 39 was attached, and the production submission succeeded at 2026-10-29 11:58 EDT (15:58 UTC).
+- App Store Connect submission record explicitly shows **Waiting for Review** for **1.0.1 (39)**. This is submitted, not yet approved or released.
+- Submission ID: `ab42ab56-41d7-4252-9b98-039f5ff2d82b`.
+- Manual release remains selected; approval does not automatically publish the update.
 
 ## English What's New
 
