@@ -1,6 +1,9 @@
 #!/bin/sh
 set -eu
 
+# CocoaPods invokes this script from ios/; resolve patches from the repo root.
+cd "$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+
 PATCH_FILES="
 ./patches/expo-router+55.0.12.patch
 ./patches/expo-widgets-build-paths+55.0.2.patch
