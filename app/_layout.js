@@ -421,7 +421,6 @@ function AppGate() {
                 headerBackButtonDisplayMode: 'minimal',
             }}>
                 <Stack.Screen name="(tabs)" />
-                <Stack.Screen name="plus-preview" options={{ presentation: 'fullScreenModal' }} />
                 <Stack.Screen
                     name="prices-sheet"
                     options={{
