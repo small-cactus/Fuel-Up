@@ -24,3 +24,5 @@ for patch_file in $PATCH_FILES; do
   echo "Failed to apply required patch: $patch_file" >&2
   exit 1
 done
+
+sh ./scripts/argent/apply-poll-guard.sh

@@ -1,0 +1,11 @@
+{
+  "before_total_processes": 2638,
+  "terminated_simulator_checks": 1014,
+  "terminated_first_launch_children": 1014,
+  "terminated_parent": 94581,
+  "after_total_processes": 648,
+  "remaining_simulator_checks": 0,
+  "remaining_first_launch_children": 0,
+  "live_simulator_probe_passed": true,
+  "restored_server_tools_http": 200
+}

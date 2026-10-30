@@ -1,0 +1,36 @@
+--- a/node_modules/@swmansion/argent/dist/tool-server.cjs
++++ b/node_modules/@swmansion/argent/dist/tool-server.cjs
+@@ -158443,7 +158443,7 @@
+ var import_node_child_process39 = require("node:child_process");
+ var import_node_util27 = require("node:util");
+ init_external_devices();
+-var execFileAsync29 = (0, import_node_util27.promisify)(import_node_child_process39.execFile);
++var { runBoundedProbe: execFileAsync29, guardSimulatorPoll } = require("./fuelup-simulator-poll.cjs");
+ var POLL_INTERVAL_MS2 = 1e4;
+ async function getBootedUdidsInSet(deviceSet) {
+   const { stdout } = await execFileAsync29("xcrun", [
+@@ -158532,8 +158532,8 @@
+     let claimed;
+     try {
+       ({ ours: booted, claimed } = withoutForeignSimulators(await getBootedUdids()));
+-    } catch {
+-      return;
++    } catch (error) {
++      throw error;
+     }
+     await handBackClaimed(claimed);
+     const newUdids = [...booted].filter((udid) => !trackedServices.has(udid));
+@@ -158558,8 +158558,11 @@
+       });
+     }
+   }
+-  const ready2 = poll(true);
+-  const interval2 = setInterval(() => poll(false).catch(() => {
++  const safePoll = guardSimulatorPoll(poll, (error) => {
++    process.stderr.write(`[simulator-watcher] paused after failed inventory probe: ${error.message}. Resolve Xcode setup and restart Argent to retry.\n`);
++  });
++  const ready2 = safePoll(true);
++  const interval2 = setInterval(() => safePoll(false).catch(() => {
+   }), POLL_INTERVAL_MS2);
+   return { stop: () => clearInterval(interval2), ready: ready2 };
+ }

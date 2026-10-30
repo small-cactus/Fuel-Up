@@ -1,0 +1,59 @@
+{
+  "campaigns": [
+    {
+      "cooldown": "2026-10-07T18:12:54.381439+00:00",
+      "status": "complete"
+    }
+  ],
+  "gap_hours": [
+    {
+      "lookups": 143407,
+      "requests": 73,
+      "slot_at": "2026-10-30T08:00:00+00:00",
+      "status": "complete"
+    },
+    {
+      "lookups": 141660,
+      "requests": 72,
+      "slot_at": "2026-10-30T09:00:00+00:00",
+      "status": "complete"
+    },
+    {
+      "lookups": 141660,
+      "requests": 72,
+      "slot_at": "2026-10-30T10:00:00+00:00",
+      "status": "complete"
+    },
+    {
+      "lookups": 141660,
+      "requests": 72,
+      "slot_at": "2026-10-30T11:00:00+00:00",
+      "status": "complete"
+    },
+    {
+      "lookups": 145660,
+      "requests": 74,
+      "slot_at": "2026-10-30T12:00:00+00:00",
+      "status": "complete"
+    },
+    {
+      "lookups": 143660,
+      "requests": 73,
+      "slot_at": "2026-10-30T13:00:00+00:00",
+      "status": "complete"
+    },
+    {
+      "lookups": 141660,
+      "requests": 72,
+      "slot_at": "2026-10-30T14:00:00+00:00",
+      "status": "complete"
+    },
+    {
+      "lookups": 145660,
+      "requests": 74,
+      "slot_at": "2026-10-30T15:00:00+00:00",
+      "status": "complete"
+    }
+  ],
+  "operational_pending_repairs": 0
+}
