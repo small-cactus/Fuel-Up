@@ -79,7 +79,7 @@ export function WelcomeStep({ isDark, themeColors, insets, mapRegion }) {
                 />
                 <FuelUpHeaderLogo isDark={isDark} />
                 <Text style={[styles.welcomeSubtitle, { color: themeColors.text }]}>
-                    Find the cheapest gas near you, instantly.
+                    Find cheaper gas near you.
                 </Text>
             </View>
         </View>

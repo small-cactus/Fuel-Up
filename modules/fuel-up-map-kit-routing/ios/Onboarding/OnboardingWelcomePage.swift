@@ -14,7 +14,7 @@ struct OnboardingWelcomePage: View {
               Image(uiImage: icon).resizable().frame(width: 64, height: 64).clipShape(RoundedRectangle(cornerRadius: 14))
             }
             OnboardingWordmark()
-            Text("Find the cheapest gas near you, instantly.")
+            Text("Find cheaper gas near you.")
               .font(.body).foregroundStyle(.primary).multilineTextAlignment(.center).frame(maxWidth: 280)
           }.padding(.top, 40).padding(.horizontal, 24)
             .frame(maxWidth: .infinity, minHeight: geometry.size.height, alignment: .top)

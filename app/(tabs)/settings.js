@@ -97,9 +97,9 @@ export default function SettingsScreen() {
             clearTrendDataCache();
             setFuelDebugState(null);
             requestFuelReset();
-            if (mountedRef.current) Alert.alert(t("Prices Refreshed"), t("The map will check for the latest gas prices."));
+            if (mountedRef.current) Alert.alert(t("Refresh Requested"), t("The map will check for the latest gas prices."));
         } catch (error) {
-            if (mountedRef.current) Alert.alert(t("Reset Failed"), t("We couldn’t refresh gas prices. Please try again."));
+            if (mountedRef.current) Alert.alert(t("Refresh Failed"), t("We couldn’t refresh gas prices. Please try again."));
         } finally {
             resettingFuelRef.current = false;
         }

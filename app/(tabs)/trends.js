@@ -472,7 +472,7 @@ export default function TrendsScreen() {
                                 {/* Empty/No Data Fallback */}
                                 {!chartLoading && !displayTrendData?.averagePricesByDay?.length && !displayTrendData?.leaderboard?.length && (
                                     <View style={styles.emptyState}>
-                                        <Text style={[styles.emptyText, darkModeWeightStyle.emptyText, { color: themeColors.textOpacity }]}>{trendError || t("Not enough historical data collected yet to render trends. Check back soon.")}</Text>
+                                        <Text style={[styles.emptyText, darkModeWeightStyle.emptyText, { color: themeColors.textOpacity }]}>{trendError || t("Not enough local price history yet. Check back soon.")}</Text>
                                     </View>
                                 )}
                             </View>}
