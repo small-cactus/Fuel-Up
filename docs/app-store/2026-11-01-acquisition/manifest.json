@@ -1,0 +1,141 @@
+{
+  "features": [
+    {
+      "file": "01-nearby",
+      "lines": [
+        "Cheaper gas nearby.",
+        "No signup."
+      ],
+      "sub": "Compare prices. Choose your next stop.",
+      "bg": "#DDF3E7",
+      "ink": "#102C23",
+      "accent": "#177447"
+    }
+  ],
+  "exports": [
+    {
+      "file": "exports/iphone-large/01-nearby.png",
+      "width": 1320,
+      "height": 2868,
+      "source": "../2026-10-07-conversion/raw/iphone-large/01-nearby.png",
+      "sha256": "9a16b5e63f7d5dc59742fbbbfb2a8c2a957726b91ac2265b0972b4b8a9c271b9"
+    },
+    {
+      "file": "exports/iphone-medium/01-nearby.png",
+      "width": 1206,
+      "height": 2622,
+      "source": "../2026-10-07-conversion/raw/iphone-large/01-nearby.png",
+      "sha256": "ebcd84bddbffe78f95559affa90889f80778b3ddb198c77ef2e48005c43c8ef9"
+    },
+    {
+      "file": "exports/iphone-compact/01-nearby.png",
+      "width": 1080,
+      "height": 2340,
+      "source": "../2026-10-07-conversion/raw/iphone-large/01-nearby.png",
+      "sha256": "811c1ba0e1da4a9acecb245e7d95a6dfae825b8680811c3257c457f19c44ae53"
+    },
+    {
+      "file": "exports/ipad/01-nearby.png",
+      "width": 2064,
+      "height": 2752,
+      "source": "../2026-10-07-conversion/raw/ipad/01-nearby.png",
+      "sha256": "d552fd81749dd92431357c3a001d61cd5cb9ddab43e2ae53f67140755098c4d8"
+    },
+    {
+      "file": "exports/iphone-large/02-trends.png",
+      "width": 1320,
+      "height": 2868,
+      "source": "../2026-10-07-conversion/exports/iphone-large/02-trends.png",
+      "unchanged": true,
+      "sha256": "9691912c09f2fd01086739ba00d08dbe422f4fbc6d01e575e4ffb83a5fdee526"
+    },
+    {
+      "file": "exports/iphone-large/03-e85.png",
+      "width": 1320,
+      "height": 2868,
+      "source": "../2026-10-07-conversion/exports/iphone-large/03-e85.png",
+      "unchanged": true,
+      "sha256": "c8bfc1de77ff22c9f86f89b7e0db979eb66e6df57f12e54b6393f26b5f8487e6"
+    },
+    {
+      "file": "exports/iphone-large/04-brands.png",
+      "width": 1320,
+      "height": 2868,
+      "source": "../2026-10-07-conversion/exports/iphone-large/04-brands.png",
+      "unchanged": true,
+      "sha256": "e3e918190bedce72b9f3ae1be2cff21f1832729efa2a20a19e4e2e4d6188f5b6"
+    },
+    {
+      "file": "exports/iphone-medium/02-trends.png",
+      "width": 1206,
+      "height": 2622,
+      "source": "../2026-10-07-conversion/exports/iphone-medium/02-trends.png",
+      "unchanged": true,
+      "sha256": "0d96242e5750ed972d7dbc48463b1474529acc2f131580321421ef12e95302e5"
+    },
+    {
+      "file": "exports/iphone-medium/03-e85.png",
+      "width": 1206,
+      "height": 2622,
+      "source": "../2026-10-07-conversion/exports/iphone-medium/03-e85.png",
+      "unchanged": true,
+      "sha256": "b2c1ec553db4b62f788a277374e9372ecdf26026ea25ae4bbecfaaff3ead776a"
+    },
+    {
+      "file": "exports/iphone-medium/04-brands.png",
+      "width": 1206,
+      "height": 2622,
+      "source": "../2026-10-07-conversion/exports/iphone-medium/04-brands.png",
+      "unchanged": true,
+      "sha256": "f4b24b928f62dfbb5b93377d3e0f832378ed5c813e782330cb5b400ab5b92d36"
+    },
+    {
+      "file": "exports/iphone-compact/02-trends.png",
+      "width": 1080,
+      "height": 2340,
+      "source": "../2026-10-07-conversion/exports/iphone-compact/02-trends.png",
+      "unchanged": true,
+      "sha256": "00541a334a2f02ba38ac386e602383d87ecc1c06bbfe4bfd13e0426ac446e7f0"
+    },
+    {
+      "file": "exports/iphone-compact/03-e85.png",
+      "width": 1080,
+      "height": 2340,
+      "source": "../2026-10-07-conversion/exports/iphone-compact/03-e85.png",
+      "unchanged": true,
+      "sha256": "2279ede7c69ff362701eba312ec3cff816b31205c2f4ee6ca118856d09c7eb83"
+    },
+    {
+      "file": "exports/iphone-compact/04-brands.png",
+      "width": 1080,
+      "height": 2340,
+      "source": "../2026-10-07-conversion/exports/iphone-compact/04-brands.png",
+      "unchanged": true,
+      "sha256": "5ce0272b74390df6195566c02df952ffc5d43f3aea754bb57f2948915cff2444"
+    },
+    {
+      "file": "exports/ipad/02-trends.png",
+      "width": 2064,
+      "height": 2752,
+      "source": "../2026-10-07-conversion/exports/ipad/02-trends.png",
+      "unchanged": true,
+      "sha256": "7a72d2348e086b07d81d76de3ab371aa7f420e636bad105e3ef5c68fa99320ba"
+    },
+    {
+      "file": "exports/ipad/03-e85.png",
+      "width": 2064,
+      "height": 2752,
+      "source": "../2026-10-07-conversion/exports/ipad/03-e85.png",
+      "unchanged": true,
+      "sha256": "a406f0006354e051fd092304c8866117c6e19fa759df0d5d80256cbb1a8e6d5e"
+    },
+    {
+      "file": "exports/ipad/04-brands.png",
+      "width": 2064,
+      "height": 2752,
+      "source": "../2026-10-07-conversion/exports/ipad/04-brands.png",
+      "unchanged": true,
+      "sha256": "b9c141f277cb3770a0a2fbe107be5f29e1338db3a5ab1dc73961516d863cec15"
+    }
+  ]
+}
