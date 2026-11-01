@@ -1,0 +1,30 @@
+{
+  "bundles": [
+    {
+      "bundle": "com.anthonyh.fuelup",
+      "version": "1.0.2",
+      "build": "40",
+      "signatureValid": true,
+      "aps": "production",
+      "debugAllowed": false
+    },
+    {
+      "bundle": "com.anthonyh.fuelup.notifications",
+      "version": "1.0.2",
+      "build": "40",
+      "signatureValid": true,
+      "aps": null,
+      "debugAllowed": false
+    },
+    {
+      "bundle": "com.anthonyh.fuelup.ExpoWidgetsTarget",
+      "version": "1.0.2",
+      "build": "40",
+      "signatureValid": true,
+      "aps": null,
+      "debugAllowed": false
+    }
+  ],
+  "ipaSha256": "29a5b7519e9e4ffcb7bcfe3334772b77cbef9c0da0276490d7ddb70c4fcd7cf1",
+  "jsBundleBytes": 4847953
+}
