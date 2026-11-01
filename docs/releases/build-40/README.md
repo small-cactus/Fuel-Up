@@ -18,7 +18,7 @@ Release prepared 2026-11-01 from source including `430c0ac` (copy clarification)
 
 ## Packaging and submission status
 
-Archive and App Store export succeeded. Upload succeeded at 2026-11-01 15:56:07 EST; Apple processing is pending. App Review submission is not yet complete. The initial archive encountered a missing Xcode Metal Toolchain required by the existing launch animation. Installed Apple's Metal Toolchain 27B47 using xcodebuild download/export; xcodebuild reports installed and xcrun verifies Metal compiler 32023.922.4. The archive retry succeeded. No shader or security workaround was applied.
+Archive and App Store export succeeded. Upload succeeded at 2026-11-01 15:56:07 EST. Apple processing completed; build 40 was attached to 1.0.2 and submitted at 16:01 EST. The final submission detail page confirms **Waiting for Review**. The initial archive encountered a missing Xcode Metal Toolchain required by the existing launch animation. Installed Apple's Metal Toolchain 27B47 using xcodebuild download/export; xcodebuild reports installed and xcrun verifies Metal compiler 32023.922.4. The archive retry succeeded. No shader or security workaround was applied.
 
 App Store Connect: release notes saved for English (U.S.), Simplified Chinese, Traditional Chinese, French, Spanish (Mexico), and Vietnamese. Review notes updated for build 40. Manual release remains selected. The separately submitted screenshot product-page test is not a proven conversion winner and is not being substituted into the release.
 
@@ -30,3 +30,14 @@ App Store Connect preflight accepted the metadata and reported only: `You must c
 - Bundled JavaScript and the compiled native executable contain the new copy. No physical-device visual pass was performed for this copy/version release.
 
 Upload reported the existing nonblocking Hermes dSYM warning (UUID `B99B4F0D-1B56-3D94-940F-383F4F00C905`), also present in build 39. This limits symbolication for that framework; Apple accepted the package.
+
+## Verified App Review submission
+
+- Version/build: **1.0.2 (40)**.
+- Status: **Waiting for Review** (both submission and app-version item).
+- Submitted: November 1, 2026 at 4:01 PM America/New_York.
+- Submission ID: `0a58657e-b5b2-46c4-8208-4da8bf7e69d3`.
+- Review record: https://appstoreconnect.apple.com/apps/6759831421/distribution/reviewsubmissions/details/0a58657e-b5b2-46c4-8208-4da8bf7e69d3
+- Manual release preserved; this is not approval or public availability.
+- English description and 98-character keyword field were read back with build 40 attached before submission.
+- Apple accepted one item in this submission. The separate screenshot test remains a separate submission.
