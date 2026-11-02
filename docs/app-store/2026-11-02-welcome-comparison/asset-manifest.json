@@ -1,0 +1,100 @@
+{
+  "source": "raw/welcome-iphone.png",
+  "sourceCommit": "c4f746f",
+  "capture": "Current Release simulator build; native welcome screen",
+  "prices": "Illustrative prices shipped in the native onboarding screen, not current pump quotes.",
+  "transformations": "Uniform scaling with minimal white padding to existing store dimensions. No content edits.",
+  "scope": "First screenshot only, English (US), iPhone. Later screenshots and iPad remain unchanged.",
+  "exports": [
+    {
+      "file": "exports/iphone-large/01-welcome.png",
+      "width": 1320,
+      "height": 2868,
+      "sha256": "2d782084f32926a2e53e4a7f303f58b7157eb036530e5204d014a3e8a5507b2e"
+    },
+    {
+      "file": "exports/iphone-large/02-trends.png",
+      "width": 1320,
+      "height": 2868,
+      "unchanged": true,
+      "source": "../2026-10-07-conversion/exports/iphone-large/02-trends.png",
+      "sha256": "9691912c09f2fd01086739ba00d08dbe422f4fbc6d01e575e4ffb83a5fdee526"
+    },
+    {
+      "file": "exports/iphone-large/03-e85.png",
+      "width": 1320,
+      "height": 2868,
+      "unchanged": true,
+      "source": "../2026-10-07-conversion/exports/iphone-large/03-e85.png",
+      "sha256": "c8bfc1de77ff22c9f86f89b7e0db979eb66e6df57f12e54b6393f26b5f8487e6"
+    },
+    {
+      "file": "exports/iphone-large/04-brands.png",
+      "width": 1320,
+      "height": 2868,
+      "unchanged": true,
+      "source": "../2026-10-07-conversion/exports/iphone-large/04-brands.png",
+      "sha256": "e3e918190bedce72b9f3ae1be2cff21f1832729efa2a20a19e4e2e4d6188f5b6"
+    },
+    {
+      "file": "exports/iphone-medium/01-welcome.png",
+      "width": 1206,
+      "height": 2622,
+      "sha256": "e2f786c3007c3efff81fdba2593242273dc1790ef9051e15f98b9a0d3276bfef"
+    },
+    {
+      "file": "exports/iphone-medium/02-trends.png",
+      "width": 1206,
+      "height": 2622,
+      "unchanged": true,
+      "source": "../2026-10-07-conversion/exports/iphone-medium/02-trends.png",
+      "sha256": "0d96242e5750ed972d7dbc48463b1474529acc2f131580321421ef12e95302e5"
+    },
+    {
+      "file": "exports/iphone-medium/03-e85.png",
+      "width": 1206,
+      "height": 2622,
+      "unchanged": true,
+      "source": "../2026-10-07-conversion/exports/iphone-medium/03-e85.png",
+      "sha256": "b2c1ec553db4b62f788a277374e9372ecdf26026ea25ae4bbecfaaff3ead776a"
+    },
+    {
+      "file": "exports/iphone-medium/04-brands.png",
+      "width": 1206,
+      "height": 2622,
+      "unchanged": true,
+      "source": "../2026-10-07-conversion/exports/iphone-medium/04-brands.png",
+      "sha256": "f4b24b928f62dfbb5b93377d3e0f832378ed5c813e782330cb5b400ab5b92d36"
+    },
+    {
+      "file": "exports/iphone-compact/01-welcome.png",
+      "width": 1080,
+      "height": 2340,
+      "sha256": "1979fd576ef8050936f0c168fd95356167595218236e8769c26e8118f842a0e0"
+    },
+    {
+      "file": "exports/iphone-compact/02-trends.png",
+      "width": 1080,
+      "height": 2340,
+      "unchanged": true,
+      "source": "../2026-10-07-conversion/exports/iphone-compact/02-trends.png",
+      "sha256": "00541a334a2f02ba38ac386e602383d87ecc1c06bbfe4bfd13e0426ac446e7f0"
+    },
+    {
+      "file": "exports/iphone-compact/03-e85.png",
+      "width": 1080,
+      "height": 2340,
+      "unchanged": true,
+      "source": "../2026-10-07-conversion/exports/iphone-compact/03-e85.png",
+      "sha256": "2279ede7c69ff362701eba312ec3cff816b31205c2f4ee6ca118856d09c7eb83"
+    },
+    {
+      "file": "exports/iphone-compact/04-brands.png",
+      "width": 1080,
+      "height": 2340,
+      "unchanged": true,
+      "source": "../2026-10-07-conversion/exports/iphone-compact/04-brands.png",
+      "sha256": "5ce0272b74390df6195566c02df952ffc5d43f3aea754bb57f2948915cff2444"
+    }
+  ]
+}

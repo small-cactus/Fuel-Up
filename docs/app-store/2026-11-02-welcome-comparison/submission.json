@@ -1,0 +1,48 @@
+{
+  "appId": "6759831421",
+  "testId": "ed021cfd-2675-4ddd-b6e1-011758ea59b0",
+  "treatmentId": "490f198f-4133-46ed-9739-a63077f53843",
+  "name": "Welcome price comparison - November 2026",
+  "localizations": [
+    "en-US"
+  ],
+  "treatments": 1,
+  "trafficPercent": 50,
+  "sequence": [
+    "01-welcome.png",
+    "02-trends.png",
+    "03-e85.png",
+    "04-brands.png"
+  ],
+  "explicitAssetSize": "1206x2622",
+  "sizeInheritanceVerified": [
+    "iPhone with Dynamic Island (large display)",
+    "iPhone with Face ID (medium display)"
+  ],
+  "unchanged": [
+    "iPad screenshots",
+    "all text metadata",
+    "app binary",
+    "original product page"
+  ],
+  "supersededTest": {
+    "id": "62271d72-034c-4759-979a-866a5a964479",
+    "status": "Stopped by Developer",
+    "date": "2026-11-02",
+    "reason": "User requested welcome-first screenshot experiment; separate result history retained."
+  },
+  "status": "Waiting for Review",
+  "verification": [
+    "Release simulator build succeeded",
+    "Current welcome screen visually inspected",
+    "4 screenshot sequence read back from App Store Connect",
+    "12 local file hashes checked; later assets exactly match originals",
+    "Apple confirmed 1 Item Submitted",
+    "App Review submission and Product Page Optimization row both read Waiting for Review"
+  ],
+  "submittedAtDisplayed": "Nov 2, 2026 at 10:47 AM America/New_York",
+  "reviewSubmissionId": "27bb3f58-9b10-4e5e-8c82-d5cdc51d5c99",
+  "reviewUrl": "https://appstoreconnect.apple.com/apps/6759831421/distribution/reviewsubmissions/details/27bb3f58-9b10-4e5e-8c82-d5cdc51d5c99",
+  "uploadScope": "Only medium iPhone assets uploaded; large and compact iPhone treatment assets inherit the verified welcome-first medium sequence.",
+  "publicationBoundary": "Submitted experiment, not yet approved or running; original default product page unchanged."
+}

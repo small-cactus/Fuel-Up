@@ -1,0 +1,693 @@
+{
+  "observedAt": "2026-11-02T15:28:52.086873+00:00",
+  "storefront": "us",
+  "device": "iPhone",
+  "method": "Apple public iTunes search API; gas prices top 10 cross-checked in Shipmunk. First two screenshot images inspected for each app. Ordering is a discovery proxy, not guaranteed live on-device organic rank. No competitor conversion, keyword volume, web traffic or backlink counts obtained.",
+  "searches": [
+    {
+      "query": "gas prices",
+      "count": 158,
+      "fuelUpPosition": 56,
+      "top10": [
+        {
+          "position": 1,
+          "name": "GasBuddy: Find & Pay for Gas",
+          "id": 406719683
+        },
+        {
+          "position": 2,
+          "name": "Gas Prices Near You",
+          "id": 581748070
+        },
+        {
+          "position": 3,
+          "name": "Upside: Gas & Food Cash Back",
+          "id": 1099997174
+        },
+        {
+          "position": 4,
+          "name": "Cheap Gas Finder USA",
+          "id": 6762310363
+        },
+        {
+          "position": 5,
+          "name": "Waze Navigation & Live Traffic",
+          "id": 323229106
+        },
+        {
+          "position": 6,
+          "name": "FuelSaver - Cheap Gas Station",
+          "id": 6761938959
+        },
+        {
+          "position": 7,
+          "name": "Find Cheap Gas \u2013 Fuel Prices",
+          "id": 6759683321
+        },
+        {
+          "position": 8,
+          "name": "Gas Prices USA: Fuel Tracker",
+          "id": 6771888837
+        },
+        {
+          "position": 9,
+          "name": "Cheap Fuel & Gas Tracker",
+          "id": 6768006115
+        },
+        {
+          "position": 10,
+          "name": "Murphy Drive Rewards",
+          "id": 1386235320
+        }
+      ]
+    },
+    {
+      "query": "cheap gas",
+      "count": 167,
+      "fuelUpPosition": 21,
+      "top10": [
+        {
+          "position": 1,
+          "name": "GasBuddy: Find & Pay for Gas",
+          "id": 406719683
+        },
+        {
+          "position": 2,
+          "name": "Cheap Gas Finder USA",
+          "id": 6762310363
+        },
+        {
+          "position": 3,
+          "name": "Upside: Gas & Food Cash Back",
+          "id": 1099997174
+        },
+        {
+          "position": 4,
+          "name": "Gas Prices Near You",
+          "id": 581748070
+        },
+        {
+          "position": 5,
+          "name": "FuelSaver - Cheap Gas Station",
+          "id": 6761938959
+        },
+        {
+          "position": 6,
+          "name": "Cheap Gas Stations Spritkenig",
+          "id": 1434546056
+        },
+        {
+          "position": 7,
+          "name": "Find Cheap Gas \u2013 Fuel Prices",
+          "id": 6759683321
+        },
+        {
+          "position": 8,
+          "name": "Murphy Drive Rewards",
+          "id": 1386235320
+        },
+        {
+          "position": 9,
+          "name": "Gaspy",
+          "id": 1157169797
+        },
+        {
+          "position": 10,
+          "name": "GasMeUp: Find Cheap Gas",
+          "id": 6777846453
+        }
+      ]
+    },
+    {
+      "query": "find cheap gas",
+      "count": 157,
+      "fuelUpPosition": 20,
+      "top10": [
+        {
+          "position": 1,
+          "name": "GasBuddy: Find & Pay for Gas",
+          "id": 406719683
+        },
+        {
+          "position": 2,
+          "name": "Gas Prices Near You",
+          "id": 581748070
+        },
+        {
+          "position": 3,
+          "name": "Upside: Gas & Food Cash Back",
+          "id": 1099997174
+        },
+        {
+          "position": 4,
+          "name": "Find Cheap Gas \u2013 Fuel Prices",
+          "id": 6759683321
+        },
+        {
+          "position": 5,
+          "name": "Cheap Gas Finder USA",
+          "id": 6762310363
+        },
+        {
+          "position": 6,
+          "name": "Murphy Drive Rewards",
+          "id": 1386235320
+        },
+        {
+          "position": 7,
+          "name": "Circle K",
+          "id": 1592397814
+        },
+        {
+          "position": 8,
+          "name": "Cheap Fuel & Gas Tracker",
+          "id": 6768006115
+        },
+        {
+          "position": 9,
+          "name": "Fuel Forward",
+          "id": 922282104
+        },
+        {
+          "position": 10,
+          "name": "GasMeUp: Find Cheap Gas",
+          "id": 6777846453
+        }
+      ]
+    },
+    {
+      "query": "gas prices near me",
+      "count": 148,
+      "fuelUpPosition": 36,
+      "top10": [
+        {
+          "position": 1,
+          "name": "GasBuddy: Find & Pay for Gas",
+          "id": 406719683
+        },
+        {
+          "position": 2,
+          "name": "Gas Prices Near You",
+          "id": 581748070
+        },
+        {
+          "position": 3,
+          "name": "Upside: Gas & Food Cash Back",
+          "id": 1099997174
+        },
+        {
+          "position": 4,
+          "name": "Cheap Fuel Price Near Me",
+          "id": 6761396394
+        },
+        {
+          "position": 5,
+          "name": "GasMeUp: Find Cheap Gas",
+          "id": 6777846453
+        },
+        {
+          "position": 6,
+          "name": "Find Cheap Gas \u2013 Fuel Prices",
+          "id": 6759683321
+        },
+        {
+          "position": 7,
+          "name": "Murphy Drive Rewards",
+          "id": 1386235320
+        },
+        {
+          "position": 8,
+          "name": "Pump Scout: Cheap Gas Finder",
+          "id": 6757690053
+        },
+        {
+          "position": 9,
+          "name": "Gasolino - Cheap Gas Prices",
+          "id": 6760481207
+        },
+        {
+          "position": 10,
+          "name": "SmartFill",
+          "id": 6766342454
+        }
+      ]
+    },
+    {
+      "query": "e85",
+      "count": 170,
+      "fuelUpPosition": 78,
+      "top10": [
+        {
+          "position": 1,
+          "name": "E85 Stations USA",
+          "id": 6446505663
+        },
+        {
+          "position": 2,
+          "name": "E85 App",
+          "id": 1508517906
+        },
+        {
+          "position": 3,
+          "name": "Pearson Fuels - E85 Stations",
+          "id": 1184769431
+        },
+        {
+          "position": 4,
+          "name": "e85Cal",
+          "id": 1470313135
+        },
+        {
+          "position": 5,
+          "name": "GasBuddy: Find & Pay for Gas",
+          "id": 406719683
+        },
+        {
+          "position": 6,
+          "name": "E85 Navigator",
+          "id": 6800078473
+        },
+        {
+          "position": 7,
+          "name": "Alternative Fueling Stations",
+          "id": 718577947
+        },
+        {
+          "position": 8,
+          "name": "85Blends",
+          "id": 6762037468
+        },
+        {
+          "position": 9,
+          "name": "E85 Search",
+          "id": 6758813502
+        },
+        {
+          "position": 10,
+          "name": "Propel Fuels Station Locator",
+          "id": 912207853
+        }
+      ]
+    },
+    {
+      "query": "diesel prices",
+      "count": 179,
+      "fuelUpPosition": 20,
+      "top10": [
+        {
+          "position": 1,
+          "name": "GasBuddy: Find & Pay for Gas",
+          "id": 406719683
+        },
+        {
+          "position": 2,
+          "name": "Fuelbook",
+          "id": 427247688
+        },
+        {
+          "position": 3,
+          "name": "Mudflap",
+          "id": 1488815024
+        },
+        {
+          "position": 4,
+          "name": "Diesel Near Me",
+          "id": 6760606869
+        },
+        {
+          "position": 5,
+          "name": "Gas Prices Near You",
+          "id": 581748070
+        },
+        {
+          "position": 6,
+          "name": "EDS Diesel",
+          "id": 1560167726
+        },
+        {
+          "position": 7,
+          "name": "Daily Petrol Diesel Price",
+          "id": 1321240117
+        },
+        {
+          "position": 8,
+          "name": "Petrol Diesel Price In India",
+          "id": 1250027506
+        },
+        {
+          "position": 9,
+          "name": "AtoB: Find and Save on Fuel",
+          "id": 1618855693
+        },
+        {
+          "position": 10,
+          "name": "10-4 by WEX",
+          "id": 6461532828
+        }
+      ]
+    },
+    {
+      "query": "fuel up",
+      "count": 178,
+      "fuelUpPosition": 7,
+      "top10": [
+        {
+          "position": 1,
+          "name": "fuelUP",
+          "id": 1561904496
+        },
+        {
+          "position": 2,
+          "name": "Fuel Forward",
+          "id": 922282104
+        },
+        {
+          "position": 3,
+          "name": "GasBuddy: Find & Pay for Gas",
+          "id": 406719683
+        },
+        {
+          "position": 4,
+          "name": "Upside: Gas & Food Cash Back",
+          "id": 1099997174
+        },
+        {
+          "position": 5,
+          "name": "FuelUp Mobile",
+          "id": 1087888159
+        },
+        {
+          "position": 6,
+          "name": "FuelUp-OH",
+          "id": 6758350173
+        },
+        {
+          "position": 7,
+          "name": "Fuel Up: Find Cheap Gas Prices",
+          "id": 6759831421
+        },
+        {
+          "position": 8,
+          "name": "Fuel-Up by Kcal",
+          "id": 1664677272
+        },
+        {
+          "position": 9,
+          "name": "AtoB: Find and Save on Fuel",
+          "id": 1618855693
+        },
+        {
+          "position": 10,
+          "name": "Fuel Up Rewards",
+          "id": 6654927520
+        }
+      ]
+    }
+  ],
+  "apps": [
+    {
+      "trackId": 406719683,
+      "trackName": "GasBuddy: Find & Pay for Gas",
+      "trackViewUrl": "https://apps.apple.com/us/app/gasbuddy-find-pay-for-gas/id406719683?uo=4",
+      "version": "702.9.26968",
+      "averageUserRating": 4.6863,
+      "userRatingCount": 448033,
+      "sellerUrl": "http://www.gasbuddy.com/GasBuddyMobileApps.aspx",
+      "screenshotUrls": [
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/9f/12/06/9f120617-7f78-40b2-17df-b92194da531a/db4f0123-3efb-4e59-8839-9651e8158fb7_1242x2208_-_iPhone_8_Plus_-_1.png/392x696bb.png",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/49/53/c8/4953c87b-9ebf-cd14-1c84-230016f0501f/e7993de9-85a7-46fe-a20c-cd6a34e78362_1242x2208_-_iPhone_8_Plus_-_2.png/392x696bb.png",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/0e/e1/12/0ee11218-5997-23d4-b1b6-618e77fa0e2f/719833d0-c142-42fd-8b40-96d6eefa3768_1242x2208_-_iPhone_8_Plus_-_3.png/392x696bb.png",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/cc/b6/3d/ccb63d4d-ab70-9c72-0bcc-21084f1ed130/983e2fae-69c2-4688-8168-b2344d2e9968_1242x2208_-_iPhone_8_Plus_-_4.png/392x696bb.png",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/49/ce/a3/49cea3c5-3f05-301a-8211-098741846fac/96fe4ed7-a57a-421b-a213-060408a4eea5_1242x2208_-_iPhone_8_Plus_-_5.png/392x696bb.png",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/2a/f0/6a/2af06af3-88dd-4102-3f0f-c3209d804e62/be844ad8-40fb-4b9e-9b20-c71edbc5150b_1242x2208_-_iPhone_8_Plus_-_6.png/392x696bb.png",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/6c/02/4a/6c024a69-9943-13ea-5960-b51660efa964/9f707fee-8d45-4117-89bb-c2ec8d17ddea_1242x2208_-_iPhone_8_Plus_-_7.png/392x696bb.png"
+      ]
+    },
+    {
+      "trackId": 581748070,
+      "trackName": "Gas Prices Near You",
+      "trackViewUrl": "https://apps.apple.com/us/app/gas-prices-near-you/id581748070?uo=4",
+      "version": "2.1.5",
+      "averageUserRating": 4.26081,
+      "userRatingCount": 7814,
+      "sellerUrl": "https://enter.im/gas/support.html",
+      "screenshotUrls": [
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/41/ff/e8/41ffe8bf-9899-bcfc-0001-3509810e497b/Simulator_Screenshot_-_iPhone_13_Pro_Max_-_2026-08-12_at_21.36.41.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/64/b3/ee/64b3ee69-1101-2cc7-c636-5468ba3bcc2e/Simulator_Screenshot_-_iPhone_13_Pro_Max_-_2026-08-12_at_21.40.18.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/a3/27/03/a32703bf-be24-1df9-b65f-dbdd41b28051/Simulator_Screenshot_-_iPhone_13_Pro_Max_-_2026-08-12_at_21.40.27.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/c0/e7/58/c0e75871-f1e1-4097-da66-97d9d511410b/Simulator_Screenshot_-_iPhone_13_Pro_Max_-_2026-08-12_at_21.40.44.png/320x480bb.jpg"
+      ]
+    },
+    {
+      "trackId": 1099997174,
+      "trackName": "Upside: Gas & Food Cash Back",
+      "trackViewUrl": "https://apps.apple.com/us/app/upside-gas-food-cash-back/id1099997174?uo=4",
+      "version": "26.30.0",
+      "averageUserRating": 4.78846,
+      "userRatingCount": 689902,
+      "sellerUrl": "https://www.upside.com/",
+      "screenshotUrls": [
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/90/7e/b4/907eb400-f763-56b4-e6af-bc7bbfe57178/Upside_OptionA_Apple_6.7_Panel1.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/73/3f/f1/733ff147-1e19-710c-5b02-10734d9f8b14/Upside_OptionA_Apple_6.7_Panel2.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/0b/68/cc/0b68cc76-bd56-d994-ec1c-6c4d1ee807a5/Upside_OptionA_Apple_6.7_Panel3.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/02/fb/dd/02fbdd61-580d-13c5-8071-4950994523d3/Upside_OptionA_Apple_6.7_Panel4.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/8f/25/52/8f2552c0-ef6c-332e-554d-9054fddf6951/Upside_OptionA_Apple_6.7_Panel5.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/cb/95/bd/cb95bdc3-1895-f5c7-e690-126b739c22b4/Upside_OptionA_Apple_6.7_Panel6.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/27/e4/b3/27e4b3ca-bba7-9c65-c919-f46948a34fdc/Upside_OptionA_Apple_6.7_Panel7.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/34/2c/91/342c9196-56f4-f8b9-5eef-5466c02ac937/Upside_OptionA_Apple_6.7_Panel8.png/320x480bb.jpg"
+      ]
+    },
+    {
+      "trackId": 6762310363,
+      "trackName": "Cheap Gas Finder USA",
+      "trackViewUrl": "https://apps.apple.com/us/app/cheap-gas-finder-usa/id6762310363?uo=4",
+      "version": "1.4.0",
+      "averageUserRating": 4.11111,
+      "userRatingCount": 18,
+      "sellerUrl": "https://vermilion-apps.com/cheap-gas-finder-usa",
+      "screenshotUrls": [
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/93/a7/47/93a74705-83f8-656a-9f1f-d089315156b3/nearby_6.5.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/ab/2e/72/ab2e72bc-4c7b-ab24-491f-23ea4b476c04/map_6.5.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/43/0e/4b/430e4b82-2028-9249-6b63-3f80553ff942/detail_6.5.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/ed/52/40/ed5240bb-b650-9baa-5790-e75cff52eced/settings_6.5.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/59/1f/ec/591fecb6-3b0b-d0f8-143b-3f76a7bb5fd5/carplay_6.5.png/320x480bb.jpg"
+      ]
+    },
+    {
+      "trackId": 323229106,
+      "trackName": "Waze Navigation & Live Traffic",
+      "trackViewUrl": "https://apps.apple.com/us/app/waze-navigation-live-traffic/id323229106?uo=4",
+      "version": "5.26.5.1",
+      "averageUserRating": 4.83883,
+      "userRatingCount": 3198517,
+      "sellerUrl": "http://www.waze.com",
+      "screenshotUrls": [
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/65/54/e5/6554e54a-854b-8270-2d6d-ca73cb449412/98def561-b8fc-4650-8946-15239d81a878_Usecase_01.jpg/392x696bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/81/df/ed/81dfedae-d72e-a25d-24e7-2f43b64ab618/cf7d60dc-7f33-474b-ab60-bd3b9ff24dc0_Usecase_02.jpg/392x696bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/c7/04/84/c70484a3-4301-f9cf-9716-a95e0ac6bc8a/ff02c3c6-aaf3-439e-98e2-328fd053fe98_Usecase_03.jpg/392x696bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/ff/8d/20/ff8d2076-abdd-5705-23de-129db40b0532/63513f6f-9f7e-41bd-837a-60446b30594d_Usecase_08.jpg/392x696bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/46/0a/f4/460af40d-a2b9-a88b-724b-2acad30eee09/22d189f4-236d-4018-9631-cee16a583c47_Usecase_05.jpg/392x696bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d4/31/40/d4314022-7502-9148-a125-458a604e9549/bd6ad41f-146e-4f88-bd78-822da6a1a571_Usecase_06.jpg/392x696bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/60/35/2a/60352a8e-6902-ecf4-dcfc-9d7b91ede190/9b909502-6ee7-40ad-8cba-0b8314c0a8a0_Usecase_07.jpg/392x696bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d4/d0/5e/d4d05e3c-bd6c-f65c-a0d5-57b8e4ce1b61/90ea4f0a-a0ed-4c93-86e8-e560706ce284_Usecase_04.jpg/392x696bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/0c/f5/51/0cf551e5-0745-374a-cf94-3d32793a2618/5f8c9915-9d27-49ef-b765-65b9d2f502fd_Usecase_09.jpg/392x696bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/ac/f8/41/acf84125-b2ea-898d-27dd-f10d76385172/6e201d84-e76d-4e8a-bd47-af0e6670e6bf_Usecase_10.jpg/392x696bb.jpg"
+      ]
+    },
+    {
+      "trackId": 6761938959,
+      "trackName": "FuelSaver - Cheap Gas Station",
+      "trackViewUrl": "https://apps.apple.com/us/app/fuelsaver-cheap-gas-station/id6761938959?uo=4",
+      "version": "2.1.49",
+      "averageUserRating": 5,
+      "userRatingCount": 1,
+      "sellerUrl": "https://fuelsaver.one/",
+      "screenshotUrls": [
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/96/0e/1b/960e1bb0-cc6e-d1c3-061e-4a5b15817725/1_find_cheap_fuel.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/dd/b3/41/ddb341ef-e657-5d4e-b10e-6170570d2b06/2_trip_costs.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/98/18/e7/9818e79f-b006-7618-ed82-00b21b9cd75f/3_price_alerts.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/3b/5c/3a/3b5c3a37-1bca-0ce5-8da1-ec50cf64a42f/4_fill_up_log.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/fa/69/41/fa6941d1-62ce-84ae-78c1-612bd241f0d6/5_scan_receipt.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/e1/de/74/e1de747c-0aea-e51e-3a52-4be7f603b885/6_fuel_consumption.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/08/ef/1e/08ef1e1d-8b57-7f2f-aeaa-40432c2bf75f/7_car_costs.png/320x480bb.jpg"
+      ]
+    },
+    {
+      "trackId": 6759683321,
+      "trackName": "Find Cheap Gas \u2013 Fuel Prices",
+      "trackViewUrl": "https://apps.apple.com/us/app/find-cheap-gas-fuel-prices/id6759683321?uo=4",
+      "version": "4.1.0",
+      "averageUserRating": 4.28099,
+      "userRatingCount": 121,
+      "sellerUrl": "https://playful-souls.com",
+      "screenshotUrls": [
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/62/0c/c2/620cc240-f409-51ef-6c9c-44249460e1f2/image2.jpg/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/0b/4a/f9/0b4af9d0-9b75-26ac-fa0b-8fd07386aeb5/image4.jpg/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/83/75/11/83751151-89a2-dcff-7554-a40eb9c60ae4/image3.jpg/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/18/b9/70/18b97045-0333-d497-f00e-640bbe97e4b0/image1.jpg/320x480bb.jpg"
+      ]
+    },
+    {
+      "trackId": 6771888837,
+      "trackName": "Gas Prices USA: Fuel Tracker",
+      "trackViewUrl": "https://apps.apple.com/us/app/gas-prices-usa-fuel-tracker/id6771888837?uo=4",
+      "version": "1.0.4",
+      "averageUserRating": 1,
+      "userRatingCount": 1,
+      "sellerUrl": "https://pf2dcf12b.app-ads-txt.com",
+      "screenshotUrls": [
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/5b/95/2b/5b952ba7-1aad-c415-6366-a67d6a04b0dc/Simulator_Screenshot_-_iPhone_17_Pro_Max_-_2026-10-18_at_11.15.10.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/6d/c2/35/6dc2354b-f587-cae8-bed4-ff8e8129cd7f/Simulator_Screenshot_-_iPhone_17_Pro_Max_-_2026-10-18_at_11.15.20.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/76/c3/5b/76c35baf-3144-4596-64a0-94e063ede918/Simulator_Screenshot_-_iPhone_17_Pro_Max_-_2026-10-18_at_11.15.53.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/f8/29/74/f82974ab-cfe0-db36-6057-32188ce9cb19/Simulator_Screenshot_-_iPhone_17_Pro_Max_-_2026-10-18_at_11.17.52.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/f9/f3/2e/f9f32e92-d4a3-b7b4-52c7-88a3d4d2b204/Simulator_Screenshot_-_iPhone_17_Pro_Max_-_2026-10-18_at_11.16.26.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/45/ba/98/45ba98fb-aa8e-c2be-638a-460a1f605c75/Simulator_Screenshot_-_iPhone_17_Pro_Max_-_2026-10-18_at_11.17.16.png/320x480bb.jpg"
+      ]
+    },
+    {
+      "trackId": 6768006115,
+      "trackName": "Cheap Fuel & Gas Tracker",
+      "trackViewUrl": "https://apps.apple.com/us/app/cheap-fuel-gas-tracker/id6768006115?uo=4",
+      "version": "1.0.18",
+      "averageUserRating": 3.77778,
+      "userRatingCount": 9,
+      "sellerUrl": "https://dailyfaith.me/",
+      "screenshotUrls": [
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/5b/91/d7/5b91d798-3b47-37c5-76a6-049cfce5636e/iphone_screenshot_1242__U00281_U0029.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/a4/c0/69/a4c069ab-b10e-f345-af90-ba3cd007f14b/iphone_screenshot_2_1242.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/b5/9c/82/b59c824b-fddc-ca4e-940d-388a614c4ca1/iphone_screenshot_3_1242.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/49/17/02/4917027f-0ff8-be7f-3526-87b746cb9cac/iphone_screenshot_savings_1242.png/320x480bb.jpg"
+      ]
+    },
+    {
+      "trackId": 1386235320,
+      "trackName": "Murphy Drive Rewards",
+      "trackViewUrl": "https://apps.apple.com/us/app/murphy-drive-rewards/id1386235320?uo=4",
+      "version": "1.31.0",
+      "averageUserRating": 4.84489,
+      "userRatingCount": 534507,
+      "sellerUrl": "https://www.murphydriverewards.com",
+      "screenshotUrls": [
+        "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/0e/02/2f/0e022f97-a5e7-24eb-9587-76a9eb4bc21e/mzl.wqlcmtyk.png/392x696bb.png",
+        "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/85/dc/83/85dc83bb-7a4c-bc57-5995-6f0ca899e13e/mzl.nkmedphd.png/392x696bb.png",
+        "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/a8/99/fd/a899fd94-f7f2-66e1-68e0-6c235a54d497/mzl.wcribcwa.png/392x696bb.png",
+        "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/11/ca/f0/11caf05b-5186-a716-e7eb-d4dc230b0bb8/mzl.xfgzclgl.png/392x696bb.png",
+        "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/87/6c/f1/876cf140-14ef-0eb9-2ea3-f62f820ad4dc/mzl.mavpngov.png/392x696bb.png"
+      ]
+    },
+    {
+      "trackId": 6759831421,
+      "trackName": "Fuel Up: Find Cheap Gas Prices",
+      "trackViewUrl": "https://apps.apple.com/us/app/fuel-up-find-cheap-gas-prices/id6759831421?uo=4",
+      "version": "1.0.2",
+      "averageUserRating": 0,
+      "userRatingCount": 0,
+      "sellerUrl": null,
+      "screenshotUrls": [
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/6a/00/f9/6a00f9a7-9d79-7a96-3492-938425b9580c/01-nearby.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/03/80/4d/03804d8f-b0a9-29a8-ad1e-fbd8be5f4a10/02-trends.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/6c/a2/2c/6ca22cfc-134e-9080-8bb9-0744e8fb3d0b/03-e85.png/320x480bb.jpg",
+        "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/c8/62/9e/c8629ee1-515a-de80-cdb0-9b40423c3956/04-brands.png/320x480bb.jpg"
+      ]
+    }
+  ],
+  "fuelUpAnalytics": {
+    "period": "2026-10-29 through 2026-10-31",
+    "impressionsNonUnique": 212,
+    "productPageViews": 18,
+    "firstTimeDownloads": 5,
+    "redownloads": 1,
+    "dailyAverageConversionPercent": 3.59,
+    "sourcePageViews": {
+      "search": 7,
+      "appReferrer": 8,
+      "browse": 3
+    },
+    "sourceDownloads": {
+      "search": 2,
+      "appReferrer": 2,
+      "browse": 2
+    },
+    "caveat": "Apple conversion is daily average downloads divided by unique impressions, not product page visitors converting. Small sample; no causal attribution."
+  },
+  "appleAds": {
+    "campaignId": "2145003416",
+    "observedLast7DaysAndToday": {
+      "impressions": 0,
+      "taps": 0,
+      "installs": 0,
+      "spend": 0
+    },
+    "dailyBudgetUSD": 10,
+    "caveat": "Delivery issue, not evidence of poor paid conversion. Reporting may lag."
+  },
+  "qualitativeAudit": [
+    {
+      "app": "GasBuddy",
+      "strength": "Large review base; price comparison, deals, public utilities and earned media.",
+      "tradeoff": "Rewards/card messaging introduces more concepts than a simple nearby-price lookup.",
+      "website": "https://www.gasbuddy.com/"
+    },
+    {
+      "app": "Gas Prices Near You",
+      "strength": "Literal search-intent title; prices visible immediately.",
+      "tradeoff": "Inspected screenshots show ads and many unavailable map prices.",
+      "website": "https://enter.im/gas/support.html"
+    },
+    {
+      "app": "Upside",
+      "strength": "Cash-back benefit immediately visible, large review base, dedicated how-it-works funnel and partner distribution.",
+      "tradeoff": "Offer eligibility and claim/purchase steps; different proposition from neutral pump-price comparison.",
+      "website": "https://www.upside.com/how-upside-works"
+    },
+    {
+      "app": "Cheap Gas Finder USA",
+      "strength": "First screenshot isolates cheapest nearby price against alternatives; dedicated benefit-led landing page.",
+      "tradeoff": "Free search allowance followed by paid access; website and indexed store pricing differ.",
+      "website": "https://vermilion-apps.com/cheap-gas-finder-usa/"
+    },
+    {
+      "app": "Waze",
+      "strength": "Established navigation habit, large review base, simple benefit-led screenshots and broad web ecosystem.",
+      "tradeoff": "Fuel comparison is secondary to navigation.",
+      "website": "https://www.waze.com/"
+    },
+    {
+      "app": "FuelSaver",
+      "strength": "Price difference expressed as tank savings; route calculator, region pages and comparison guides on web.",
+      "tradeoff": "US listing screenshots use Australian locations/litres. Current Apple description explicitly says no US prices; website claims broader coverage.",
+      "website": "https://fuelsaver.one/"
+    },
+    {
+      "app": "Find Cheap Gas - Fuel Prices",
+      "strength": "Literal title and immediately legible price list.",
+      "tradeoff": "Seller link leads to generic software studio rather than a focused app landing page.",
+      "website": "https://playful-souls.com/"
+    },
+    {
+      "app": "Gas Prices USA: Fuel Tracker",
+      "strength": "Clear national/state price benchmark imagery.",
+      "tradeoff": "National averages are less direct for nearby-station intent; only one rating. Seller link did not expose a useful app site.",
+      "website": "https://pf2dcf12b.app-ads-txt.com"
+    },
+    {
+      "app": "Cheap Fuel & Gas Tracker",
+      "strength": "Bold benefit-led captions.",
+      "tradeoff": "US store screenshots inspected show South African locations/currency; seller website resolves to unrelated Bible app.",
+      "website": "https://dailyfaith.me/"
+    },
+    {
+      "app": "Murphy Drive Rewards",
+      "strength": "Concrete points/coupon proposition, large review base and dedicated rewards/store-locator funnel.",
+      "tradeoff": "Single-brand rewards do not independently compare all nearby brands.",
+      "website": "https://www.murphydriverewards.com/driverewards/home"
+    }
+  ],
+  "hypothesesNotProvenCauses": [
+    "First image should make the local price comparison immediately apparent.",
+    "Fuel Up has no ratings yet, but several apps near the top also have very few ratings; trust is not the sole ranking explanation.",
+    "Dedicated web landing pages and useful location/route content may improve discoverability; no organic web rank or traffic lift measured.",
+    "Keywords are not demonstrably optimal without meaningful search/ad data. Do not change all variables at once."
+  ],
+  "retainedEvidence": "Public metadata, links and original analysis retained; full third-party descriptions omitted."
+}
