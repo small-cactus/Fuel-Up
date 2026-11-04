@@ -87,7 +87,7 @@ test('Settings shows the chosen language and opens native app settings', async (
   const load = require('./helpers/loadComponent.cjs');
   global.IS_REACT_ACT_ENVIRONMENT = true;
   let opened = 0;
-  const names = ['Button','Host','HStack','Image','Label','LabeledContent','Picker','Slider','Text'];
+  const names = ['Button','Host','HStack','Image','Label','LabeledContent','Picker','Slider','Toggle','Text'];
   const form = load('src/components/settings/NativeSettingsForm.js', {
     '../../localization': {t: (key, values) => translate(catalog,'es',key,values),languageName:'Español'},
     '../../../modules/fuel-up-glass': {GlassForm:'Form',GlassSection:'Section'},

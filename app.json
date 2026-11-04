@@ -3,7 +3,7 @@
     "name": "Fuel Up",
     "slug": "fuel-up",
     "scheme": "fuelup",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "plugins": [
       [
         "expo-build-properties",
@@ -107,7 +107,7 @@
           "fr"
         ]
       },
-      "buildNumber": "40"
+      "buildNumber": "41"
     },
     "android": {
       "package": "com.anthonyh.fuelup",

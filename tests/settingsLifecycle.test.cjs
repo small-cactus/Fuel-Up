@@ -13,6 +13,8 @@ async function setup() {
         '../../src/lib/installationTelemetry': { trackInstallationEvent: async () => {} },
         'react-native': { View: 'View', StyleSheet: { create: value => value }, Alert: { alert: (...args) => alerts.push(args) },
             AppState: { addEventListener: (_, callback) => { foreground = callback; return { remove() {} }; } } },
+        'expo-notifications': { IosAuthorizationStatus:{AUTHORIZED:2}, getPermissionsAsync:async()=>({ios:{status:2}}) },
+        '../../src/lib/priceWatchClient': {clearPriceWatch:async()=>{}},
         'expo-router': { useRouter: () => ({ push: route => routes.push(route) }) },
         'expo-haptics': { impactAsync: async () => {}, selectionAsync: async () => {}, ImpactFeedbackStyle: { Light: 1, Medium: 2 } },
         'react-native-safe-area-context': { useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) },

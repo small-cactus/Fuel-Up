@@ -1,7 +1,9 @@
 import { trackInstallationEvent } from '../../src/lib/installationTelemetry';
 import { t } from '../../src/localization';
 import React, { useEffect, useRef, useState } from 'react';
-import { AppState, Alert, StyleSheet, View } from 'react-native';
+import * as Notifications from 'expo-notifications';
+import { clearPriceWatch } from '../../src/lib/priceWatchClient';
+import { AppState, Alert, Linking, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -68,6 +70,24 @@ export default function SettingsScreen() {
 
     const fireTapHaptic = () => {
         noThrow(Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light));
+    };
+
+    const handlePriceAlertsChange = async enabled => {
+        if (!enabled) {
+            await updatePreference('priceAlertsEnabled', false);
+            await clearPriceWatch();
+            return;
+        }
+        let permission = await Notifications.getPermissionsAsync();
+        if (permission.ios?.status !== Notifications.IosAuthorizationStatus.AUTHORIZED && permission.canAskAgain) {
+            permission = await Notifications.requestPermissionsAsync({ios: {allowAlert:true, allowSound:true, allowBadge:false}});
+        }
+        if (permission.ios?.status === Notifications.IosAuthorizationStatus.AUTHORIZED) {
+            await updatePreference('priceAlertsEnabled', true);
+        } else {
+            Alert.alert(t("Nearby price drops"), t("Allow notifications in Settings to hear about lower prices."),
+                [{text:t("Cancel"),style:'cancel'}, {text:t("Open Settings"),onPress:()=>Linking.openSettings()}]);
+        }
     };
 
     const handleRadiusChange = (nextValue) => {
@@ -214,6 +234,8 @@ export default function SettingsScreen() {
                         searchRadiusMiles={preferences.searchRadiusMiles}
                         preferredOctane={preferences.preferredOctane}
                         onRadiusChange={handleRadiusChange}
+                        priceAlertsEnabled={preferences.priceAlertsEnabled}
+                        onPriceAlertsChange={enabled=>noThrow(handlePriceAlertsChange(enabled))}
                         onEditFuel={() => router.push('/fuel-preferences')}
                         requiresE85={preferences.requiresE85}
                         fuelMemberships={preferences.fuelMemberships}

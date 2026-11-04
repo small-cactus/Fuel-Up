@@ -1,5 +1,7 @@
 import Foundation
 import UIKit
+import UserNotifications
+import CoreLocation
 
 // App-usage transport only. Never touches research identity, consent or sensors.
 @MainActor final class InstallationSync {
@@ -17,7 +19,63 @@ import UIKit
     return URLSession(configuration: config)
   }()
 
+  private var sendingWatch = false
+  private let watchKey = "priceAlerts.pendingWatch"
+  private let lastWatchKey = "priceAlerts.lastWatch"
+  private let lastWatchDate = "priceAlerts.lastWatchDate"
+
+  // Keep a pending opt-out across a network failure or app termination. The
+  // station set comes from a recent Home search, never from research telemetry.
+  func setWatch(ids: [String], product: String) {
+    let defaults = UserDefaults.standard
+    let fields: [String: Any] = ["stationIds": Array(Set(ids)).sorted(), "product": product,
+                                 "zone": TimeZone.current.identifier]
+    guard let data = try? JSONSerialization.data(withJSONObject: fields, options: .sortedKeys) else { return }
+    if ids.isEmpty && defaults.data(forKey: lastWatchKey) == nil && defaults.data(forKey: watchKey) == nil && !sendingWatch { return }
+    if defaults.data(forKey: watchKey) == nil && defaults.data(forKey: lastWatchKey) == data &&
+        Date().timeIntervalSince1970 - defaults.double(forKey: lastWatchDate) < 3600 { return }
+    defaults.set(data, forKey: watchKey)
+    defaults.set(Date().timeIntervalSince1970, forKey: "priceAlerts.pendingDate")
+    Task { await flushWatch() }
+  }
+
+  private func flushWatch() async {
+    guard !sendingWatch else { return }
+    sendingWatch = true
+    defer { sendingWatch = false }
+    let defaults = UserDefaults.standard
+    while let data = defaults.data(forKey: watchKey),
+          var fields = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] {
+      let permission = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+      let location = CLLocationManager().authorizationStatus
+      let stale = Date().timeIntervalSince1970 - defaults.double(forKey: "priceAlerts.pendingDate") > 86400
+      if permission != .authorized || !(location == .authorizedWhenInUse || location == .authorizedAlways) || stale {
+        fields["stationIds"] = [String]()
+      }
+      do {
+        _ = try await send("priceWatch", fields: fields)
+        let empty = (fields["stationIds"] as? [String])?.isEmpty == true
+        if empty { defaults.removeObject(forKey: lastWatchKey) } else { defaults.set(data, forKey: lastWatchKey) }
+        defaults.set(Date().timeIntervalSince1970, forKey: lastWatchDate)
+        if defaults.data(forKey: watchKey) == data { defaults.removeObject(forKey: watchKey) }
+      } catch {
+        if defaults.data(forKey: watchKey) != data { continue }
+        return
+      }
+    }
+  }
+
   func activate() {
+    Task {
+      if UserDefaults.standard.data(forKey: lastWatchKey) != nil {
+        let permission = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+        let location = CLLocationManager().authorizationStatus
+        if permission != .authorized || !(location == .authorizedAlways || location == .authorizedWhenInUse) {
+          setWatch(ids: [], product: "regular_gas")
+        }
+      }
+      await flushWatch()
+    }
     // Obtaining an APNs address does not request visible-alert authorization.
     if Date().timeIntervalSince(lastRegistration) >= 60 {
       lastRegistration = Date()

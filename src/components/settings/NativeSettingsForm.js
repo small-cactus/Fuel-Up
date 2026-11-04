@@ -28,6 +28,7 @@ import {
     LabeledContent,
     Picker,
     Slider,
+    Toggle,
     Text,
 } from '@expo/ui/swift-ui';
 import {
@@ -63,6 +64,8 @@ export default function NativeSettingsForm({
     searchRadiusMiles,
     preferredOctane,
     onRadiusChange,
+    priceAlertsEnabled,
+    onPriceAlertsChange,
     onEditFuel,
     requiresE85,
     preferredBrands = [],
@@ -141,6 +144,8 @@ export default function NativeSettingsForm({
                         }}
                     />
 
+                    <Toggle label={t("Nearby price drops")} systemImage="fuelpump.fill"
+                        isOn={Boolean(priceAlertsEnabled)} onIsOnChange={onPriceAlertsChange} />
                     <SettingsLink title={t("Fuel Type")} systemImage="gauge.with.dots.needle.33percent"
                         value={`${t(getFuelGradeMeta(preferredOctane).label)}${requiresE85 && preferredOctane !== 'e85' ? ' + E85' : ''}`}
                         onPress={onEditFuel} testID="settings-fuel-type" />

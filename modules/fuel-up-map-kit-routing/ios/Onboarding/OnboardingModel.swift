@@ -171,7 +171,6 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
     let result = await center.notificationSettings().authorizationStatus
     OnboardingTelemetry.emit("permission_snapshot", ["notifications": result.rawValue, "reason": "price_alerts_result", "step": step])
     priceAlertsEnabled = result == .authorized
-    if priceAlertsEnabled { emit?(["type": "priceAlertsAuthorized"]) }
     finish(skippingPreferences: skipBrands)
   }
 

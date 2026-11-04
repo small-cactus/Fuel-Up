@@ -12,6 +12,8 @@ import { onboardingHandoff } from '../../lib/onboardingHandoff';
 import { finishLaunch } from '../../lib/launchReadiness';
 import { useLaunchReady } from '../../components/LaunchSplash';
 import useClusterLabStations from './useClusterLabStations';
+import { useAppState } from '../../AppStateContext';
+import usePriceWatch from './usePriceWatch';
 import useHomeDeviceLocation from './useHomeDeviceLocation';
 import StationCardCarousel from './StationCardCarousel';
 import FuelUpHeaderLogo from '../../components/FuelUpHeaderLogo';
@@ -30,10 +32,12 @@ export default function HomeScreen() {
     const revealed = useLaunchReady();
     useHomeDeviceLocation(active);
     const { isDark, themeColors } = useTheme();
-    const { preferences } = usePreferences();
+    const { preferences, isLoading: preferencesLoading } = usePreferences();
     const insets = useSafeAreaInsets();
     const headerStyle = useMemo(() => [styles.header, { paddingTop: insets.top }], [insets.top]);
     const { origin, stations, loaded, error } = useClusterLabStations(active);
+    const { manualLocationOverride } = useAppState();
+    usePriceWatch({active, preferencesReady: !preferencesLoading, manual: Boolean(manualLocationOverride), preferences, stations, origin, loaded, error});
     useEffect(() => { if (error) onboardingHandoff.fail(new Error('Could not load nearby prices. Check your connection and try Save again.')); }, [error]);
     const mapReady = useCallback(() => { finishLaunch(); onboardingHandoff.mapReady(); }, []);
     const probeParams = useLocalSearchParams();
@@ -85,6 +89,19 @@ export default function HomeScreen() {
         setSelectedId(id);
         carousel.current?.scrollTo(index);
     }, [stations]);
+    const openedAlert = useRef(null);
+    useEffect(() => {
+        const { priceDropStation, priceDropId } = probeParams;
+        if (!active || !loaded || !revealed || !priceDropId || priceDropId === openedAlert.current) return;
+        const index = stations.findIndex(station => station.id === priceDropStation);
+        if (index < 0) return;
+        openedAlert.current = priceDropId;
+        setOverview(false);
+        setSelectedId(priceDropStation);
+        carousel.current?.scrollTo(index);
+        void map.current?.focusStation(priceDropStation);
+    }, [active, loaded, revealed, probeParams.priceDropStation, probeParams.priceDropId, stations]);
+
     const navigate = useCallback(station => {
         void openStationNavigation({ latitude: station.latitude, longitude: station.longitude,
             label: station.name, navigationApp: preferences.navigationApp });

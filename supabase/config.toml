@@ -36,3 +36,6 @@ verify_jwt = false
 
 [functions.installation-telemetry]
 verify_jwt = false
+
+[functions.fuel-price-alerts]
+verify_jwt = false

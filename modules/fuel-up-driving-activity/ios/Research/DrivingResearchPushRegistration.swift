@@ -47,6 +47,9 @@ final class DrivingResearchPushRegistration {
     } catch { /* Retry on the next native foreground/connectivity wake. */ }
   }
   static func environment()->String? {
+    #if targetEnvironment(simulator)
+    return "sandbox"
+    #else
     // Development/ad-hoc builds carry their signed entitlement in the profile.
     // App Store/TestFlight apps have no embedded profile and use production APNs.
     guard let url=Bundle.main.url(forResource:"embedded",withExtension:"mobileprovision") else{return "production"}
@@ -55,5 +58,6 @@ final class DrivingResearchPushRegistration {
       let plist=try? PropertyListSerialization.propertyList(from:data.subdata(in:start.lowerBound..<end.upperBound),options:[],format:nil) as? [String:Any],
       let entitlements=plist["Entitlements"] as? [String:Any],let value=entitlements["aps-environment"] as? String else{return nil}
     return value == "development" ? "sandbox" : value == "production" ? "production" : nil
+    #endif
   }
 }

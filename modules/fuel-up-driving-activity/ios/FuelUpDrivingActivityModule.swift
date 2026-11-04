@@ -49,6 +49,9 @@ public final class FuelUpDrivingActivityModule: Module {
     AsyncFunction("resumeResearchAsync") {
       await MainActor.run { DrivingResearchCollector.shared.resume(reason: "bridge_ready") }
     }
+    AsyncFunction("setPriceWatchAsync") { (ids: [String], product: String) in
+      await MainActor.run { InstallationSync.shared.setWatch(ids: ids, product: product) }
+    }
     AsyncFunction("recordInstallationEventAsync") { (kind: String, fields: [String: Any]) in
       await MainActor.run { InstallationTelemetry.shared.track(kind, fields) }
     }

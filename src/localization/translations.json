@@ -218,7 +218,9 @@
     "Yesterday": "Ayer",
     "Today": "Hoy",
     "That’s $11 less on a 10-gallon fill-up.": "Son $11 menos al llenar 10 galones.",
-    "Yes, tell me": "Sí, avísame"
+    "Yes, tell me": "Sí, avísame",
+    "Nearby price drops": "Bajadas de precio cercanas",
+    "Allow notifications in Settings to hear about lower prices.": "Permite las notificaciones en Ajustes para enterarte de las bajadas de precio."
   },
   "zh-Hans": {
     "Home": "首页",
@@ -439,7 +441,9 @@
     "Yesterday": "昨天",
     "Today": "今天",
     "That’s $11 less on a 10-gallon fill-up.": "加 10 加仑可省 11 美元。",
-    "Yes, tell me": "好，告诉我"
+    "Yes, tell me": "好，告诉我",
+    "Nearby price drops": "附近降价",
+    "Allow notifications in Settings to hear about lower prices.": "请在设置中允许通知，以便在油价下跌时收到提醒。"
   },
   "zh-Hant": {
     "Home": "首頁",
@@ -660,7 +664,9 @@
     "Yesterday": "昨天",
     "Today": "今天",
     "That’s $11 less on a 10-gallon fill-up.": "加 10 加侖可省 11 美元。",
-    "Yes, tell me": "好，告訴我"
+    "Yes, tell me": "好，告訴我",
+    "Nearby price drops": "附近降價",
+    "Allow notifications in Settings to hear about lower prices.": "請在設定中允許通知，以便在油價下跌時收到提醒。"
   },
   "fil": {
     "Home": "Home",
@@ -881,7 +887,9 @@
     "Yesterday": "Kahapon",
     "Today": "Ngayon",
     "That’s $11 less on a 10-gallon fill-up.": "Tipid ka ng $11 sa 10 galon.",
-    "Yes, tell me": "Oo, sabihan ako"
+    "Yes, tell me": "Oo, sabihan ako",
+    "Nearby price drops": "Pagbaba ng presyo sa malapit",
+    "Allow notifications in Settings to hear about lower prices.": "Payagan ang mga abiso sa Settings para malaman kapag bumaba ang presyo."
   },
   "vi": {
     "Home": "Trang chủ",
@@ -1102,7 +1110,9 @@
     "Yesterday": "Hôm qua",
     "Today": "Hôm nay",
     "That’s $11 less on a 10-gallon fill-up.": "Tiết kiệm 11 USD khi đổ 10 gallon.",
-    "Yes, tell me": "Có, hãy báo cho tôi"
+    "Yes, tell me": "Có, hãy báo cho tôi",
+    "Nearby price drops": "Giảm giá ở gần bạn",
+    "Allow notifications in Settings to hear about lower prices.": "Cho phép thông báo trong Cài đặt để biết khi giá giảm."
   },
   "fr": {
     "Home": "Accueil",
@@ -1323,6 +1333,8 @@
     "Yesterday": "Hier",
     "Today": "Aujourd’hui",
     "That’s $11 less on a 10-gallon fill-up.": "Vous économisez 11 $ sur 10 gallons.",
-    "Yes, tell me": "Oui, prévenez-moi"
+    "Yes, tell me": "Oui, prévenez-moi",
+    "Nearby price drops": "Baisses de prix à proximité",
+    "Allow notifications in Settings to hear about lower prices.": "Autorisez les notifications dans Réglages pour être informé des baisses de prix."
   }
 }

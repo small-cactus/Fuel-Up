@@ -95,6 +95,10 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
   }
   func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
                               withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    if notification.request.content.userInfo["type"] as? String == "fuelup.price-drop.v1" {
+      completionHandler([.banner, .list, .sound])
+      return
+    }
     guard [ResearchConfirmation.category,DrivingResearchTestNotifications.category,Self.healthCategory].contains(notification.request.content.categoryIdentifier) else {
       if let forwarding, forwarding.responds(to: #selector(UNUserNotificationCenterDelegate.userNotificationCenter(_:willPresent:withCompletionHandler:))) {
         forwarding.userNotificationCenter?(center, willPresent: notification, withCompletionHandler: completionHandler)
@@ -109,6 +113,18 @@ final class DrivingResearchNotifications: NSObject, UNUserNotificationCenterDele
   }
   func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
                               withCompletionHandler completionHandler: @escaping () -> Void) {
+    let info = response.notification.request.content.userInfo
+    if info["type"] as? String == "fuelup.price-drop.v1" {
+      if response.actionIdentifier == UNNotificationDefaultActionIdentifier,
+         let station = info["stationId"] as? String, let id = info["deliveryId"] as? String,
+         UUID(uuidString: id) != nil {
+        var link = URLComponents(string: "fuelup:///")
+        link?.queryItems = [URLQueryItem(name:"priceDropStation",value:station), URLQueryItem(name:"priceDropId",value:id)]
+        if let url = link?.url { Task { @MainActor in UIApplication.shared.open(url) } }
+      }
+      completionHandler()
+      return
+    }
     if response.notification.request.content.categoryIdentifier == Self.healthCategory {
       if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
         Task { @MainActor in
