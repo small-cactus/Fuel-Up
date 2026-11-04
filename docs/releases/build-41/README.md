@@ -6,6 +6,12 @@ Verified November 4 on a dedicated iPhone simulator against the production subsc
 
 The scheduled Supabase sampler and local launchd sender are operational. The hosted sender accepts only the dedicated runner credential and its scheduler returns without dispatch until hosted signing is configured. Existing installations require a client update and explicit opt-in.
 
-The App Store archive and export succeeded. Strict code-signature checks passed for the app and both extensions. All three identify as 1.0.3 (41), and the main app carries the production APNs entitlement. The signed IPA is saved alongside the November 4 Xcode archive. This task did not submit it to App Review. The package digest and bundle checks are in [export-validation.json](export-validation.json).
+The App Store archive and export succeeded. Strict code-signature checks passed for the app and both extensions. All three identify as 1.0.3 (41), and the main app carries the production APNs entitlement. The signed IPA is saved alongside the November 4 Xcode archive. The package digest and bundle checks are in [export-validation.json](export-validation.json).
 
 In the October 29–November 3 market sample, 391 of 6,112 station-day comparisons (6.4%) met the 10¢ and 3% size tests. This is a calibration of the size filter alone. Those daily observations can mix cash and credit; actual sends require matching payment type, an eligible nearby alternative, a fresh quote, a recent opted-in watch and the delivery controls.
+
+## App Review submission
+
+Apple received build 41 on November 4, 2026. The upload reported the existing nonblocking Hermes dSYM warning. The processed build was attached to iOS version 1.0.3. Release notes were saved for all six existing App Store localizations, and reviewer notes describe how to opt in and verify conditional delivery. Manual release was selected before submission.
+
+Submitted November 4, 2026 at 3:37 p.m. Eastern. App Store Connect confirmed one submitted item, **iOS App 1.0.3 (41)**. Both the submission and its item showed **Waiting for Review**. [Apple review record](https://appstoreconnect.apple.com/apps/6759831421/distribution/reviewsubmissions/details/09f599c4-d2d6-4c95-9c41-5a478b098c57)
