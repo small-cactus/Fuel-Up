@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { execFileSync } = require('node:child_process');
 const http2 = require('http2');
 const readline = require('node:readline/promises');
 const { stdin, stdout } = require('node:process');
@@ -137,7 +138,8 @@ Optional env vars:
   APNS_ENV             sandbox | production
   APNS_TOPIC           Defaults to app bundle id
   SUPABASE_URL         Defaults to app.json extra.supabase.url
-  SUPABASE_KEY         Defaults to app.json extra.supabase.key
+  SUPABASE_SERVICE_ROLE_KEY  Server credential (SUPABASE_KEY also accepted)
+  Without a server key, uses the signed-in Supabase CLI for the Fuel Up project.
 `);
 }
 
@@ -189,23 +191,32 @@ function formatTokenRow(row, index) {
     return `${String(index + 1).padStart(2, ' ')}. ${shortToken(row.token)}  ${environment}  ${createdAt}`;
 }
 
- function getSupabaseConfig() {
-     const extra = getAppExtra();
-     const extraSupabase = extra.supabase || {};
-    const url = pickFirstNonEmpty(
-        process.env.SUPABASE_URL,
-        process.env.EXPO_PUBLIC_SUPABASE_URL,
-        extraSupabase.url,
-        extra.EXPO_PUBLIC_SUPABASE_URL
-    );
-     const key = pickFirstNonEmpty(
-         process.env.SUPABASE_KEY,
-        process.env.EXPO_PUBLIC_SUPABASE_KEY,
-         extraSupabase.key,
-         extra.EXPO_PUBLIC_SUPABASE_KEY
-     );
+let adminClient;
+function getPushAdminClient() {
+    if (adminClient) return adminClient;
+    const url = pickFirstNonEmpty(process.env.SUPABASE_URL, getAppExtra().supabase?.url);
+    let key = pickFirstNonEmpty(process.env.SUPABASE_SERVICE_ROLE_KEY, process.env.SUPABASE_KEY);
+    if (!key || !isServerKey(key)) {
+        const project = 'vjindchxfebaltbslqwc';
+        if (url !== `https://${project}.supabase.co`) {
+            throw new Error('Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY for this project.');
+        }
+        const output = execFileSync('npx', ['--no-install', 'supabase@2.118.0', 'projects', 'api-keys',
+            '--project-ref', project, '--output', 'json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+        key = JSON.parse(output).find(row => row.name === 'service_role')?.api_key;
+        if (!key) throw new Error('Set SUPABASE_SERVICE_ROLE_KEY or sign in to the Supabase CLI.');
+    }
+    adminClient = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+    return adminClient;
+}
 
-    return { url, key };
+function isServerKey(key) {
+    if (key.startsWith('sb_secret_')) return true;
+    try {
+        return JSON.parse(Buffer.from(key.split('.')[1], 'base64url')).role === 'service_role';
+    } catch {
+        return false;
+    }
 }
 
 function getApnsConfig(overrides = {}) {
@@ -308,12 +319,7 @@ function createHttp2Client(apnsConfig) {
 }
 
 async function fetchPushTokens() {
-    const { url, key } = getSupabaseConfig();
-    if (!url || !key) {
-        throw new Error('Supabase credentials are missing. Set SUPABASE_URL/SUPABASE_KEY or use app.json extra.supabase.');
-    }
-
-    const supabase = createClient(url, key);
+    const supabase = getPushAdminClient();
     const tokens = [];
     const pageSize = 1000;
     let supportsEnvironmentColumn = true;
@@ -362,12 +368,7 @@ async function updatePushTokenEnvironment({ id, token, environment }) {
         return false;
     }
 
-    const { url, key } = getSupabaseConfig();
-    if (!url || !key) {
-        return false;
-    }
-
-    const supabase = createClient(url, key);
+    const supabase = getPushAdminClient();
     const filterColumn = id ? 'id' : 'token';
     const filterValue = id || token;
 
