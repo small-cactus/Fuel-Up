@@ -45,11 +45,29 @@ struct OnboardingFooter: View {
           Text(LocalizedStringKey(error)).font(.footnote).foregroundStyle(.secondary)
             .multilineTextAlignment(.center).accessibilityIdentifier("onboarding-save-error")
         }
-        OnboardingPageControl(selection: Binding(get: { model.step }, set: { model.selectStep($0) }), count: 4)
+        OnboardingPageControl(selection: Binding(get: { model.step }, set: { model.selectStep($0) }), count: OnboardingModel.pageCount)
           .frame(width: 130, height: 28)
-        actions
+        Group {
+          if model.step == OnboardingModel.pageCount - 1 { alertActions } else { actions }
+        }
           .disabled(model.completing || (model.step == 1 && model.locationRequested && model.hasLocationAccess && !model.locationReady && model.locationError == nil))
-      }.disabled(model.completing).padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 16)
+      }.disabled(model.completing || model.requestingAlerts).padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 16)
+    }
+  }
+
+  private var alertActions: some View {
+    VStack(spacing: 4) {
+      OnboardingPrimaryButton(title: model.alertsDenied ? "Open Settings" : "Yes, tell me") {
+        Task { await model.enablePriceAlerts() }
+      }
+      Button(action: model.skipPriceAlerts) {
+        Text("Not now").font(.body.weight(.medium))
+          .frame(maxWidth: .infinity, minHeight: 44).contentShape(Rectangle())
+      }.accessibilityIdentifier("onboarding-alerts-later")
+    }
+    .task { await model.refreshAlertPermission() }
+    .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+      Task { await model.refreshAlertPermission() }
     }
   }
 
@@ -64,7 +82,7 @@ struct OnboardingFooter: View {
             .glassEffect(model.step == 3 ? .regular.interactive() : .regular.tint(.blue).interactive(), in: .capsule)
             .glassEffectID("advance", in: buttons)
           if model.step == 3 {
-            actionButton("Save", id: "onboarding-save", prominent: true) { model.finish() }
+            actionButton("Save", id: "onboarding-save", prominent: true) { model.leaveBrands(skipping: false) }
               .glassEffect(.regular.tint(.blue).interactive(), in: .capsule)
               .glassEffectID("save", in: buttons)
               .glassEffectTransition(.matchedGeometry)
@@ -77,7 +95,7 @@ struct OnboardingFooter: View {
                      prominent: model.step != 3, action: advance)
           .background(model.step == 3 ? Color(uiColor: .secondarySystemGroupedBackground) : .blue, in: Capsule())
         if model.step == 3 {
-          actionButton("Save", id: "onboarding-save", prominent: true) { model.finish() }
+          actionButton("Save", id: "onboarding-save", prominent: true) { model.leaveBrands(skipping: false) }
             .background(.blue, in: Capsule())
         }
       }
@@ -104,7 +122,7 @@ struct OnboardingFooter: View {
   private func advance() {
     OnboardingTelemetry.emit("onboarding_action", ["action":model.step == 3 ? "skip" : "continue", "step":model.step])
     if model.step == 1 && !model.locationReady { model.requestLocation() }
-    else if model.step == 3 { model.finish(skippingPreferences: true) }
+    else if model.step == 3 { model.leaveBrands(skipping: true) }
     else { model.selectStep(model.step + 1) }
   }
 }

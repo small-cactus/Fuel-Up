@@ -9,7 +9,7 @@ struct OnboardingFlow: View {
       OnboardingMapBackdrop(presentation: model.mapPresentation, onMapReady: { model.emit?(["type": "mapReady"]) })
         .ignoresSafeArea()
       OnboardingPager(model: model)
-        .allowsHitTesting(!model.completing)
+        .allowsHitTesting(!model.completing && !model.requestingAlerts)
         .ignoresSafeArea(.container, edges: .vertical)
       OnboardingFooter(model: model)
         .background {

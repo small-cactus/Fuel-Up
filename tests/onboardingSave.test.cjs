@@ -11,6 +11,7 @@ for (const failure of [null, 'storage', 'network', 'completion']) {
         const handoff = createOnboardingHandoff();
         const events = [];
         const Screen = load('src/screens/OnboardingScreen.js', {
+            '../lib/installationTelemetry': { trackInstallationEvent: async () => {} },
             'react-native': { Platform: { OS: 'ios' } },
             '../AppStateContext': { useAppState: () => ({ setResolvedFuelSearchContext: v => events.push(['context', v]) }) },
             '../lib/deviceLocationCache': { persistLastDeviceLocationRegion: async () => { events.push(['location']); } },

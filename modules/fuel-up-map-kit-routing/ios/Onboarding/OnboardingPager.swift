@@ -28,7 +28,7 @@ final class OnboardingPagerController: UIPageViewController, UIPageViewControlle
     self.model = model
     locationReady = model.locationReady
     super.init(transitionStyle: .scroll, navigationOrientation: .horizontal)
-    pages = (0..<4).map { index in
+    pages = (0..<OnboardingModel.pageCount).map { index in
       let host = OnboardingPageHost(rootView: OnboardingPage(index: index, model: model))
       return host
     }
@@ -106,7 +106,7 @@ final class OnboardingPagerController: UIPageViewController, UIPageViewControlle
   }
   func pageViewController(_ pageViewController: UIPageViewController,
                           viewControllerAfter viewController: UIViewController) -> UIViewController? {
-    guard let current = index(of: viewController), current < (model.locationReady ? 3 : 1) else { return nil }
+    guard let current = index(of: viewController), current < (model.locationReady ? OnboardingModel.pageCount - 1 : 1) else { return nil }
     return pages[current + 1]
   }
   func pageViewController(_ pageViewController: UIPageViewController,
@@ -137,7 +137,7 @@ private struct OnboardingPage: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .modifier(OnboardingBottomBar(model: model, overlaysMap: index == 0))
       .background {
-        if index >= 2 {
+        if index == 2 || index == 3 {
           PureProgressiveBlur(direction: .uniform)
             .ignoresSafeArea().allowsHitTesting(false).accessibilityHidden(true)
         }
@@ -149,7 +149,8 @@ private struct OnboardingPage: View {
     case 0: OnboardingWelcomePage()
     case 1: OnboardingLocationPage(model: model)
     case 2: OnboardingFuelPage(model: model)
-    default: OnboardingBrandsPage(model: model)
+    case 3: OnboardingBrandsPage(model: model)
+    default: OnboardingPriceAlertsPage()
     }
   }
 }

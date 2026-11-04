@@ -16,6 +16,7 @@ test('the iOS-only native flow does not depend on parsing the OS version', async
     ]) {
         const loaded = [];
         const Screen = load('src/screens/OnboardingScreen.js', {
+            '../lib/installationTelemetry': { trackInstallationEvent: async () => {} },
             'react-native': { Platform: { OS, Version } },
             '../PreferencesContext': { usePreferences: () => ({ preferences: {}, completeOnboarding() {} }) },
             '../ThemeContext': { useTheme: () => ({ isDark: false }) },
@@ -40,7 +41,10 @@ test('native completion saves exactly the final draft, including membership and 
     await store.load();
     const initial = store.getSnapshot().preferences;
     let query, prefetched, retries = 0, backs = 0;
+    const registeredTokens = [];
     const Native = load('src/screens/onboarding/NativeOnboarding.js', {
+        '../../lib/notifications': { registerForPushNotificationsAsync: async () => 'test-token',
+            savePushTokenToSupabase: async token => registeredTokens.push(token) },
         'expo-modules-core': { requireNativeViewManager: () => 'NativeFlow' },
         '../../AppStateContext': { useAppState: () => ({ fuelResetToken: 0 }) },
         './useOnboardingTrendsPrefetch': { __esModule: true, default: coordinate => finalChoices => { prefetched = { coordinate, choices: finalChoices }; } },
@@ -66,6 +70,9 @@ test('native completion saves exactly the final draft, including membership and 
     await send({ type: 'back' });
     await send({ type: 'retry' });
     assert.equal(backs, 1); assert.equal(retries, 1);
+    assert.deepEqual(registeredTokens, []);
+    await send({ type: 'priceAlertsAuthorized' });
+    assert.deepEqual(registeredTokens, ['test-token']);
     await send({ type: 'complete', choices: draft });
     assert.deepEqual(prefetched, { coordinate: { latitude: 27.98, longitude: -82.75 }, choices: draft });
     const result = JSON.parse(saved);

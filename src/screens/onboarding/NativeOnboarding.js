@@ -1,3 +1,4 @@
+import { registerForPushNotificationsAsync, savePushTokenToSupabase } from '../../lib/notifications';
 import React, { useRef, useState } from 'react';
 import { requireNativeViewManager } from 'expo-modules-core';
 import useNativeOnboardingData from './useNativeOnboardingData';
@@ -15,6 +16,9 @@ export default function NativeOnboarding({ preferences, isDark, visible, onBack,
     return <NativeView testID="native-onboarding" style={{ flex: 1, display: visible ? 'flex' : 'none' }}
         initialChoices={initial} data={data} isDark={isDark} revealing={revealing} saveError={saveError} onAction={({ nativeEvent: event }) => {
             switch (event.type) {
+                case 'priceAlertsAuthorized':
+                    void registerForPushNotificationsAsync().then(token => token && savePushTokenToSupabase(token)).catch(error => console.warn('Price alert registration failed', error));
+                    break;
                 case 'mapReady': onMapReady?.(); break;
                 case 'location': setCoordinate({ latitude: event.latitude, longitude: event.longitude }); break;
                 case 'choices': setChoices(event.choices); break;

@@ -209,7 +209,16 @@
     "Find cheaper gas near you.": "Encuentra gasolina más barata cerca de ti.",
     "Refresh Requested": "Actualización solicitada",
     "Refresh Failed": "No se pudo actualizar",
-    "Not enough local price history yet. Check back soon.": "Aún no hay suficiente historial de precios locales. Vuelve más tarde."
+    "Not enough local price history yet. Check back soon.": "Aún no hay suficiente historial de precios locales. Vuelve más tarde.",
+    "Example": "Ejemplo",
+    "Regular gas nearby": "Gasolina regular cerca de ti",
+    "Not now": "Ahora no",
+    "Couldn’t request notifications. Try again or choose Not now.": "No se pudieron solicitar las notificaciones. Inténtalo de nuevo o elige Ahora no.",
+    "Can we tell you when gas prices near you drop?": "¿Te avisamos cuando baje el precio de la gasolina cerca de ti?",
+    "Yesterday": "Ayer",
+    "Today": "Hoy",
+    "That’s $2 less on a 10-gallon fill-up.": "Son $2 menos al llenar 10 galones.",
+    "Yes, tell me": "Sí, avísame"
   },
   "zh-Hans": {
     "Home": "首页",
@@ -421,7 +430,16 @@
     "Find cheaper gas near you.": "查找附近更便宜的汽油。",
     "Refresh Requested": "已请求刷新",
     "Refresh Failed": "刷新失败",
-    "Not enough local price history yet. Check back soon.": "本地油价历史数据暂不足。请稍后再查看。"
+    "Not enough local price history yet. Check back soon.": "本地油价历史数据暂不足。请稍后再查看。",
+    "Example": "示例",
+    "Regular gas nearby": "附近的普通汽油",
+    "Not now": "暂不开启",
+    "Couldn’t request notifications. Try again or choose Not now.": "无法请求通知权限。请重试或选择“暂不开启”。",
+    "Can we tell you when gas prices near you drop?": "附近的油价下跌时，可以通知你吗？",
+    "Yesterday": "昨天",
+    "Today": "今天",
+    "That’s $2 less on a 10-gallon fill-up.": "加 10 加仑可省 2 美元。",
+    "Yes, tell me": "好，告诉我"
   },
   "zh-Hant": {
     "Home": "首頁",
@@ -633,7 +651,16 @@
     "Find cheaper gas near you.": "尋找附近更便宜的汽油。",
     "Refresh Requested": "已要求更新",
     "Refresh Failed": "更新失敗",
-    "Not enough local price history yet. Check back soon.": "本地油價歷史資料暫不足。請稍後再查看。"
+    "Not enough local price history yet. Check back soon.": "本地油價歷史資料暫不足。請稍後再查看。",
+    "Example": "範例",
+    "Regular gas nearby": "附近的普通汽油",
+    "Not now": "暫時不要",
+    "Couldn’t request notifications. Try again or choose Not now.": "無法要求通知權限。請再試一次或選擇「暫時不要」。",
+    "Can we tell you when gas prices near you drop?": "附近的油價下跌時，可以通知你嗎？",
+    "Yesterday": "昨天",
+    "Today": "今天",
+    "That’s $2 less on a 10-gallon fill-up.": "加 10 加侖可省 2 美元。",
+    "Yes, tell me": "好，告訴我"
   },
   "fil": {
     "Home": "Home",
@@ -845,7 +872,16 @@
     "Find cheaper gas near you.": "Humanap ng mas murang gasolina malapit sa iyo.",
     "Refresh Requested": "Hiniling ang Pag-refresh",
     "Refresh Failed": "Hindi Nagtagumpay ang Pag-refresh",
-    "Not enough local price history yet. Check back soon.": "Kulang pa ang kasaysayan ng lokal na presyo. Bumalik mamaya."
+    "Not enough local price history yet. Check back soon.": "Kulang pa ang kasaysayan ng lokal na presyo. Bumalik mamaya.",
+    "Example": "Halimbawa",
+    "Regular gas nearby": "Regular na gasolina sa malapit",
+    "Not now": "Sa ibang pagkakataon",
+    "Couldn’t request notifications. Try again or choose Not now.": "Hindi makahiling ng pahintulot para sa mga abiso. Subukan ulit o piliin ang Sa ibang pagkakataon.",
+    "Can we tell you when gas prices near you drop?": "Puwede ka ba naming abisuhan kapag bumaba ang presyo ng gasolina malapit sa iyo?",
+    "Yesterday": "Kahapon",
+    "Today": "Ngayon",
+    "That’s $2 less on a 10-gallon fill-up.": "Tipid ka ng $2 sa 10 galon.",
+    "Yes, tell me": "Oo, sabihan ako"
   },
   "vi": {
     "Home": "Trang chủ",
@@ -1057,7 +1093,16 @@
     "Find cheaper gas near you.": "Tìm xăng rẻ hơn gần bạn.",
     "Refresh Requested": "Đã yêu cầu làm mới",
     "Refresh Failed": "Không thể làm mới",
-    "Not enough local price history yet. Check back soon.": "Chưa có đủ lịch sử giá địa phương. Hãy quay lại sau."
+    "Not enough local price history yet. Check back soon.": "Chưa có đủ lịch sử giá địa phương. Hãy quay lại sau.",
+    "Example": "Ví dụ",
+    "Regular gas nearby": "Xăng thường gần đây",
+    "Not now": "Để sau",
+    "Couldn’t request notifications. Try again or choose Not now.": "Không thể yêu cầu quyền thông báo. Hãy thử lại hoặc chọn Để sau.",
+    "Can we tell you when gas prices near you drop?": "Bạn có muốn nhận thông báo khi giá xăng gần bạn giảm không?",
+    "Yesterday": "Hôm qua",
+    "Today": "Hôm nay",
+    "That’s $2 less on a 10-gallon fill-up.": "Tiết kiệm 2 USD khi đổ 10 gallon.",
+    "Yes, tell me": "Có, hãy báo cho tôi"
   },
   "fr": {
     "Home": "Accueil",
@@ -1269,6 +1314,15 @@
     "Find cheaper gas near you.": "Trouvez de l’essence moins chère près de vous.",
     "Refresh Requested": "Actualisation demandée",
     "Refresh Failed": "Échec de l’actualisation",
-    "Not enough local price history yet. Check back soon.": "L’historique des prix locaux est encore insuffisant. Revenez plus tard."
+    "Not enough local price history yet. Check back soon.": "L’historique des prix locaux est encore insuffisant. Revenez plus tard.",
+    "Example": "Exemple",
+    "Regular gas nearby": "Essence ordinaire à proximité",
+    "Not now": "Plus tard",
+    "Couldn’t request notifications. Try again or choose Not now.": "Impossible de demander les notifications. Réessayez ou choisissez Plus tard.",
+    "Can we tell you when gas prices near you drop?": "Voulez-vous être prévenu quand le prix de l’essence baisse près de vous ?",
+    "Yesterday": "Hier",
+    "Today": "Aujourd’hui",
+    "That’s $2 less on a 10-gallon fill-up.": "Vous économisez 2 $ sur 10 gallons.",
+    "Yes, tell me": "Oui, prévenez-moi"
   }
 }

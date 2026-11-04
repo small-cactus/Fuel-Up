@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreLocation
+import UserNotifications
 
 struct OnboardingBrand: Identifiable {
   let id: String
@@ -13,6 +14,11 @@ struct OnboardingBrand: Identifiable {
 
 // Draft choices live in Swift throughout navigation. Only completion persists them.
 final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelegate {
+  static let pageCount = 5
+  @Published var requestingAlerts = false
+  @Published var alertsDenied = false
+  private var skipBrands = false
+  private var priceAlertsEnabled = false
   let mapPresentation = OnboardingMapPresentation()
   @Published var step = 0 {
     didSet {
@@ -65,6 +71,7 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
     guard !initialized else { return }
     initialized = true
     if tracksLocation { OnboardingTelemetry.emit("onboarding_step", ["step": step]) }
+    priceAlertsEnabled = value["priceAlertsEnabled"] as? Bool ?? false
     radius = 6
     let grade = value["preferredOctane"] as? String ?? "regular"
     fuel = ["regular", "midgrade", "premium", "diesel", "e85"].contains(grade) ? grade : "regular"
@@ -105,8 +112,9 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
   }
   func selectStep(_ target: Int) {
     guard !completing else { return }
-    if tracksLocation { OnboardingTelemetry.emit("onboarding_action", ["action":"select_step", "step":min(3,max(0,target)), "previousStep":step]) }
-    let bounded = min(3, max(0, target))
+    if tracksLocation { OnboardingTelemetry.emit("onboarding_action", ["action":"select_step", "step":min(Self.pageCount - 1,max(0,target)), "previousStep":step]) }
+    let bounded = min(Self.pageCount - 1, max(0, target))
+    if bounded == 3 { skipBrands = false }
     step = locationReady ? bounded : min(bounded, 1)
   }
   func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
@@ -136,6 +144,42 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
     guard locationRequested, !locationReady else { return }
     locationError = "Your location isn’t available yet. Tap Continue to try again."
   }
+  func leaveBrands(skipping: Bool) {
+    skipBrands = skipping
+    selectStep(Self.pageCount - 1)
+  }
+
+  @MainActor func refreshAlertPermission() async {
+    alertsDenied = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus == .denied
+  }
+
+  @MainActor func enablePriceAlerts() async {
+    guard step == Self.pageCount - 1, !requestingAlerts, !completing else { return }
+    requestingAlerts = true
+    defer { requestingAlerts = false }
+    let center = UNUserNotificationCenter.current()
+    let status = await center.notificationSettings().authorizationStatus
+    if status == .denied {
+      if let url = URL(string: UIApplication.openNotificationSettingsURLString) { await UIApplication.shared.open(url) }
+      return
+    }
+    if status != .authorized {
+      OnboardingTelemetry.emit("permission_request", ["permission": "notifications", "step": step])
+      do { _ = try await center.requestAuthorization(options: [.alert, .sound]) }
+      catch { saveError = "Couldn’t request notifications. Try again or choose Not now."; return }
+    }
+    let result = await center.notificationSettings().authorizationStatus
+    OnboardingTelemetry.emit("permission_snapshot", ["notifications": result.rawValue, "reason": "price_alerts_result", "step": step])
+    priceAlertsEnabled = result == .authorized
+    if priceAlertsEnabled { emit?(["type": "priceAlertsAuthorized"]) }
+    finish(skippingPreferences: skipBrands)
+  }
+
+  func skipPriceAlerts() {
+    OnboardingTelemetry.emit("onboarding_action", ["action": "skip_price_alerts", "step": step])
+    finish(skippingPreferences: skipBrands)
+  }
+
   func finish(skippingPreferences: Bool = false) {
     guard !completing, locationReady else { return }
     OnboardingTelemetry.emit("onboarding_action", ["action": "finish", "step": step, "skippedPreferences": skippingPreferences])
@@ -143,6 +187,7 @@ final class OnboardingModel: NSObject, ObservableObject, CLLocationManagerDelega
     completingWithoutPreferences = skippingPreferences
     saveError = nil
     var savedChoices = choices
+    savedChoices["priceAlertsEnabled"] = priceAlertsEnabled
     if skippingPreferences {
       // Skip discards only this optional page's edits. Preserve any preferences
       // already saved before onboarding, plus the current fuel/location choices.
