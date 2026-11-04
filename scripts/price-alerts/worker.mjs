@@ -3,11 +3,11 @@ import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {loadCredentials, providerToken, sendPush} from '../driving-research/apns.mjs';
 
-import {applePriceAlert} from '../../supabase/functions/_shared/priceAlertPayload.mjs';
+import {applePriceAlert,deliverWithRetry} from '../../supabase/functions/_shared/priceAlertPayload.mjs';
 
-export function alertRequest(claim, credentials) {
+export function alertRequest(claim, credentials, jwt=providerToken(credentials)) {
     const {host,path,headers,payload}=applePriceAlert(claim);
-    return {host,payload,headers:{...headers,':method':'POST',':path':path,authorization:'bearer '+providerToken(credentials)}};
+    return {host,payload,headers:{...headers,':method':'POST',':path':path,authorization:'bearer '+jwt}};
 }
 
 function query(sql) {
@@ -20,11 +20,13 @@ function query(sql) {
 
 async function run() {
     const credentials=loadCredentials();
+    const jwt=providerToken(credentials);
     let attempts=0;
     while(attempts<40) {
         const claim=query('select fuel_app_private.claim_price_alert() as claim')[0].claim;
         if (!claim) break;
-        const result=await sendPush(alertRequest(claim,credentials));
+        const request=alertRequest(claim,credentials,jwt);
+        const result=await deliverWithRetry(()=>sendPush(request),claim.expiresAt);
         const reason=/^[A-Za-z0-9]+$/.test(result.reason || '') ? "'"+result.reason+"'" : 'null';
         if(!['accepted','unknown','rejected'].includes(result.status)) throw Error('Invalid result');
         query(`update fuel_app_private.price_alert_deliveries set status='${result.status}',reason=${reason} where id='${claim.id}' and status='sending'`);

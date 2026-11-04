@@ -17,3 +17,14 @@ export function applePriceAlert(claim) {
         sound:'default','thread-id':'fuelup-price-drops'}, type:'fuelup.price-drop.v1', stationId, deliveryId:id});
     return {host,path,headers,payload};
 }
+
+// A definite temporary rejection can be retried once. A transport timeout is
+// ambiguous; retrying it could deliver the same alert twice.
+export async function deliverWithRetry(send, expiresAt, sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms))) {
+    const first=await send();
+    const backoff=first.reason==='TooManyRequests' ? 10000 : 3000;
+    if(first.status!=='rejected' || !['TooManyRequests','ServiceUnavailable','Shutdown','InternalServerError','HTTP500','HTTP503'].includes(first.reason) ||
+        Date.now()+backoff>=expiresAt*1000) return first;
+    await sleep(backoff);
+    return send();
+}

@@ -4,7 +4,7 @@ The price-alert choice is separate from research consent, iOS authorization, and
 
 Supabase samples cached, station-level quotes from complete national sweeps at minutes 7, 27, and 47. No extra provider collection runs. The matcher compares prices for the same station, fuel and payment type. A candidate must be at least 10¢ and 3% below an earlier report within 24 hours, the new report must be at most 12 hours old, and it must be within 5¢ of the cheapest fresh watched quote for that payment type. A notification names the fuel, decrease, station, new reported price, and cash/credit basis. Tapping it opens the Home map and selects the station if it is still in the user's eligible results.
 
-Delivery hours are 8 a.m. through 8:59 p.m. in the device's last reported time zone. An atomic claim consumes the quote and a 48-hour per-installation cooldown before contacting Apple. That conservatively suppresses another attempt after a timeout with an unknown outcome. Delivery history expires after 30 days. Both senders share these controls.
+Delivery hours are 8 a.m. through 8:59 p.m. in the device's last reported time zone. An atomic claim consumes the quote and a 48-hour per-installation cooldown before contacting Apple. A definitive temporary Apple rejection can be retried once while the quote is fresh. A timeout with an unknown outcome consumes the claim. Delivery history expires after 30 days. Both senders share these controls.
 
 ## Operations
 

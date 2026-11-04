@@ -1,5 +1,5 @@
 import {createClient} from 'npm:@supabase/supabase-js@2.98.0';
-import {applePriceAlert} from '../_shared/priceAlertPayload.mjs';
+import {applePriceAlert,deliverWithRetry} from '../_shared/priceAlertPayload.mjs';
 import {signAppleToken} from '../_shared/appleProviderToken.mjs';
 
 const db=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
@@ -20,13 +20,15 @@ Deno.serve(async req=>{
       if(error) throw Error('Claim failed');
       if(!claim) break;
       const {host,path,headers,payload}=applePriceAlert(claim);
-      let status='unknown', reason='TransportError';
-      try {
-        const reply=await fetch(host+path,{method:'POST',headers:{...headers,authorization:'bearer '+cachedToken},
-          body:payload,signal:AbortSignal.timeout(8000),redirect:'error'});
-        status=reply.status===200?'accepted':'rejected';
-        reason=reply.status===200?'':String((await reply.json()).reason || 'AppleRejected').slice(0,80);
-      } catch { /* Apple may have accepted an interrupted request. */ }
+      const {status,reason}=await deliverWithRetry(async ()=>{
+        try {
+          const reply=await fetch(host+path,{method:'POST',headers:{...headers,authorization:'bearer '+cachedToken},
+            body:payload,signal:AbortSignal.timeout(8000),redirect:'error'});
+          if(reply.status===200) return {status:'accepted',reason:''};
+          const details=await reply.json().catch(()=>({}));
+          return {status:'rejected',reason:String(details.reason || 'HTTP'+reply.status).slice(0,80)};
+        } catch { return {status:'unknown',reason:'TransportError'}; }
+      },claim.expiresAt);
       const saved=await db.rpc('finish_hosted_price_alert',{p_id:claim.id,p_status:status,p_reason:reason});
       if(saved.error) throw Error('Result update failed');
       if(status!=='accepted') break;

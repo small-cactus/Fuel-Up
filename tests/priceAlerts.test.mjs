@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {generateKeyPairSync,randomUUID} from 'node:crypto';
+import {deliverWithRetry} from '../supabase/functions/_shared/priceAlertPayload.mjs';
 import {alertRequest} from '../scripts/price-alerts/worker.mjs';
 import {priceWatchStations} from '../src/lib/priceWatchStations.js';
 import {installationSyncCall} from '../supabase/functions/_shared/installationSync.mjs';
@@ -26,4 +27,13 @@ test('Apple receives a visible short-lived price alert with the actual grade and
  assert.equal(r.headers['apns-push-type'],'alert');assert.equal(p.aps.alert.title,'Regular dropped $1.10 nearby');
  assert.equal(p.aps.alert.body,'Example reported $2.80/gal (credit).');
  assert.throws(()=>alertRequest({...c,environment:'untrusted'},creds));
+});
+
+test('only a definite transient Apple rejection gets a second attempt',async()=>{
+ for(const [first,expected] of [[{status:'unknown',reason:'TransportTimeout'},1],[{status:'rejected',reason:'BadDeviceToken'},1],
+   [{status:'accepted'},1],[{status:'rejected',reason:'ServiceUnavailable'},2]]) {
+   let n=0;
+   await deliverWithRetry(async()=>++n===1?first:{status:'accepted'},Date.now()/1000+120,async()=>{});
+   assert.equal(n,expected);
+ }
 });
