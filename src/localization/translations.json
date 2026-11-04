@@ -217,7 +217,7 @@
     "Can we tell you when gas prices near you drop?": "¿Te avisamos cuando baje el precio de la gasolina cerca de ti?",
     "Yesterday": "Ayer",
     "Today": "Hoy",
-    "That’s $2 less on a 10-gallon fill-up.": "Son $2 menos al llenar 10 galones.",
+    "That’s $11 less on a 10-gallon fill-up.": "Son $11 menos al llenar 10 galones.",
     "Yes, tell me": "Sí, avísame"
   },
   "zh-Hans": {
@@ -438,7 +438,7 @@
     "Can we tell you when gas prices near you drop?": "附近的油价下跌时，可以通知你吗？",
     "Yesterday": "昨天",
     "Today": "今天",
-    "That’s $2 less on a 10-gallon fill-up.": "加 10 加仑可省 2 美元。",
+    "That’s $11 less on a 10-gallon fill-up.": "加 10 加仑可省 11 美元。",
     "Yes, tell me": "好，告诉我"
   },
   "zh-Hant": {
@@ -659,7 +659,7 @@
     "Can we tell you when gas prices near you drop?": "附近的油價下跌時，可以通知你嗎？",
     "Yesterday": "昨天",
     "Today": "今天",
-    "That’s $2 less on a 10-gallon fill-up.": "加 10 加侖可省 2 美元。",
+    "That’s $11 less on a 10-gallon fill-up.": "加 10 加侖可省 11 美元。",
     "Yes, tell me": "好，告訴我"
   },
   "fil": {
@@ -880,7 +880,7 @@
     "Can we tell you when gas prices near you drop?": "Puwede ka ba naming abisuhan kapag bumaba ang presyo ng gasolina malapit sa iyo?",
     "Yesterday": "Kahapon",
     "Today": "Ngayon",
-    "That’s $2 less on a 10-gallon fill-up.": "Tipid ka ng $2 sa 10 galon.",
+    "That’s $11 less on a 10-gallon fill-up.": "Tipid ka ng $11 sa 10 galon.",
     "Yes, tell me": "Oo, sabihan ako"
   },
   "vi": {
@@ -1101,7 +1101,7 @@
     "Can we tell you when gas prices near you drop?": "Bạn có muốn nhận thông báo khi giá xăng gần bạn giảm không?",
     "Yesterday": "Hôm qua",
     "Today": "Hôm nay",
-    "That’s $2 less on a 10-gallon fill-up.": "Tiết kiệm 2 USD khi đổ 10 gallon.",
+    "That’s $11 less on a 10-gallon fill-up.": "Tiết kiệm 11 USD khi đổ 10 gallon.",
     "Yes, tell me": "Có, hãy báo cho tôi"
   },
   "fr": {
@@ -1322,7 +1322,7 @@
     "Can we tell you when gas prices near you drop?": "Voulez-vous être prévenu quand le prix de l’essence baisse près de vous ?",
     "Yesterday": "Hier",
     "Today": "Aujourd’hui",
-    "That’s $2 less on a 10-gallon fill-up.": "Vous économisez 2 $ sur 10 gallons.",
+    "That’s $11 less on a 10-gallon fill-up.": "Vous économisez 11 $ sur 10 gallons.",
     "Yes, tell me": "Oui, prévenez-moi"
   }
 }

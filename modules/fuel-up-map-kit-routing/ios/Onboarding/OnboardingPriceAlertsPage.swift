@@ -28,7 +28,7 @@ struct OnboardingPriceAlertsPage: View {
               }.fixedSize(horizontal: true, vertical: false)
               VStack(alignment: .leading, spacing: 12) { previousPrice; currentPrice }
             }
-            Text("That’s $2 less on a 10-gallon fill-up.")
+            Text("That’s $11 less on a 10-gallon fill-up.")
               .font(.body.weight(.medium)).fixedSize(horizontal: false, vertical: true)
           }
           .padding(22).frame(maxWidth: .infinity, alignment: .leading)
@@ -48,14 +48,14 @@ struct OnboardingPriceAlertsPage: View {
   private var previousPrice: some View {
     VStack(alignment: .leading, spacing: 2) {
       Text("Yesterday").font(.subheadline)
-      Text(verbatim: "$3.29").font(.system(size: priceSize, weight: .medium, design: .rounded))
+      Text(verbatim: "$3.90").font(.system(size: priceSize, weight: .medium, design: .rounded))
     }.foregroundStyle(.secondary)
   }
 
   private var currentPrice: some View {
     VStack(alignment: .leading, spacing: 2) {
       Text("Today").font(.subheadline.weight(.semibold))
-      Text(verbatim: "$3.09").font(.system(size: priceSize, weight: .bold, design: .rounded))
+      Text(verbatim: "$2.80").font(.system(size: priceSize, weight: .bold, design: .rounded))
     }
   }
 }
