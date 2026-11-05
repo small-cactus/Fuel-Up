@@ -7,6 +7,29 @@ const connectionReset = {
   message: 'request to http://poi-serv:8000/v2/station/49579 failed, reason: connect ECONNRESET 172.23.238.89:8000',
   extensions: { code: 'INTERNAL_SERVER_ERROR' },
 };
+const connectionRefused = {
+  message: 'request to http://poi-serv:8000/v2/station/187006 failed, reason: connect ECONNREFUSED 172.23.238.89:8000',
+  extensions: { code: 'INTERNAL_SERVER_ERROR' },
+};
+
+test('saved provider internal connection refusal uses bounded transient retry', async () => {
+  const errors = [...Array(155).fill(connectionReset), connectionRefused, connectionRefused];
+  assert.deepEqual(classify(errors), { code: 'UPSTREAM_TRANSIENT_GRAPHQL', retryAfterSeconds: 60 });
+  assert.equal(classify(errors, 3600).retryAfterSeconds, 3600);
+  for (const [error, expected] of [
+    [{ message: 'forbidden' }, 'UPSTREAM_HTTP_403'],
+    [{ message: 'too many requests' }, 'UPSTREAM_HTTP_429'],
+    [{ ...connectionRefused, extensions: { code: 'UNKNOWN_DENIAL' } }, 'GRAPHQL_ERROR'],
+    [{ message: connectionRefused.message.replace('poi-serv', 'unknown-host') }, 'GRAPHQL_ERROR'],
+  ]) assert.equal(classify([...errors, error]).code, expected);
+  let calls = 0;
+  await assert.rejects(fetchNationalPriceBatch(['187006'], { fetchImpl: async () => {
+    calls++;
+    return new Response(JSON.stringify({ data: { s0: null }, errors }));
+  } }), error => error.code === 'UPSTREAM_TRANSIENT_GRAPHQL' &&
+    error.responseEvidence.graphqlErrorSummary.classes.UPSTREAM_TRANSIENT_GRAPHQL.count === 157);
+  assert.equal(calls, 1);
+});
 
 test('provider connect resets retry but never conceal a mixed denial or unknown error', () => {
   assert.deepEqual(classify([connectionReset], 120), { code: 'UPSTREAM_TRANSIENT_GRAPHQL', retryAfterSeconds: 120 });
