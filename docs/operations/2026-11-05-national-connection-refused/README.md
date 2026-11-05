@@ -21,3 +21,17 @@ A transaction-rolled-back dry run before the recovery window returned CONNECTION
 Recovery is pending. On the next heartbeat, inspect the recovery event and schedule removal, count the expired 12:00 gap and any absent later slots, verify normal scheduled collection and latest complete Trends, and use auditRegionalSample.mjs for immutable archive read-back on the resumed run. Do not declare recovery from this deployment or schedule alone. Further repair attempts require fresh evidence and remain capped at three for this incident.
 
 The closed research window, city campaigns, original research/evaluation archives, and fixed routing remain protected. Observations represent the fixed inventory and do not establish verified pump truth.
+
+## Verified recovery at 13:27 UTC
+
+The guarded attempt executed at 13:09:00.109692 UTC after the preserved 13:08:44.392184 cooldown. Event 5747 records attempt 1 for original event 5745. The one-shot schedule removed itself. At follow-up there were zero newer authentication, rate, or unknown GraphQL denials.
+
+Normal scheduled collection completed run 48840 for 13:00 UTC at 13:25:15.147674. All 72 batches succeeded, with east 59/59, southwest 9/9, and northwest 4/4, zero wrong-region jobs, 141,660 fixed-inventory stations observed, and 92,671 stations with a reported price. Usage was 73 requests and 143,660 lookup attempts, within limits of 92 and 161,660.
+
+Immutable read-back of one successful post-recovery batch from each assigned region passed checksum, exact station IDs, price schema, region, and provenance checks. The audit selected those samples while the sweep was still running; the subsequent health result independently establishes full sweep completion. This sample does not verify every archived object or real pump prices.
+
+Trends published run 48840 across all ten scopes at 13:27:00.252908 UTC. Projection missing batches and pending operational repairs were zero. All six service schedules remained active. Retention had zero eligible objects and zero overdue derived runs; the worker returned HTTP 200. Archive accounting was 746,709,859 bytes and total Storage use 750,984,807 bytes, below the 900,000,000-byte archive budget.
+
+The 12:00 UTC run closed partial at 13:00 with 37/72 successful batches and 35 missed east batches. The retained eight-day window contains 191 complete sweeps and this one incomplete hour, zero absent expired slots, and zero expired running slots. Previously aged-out operational history cannot be recounted from retained metadata alone. This incident added one incomplete operational hour. Repair attempts remain one. Recovery verification required no further deployment or provider collection from the monitor.
+
+Evidence is recorded in after-recovery.json, recovery-checks.json, archive-after-recovery.json, and cache-after-recovery.json.
