@@ -1,0 +1,14 @@
+{
+  "appId": "6759831421",
+  "version": "1.0.4",
+  "build": "42",
+  "submittedDate": "2026-11-06",
+  "submissionId": "5c9dc701-271d-4882-9e58-c83e2ccb1b93",
+  "observedStatus": "Waiting for Review",
+  "observedConfirmation": "1 Item Submitted",
+  "releaseMode": "Automatically release this version",
+  "rolloutMode": "Release update to all users immediately",
+  "source": "App Store Connect UI read-back",
+  "approved": false,
+  "released": false
+}

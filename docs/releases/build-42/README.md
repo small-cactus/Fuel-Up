@@ -22,7 +22,10 @@ Prepared November 6, 2026 for App Store review with automatic release after appr
 - Release notes saved for English (US), Simplified Chinese, Traditional Chinese, French, Spanish (Mexico), and Vietnamese.
 - Review notes describe this onboarding presentation fix and retain the existing feature/permission review guidance.
 - Automatically release this version and immediate release to all users selected; existing rating retained.
-- Final review submission verification is recorded separately after processing completes.
+- Apple finished processing build 42, which was selected and saved for version 1.0.4.
+- Submitted to App Review on November 6, 2026. The resulting UI displayed **1 Item Submitted** and **1.0.4 Waiting for Review**. This confirms submission, not approval or availability on the App Store.
+- Submission details: https://appstoreconnect.apple.com/apps/6759831421/distribution/reviewsubmissions/details/5c9dc701-271d-4882-9e58-c83e2ccb1b93
+- Automatic release and immediate release to all users were independently read back as selected immediately before adding the version for review.
 
 ## Local artifacts
 
