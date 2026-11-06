@@ -1,7 +1,7 @@
 import MapKit
 import SwiftUI
 
-// One native scene for the location, fuel and station-preference backgrounds.
+// One native scene for the location and subsequent setup-page backgrounds.
 enum OnboardingMapScene {
   static var camera: MKMapCamera {
     MKMapCamera(lookingAtCenter: .init(latitude: 37.7720, longitude: -122.3954),
@@ -19,7 +19,7 @@ enum OnboardingMapScene {
 // The pager supplies the actual page origins, including bounce/cancelled swipes.
 // Apply transforms synchronously in UIKit so maps and content move in one frame.
 final class OnboardingMapPresentation {
-  var pageOffsets: [CGFloat?] = [0, nil, nil, nil] {
+  var pageOffsets: [CGFloat?] = [0] + Array(repeating: nil, count: OnboardingModel.pageCount - 1) {
     didSet { applyOffsets?(pageOffsets) }
   }
   var applyOffsets: (([CGFloat?]) -> Void)?
@@ -45,7 +45,7 @@ final class OnboardingMapBackdropController: UIViewController {
     self.presentation = presentation
     // One full-size, retained map per slide. All start loading with the flow;
     // entering or revisiting a slide never constructs another MKMapView.
-    maps = (0..<4).map { index in
+    maps = (0..<OnboardingModel.pageCount).map { index in
       let map = index == 0
         ? AnyView(OnboardingWelcomeMap(onMapReady: onMapReady).ignoresSafeArea())
         : AnyView(LocationInvitationMap().ignoresSafeArea())

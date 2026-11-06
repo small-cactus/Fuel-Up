@@ -5,43 +5,36 @@ struct OnboardingPriceAlertsPage: View {
   @ScaledMetric(relativeTo: .largeTitle) private var priceSize: CGFloat = 40
 
   var body: some View {
-    GeometryReader { size in
-      ScrollView {
-        VStack(alignment: .leading, spacing: 28) {
-          Text("Can we tell you when gas prices near you drop?")
-            .font(.system(.largeTitle, design: .rounded, weight: .bold))
-            .accessibilityAddTraits(.isHeader)
-          VStack(alignment: .leading, spacing: 18) {
-            HStack {
-              Label("Regular gas nearby", systemImage: "fuelpump.fill")
-                .font(.subheadline.weight(.semibold))
-              Spacer()
-              Text("Example").font(.caption).foregroundStyle(.secondary)
-            }
-            Divider()
-            ViewThatFits(in: .horizontal) {
-              HStack(alignment: .bottom, spacing: 14) {
-                previousPrice
-                Image(systemName: "arrow.right").foregroundStyle(.secondary)
-                  .padding(.bottom, 10).accessibilityHidden(true)
-                currentPrice
-              }.fixedSize(horizontal: true, vertical: false)
-              VStack(alignment: .leading, spacing: 12) { previousPrice; currentPrice }
-            }
-            Text("That’s $11 less on a 10-gallon fill-up.")
-              .font(.body.weight(.medium)).fixedSize(horizontal: false, vertical: true)
+    ScrollView {
+      VStack(alignment: .leading, spacing: 26) {
+        OnboardingWordmark()
+        Text("Can we tell you when gas prices near you drop?")
+          .font(.system(.largeTitle, design: .rounded, weight: .bold))
+          .accessibilityAddTraits(.isHeader)
+        VStack(alignment: .leading, spacing: 18) {
+          HStack {
+            Label("Regular gas nearby", systemImage: "fuelpump.fill")
+              .font(.subheadline.weight(.semibold))
+            Spacer()
+            Text("Example").font(.caption).foregroundStyle(.secondary)
           }
-          .padding(22).frame(maxWidth: .infinity, alignment: .leading)
-          .modifier(OnboardingGlass()).accessibilityElement(children: .combine)
+          ViewThatFits(in: .horizontal) {
+            HStack(alignment: .bottom, spacing: 14) {
+              previousPrice
+              Image(systemName: "arrow.right").foregroundStyle(.secondary)
+                .padding(.bottom, 10).accessibilityHidden(true)
+              currentPrice
+            }.fixedSize(horizontal: true, vertical: false)
+            VStack(alignment: .leading, spacing: 12) { previousPrice; currentPrice }
+          }
+          Text("That’s $11 less on a 10-gallon fill-up.")
+            .font(.body.weight(.medium)).fixedSize(horizontal: false, vertical: true)
         }
-        .fixedSize(horizontal: false, vertical: true)
-        .frame(maxWidth: 480, alignment: .leading)
-        .padding(.horizontal, 26).padding(.vertical, 56)
-        .frame(maxWidth: .infinity, minHeight: size.size.height, alignment: .center)
-        .overlay(alignment: .top) { OnboardingWordmark() }
-      }.scrollBounceBehavior(.basedOnSize)
-    }
-    .background(Color(uiColor: .systemGroupedBackground))
+        .padding(22).frame(maxWidth: .infinity, alignment: .leading)
+        .modifier(OnboardingGlass()).accessibilityElement(children: .combine)
+      }
+      .padding(.horizontal, 24).padding(.bottom, 24)
+    }.scrollBounceBehavior(.basedOnSize)
     .accessibilityIdentifier("onboarding-price-alerts")
   }
 

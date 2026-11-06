@@ -33,7 +33,17 @@ struct OnboardingFooter: View {
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @Namespace private var buttons
 
+  private var isPriceAlerts: Bool { model.step == OnboardingModel.pageCount - 1 }
+  private var hasSplitActions: Bool { model.step == 3 || isPriceAlerts }
+  private var leadingID: String {
+    isPriceAlerts ? "onboarding-alerts-later" : (model.step == 3 ? "onboarding-skip" : "onboarding-next")
+  }
+  private var trailingTitle: String {
+    isPriceAlerts ? (model.alertsDenied ? "Open Settings" : "Yes, tell me") : "Save"
+  }
+
   private var buttonTitle: String {
+    if isPriceAlerts { return "Not now" }
     if model.step == 1 && model.locationRequested && model.hasLocationAccess && !model.locationReady && model.locationError == nil { return "Finding your location…" }
     return model.step == 3 ? "Skip" : "Continue"
   }
@@ -56,15 +66,7 @@ struct OnboardingFooter: View {
   }
 
   private var alertActions: some View {
-    VStack(spacing: 4) {
-      OnboardingPrimaryButton(title: model.alertsDenied ? "Open Settings" : "Yes, tell me") {
-        Task { await model.enablePriceAlerts() }
-      }
-      Button(action: model.skipPriceAlerts) {
-        Text("Not now").font(.body.weight(.medium))
-          .frame(maxWidth: .infinity, minHeight: 44).contentShape(Rectangle())
-      }.accessibilityIdentifier("onboarding-alerts-later")
-    }
+    actions
     .task { await model.refreshAlertPermission() }
     .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
       Task { await model.refreshAlertPermission() }
@@ -73,29 +75,29 @@ struct OnboardingFooter: View {
 
   @ViewBuilder private var actions: some View {
     if #available(iOS 26.0, *) {
-      // Keep Continue's glass identity as it becomes Skip. The new Save effect
-      // splits out within Apple's container and merges back on reverse paging.
+      // Keep the same split capsules for preferences and price-drop permission.
+      // They merge back into Continue when returning to earlier pages.
       GlassEffectContainer(spacing: 12) {
         HStack(spacing: 12) {
-          actionButton(buttonTitle, id: model.step == 3 ? "onboarding-skip" : "onboarding-next",
-                       prominent: model.step != 3, action: advance)
-            .glassEffect(model.step == 3 ? .regular.interactive() : .regular.tint(.blue).interactive(), in: .capsule)
+          actionButton(buttonTitle, id: leadingID, prominent: !hasSplitActions, action: advance)
+            .glassEffect(hasSplitActions ? .regular.interactive() : .regular.tint(.blue).interactive(), in: .capsule)
             .glassEffectID("advance", in: buttons)
-          if model.step == 3 {
-            actionButton("Save", id: "onboarding-save", prominent: true) { model.leaveBrands(skipping: false) }
+          if hasSplitActions {
+            actionButton(trailingTitle, id: isPriceAlerts ? "onboarding-next" : "onboarding-save",
+                         prominent: true, action: confirm)
               .glassEffect(.regular.tint(.blue).interactive(), in: .capsule)
               .glassEffectID("save", in: buttons)
               .glassEffectTransition(.matchedGeometry)
           }
         }
-      }.animation(reduceMotion ? nil : .smooth(duration: 0.35), value: model.step == 3)
+      }.animation(reduceMotion ? nil : .smooth(duration: 0.35), value: hasSplitActions)
     } else {
       HStack(spacing: 12) {
-        actionButton(buttonTitle, id: model.step == 3 ? "onboarding-skip" : "onboarding-next",
-                     prominent: model.step != 3, action: advance)
-          .background(model.step == 3 ? Color(uiColor: .secondarySystemGroupedBackground) : .blue, in: Capsule())
-        if model.step == 3 {
-          actionButton("Save", id: "onboarding-save", prominent: true) { model.leaveBrands(skipping: false) }
+        actionButton(buttonTitle, id: leadingID, prominent: !hasSplitActions, action: advance)
+          .background(hasSplitActions ? Color(uiColor: .secondarySystemGroupedBackground) : .blue, in: Capsule())
+        if hasSplitActions {
+          actionButton(trailingTitle, id: isPriceAlerts ? "onboarding-next" : "onboarding-save",
+                       prominent: true, action: confirm)
             .background(.blue, in: Capsule())
         }
       }
@@ -120,10 +122,16 @@ struct OnboardingFooter: View {
   }
 
   private func advance() {
+    if isPriceAlerts { model.skipPriceAlerts(); return }
     OnboardingTelemetry.emit("onboarding_action", ["action":model.step == 3 ? "skip" : "continue", "step":model.step])
     if model.step == 1 && !model.locationReady { model.requestLocation() }
     else if model.step == 3 { model.leaveBrands(skipping: true) }
     else { model.selectStep(model.step + 1) }
+  }
+
+  private func confirm() {
+    if isPriceAlerts { Task { await model.enablePriceAlerts() } }
+    else { model.leaveBrands(skipping: false) }
   }
 }
 

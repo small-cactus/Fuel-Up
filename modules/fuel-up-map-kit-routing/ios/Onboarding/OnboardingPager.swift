@@ -137,7 +137,7 @@ private struct OnboardingPage: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .modifier(OnboardingBottomBar(model: model, overlaysMap: index == 0))
       .background {
-        if index == 2 || index == 3 {
+        if index >= 2 {
           PureProgressiveBlur(direction: .uniform)
             .ignoresSafeArea().allowsHitTesting(false).accessibilityHidden(true)
         }
