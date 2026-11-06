@@ -1,0 +1,170 @@
+TAP version 13
+# (node:29734) ExperimentalWarning: CommonJS module /Users/anthonyh/Desktop/Fuel Up/tests/nativeOnboarding.test.cjs is loading ES Module /Users/anthonyh/Desktop/Fuel Up/src/lib/preferencesStore.js using require().
+# Support for loading ES Module in require() is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:29734) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelSearchState.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: the iOS-only native flow does not depend on parsing the OS version
+ok 1 - the iOS-only native flow does not depend on parsing the OS version
+  ---
+  duration_ms: 420.180375
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: native completion saves exactly the final draft, including membership and E85 choices
+ok 2 - native completion saves exactly the final draft, including membership and E85 choices
+  ---
+  duration_ms: 34.842084
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: onboarding prefetch uses max radius; radius changes reuse inventory and filter brands locally
+ok 3 - onboarding prefetch uses max radius; radius changes reuse inventory and filter brands locally
+  ---
+  duration_ms: 22.259875
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: membership prefetch recovers a transient location lookup and uses the normalized state
+ok 4 - membership prefetch recovers a transient location lookup and uses the normalized state
+  ---
+  duration_ms: 1127.355167
+  ...
+# Subtest: membership loading state reaches both native pages without dropping saved memberships
+ok 5 - membership loading state reaches both native pages without dropping saved memberships
+  ---
+  duration_ms: 20.365875
+  ...
+# (node:29736) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/onboardingFlow.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: onboarding flow places optional brand preferences after fuel grade
+ok 6 - onboarding flow places optional brand preferences after fuel grade
+  ---
+  duration_ms: 0.596708
+  ...
+# Subtest: onboarding only commits radius and octane on their respective steps
+ok 7 - onboarding only commits radius and octane on their respective steps
+  ---
+  duration_ms: 0.197958
+  ...
+# Subtest: onboarding translucency stays limited to the intended steps
+ok 8 - onboarding translucency stays limited to the intended steps
+  ---
+  duration_ms: 0.063833
+  ...
+# (node:29737) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/onboardingHandoff.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:29737) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# Subtest: Save keeps onboarding mounted until Home renders and the full reveal completes
+ok 9 - Save keeps onboarding mounted until Home renders and the full reveal completes
+  ---
+  duration_ms: 13.726208
+  ...
+# Subtest: timeout never reveals an empty Home and permits retry
+ok 10 - timeout never reveals an empty Home and permits retry
+  ---
+  duration_ms: 1.745458
+  ...
+# Subtest: network never reveals an empty Home and permits retry
+ok 11 - network never reveals an empty Home and permits retry
+  ---
+  duration_ms: 0.447375
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: radius location uses native coordinates only after permission and removes its watch
+ok 12 - radius location uses native coordinates only after permission and removes its watch
+  ---
+  duration_ms: 354.153625
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# (node:29740) ExperimentalWarning: CommonJS module /Users/anthonyh/Desktop/Fuel Up/src/screens/OnboardingScreen.js is loading ES Module /Users/anthonyh/Desktop/Fuel Up/src/lib/fuelSearchState.js using require().
+# Support for loading ES Module in require() is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:29740) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelMemberships.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: Save coordinates persisted choices, cached Home readiness and reveal (success)
+ok 13 - Save coordinates persisted choices, cached Home readiness and reveal (success)
+  ---
+  duration_ms: 102.036166
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: Save coordinates persisted choices, cached Home readiness and reveal (storage)
+ok 14 - Save coordinates persisted choices, cached Home readiness and reveal (storage)
+  ---
+  duration_ms: 14.239875
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: Save coordinates persisted choices, cached Home readiness and reveal (network)
+ok 15 - Save coordinates persisted choices, cached Home readiness and reveal (network)
+  ---
+  duration_ms: 26.036458
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: Save coordinates persisted choices, cached Home readiness and reveal (completion)
+ok 16 - Save coordinates persisted choices, cached Home readiness and reveal (completion)
+  ---
+  duration_ms: 38.916708
+  ...
+# Subtest: setup replay selects Home explicitly in the mounted native tab navigator
+ok 17 - setup replay selects Home explicitly in the mounted native tab navigator
+  ---
+  duration_ms: 23.428875
+  ...
+# (node:29741) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/priceWatchStations.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: watch only station-level, in-radius, selected-grade quotes
+ok 18 - watch only station-level, in-radius, selected-grade quotes
+  ---
+  duration_ms: 0.843708
+  ...
+# Subtest: watch registration is bounded and supports authenticated withdrawal
+ok 19 - watch registration is bounded and supports authenticated withdrawal
+  ---
+  duration_ms: 1.409334
+  ...
+# Subtest: Apple receives a visible short-lived price alert with the actual grade and payment
+ok 20 - Apple receives a visible short-lived price alert with the actual grade and payment
+  ---
+  duration_ms: 3.756417
+  ...
+# Subtest: only a definite transient Apple rejection gets a second attempt
+ok 21 - only a definite transient Apple rejection gets a second attempt
+  ---
+  duration_ms: 0.351792
+  ...
+# Subtest: iOS production excludes legacy screens while development retains the real map probe
+ok 22 - iOS production excludes legacy screens while development retains the real map probe
+  ---
+  duration_ms: 709.375125
+  ...
+# Subtest: native Release configurations optimize widgets without changing Debug
+ok 23 - native Release configurations optimize widgets without changing Debug
+  ---
+  duration_ms: 3.834833
+  ...
+# Subtest: Release packaging prunes only generated assets and respects skipped bundling
+ok 24 - Release packaging prunes only generated assets and respects skipped bundling
+  ---
+  duration_ms: 46.126833
+  ...
+1..24
+# tests 24
+# suites 0
+# pass 24
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2095.2515
