@@ -1,0 +1,91 @@
+{
+  "observed_at": "2026-11-07T14:37:27Z",
+  "project_ref": "vjindchxfebaltbslqwc",
+  "incident_status": "unresolved",
+  "repair_attempts": 0,
+  "provider_requests_by_monitor": 0,
+  "last_complete": {
+    "run_id": 51710,
+    "slot_at": "2026-11-07T13:00:00Z",
+    "completed_at": "2026-11-07T13:14:34.697790Z",
+    "cache_published_at": "2026-11-07T13:15:00.257887Z",
+    "cache_scopes": 10
+  },
+  "current_hour_last_successful_read": {
+    "run_id": 51770,
+    "slot_at": "2026-11-07T14:00:00Z",
+    "deadline_at": "2026-11-07T15:00:00Z",
+    "status": "running",
+    "succeeded_batches": 30,
+    "queued_batches": 42,
+    "requests": 31,
+    "lookups": 59960,
+    "last_request_at": "2026-11-07T14:08:12.934935Z",
+    "enabled": true,
+    "continuous": true,
+    "cooldown_until": "2026-11-07T14:06:15.013849Z"
+  },
+  "scheduled_worker_failures": {
+    "code": "DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED",
+    "http_status": 503,
+    "expected_region": "us-east-1",
+    "actual_region": "us-east-1",
+    "observed_response_times": [
+      "2026-11-07T14:24:21.483637Z",
+      "2026-11-07T14:25:20.987994Z",
+      "2026-11-07T14:26:22.276338Z",
+      "2026-11-07T14:28:17.172954Z"
+    ]
+  },
+  "monitor_failures": [
+    {
+      "operation": "status.mjs",
+      "status": 524,
+      "message": "Management API timeout"
+    },
+    {
+      "operation": "bounded health view read",
+      "status": 524,
+      "message": "Management API timeout"
+    },
+    {
+      "operation": "EXPLAIN ANALYZE with 5 second statement timeout",
+      "status": 544,
+      "message": "Connection terminated due to connection timeout"
+    },
+    {
+      "operation": "read live SQL definitions",
+      "status": 544,
+      "message": "Failed to create login role: Connection terminated due to connection timeout"
+    },
+    {
+      "operation": "protected REST jobs read",
+      "timeout_ms": 12009
+    },
+    {
+      "operation": "protected REST config read",
+      "timeout_ms": 12002
+    }
+  ],
+  "prior_closed_partial_slots": [
+    "2026-11-05T12:00:00Z"
+  ],
+  "pending_operational_projection_repairs_at_successful_read": 0,
+  "schedules_at_successful_read": {
+    "dispatch": true,
+    "watchdog": true,
+    "trends_cache": true,
+    "projection_repair": true,
+    "retention": true
+  },
+  "diagnostic_activity_snapshot": {
+    "blocking_pids": [],
+    "active_queries": "Only monitor health read and activity inspection at snapshot; no evidence establishing a lock or root cause."
+  },
+  "limitations": [
+    "Current hour is not yet an expired gap.",
+    "Complete status refresh failed; archive capacity and retention are not freshly verified.",
+    "No diagnosis establishing a safe targeted repair; no restart, re-enable, DDL, provider replay, or collection change attempted.",
+    "Fixed-inventory observations are not verified pump truth."
+  ]
+}
