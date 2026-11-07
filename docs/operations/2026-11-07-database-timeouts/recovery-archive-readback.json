@@ -1,0 +1,92 @@
+{
+  "auditedAt": "2026-11-07T16:27:46.841Z",
+  "runId": 51815,
+  "slotAt": "2026-11-07T16:00:00+00:00",
+  "runStatusAtSelection": "complete",
+  "verified": true,
+  "providerRequests": 0,
+  "batches": [
+    {
+      "jobId": 3726568,
+      "objectPath": "51815/3726568/3ac5f320-b341-40e6-be59-2687fc7e8125.json.gz",
+      "sha256": "5bb1f2cb88ba800c952ffd2316d9cb127b8f69998f5db04d9ffd43ee0c72b8b0",
+      "stations": 1700,
+      "priced": 1055,
+      "bytes": 39973,
+      "executionRegion": "us-east-1",
+      "startedAt": "2026-11-07T16:16:02.147Z",
+      "observedAt": "2026-11-07T16:16:03.818Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-11-07T16:16:03.562Z",
+        "elapsedMs": 1414,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a56da3dd9b3513c9-IAD",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Sat, 07 Nov 2026 16:16:03 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 632625,
+        "fullElapsedMs": 1660
+      }
+    },
+    {
+      "jobId": 3726577,
+      "objectPath": "51815/3726577/240a7ce7-b535-4539-986a-2d42b95fb3d1.json.gz",
+      "sha256": "44a80d5795404b5efa2cdb6cdcb4cae358b86e14ab6435ea134b673032fb8868",
+      "stations": 1747,
+      "priced": 1311,
+      "bytes": 58961,
+      "executionRegion": "us-west-1",
+      "startedAt": "2026-11-07T16:05:01.965Z",
+      "observedAt": "2026-11-07T16:05:04.550Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-11-07T16:05:04.147Z",
+        "elapsedMs": 2181,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a56d93bf7b6b6ad3-SJC",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Sat, 07 Nov 2026 16:05:04 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 781896,
+        "fullElapsedMs": 2568
+      }
+    },
+    {
+      "jobId": 3726581,
+      "objectPath": "51815/3726581/a3571409-4b9d-4d06-8912-a8d3ea432cf1.json.gz",
+      "sha256": "ad539096ac35c1e97086249653f7972d16667b72155d61730d31424d02c93b6b",
+      "stations": 213,
+      "priced": 155,
+      "bytes": 6565,
+      "executionRegion": "us-west-2",
+      "startedAt": "2026-11-07T16:02:34.979Z",
+      "observedAt": "2026-11-07T16:02:35.520Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-11-07T16:02:35.388Z",
+        "elapsedMs": 409,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a56d9028a811b74e-PDX",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Sat, 07 Nov 2026 16:02:35 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 89866,
+        "fullElapsedMs": 539
+      }
+    }
+  ],
+  "limitation": "One successful immutable batch per assigned region. Verifies hashes, exact IDs, prices schema and provenance; not full-hour completeness or pump truth."
+}

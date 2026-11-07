@@ -1,0 +1,26 @@
+{
+  "budgets": [
+    {
+      "lookups": 59960,
+      "requests": 31,
+      "slot_at": "2026-11-07T14:00:00+00:00"
+    },
+    {
+      "lookups": 0,
+      "requests": 0,
+      "slot_at": "2026-11-07T15:00:00+00:00"
+    },
+    {
+      "lookups": 141660,
+      "requests": 72,
+      "slot_at": "2026-11-07T16:00:00+00:00"
+    }
+  ],
+  "campaigns": [
+    {
+      "cooldown": "2026-10-07T18:12:54.381439+00:00",
+      "status": "complete"
+    }
+  ],
+  "pending_operational_repairs": 0
+}
