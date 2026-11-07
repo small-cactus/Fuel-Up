@@ -1,0 +1,133 @@
+{
+  "checked_at": "2026-11-07T15:33:00Z",
+  "status": "unresolved",
+  "repair_attempts": 0,
+  "provider_requests_by_monitor": 0,
+  "brief": {
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "id": true,
+      "last_dispatch_at": "2026-11-07T15:27:07.682316+00:00",
+      "last_request_at": "2026-11-07T14:08:12.934935+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-11-07T14:06:15.013849+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "current_jobs": [
+      {
+        "count": 30,
+        "run_id": 51770,
+        "status": "succeeded"
+      },
+      {
+        "count": 72,
+        "run_id": 51796,
+        "status": "queued"
+      },
+      {
+        "count": 42,
+        "run_id": 51770,
+        "status": "missed"
+      }
+    ],
+    "runs": [
+      {
+        "completed_at": null,
+        "deadline_at": "2026-11-07T16:00:00+00:00",
+        "id": 51796,
+        "slot_at": "2026-11-07T15:00:00+00:00",
+        "status": "running"
+      },
+      {
+        "completed_at": "2026-11-07T15:04:02.905128+00:00",
+        "deadline_at": "2026-11-07T15:00:00+00:00",
+        "id": 51770,
+        "slot_at": "2026-11-07T14:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "completed_at": "2026-11-07T13:14:34.69779+00:00",
+        "deadline_at": "2026-11-07T14:00:00+00:00",
+        "id": 51710,
+        "slot_at": "2026-11-07T13:00:00+00:00",
+        "status": "complete"
+      }
+    ]
+  },
+  "checks": {
+    "cache": {
+      "published_at": "2026-11-07T13:15:00.257887+00:00",
+      "run_id": 51710,
+      "scopes": 10
+    },
+    "cron": [
+      {
+        "active": true,
+        "name": "fuel-national-dispatch"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-watchdog"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-trends-cache"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-projection-repair"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-retention"
+      },
+      {
+        "active": true,
+        "name": "fuel-local-history-retention"
+      }
+    ],
+    "retention": [
+      {
+        "created": "2026-11-07T15:10:17.259481+00:00",
+        "result": "{\"error\":\"NATIONAL_RETENTION_FAILED\"}",
+        "status_code": 503,
+        "timed_out": false
+      },
+      {
+        "created": "2026-11-07T14:00:00.132381+00:00",
+        "result": "{\"status\":\"retained\",\"removedObjects\":72,\"marked_archives\":72,\"removed_operational_hours\":0,\"deferred_operational_hours\":1,\"detached_content_references\":100,\"providerRequests\":0}",
+        "status_code": 200,
+        "timed_out": false
+      }
+    ],
+    "slots": {
+      "current_absent": 0,
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 2
+    }
+  },
+  "diagnostics": {
+    "full_status": "SQLSTATE 57014 canceling statement due to statement timeout; context fuel_national_retention_candidates statement 1",
+    "live_definition_and_activity_reads": "HTTP 544 Failed to create login role: Connection terminated due to connection timeout",
+    "management_project_listing": "ACTIVE_HEALTHY; does not establish worker/database health",
+    "dashboard": "No authenticated browser session; existing GitHub sign-in flow reached login form. No credentials entered or permissions changed."
+  },
+  "limitations": [
+    "15:00 hour remains within its 16:00 UTC deadline.",
+    "Two partial retained operational hours: known November 5 12:00 plus new November 7 14:00.",
+    "No expired absent or expired running slots in retained eight-day range. Aged-out metadata cannot establish lifetime absence.",
+    "Current archive capacity, projection backlog and full regional health not verified because comprehensive reads fail.",
+    "No restart, re-enable, DDL, collection replay, deletion or budget change attempted."
+  ]
+}
