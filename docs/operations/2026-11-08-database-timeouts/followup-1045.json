@@ -1,0 +1,60 @@
+{
+  "recorded_at": "2026-11-08T10:48:53.579700+00:00",
+  "incident_status": "unresolved",
+  "repair_attempts": 0,
+  "provider_requests_by_monitor": 0,
+  "runs": [
+    {
+      "completed_at": null,
+      "deadline_at": "2026-11-08 11:00:00+00",
+      "id": 52800,
+      "slot_at": "2026-11-08 10:00:00+00",
+      "status": "running"
+    },
+    {
+      "completed_at": "2026-11-08 10:01:03.388278+00",
+      "deadline_at": "2026-11-08 10:00:00+00",
+      "id": 52771,
+      "slot_at": "2026-11-08 09:00:00+00",
+      "status": "partial"
+    },
+    {
+      "completed_at": "2026-11-08 09:01:04.478751+00",
+      "deadline_at": "2026-11-08 09:00:00+00",
+      "id": 52746,
+      "slot_at": "2026-11-08 08:00:00+00",
+      "status": "partial"
+    },
+    {
+      "completed_at": "2026-11-08 08:01:01.660889+00",
+      "deadline_at": "2026-11-08 08:00:00+00",
+      "id": 52715,
+      "slot_at": "2026-11-08 07:00:00+00",
+      "status": "partial"
+    },
+    {
+      "completed_at": "2026-11-08 06:17:14.545098+00",
+      "deadline_at": "2026-11-08 07:00:00+00",
+      "id": 52655,
+      "slot_at": "2026-11-08 06:00:00+00",
+      "status": "complete"
+    }
+  ],
+  "monitor_failures": {
+    "full_status": "SQLSTATE 57014 statement timeout inside fuel_national_retention_candidates",
+    "brief_status": "HTTP 544 login-role connection timeout",
+    "jobs_cache_slots_worker_check": "HTTP 544 login-role connection timeout",
+    "query_timing_diagnostic": "HTTP 544 login-role connection timeout",
+    "minimal_jobs_config_cache_retry": "HTTP 544 login-role connection timeout"
+  },
+  "confirmed_new_information": [
+    "08:00 and 09:00 runs have now closed partial.",
+    "10:00 run exists and was running at the successful read, with deadline 11:00 UTC."
+  ],
+  "limitations": [
+    "Latest batch counts, current cache publication, schedules, cooldowns, budgets, projection backlog, retention progress and archive capacity could not be freshly verified.",
+    "Existence/status of recent run rows is confirmed; a complete absent-slot count was not obtained this heartbeat.",
+    "The 07:00 seven-missed-batch count is from the previous successful check; no exact missed counts are asserted for 08:00 or 09:00.",
+    "No safe targeted repair was established; no service settings, raw data, research archives or billing changed."
+  ]
+}
