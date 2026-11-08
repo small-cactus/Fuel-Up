@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { collectDiagnostics, failureKind } from './diagnostics.mjs';
 const sql = `select jsonb_build_object(
  'config',(select to_jsonb(c) from public.fuel_national_config c),
  'operational_slots',(with slots as (
@@ -33,6 +34,10 @@ const sql = `select jsonb_build_object(
  'projection_repairs',(select jsonb_agg(p) from (select job_id,attempts,last_error,lease_until,next_attempt_at,completed_at from fuel_projection_repairs order by job_id desc limit 10)p),
  'accounted_archive_bytes',public.fuel_national_archive_bytes(),
  'database_bytes',pg_database_size(current_database()),
+ 'maintenance_indexes',(select jsonb_agg(jsonb_build_object('name',s.indexrelname,
+   'bytes',pg_relation_size(s.indexrelid),'valid',i.indisvalid,'ready',i.indisready))
+   from pg_stat_user_indexes s join pg_index i on i.indexrelid=s.indexrelid
+   where s.indexrelname in ('fuel_station_retention_reference_compact','fuel_national_price_order','fuel_station_price_lookup_pkey')),
  'storage_bytes',(select coalesce(sum((metadata->>'size')::bigint),0) from storage.objects),
  'regions',(select jsonb_agg(r) from public.fuel_national_regions r),
  'regional_hours',(select jsonb_agg(h) from (select * from public.fuel_national_regional_health order by slot_at desc limit 72) h),
@@ -40,5 +45,12 @@ const sql = `select jsonb_build_object(
  'hours',(select jsonb_agg(h) from (select * from public.fuel_national_health order by slot_at desc limit 24) h),
  'events',(select jsonb_agg(e) from (select created_at,job_id,code,retry_after_seconds from public.fuel_national_events order by id desc limit 20) e)
 ) as status;`;
-const result = execFileSync('npx', ['--no-install','supabase@2.118.0','db','query','--linked','--project-ref','vjindchxfebaltbslqwc',sql,'--output','json'], { encoding: 'utf8' });
-console.log(JSON.stringify(JSON.parse(result).rows[0].status, null, 2));
+try {
+  const result = execFileSync('npx', ['--no-install','supabase@2.118.0','db','query','--linked','--project-ref','vjindchxfebaltbslqwc',sql,'--output','json'], {
+    encoding: 'utf8', timeout: 45000, stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  console.log(JSON.stringify(JSON.parse(result).rows[0].status, null, 2));
+} catch (error) {
+  console.log(JSON.stringify({ statusError: failureKind(error), ...await collectDiagnostics() }, null, 2));
+  process.exitCode = 1; // Partial evidence must never be mistaken for a healthy full check.
+}

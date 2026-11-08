@@ -1,0 +1,1686 @@
+{
+  "recordedAt": "2026-11-08T16:16:45.845Z",
+  "productionRepairAttempts": 1,
+  "diagnosis": {
+    "activity": [
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "blockers": []
+      },
+      {
+        "backend_type": "autovacuum launcher",
+        "state": null,
+        "wait_event_type": "Activity",
+        "wait_event": "AutovacuumMain",
+        "blockers": []
+      },
+      {
+        "backend_type": "autovacuum worker",
+        "state": "active",
+        "wait_event_type": null,
+        "wait_event": null,
+        "blockers": []
+      },
+      {
+        "backend_type": "pg_net 0.19.5 worker",
+        "state": null,
+        "wait_event_type": null,
+        "wait_event": null,
+        "blockers": []
+      },
+      {
+        "backend_type": "pg_cron launcher",
+        "state": null,
+        "wait_event_type": "Extension",
+        "wait_event": "Extension",
+        "blockers": []
+      },
+      {
+        "backend_type": "logical replication launcher",
+        "state": null,
+        "wait_event_type": "Activity",
+        "wait_event": "LogicalLauncherMain",
+        "blockers": []
+      },
+      {
+        "backend_type": "background writer",
+        "state": null,
+        "wait_event_type": "Activity",
+        "wait_event": "BgwriterMain",
+        "blockers": []
+      },
+      {
+        "backend_type": "checkpointer",
+        "state": null,
+        "wait_event_type": "Timeout",
+        "wait_event": "CheckpointWriteDelay",
+        "blockers": []
+      },
+      {
+        "backend_type": "walwriter",
+        "state": null,
+        "wait_event_type": "Activity",
+        "wait_event": "WalWriterMain",
+        "blockers": []
+      },
+      {
+        "backend_type": "archiver",
+        "state": null,
+        "wait_event_type": "Activity",
+        "wait_event": "ArchiverMain",
+        "blockers": []
+      }
+    ],
+    "runs": [
+      {
+        "id": 52886,
+        "slot_at": "2026-11-08T16:00:00+00:00",
+        "status": "running"
+      },
+      {
+        "id": 52879,
+        "slot_at": "2026-11-08T15:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "id": 52867,
+        "slot_at": "2026-11-08T14:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "id": 52863,
+        "slot_at": "2026-11-08T13:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "id": 52847,
+        "slot_at": "2026-11-08T12:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "id": 52834,
+        "slot_at": "2026-11-08T11:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "id": 52800,
+        "slot_at": "2026-11-08T10:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "id": 52771,
+        "slot_at": "2026-11-08T09:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "id": 52746,
+        "slot_at": "2026-11-08T08:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "id": 52715,
+        "slot_at": "2026-11-08T07:00:00+00:00",
+        "status": "partial"
+      },
+      {
+        "id": 52655,
+        "slot_at": "2026-11-08T06:00:00+00:00",
+        "status": "complete"
+      },
+      {
+        "id": 52595,
+        "slot_at": "2026-11-08T05:00:00+00:00",
+        "status": "complete"
+      }
+    ],
+    "stats": {
+      "blk_read_time": 0,
+      "blk_write_time": 0,
+      "blks_hit": 3423327575,
+      "blks_read": 179835782,
+      "deadlocks": 0,
+      "temp_bytes": 20672407168,
+      "temp_files": 9050
+    },
+    "tables": [
+      {
+        "idx_scan": 32747499,
+        "last_autoanalyze": "2026-11-08T01:00:40.896828+00:00",
+        "last_autovacuum": "2026-11-08T00:09:37.285492+00:00",
+        "n_dead_tup": 88730,
+        "n_live_tup": 703313,
+        "relname": "fuel_local_daily_prices",
+        "seq_scan": 4
+      },
+      {
+        "idx_scan": 233405349,
+        "last_autoanalyze": "2026-11-08T07:05:53.113011+00:00",
+        "last_autovacuum": "2026-10-19T19:19:50.858001+00:00",
+        "n_dead_tup": 16093,
+        "n_live_tup": 141660,
+        "relname": "fuel_station_collection_state",
+        "seq_scan": 35
+      },
+      {
+        "idx_scan": 51801572,
+        "last_autoanalyze": "2026-11-08T07:10:00.2886+00:00",
+        "last_autovacuum": "2026-11-08T16:03:41.515317+00:00",
+        "n_dead_tup": 4905,
+        "n_live_tup": 152672,
+        "relname": "fuel_station_latest",
+        "seq_scan": 731
+      },
+      {
+        "idx_scan": 41524469,
+        "last_autoanalyze": "2026-11-08T15:48:14.980972+00:00",
+        "last_autovacuum": "2026-11-08T00:00:32.536874+00:00",
+        "n_dead_tup": 3293,
+        "n_live_tup": 26064,
+        "relname": "fuel_national_jobs",
+        "seq_scan": 11215
+      },
+      {
+        "idx_scan": 30567842,
+        "last_autoanalyze": "2026-11-08T16:03:32.99796+00:00",
+        "last_autovacuum": "2026-11-08T16:06:34.199953+00:00",
+        "n_dead_tup": 2514,
+        "n_live_tup": 347082,
+        "relname": "fuel_station_price_lookup",
+        "seq_scan": 1
+      },
+      {
+        "idx_scan": 251956,
+        "last_autoanalyze": "2026-11-08T02:18:38.110373+00:00",
+        "last_autovacuum": "2026-11-08T00:08:32.377459+00:00",
+        "n_dead_tup": 1600,
+        "n_live_tup": 14563,
+        "relname": "objects",
+        "seq_scan": 42557
+      },
+      {
+        "idx_scan": 548,
+        "last_autoanalyze": "2026-11-07T05:02:55.460687+00:00",
+        "last_autovacuum": "2026-10-27T20:10:58.53827+00:00",
+        "n_dead_tup": 494,
+        "n_live_tup": 6210,
+        "relname": "fuel_national_events",
+        "seq_scan": 41869
+      },
+      {
+        "idx_scan": 118171452,
+        "last_autoanalyze": "2026-11-07T20:00:21.357846+00:00",
+        "last_autovacuum": "2026-11-08T04:00:43.998462+00:00",
+        "n_dead_tup": 288,
+        "n_live_tup": 21459,
+        "relname": "fuel_national_trend_batches",
+        "seq_scan": 0
+      },
+      {
+        "idx_scan": 21846213,
+        "last_autoanalyze": "2026-11-07T12:00:15.371883+00:00",
+        "last_autovacuum": "2026-11-05T15:18:00.050556+00:00",
+        "n_dead_tup": 99,
+        "n_live_tup": 362,
+        "relname": "fuel_national_runs",
+        "seq_scan": 136211
+      },
+      {
+        "idx_scan": 43225,
+        "last_autoanalyze": "2026-11-08T09:08:07.14037+00:00",
+        "last_autovacuum": "2026-11-07T21:29:23.813936+00:00",
+        "n_dead_tup": 74,
+        "n_live_tup": 43874,
+        "relname": "app_installation_events",
+        "seq_scan": 4
+      },
+      {
+        "idx_scan": 157614,
+        "last_autoanalyze": "2026-11-07T00:20:42.060372+00:00",
+        "last_autovacuum": "2026-11-02T19:16:43.937932+00:00",
+        "n_dead_tup": 58,
+        "n_live_tup": 237,
+        "relname": "fuel_projection_repairs",
+        "seq_scan": 52665
+      },
+      {
+        "idx_scan": 521807,
+        "last_autoanalyze": "2026-11-08T07:09:51.93679+00:00",
+        "last_autovacuum": "2026-11-08T07:06:51.92603+00:00",
+        "n_dead_tup": 51,
+        "n_live_tup": 72,
+        "relname": "fuel_station_batch_checks",
+        "seq_scan": 165871
+      },
+      {
+        "idx_scan": 230,
+        "last_autoanalyze": "2026-11-06T23:13:40.591019+00:00",
+        "last_autovacuum": "2026-11-01T11:47:14.876316+00:00",
+        "n_dead_tup": 48,
+        "n_live_tup": 26,
+        "relname": "driving_research_device_counts",
+        "seq_scan": 5
+      },
+      {
+        "idx_scan": 65012,
+        "last_autoanalyze": "2026-11-08T12:06:09.426912+00:00",
+        "last_autovacuum": "2026-11-08T10:57:05.679374+00:00",
+        "n_dead_tup": 45,
+        "n_live_tup": 3,
+        "relname": "fuel_national_regions",
+        "seq_scan": 122037
+      },
+      {
+        "idx_scan": 0,
+        "last_autoanalyze": "2026-11-08T12:14:33.57819+00:00",
+        "last_autovacuum": "2026-10-18T13:21:26.182975+00:00",
+        "n_dead_tup": 40,
+        "n_live_tup": 1,
+        "relname": "fuel_national_config",
+        "seq_scan": 265991
+      }
+    ]
+  },
+  "confirmedRunsAndBudgets": {
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "id": true,
+      "last_dispatch_at": "2026-11-08T16:06:00.248418+00:00",
+      "last_request_at": "2026-11-08T16:06:43.896491+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-11-08T06:14:26.032394+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "jobs": [
+      {
+        "attempts": 65,
+        "count": 65,
+        "slot_at": "2026-11-08T07:00:00+00:00",
+        "status": "succeeded"
+      },
+      {
+        "attempts": 0,
+        "count": 7,
+        "slot_at": "2026-11-08T07:00:00+00:00",
+        "status": "missed"
+      },
+      {
+        "attempts": 0,
+        "count": 72,
+        "slot_at": "2026-11-08T08:00:00+00:00",
+        "status": "missed"
+      },
+      {
+        "attempts": 0,
+        "count": 72,
+        "slot_at": "2026-11-08T09:00:00+00:00",
+        "status": "missed"
+      },
+      {
+        "attempts": 0,
+        "count": 72,
+        "slot_at": "2026-11-08T10:00:00+00:00",
+        "status": "missed"
+      },
+      {
+        "attempts": 0,
+        "count": 72,
+        "slot_at": "2026-11-08T11:00:00+00:00",
+        "status": "missed"
+      },
+      {
+        "attempts": 0,
+        "count": 72,
+        "slot_at": "2026-11-08T12:00:00+00:00",
+        "status": "missed"
+      },
+      {
+        "attempts": 0,
+        "count": 72,
+        "slot_at": "2026-11-08T13:00:00+00:00",
+        "status": "missed"
+      },
+      {
+        "attempts": 0,
+        "count": 72,
+        "slot_at": "2026-11-08T14:00:00+00:00",
+        "status": "missed"
+      },
+      {
+        "attempts": 0,
+        "count": 72,
+        "slot_at": "2026-11-08T15:00:00+00:00",
+        "status": "missed"
+      },
+      {
+        "attempts": 0,
+        "count": 49,
+        "slot_at": "2026-11-08T16:00:00+00:00",
+        "status": "queued"
+      },
+      {
+        "attempts": 23,
+        "count": 23,
+        "slot_at": "2026-11-08T16:00:00+00:00",
+        "status": "succeeded"
+      }
+    ],
+    "outliers": [
+      {
+        "calls": 38162,
+        "max_ms": 7986,
+        "mean_ms": 1932,
+        "query": "WITH pgrst_source AS (SELECT pgrst_call.pgrst_scalar FROM (SELECT $1 AS json_data) pgrst_payload, LATERAL (SELECT \"p_job_id\", \"p_stations\" FROM json_to_record(pgrst_payload.json_data) AS _(\"p_job_id\" bigint, \"p_stations\" jsonb) LIMIT $4) pgrst_body , LATERAL (SELECT \"public\".\"publish_fuel_station_batch\"(\"p_job_id\" := pgrst_body.\"p_job_id\", \"p_stati",
+        "shared_blks_read": 27852530,
+        "temp_blks_written": 0,
+        "total_ms": 73746435
+      },
+      {
+        "calls": 32756,
+        "max_ms": 87191,
+        "mean_ms": 409,
+        "query": "select public.dispatch_fuel_national()",
+        "shared_blks_read": 273708,
+        "temp_blks_written": 0,
+        "total_ms": 13406907
+      },
+      {
+        "calls": 39876,
+        "max_ms": 7752,
+        "mean_ms": 298,
+        "query": "WITH pgrst_source AS (SELECT \"pgrst_call\".* FROM (SELECT $1 AS json_data) pgrst_payload, LATERAL (SELECT \"p_region\" FROM json_to_record(pgrst_payload.json_data) AS _(\"p_region\" text) LIMIT $4) pgrst_body , LATERAL \"public\".\"claim_fuel_national_region_job\"(\"p_region\" := pgrst_body.\"p_region\") pgrst_call) SELECT $5::bigint AS total_result_set, pg_cat",
+        "shared_blks_read": 4193722,
+        "temp_blks_written": 0,
+        "total_ms": 11880385
+      },
+      {
+        "calls": 32711,
+        "max_ms": 59557,
+        "mean_ms": 313,
+        "query": "select public.publish_completed_national_trends()",
+        "shared_blks_read": 6126508,
+        "temp_blks_written": 0,
+        "total_ms": 10254476
+      },
+      {
+        "calls": 147926,
+        "max_ms": 196927,
+        "mean_ms": 53,
+        "query": "insert into cron.job_run_details (jobid, runid, database, username, command, status) values ($1,$2,$3,$4,$5,$6)",
+        "shared_blks_read": 4758,
+        "temp_blks_written": 0,
+        "total_ms": 7887013
+      },
+      {
+        "calls": 38580,
+        "max_ms": 5634,
+        "mean_ms": 193,
+        "query": "WITH pgrst_source AS (SELECT pgrst_call.pgrst_scalar FROM (SELECT $1 AS json_data) pgrst_payload, LATERAL (SELECT \"p_ids\" FROM json_to_record(pgrst_payload.json_data) AS _(\"p_ids\" text[]) LIMIT $4) pgrst_body , LATERAL (SELECT \"public\".\"fuel_station_metadata_needed\"(\"p_ids\" := pgrst_body.\"p_ids\") pgrst_scalar) pgrst_call) SELECT $5::bigint AS total",
+        "shared_blks_read": 6928730,
+        "temp_blks_written": 0,
+        "total_ms": 7440936
+      },
+      {
+        "calls": 32672,
+        "max_ms": 114332,
+        "mean_ms": 213,
+        "query": "select public.dispatch_fuel_discovery()",
+        "shared_blks_read": 51460,
+        "temp_blks_written": 0,
+        "total_ms": 6955436
+      },
+      {
+        "calls": 32802,
+        "max_ms": 72432,
+        "mean_ms": 136,
+        "query": "select public.dispatch_fuel_projection_repair()",
+        "shared_blks_read": 66014,
+        "temp_blks_written": 0,
+        "total_ms": 4467619
+      },
+      {
+        "calls": 3147,
+        "max_ms": 3269,
+        "mean_ms": 939,
+        "query": "WITH pgrst_source AS (SELECT \"pgrst_call\".* FROM \"public\".\"fuel_national_retention_candidates\"() pgrst_call) SELECT $3::bigint AS total_result_set, pg_catalog.count(_postgrest_t) AS page_total, coalesce(json_agg(_postgrest_t), $4) AS body, nullif(current_setting($5, $6), $7) AS response_headers, nullif(current_setting($8, $9), $10) AS response_stat",
+        "shared_blks_read": 581068,
+        "temp_blks_written": 0,
+        "total_ms": 2954263
+      },
+      {
+        "calls": 30243,
+        "max_ms": 44428,
+        "mean_ms": 87,
+        "query": "WITH    rows AS (      SELECT ctid      FROM net._http_response      WHERE created < now() - $1      ORDER BY created      LIMIT $2    )    DELETE FROM net._http_response r    USING rows WHERE r.ctid = rows.ctid",
+        "shared_blks_read": 209443,
+        "temp_blks_written": 0,
+        "total_ms": 2629878
+      },
+      {
+        "calls": 6457,
+        "max_ms": 132454,
+        "mean_ms": 388,
+        "query": "update cron.job_run_details set status = $1, return_message = $2, start_time = $3, end_time = $4 where runid = $5",
+        "shared_blks_read": 6,
+        "temp_blks_written": 0,
+        "total_ms": 2507673
+      },
+      {
+        "calls": 34456,
+        "max_ms": 7824,
+        "mean_ms": 62,
+        "query": "WITH pgrst_source AS (SELECT pgrst_call.pgrst_scalar FROM (SELECT $1 AS json_data) pgrst_payload, LATERAL (SELECT \"p_id\", \"p_hash\", \"p_profile\", \"p_events\" FROM json_to_record(pgrst_payload.json_data) AS _(\"p_id\" uuid, \"p_hash\" text, \"p_profile\" jsonb, \"p_events\" jsonb) LIMIT $4) pgrst_body , LATERAL (SELECT \"public\".\"ingest_installation_telemetry\"",
+        "shared_blks_read": 43289,
+        "temp_blks_written": 0,
+        "total_ms": 2132191
+      },
+      {
+        "calls": 147926,
+        "max_ms": 100596,
+        "mean_ms": 14,
+        "query": "update cron.job_run_details set status = $1 where runid = $2",
+        "shared_blks_read": 497,
+        "temp_blks_written": 0,
+        "total_ms": 2025057
+      },
+      {
+        "calls": 78427,
+        "max_ms": 7684,
+        "mean_ms": 24,
+        "query": "WITH pgrst_source AS (SELECT pgrst_call.pgrst_scalar FROM (SELECT $1 AS json_data) pgrst_payload, LATERAL (SELECT \"p_id\", \"p_hash\", \"p_events\" FROM json_to_record(pgrst_payload.json_data) AS _(\"p_id\" uuid, \"p_hash\" text, \"p_events\" jsonb) LIMIT $4) pgrst_body , LATERAL (SELECT \"public\".\"ingest_driving_research\"(\"p_id\" := pgrst_body.\"p_id\", \"p_hash\"",
+        "shared_blks_read": 240779,
+        "temp_blks_written": 0,
+        "total_ms": 1872447
+      },
+      {
+        "calls": 38200,
+        "max_ms": 5020,
+        "mean_ms": 44,
+        "query": "WITH pgrst_source AS (SELECT pgrst_call.pgrst_scalar FROM (SELECT $1 AS json_data) pgrst_payload, LATERAL (SELECT \"p_id\", \"p_token\", \"p_ids\", \"p_started_at\", \"p_observed_at\", \"p_path\", \"p_bytes\", \"p_sha256\", \"p_priced\" FROM json_to_record(pgrst_payload.json_data) AS _(\"p_id\" bigint, \"p_token\" uuid, \"p_ids\" text[], \"p_started_at\" timestamp with time",
+        "shared_blks_read": 15041,
+        "temp_blks_written": 0,
+        "total_ms": 1688917
+      },
+      {
+        "calls": 3018,
+        "max_ms": 6814,
+        "mean_ms": 512,
+        "query": "WITH pgrst_source AS (SELECT pgrst_call.pgrst_scalar FROM (SELECT \"public\".\"reconcile_fuel_national_retention\"() pgrst_scalar) pgrst_call) SELECT $3::bigint AS total_result_set, $4 AS page_total, coalesce(json_agg(_postgrest_t.pgrst_scalar)->$5, $6) AS body, nullif(current_setting($7, $8), $9) AS response_headers, nullif(current_setting($10, $11), ",
+        "shared_blks_read": 504026,
+        "temp_blks_written": 0,
+        "total_ms": 1543853
+      },
+      {
+        "calls": 221,
+        "max_ms": 16123,
+        "mean_ms": 5711,
+        "query": "select jsonb_build_object(\n $1,(select to_jsonb(c) from public.fuel_national_config c),\n $2,(with slots as (\n   select s, s+interval $3 deadline from fuel_national_config c\n   cross join lateral generate_series(c.operational_starts_at,date_trunc($4,now()),interval $5) s\n   where c.continuous and c.operational_starts_at is not null and s>=now()-inte",
+        "shared_blks_read": 754869,
+        "temp_blks_written": 0,
+        "total_ms": 1262136
+      },
+      {
+        "calls": 83905,
+        "max_ms": 7763,
+        "mean_ms": 13,
+        "query": "WITH pgrst_source AS (SELECT pgrst_call.pgrst_scalar FROM (SELECT $1 AS json_data) pgrst_payload, LATERAL (SELECT \"p_id\", \"p_hash\" FROM json_to_record(pgrst_payload.json_data) AS _(\"p_id\" uuid, \"p_hash\" text) LIMIT $4) pgrst_body , LATERAL (SELECT \"public\".\"access_driving_research\"(\"p_id\" := pgrst_body.\"p_id\", \"p_hash\" := pgrst_body.\"p_hash\") pgrst",
+        "shared_blks_read": 7130,
+        "temp_blks_written": 0,
+        "total_ms": 1105684
+      }
+    ]
+  },
+  "hostBefore": [
+    {
+      "name": "node_vmstat_pswpout",
+      "value": 639907786
+    },
+    {
+      "name": "node_load15",
+      "value": 12.24
+    },
+    {
+      "name": "node_memory_MemTotal_bytes",
+      "value": 431308800
+    },
+    {
+      "name": "node_memory_SwapTotal_bytes",
+      "value": 1073737728
+    },
+    {
+      "name": "node_disk_io_time_seconds_total",
+      "device": "nvme0n1",
+      "value": 33952.1
+    },
+    {
+      "name": "node_disk_io_time_seconds_total",
+      "device": "nvme1n1",
+      "value": 215119.755
+    },
+    {
+      "name": "node_disk_written_bytes_total",
+      "device": "nvme0n1",
+      "value": 652761690112
+    },
+    {
+      "name": "node_disk_written_bytes_total",
+      "device": "nvme1n1",
+      "value": 2659469784064
+    },
+    {
+      "name": "node_load5",
+      "value": 4.94
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "0",
+      "mode": "idle",
+      "value": 1515845.97
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "0",
+      "mode": "iowait",
+      "value": 153234.61
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "0",
+      "mode": "irq",
+      "value": 0
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "0",
+      "mode": "nice",
+      "value": 30.75
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "0",
+      "mode": "softirq",
+      "value": 431.33
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "0",
+      "mode": "steal",
+      "value": 22.57
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "0",
+      "mode": "system",
+      "value": 15897.79
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "0",
+      "mode": "user",
+      "value": 28512.97
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "1",
+      "mode": "idle",
+      "value": 1515993.05
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "1",
+      "mode": "iowait",
+      "value": 152842.64
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "1",
+      "mode": "irq",
+      "value": 0
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "1",
+      "mode": "nice",
+      "value": 30.13
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "1",
+      "mode": "softirq",
+      "value": 464.02
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "1",
+      "mode": "steal",
+      "value": 24.83
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "1",
+      "mode": "system",
+      "value": 15998.29
+    },
+    {
+      "name": "node_cpu_seconds_total",
+      "cpu": "1",
+      "mode": "user",
+      "value": 28582.02
+    },
+    {
+      "name": "node_vmstat_pswpin",
+      "value": 621234076
+    },
+    {
+      "name": "node_disk_read_bytes_total",
+      "device": "nvme0n1",
+      "value": 1486622722048
+    },
+    {
+      "name": "node_disk_read_bytes_total",
+      "device": "nvme1n1",
+      "value": 5912430641152
+    },
+    {
+      "name": "node_memory_MemAvailable_bytes",
+      "value": 125706240
+    },
+    {
+      "name": "node_load1",
+      "value": 1.16
+    },
+    {
+      "name": "node_memory_SwapFree_bytes",
+      "value": 592449536
+    },
+    {
+      "name": "node_filesystem_avail_bytes",
+      "device": "/dev/nvme0n1",
+      "mountpoint": "/data",
+      "value": 6013513728
+    },
+    {
+      "name": "node_filesystem_avail_bytes",
+      "device": "/dev/nvme1n1p2",
+      "mountpoint": "/",
+      "value": 3176034304
+    }
+  ],
+  "indexesBefore": [
+    {
+      "definition": "CREATE INDEX fuel_national_price_order ON public.fuel_station_price_lookup USING btree (fuel_product, price, station_id) INCLUDE (reported_at, payment)",
+      "indisready": true,
+      "indisvalid": true,
+      "relname": "fuel_national_price_order",
+      "relpages": 6862,
+      "reltuples": 305607
+    },
+    {
+      "definition": "CREATE INDEX fuel_station_latest_job_id ON public.fuel_station_latest USING btree (job_id)",
+      "indisready": true,
+      "indisvalid": true,
+      "relname": "fuel_station_latest_job_id",
+      "relpages": 3524,
+      "reltuples": 142805
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX fuel_station_price_lookup_pkey ON public.fuel_station_price_lookup USING btree (station_id, fuel_product, payment)",
+      "indisready": true,
+      "indisvalid": true,
+      "relname": "fuel_station_price_lookup_pkey",
+      "relpages": 3555,
+      "reltuples": 305607
+    },
+    {
+      "definition": "CREATE INDEX fuel_station_retention_reference ON public.fuel_station_latest USING btree (job_id) INCLUDE (observation_catalog_id, observation_ordinal, observed_at)",
+      "indisready": true,
+      "indisvalid": true,
+      "relname": "fuel_station_retention_reference",
+      "relpages": 15793,
+      "reltuples": 142805
+    }
+  ],
+  "densityBefore": [
+    {
+      "index_name": "fuel_station_retention_reference",
+      "stats": {
+        "avg_leaf_density": 6.61,
+        "deleted_pages": 953,
+        "empty_pages": 0,
+        "index_size": 129376256,
+        "internal_pages": 165,
+        "leaf_fragmentation": 21.12,
+        "leaf_pages": 14674,
+        "root_block_no": 219,
+        "tree_level": 2,
+        "version": 4
+      }
+    },
+    {
+      "index_name": "fuel_national_price_order",
+      "stats": {
+        "avg_leaf_density": 32.98,
+        "deleted_pages": 1,
+        "empty_pages": 0,
+        "index_size": 56213504,
+        "internal_pages": 54,
+        "leaf_fragmentation": 48.77,
+        "leaf_pages": 6806,
+        "root_block_no": 162,
+        "tree_level": 2,
+        "version": 4
+      }
+    },
+    {
+      "index_name": "fuel_station_price_lookup_pkey",
+      "stats": {
+        "avg_leaf_density": 44.75,
+        "deleted_pages": 0,
+        "empty_pages": 0,
+        "index_size": 29122560,
+        "internal_pages": 22,
+        "leaf_fragmentation": 48.84,
+        "leaf_pages": 3532,
+        "root_block_no": 190,
+        "tree_level": 2,
+        "version": 4
+      }
+    }
+  ],
+  "compactReadPlan": [
+    {
+      "Execution Time": 0.793,
+      "Plan": {
+        "Actual Loops": 1,
+        "Actual Rows": 1,
+        "Actual Startup Time": 0.672,
+        "Actual Total Time": 0.674,
+        "Alias": "fuel_station_latest",
+        "Async Capable": false,
+        "Heap Fetches": 0,
+        "Index Cond": "(job_id = (InitPlan 2).col1)",
+        "Index Name": "fuel_station_retention_reference_compact",
+        "Local Dirtied Blocks": 0,
+        "Local Hit Blocks": 0,
+        "Local Read Blocks": 0,
+        "Local Written Blocks": 0,
+        "Node Type": "Index Only Scan",
+        "Parallel Aware": false,
+        "Plan Rows": 21,
+        "Plan Width": 36,
+        "Plans": [
+          {
+            "Actual Loops": 1,
+            "Actual Rows": 1,
+            "Actual Startup Time": 0.656,
+            "Actual Total Time": 0.656,
+            "Async Capable": false,
+            "Local Dirtied Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Written Blocks": 0,
+            "Node Type": "Result",
+            "Parallel Aware": false,
+            "Parent Relationship": "InitPlan",
+            "Plan Rows": 1,
+            "Plan Width": 8,
+            "Plans": [
+              {
+                "Actual Loops": 1,
+                "Actual Rows": 1,
+                "Actual Startup Time": 0.653,
+                "Actual Total Time": 0.654,
+                "Async Capable": false,
+                "Local Dirtied Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Written Blocks": 0,
+                "Node Type": "Limit",
+                "Parallel Aware": false,
+                "Parent Relationship": "InitPlan",
+                "Plan Rows": 1,
+                "Plan Width": 8,
+                "Plans": [
+                  {
+                    "Actual Loops": 1,
+                    "Actual Rows": 1,
+                    "Actual Startup Time": 0.652,
+                    "Actual Total Time": 0.652,
+                    "Alias": "fuel_station_latest_1",
+                    "Async Capable": false,
+                    "Heap Fetches": 0,
+                    "Index Cond": "(job_id IS NOT NULL)",
+                    "Index Name": "fuel_station_retention_reference_compact",
+                    "Local Dirtied Blocks": 0,
+                    "Local Hit Blocks": 0,
+                    "Local Read Blocks": 0,
+                    "Local Written Blocks": 0,
+                    "Node Type": "Index Only Scan",
+                    "Parallel Aware": false,
+                    "Parent Relationship": "Outer",
+                    "Plan Rows": 120024,
+                    "Plan Width": 8,
+                    "Relation Name": "fuel_station_latest",
+                    "Rows Removed by Index Recheck": 0,
+                    "Scan Direction": "Forward",
+                    "Shared Dirtied Blocks": 0,
+                    "Shared Hit Blocks": 4,
+                    "Shared Read Blocks": 0,
+                    "Shared Written Blocks": 0,
+                    "Startup Cost": 0.42,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0,
+                    "Total Cost": 6309.07
+                  }
+                ],
+                "Shared Dirtied Blocks": 0,
+                "Shared Hit Blocks": 4,
+                "Shared Read Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Startup Cost": 0.42,
+                "Subplan Name": "InitPlan 1",
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Total Cost": 0.47
+              }
+            ],
+            "Shared Dirtied Blocks": 0,
+            "Shared Hit Blocks": 4,
+            "Shared Read Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Startup Cost": 0.47,
+            "Subplan Name": "InitPlan 2",
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Total Cost": 0.48
+          }
+        ],
+        "Relation Name": "fuel_station_latest",
+        "Rows Removed by Index Recheck": 0,
+        "Scan Direction": "Forward",
+        "Shared Dirtied Blocks": 0,
+        "Shared Hit Blocks": 8,
+        "Shared Read Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Startup Cost": 0.9,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0,
+        "Total Cost": 6.76
+      },
+      "Planning": {
+        "Local Dirtied Blocks": 0,
+        "Local Hit Blocks": 0,
+        "Local Read Blocks": 0,
+        "Local Written Blocks": 0,
+        "Shared Dirtied Blocks": 0,
+        "Shared Hit Blocks": 281,
+        "Shared Read Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0
+      },
+      "Planning Time": 12.356,
+      "Triggers": []
+    }
+  ],
+  "deployment": [
+    {
+      "sql": "drop index concurrently if exists public.fuel_station_retention_reference",
+      "ok": true,
+      "elapsedMs": 2003
+    },
+    {
+      "sql": "drop index concurrently if exists public.fuel_station_latest_job_id",
+      "ok": true,
+      "elapsedMs": 1808
+    },
+    {
+      "sql": "reindex index concurrently public.fuel_national_price_order",
+      "ok": true,
+      "elapsedMs": 48511
+    },
+    {
+      "sql": "reindex index concurrently public.fuel_station_price_lookup_pkey",
+      "ok": true,
+      "elapsedMs": 4200
+    }
+  ],
+  "indexesAfter": [
+    {
+      "bytes": 2039808,
+      "indisready": true,
+      "indisvalid": true,
+      "relname": "fuel_station_retention_reference_compact"
+    },
+    {
+      "bytes": 22790144,
+      "indisready": true,
+      "indisvalid": true,
+      "relname": "fuel_national_price_order"
+    },
+    {
+      "bytes": 14376960,
+      "indisready": true,
+      "indisvalid": true,
+      "relname": "fuel_station_price_lookup_pkey"
+    }
+  ],
+  "densityAfter": {
+    "indexes": [
+      {
+        "index_name": "fuel_station_retention_reference_compact",
+        "stats": {
+          "avg_leaf_density": 88.12,
+          "deleted_pages": 0,
+          "empty_pages": 0,
+          "index_size": 2056192,
+          "internal_pages": 3,
+          "leaf_fragmentation": 0.81,
+          "leaf_pages": 247,
+          "root_block_no": 208,
+          "tree_level": 2,
+          "version": 4
+        }
+      },
+      {
+        "index_name": "fuel_national_price_order",
+        "stats": {
+          "avg_leaf_density": 76.79,
+          "deleted_pages": 0,
+          "empty_pages": 0,
+          "index_size": 23887872,
+          "internal_pages": 20,
+          "leaf_fragmentation": 16.48,
+          "leaf_pages": 2895,
+          "root_block_no": 162,
+          "tree_level": 2,
+          "version": 4
+        }
+      },
+      {
+        "index_name": "fuel_station_price_lookup_pkey",
+        "stats": {
+          "avg_leaf_density": 86.66,
+          "deleted_pages": 0,
+          "empty_pages": 0,
+          "index_size": 14868480,
+          "internal_pages": 11,
+          "leaf_fragmentation": 4.94,
+          "leaf_pages": 1803,
+          "root_block_no": 179,
+          "tree_level": 2,
+          "version": 4
+        }
+      }
+    ],
+    "invalid": null,
+    "migration_columns": [
+      "version",
+      "statements",
+      "name"
+    ]
+  },
+  "diagnosticsAfter": {
+    "observedAt": "2026-11-08T16:13:31.327Z",
+    "partial": true,
+    "providerRequests": 0,
+    "host": {
+      "ok": true,
+      "data": [
+        {
+          "name": "node_load1",
+          "value": 1
+        },
+        {
+          "name": "node_load15",
+          "value": 8.77
+        },
+        {
+          "name": "node_disk_io_time_seconds_total",
+          "device": "nvme0n1",
+          "value": 33979.973
+        },
+        {
+          "name": "node_disk_io_time_seconds_total",
+          "device": "nvme1n1",
+          "value": 215256.335
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "idle",
+          "value": 1516064.58
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "iowait",
+          "value": 153337.19
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "irq",
+          "value": 0
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "nice",
+          "value": 30.75
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "softirq",
+          "value": 431.62
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "steal",
+          "value": 22.58
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "system",
+          "value": 15906.7
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "user",
+          "value": 28528.51
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "idle",
+          "value": 1516208.79
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "iowait",
+          "value": 152947.75
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "irq",
+          "value": 0
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "nice",
+          "value": 30.14
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "softirq",
+          "value": 464.3
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "steal",
+          "value": 24.84
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "system",
+          "value": 16007.13
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "user",
+          "value": 28597.54
+        },
+        {
+          "name": "node_filesystem_avail_bytes",
+          "device": "/dev/nvme0n1",
+          "mountpoint": "/data",
+          "value": 6299734016
+        },
+        {
+          "name": "node_filesystem_avail_bytes",
+          "device": "/dev/nvme1n1p2",
+          "mountpoint": "/",
+          "value": 3175997440
+        },
+        {
+          "name": "node_memory_MemTotal_bytes",
+          "value": 431308800
+        },
+        {
+          "name": "node_load5",
+          "value": 2.39
+        },
+        {
+          "name": "node_disk_written_bytes_total",
+          "device": "nvme0n1",
+          "value": 653215690752
+        },
+        {
+          "name": "node_disk_written_bytes_total",
+          "device": "nvme1n1",
+          "value": 2661453718528
+        },
+        {
+          "name": "node_vmstat_pswpin",
+          "value": 621718850
+        },
+        {
+          "name": "node_memory_SwapFree_bytes",
+          "value": 589053952
+        },
+        {
+          "name": "node_vmstat_pswpout",
+          "value": 640387949
+        },
+        {
+          "name": "node_memory_SwapTotal_bytes",
+          "value": 1073737728
+        },
+        {
+          "name": "node_disk_read_bytes_total",
+          "device": "nvme0n1",
+          "value": 1488255154176
+        },
+        {
+          "name": "node_disk_read_bytes_total",
+          "device": "nvme1n1",
+          "value": 5916373323776
+        },
+        {
+          "name": "node_memory_MemAvailable_bytes",
+          "value": 103452672
+        }
+      ]
+    },
+    "database": {
+      "ok": true,
+      "data": {
+        "activity": [
+          {
+            "backend_type": "walwriter",
+            "count": 1,
+            "state": null,
+            "wait_event": "WalWriterMain",
+            "wait_event_type": "Activity"
+          },
+          {
+            "backend_type": "client backend",
+            "count": 9,
+            "state": "idle",
+            "wait_event": "ClientRead",
+            "wait_event_type": "Client"
+          },
+          {
+            "backend_type": "autovacuum worker",
+            "count": 1,
+            "state": "active",
+            "wait_event": "DataFileRead",
+            "wait_event_type": "IO"
+          },
+          {
+            "backend_type": "archiver",
+            "count": 1,
+            "state": null,
+            "wait_event": "ArchiverMain",
+            "wait_event_type": "Activity"
+          },
+          {
+            "backend_type": "checkpointer",
+            "count": 1,
+            "state": null,
+            "wait_event": "CheckpointWriteDelay",
+            "wait_event_type": "Timeout"
+          },
+          {
+            "backend_type": "pg_net 0.19.5 worker",
+            "count": 1,
+            "state": null,
+            "wait_event": null,
+            "wait_event_type": null
+          },
+          {
+            "backend_type": "pg_cron launcher",
+            "count": 1,
+            "state": null,
+            "wait_event": "Extension",
+            "wait_event_type": "Extension"
+          },
+          {
+            "backend_type": "background writer",
+            "count": 1,
+            "state": null,
+            "wait_event": "BgwriterMain",
+            "wait_event_type": "Activity"
+          },
+          {
+            "backend_type": "autovacuum launcher",
+            "count": 1,
+            "state": null,
+            "wait_event": "AutovacuumMain",
+            "wait_event_type": "Activity"
+          },
+          {
+            "backend_type": "client backend",
+            "count": 1,
+            "state": "active",
+            "wait_event": null,
+            "wait_event_type": null
+          },
+          {
+            "backend_type": "logical replication launcher",
+            "count": 1,
+            "state": null,
+            "wait_event": "LogicalLauncherMain",
+            "wait_event_type": "Activity"
+          }
+        ],
+        "cache": {
+          "published_at": "2026-11-08T06:20:00.291971+00:00",
+          "run_id": 52655,
+          "scopes": 10
+        },
+        "config": {
+          "approved_lookups_per_hour": 161660,
+          "archive_budget_bytes": 900000000,
+          "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+          "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+          "continuous": true,
+          "enabled": true,
+          "ends_at": "2026-10-07T18:19:00+00:00",
+          "halt_reason": "UPSTREAM_HTTP_502",
+          "id": true,
+          "last_dispatch_at": "2026-11-08T16:13:00.346135+00:00",
+          "last_request_at": "2026-11-08T16:13:32.366359+00:00",
+          "max_requests_per_hour": 92,
+          "operational_raw_hours": 48,
+          "operational_starts_at": "2026-10-07T19:00:00+00:00",
+          "provider_backoff_until": "2026-11-08T16:09:02.528169+00:00",
+          "request_interval_seconds": 10,
+          "starts_at": "2026-09-30T22:00:00+00:00"
+        },
+        "observed_at": "2026-11-08T16:13:38.411459+00:00",
+        "runs": [
+          {
+            "completed_at": null,
+            "deadline_at": "2026-11-08T17:00:00+00:00",
+            "id": 52886,
+            "slot_at": "2026-11-08T16:00:00+00:00",
+            "status": "running"
+          },
+          {
+            "completed_at": "2026-11-08T16:00:07.116712+00:00",
+            "deadline_at": "2026-11-08T16:00:00+00:00",
+            "id": 52879,
+            "slot_at": "2026-11-08T15:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-11-08T15:27:08.459379+00:00",
+            "deadline_at": "2026-11-08T15:00:00+00:00",
+            "id": 52867,
+            "slot_at": "2026-11-08T14:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-11-08T14:20:32.607031+00:00",
+            "deadline_at": "2026-11-08T14:00:00+00:00",
+            "id": 52863,
+            "slot_at": "2026-11-08T13:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-11-08T13:23:36.49773+00:00",
+            "deadline_at": "2026-11-08T13:00:00+00:00",
+            "id": 52847,
+            "slot_at": "2026-11-08T12:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-11-08T12:04:32.630242+00:00",
+            "deadline_at": "2026-11-08T12:00:00+00:00",
+            "id": 52834,
+            "slot_at": "2026-11-08T11:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-11-08T11:02:01.457062+00:00",
+            "deadline_at": "2026-11-08T11:00:00+00:00",
+            "id": 52800,
+            "slot_at": "2026-11-08T10:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-11-08T10:01:03.388278+00:00",
+            "deadline_at": "2026-11-08T10:00:00+00:00",
+            "id": 52771,
+            "slot_at": "2026-11-08T09:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-11-08T09:01:04.478751+00:00",
+            "deadline_at": "2026-11-08T09:00:00+00:00",
+            "id": 52746,
+            "slot_at": "2026-11-08T08:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-11-08T08:01:01.660889+00:00",
+            "deadline_at": "2026-11-08T08:00:00+00:00",
+            "id": 52715,
+            "slot_at": "2026-11-08T07:00:00+00:00",
+            "status": "partial"
+          },
+          {
+            "completed_at": "2026-11-08T06:17:14.545098+00:00",
+            "deadline_at": "2026-11-08T07:00:00+00:00",
+            "id": 52655,
+            "slot_at": "2026-11-08T06:00:00+00:00",
+            "status": "complete"
+          },
+          {
+            "completed_at": "2026-11-08T05:15:04.679441+00:00",
+            "deadline_at": "2026-11-08T06:00:00+00:00",
+            "id": 52595,
+            "slot_at": "2026-11-08T05:00:00+00:00",
+            "status": "complete"
+          },
+          {
+            "completed_at": "2026-11-08T04:16:36.82188+00:00",
+            "deadline_at": "2026-11-08T05:00:00+00:00",
+            "id": 52535,
+            "slot_at": "2026-11-08T04:00:00+00:00",
+            "status": "complete"
+          },
+          {
+            "completed_at": "2026-11-08T03:15:46.021024+00:00",
+            "deadline_at": "2026-11-08T04:00:00+00:00",
+            "id": 52475,
+            "slot_at": "2026-11-08T03:00:00+00:00",
+            "status": "complete"
+          },
+          {
+            "completed_at": "2026-11-08T02:18:04.495279+00:00",
+            "deadline_at": "2026-11-08T03:00:00+00:00",
+            "id": 52415,
+            "slot_at": "2026-11-08T02:00:00+00:00",
+            "status": "complete"
+          },
+          {
+            "completed_at": "2026-11-08T01:14:35.183462+00:00",
+            "deadline_at": "2026-11-08T02:00:00+00:00",
+            "id": 52355,
+            "slot_at": "2026-11-08T01:00:00+00:00",
+            "status": "complete"
+          },
+          {
+            "completed_at": "2026-11-08T00:15:04.847883+00:00",
+            "deadline_at": "2026-11-08T01:00:00+00:00",
+            "id": 52295,
+            "slot_at": "2026-11-08T00:00:00+00:00",
+            "status": "complete"
+          },
+          {
+            "completed_at": "2026-11-07T23:14:45.818253+00:00",
+            "deadline_at": "2026-11-08T00:00:00+00:00",
+            "id": 52235,
+            "slot_at": "2026-11-07T23:00:00+00:00",
+            "status": "complete"
+          },
+          {
+            "completed_at": "2026-11-07T22:14:44.860925+00:00",
+            "deadline_at": "2026-11-07T23:00:00+00:00",
+            "id": 52175,
+            "slot_at": "2026-11-07T22:00:00+00:00",
+            "status": "complete"
+          },
+          {
+            "completed_at": "2026-11-07T21:14:36.393408+00:00",
+            "deadline_at": "2026-11-07T22:00:00+00:00",
+            "id": 52115,
+            "slot_at": "2026-11-07T21:00:00+00:00",
+            "status": "complete"
+          },
+          {
+            "completed_at": "2026-11-07T20:15:38.488771+00:00",
+            "deadline_at": "2026-11-07T21:00:00+00:00",
+            "id": 52055,
+            "slot_at": "2026-11-07T20:00:00+00:00",
+            "status": "complete"
+          },
+          {
+            "completed_at": "2026-11-07T19:15:49.438552+00:00",
+            "deadline_at": "2026-11-07T20:00:00+00:00",
+            "id": 51995,
+            "slot_at": "2026-11-07T19:00:00+00:00",
+            "status": "complete"
+          },
+          {
+            "completed_at": "2026-11-07T18:14:44.984191+00:00",
+            "deadline_at": "2026-11-07T19:00:00+00:00",
+            "id": 51935,
+            "slot_at": "2026-11-07T18:00:00+00:00",
+            "status": "complete"
+          },
+          {
+            "completed_at": "2026-11-07T17:16:15.097765+00:00",
+            "deadline_at": "2026-11-07T18:00:00+00:00",
+            "id": 51875,
+            "slot_at": "2026-11-07T17:00:00+00:00",
+            "status": "complete"
+          }
+        ],
+        "schedules": [
+          {
+            "active": true,
+            "name": "fuel-national-discovery",
+            "schedule": "* * * * *"
+          },
+          {
+            "active": true,
+            "name": "fuel-national-trends-cache",
+            "schedule": "* * * * *"
+          },
+          {
+            "active": true,
+            "name": "fuel-national-projection-repair",
+            "schedule": "* * * * *"
+          },
+          {
+            "active": true,
+            "name": "fuel-national-dispatch",
+            "schedule": "* * * * *"
+          },
+          {
+            "active": true,
+            "name": "fuel-national-watchdog",
+            "schedule": "*/5 * * * *"
+          },
+          {
+            "active": true,
+            "name": "fuel-national-retention",
+            "schedule": "*/10 * * * *"
+          },
+          {
+            "active": true,
+            "name": "fuel-local-history-retention",
+            "schedule": "17 * * * *"
+          }
+        ],
+        "slots": {
+          "complete": 179,
+          "current_absent": 0,
+          "expected": 192,
+          "expired_absent": 0,
+          "expired_running": 0,
+          "partial": 12
+        }
+      }
+    }
+  },
+  "retentionCatchup": [
+    {
+      "at": "2026-11-08T16:15:09.749Z",
+      "ms": 4652,
+      "deferred_operational_hours": 1,
+      "detached_content_references": 100,
+      "marked_archives": 0,
+      "removed_operational_hours": 2
+    },
+    {
+      "at": "2026-11-08T16:15:13.706Z",
+      "ms": 3954,
+      "deferred_operational_hours": 1,
+      "detached_content_references": 100,
+      "marked_archives": 0,
+      "removed_operational_hours": 1
+    },
+    {
+      "at": "2026-11-08T16:15:16.196Z",
+      "ms": 2489,
+      "deferred_operational_hours": 0,
+      "detached_content_references": 96,
+      "marked_archives": 0,
+      "removed_operational_hours": 3
+    },
+    {
+      "at": "2026-11-08T16:15:18.295Z",
+      "ms": 2098,
+      "deferred_operational_hours": 0,
+      "detached_content_references": 0,
+      "marked_archives": 0,
+      "removed_operational_hours": 0
+    }
+  ],
+  "protectedBefore": {
+    "pinned_cache": {
+      "count": 72,
+      "fingerprint": "5cefdebf60bb700e496e22b412640bd6"
+    },
+    "research": {
+      "count": 11121,
+      "fingerprint": "91f9a30abb124c2cf93888d1a4a46c27"
+    }
+  },
+  "limits": "Initial collection recovery preceded our index repair. Resource pressure and index bloat are measured; the precise initiating cause of every timeout is not proven. No provider replay or billing change."
+}
