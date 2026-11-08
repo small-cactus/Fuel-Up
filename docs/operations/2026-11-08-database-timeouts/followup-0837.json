@@ -1,0 +1,231 @@
+{
+  "recorded_at": "2026-11-08T08:41:25.351094+00:00",
+  "incident_status": "unresolved",
+  "repair_attempts": 0,
+  "provider_requests_by_monitor": 0,
+  "runs": [
+    {
+      "completed_at": null,
+      "deadline_at": "2026-11-08 09:00:00+00",
+      "id": 52746,
+      "slot_at": "2026-11-08 08:00:00+00",
+      "status": "running"
+    },
+    {
+      "completed_at": "2026-11-08 08:01:01.660889+00",
+      "deadline_at": "2026-11-08 08:00:00+00",
+      "id": 52715,
+      "slot_at": "2026-11-08 07:00:00+00",
+      "status": "partial"
+    },
+    {
+      "completed_at": "2026-11-08 06:17:14.545098+00",
+      "deadline_at": "2026-11-08 07:00:00+00",
+      "id": 52655,
+      "slot_at": "2026-11-08 06:00:00+00",
+      "status": "complete"
+    }
+  ],
+  "checks": {
+    "cache": {
+      "published_at": "2026-11-08T06:20:00.291971+00:00",
+      "run_id": 52655,
+      "scopes": 10
+    },
+    "cron": [
+      {
+        "active": true,
+        "name": "fuel-national-dispatch"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-watchdog"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-retention"
+      }
+    ],
+    "jobs": [
+      {
+        "attempts": 65,
+        "batches": 65,
+        "run_id": 52715,
+        "status": "succeeded"
+      },
+      {
+        "attempts": 0,
+        "batches": 7,
+        "run_id": 52715,
+        "status": "missed"
+      },
+      {
+        "attempts": 0,
+        "batches": 72,
+        "run_id": 52746,
+        "status": "queued"
+      }
+    ],
+    "responses": [
+      {
+        "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "created": "2026-11-08T08:37:07.186087+00:00",
+        "status_code": 503
+      },
+      {
+        "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+        "created": "2026-11-08T08:36:31.297837+00:00",
+        "status_code": 503
+      },
+      {
+        "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+        "created": "2026-11-08T08:35:16.705364+00:00",
+        "status_code": 503
+      },
+      {
+        "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "created": "2026-11-08T08:30:02.856166+00:00",
+        "status_code": 503
+      },
+      {
+        "content": "{\"error\":\"NATIONAL_RETENTION_FAILED\"}",
+        "created": "2026-11-08T08:30:02.856166+00:00",
+        "status_code": 503
+      },
+      {
+        "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+        "created": "2026-11-08T08:27:15.142534+00:00",
+        "status_code": 503
+      }
+    ],
+    "slots": {
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 4
+    }
+  },
+  "connection_snapshot": {
+    "active": [
+      {
+        "blockers": [],
+        "duration": "00:00:00",
+        "pid": 2319944,
+        "state": "active",
+        "usename": "postgres",
+        "wait_event": null,
+        "wait_event_type": null
+      },
+      {
+        "blockers": [],
+        "duration": "-00:00:00.005025",
+        "pid": 2319942,
+        "state": "active",
+        "usename": "postgres",
+        "wait_event": null,
+        "wait_event_type": null
+      }
+    ],
+    "connection_limit": "60",
+    "connections": [
+      {
+        "connections": 1,
+        "oldest_transaction": null,
+        "state": null,
+        "usename": "supabase_admin",
+        "wait_event": "LogicalLauncherMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "connections": 1,
+        "oldest_transaction": null,
+        "state": null,
+        "usename": null,
+        "wait_event": "WalWriterMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "connections": 1,
+        "oldest_transaction": null,
+        "state": null,
+        "usename": null,
+        "wait_event": "ArchiveCommand",
+        "wait_event_type": "IPC"
+      },
+      {
+        "connections": 1,
+        "oldest_transaction": null,
+        "state": null,
+        "usename": null,
+        "wait_event": "AutovacuumMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "connections": 2,
+        "oldest_transaction": "00:00:00",
+        "state": "active",
+        "usename": "postgres",
+        "wait_event": null,
+        "wait_event_type": null
+      },
+      {
+        "connections": 1,
+        "oldest_transaction": null,
+        "state": "idle",
+        "usename": "pgbouncer",
+        "wait_event": "ClientRead",
+        "wait_event_type": "Client"
+      },
+      {
+        "connections": 2,
+        "oldest_transaction": null,
+        "state": "idle",
+        "usename": "supabase_admin",
+        "wait_event": "ClientRead",
+        "wait_event_type": "Client"
+      },
+      {
+        "connections": 2,
+        "oldest_transaction": null,
+        "state": null,
+        "usename": "supabase_admin",
+        "wait_event": "Extension",
+        "wait_event_type": "Extension"
+      },
+      {
+        "connections": 1,
+        "oldest_transaction": null,
+        "state": null,
+        "usename": null,
+        "wait_event": "CheckpointerMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "connections": 1,
+        "oldest_transaction": null,
+        "state": null,
+        "usename": null,
+        "wait_event": "BgwriterMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "connections": 11,
+        "oldest_transaction": null,
+        "state": "idle",
+        "usename": "authenticator",
+        "wait_event": "ClientRead",
+        "wait_event_type": "Client"
+      }
+    ]
+  },
+  "monitor_failures": {
+    "full_status": "Management HTTP 524 timeout",
+    "brief_status": "HTTP 544 login-role connection timeout"
+  },
+  "limitations": [
+    "08:00 hour has until 09:00 UTC; no new expired absent slots in the retained eight-day range.",
+    "Four partial operational hours include three previously reported partial hours and the new 07:00 partial.",
+    "Activity snapshot is not continuous evidence and does not establish root cause.",
+    "Full projection backlog and archive capacity could not be freshly verified.",
+    "No collection replay, re-enable, restart, schema/configuration, billing, routing or raw-price changes attempted."
+  ]
+}
