@@ -1,0 +1,122 @@
+{
+  "recorded_at": "2026-11-08T07:42:53.119767+00:00",
+  "incident_status": "unresolved",
+  "repair_attempts": 0,
+  "provider_requests_by_monitor": 0,
+  "brief": {
+    "cache": {
+      "published_at": "2026-11-08T06:20:00.291971+00:00",
+      "run_id": 52655,
+      "scopes": 10
+    },
+    "config": {
+      "continuous": true,
+      "enabled": true,
+      "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+      "last_dispatch_at": "2026-11-08T07:39:05.088565+00:00",
+      "last_request_at": "2026-11-08T07:13:31.720838+00:00",
+      "provider_backoff_until": "2026-11-08T06:14:26.032394+00:00"
+    },
+    "runs": [
+      {
+        "completed_at": null,
+        "deadline_at": "2026-11-08T08:00:00+00:00",
+        "id": 52715,
+        "slot_at": "2026-11-08T07:00:00+00:00",
+        "status": "running"
+      },
+      {
+        "completed_at": "2026-11-08T06:17:14.545098+00:00",
+        "deadline_at": "2026-11-08T07:00:00+00:00",
+        "id": 52655,
+        "slot_at": "2026-11-08T06:00:00+00:00",
+        "status": "complete"
+      },
+      {
+        "completed_at": "2026-11-08T05:15:04.679441+00:00",
+        "deadline_at": "2026-11-08T06:00:00+00:00",
+        "id": 52595,
+        "slot_at": "2026-11-08T05:00:00+00:00",
+        "status": "complete"
+      }
+    ]
+  },
+  "workers": {
+    "jobs": [
+      {
+        "attempts": 65,
+        "batches": 65,
+        "status": "succeeded"
+      },
+      {
+        "attempts": 0,
+        "batches": 7,
+        "status": "queued"
+      }
+    ],
+    "responses": [
+      {
+        "content": null,
+        "created": "2026-11-08T07:39:17.620488+00:00",
+        "status_code": null,
+        "timed_out": null
+      },
+      {
+        "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "created": "2026-11-08T07:36:09.03919+00:00",
+        "status_code": 503,
+        "timed_out": false
+      },
+      {
+        "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "created": "2026-11-08T07:33:15.050277+00:00",
+        "status_code": 503,
+        "timed_out": false
+      },
+      {
+        "content": null,
+        "created": "2026-11-08T07:30:30.3773+00:00",
+        "status_code": null,
+        "timed_out": null
+      },
+      {
+        "content": null,
+        "created": "2026-11-08T07:30:30.3773+00:00",
+        "status_code": null,
+        "timed_out": null
+      },
+      {
+        "content": "{\"error\":\"DATABASE_CLAIM_FUEL_NATIONAL_REGION_JOB_FAILED\",\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+        "created": "2026-11-08T07:28:37.152708+00:00",
+        "status_code": 503,
+        "timed_out": false
+      }
+    ]
+  },
+  "direct_read_checks": {
+    "observedAt": "2026-11-08T07:41:08.063Z",
+    "reads": [
+      {
+        "path": "fuel_national_runs?select=id,slot_at,status,deadline_at,completed_at&order=slot_at.desc&limit=3",
+        "error": "TimeoutError",
+        "ms": 12006
+      },
+      {
+        "path": "fuel_national_config?select=enabled,last_request_at,last_dispatch_at,halt_reason,provider_backoff_until",
+        "error": "TimeoutError",
+        "ms": 12003
+      }
+    ]
+  },
+  "management_failures": {
+    "status": "HTTP 544: Failed to create login role: Connection terminated due to connection timeout",
+    "supplemental_checks": "same HTTP 544 connection timeout",
+    "combined_diagnostics": "same HTTP 544 connection timeout"
+  },
+  "limitations": [
+    "07:00 hour has until 08:00 UTC; not yet counted as a missed hour.",
+    "No successful comprehensive check this heartbeat; full gap count, capacity, retention, budgets and projection backlog are not freshly verified.",
+    "Symptoms resemble November 7 incident; common root cause is not proven.",
+    "No configuration, billing, routing, raw-price or collection changes attempted."
+  ]
+}
