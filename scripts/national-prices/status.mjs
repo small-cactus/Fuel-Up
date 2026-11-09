@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { collectDiagnostics, failureKind } from './diagnostics.mjs';
+import { protectedReadSql } from './protectedRead.mjs';
 const sql = `select jsonb_build_object(
  'config',(select to_jsonb(c) from public.fuel_national_config c),
  'operational_slots',(with slots as (
@@ -46,7 +47,7 @@ const sql = `select jsonb_build_object(
  'events',(select jsonb_agg(e) from (select created_at,job_id,code,retry_after_seconds from public.fuel_national_events order by id desc limit 20) e)
 ) as status;`;
 try {
-  const result = execFileSync('npx', ['--no-install','supabase@2.118.0','db','query','--linked','--project-ref','vjindchxfebaltbslqwc',sql,'--output','json'], {
+  const result = execFileSync('npx', ['--no-install','supabase@2.118.0','db','query','--linked','--project-ref','vjindchxfebaltbslqwc',protectedReadSql(sql),'--output','json'], {
     encoding: 'utf8', timeout: 45000, stdio: ['ignore', 'pipe', 'pipe'],
   });
   console.log(JSON.stringify(JSON.parse(result).rows[0].status, null, 2));

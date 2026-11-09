@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { collectDiagnostics, summarizeMetrics } from '../scripts/national-prices/diagnostics.mjs';
+import { collectDiagnostics, summarizeMetrics, failureKind } from '../scripts/national-prices/diagnostics.mjs';
 
 test('database outage retains independent metrics and never reports full health', async () => {
   const result = await collectDiagnostics({
@@ -32,4 +32,10 @@ unrelated_metric{email="omit"} 1`), [
     { name: 'node_cpu_seconds_total', cpu: '0', mode: 'iowait', value: 150000 },
   ]);
   assert.throws(() => summarizeMetrics('<html>Gateway failure</html>'));
+});
+
+test('timeout and metrics gateway failures retain their safe diagnostic category', () => {
+  assert.equal(failureKind({ code: 'ETIMEDOUT', stderr: '' }), 'CLIENT_TIMEOUT');
+  assert.equal(failureKind({ name: 'TimeoutError', message: 'private detail' }), 'CLIENT_TIMEOUT');
+  assert.equal(failureKind(Error('Metrics HTTP 504')), 'METRICS_HTTP_504');
 });

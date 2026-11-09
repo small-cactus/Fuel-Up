@@ -2,6 +2,7 @@
 // Never calls a collector, modifies configuration, or prints credentials.
 import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
+import { protectedReadSql } from './protectedRead.mjs';
 
 const project = 'vjindchxfebaltbslqwc';
 const cli = args => execFileSync('npx', ['--no-install', 'supabase@2.118.0', ...args], {
@@ -40,6 +41,9 @@ export function failureKind(error) {
   if (/57014|statement timeout/.test(message)) return 'STATEMENT_TIMEOUT';
   if (/544|connection timeout/.test(message)) return 'DATABASE_CONNECTION_TIMEOUT';
   if (/524/.test(message)) return 'MANAGEMENT_GATEWAY_TIMEOUT';
+  const metricsStatus = message.match(/Metrics HTTP (\d{3})/);
+  if (metricsStatus) return `METRICS_HTTP_${metricsStatus[1]}`;
+  if (error?.code === 'ETIMEDOUT' || error?.name === 'TimeoutError') return 'CLIENT_TIMEOUT';
   if (/ETIMEDOUT|TimeoutError|timed out/.test(message)) return 'CLIENT_TIMEOUT';
   return 'READ_FAILED';
 }
@@ -82,7 +86,7 @@ async function hostMetrics() {
 }
 
 export async function collectDiagnostics({ query = () => JSON.parse(cli([
-  'db', 'query', '--linked', '--project-ref', project, coreSql, '--output', 'json',
+  'db', 'query', '--linked', '--project-ref', project, protectedReadSql(coreSql, 10000), '--output', 'json',
 ])).rows[0].diagnostics, metrics = hostMetrics } = {}) {
   const result = { observedAt: new Date().toISOString(), partial: true, providerRequests: 0 };
   // Host metrics first: unavailable SQL must not hide the independent resource signal.

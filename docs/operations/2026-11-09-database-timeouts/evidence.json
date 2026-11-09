@@ -1,0 +1,140 @@
+{
+  "incident_date": "2026-11-09",
+  "collection_repair_attempts": 0,
+  "monitor_provider_requests": 0,
+  "note": "Temporary filenames are identifiers, not observation timestamps; use embedded database or diagnostics timestamps.",
+  "observations": {
+    "initial_status": {
+      "statusError": "READ_FAILED",
+      "observedAt": "2026-11-09T15:10:34.190Z",
+      "partial": true,
+      "providerRequests": 0,
+      "host": {
+        "ok": false,
+        "error": "READ_FAILED"
+      },
+      "database": {
+        "ok": false,
+        "error": "READ_FAILED"
+      }
+    },
+    "initial_host": {
+      "observedAt": "2026-11-09T15:09:49.149Z",
+      "host": {
+        "ok": false,
+        "error": "READ_FAILED"
+      }
+    },
+    "recent_runs": [
+      {
+        "completed_at": null,
+        "id": 54266,
+        "now": "2026-11-09 15:11:02.227976+00",
+        "slot_at": "2026-11-09 15:00:00+00",
+        "status": "running"
+      },
+      {
+        "completed_at": "2026-11-09 14:14:34.474461+00",
+        "id": 54206,
+        "now": "2026-11-09 15:11:02.227976+00",
+        "slot_at": "2026-11-09 14:00:00+00",
+        "status": "complete"
+      },
+      {
+        "completed_at": "2026-11-09 13:15:35.516577+00",
+        "id": 54146,
+        "now": "2026-11-09 15:11:02.227976+00",
+        "slot_at": "2026-11-09 13:00:00+00",
+        "status": "complete"
+      }
+    ],
+    "first_activity": [
+      {
+        "age": "00:01:15.997267",
+        "backend_type": "client backend",
+        "blockers": [],
+        "pid": 2446626,
+        "query": "select jsonb_build_object(\n 'config',(select to_jsonb(c) from public.fuel_national_config c),\n 'operational_slots',(with slots as (\n   select s, s+interval '1 hour' deadline from fuel_national_config c\n   cross join lateral generate_series(c.operational_starts_at,date_trunc('hour',now()),interval '1 hour') s\n   where c.continuous and c.operational_",
+        "state": "active",
+        "wait_event": "DataFileRead",
+        "wait_event_type": "IO"
+      },
+      {
+        "age": "00:00:33.20942",
+        "backend_type": "client backend",
+        "blockers": [],
+        "pid": 2446660,
+        "query": "select jsonb_build_object(\n 'observed_at',now(),\n 'config',(select to_jsonb(c) from fuel_national_config c),\n 'runs',(select jsonb_agg(x) from (select id,slot_at,status,deadline_at,completed_at\n   from fuel_national_runs order by slot_at desc limit 24)x),\n 'batches',(select jsonb_agg(x) from (select r.slot_at,j.status,count(*) batches,\n   sum(j.att",
+        "state": "active",
+        "wait_event": null,
+        "wait_event_type": null
+      },
+      {
+        "age": "00:00:00.860074",
+        "backend_type": "client backend",
+        "blockers": [],
+        "pid": 1636878,
+        "query": "SELECT setting as connection_count\nFROM pg_settings\nWHERE name = 'max_connections';\n",
+        "state": "active",
+        "wait_event": null,
+        "wait_event_type": null
+      }
+    ],
+    "metrics_http": {
+      "status": 504
+    },
+    "rest_reads": {
+      "runs": {
+        "error": "TimeoutError"
+      },
+      "jobs": {
+        "error": "TimeoutError"
+      }
+    },
+    "later_activity": [
+      {
+        "age": "00:00:00.354948",
+        "backend_type": "client backend",
+        "blockers": [],
+        "pid": 2446757,
+        "query": "WITH pgrst_source AS (SELECT \"pgrst_call\".* FROM \"public\".\"claim_fuel_repair\"() pgrst_call) SELECT null::bigint AS total_result_set, pg_catalog.count(_postgrest_t) AS page_total, coalesce(json_agg(_postgrest_t), '[]') AS body, nullif(curren",
+        "state": "active",
+        "wait_event": null,
+        "wait_event_type": null
+      }
+    ],
+    "bounded_status": {
+      "statusError": "STATEMENT_TIMEOUT",
+      "observedAt": "2026-11-09T15:16:06.166Z",
+      "partial": true,
+      "providerRequests": 0,
+      "host": {
+        "ok": false,
+        "error": "CLIENT_TIMEOUT"
+      },
+      "database": {
+        "ok": false,
+        "error": "DATABASE_CONNECTION_TIMEOUT"
+      }
+    },
+    "batch_counts": [
+      {
+        "batches": 12,
+        "observed_at": "2026-11-09 15:02:24.569+00",
+        "status": "succeeded"
+      },
+      {
+        "batches": 60,
+        "observed_at": null,
+        "status": "queued"
+      }
+    ]
+  },
+  "failed_queries": {
+    "supplemental": "DATABASE_CONNECTION_TIMEOUT",
+    "cancel_monitor_queries": "DATABASE_CONNECTION_TIMEOUT; cancellation not executed",
+    "bounded_resources": "DATABASE_CONNECTION_TIMEOUT",
+    "bounded_combined_read": "STATEMENT_TIMEOUT",
+    "bounded_worker_evidence": "STATEMENT_TIMEOUT"
+  }
+}
