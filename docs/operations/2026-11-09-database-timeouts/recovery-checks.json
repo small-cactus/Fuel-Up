@@ -1,0 +1,25 @@
+[
+  {
+    "checks": {
+      "budgets": [
+        {
+          "lookups": 145660,
+          "requests": 74,
+          "slot_at": "2026-11-09T16:00:00+00:00"
+        },
+        {
+          "lookups": 24213,
+          "requests": 13,
+          "slot_at": "2026-11-09T15:00:00+00:00"
+        }
+      ],
+      "city": [
+        {
+          "backoff": "2026-10-07T18:12:54.381439+00:00",
+          "status": "complete"
+        }
+      ],
+      "pending_operational_repairs": 0
+    }
+  }
+]

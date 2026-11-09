@@ -1,0 +1,445 @@
+{
+  "indexes_and_activity": [
+    {
+      "evidence": {
+        "activity": null,
+        "indexes": [
+          {
+            "bytes": 5849088,
+            "name": "fuel_station_retention_reference_compact"
+          },
+          {
+            "bytes": 34758656,
+            "name": "fuel_national_price_order"
+          },
+          {
+            "bytes": 21659648,
+            "name": "fuel_station_price_lookup_pkey"
+          }
+        ],
+        "observed_at": "2026-11-09T16:14:17.730095+00:00"
+      }
+    }
+  ],
+  "cumulative_query_io": [
+    {
+      "calls": 39876,
+      "query": "WITH pgrst_source AS (SELECT pgrst_call.pgrst_scalar FROM (SELECT $1 AS json_data) pgrst_payload, LATERAL (SELECT \"p_job_id\", \"p_stations\" FROM json_to_record(pgrst_payload.json_data) AS _(\"p_job_id\" bigint, \"p_stations\"",
+      "queryid": "-418426432983161343",
+      "shared_blks_read": 29188143,
+      "temp_blks_read": 0,
+      "temp_blks_written": 0,
+      "total_ms": "77711676.2"
+    },
+    {
+      "calls": 40320,
+      "query": "WITH pgrst_source AS (SELECT pgrst_call.pgrst_scalar FROM (SELECT $1 AS json_data) pgrst_payload, LATERAL (SELECT \"p_ids\" FROM json_to_record(pgrst_payload.json_data) AS _(\"p_ids\" text[]) LIMIT $4) pgrst_body , LATERAL (",
+      "queryid": "8287076551700581678",
+      "shared_blks_read": 7019204,
+      "temp_blks_read": 0,
+      "temp_blks_written": 0,
+      "total_ms": "7636565.4"
+    },
+    {
+      "calls": 34130,
+      "query": "select public.publish_completed_national_trends()",
+      "queryid": "5175005624797353213",
+      "shared_blks_read": 6330724,
+      "temp_blks_read": 0,
+      "temp_blks_written": 0,
+      "total_ms": "10631185.1"
+    },
+    {
+      "calls": 41673,
+      "query": "WITH pgrst_source AS (SELECT \"pgrst_call\".* FROM (SELECT $1 AS json_data) pgrst_payload, LATERAL (SELECT \"p_region\" FROM json_to_record(pgrst_payload.json_data) AS _(\"p_region\" text) LIMIT $4) pgrst_body , LATERAL \"publi",
+      "queryid": "-8826223861888258425",
+      "shared_blks_read": 4199150,
+      "temp_blks_read": 0,
+      "temp_blks_written": 0,
+      "total_ms": "12431214.8"
+    },
+    {
+      "calls": 18,
+      "query": "select sum(attach_fuel_station_observation_batch(catalog_id,ordinal)) as attached from (values ($1::uuid,$2),($3::uuid,$4),($5::uuid,$6),($7::uuid,$8)) as batches(catalog_id,ordinal)",
+      "queryid": "8305572735219906278",
+      "shared_blks_read": 1009221,
+      "temp_blks_read": 0,
+      "temp_blks_written": 0,
+      "total_ms": "136503.2"
+    },
+    {
+      "calls": 24,
+      "query": "select participant_id,id,received_at,event from driving_research_events where received_at < $1::timestamptz and received_at >= $2::timestamptz and received_at < $3::timestamptz + interval $4 and (event->>$5 = $6) order b",
+      "queryid": "788335796407684647",
+      "shared_blks_read": 844677,
+      "temp_blks_read": 2897,
+      "temp_blks_written": 2906,
+      "total_ms": "41015.1"
+    }
+  ],
+  "host_1613": {
+    "observedAt": "2026-11-09T16:13:21.406Z",
+    "host": {
+      "ok": true,
+      "data": [
+        {
+          "name": "node_load5",
+          "value": 1.48
+        },
+        {
+          "name": "node_memory_SwapFree_bytes",
+          "value": 304521216
+        },
+        {
+          "name": "node_vmstat_pswpin",
+          "value": 658604507
+        },
+        {
+          "name": "node_memory_MemAvailable_bytes",
+          "value": 186982400
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "idle",
+          "value": 1589819.66
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "iowait",
+          "value": 163093.59
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "irq",
+          "value": 0
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "nice",
+          "value": 32.27
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "softirq",
+          "value": 457.16
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "steal",
+          "value": 23.76
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "system",
+          "value": 16758.39
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "user",
+          "value": 30072.01
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "idle",
+          "value": 1589959.65
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "iowait",
+          "value": 162700.96
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "irq",
+          "value": 0
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "nice",
+          "value": 31.5
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "softirq",
+          "value": 491.31
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "steal",
+          "value": 26.15
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "system",
+          "value": 16863.64
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "user",
+          "value": 30138.13
+        },
+        {
+          "name": "node_disk_written_bytes_total",
+          "device": "nvme0n1",
+          "value": 686179729408
+        },
+        {
+          "name": "node_disk_written_bytes_total",
+          "device": "nvme1n1",
+          "value": 2811337954304
+        },
+        {
+          "name": "node_load1",
+          "value": 0.88
+        },
+        {
+          "name": "node_memory_MemTotal_bytes",
+          "value": 431308800
+        },
+        {
+          "name": "node_disk_read_bytes_total",
+          "device": "nvme0n1",
+          "value": 1558675159040
+        },
+        {
+          "name": "node_disk_read_bytes_total",
+          "device": "nvme1n1",
+          "value": 6249487134720
+        },
+        {
+          "name": "node_memory_SwapTotal_bytes",
+          "value": 1073737728
+        },
+        {
+          "name": "node_filesystem_avail_bytes",
+          "device": "/dev/nvme0n1",
+          "mountpoint": "/data",
+          "value": 6266814464
+        },
+        {
+          "name": "node_filesystem_avail_bytes",
+          "device": "/dev/nvme1n1p2",
+          "mountpoint": "/",
+          "value": 3171364864
+        },
+        {
+          "name": "node_disk_io_time_seconds_total",
+          "device": "nvme0n1",
+          "value": 35813.163
+        },
+        {
+          "name": "node_disk_io_time_seconds_total",
+          "device": "nvme1n1",
+          "value": 228548.659
+        },
+        {
+          "name": "node_vmstat_pswpout",
+          "value": 676505746
+        },
+        {
+          "name": "node_load15",
+          "value": 4.69
+        }
+      ]
+    }
+  },
+  "host_1615": {
+    "observedAt": "2026-11-09T16:15:09.293Z",
+    "host": {
+      "ok": true,
+      "data": [
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "idle",
+          "value": 1589852.43
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "iowait",
+          "value": 163154.62
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "irq",
+          "value": 0
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "nice",
+          "value": 32.28
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "softirq",
+          "value": 457.32
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "steal",
+          "value": 23.77
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "system",
+          "value": 16761.78
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "user",
+          "value": 30079.12
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "idle",
+          "value": 1589993.12
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "iowait",
+          "value": 162762.57
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "irq",
+          "value": 0
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "nice",
+          "value": 31.5
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "softirq",
+          "value": 491.46
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "steal",
+          "value": 26.15
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "system",
+          "value": 16867.22
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "user",
+          "value": 30144.02
+        },
+        {
+          "name": "node_load5",
+          "value": 1.94
+        },
+        {
+          "name": "node_memory_SwapFree_bytes",
+          "value": 438595584
+        },
+        {
+          "name": "node_memory_MemAvailable_bytes",
+          "value": 109088768
+        },
+        {
+          "name": "node_disk_written_bytes_total",
+          "device": "nvme0n1",
+          "value": 686336462848
+        },
+        {
+          "name": "node_disk_written_bytes_total",
+          "device": "nvme1n1",
+          "value": 2812288263168
+        },
+        {
+          "name": "node_load1",
+          "value": 1.89
+        },
+        {
+          "name": "node_memory_MemTotal_bytes",
+          "value": 431308800
+        },
+        {
+          "name": "node_load15",
+          "value": 4.53
+        },
+        {
+          "name": "node_disk_read_bytes_total",
+          "device": "nvme0n1",
+          "value": 1559132387328
+        },
+        {
+          "name": "node_disk_read_bytes_total",
+          "device": "nvme1n1",
+          "value": 6251458146304
+        },
+        {
+          "name": "node_filesystem_avail_bytes",
+          "device": "/dev/nvme0n1",
+          "mountpoint": "/data",
+          "value": 6266654720
+        },
+        {
+          "name": "node_filesystem_avail_bytes",
+          "device": "/dev/nvme1n1p2",
+          "mountpoint": "/",
+          "value": 3171344384
+        },
+        {
+          "name": "node_vmstat_pswpin",
+          "value": 658882790
+        },
+        {
+          "name": "node_memory_SwapTotal_bytes",
+          "value": 1073737728
+        },
+        {
+          "name": "node_disk_io_time_seconds_total",
+          "device": "nvme0n1",
+          "value": 35824.129
+        },
+        {
+          "name": "node_disk_io_time_seconds_total",
+          "device": "nvme1n1",
+          "value": 228623.222
+        },
+        {
+          "name": "node_vmstat_pswpout",
+          "value": 676735678
+        }
+      ]
+    }
+  },
+  "limitations": "Cumulative query totals do not establish the cause of this incident. Host metric counters changed between samples, but exporter freshness/cadence limits precise per-second attribution."
+}
