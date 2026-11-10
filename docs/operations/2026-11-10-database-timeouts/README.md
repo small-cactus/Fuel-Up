@@ -83,3 +83,49 @@ The previous statement of zero attempts describes the initial 12:42 check only.
 Validation consists of current configuration read-back and explicit failed live
 recovery checks; no source change or unit-test claim is made. followup-1340.json
 preserves sanitized results.
+
+## 14:44 UTC: restart confirmed, service still degraded
+
+The fallback database read succeeded at 14:45:33 despite another failed full
+status request. The 13:00 run 55521 closed partial at 14:01:00 with all 72 batches
+missed and zero attempts. Together with 12:00, this incident has 113 confirmed
+missed batches. The 14:00 run 55542 had one successful batch and 71 queued; its
+deadline is 15:00. The retained eight-day window contains 176 complete hours,
+15 partial hours, one running hour, zero expired absent slots and zero expired
+running slots. These totals include the 13 previously reported partial hours.
+
+All required schedules remain active. Continuous collection remains enabled,
+the shared cooldown expired at 12:05:15, and no re-enable is warranted. The last
+complete cache remains run 55436 (11:00), published at 11:18 in ten scopes.
+Current capacity and full projection/retention backlog are not freshly verified.
+
+A server-state query at 14:45:58 confirmed PostgreSQL started at 13:50:48.462786,
+after the two earlier accepted recovery requests. The shared_buffers value is
+12,288 8 KiB pages (96 MiB), pending_restart=false. This confirms a restart after
+those requests, but does not identify which request caused it or prove recovery.
+The service remained degraded afterwards. Saved responses show HTTP 503 database
+claim failures in all three expected regions and NATIONAL_RETENTION_FAILED at
+14:40. No routing mismatch was observed.
+
+The retention reference index is 8,765,440 bytes; price-order and primary-key
+indexes are 35,766,272 and 23,150,592 bytes. This does not demonstrate recurrence
+of the former 129 MB index defect. A fresh activity sample had seven idle client
+connections, only the diagnostic query active, no lock blockers and no idle
+transactions. No query cancellation or speculative reindex was justified.
+
+The first successful resource sample returned identical counters across 20.8
+seconds. Cached metrics cannot establish current I/O or swap rates, and are not
+interpreted as healthy zero activity. A longer interval was sampled separately.
+
+Safari was checked again and remains signed out of Supabase. The official CLI's
+keyring-library path was investigated as an alternative for the documented direct
+restart API, but the credential read blocked and was interrupted. No credential
+was retrieved or logged, no new credential/access grant was created, and no direct
+restart request was sent. Repair count remains two; no third speculative restart
+was attempted after the already-confirmed restart failed to restore service.
+Dashboard sign-in remains necessary for the established deeper server-log path.
+
+The longer pressure check timed out. A final full status request hit its server
+statement timeout, its host metrics timed out, and its fallback database read
+failed at connection setup. Scheduled recovery and immutable archive read-back
+remain unverified. No additional gaps are inferred from these failures.
