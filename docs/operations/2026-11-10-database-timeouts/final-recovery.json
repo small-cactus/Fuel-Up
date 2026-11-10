@@ -1,0 +1,767 @@
+{
+  "verifiedAt": "2026-11-10T16:17:40.187Z",
+  "repairAttempts": 3,
+  "serviceRecovered": true,
+  "permanentResourcePressureFixProven": false,
+  "verification": {
+    "cache": {
+      "latest_complete_run": 55615,
+      "max_run_id": 55615,
+      "min_run_id": 55615,
+      "published_at": "2026-11-10T16:17:00.227915+00:00",
+      "scopes": 10
+    },
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_HTTP_503",
+      "id": true,
+      "last_dispatch_at": "2026-11-10T16:16:00.282373+00:00",
+      "last_request_at": "2026-11-10T16:16:01.140021+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-11-10T16:14:58.179185+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "observed_at": "2026-11-10T16:17:34.668977+00:00",
+    "pending_operational_complete_repairs": 0,
+    "projection_missing": 0,
+    "regions": [
+      {
+        "batches": 9,
+        "deleted_archives": 0,
+        "execution_region": "us-west-1",
+        "lookups": 17747,
+        "requests": 9,
+        "succeeded": 9,
+        "wrong_route": 0
+      },
+      {
+        "batches": 59,
+        "deleted_archives": 0,
+        "execution_region": "us-east-1",
+        "lookups": 121700,
+        "requests": 61,
+        "succeeded": 59,
+        "wrong_route": 0
+      },
+      {
+        "batches": 4,
+        "deleted_archives": 0,
+        "execution_region": "us-west-2",
+        "lookups": 6213,
+        "requests": 4,
+        "succeeded": 4,
+        "wrong_route": 0
+      }
+    ],
+    "run": {
+      "archive_bytes": 3573721,
+      "completed_at": "2026-11-10T16:16:04.171999+00:00",
+      "expected_batches": 72,
+      "expected_stations": 141660,
+      "id": 55615,
+      "missed_batches": 0,
+      "observed_stations": 141660,
+      "priced_stations": 90445,
+      "slot_at": "2026-11-10T16:00:00+00:00",
+      "status": "complete",
+      "succeeded_batches": 72
+    },
+    "schedules": [
+      {
+        "active": true,
+        "latest_end": "2026-11-10T16:17:00.276855+00:00",
+        "latest_start": "2026-11-10T16:17:00.232401+00:00",
+        "latest_status": "succeeded",
+        "name": "fuel-national-discovery",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "latest_end": "2026-11-10T16:17:07.658443+00:00",
+        "latest_start": "2026-11-10T16:17:00.227698+00:00",
+        "latest_status": "succeeded",
+        "name": "fuel-national-trends-cache",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "latest_end": "2026-11-10T16:17:00.261577+00:00",
+        "latest_start": "2026-11-10T16:17:00.233596+00:00",
+        "latest_status": "succeeded",
+        "name": "fuel-national-projection-repair",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "latest_end": "2026-11-10T16:17:00.272425+00:00",
+        "latest_start": "2026-11-10T16:17:00.234741+00:00",
+        "latest_status": "succeeded",
+        "name": "fuel-national-dispatch",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "latest_end": "2026-11-10T16:15:00.310038+00:00",
+        "latest_start": "2026-11-10T16:15:00.265532+00:00",
+        "latest_status": "succeeded",
+        "name": "fuel-national-watchdog",
+        "schedule": "*/5 * * * *"
+      },
+      {
+        "active": true,
+        "latest_end": "2026-11-10T16:10:00.368964+00:00",
+        "latest_start": "2026-11-10T16:10:00.283742+00:00",
+        "latest_status": "succeeded",
+        "name": "fuel-national-retention",
+        "schedule": "*/10 * * * *"
+      },
+      {
+        "active": true,
+        "latest_end": "2026-11-10T16:17:00.377774+00:00",
+        "latest_start": "2026-11-10T16:17:00.223252+00:00",
+        "latest_status": "succeeded",
+        "name": "fuel-local-history-retention",
+        "schedule": "17 * * * *"
+      }
+    ],
+    "server_started_at": "2026-11-10T15:41:10.930011+00:00",
+    "slots": {
+      "complete": 176,
+      "current_absent": 0,
+      "expected": 192,
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 16
+    }
+  },
+  "capacityAndRetention": {
+    "archive_bytes": 729904203,
+    "database_bytes": 1778568339,
+    "eligible_raw_objects": 0,
+    "indexes": [
+      {
+        "bytes": 36216832,
+        "name": "fuel_national_price_order",
+        "ready": true,
+        "valid": true
+      },
+      {
+        "bytes": 24297472,
+        "name": "fuel_station_price_lookup_pkey",
+        "ready": true,
+        "valid": true
+      },
+      {
+        "bytes": 9216000,
+        "name": "fuel_station_retention_reference_compact",
+        "ready": true,
+        "valid": true
+      }
+    ],
+    "latest_retention": [
+      {
+        "created": "2026-11-10T16:10:00.369065+00:00",
+        "result": {
+          "deferred_operational_hours": 0,
+          "detached_content_references": 0,
+          "marked_archives": 0,
+          "providerRequests": 0,
+          "removedObjects": 0,
+          "removed_operational_hours": 0,
+          "status": "idle"
+        },
+        "status_code": 200,
+        "timed_out": false
+      }
+    ],
+    "observed_at": "2026-11-10T16:18:23.44436+00:00",
+    "old_operational_runs": 0
+  },
+  "appHttp": {
+    "checkedAt": "2026-11-10T16:17:40.187Z",
+    "providerRequests": 0,
+    "results": [
+      {
+        "fuel": "regular",
+        "requiresE85": false,
+        "status": 200,
+        "scanId": 55615,
+        "completedAt": "2026-11-10T16:16:04.171999+00:00",
+        "elapsedMs": 774,
+        "source": "national-cache",
+        "scope": "national",
+        "quoteCount": 5,
+        "historyCount": 151,
+        "historyError": null,
+        "responseKeys": [
+          "version",
+          "scanId",
+          "completedAt",
+          "refreshAfter",
+          "history",
+          "historyError",
+          "source",
+          "scope",
+          "quotes",
+          "summary"
+        ],
+        "errorCode": null
+      },
+      {
+        "fuel": "regular",
+        "requiresE85": true,
+        "status": 200,
+        "scanId": 55615,
+        "completedAt": "2026-11-10T16:16:04.171999+00:00",
+        "elapsedMs": 170,
+        "source": "national-cache",
+        "scope": "national",
+        "quoteCount": 5,
+        "historyCount": 151,
+        "historyError": null,
+        "responseKeys": [
+          "version",
+          "scanId",
+          "completedAt",
+          "refreshAfter",
+          "history",
+          "historyError",
+          "source",
+          "scope",
+          "quotes",
+          "summary"
+        ],
+        "errorCode": null
+      },
+      {
+        "fuel": "midgrade",
+        "requiresE85": false,
+        "status": 200,
+        "scanId": 55615,
+        "completedAt": "2026-11-10T16:16:04.171999+00:00",
+        "elapsedMs": 181,
+        "source": "national-cache",
+        "scope": "national",
+        "quoteCount": 5,
+        "historyCount": 151,
+        "historyError": null,
+        "responseKeys": [
+          "version",
+          "scanId",
+          "completedAt",
+          "refreshAfter",
+          "history",
+          "historyError",
+          "source",
+          "scope",
+          "quotes",
+          "summary"
+        ],
+        "errorCode": null
+      },
+      {
+        "fuel": "midgrade",
+        "requiresE85": true,
+        "status": 200,
+        "scanId": 55615,
+        "completedAt": "2026-11-10T16:16:04.171999+00:00",
+        "elapsedMs": 142,
+        "source": "national-cache",
+        "scope": "national",
+        "quoteCount": 5,
+        "historyCount": 151,
+        "historyError": null,
+        "responseKeys": [
+          "version",
+          "scanId",
+          "completedAt",
+          "refreshAfter",
+          "history",
+          "historyError",
+          "source",
+          "scope",
+          "quotes",
+          "summary"
+        ],
+        "errorCode": null
+      },
+      {
+        "fuel": "premium",
+        "requiresE85": false,
+        "status": 200,
+        "scanId": 55615,
+        "completedAt": "2026-11-10T16:16:04.171999+00:00",
+        "elapsedMs": 140,
+        "source": "national-cache",
+        "scope": "national",
+        "quoteCount": 5,
+        "historyCount": 151,
+        "historyError": null,
+        "responseKeys": [
+          "version",
+          "scanId",
+          "completedAt",
+          "refreshAfter",
+          "history",
+          "historyError",
+          "source",
+          "scope",
+          "quotes",
+          "summary"
+        ],
+        "errorCode": null
+      },
+      {
+        "fuel": "premium",
+        "requiresE85": true,
+        "status": 200,
+        "scanId": 55615,
+        "completedAt": "2026-11-10T16:16:04.171999+00:00",
+        "elapsedMs": 143,
+        "source": "national-cache",
+        "scope": "national",
+        "quoteCount": 5,
+        "historyCount": 151,
+        "historyError": null,
+        "responseKeys": [
+          "version",
+          "scanId",
+          "completedAt",
+          "refreshAfter",
+          "history",
+          "historyError",
+          "source",
+          "scope",
+          "quotes",
+          "summary"
+        ],
+        "errorCode": null
+      },
+      {
+        "fuel": "diesel",
+        "requiresE85": false,
+        "status": 200,
+        "scanId": 55615,
+        "completedAt": "2026-11-10T16:16:04.171999+00:00",
+        "elapsedMs": 203,
+        "source": "national-cache",
+        "scope": "national",
+        "quoteCount": 5,
+        "historyCount": 151,
+        "historyError": null,
+        "responseKeys": [
+          "version",
+          "scanId",
+          "completedAt",
+          "refreshAfter",
+          "history",
+          "historyError",
+          "source",
+          "scope",
+          "quotes",
+          "summary"
+        ],
+        "errorCode": null
+      },
+      {
+        "fuel": "diesel",
+        "requiresE85": true,
+        "status": 200,
+        "scanId": 55615,
+        "completedAt": "2026-11-10T16:16:04.171999+00:00",
+        "elapsedMs": 144,
+        "source": "national-cache",
+        "scope": "national",
+        "quoteCount": 5,
+        "historyCount": 151,
+        "historyError": null,
+        "responseKeys": [
+          "version",
+          "scanId",
+          "completedAt",
+          "refreshAfter",
+          "history",
+          "historyError",
+          "source",
+          "scope",
+          "quotes",
+          "summary"
+        ],
+        "errorCode": null
+      },
+      {
+        "fuel": "e85",
+        "requiresE85": false,
+        "status": 200,
+        "scanId": 55615,
+        "completedAt": "2026-11-10T16:16:04.171999+00:00",
+        "elapsedMs": 152,
+        "source": "national-cache",
+        "scope": "national",
+        "quoteCount": 5,
+        "historyCount": 151,
+        "historyError": null,
+        "responseKeys": [
+          "version",
+          "scanId",
+          "completedAt",
+          "refreshAfter",
+          "history",
+          "historyError",
+          "source",
+          "scope",
+          "quotes",
+          "summary"
+        ],
+        "errorCode": null
+      },
+      {
+        "fuel": "e85",
+        "requiresE85": true,
+        "status": 200,
+        "scanId": 55615,
+        "completedAt": "2026-11-10T16:16:04.171999+00:00",
+        "elapsedMs": 227,
+        "source": "national-cache",
+        "scope": "national",
+        "quoteCount": 5,
+        "historyCount": 151,
+        "historyError": null,
+        "responseKeys": [
+          "version",
+          "scanId",
+          "completedAt",
+          "refreshAfter",
+          "history",
+          "historyError",
+          "source",
+          "scope",
+          "quotes",
+          "summary"
+        ],
+        "errorCode": null
+      }
+    ]
+  },
+  "archiveEvidence": "archive-55615.json",
+  "monitorAutomation": {
+    "id": "monitor-fuel-up-continuous-national-prices",
+    "status": "ACTIVE",
+    "frequency": "hourly",
+    "modified": false
+  },
+  "earlierCompleteRunProjectionLimitation": {
+    "runId": 55572,
+    "missingBatchesAt160929": 3,
+    "reason": "Scheduled replay stops while collection is active and targets the latest complete run; this older run was superseded. Raw archives remain intact.",
+    "latestCompleteRunBacklog": 0
+  },
+  "timeline": [
+    {
+      "observed_at": "2026-11-10T15:42:35.438927+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 4,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:43:38.327878+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 8,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:44:40.666653+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 12,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:45:43.038499+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 16,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:46:45.477678+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 21,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:47:47.904991+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 26,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:48:50.279975+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 31,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:49:52.791969+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 36,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:50:56.16722+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 40,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:51:58.974667+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 44,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:53:01.448835+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 49,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:54:04.628158+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 54,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:55:07.626993+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 60,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:56:10.254447+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 65,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:57:12.877959+00:00",
+      "run_id": 55572,
+      "run_status": "running",
+      "succeeded_batches": 70,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:58:15.517439+00:00",
+      "run_id": 55572,
+      "run_status": "complete",
+      "succeeded_batches": 72,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T15:59:18.247835+00:00",
+      "run_id": 55572,
+      "run_status": "complete",
+      "succeeded_batches": 72,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:00:20.73974+00:00",
+      "run_id": 55572,
+      "run_status": "complete",
+      "succeeded_batches": 72,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:01:23.034164+00:00",
+      "run_id": 55572,
+      "run_status": "complete",
+      "succeeded_batches": 72,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:02:25.663727+00:00",
+      "run_id": 55572,
+      "run_status": "complete",
+      "succeeded_batches": 72,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:03:28.038081+00:00",
+      "run_id": 55572,
+      "run_status": "complete",
+      "succeeded_batches": 72,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:04:30.330605+00:00",
+      "run_id": 55572,
+      "run_status": "complete",
+      "succeeded_batches": 72,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:03:17.590298+00:00",
+      "run_id": 55615,
+      "run_status": "running",
+      "succeeded_batches": 16,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:04:20.418601+00:00",
+      "run_id": 55615,
+      "run_status": "running",
+      "succeeded_batches": 20,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:05:23.366126+00:00",
+      "run_id": 55615,
+      "run_status": "running",
+      "succeeded_batches": 25,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:06:26.003606+00:00",
+      "run_id": 55615,
+      "run_status": "running",
+      "succeeded_batches": 31,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:07:28.759803+00:00",
+      "run_id": 55615,
+      "run_status": "running",
+      "succeeded_batches": 36,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:08:31.1194+00:00",
+      "run_id": 55615,
+      "run_status": "running",
+      "succeeded_batches": 41,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:09:33.431486+00:00",
+      "run_id": 55615,
+      "run_status": "running",
+      "succeeded_batches": 46,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:10:37.328915+00:00",
+      "run_id": 55615,
+      "run_status": "running",
+      "succeeded_batches": 51,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:11:39.686133+00:00",
+      "run_id": 55615,
+      "run_status": "running",
+      "succeeded_batches": 57,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:12:44.163557+00:00",
+      "run_id": 55615,
+      "run_status": "running",
+      "succeeded_batches": 62,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:13:46.655093+00:00",
+      "run_id": 55615,
+      "run_status": "running",
+      "succeeded_batches": 65,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:14:49.573966+00:00",
+      "run_id": 55615,
+      "run_status": "running",
+      "succeeded_batches": 69,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:15:52.123842+00:00",
+      "run_id": 55615,
+      "run_status": "running",
+      "succeeded_batches": 71,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:16:54.965945+00:00",
+      "run_id": 55615,
+      "run_status": "complete",
+      "succeeded_batches": 72,
+      "cache_run_id": 55436,
+      "error": null
+    },
+    {
+      "observed_at": "2026-11-10T16:17:57.290328+00:00",
+      "run_id": 55615,
+      "run_status": "complete",
+      "succeeded_batches": 72,
+      "cache_run_id": 55615,
+      "error": null
+    }
+  ],
+  "noProviderCollectionTriggeredByMonitor": true
+}

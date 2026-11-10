@@ -1,0 +1,65 @@
+{
+  "auditedAt": "2026-11-10T16:17:22.137Z",
+  "runId": 55615,
+  "slotAt": "2026-11-10T16:00:00+00:00",
+  "runStatusAtSelection": "complete",
+  "verified": true,
+  "providerRequests": 0,
+  "batches": [
+    {
+      "jobId": 4000094,
+      "objectPath": "55615/4000094/e79e40ce-8ad4-4a88-8a5a-7a2d7f891e04.json.gz",
+      "sha256": "20faff8ef581dfed2acacfcb6747953c171ab39b694ace40c36e0c2362abe9aa",
+      "stations": 2000,
+      "priced": 1332,
+      "bytes": 49621,
+      "executionRegion": "us-east-1",
+      "startedAt": "2026-11-10T16:16:01.350Z",
+      "observedAt": "2026-11-10T16:16:03.895Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-11-10T16:16:03.832Z",
+        "elapsedMs": 2481,
+        "decodedBodyBytes": 755894,
+        "fullElapsedMs": 2525
+      }
+    },
+    {
+      "jobId": 4000105,
+      "objectPath": "55615/4000105/6f37a3ce-f0cc-4719-899b-315eaade1233.json.gz",
+      "sha256": "d609878487574e9c902c3963b319f3e7874528340c26e0506a356d2d582f46ca",
+      "stations": 1747,
+      "priced": 1278,
+      "bytes": 56991,
+      "executionRegion": "us-west-1",
+      "startedAt": "2026-11-10T16:03:32.784Z",
+      "observedAt": "2026-11-10T16:03:35.089Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-11-10T16:03:34.726Z",
+        "elapsedMs": 1942,
+        "decodedBodyBytes": 777793,
+        "fullElapsedMs": 2295
+      }
+    },
+    {
+      "jobId": 4000109,
+      "objectPath": "55615/4000109/5268708a-64b1-4289-930c-4b36fcd4b9f5.json.gz",
+      "sha256": "5939516e6e06244616ef9c889bb046754e9d8cbb55f619ea4f6f4bd664035d70",
+      "stations": 213,
+      "priced": 146,
+      "bytes": 6349,
+      "executionRegion": "us-west-2",
+      "startedAt": "2026-11-10T16:00:46.202Z",
+      "observedAt": "2026-11-10T16:00:46.814Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-11-10T16:00:46.641Z",
+        "elapsedMs": 439,
+        "decodedBodyBytes": 89176,
+        "fullElapsedMs": 611
+      }
+    }
+  ],
+  "limitation": "One successful immutable batch per assigned region. Verifies hashes, exact IDs, prices schema and provenance; not full-hour completeness or pump truth."
+}

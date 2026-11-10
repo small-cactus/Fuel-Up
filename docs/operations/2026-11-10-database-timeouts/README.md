@@ -1,5 +1,11 @@
 # November 10 database access degradation
 
+**Current outcome, 16:18 UTC:** Scheduled collection, fresh Trends publication,
+app API delivery, retention and regional immutable archive read-back are verified
+restored after the third recovery attempt (full project restart). Resource
+pressure remains; this is service recovery, not proof of a permanent capacity fix.
+The hourly monitor remains ACTIVE. See the final verification section below.
+
 The 12:42 UTC monitor encountered a new incident after verified healthy collection
 through 11:00. Full status and supplemental reads failed during login-role setup
 with HTTP 544. The bounded SQL fallback and a three-run query timed out on the
@@ -216,3 +222,54 @@ hours, detached 92 references and reported zero deferred operational hours.
 No raw objects were removed. Thus retention execution recovered and its earlier
 metadata backlog cleared. All required cron entries remained active and their
 most recent completed invocations succeeded.
+
+
+## Final verification: scheduled service and app cache restored
+
+The next scheduled run, 55615 for 16:00, completed at 16:16:04.171999 with all
+72 batches and all 141,660 fixed-inventory observations, 90,445 stations with
+reported prices, zero missed batches and zero route mismatches. All fixed
+regional allocations completed (59/9/4). Two normal upstream 503 retries made
+74 total requests and 145,660 lookups, below the 92/161,660 hourly budgets.
+No provider denial was overridden; the latest cooldown expired at 16:14:58.179185.
+The authoritative exact configuration timestamps are in final-recovery.json.
+
+At 16:17:00.227915 all ten Trends cache scopes published run 55615. At 16:17:34
+it matched the latest complete run with zero missing trend projections and zero
+pending operational repair records for complete runs. The earlier 15:00 run still
+had three unprojected batches at its last targeted check; it was superseded by the
+fully projected 16:00 run. Its immutable raw archives remain intact. Do not confuse
+zero latest-run backlog with proof every older derived batch was backfilled.
+
+At 16:17:40, all ten fuel/E85 combinations returned HTTP 200 through the same
+`gas-prices` Edge Function and fixed us-east-2 API region used by the app. Every
+response had source=national-cache, scanId=55615, five quotes, 151 history points
+and no history error. Observed request durations were 140–774 ms. This verifies
+API delivery without opening the phone app and without contacting the provider.
+
+At 16:17:22, immutable Storage read-back passed for one successful batch from each
+fixed collection region in the completed 16:00 run. Hashes, compressed sizes,
+exact IDs, price schema and provenance matched. The sanitized report is
+archive-55615.json. This is a three-batch integrity sample, not an audit of every
+raw object or proof of pump truth. Coverage is against the fixed 141,660-station
+catalog, not a newly verified nationwide station inventory.
+
+Final narrow reads at 16:18:23 showed 729,904,203 of 900,000,000 archive bytes,
+zero eligible raw-retention objects, zero overdue operational metadata runs,
+and a successful 16:10 retention response with no deferred hours. The compact
+reference index was 9,216,000 bytes and valid/ready; price-order and primary-key
+indexes were also valid/ready. There is no recurrence of the former 129 MB
+INCLUDE index. Database size was 1,778,568,339 bytes. The retained eight-day slot
+check had 176 complete, 16 partial and zero expired absent/running slots; the
+16 partial hours comprise 13 known earlier gaps plus this incident's three.
+The three outage hours contain 184 confirmed missed batches and were not replayed.
+
+All required schedules and continuous collection remain enabled. The Codex hourly
+monitor was read back ACTIVE and was not modified. The original research/city
+campaign, fixed collection routes, budgets, raw data and billing were unchanged.
+Three recovery attempts were used; no fourth was made. Final evidence is in
+final-recovery.json, including the observed progress timeline. Resource pressure
+and the 15:50 broad-query timeout remain recorded limitations; do not describe
+this restart as a proven permanent fix. Validation used protected live reads,
+real app API responses, immutable archive audits, JSON assertions and diff checks;
+no application source or schema change was made in this interactive recovery.
