@@ -129,3 +129,42 @@ The longer pressure check timed out. A final full status request hit its server
 statement timeout, its host metrics timed out, and its fallback database read
 failed at connection setup. Scheduled recovery and immutable archive read-back
 remain unverified. No additional gaps are inferred from these failures.
+
+## 15:33 UTC: signed-in diagnosis and full project restart
+
+The user completed Supabase sign-in and explicitly directed continued repair.
+The signed-in dashboard showed the project Unhealthy. Database observability
+reported severe memory commitment (1.54 GB), 1.67 GB database use on an 8 GB disk,
+and unavailable connection/I/O charts. Logs showed cron startup timeouts and
+statement cancellations; even small metadata/settings queries took 13–19 seconds.
+A fresh CLI status timed out on both full and fallback SQL, while independent
+host metrics returned load1=14.03, about 135 MiB available RAM of 411 MiB, and
+about 450 MiB swap occupied. One sample cannot establish swap or I/O rates.
+The December 2 quota-grace banner is not evidence of an active quota restriction.
+No billing change was made.
+
+The separate full-project restart was chosen because the earlier PostgreSQL
+restart did not restore service and evidence showed broader resource/service
+pressure. The General settings UI explicitly offered Fast database reboot as a
+separate dropdown option; that option was not selected. At approximately 15:37
+UTC, Restart project > Restart was accepted and the UI showed Restarting server
+and project unavailable during restart. This is production repair attempt three
+of three for this incident. No further repair should be issued without accounting
+for this limit. A bounded SQL check during restart returned HTTP 400, database
+possibly not accessible. Recovery is not established by restart acceptance.
+
+At 15:41:44 the server read succeeded and confirmed a new postmaster start time
+of 15:41:10.930011, still with shared_buffers=96MB. The dashboard returned Healthy
+and the full protected status read succeeded. The 14:00 run had closed partial
+with one successful and 71 missed batches, making 184 confirmed missed batches
+across the three incident hours. The retained window had 16 partial hours
+(including 13 earlier known partial hours), zero expired absent/running slots,
+and one current running hour. All six required schedules were active. Archive
+usage was 722,803,938 of 900,000,000 bytes. All three maintenance indexes were
+valid and ready, with no recurrence of the old oversized INCLUDE index.
+
+Scheduled collection began advancing after restart: by 15:42:35 all four us-west-2
+batches were successful. This proves partial scheduled progress only. The latest
+complete cache remained the 11:00 run, and three operational metadata runs were
+past the retention-age threshold. Full current sweep, fresh cache, retention
+success and archive read-back still need verification at this checkpoint.
