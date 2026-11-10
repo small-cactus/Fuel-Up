@@ -1,0 +1,327 @@
+{
+  "question": "Is recurring memory pressure caused by too many users?",
+  "checkedAt": "2026-11-10T16:38:11.773Z",
+  "activity": {
+    "activity": [
+      {
+        "backend_type": "walwriter",
+        "connections": 1,
+        "state": null,
+        "wait_event": "WalWriterMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "backend_type": "checkpointer",
+        "connections": 1,
+        "state": null,
+        "wait_event": "CheckpointerMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "backend_type": "client backend",
+        "connections": 6,
+        "state": "idle",
+        "wait_event": "ClientRead",
+        "wait_event_type": "Client"
+      },
+      {
+        "backend_type": "pg_net 0.19.5 worker",
+        "connections": 1,
+        "state": null,
+        "wait_event": "Extension",
+        "wait_event_type": "Extension"
+      },
+      {
+        "backend_type": "archiver",
+        "connections": 1,
+        "state": null,
+        "wait_event": "ArchiverMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "backend_type": "pg_cron launcher",
+        "connections": 1,
+        "state": null,
+        "wait_event": "Extension",
+        "wait_event_type": "Extension"
+      },
+      {
+        "backend_type": "background writer",
+        "connections": 1,
+        "state": null,
+        "wait_event": "BgwriterMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "backend_type": "autovacuum launcher",
+        "connections": 1,
+        "state": null,
+        "wait_event": "AutovacuumMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "backend_type": "client backend",
+        "connections": 1,
+        "state": "active",
+        "wait_event": null,
+        "wait_event_type": null
+      },
+      {
+        "backend_type": "logical replication launcher",
+        "connections": 1,
+        "state": null,
+        "wait_event": "LogicalLauncherMain",
+        "wait_event_type": "Activity"
+      }
+    ],
+    "database": {
+      "cache_blocks_hit": 3743319013,
+      "commits": 3699544,
+      "connections": 9,
+      "deadlocks": 0,
+      "disk_blocks_read": 190725102,
+      "rollbacks": 44930,
+      "stats_reset": null,
+      "temp_bytes": 33356161645
+    },
+    "observed_at": "2026-11-10T16:37:42.755666+00:00",
+    "query_stats_schema": "extensions",
+    "server_started_at": "2026-11-10T15:41:10.930011+00:00",
+    "settings": {
+      "max_connections": "60",
+      "shared_buffers": "12288",
+      "work_mem": "2184"
+    }
+  },
+  "pressureBetweenSweeps": {
+    "sampledAt": "2026-11-10T16:38:11.773Z",
+    "project": "vjindchxfebaltbslqwc",
+    "elapsedSeconds": 60.389,
+    "rebooted": false,
+    "countersAdvanced": true,
+    "limitation": null,
+    "memoryBytes": {
+      "total": 431304704,
+      "available": 217899008,
+      "free": 26697728,
+      "cached": 179646464,
+      "buffers": 2084864,
+      "swapTotal": 1073737728,
+      "swapFree": 738979840
+    },
+    "swapInPages": 605,
+    "swapOutPages": 164,
+    "swapInBytesAt4KiB": 2478080,
+    "swapOutBytesAt4KiB": 671744,
+    "majorFaults": 493,
+    "oomKills": 0,
+    "cpuModePercent": {
+      "idle": 98.80636604774534,
+      "iowait": 0.3647214854111392,
+      "irq": 0,
+      "nice": 0,
+      "softirq": 0.01657824933686988,
+      "steal": 0,
+      "system": 0.31498673740053307,
+      "user": 0.4973474801061086
+    },
+    "cpuIoWaitPercent": 0.3647214854111392,
+    "disks": {
+      "nvme0n1": {
+        "read_bytes": 13336576,
+        "io_time_seconds": 0.41600000000005366,
+        "written_bytes": 1339392
+      },
+      "nvme1n1": {
+        "read_bytes": 327680,
+        "io_time_seconds": 0.06900000000001683,
+        "written_bytes": 17129472
+      }
+    }
+  },
+  "workloadClasses": {
+    "classes": [
+      {
+        "calls": 11655,
+        "category": "other",
+        "disk_blocks_read": 150709,
+        "execution_ms": 1498918.7,
+        "temp_blocks_written": 0
+      },
+      {
+        "calls": 380,
+        "category": "collection_scheduling",
+        "disk_blocks_read": 3065,
+        "execution_ms": 533810.2,
+        "temp_blocks_written": 0
+      },
+      {
+        "calls": 430,
+        "category": "collection_publication",
+        "disk_blocks_read": 34966,
+        "execution_ms": 176257.1,
+        "temp_blocks_written": 0
+      },
+      {
+        "calls": 28,
+        "category": "retention",
+        "disk_blocks_read": 17472,
+        "execution_ms": 63162.4,
+        "temp_blocks_written": 0
+      },
+      {
+        "calls": 23,
+        "category": "diagnostics",
+        "disk_blocks_read": 158,
+        "execution_ms": 6489.3,
+        "temp_blocks_written": 0
+      },
+      {
+        "calls": 11,
+        "category": "app_price_reads",
+        "disk_blocks_read": 597,
+        "execution_ms": 789.9,
+        "temp_blocks_written": 0
+      }
+    ],
+    "observed_at": "2026-11-10T16:38:16.237663+00:00",
+    "stats_reset": "2026-11-10T13:50:41.790669+00:00"
+  },
+  "specificAppAndCollectionOperations": [
+    {
+      "calls": "141",
+      "disk_blocks_read": "126476",
+      "execution_ms": "288893.9",
+      "operation": "Scheduled station publication"
+    },
+    {
+      "calls": "148",
+      "disk_blocks_read": "7956",
+      "execution_ms": "20090.0",
+      "operation": "Scheduled station metadata"
+    },
+    {
+      "calls": "1",
+      "disk_blocks_read": "595",
+      "execution_ms": "776.1",
+      "operation": "Local Trends reads"
+    },
+    {
+      "calls": "1",
+      "disk_blocks_read": "205",
+      "execution_ms": "337.4",
+      "operation": "Home cached price reads"
+    },
+    {
+      "calls": "10",
+      "disk_blocks_read": "2",
+      "execution_ms": "13.8",
+      "operation": "National Trends reads"
+    }
+  ],
+  "topOperationsWithoutQueryText": [
+    {
+      "calls": 113,
+      "category": "other",
+      "disk_blocks_read": 1260,
+      "execution_ms": "336802.1",
+      "operation": null,
+      "queryid": "-1065206138625326377"
+    },
+    {
+      "calls": 141,
+      "category": "station_publication",
+      "disk_blocks_read": 126476,
+      "execution_ms": "288893.9",
+      "operation": "publish_fuel_station_batch",
+      "queryid": "-418426432983161343"
+    },
+    {
+      "calls": 16,
+      "category": "price_alert",
+      "disk_blocks_read": 1445,
+      "execution_ms": "211529.8",
+      "operation": null,
+      "queryid": "2574254089068149380"
+    },
+    {
+      "calls": 448,
+      "category": "other",
+      "disk_blocks_read": 679,
+      "execution_ms": "160543.4",
+      "operation": null,
+      "queryid": "-4311153709672551154"
+    },
+    {
+      "calls": 111,
+      "category": "other",
+      "disk_blocks_read": 195,
+      "execution_ms": "151827.9",
+      "operation": null,
+      "queryid": "1600281308229423497"
+    },
+    {
+      "calls": 726,
+      "category": "other",
+      "disk_blocks_read": 347,
+      "execution_ms": "131271.6",
+      "operation": null,
+      "queryid": "-5843361444644835286"
+    },
+    {
+      "calls": 230,
+      "category": "other",
+      "disk_blocks_read": 108,
+      "execution_ms": "121754.1",
+      "operation": null,
+      "queryid": "3443322792766563492"
+    },
+    {
+      "calls": 726,
+      "category": "other",
+      "disk_blocks_read": 371,
+      "execution_ms": "113826.5",
+      "operation": null,
+      "queryid": "2391836561494396458"
+    },
+    {
+      "calls": 110,
+      "category": "other",
+      "disk_blocks_read": 8496,
+      "execution_ms": "94410.8",
+      "operation": null,
+      "queryid": "5175005624797353213"
+    },
+    {
+      "calls": 115,
+      "category": "other",
+      "disk_blocks_read": 204,
+      "execution_ms": "73660.4",
+      "operation": null,
+      "queryid": "620209756655281218"
+    },
+    {
+      "calls": 500,
+      "category": "other",
+      "disk_blocks_read": 102,
+      "execution_ms": "58920.1",
+      "operation": null,
+      "queryid": "5056092156286539842"
+    },
+    {
+      "calls": 6,
+      "category": "other",
+      "disk_blocks_read": 371,
+      "execution_ms": "53845.8",
+      "operation": null,
+      "queryid": "8898595240669984357"
+    }
+  ],
+  "interpretation": "No evidence of a user traffic surge. Known app read RPC counts are small; ten National Trends reads correspond to our recovery verification. Scheduled station publication dominates these compared operation totals. Pressure was much lower between sweeps than during active collection. This supports workload-related capacity pressure, not exact process-level causal proof.",
+  "limits": [
+    "Database RPC calls are not unique users or a complete external request log.",
+    "Query counters are cumulative since the recorded reset; elapsed execution time includes waits and is not CPU time.",
+    "Classification is heuristic, includes an other category, and does not attribute all database work.",
+    "Both the index fix and 96 MiB shared_buffers override remain in effect; neither expands physical RAM."
+  ]
+}

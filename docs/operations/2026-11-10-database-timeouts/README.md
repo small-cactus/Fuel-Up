@@ -273,3 +273,35 @@ and the 15:50 broad-query timeout remain recorded limitations; do not describe
 this restart as a proven permanent fix. Validation used protected live reads,
 real app API responses, immutable archive audits, JSON assertions and diff checks;
 no application source or schema change was made in this interactive recovery.
+
+
+## 16:38 UTC: user traffic versus background load
+
+The user asked whether memory pressure returned because of too many users.
+Fresh read-only evidence does not support a traffic surge. Query-statistics
+counters reset at 13:50:41 and, by 16:38–16:39, recorded one Home cached-price
+RPC, one Local Trends RPC and ten National Trends RPCs. The ten national reads
+correspond to this recovery's app API checks. These are database call counters,
+not unique user counts or a complete HTTP traffic log.
+
+In the same retained counter window, station publication had 141 calls, about
+289 seconds total elapsed execution and 126,476 disk blocks read; station metadata
+had 148 calls and about 20 seconds. The three known app-read operations together
+had about 1.13 seconds elapsed execution. These cumulative elapsed totals include
+waits, are not CPU time, and do not classify every database operation. They support
+background collection as the dominant work among the compared functions.
+
+The live activity sample had nine database connections against max_connections=60,
+six idle client backends and one active diagnostic client. shared_buffers remains
+96 MiB. The measured 60.4-second interval ending 16:38:11, between hourly sweeps,
+had 98.8% CPU idle, 0.365% I/O wait, 2.48 MB swap-in, 0.67 MB swap-out and about
+208 MiB available RAM. Contrast this with the active-collection sample at 15:52
+(374.5 MB swap-in, 314.3 MB swap-out, 22.57% I/O wait). This supports pressure
+varying with workload, not continuous severe pressure at the latest check.
+
+The prior fixes remain in place: the compact index is about 9.2 MB rather than
+129 MB, and the shared cache remains 96 MiB rather than the earlier 224 MiB default.
+They removed specific waste but did not enlarge the roughly 411 MiB physical RAM
+pool. A permanent capacity/root-cause fix has not been demonstrated. No production
+change, restart, provider request or billing change was made for this explanation.
+Sanitized current evidence is resource-attribution.json.
