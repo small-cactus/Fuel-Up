@@ -168,3 +168,51 @@ batches were successful. This proves partial scheduled progress only. The latest
 complete cache remained the 11:00 run, and three operational metadata runs were
 past the retention-age threshold. Full current sweep, fresh cache, retention
 success and archive read-back still need verification at this checkpoint.
+
+At 15:45:36 immutable archive read-back passed for one post-restart batch in each
+fixed region. SHA-256, compressed size, exact requested station IDs, price schema
+and provenance were verified by auditRegionalSample.mjs. The source run was still
+running, so this is explicitly a three-batch integrity sample, not evidence that
+all 72 batches had completed or that observations equal verified pump prices.
+The sanitized report is archive-55572.json; response headers were removed.
+
+A single upstream HTTP 503 at 15:44:43 used the existing five-second shared
+cooldown. The queued retry succeeded without operator intervention or re-enable.
+Both western routes completed, and the eastern route continued through its fixed
+schedule. No monitor-triggered provider collection was performed.
+
+The 15:50 broad status query again hit its 15-second statement timeout. Host
+metrics and the smaller fallback query succeeded, and independent narrow reads
+confirmed ongoing collection. This is not labeled fully healthy monitoring.
+The 15:50 retention worker returned HTTP 200: two old operational hours removed,
+one deferred, 100 content references detached, no raw objects removed. At 15:51
+archive accounting was 724,754,476 of 900,000,000 bytes, with zero raw retention
+candidates and one old operational metadata run remaining. Bounded retention
+continues to protect the original research and latest published cache.
+
+A 60.5-second host sample ending 15:52:56 showed continued pressure: 374.5 MB swap
+read, 314.3 MB swap written, 22.57% CPU I/O wait, about 104 MiB available RAM,
+and no new OOM kills. Counters advanced, so these are measured interval values,
+not cached zero deltas. The full restart restored database access and scheduled
+progress, but it did not eliminate resource pressure or prove permanent recovery.
+No fourth repair, paid upgrade, budget increase or collection replay was issued.
+
+The 15:00 sweep 55572 completed at 15:57:24.544365, with all 72 batches and
+141,660 fixed-inventory observations, 90,353 stations with reported prices,
+zero missed batches and zero route mismatches. The regional totals were 59 east,
+9 southwest and 4 northwest. Its 73 requests and 143,660 lookups remained under
+92 and 161,660 limits. All 72 archive references remained undeleted. This proves
+scheduled collection recovery after the full restart, not verified pump truth.
+
+Five trend projections were missing immediately after completion. The normal
+projector successfully replayed one immutable archive at 15:58 and another at
+15:59, with zero provider requests. Three remained when run 55615 for 16:00
+started. The existing projection guard intentionally pauses optional replay
+while collection is running. It was not bypassed. The cache remained on the last
+complete projected run, so cache recovery was still pending at 16:01.
+
+The 16:00 retention worker also succeeded (HTTP 200), removed two overdue metadata
+hours, detached 92 references and reported zero deferred operational hours.
+No raw objects were removed. Thus retention execution recovered and its earlier
+metadata backlog cleared. All required cron entries remained active and their
+most recent completed invocations succeeded.
