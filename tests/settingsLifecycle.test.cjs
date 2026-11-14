@@ -18,7 +18,7 @@ async function setup() {
         'expo-router': { useRouter: () => ({ push: route => routes.push(route) }) },
         'expo-haptics': { impactAsync: async () => {}, selectionAsync: async () => {}, ImpactFeedbackStyle: { Light: 1, Medium: 2 } },
         'react-native-safe-area-context': { useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) },
-        '../../src/AppStateContext': { useAppState: () => ({ requestFuelReset() {}, setFuelDebugState() {} }) },
+        '../../src/AppStateContext': { useAppActions: () => ({ requestFuelReset() {}, setFuelDebugState() {} }) },
         '../../src/PreferencesContext': { usePreferences: () => ({ preferences: { preferredBrands: ['shell'], requiresE85: false }, updatePreference: (...args) => updates.push(args), resetOnboarding() {} }) },
         '../../src/ThemeContext': { useTheme: () => ({ isDark: false, themeMode: 'light', setThemeMode() {}, themeColors: {} }) },
         '../../src/services/fuel': { clearFuelPriceCache: async () => {} },

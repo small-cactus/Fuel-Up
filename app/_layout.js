@@ -2,7 +2,7 @@ import { trackInstallationEvent } from '../src/lib/installationTelemetry';
 import { migrateToNativeResearchAsync } from '../src/lib/drivingResearch';
 import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Platform, View } from 'react-native';
-import { AppStateProvider, useAppState } from '../src/AppStateContext';
+import { AppStateProvider, useAppControls } from '../src/AppStateContext';
 import { ThemeProvider, useTheme } from '../src/ThemeContext';
 import { PreferencesProvider, usePreferences } from '../src/PreferencesContext';
 import { Stack, usePathname } from 'expo-router';
@@ -104,7 +104,7 @@ function AppGate() {
         rootRevealPhase,
         rootRevealVersion,
         hideRootReveal,
-    } = useAppState();
+    } = useAppControls();
     const { isDark, themeColors } = useTheme();
     const predictiveDriveGateRef = useRef(null);
     const lastClusterProbeUrlRef = useRef('');

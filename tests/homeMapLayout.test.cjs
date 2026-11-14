@@ -29,7 +29,7 @@ test('Home waits for the real SwiftUI card height before publishing the camera i
     assert.deepEqual(heights, [], 'Provisional layout must not drive initial zoom');
     await act(async () => {
         const card = view.root.findByType('FlatList').props.renderItem({ item: { id: 'one' }, index: 0 });
-        card.props.children.props.onLayout(layout(198));
+        card.props.children.props.onMeasure('one', layout(198));
     });
     assert.deepEqual(heights, [], 'Old outer layout must not race the new card measurement');
     await act(async () => containers()[0].props.onLayout(layout(294)));

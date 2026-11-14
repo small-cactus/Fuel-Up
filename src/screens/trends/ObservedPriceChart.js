@@ -4,7 +4,7 @@ import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from 'reac
 import * as d3Shape from 'd3-shape';
 import * as d3Scale from 'd3-scale';
 
-export default function ObservedPriceChart({ data, width, height, trendColor, topBleed = 40 }) {
+export default React.memo(function ObservedPriceChart({ data, width, height, trendColor, topBleed = 40 }) {
     if (!data || data.length === 0) return null;
 
     const margin = { top: topBleed, right: 0, bottom: 0, left: 0 };
@@ -56,5 +56,5 @@ export default function ObservedPriceChart({ data, width, height, trendColor, to
             </Svg>
         </View>
     );
-}
+});
 

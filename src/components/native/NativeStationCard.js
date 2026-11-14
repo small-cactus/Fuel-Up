@@ -5,24 +5,23 @@ import { useWindowDimensions } from 'react-native';
 import { Host, VStack, HStack, Text, Image, Spacer, Button, ProgressView } from '@expo/ui/swift-ui';
 import { accessibilityLabel, buttonStyle, controlSize, disabled, fixedSize, font, foregroundStyle, glassEffect, lineLimit, layoutPriority, padding, tint } from '@expo/ui/swift-ui/modifiers';
 import { getFuelGradeMeta, resolveQuotePriceForFuelGrade } from '../../lib/fuelGrade';
+import { createStationCardPresentation } from '../../lib/stationCardPresentation';
 
 export default function NativeStationCard({ station, rank, fuelGrade, isDark, themeColors, now,
-    compact, onNavigate, onLayout, isRefreshing = false, errorMsg, emptyTitle }) {
+    compact, onNavigate, onLayout, isRefreshing = false, errorMsg, emptyTitle, presentation, getStation }) {
     const { fontScale, width } = useWindowDimensions();
     const scale = Math.min(fontScale, 2);
     const stacked = fontScale > 1.3;
     const grade = getFuelGradeMeta(fuelGrade);
-    const price = resolveQuotePriceForFuelGrade(station, fuelGrade);
-    const name = station?.name || emptyTitle || t("Cheapest Nearby");
-    const rating = Number.isFinite(station?.rating) ? station.rating.toFixed(1) : null;
-    const details = [distanceText(station?.distanceMiles), station?.updatedAt ? relativeTime(station.updatedAt, now) : null].filter(Boolean).join(' · ');
-    const canNavigate = typeof onNavigate === 'function' && Number.isFinite(station?.latitude)
-        && Math.abs(station.latitude) <= 90 && Number.isFinite(station?.longitude) && Math.abs(station.longitude) <= 180;
+    const card = presentation || createStationCardPresentation(station, fuelGrade, now, { distanceText, relativeTime });
+    const { price, rating, details } = card;
+    const name = card.name || emptyTitle || t("Cheapest Nearby");
+    const canNavigate = typeof onNavigate === 'function' && card.canNavigate;
     const text = (size, weight = 'medium', color = themeColors.text) => [font({ size: size * scale, weight }), foregroundStyle(color), fixedSize({ horizontal: false, vertical: true })];
     const Header = stacked ? VStack : HStack;
     const PriceRow = stacked ? VStack : HStack;
     const Subtitle = stacked ? VStack : HStack;
-    const dualPrices = station?.dualPrices;
+    const dualPrices = card.hasDualPrices ? { primaryLabel: card.dualPrimaryLabel, primaryPrice: card.dualPrimaryPrice, e85Price: card.dualE85Price } : null;
     const dualPriceSize = stacked ? (compact ? 30 : 44) * scale : Math.min(34 * scale, (width - 84) / 9);
     const priceSize = Math.min((compact ? 30 : 44) * scale, (width - 68) / 4.2);
     return <Host ignoreSafeArea="all" matchContents={{ vertical: true }} colorScheme={isDark ? 'dark' : 'light'}
@@ -47,8 +46,10 @@ export default function NativeStationCard({ station, rank, fuelGrade, isDark, th
                 <HStack spacing={8} modifiers={[layoutPriority(1)]}>
                     {isRefreshing && <ProgressView />}
                     <Button onPress={async () => {
-                        await recordResearchInteraction('station_go', { station: { ...station, price }, fuelGrade, rank, surface: 'station_card' });
-                        onNavigate?.(station);
+                        const currentStation = getStation?.() || station;
+                        const currentPrice = resolveQuotePriceForFuelGrade(currentStation, fuelGrade);
+                        await recordResearchInteraction('station_go', { station: { ...currentStation, price: currentPrice }, fuelGrade, rank, surface: 'station_card' });
+                        onNavigate?.(currentStation);
                     }} label={t("Go")} systemImage="arrow.up.right" modifiers={[
                         buttonStyle('glassProminent'), controlSize('large'), tint('#248A3D'), disabled(!canNavigate),
                         accessibilityLabel(t('Navigate to {station}', { station: name })), font({ size: 16 * scale, weight: 'bold' }),
@@ -68,8 +69,8 @@ export default function NativeStationCard({ station, rank, fuelGrade, isDark, th
             </PriceRow> : Number.isFinite(price) ? <PriceRow alignment={stacked ? 'leading' : 'firstTextBaseline'} spacing={6}>
                 <Text modifiers={[font({ size: priceSize, weight: 'bold' }), foregroundStyle(themeColors.text), lineLimit(1)]}>${price.toFixed(2)}</Text>
                 <Text modifiers={text(15, 'regular', themeColors.textOpacity)}>/ gal</Text>
-            </PriceRow> : <Text modifiers={text(12, 'medium', themeColors.textOpacity)}>{station ? t("E85 available · Price unavailable") : isRefreshing ? t("Checking nearby prices…") : t("Price unavailable")}</Text>}
-            {!compact && station?.address ? <Text modifiers={text(14, 'regular')}>{station.address}</Text> : null}
+            </PriceRow> : <Text modifiers={text(12, 'medium', themeColors.textOpacity)}>{card.hasStation ? t("E85 available · Price unavailable") : isRefreshing ? t("Checking nearby prices…") : t("Price unavailable")}</Text>}
+            {!compact && card.address ? <Text modifiers={text(14, 'regular')}>{card.address}</Text> : null}
             {!compact && details ? <Text modifiers={text(12, 'medium', themeColors.textOpacity)}>{details}</Text> : null}
             {errorMsg ? <Text modifiers={text(12, 'medium', themeColors.textOpacity)}>{errorMsg}</Text> : null}
         </VStack>

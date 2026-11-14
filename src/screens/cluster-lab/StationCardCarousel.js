@@ -1,5 +1,5 @@
 import { t } from '../../localization';
-import React, { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 import { FlatList, StyleSheet, View, useWindowDimensions } from 'react-native';
 import GlassActionButton from '../../components/native/GlassActionButton';
 import { requireNativeViewManager } from 'expo-modules-core';
@@ -14,6 +14,7 @@ const StationCardCarousel = forwardRef(function StationCardCarousel({ stations, 
     const compact = height < 500;
     const list = useRef(null);
     const programmaticPage = useRef(null);
+    const userScrolling = useRef(false);
     const measuredHeights = useRef(new Map());
     const [cardHeight, setCardHeight] = useState(230);
     const [hasMeasuredCard, setHasMeasuredCard] = useState(false);
@@ -48,10 +49,28 @@ const StationCardCarousel = forwardRef(function StationCardCarousel({ stations, 
 
     useImperativeHandle(ref, () => ({
         scrollTo(index, animated = true) {
+            userScrolling.current = false;
             programmaticPage.current = index;
             list.current?.scrollToOffset({ offset: index * width, animated });
         },
+        syncSelection(index) {
+            // A refreshed ranking may move the selected station. Correct only
+            // when idle; a swipe owns its position until it settles.
+            if (userScrolling.current || programmaticPage.current === index) return;
+            programmaticPage.current = index;
+            list.current?.scrollToOffset({ offset: index * width, animated: false });
+        },
     }), [width]);
+
+    const measureCard = useCallback((id, event) => {
+        const measured = Math.ceil(event.nativeEvent.layout.height);
+        if (!Number.isFinite(measured) || measured <= 0) return;
+        setHasMeasuredCard(true);
+        measuredHeights.current.set(id, measured);
+        // Card content has no fixed height. Keep neighboring pages aligned.
+        const tallest = Math.max(...measuredHeights.current.values());
+        setCardHeight(value => Math.abs(value - tallest) > 1 ? tallest : value);
+    }, []);
 
     const choose = page => {
         if (!stations[page]) return;
@@ -85,24 +104,25 @@ const StationCardCarousel = forwardRef(function StationCardCarousel({ stations, 
                 showsHorizontalScrollIndicator={false} keyExtractor={station => station.id}
                 getItemLayout={(_, page) => ({ length: width, offset: page * width, index: page })}
                 initialScrollIndex={index} initialNumToRender={2} maxToRenderPerBatch={2} windowSize={3}
-                onScrollBeginDrag={() => { programmaticPage.current = null; }}
-                onMomentumScrollEnd={event => settle(event.nativeEvent.contentOffset.x)}
+                onScrollBeginDrag={() => { userScrolling.current = true; programmaticPage.current = null; }}
+                onMomentumScrollEnd={event => {
+                    userScrolling.current = false;
+                    settle(event.nativeEvent.contentOffset.x);
+                }}
                 onScrollEndDrag={event => {
                     const offset = event.nativeEvent.targetContentOffset?.x;
-                    if (Number.isFinite(offset)) settle(offset);
+                    if (Number.isFinite(offset)) {
+                        // iOS supplies the eventual snap position before momentum.
+                        userScrolling.current = Math.abs(offset - event.nativeEvent.contentOffset.x) > 1;
+                        settle(offset);
+                    } else {
+                        userScrolling.current = false;
+                    }
                 }}
                 renderItem={({ item, index: page }) => <View style={{ width, paddingHorizontal: 16 }}>
                     <StationPriceCard station={item} rank={page + 1} fuelGrade={item.dualPrices ? fuelGrade : item.fuelType || fuelGrade} isDark={isDark}
                         themeColors={themeColors} compact={compact} now={now} onNavigate={onNavigate}
-                        onLayout={event => {
-                            const measured = Math.ceil(event.nativeEvent.layout.height);
-                            if (!Number.isFinite(measured) || measured <= 0) return;
-                            setHasMeasuredCard(true);
-                            measuredHeights.current.set(item.id, measured);
-                            // Card content has no fixed height. Keep neighboring pages aligned.
-                            const tallest = Math.max(...measuredHeights.current.values());
-                            setCardHeight(value => Math.abs(value - tallest) > 1 ? tallest : value);
-                        }} />
+                        onMeasure={measureCard} />
                 </View>} />
             <NativePages style={styles.pages} pageCount={stations.length} currentPage={index} isDark={isDark}
                 onPageChange={event => choose(event.nativeEvent.page)} />

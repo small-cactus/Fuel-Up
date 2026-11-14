@@ -47,8 +47,7 @@ export default function HomeScreen() {
     const [overview, setOverview] = useState(true);
     const [overlayHeight, setOverlayHeight] = useState(0);
     const selection = !overview && stations.some(station => station.id === selectedId) ? selectedId : stations[0]?.id;
-    const selectionRef = useRef(selection);
-    selectionRef.current = selection;
+    const selectedIndex = stations.findIndex(station => station.id === selection);
     useEffect(() => {
         if (active) {
             setOverview(true);
@@ -59,13 +58,11 @@ export default function HomeScreen() {
     useEffect(() => {
         if (selectedId !== selection) {
             setSelectedId(selection || null);
-            carousel.current?.scrollTo(0, false);
         }
     }, [selectedId, selection]);
     useEffect(() => {
-        const index = stations.findIndex(station => station.id === selectionRef.current);
-        if (index >= 0) carousel.current?.scrollTo(index, false);
-    }, [stations]);
+        if (selectedIndex >= 0) carousel.current?.syncSelection(selectedIndex);
+    }, [selectedIndex]);
     const select = useCallback(id => {
         void recordResearchInteraction('station_select', { station: stations.find(s => s.id === id), surface: 'station_carousel' });
         setOverview(false);

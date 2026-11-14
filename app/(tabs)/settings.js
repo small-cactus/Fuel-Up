@@ -7,7 +7,7 @@ import { AppState, Alert, Linking, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAppState } from '../../src/AppStateContext';
+import { useAppActions } from '../../src/AppStateContext';
 import { usePreferences } from '../../src/PreferencesContext';
 import { clearFuelPriceCache } from '../../src/services/fuel';
 import { clearTrendDataCache } from '../../src/services/fuel/trends';
@@ -31,7 +31,7 @@ export default function SettingsScreen() {
     const insets = useSafeAreaInsets();
     const router = useRouter();
     const { isDark, themeMode, setThemeMode, themeColors } = useTheme();
-    const { requestFuelReset, setFuelDebugState } = useAppState();
+    const { requestFuelReset, setFuelDebugState } = useAppActions();
     const { preferences, updatePreference, resetOnboarding } = usePreferences();
     const [trackingPermissionState, setTrackingPermissionState] = useState(null);
     const mountedRef = useRef(false);

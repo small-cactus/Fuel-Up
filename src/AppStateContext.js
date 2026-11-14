@@ -9,7 +9,7 @@ const ROOT_REVEAL_SESSION_DEFAULT = {
 
 let rootRevealSessionState = { ...ROOT_REVEAL_SESSION_DEFAULT };
 
-const AppStateContext = createContext({
+const DEFAULT_APP_STATE = {
     fuelResetToken: 0,
     fuelDebugState: null,
     homeStationSnapshot: null,
@@ -34,6 +34,19 @@ const AppStateContext = createContext({
     holdRootReveal: () => { },
     startRootReveal: () => { },
     hideRootReveal: () => { },
+};
+
+const DEFAULT_APP_ACTIONS = Object.fromEntries(Object.entries(DEFAULT_APP_STATE)
+    .filter(([, value]) => typeof value === 'function'));
+const AppStateContext = createContext(DEFAULT_APP_STATE);
+const AppActionsContext = createContext(DEFAULT_APP_ACTIONS);
+const AppControlContext = createContext({
+    ...DEFAULT_APP_ACTIONS,
+    clusterProbeRequest: null,
+    isClusterProbeSessionActive: false,
+    rootRevealPhase: 'blurred',
+    rootRevealVersion: 0,
+    hasCompletedRootReveal: false,
 });
 
 export function AppStateProvider({ children }) {
@@ -179,6 +192,36 @@ export function AppStateProvider({ children }) {
         setRootRevealPhase('hidden');
     }, []);
 
+    // Navigation and Settings do not consume moving coordinates. Keep their
+    // subscriptions independent without suspending effects or background work.
+    const actions = useMemo(() => ({
+        setHomeStationSnapshot,
+        setFuelDebugState,
+        setManualLocationOverride,
+        clearManualLocationOverride,
+        setResolvedFuelSearchContext,
+        clearResolvedFuelSearchContext,
+        requestClusterProbe,
+        clearClusterProbeRequest,
+        finishClusterProbeSession,
+        requestFuelReset,
+        holdRootReveal,
+        startRootReveal,
+        hideRootReveal,
+    }), [setHomeStationSnapshot, setFuelDebugState, setManualLocationOverride, clearManualLocationOverride,
+        setResolvedFuelSearchContext, clearResolvedFuelSearchContext, requestClusterProbe,
+        clearClusterProbeRequest, finishClusterProbeSession, requestFuelReset, holdRootReveal,
+        startRootReveal, hideRootReveal]);
+    const controls = useMemo(() => ({
+        ...actions,
+        clusterProbeRequest,
+        isClusterProbeSessionActive,
+        rootRevealPhase,
+        rootRevealVersion,
+        hasCompletedRootReveal,
+    }), [actions, clusterProbeRequest, isClusterProbeSessionActive, rootRevealPhase,
+        rootRevealVersion, hasCompletedRootReveal]);
+
     const value = useMemo(() => ({
         fuelDebugState,
         homeStationSnapshot,
@@ -206,9 +249,21 @@ export function AppStateProvider({ children }) {
         hideRootReveal
     }), [fuelDebugState, homeStationSnapshot, fuelResetToken, manualLocationOverride, resolvedFuelSearchContext, resolvedFuelSearchVersion, clusterProbeRequest, isClusterProbeSessionActive, rootRevealPhase, rootRevealVersion, hasCompletedRootReveal, setFuelDebugState, setManualLocationOverride, clearManualLocationOverride, setResolvedFuelSearchContext, clearResolvedFuelSearchContext, requestClusterProbe, clearClusterProbeRequest, finishClusterProbeSession, requestFuelReset, holdRootReveal, startRootReveal, hideRootReveal]);
 
-    return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
+    return <AppActionsContext.Provider value={actions}>
+        <AppControlContext.Provider value={controls}>
+            <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>
+        </AppControlContext.Provider>
+    </AppActionsContext.Provider>;
 }
 
 export function useAppState() {
     return useContext(AppStateContext);
+}
+
+export function useAppActions() {
+    return useContext(AppActionsContext);
+}
+
+export function useAppControls() {
+    return useContext(AppControlContext);
 }

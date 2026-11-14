@@ -1,6 +1,7 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const load=require('./helpers/loadComponent.cjs');
+const memoHooks = { useCallback: fn => fn, useRef: value => ({ current: value }) };
 
 test('Home shares its fallback GPS origin so Trends searches the same radius center',async t=>{
     let effect;
@@ -8,7 +9,7 @@ test('Home shares its fallback GPS origin so Trends searches the same radius cen
     const origin={latitude:27.95,longitude:-82.45};
     const hook=load('src/screens/cluster-lab/useClusterLabStations.js',{
         '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ faultsEnabled: false, generation: 0, connected: null }) },
-        react:{useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,()=>{}]},
+        react:{...memoHooks,useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,()=>{}]},
         'react-native':{AppState:{currentState:'active',addEventListener:()=>({remove(){}})}},
         'expo-location':{getForegroundPermissionsAsync:async()=>({status:'granted'}),getLastKnownPositionAsync:async()=>({coords:origin})},
         '../../AppStateContext':{useAppState:()=>({setResolvedFuelSearchContext:value=>commits.push(value)})},
@@ -33,7 +34,7 @@ test('Home publishes local data then refreshes DB on focus and foreground; clean
     const results=[];
     const hook=load('src/screens/cluster-lab/useClusterLabStations.js',{
         '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ faultsEnabled: false, generation: 0, connected: null }) },
-        react:{useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,value=>results.push(value)]},
+        react:{...memoHooks,useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,value=>results.push(value)]},
         'react-native':{AppState:{currentState:'active',addEventListener:(_,fn)=>{foreground=fn;return {remove(){foreground=null;}};}}},
         'expo-location':{},'../../AppStateContext':{useAppState:()=>({resolvedFuelSearchContext:{latitude:27.95,longitude:-82.45}})},
         '../../PreferencesContext':{usePreferences:()=>({preferences:{preferredOctane:'regular',searchRadiusMiles:5}})},
@@ -61,7 +62,7 @@ test('Home removes a quote immediately after its 24-hour expiry without a networ
     const {isFreshReportedQuote}=require('../src/services/fuel/reportedPrices');
     const hook=load('src/screens/cluster-lab/useClusterLabStations.js',{
         '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ faultsEnabled: false, generation: 0, connected: null }) },
-        react:{useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,value=>results.push(value)]},
+        react:{...memoHooks,useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,value=>results.push(value)]},
         'react-native':{AppState:{currentState:'active',addEventListener:()=>({remove(){}})}},
         'expo-location':{},'../../AppStateContext':{useAppState:()=>({resolvedFuelSearchContext:{latitude:27.95,longitude:-82.45}})},
         '../../PreferencesContext':{usePreferences:()=>({preferences:{preferredOctane:'regular',searchRadiusMiles:5}})},
@@ -81,7 +82,7 @@ test('live Home location updates the shared search context and launch cache usin
     let effect, options;
     const commits=[], persisted=[];
     const hook=load('src/screens/cluster-lab/useHomeDeviceLocation.js', {
-        react:{useEffect:fn=>{effect=fn;},useRef:()=>({current:null})},
+        react:{...memoHooks,useEffect:fn=>{effect=fn;},useRef:()=>({current:null})},
         'react-native':{AppState:{}},'expo-location':{},
         '../../AppStateContext':{useAppState:()=>({resolvedFuelSearchContext:{latitude:27.9,longitude:-82.8},setResolvedFuelSearchContext:c=>commits.push(c)})},
         '../../PreferencesContext':{usePreferences:()=>({preferences:{preferredOctane:'premium',searchRadiusMiles:8,preferredBrands:['wawa'],fuelMemberships:['costco']}})},
@@ -100,7 +101,7 @@ test('live GPS does not override an explicit manual location or run on an unfocu
     for (const [active,manualLocationOverride] of [[false,null],[true,{latitude:27,longitude:-82}]]) {
         let effect, starts=0;
         const hook=load('src/screens/cluster-lab/useHomeDeviceLocation.js', {
-            react:{useEffect:fn=>{effect=fn;},useRef:()=>({current:null})},
+            react:{...memoHooks,useEffect:fn=>{effect=fn;},useRef:()=>({current:null})},
             'react-native':{AppState:{}},'expo-location':{},
             '../../AppStateContext':{useAppState:()=>({manualLocationOverride})},
             '../../PreferencesContext':{usePreferences:()=>({preferences:{}})},
@@ -116,7 +117,7 @@ test('cached station distances are recalculated from the current search center b
     const stale={latitude:28.01,longitude:-82.577,distanceMiles:15};
     const hook=load('src/screens/cluster-lab/useClusterLabStations.js',{
         '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ faultsEnabled: false, generation: 0, connected: null }) },
-        react:{useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,value=>results.push(value)]},
+        react:{...memoHooks,useEffect:fn=>{effect=fn;},useMemo:fn=>fn(),useState:()=>[null,value=>results.push(value)]},
         'react-native':{AppState:{currentState:'active',addEventListener:()=>({remove(){}})}},
         'expo-location':{},'../../AppStateContext':{useAppState:()=>({resolvedFuelSearchContext:{latitude:28.01,longitude:-82.577}})},
         '../../PreferencesContext':{usePreferences:()=>({preferences:{preferredOctane:'regular',searchRadiusMiles:5}})},
@@ -136,7 +137,7 @@ test('Home publishes map origin before an unresolved price-cache read', async t 
     const origin = {latitude:27.95, longitude:-82.45};
     const hook = load('src/screens/cluster-lab/useClusterLabStations.js', {
         '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ faultsEnabled: false, generation: 0, connected: null }) },
-        react: {useEffect: fn=>{effect=fn;}, useMemo: fn=>fn(), useState:()=>{const index=stateIndex++; return [values[index],value=>{values[index]=value;updates[index].push(value);}];}},
+        react: { ...memoHooks,useEffect: fn=>{effect=fn;}, useMemo: fn=>fn(), useState:()=>{const index=stateIndex++; return [values[index],value=>{values[index]=value;updates[index].push(value);}];}},
         'react-native': {AppState:{currentState:'active',addEventListener:()=>({remove(){}})}},
         'expo-location':{},
         '../../AppStateContext':{useAppState:()=>({resolvedFuelSearchContext:origin})},
@@ -162,7 +163,7 @@ for (const cachedFresh of [true, false]) {
         const hook = load('src/screens/cluster-lab/useClusterLabStations.js', {
             '../../lib/onboardingHandoff': { onboardingHandoff: { getSnapshot: () => 'preparing' } },
             '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ connected: true }) },
-            react: { useEffect: fn => { effect = fn; }, useMemo: fn => fn(), useState: () => [null, v => results.push(v)] },
+            react: { ...memoHooks, useEffect: fn => { effect = fn; }, useMemo: fn => fn(), useState: () => [null, v => results.push(v)] },
             'react-native': { AppState: { currentState: 'active', addEventListener: () => ({ remove() {} }) } },
             'expo-location': {},
             '../../AppStateContext': { useAppState: () => ({ resolvedFuelSearchContext: { latitude: 27, longitude: -82 } }) },
@@ -189,7 +190,7 @@ test('Also show E85 keeps gasoline available while the extra grade refreshes', a
     const queries = [], published = [];
     const hook = load('src/screens/cluster-lab/useClusterLabStations.js', {
         '../../lib/useNetworkStatus': { __esModule: true, default: () => ({ connected: true }) },
-        react: { useEffect: fn => { effect = fn; }, useMemo: fn => fn(), useState: () => [null, () => {}] },
+        react: { ...memoHooks, useEffect: fn => { effect = fn; }, useMemo: fn => fn(), useState: () => [null, () => {}] },
         'react-native': { AppState: { currentState: 'active', addEventListener: () => ({ remove() {} }) } },
         'expo-location': {},
         '../../AppStateContext': { useAppState: () => ({ resolvedFuelSearchContext: { latitude: 28, longitude: -82 } }) },

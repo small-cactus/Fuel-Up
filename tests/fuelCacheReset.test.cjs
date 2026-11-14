@@ -2,7 +2,9 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const query={latitude:37.3346,longitude:-122.009,radiusMiles:10,fuelType:'regular'};
 const station=(prices)=>({id:'A',name:'Test fuel',latitude:query.latitude,longitude:query.longitude,prices});
-const price=(fuelProduct,value)=>({fuelProduct,credit:{price:value,postedTime:new Date().toISOString()}});
+// The server captures `now` before awaiting rows. A fixture created inside that
+// await must already be reported, rather than becoming 1ms future-dated.
+const price=(fuelProduct,value)=>({fuelProduct,credit:{price:value,postedTime:new Date(Date.now()-60_000).toISOString()}});
 
 async function setup(t, readRows) {
     const storage=new Map();
