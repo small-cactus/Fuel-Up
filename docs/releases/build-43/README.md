@@ -14,13 +14,17 @@ The native suite passed 25/26 initially; the remaining assertion incorrectly req
 
 ## Listing preparation
 
-`listing.json` contains non-empty promotional text and release notes for English (US), Simplified Chinese, Traditional Chinese, French, Spanish (Mexico), and Vietnamese. All promotional texts are within 170 characters. It records the requested automatic release after approval and no phased release. These are prepared values, not proof of saved App Store Connect state.
+`listing.json` contains non-empty promotional text and release notes for English (US), Simplified Chinese, Traditional Chinese, French, Spanish (Mexico), and Vietnamese. All promotional texts are within 170 characters. It records the requested automatic release after approval and no phased release. All six promotional texts and release notes were saved and read back in App Store Connect on November 14. Automatic release after approval and immediate availability to all users were also verified selected before submission.
 
-`review-notes.txt` describes the change; retain existing review access guidance when entering it.
+`review-notes.txt` describes the change. The saved App Review notes identify 1.0.5 (43), include the movement-continuity change, and preserve the existing review access and notification/research guidance.
 
-## Submission blocker
+## Submission confirmed
 
-App Store Connect's Safari session expired. The passkey sign-in required user Touch ID, which was not completed; the browser returned to the sign-in page with `authResult=FAILED`. No version, promotional text, automatic-release selection, or App Review submission has been saved through that browser session. User authentication is required to complete those steps.
+Apple confirmed **1.0.5 (43) — Waiting for Review** at approximately **2026-11-14 18:43 UTC**, with “1 Item Submitted” and zero draft submissions. Submission ID: `bf204e5d-d348-4cc0-8c76-350d74dc6e38`.
+
+Automatic release after approval is enabled; phased release is off. Promotional text and release notes are non-empty in all six existing localizations. Build 43 was processed and attached. Public App Store availability has **not** been verified; Apple review is pending.
+
+The earlier expired-login blocker was resolved by the user's sign-in. Safari's App Store web content stalled during localization edits; restarting only the stalled App Store web-content processes restored the session. All metadata was saved and read back before submission.
 
 ## Local packaging
 
@@ -28,7 +32,7 @@ Archive target: `/Users/anthonyh/Library/Developer/Xcode/Archives/2026-11-14/Fue
 
 The generated native app/project and notification extension were synchronized to 1.0.5 (43). The first archive was intentionally interrupted to correct the notification extension's explicit Info.plist values; compilation resumed using the same `/tmp/FuelUpGlassDevice` cache. Archive and App Store export succeeded. The exported app and both extensions passed strict signature checks and report 1.0.5 (43), with debugging disabled. The app has production APNs entitlement. `export-validation.json` records the IPA digest and bundle checks. The archived Release JavaScript bundle does not contain the legacy probe marker, consistent with the passing production route-exclusion packaging test.
 
-Validated IPA: `/tmp/FuelUp-AppStore-43-Driving/FuelUp.ipa`. Archive/export/upload logs: `/tmp/fuelup-43-{archive,export,upload}.log`. Apple accepted the upload at **2026-11-14 10:41:46 UTC** and reported that the uploaded package is processing. See `upload-result.txt`. Processing completion, App Review submission, automatic release settings, live promotional text, and public availability have not been verified.
+Validated IPA: `/tmp/FuelUp-AppStore-43-Driving/FuelUp.ipa`. Archive/export/upload logs: `/tmp/fuelup-43-{archive,export,upload}.log`. Apple accepted the upload at **2026-11-14 10:41:46 UTC** and reported that the uploaded package is processing. See `upload-result.txt`. Processing completion, App Review submission, automatic release settings, and saved promotional text were subsequently verified as recorded above. Public availability remains pending review.
 
 Upload emitted the existing non-blocking missing `hermesvm.framework` dSYM warning. Hermes crash symbolication may be limited.
 

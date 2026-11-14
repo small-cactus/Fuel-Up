@@ -3,11 +3,11 @@
   "build": "43",
   "uploadedAt": "2026-11-14T10:41:46Z",
   "uploadSucceeded": true,
-  "lastAppleBuildState": "processing",
-  "submittedForReview": false,
+  "lastAppleBuildState": "processed_and_attached",
+  "submittedForReview": true,
   "publicReleaseVerified": false,
-  "automaticReleaseSaved": false,
-  "promotionalTextSaved": false,
+  "automaticReleaseSaved": true,
+  "promotionalTextSaved": true,
   "listingPreparedLocales": [
     "en-US",
     "zh-Hans",
@@ -16,5 +16,19 @@
     "es-MX",
     "vi"
   ],
-  "blocker": "App Store Connect browser authentication requires user sign-in; passkey Touch ID not completed."
+  "blocker": null,
+  "appStoreVersionState": "WAITING_FOR_REVIEW",
+  "submittedAt": "2026-11-14T18:43:23Z",
+  "submissionId": "bf204e5d-d348-4cc0-8c76-350d74dc6e38",
+  "releaseType": "AFTER_APPROVAL",
+  "phasedRelease": false,
+  "listingSavedAndReadBackLocales": [
+    "en-US",
+    "zh-Hans",
+    "zh-Hant",
+    "fr-FR",
+    "es-MX",
+    "vi"
+  ],
+  "reviewNotesSaved": true
 }
