@@ -1,0 +1,14 @@
+{
+  "statusError": "DATABASE_CONNECTION_TIMEOUT",
+  "observedAt": "2026-11-14T10:45:30.240Z",
+  "partial": true,
+  "providerRequests": 0,
+  "host": {
+    "ok": false,
+    "error": "CLIENT_TIMEOUT"
+  },
+  "database": {
+    "ok": false,
+    "error": "CLIENT_TIMEOUT"
+  }
+}

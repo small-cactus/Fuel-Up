@@ -1,0 +1,29 @@
+{
+  "observedAt": "2026-11-14T10:48:00Z",
+  "dashboardHealth": "Unhealthy",
+  "dashboardMemoryCommitment": "1.5 GB severe",
+  "dashboardMemoryUsage": "406.31 MB",
+  "dashboardCpuChart": "86.30%",
+  "dashboardDiskWarning": "About to deplete Disk IO Budget; baseline 5 MB/s",
+  "unavailableCharts": [
+    "IOPS",
+    "disk throughput",
+    "database connections",
+    "disk usage"
+  ],
+  "logEvidence": [
+    "National dispatch cron job 4 startup timeout",
+    "Trends publisher cron job 15 startup timeout",
+    "Projection repair cron job 20 startup timeout",
+    "SQLSTATE 57014 statement cancellation",
+    "SSL EOF/reset failures",
+    "pg_settings metadata query took 14384 ms",
+    "Role object lock waits 12887 and 20475 ms"
+  ],
+  "independentMetrics": "15-second timeout; subsequent 20-second attempt HTTP 504",
+  "narrowReads": "Four-run SQL read exceeded client 20-second bound; direct REST exceeded 12-second bound; activity/index SQL exceeded 20-second bound",
+  "limitations": "No current run/gap counts, exact index size, swap rate or I/O rate established before restart. Chart labels are dashboard observations, not independent interval measurements. December 2 quota grace does not establish an active restriction.",
+  "repair": "Full-project restart requested at approximately 10:48 UTC; first attempt for this recurrence. Prior November 10 incident was verified recovered after its third attempt.",
+  "providerRequests": 0,
+  "billingChanges": 0
+}
