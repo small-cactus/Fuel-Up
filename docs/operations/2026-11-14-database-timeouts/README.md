@@ -236,3 +236,31 @@ attempt, provider collection, app launch or archive rewrite occurred. The prior
 recovery archive read-back remains the integrity evidence; this is continued
 scheduled operation, not a new recovery. Fixed-inventory coverage is not verified
 pump truth. `followup-2013.json` preserves the passing checks and host counters.
+
+## 21:12 UTC: no new expired gaps
+
+Scheduled run 61588 (20:00) completed 72/72 batches on the correct 59/9/4 routes,
+with 141,660 catalog observations and 91,506 reported-price stations. Its 75
+requests and 147,660 lookups stayed within 92/161,660. The complete cache published
+all ten scopes at 20:19 with zero missing latest-run projections. The 21:00 run
+61648 was 58/72 at the status snapshot and has until 22:00. Retained operational
+slots remain 176 complete, 15 known partial and one current running, with zero
+expired absent/running slots. Metadata outside retention is not a new collection
+gap. The three old November 10 projection gaps are unchanged.
+
+All six schedules are active. Retention returned HTTP 200 at 21:00 and 21:10,
+with zero eligible raw objects or overdue metadata. Archive accounting is
+748,613,285 / 900,000,000 bytes. The shared cooldown expired naturally at 20:14:25;
+the city campaign is still complete and continuous national mode remains enabled.
+The compact reference index is valid/ready at 22,994,944 bytes, up 155,648 bytes
+since 20:13. This size observation does not measure bloat. Host available RAM is
+108,785,664 bytes, occupied swap 543,838,208 bytes and loads 0.95/0.79/0.51. Swap
+occupancy increased, so memory pressure remains a concern; protected reads and
+scheduled service succeeded and no lock waits were observed. There is no new
+failure supporting a speculative restart, billing change or index operation.
+
+Evidence and passing consistency checks are in `followup-2112.json`. Zero repair
+attempts this check; the incident total remains one. No provider requests, app
+launch, raw-price overwrite or research change was triggered. The prior recovery
+archive sample remains verified; no new recovery occurred. Coverage is relative
+to the fixed inventory and is not verified pump truth.
