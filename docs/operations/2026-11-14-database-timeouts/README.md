@@ -173,3 +173,38 @@ during collection or prove a permanent capacity fix. Recovery-attempt count stay
 one. JSON assertions checked complete regional coverage, budgets, cache alignment,
 absence of new expired gaps, active schedules, retention capacity and archive
 integrity. Evidence is in complete-sweep-*.json and resource-1148.json.
+
+## 19:10 UTC: continued scheduled service
+
+The full protected status query and supplemental read succeeded. The 18:00 run
+61468 completed 72/72 batches on the correct 59/9/4 routes, using 73 requests and
+143,660 lookups within the 92/161,660 budgets. Its ten-scope Trends cache published
+at 18:18 UTC with zero missing latest-run projections. The 19:00 run 61528 is
+in progress (47/72 at the status snapshot) and has until 20:00 UTC; it is not an
+expired gap. The retained eight-day window has 176 complete, 15 known partial,
+one current running and zero expired absent/running slots. Expired metadata before
+that window is not counted as absent collection; historical gaps remain recorded.
+The three known November 10 projection gaps remain separate from current cache health.
+
+All six schedules are active. Retention returned HTTP 200 at 19:00, removed 72
+eligible operational objects and one metadata hour, and reported no deferrals.
+No eligible raw objects or overdue metadata remain. Archive accounting is
+748,064,220 / 900,000,000 bytes. The city campaign remains complete. Continuous
+mode, the October 7 operational start, 48-hour raw retention and eight-day metadata
+retention are unchanged. The shared transient cooldown expired at 18:05:47 UTC;
+no cooldown was overridden. Deferred serving writes have not left a latest-complete
+projection backlog.
+
+The compact reference index is valid/ready at 22,675,456 bytes, up from 21,708,800
+at 11:48; this is growth, not a measured bloat ratio or proof of the old INCLUDE
+defect recurring. Host metrics show 155,103,232 bytes available RAM, 372,781,056
+bytes occupied swap and load averages 0.31/0.37/0.24. The activity snapshot has no
+lock waits. Existing resource pressure remains a monitoring concern, but these
+successful reads and current collection do not justify another restart or index
+operation. No repair was performed; incident attempt count remains one. Recovery
+archive integrity was already verified at 11:48; no new recovery occurred here.
+
+`followup-1910.json` records the status, host counters, bounded supplemental read
+and passing consistency assertions. No provider collection, app launch, raw-price
+write, billing change or research modification was triggered. Coverage is relative
+to the fixed 141,660-ID inventory; reported prices are not verified pump truth.
