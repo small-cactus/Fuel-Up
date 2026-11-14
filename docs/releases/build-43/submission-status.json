@@ -1,0 +1,20 @@
+{
+  "version": "1.0.5",
+  "build": "43",
+  "uploadedAt": "2026-11-14T10:41:46Z",
+  "uploadSucceeded": true,
+  "lastAppleBuildState": "processing",
+  "submittedForReview": false,
+  "publicReleaseVerified": false,
+  "automaticReleaseSaved": false,
+  "promotionalTextSaved": false,
+  "listingPreparedLocales": [
+    "en-US",
+    "zh-Hans",
+    "zh-Hant",
+    "fr-FR",
+    "es-MX",
+    "vi"
+  ],
+  "blocker": "App Store Connect browser authentication requires user sign-in; passkey Touch ID not completed."
+}

@@ -1,0 +1,33 @@
+{
+  "verifiedAt": "2026-11-14T10:39:29.619934+00:00",
+  "ipaSha256": "6a737d3a74f6d4386c71d833654e6e1baebf2cb4813643c5d0ac8bb2d29ce0c9",
+  "ipaBytes": 45844071,
+  "releaseBundleBytes": 4864901,
+  "legacyProbeMarkerPresent": false,
+  "bundles": [
+    {
+      "bundle": "FuelUp.app",
+      "version": "1.0.5",
+      "build": "43",
+      "signatureValid": true,
+      "getTaskAllow": false,
+      "apsEnvironment": "production"
+    },
+    {
+      "bundle": "FuelUpNotificationService.appex",
+      "version": "1.0.5",
+      "build": "43",
+      "signatureValid": true,
+      "getTaskAllow": false,
+      "apsEnvironment": null
+    },
+    {
+      "bundle": "ExpoWidgetsTarget.appex",
+      "version": "1.0.5",
+      "build": "43",
+      "signatureValid": true,
+      "getTaskAllow": false,
+      "apsEnvironment": null
+    }
+  ]
+}

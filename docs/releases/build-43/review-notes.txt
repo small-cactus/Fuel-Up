@@ -1,0 +1,3 @@
+This update improves map and station-card continuity as device location changes. Existing station results remain visible while refreshed data loads; the selected station and card swipe are preserved. Unchanged card, chart, leaderboard, navigation, and Settings views avoid unnecessary work.
+
+There are no changes to location permission requests, background collection, purchases, account requirements, or notification behavior in this update. Existing review access instructions should be retained.
