@@ -1,0 +1,291 @@
+
+> fuel-up@1.0.2 test:trends
+> node --test tests/localTrendsEndpoint.test.cjs tests/displayTrendSeries.test.cjs tests/trendData.test.cjs tests/rawTrendRows.test.cjs tests/trendStationPreferences.test.cjs tests/trendsLifecycle.test.cjs tests/trendsAnimationLifecycle.test.cjs tests/nationalLeaderboard.test.mjs tests/nationalTrendsLifecycle.test.cjs tests/onboardingTrendsPrefetch.test.cjs tests/trendSnapshotStore.test.cjs tests/trendsBackgroundRefresh.test.cjs ./tests/trendsRenderIsolation.test.cjs
+
+TAP version 13
+# Subtest: missing hourly buckets and trailing time carry the last observed price without mutating observations
+ok 1 - missing hourly buckets and trailing time carry the last observed price without mutating observations
+  ---
+  duration_ms: 3.321709
+  ...
+# Subtest: a single current observation creates a flat renderable line without fake price changes
+ok 2 - a single current observation creates a flat renderable line without fake price changes
+  ---
+  duration_ms: 0.479792
+  ...
+# Subtest: new local areas use their actual current average; completely absent data stays absent
+ok 3 - new local areas use their actual current average; completely absent data stays absent
+  ---
+  duration_ms: 0.406208
+  ...
+# Subtest: anonymous first-launch local history reads archived observations for the exact area and grade
+ok 4 - anonymous first-launch local history reads archived observations for the exact area and grade
+  ---
+  duration_ms: 19.180625
+  ...
+# Subtest: national serving uses only the protected cache RPC and preserves fresh reported values
+ok 5 - national serving uses only the protected cache RPC and preserves fresh reported values
+  ---
+  duration_ms: 2.750667
+  ...
+# Subtest: national requests reject invalid grades and filters before reading the database
+ok 6 - national requests reject invalid grades and filters before reading the database
+  ---
+  duration_ms: 0.367083
+  ...
+# Subtest: national empty data stays empty and failures do not use a provider fallback
+ok 7 - national empty data stays empty and failures do not use a provider fallback
+  ---
+  duration_ms: 0.150042
+  ...
+# Subtest: history failures preserve the fresh leaderboard without inventing a chart
+ok 8 - history failures preserve the fresh leaderboard without inventing a chart
+  ---
+  duration_ms: 0.15425
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# (node:27568) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: switching national grades or leaving the screen ignores stale UI responses while shared refreshes finish; initial loads do not pull the page down
+ok 9 - switching national grades or leaving the screen ignores stale UI responses while shared refreshes finish; initial loads do not pull the page down
+  ---
+  duration_ms: 371.004875
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: national cache returns immediately on revisit, stays isolated by grade/filter/reset, and refreshes after an hour
+ok 10 - national cache returns immediately on revisit, stays isolated by grade/filter/reset, and refreshes after an hour
+  ---
+  duration_ms: 84.038459
+  ...
+# Subtest: server scan deadline refreshes an old cached scan, while quote expiry alone does not fetch
+ok 11 - server scan deadline refreshes an old cached scan, while quote expiry alone does not fetch
+  ---
+  duration_ms: 40.909583
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# (node:27569) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:27569) ExperimentalWarning: CommonJS module /Users/anthonyh/Desktop/Fuel Up/src/screens/onboarding/useOnboardingTrendsPrefetch.js is loading ES Module /Users/anthonyh/Desktop/Fuel Up/src/lib/fuelSearchState.js using require().
+# Support for loading ES Module in require() is an experimental feature and might change at any time
+# (node:27569) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelMemberships.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: onboarding waits for the map, debounces choices, and Save warms the exact final selection without waiting
+ok 12 - onboarding waits for the map, debounces choices, and Save warms the exact final selection without waiting
+  ---
+  duration_ms: 362.992667
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: Trends joins an onboarding national request, then renders the shared cache immediately on remount
+ok 13 - Trends joins an onboarding national request, then renders the shared cache immediately on remount
+  ---
+  duration_ms: 91.515458
+  ...
+# Subtest: failed and partial prefetches remain retryable and reset/grade scopes remain isolated
+ok 14 - failed and partial prefetches remain retryable and reset/grade scopes remain isolated
+  ---
+  duration_ms: 26.135458
+  ...
+# Subtest: historical trends recover the exact raw payment price, never an adjusted display value
+ok 15 - historical trends recover the exact raw payment price, never an adjusted display value
+  ---
+  duration_ms: 0.900375
+  ...
+# Subtest: unverifiable, stale-at-observation, future, or wrong-grade history is omitted, never filled
+ok 16 - unverifiable, stale-at-observation, future, or wrong-grade history is omitted, never filled
+  ---
+  duration_ms: 1.063875
+  ...
+# Subtest: historical cash fallback preserves the actual cash value
+ok 17 - historical cash fallback preserves the actual cash value
+  ---
+  duration_ms: 0.087959
+  ...
+# Subtest: same-day trend history falls back to hourly chart buckets
+ok 18 - same-day trend history falls back to hourly chart buckets
+  ---
+  duration_ms: 1.86175
+  ...
+# Subtest: trend history never fills missing observations with a current average
+ok 19 - trend history never fills missing observations with a current average
+  ---
+  duration_ms: 0.142417
+  ...
+# Subtest: trend projection upgrades the latest displayed station row to the current validated quote
+ok 20 - trend projection upgrades the latest displayed station row to the current validated quote
+  ---
+  duration_ms: 32.301959
+  ...
+# (node:27571) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/homeState.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: trend leaderboard prices stay identical to the Home ranking pipeline for the same location and filters
+ok 21 - trend leaderboard prices stay identical to the Home ranking pipeline for the same location and filters
+  ---
+  duration_ms: 14.9335
+  ...
+# Subtest: buildLatestFuelStationQuotesFromRows suppresses duplicate gasoline grades while retaining independently priced diesel
+ok 22 - buildLatestFuelStationQuotesFromRows suppresses duplicate gasoline grades while retaining independently priced diesel
+  ---
+  duration_ms: 0.919792
+  ...
+# Subtest: buildLatestFuelStationQuotesFromRows drops uniform multi-grade rows for non-regular queries
+ok 23 - buildLatestFuelStationQuotesFromRows drops uniform multi-grade rows for non-regular queries
+  ---
+  duration_ms: 2.294083
+  ...
+# Subtest: buildLatestFuelStationQuotesFromRows suppresses duplicate higher grades and keeps the cheapest matching grade
+ok 24 - buildLatestFuelStationQuotesFromRows suppresses duplicate higher grades and keeps the cheapest matching grade
+  ---
+  duration_ms: 0.539958
+  ...
+# Subtest: buildLatestFuelStationQuotesFromRows drops duplicate grades when the requested grade is not the cheapest match
+ok 25 - buildLatestFuelStationQuotesFromRows drops duplicate grades when the requested grade is not the cheapest match
+  ---
+  duration_ms: 0.377125
+  ...
+# Subtest: saved Trends survive a fresh process, remain scope isolated, and expire after 24 hours
+ok 26 - saved Trends survive a fresh process, remain scope isolated, and expire after 24 hours
+  ---
+  duration_ms: 0.575375
+  ...
+# Subtest: reset wins against a delayed disk read and a concurrent save
+ok 27 - reset wins against a delayed disk read and a concurrent save
+  ---
+  duration_ms: 0.336875
+  ...
+# Subtest: concurrent saves are serialized, storage stays bounded, and unavailable storage is nonfatal
+ok 28 - concurrent saves are serialized, storage stays bounded, and unavailable storage is nonfatal
+  ---
+  duration_ms: 1.695792
+  ...
+# (node:27573) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelGrade.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:27573) ExperimentalWarning: CommonJS module /Users/anthonyh/Desktop/Fuel Up/src/services/fuel/trends.js is loading ES Module /Users/anthonyh/Desktop/Fuel Up/src/lib/visibleStations.js using require().
+# Support for loading ES Module in require() is an experimental feature and might change at any time
+# Subtest: local ranking stays price-first like Home even with preferred brands
+ok 29 - local ranking stays price-first like Home even with preferred brands
+  ---
+  duration_ms: 386.29975
+  ...
+# Subtest: requiring E85 excludes unavailable stations from leaderboard and historical averages
+ok 30 - requiring E85 excludes unavailable stations from leaderboard and historical averages
+  ---
+  duration_ms: 62.166791
+  ...
+# Subtest: trend request keys distinguish brand and E85 preferences
+ok 31 - trend request keys distinguish brand and E85 preferences
+  ---
+  duration_ms: 47.410916
+  ...
+# Subtest: fresh local prices remain available without history; no historical values are invented
+ok 32 - fresh local prices remain available without history; no historical values are invented
+  ---
+  duration_ms: 30.542833
+  ...
+# Subtest: local leaderboard exactly matches Home candidate filtering and ID tie order from the same snapshot
+ok 33 - local leaderboard exactly matches Home candidate filtering and ID tie order from the same snapshot
+  ---
+  duration_ms: 44.404708
+  ...
+# Subtest: Home and Local use identical membership exclusions and bounded preferred ranks
+ok 34 - Home and Local use identical membership exclusions and bounded preferred ranks
+  ---
+  duration_ms: 28.661208
+  ...
+# Subtest: Trends joins Home in flight instead of using an older cached snapshot or issuing another station read
+ok 35 - Trends joins Home in flight instead of using an older cached snapshot or issuing another station read
+  ---
+  duration_ms: 30.102791
+  ...
+# Subtest: local results restore into a new session and failed refreshes preserve them
+ok 36 - local results restore into a new session and failed refreshes preserve them
+  ---
+  duration_ms: 34.424541
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: a gradient target starts once and superseded/unmounted animation work is stopped
+ok 37 - a gradient target starts once and superseded/unmounted animation work is stopped
+  ---
+  duration_ms: 641.420917
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# (node:27575) ExperimentalWarning: CommonJS module /Users/anthonyh/Desktop/Fuel Up/src/screens/trends/useTrendsBackgroundRefresh.js is loading ES Module /Users/anthonyh/Desktop/Fuel Up/src/lib/fuelSearchState.js using require().
+# Support for loading ES Module in require() is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:27575) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelMemberships.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# Subtest: refreshes on cold launch and foreground, waits for Home location, and does not refresh for Control Center
+ok 38 - refreshes on cold launch and foreground, waits for Home location, and does not refresh for Control Center
+  ---
+  duration_ms: 196.38375
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: local freshness removes expired reports and preserves data identity between unchanged renders
+ok 39 - local freshness removes expired reports and preserves data identity between unchanged renders
+  ---
+  duration_ms: 355.112666
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: old fuel-grade response never flashes over the current grade or starts a fetch loop
+ok 40 - old fuel-grade response never flashes over the current grade or starts a fetch loop
+  ---
+  duration_ms: 52.488458
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: late GPS resolution cannot override a manual location chosen while waiting
+ok 41 - late GPS resolution cannot override a manual location chosen while waiting
+  ---
+  duration_ms: 31.12475
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: a cache reset rejects the old completion and starts one current request
+ok 42 - a cache reset rejects the old completion and starts one current request
+  ---
+  duration_ms: 27.362584
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: denied location does not fetch fake Apple Park prices or repeatedly prompt
+ok 43 - denied location does not fetch fake Apple Park prices or repeatedly prompt
+  ---
+  duration_ms: 23.763583
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: unmounted location work cannot publish a fix or start a network request
+ok 44 - unmounted location work cannot publish a fix or start a network request
+  ---
+  duration_ms: 9.890709
+  ...
+# Subtest: StrictMode remount accepts current data and ignores the abandoned request
+ok 45 - StrictMode remount accepts current data and ignores the abandoned request
+  ---
+  duration_ms: 15.512
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: GPS renders keep unchanged Trends leaves stable while displayed data, theme and grade still update
+ok 46 - GPS renders keep unchanged Trends leaves stable while displayed data, theme and grade still update
+  ---
+  duration_ms: 569.212208
+  ...
+# Subtest: leaderboard memoization preserves its internal dynamic layout updates
+ok 47 - leaderboard memoization preserves its internal dynamic layout updates
+  ---
+  duration_ms: 4.674125
+  ...
+1..47
+# tests 47
+# suites 0
+# pass 47
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 915.465708

@@ -1,0 +1,67 @@
+TAP version 13
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: app state callbacks stay stable and search revisions increment exactly once under StrictMode
+ok 1 - app state callbacks stay stable and search revisions increment exactly once under StrictMode
+  ---
+  duration_ms: 136.498083
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: moving location updates data consumers without rendering navigation or action-only screens
+ok 2 - moving location updates data consumers without rendering navigation or action-only screens
+  ---
+  duration_ms: 30.977083
+  ...
+# Subtest: probe and launch controls remain reactive while action consumers stay isolated
+ok 3 - probe and launch controls remain reactive while action consumers stay isolated
+  ---
+  duration_ms: 19.422708
+  ...
+# Subtest: iOS production excludes legacy screens while development retains the real map probe
+ok 4 - iOS production excludes legacy screens while development retains the real map probe
+  ---
+  duration_ms: 342.883458
+  ...
+# Subtest: native Release configurations optimize widgets without changing Debug
+ok 5 - native Release configurations optimize widgets without changing Debug
+  ---
+  duration_ms: 2.133833
+  ...
+# Subtest: Release packaging prunes only generated assets and respects skipped bundling
+ok 6 - Release packaging prunes only generated assets and respects skipped bundling
+  ---
+  duration_ms: 23.651459
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: slow background permission read cannot overwrite the completed explicit setup
+ok 7 - slow background permission read cannot overwrite the completed explicit setup
+  ---
+  duration_ms: 145.274375
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: repeated permission taps share one native setup flow
+ok 8 - repeated permission taps share one native setup flow
+  ---
+  duration_ms: 32.964958
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: permission completion after leaving Settings cannot display an orphan alert
+ok 9 - permission completion after leaving Settings cannot display an orphan alert
+  ---
+  duration_ms: 17.306584
+  ...
+# Subtest: Settings links open dedicated fuel and station brand pages
+ok 10 - Settings links open dedicated fuel and station brand pages
+  ---
+  duration_ms: 15.529542
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 476.337875

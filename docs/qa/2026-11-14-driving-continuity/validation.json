@@ -1,0 +1,64 @@
+{
+  "unitTests": 188,
+  "trendsTests": 47,
+  "releasePackagingAndLifecycleTests": 10,
+  "lint": {
+    "errors": 0,
+    "warningsAllSrcAndApp": 672,
+    "comparableSourceWarningsBefore": 602,
+    "comparableSourceWarningsAfter": 600
+  },
+  "nativeTraces": [
+    {
+      "file": "/tmp/fuelup-driving-final-device.trace",
+      "durationSeconds": 30.828199,
+      "microhangsOver250ms": [
+        280.058917
+      ]
+    },
+    {
+      "file": "/tmp/fuelup-driving-context-device.trace",
+      "microhangsOver250ms": [],
+      "timeLimitSeconds": 30
+    },
+    {
+      "file": "/tmp/fuelup-driving-leaf-device.trace",
+      "timeLimitSeconds": 30,
+      "microhangsOver250ms": []
+    }
+  ],
+  "legacyProbe": {
+    "passed": false,
+    "samples": 1623,
+    "transitions": 155,
+    "maxFrameDeltaPx": 82.907,
+    "limitPx": 2,
+    "visibleP99Px": 6.79,
+    "visibleP99LimitPx": 1.75,
+    "outsideSamples": 33,
+    "outsideRequired": 100
+  },
+  "nativeSuite": {
+    "initialPassed": 25,
+    "initialTotal": 26,
+    "initialFailure": "horizontal-only optimal-fit assumption",
+    "correctedIsolatedFitPassed": true,
+    "correctedFitFrames": 120,
+    "rendererChanged": false,
+    "toleranceChanged": false
+  },
+  "finalDrive": {
+    "durationMs": 76741,
+    "commitSamples": 37,
+    "emptyLists": 0,
+    "cardOrCarouselUnmounts": 0,
+    "selectedStation": "18894",
+    "reactDurationMs": 76823.012,
+    "reactCommits": 36,
+    "componentRenders": 2370
+  },
+  "polishedFlow": {
+    "passed": 6,
+    "total": 6
+  }
+}

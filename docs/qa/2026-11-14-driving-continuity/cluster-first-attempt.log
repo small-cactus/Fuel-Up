@@ -1,0 +1,56 @@
+TAP version 13
+# Subtest: cluster probe integration enforces strict smoothness, continuity, and transition coverage
+not ok 1 - cluster probe integration enforces strict smoothness, continuity, and transition coverage
+  ---
+  duration_ms: 101258.865709
+  location: '/Users/anthonyh/Desktop/Fuel Up/tests/clusterProbe.integration.test.cjs:240:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Cluster probe quality gates failed:
+    1. sampleCount too low: expected >= 250, received 0.
+    2. transitionCount too low: expected >= 8, received 0.
+    3. stepped mode coverage too low: expected >= 80, received 0.
+    4. one-shot mode coverage too low: expected >= 20, received 0.
+    5. runtime phase coverage missing: live phase not recorded.
+    6. runtime phase coverage missing: merge_active phase not recorded.
+    7. runtime phase coverage missing: split_active phase not recorded.
+    8. transition coverage missing: merge-sequence-start.
+    9. transition coverage missing: merge-duplicate-spawn.
+    10. transition coverage missing: merge-accumulator-increment.
+    11. transition coverage missing: merge-sequence-complete.
+    12. transition coverage missing: split-sequence-start.
+    13. transition coverage missing: split-duplicate-spawn.
+    14. transition coverage missing: split-duplicate-arrive.
+    15. transition coverage missing: split-handoff-complete.
+    16. outside layer coverage too low: expected >= 100, received 0.
+    17. accumulator layer coverage too low: expected >= 60, received 0.
+    18. mergeMover layer coverage too low: expected >= 20, received 0.
+    19. splitMover layer coverage too low: expected >= 20, received 0.
+    20. mergeMover travel too low: expected >= 20px, received 0.000px.
+    21. splitMover travel too low: expected >= 20px, received 0.000px.
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'fail'
+  stack: |-
+    TestContext.<anonymous> (/Users/anthonyh/Desktop/Fuel Up/tests/clusterProbe.integration.test.cjs:270:12)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# probe token=probe-test-1794650863532
+# probe report file=/Users/anthonyh/Library/Developer/CoreSimulator/Devices/AF1A4AD7-8C23-42B2-B371-E96455EFB8C1/data/Containers/Data/Application/41816495-7779-47B4-879D-B1944DFF212A/Documents/cluster-debug-probe.json
+# samples=0 transitions=0 maxFrameDelta=0.000px
+# visible p95=0.000px p99=0.000px max=0.000px
+# mode coverage: {}
+# phase coverage: {}
+# transition coverage: {}
+# layer coverage: {"outside":0,"accumulator":0,"mergeMover":0,"splitMover":0}
+# layer travel: {"outside":0,"accumulator":0,"mergeMover":0,"splitMover":0}
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 101339.380167

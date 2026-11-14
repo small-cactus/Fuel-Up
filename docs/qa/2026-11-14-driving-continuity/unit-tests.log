@@ -1,0 +1,1047 @@
+
+> fuel-up@1.0.2 test
+> node --test ./tests/fuelMemberships.test.mjs ./tests/fuelDataContracts.test.cjs ./tests/fuelCacheReset.test.cjs ./tests/trendData.test.cjs ./tests/priceValidation.test.cjs ./tests/fuelGradeValidation.test.mjs ./tests/homeLaunch.test.mjs ./tests/homeState.test.mjs ./tests/stationMarkerPresentation.test.mjs ./tests/clusterMarkerOverlayMemo.test.mjs ./tests/predictiveFuelingDemo.test.cjs ./tests/locationRefresh.test.mjs ./tests/locationMovementScenarios.test.mjs ./tests/horizontalTextLayout.test.mjs ./tests/searchRadiusRange.test.mjs ./tests/clusterLabCards.test.mjs ./tests/reportedPrices.test.cjs ./tests/homeCachedStations.test.cjs ./tests/homeDeviceLocation.test.mjs ./tests/homeMovementContinuity.test.cjs ./tests/stationCardMovement.test.cjs ./tests/homeMapLayout.test.cjs ./tests/appStateContext.test.cjs ./tests/settingsLifecycle.test.cjs ./tests/trendsRenderIsolation.test.cjs
+
+TAP version 13
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: app state callbacks stay stable and search revisions increment exactly once under StrictMode
+ok 1 - app state callbacks stay stable and search revisions increment exactly once under StrictMode
+  ---
+  duration_ms: 458.475375
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: moving location updates data consumers without rendering navigation or action-only screens
+ok 2 - moving location updates data consumers without rendering navigation or action-only screens
+  ---
+  duration_ms: 100.267791
+  ...
+# Subtest: probe and launch controls remain reactive while action consumers stay isolated
+ok 3 - probe and launch controls remain reactive while action consumers stay isolated
+  ---
+  duration_ms: 150.808917
+  ...
+# (node:28064) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/screens/cluster-lab/stationCardModel.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: card and map share station IDs and cheapest ordering without losing quote metadata
+ok 4 - card and map share station IDs and cheapest ordering without losing quote metadata
+  ---
+  duration_ms: 11.991
+  ...
+# Subtest: card age and distance tolerate bad data and advance with the supplied clock
+ok 5 - card age and distance tolerate bad data and advance with the supplied clock
+  ---
+  duration_ms: 0.28025
+  ...
+# Subtest: pagination clamps overscroll and rejects unavailable layouts
+ok 6 - pagination clamps overscroll and rejects unavailable layouts
+  ---
+  duration_ms: 0.067084
+  ...
+# Subtest: Glass Lab cache fallback applies Home radius, rating, selected fuel while also showing E85
+ok 7 - Glass Lab cache fallback applies Home radius, rating, selected fuel while also showing E85
+  ---
+  duration_ms: 0.435458
+  ...
+# Subtest: Home snapshot survives tab returns but is rejected after changing search or resetting cache
+ok 8 - Home snapshot survives tab returns but is rejected after changing search or resetting cache
+  ---
+  duration_ms: 0.161458
+  ...
+# Subtest: unpriced E85 remains on the map after fresh prices, preserving radius and membership rules
+ok 9 - unpriced E85 remains on the map after fresh prices, preserving radius and membership rules
+  ---
+  duration_ms: 0.47675
+  ...
+# Subtest: green map identity follows the same personalized first card without changing prices
+ok 10 - green map identity follows the same personalized first card without changing prices
+  ---
+  duration_ms: 13.389334
+  ...
+# Subtest: Also show E85 adds stations without removing gasoline or duplicating shared IDs
+ok 11 - Also show E85 adds stations without removing gasoline or duplicating shared IDs
+  ---
+  duration_ms: 10.645125
+  ...
+# (node:28065) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/cluster/clusterMarkerOverlayMemo.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: didClusterActiveSelectionChange only flags clusters touched by the old or new active index
+ok 12 - didClusterActiveSelectionChange only flags clusters touched by the old or new active index
+  ---
+  duration_ms: 0.856125
+  ...
+# Subtest: areClusterMarkerOverlayPropsEqual skips rerenders when focus moves between unrelated clusters
+ok 13 - areClusterMarkerOverlayPropsEqual skips rerenders when focus moves between unrelated clusters
+  ---
+  duration_ms: 0.452875
+  ...
+# Subtest: areClusterMarkerOverlayPropsEqual rerenders when the overlay gains or loses the active quote
+ok 14 - areClusterMarkerOverlayPropsEqual rerenders when the overlay gains or loses the active quote
+  ---
+  duration_ms: 0.333125
+  ...
+# Subtest: clearFuelPriceCache prevents an in-flight DB read from repopulating cache
+ok 15 - clearFuelPriceCache prevents an in-flight DB read from repopulating cache
+  ---
+  duration_ms: 29.06525
+  ...
+# Subtest: empty nationwide DB results clear an old winner without fetching the provider
+ok 16 - empty nationwide DB results clear an old winner without fetching the provider
+  ---
+  duration_ms: 2.218625
+  ...
+# Subtest: refresh persists the exact reported price locally, without prediction or history writes
+ok 17 - refresh persists the exact reported price locally, without prediction or history writes
+  ---
+  duration_ms: 18.4985
+  ...
+# Subtest: uniform multi-grade prices exclude unsupported higher grades
+ok 18 - uniform multi-grade prices exclude unsupported higher grades
+  ---
+  duration_ms: 2.403333
+  ...
+# Subtest: duplicate higher grades stay suppressed in the local cache
+ok 19 - duplicate higher grades stay suppressed in the local cache
+  ---
+  duration_ms: 8.511833
+  ...
+# Subtest: a requested duplicate higher grade does not reappear via the client cache
+ok 20 - a requested duplicate higher grade does not reappear via the client cache
+  ---
+  duration_ms: 2.298875
+  ...
+# Subtest: Trends can join the exact Home station request without another database read
+ok 21 - Trends can join the exact Home station request without another database read
+  ---
+  duration_ms: 0.873
+  ...
+# Subtest: buildTomTomSearchUrl produces a location-scoped station search request
+ok 22 - buildTomTomSearchUrl produces a location-scoped station search request
+  ---
+  duration_ms: 35.252291
+  ...
+# Subtest: buildBarchartUrl supports geographic and postal lookups
+ok 23 - buildBarchartUrl supports geographic and postal lookups
+  ---
+  duration_ms: 1.313083
+  ...
+# Subtest: TomTom station bundle normalizes into an actual station quote
+ok 24 - TomTom station bundle normalizes into an actual station quote
+  ---
+  duration_ms: 2.919875
+  ...
+# Subtest: Barchart payload normalizes and filters to the requested fuel type
+ok 25 - Barchart payload normalizes and filters to the requested fuel type
+  ---
+  duration_ms: 0.6795
+  ...
+# Subtest: Google nearby search request and payload normalize into a station quote
+ok 26 - Google nearby search request and payload normalize into a station quote
+  ---
+  duration_ms: 1.405709
+  ...
+# Subtest: Public area-level providers normalize into estimated quotes
+ok 27 - Public area-level providers normalize into estimated quotes
+  ---
+  duration_ms: 0.4815
+  ...
+# Subtest: Cheapest actual station wins over estimated fallbacks
+ok 28 - Cheapest actual station wins over estimated fallbacks
+  ---
+  duration_ms: 0.389042
+  ...
+# Subtest: No station quotes means no preferred quote is returned
+ok 29 - No station quotes means no preferred quote is returned
+  ---
+  duration_ms: 0.143875
+  ...
+# Subtest: Fuel failure messaging distinguishes bad location from missing station prices
+ok 30 - Fuel failure messaging distinguishes bad location from missing station prices
+  ---
+  duration_ms: 0.699917
+  ...
+# Subtest: cache keys preserve exact search centers and freshness respects the ttl
+ok 31 - cache keys preserve exact search centers and freshness respects the ttl
+  ---
+  duration_ms: 0.705708
+  ...
+# Subtest: GasBuddy fuel type mapping covers all app fuel types
+ok 32 - GasBuddy fuel type mapping covers all app fuel types
+  ---
+  duration_ms: 0.22425
+  ...
+# Subtest: buildGasBuddyGraphQLRequest produces a valid GraphQL POST config
+ok 33 - buildGasBuddyGraphQLRequest produces a valid GraphQL POST config
+  ---
+  duration_ms: 0.1835
+  ...
+# Subtest: GasBuddy GraphQL payload normalizes into station quotes with credit-first fallback to cash
+ok 34 - GasBuddy GraphQL payload normalizes into station quotes with credit-first fallback to cash
+  ---
+  duration_ms: 0.803166
+  ...
+# Subtest: GasBuddy station quote wins preferred selection
+ok 35 - GasBuddy station quote wins preferred selection
+  ---
+  duration_ms: 0.14525
+  ...
+# Subtest: GasBuddy uses verified diesel and E85 filters with matching product keys
+ok 36 - GasBuddy uses verified diesel and E85 filters with matching product keys
+  ---
+  duration_ms: 0.550167
+  ...
+# (node:28068) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelGrade.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: applyFuelGradeToQuote exposes grade-specific corrected price and validation metadata
+ok 37 - applyFuelGradeToQuote exposes grade-specific corrected price and validation metadata
+  ---
+  duration_ms: 0.54275
+  ...
+# Subtest: rankQuotesForFuelGrade sorts leaderboard rows by the corrected selected-grade price
+ok 38 - rankQuotesForFuelGrade sorts leaderboard rows by the corrected selected-grade price
+  ---
+  duration_ms: 0.19575
+  ...
+# Subtest: applyFuelGradeToQuote prefers the validated final price over stale allPrices data
+ok 39 - applyFuelGradeToQuote prefers the validated final price over stale allPrices data
+  ---
+  duration_ms: 0.59375
+  ...
+# Subtest: applyFuelGradeToQuote rejects unavailable grades on regular-only quotes
+ok 40 - applyFuelGradeToQuote rejects unavailable grades on regular-only quotes
+  ---
+  duration_ms: 0.1675
+  ...
+# Subtest: applyFuelGradeToQuote rejects grades suppressed by duplicate-price sanitization
+ok 41 - applyFuelGradeToQuote rejects grades suppressed by duplicate-price sanitization
+  ---
+  duration_ms: 0.134583
+  ...
+# Subtest: applyFuelGradeToQuote suppresses duplicate grade prices even on unsanitized quotes
+ok 42 - applyFuelGradeToQuote suppresses duplicate grade prices even on unsanitized quotes
+  ---
+  duration_ms: 0.115667
+  ...
+# Subtest: applyFuelGradeToQuote exposes diesel validation metadata and corrected price
+ok 43 - applyFuelGradeToQuote exposes diesel validation metadata and corrected price
+  ---
+  duration_ms: 0.057167
+  ...
+# Subtest: E85 never borrows a regular quote or its validation
+ok 44 - E85 never borrows a regular quote or its validation
+  ---
+  duration_ms: 0.0585
+  ...
+# Subtest: equal E85 or diesel prices are not gasoline-grade duplicates
+ok 45 - equal E85 or diesel prices are not gasoline-grade duplicates
+  ---
+  duration_ms: 0.305541
+  ...
+# (node:28069) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/visibleStations.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: unselected clubs are excluded, Walmart+ grants Sam’s access, public lookalikes stay available
+ok 46 - unselected clubs are excluded, Walmart+ grants Sam’s access, public lookalikes stay available
+  ---
+  duration_ms: 2.864875
+  ...
+# Subtest: Home applies membership, radius and fresh raw quote gates before ranking
+ok 47 - Home applies membership, radius and fresh raw quote gates before ranking
+  ---
+  duration_ms: 2.530375
+  ...
+# Subtest: 20-cent boundary honors preference only within advantage, with raw lower price winning exact ties
+ok 48 - 20-cent boundary honors preference only within advantage, with raw lower price winning exact ties
+  ---
+  duration_ms: 0.259166
+  ...
+# Subtest: all fifty states and DC normalize; unrelated regions never fall back to another state
+ok 49 - all fifty states and DC normalize; unrelated regions never fall back to another state
+  ---
+  duration_ms: 0.883458
+  ...
+# Subtest: membership edits persist, normalize, and partition user-facing search keys
+ok 50 - membership edits persist, normalize, and partition user-facing search keys
+  ---
+  duration_ms: 1.077959
+  ...
+# (node:28070) ExperimentalWarning: CommonJS module /Users/anthonyh/Desktop/Fuel Up/src/screens/cluster-lab/useClusterLabStations.js is loading ES Module /Users/anthonyh/Desktop/Fuel Up/src/lib/onboardingHandoff.js using require().
+# Support for loading ES Module in require() is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:28070) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelMemberships.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# Subtest: Home shares its fallback GPS origin so Trends searches the same radius center
+ok 51 - Home shares its fallback GPS origin so Trends searches the same radius center
+  ---
+  duration_ms: 422.962417
+  ...
+# (node:28070) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# Subtest: Home publishes local data then refreshes DB on focus and foreground; cleanup prevents old query results
+ok 52 - Home publishes local data then refreshes DB on focus and foreground; cleanup prevents old query results
+  ---
+  duration_ms: 79.9795
+  ...
+# Subtest: Home removes a quote immediately after its 24-hour expiry without a network request
+ok 53 - Home removes a quote immediately after its 24-hour expiry without a network request
+  ---
+  duration_ms: 31.732
+  ...
+# Subtest: live Home location updates the shared search context and launch cache using current preferences
+ok 54 - live Home location updates the shared search context and launch cache using current preferences
+  ---
+  duration_ms: 29.827167
+  ...
+# Subtest: live GPS does not override an explicit manual location or run on an unfocused Home
+ok 55 - live GPS does not override an explicit manual location or run on an unfocused Home
+  ---
+  duration_ms: 39.333709
+  ...
+# Subtest: cached station distances are recalculated from the current search center before filtering
+ok 56 - cached station distances are recalculated from the current search center before filtering
+  ---
+  duration_ms: 125.376458
+  ...
+# Subtest: Home publishes map origin before an unresolved price-cache read
+ok 57 - Home publishes map origin before an unresolved price-cache read
+  ---
+  duration_ms: 40.060375
+  ...
+# Subtest: onboarding Home waits for durable cache (cached fresh: true)
+ok 58 - onboarding Home waits for durable cache (cached fresh: true)
+  ---
+  duration_ms: 43.630459
+  ...
+# Subtest: onboarding Home waits for durable cache (cached fresh: false)
+ok 59 - onboarding Home waits for durable cache (cached fresh: false)
+  ---
+  duration_ms: 26.082375
+  ...
+# Subtest: Also show E85 keeps gasoline available while the extra grade refreshes
+ok 60 - Also show E85 keeps gasoline available while the extra grade refreshes
+  ---
+  duration_ms: 24.136125
+  ...
+# (node:28071) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/homeDeviceLocation.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: replaces an existing saved origin and follows foreground movement, ignoring GPS drift
+ok 61 - replaces an existing saved origin and follows foreground movement, ignoring GPS drift
+  ---
+  duration_ms: 3.544083
+  ...
+# Subtest: background stops watching, foreground obtains a fresh fix and restarts movement updates
+ok 62 - background stops watching, foreground obtains a fresh fix and restarts movement updates
+  ---
+  duration_ms: 2.208334
+  ...
+# Subtest: late one-shot and stale or invalid fixes cannot roll back a newer watched location
+ok 63 - late one-shot and stale or invalid fixes cannot roll back a newer watched location
+  ---
+  duration_ms: 0.98825
+  ...
+# Subtest: unmount removes a subscription whose async setup completed after cleanup
+ok 64 - unmount removes a subscription whose async setup completed after cleanup
+  ---
+  duration_ms: 1.276458
+  ...
+# Subtest: denied permission makes no location requests
+ok 65 - denied permission makes no location requests
+  ---
+  duration_ms: 1.19425
+  ...
+# (node:28072) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/homeLaunch.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: first uncached launch defers the home reveal until visual bootstrap finishes
+ok 66 - first uncached launch defers the home reveal until visual bootstrap finishes
+  ---
+  duration_ms: 0.775709
+  ...
+# Subtest: cached or manual launches keep the fast home reveal path
+ok 67 - cached or manual launches keep the fast home reveal path
+  ---
+  duration_ms: 0.184875
+  ...
+# Subtest: home reveal only starts after the launch visual state is ready
+ok 68 - home reveal only starts after the launch visual state is ready
+  ---
+  duration_ms: 0.135333
+  ...
+# Subtest: first uncached launch can reveal during the initial animated fit instead of after a pop
+ok 69 - first uncached launch can reveal during the initial animated fit instead of after a pop
+  ---
+  duration_ms: 0.286625
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: Home waits for the real SwiftUI card height before publishing the camera inset
+ok 70 - Home waits for the real SwiftUI card height before publishing the camera inset
+  ---
+  duration_ms: 504.635208
+  ...
+# (node:28074) ExperimentalWarning: CommonJS module /Users/anthonyh/Desktop/Fuel Up/tests/homeMovementContinuity.test.cjs is loading ES Module /Users/anthonyh/Desktop/Fuel Up/src/screens/cluster-lab/stationCardModel.js using require().
+# Support for loading ES Module in require() is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:28074) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/visibleStations.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: GPS movement retains IDs and rebases raw quotes while next cache read is unresolved
+ok 71 - GPS movement retains IDs and rebases raw quotes while next cache read is unresolved
+  ---
+  duration_ms: 395.017084
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: a superseded request cannot replace the latest moving-origin snapshot
+ok 72 - a superseded request cannot replace the latest moving-origin snapshot
+  ---
+  duration_ms: 113.024834
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: criteria invalidates prior content immediately and cannot resurrect it on return
+ok 73 - criteria invalidates prior content immediately and cannot resurrect it on return
+  ---
+  duration_ms: 31.784125
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: reset invalidates prior content immediately and cannot resurrect it on return
+ok 74 - reset invalidates prior content immediately and cannot resurrect it on return
+  ---
+  duration_ms: 90.96125
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# (node:28074) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# Subtest: manual invalidates prior content immediately and cannot resurrect it on return
+ok 75 - manual invalidates prior content immediately and cannot resurrect it on return
+  ---
+  duration_ms: 34.901291
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: retained quotes expire while moving and the new cache read never finishes
+ok 76 - retained quotes expire while moving and the new cache read never finishes
+  ---
+  duration_ms: 42.690292
+  ...
+# [Home] E85 refresh failed: offline
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: movement retains additive E85 while primary refresh finishes and secondary fails
+ok 77 - movement retains additive E85 while primary refresh finishes and secondary fails
+  ---
+  duration_ms: 39.852041
+  ...
+# [Home] E85 refresh failed: offline
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: foreground refresh uses the latest committed E85 snapshot from the same search
+ok 78 - foreground refresh uses the latest committed E85 snapshot from the same search
+  ---
+  duration_ms: 31.842125
+  ...
+# Subtest: refocusing Home removes expired retained prices before a hanging cache refresh
+ok 79 - refocusing Home removes expired retained prices before a hanging cache refresh
+  ---
+  duration_ms: 45.389083
+  ...
+# (node:28075) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelGrade.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: filterStationQuotesForHome enforces radius filtering and dedupes overlapping station rows
+ok 80 - filterStationQuotesForHome enforces radius filtering and dedupes overlapping station rows
+  ---
+  duration_ms: 0.860875
+  ...
+# Subtest: rankQuotesForFuelGrade reorders filtered home rows immediately when fuel grade changes
+ok 81 - rankQuotesForFuelGrade reorders filtered home rows immediately when fuel grade changes
+  ---
+  duration_ms: 0.287833
+  ...
+# Subtest: buildVisibleSuppressedStationIds keeps overlap suppression authoritative for non-cluster pills
+ok 82 - buildVisibleSuppressedStationIds keeps overlap suppression authoritative for non-cluster pills
+  ---
+  duration_ms: 0.306166
+  ...
+# Subtest: shouldShowActiveStationDecoration only decorates non-best visible active stations
+ok 83 - shouldShowActiveStationDecoration only decorates non-best visible active stations
+  ---
+  duration_ms: 0.070167
+  ...
+# Subtest: canRevealActiveStation stays locked while the map is moving and only releases after the current suppression pass clears the active station
+ok 84 - canRevealActiveStation stays locked while the map is moving and only releases after the current suppression pass clears the active station
+  ---
+  duration_ms: 0.210791
+  ...
+# Subtest: shouldDelayStationMarkerSuppression only keeps the launch delay for the stations captured in the initial suppression snapshot
+ok 85 - shouldDelayStationMarkerSuppression only keeps the launch delay for the stations captured in the initial suppression snapshot
+  ---
+  duration_ms: 0.121834
+  ...
+# Subtest: resolveCommittedHomeActiveIndex ignores preview changes and only commits settled or explicit selection changes
+ok 86 - resolveCommittedHomeActiveIndex ignores preview changes and only commits settled or explicit selection changes
+  ---
+  duration_ms: 0.4675
+  ...
+# Subtest: resolveHomeCardIndexFromOffset clamps the settled card index to the available station range
+ok 87 - resolveHomeCardIndexFromOffset clamps the settled card index to the available station range
+  ---
+  duration_ms: 0.269417
+  ...
+# Subtest: shouldInitializeInitialSuppressionDelay only allows the launch grace period once the initial layout has settled
+ok 88 - shouldInitializeInitialSuppressionDelay only allows the launch grace period once the initial layout has settled
+  ---
+  duration_ms: 0.608125
+  ...
+# Subtest: buildPersistentSuppressedStationIds mirrors the current overlap set so zoom-in reveals previously hidden chips
+ok 89 - buildPersistentSuppressedStationIds mirrors the current overlap set so zoom-in reveals previously hidden chips
+  ---
+  duration_ms: 1.017333
+  ...
+# Subtest: buildPausedSuppressedStationIds seeds from raw set on first start
+ok 90 - buildPausedSuppressedStationIds seeds from raw set on first start
+  ---
+  duration_ms: 0.260292
+  ...
+# Subtest: buildPausedSuppressedStationIds returns empty when both current and raw are empty
+ok 91 - buildPausedSuppressedStationIds returns empty when both current and raw are empty
+  ---
+  duration_ms: 0.050625
+  ...
+# Subtest: buildPausedSuppressedStationIds prunes stations no longer in the visible set
+ok 92 - buildPausedSuppressedStationIds prunes stations no longer in the visible set
+  ---
+  duration_ms: 0.048542
+  ...
+# Subtest: buildPausedSuppressedStationIds reveals the active station during pause when it has no raw overlap
+ok 93 - buildPausedSuppressedStationIds reveals the active station during pause when it has no raw overlap
+  ---
+  duration_ms: 0.03875
+  ...
+# Subtest: buildPausedSuppressedStationIds keeps the active station suppressed when it has raw overlap
+ok 94 - buildPausedSuppressedStationIds keeps the active station suppressed when it has raw overlap
+  ---
+  duration_ms: 0.033416
+  ...
+# Subtest: buildPausedSuppressedStationIds does not delete anything when active station is null
+ok 95 - buildPausedSuppressedStationIds does not delete anything when active station is null
+  ---
+  duration_ms: 0.209625
+  ...
+# Subtest: home auto-fit skips passive focus restoration when there is no pending refit request
+ok 96 - home auto-fit skips passive focus restoration when there is no pending refit request
+  ---
+  duration_ms: 0.10925
+  ...
+# Subtest: home auto-fit returns a forced animated intent for off-screen filter changes even without new data
+ok 97 - home auto-fit returns a forced animated intent for off-screen filter changes even without new data
+  ---
+  duration_ms: 0.098042
+  ...
+# Subtest: home auto-fit keeps initial-load behavior on fresh data only
+ok 98 - home auto-fit keeps initial-load behavior on fresh data only
+  ---
+  duration_ms: 0.040833
+  ...
+# Subtest: home fuel snapshot strategy only controls cached bootstrap eligibility
+ok 99 - home fuel snapshot strategy only controls cached bootstrap eligibility
+  ---
+  duration_ms: 0.070291
+  ...
+# Subtest: buildHomeQuerySignature changes when the selected fuel grade or radius changes
+ok 100 - buildHomeQuerySignature changes when the selected fuel grade or radius changes
+  ---
+  duration_ms: 0.2165
+  ...
+# Subtest: buildHomeFilterSignature changes for rating and normalizes legacy providers
+ok 101 - buildHomeFilterSignature changes for rating and normalizes legacy providers
+  ---
+  duration_ms: 0.058042
+  ...
+# Subtest: hasHomeFilterSignatureChanged only flags a real off-screen filter change once a baseline exists
+ok 102 - hasHomeFilterSignatureChanged only flags a real off-screen filter change once a baseline exists
+  ---
+  duration_ms: 0.049666
+  ...
+# Subtest: iPhone 17 Pro viewport constants load from FuelSummaryCard + legacy Home fallback
+ok 103 - iPhone 17 Pro viewport constants load from FuelSummaryCard + legacy Home fallback
+  ---
+  duration_ms: 6.89275
+  ...
+# Subtest: FuelSummaryCard hero price stays single-line for realistic prices
+ok 104 - FuelSummaryCard hero price stays single-line for realistic prices
+  ---
+  duration_ms: 42.653416
+  ...
+# Subtest: FuelSummaryCard cardPrice Text blocks carry shrink-to-fit props
+ok 105 - FuelSummaryCard cardPrice Text blocks carry shrink-to-fit props
+  ---
+  duration_ms: 0.516458
+  ...
+# Subtest: FuelSummaryCard gradeLabelText Text blocks carry shrink-to-fit props
+ok 106 - FuelSummaryCard gradeLabelText Text blocks carry shrink-to-fit props
+  ---
+  duration_ms: 0.224083
+  ...
+# Subtest: FuelSummaryCard gradeOctaneText Text blocks carry shrink-to-fit props
+ok 107 - FuelSummaryCard gradeOctaneText Text blocks carry shrink-to-fit props
+  ---
+  duration_ms: 0.256958
+  ...
+# Subtest: FuelSummaryCard ratingText carries shrink-to-fit props
+ok 108 - FuelSummaryCard ratingText carries shrink-to-fit props
+  ---
+  duration_ms: 0.112542
+  ...
+# Subtest: FuelSummaryCard cardMeta (footer row) Text blocks carry shrink-to-fit props
+ok 109 - FuelSummaryCard cardMeta (footer row) Text blocks carry shrink-to-fit props
+  ---
+  duration_ms: 0.157458
+  ...
+# Subtest: NativeSettingsForm uses @expo/ui SwiftUI primitives, not RN Text rows
+ok 110 - NativeSettingsForm uses @expo/ui SwiftUI primitives, not RN Text rows
+  ---
+  duration_ms: 0.411916
+  ...
+# Subtest: NativeSettingsForm exposes the navigation-app picker
+ok 111 - NativeSettingsForm exposes the navigation-app picker
+  ---
+  duration_ms: 0.36425
+  ...
+# Subtest: Home reload button Text carries shrink-to-fit props
+ok 112 - Home reload button Text carries shrink-to-fit props
+  ---
+  duration_ms: 0.983875
+  ...
+# (node:28077) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/locationRefresh.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: 10 city waypoints are all at least 10 km / ~6mi apart from each other
+ok 113 - 10 city waypoints are all at least 10 km / ~6mi apart from each other
+  ---
+  duration_ms: 1.035333
+  ...
+# Subtest: Every city waypoint triggers a refresh from every other city waypoint
+ok 114 - Every city waypoint triggers a refresh from every other city waypoint
+  ---
+  duration_ms: 0.259375
+  ...
+# Subtest: GPS drift around San Jose Downtown never triggers a refresh
+ok 115 - GPS drift around San Jose Downtown never triggers a refresh
+  ---
+  duration_ms: 0.064333
+  ...
+# Subtest: Cold launch with fresh cache (< 2min old) skips the movement check
+ok 116 - Cold launch with fresh cache (< 2min old) skips the movement check
+  ---
+  duration_ms: 0.067125
+  ...
+# Subtest: Cold launch with stale cache (> 2min old) triggers the movement check
+ok 117 - Cold launch with stale cache (> 2min old) triggers the movement check
+  ---
+  duration_ms: 0.053708
+  ...
+# Subtest: Reopening the app after traveling to a new city resolves to the new city
+ok 118 - Reopening the app after traveling to a new city resolves to the new city
+  ---
+  duration_ms: 0.055667
+  ...
+# Subtest: Reopening the app in the same neighborhood keeps the cached region
+ok 119 - Reopening the app in the same neighborhood keeps the cached region
+  ---
+  duration_ms: 0.056083
+  ...
+# Subtest: Rapid background/foreground flips debounce as long as they come within 30s
+ok 120 - Rapid background/foreground flips debounce as long as they come within 30s
+  ---
+  duration_ms: 0.067875
+  ...
+# Subtest: Simulated road trip through 10 waypoints decides correctly at each step
+ok 121 - Simulated road trip through 10 waypoints decides correctly at each step
+  ---
+  duration_ms: 0.280625
+  ...
+# Subtest: Zigzag drift around the same waypoint only triggers the first refresh
+ok 122 - Zigzag drift around the same waypoint only triggers the first refresh
+  ---
+  duration_ms: 0.695708
+  ...
+# (node:28078) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/locationRefresh.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: calculateDistanceMeters returns infinity when any coordinate is missing or invalid
+ok 123 - calculateDistanceMeters returns infinity when any coordinate is missing or invalid
+  ---
+  duration_ms: 2.011541
+  ...
+# Subtest: calculateDistanceMeters agrees with well-known distances between city points
+ok 124 - calculateDistanceMeters agrees with well-known distances between city points
+  ---
+  duration_ms: 0.434292
+  ...
+# Subtest: hasMovedBeyondThreshold treats identical regions as not moved
+ok 125 - hasMovedBeyondThreshold treats identical regions as not moved
+  ---
+  duration_ms: 0.183208
+  ...
+# Subtest: hasMovedBeyondThreshold ignores sub-threshold GPS drift
+ok 126 - hasMovedBeyondThreshold ignores sub-threshold GPS drift
+  ---
+  duration_ms: 0.271
+  ...
+# Subtest: hasMovedBeyondThreshold flags real movement between city neighborhoods
+ok 127 - hasMovedBeyondThreshold flags real movement between city neighborhoods
+  ---
+  duration_ms: 0.155708
+  ...
+# Subtest: hasMovedBeyondThreshold flags long-distance moves between cities
+ok 128 - hasMovedBeyondThreshold flags long-distance moves between cities
+  ---
+  duration_ms: 0.0965
+  ...
+# Subtest: hasMovedBeyondThreshold treats missing regions as moved so callers refetch safely
+ok 129 - hasMovedBeyondThreshold treats missing regions as moved so callers refetch safely
+  ---
+  duration_ms: 0.245333
+  ...
+# Subtest: hasMovedBeyondThreshold honors a custom threshold
+ok 130 - hasMovedBeyondThreshold honors a custom threshold
+  ---
+  duration_ms: 0.200333
+  ...
+# Subtest: isCachedLocationStale treats missing or invalid timestamps as stale
+ok 131 - isCachedLocationStale treats missing or invalid timestamps as stale
+  ---
+  duration_ms: 0.43925
+  ...
+# Subtest: isCachedLocationStale returns false within the launch staleness window
+ok 132 - isCachedLocationStale returns false within the launch staleness window
+  ---
+  duration_ms: 0.597
+  ...
+# Subtest: isCachedLocationStale returns true at or beyond the launch staleness window
+ok 133 - isCachedLocationStale returns true at or beyond the launch staleness window
+  ---
+  duration_ms: 0.279917
+  ...
+# Subtest: shouldCheckOnForegroundResume debounces rapid tab switches
+ok 134 - shouldCheckOnForegroundResume debounces rapid tab switches
+  ---
+  duration_ms: 0.14075
+  ...
+# Subtest: shouldCheckOnForegroundResume returns true after the debounce window closes
+ok 135 - shouldCheckOnForegroundResume returns true after the debounce window closes
+  ---
+  duration_ms: 0.077959
+  ...
+# Subtest: shouldCheckOnLaunch mirrors isCachedLocationStale
+ok 136 - shouldCheckOnLaunch mirrors isCachedLocationStale
+  ---
+  duration_ms: 0.105833
+  ...
+# Subtest: buildRegionFromLocation normalizes expo-location coordinates into region shape
+ok 137 - buildRegionFromLocation normalizes expo-location coordinates into region shape
+  ---
+  duration_ms: 0.714792
+  ...
+# Subtest: buildRegionFromLocation returns null for malformed location objects
+ok 138 - buildRegionFromLocation returns null for malformed location objects
+  ---
+  duration_ms: 0.0765
+  ...
+# Subtest: buildRegionFromLocation honors custom latitudeDelta / longitudeDelta
+ok 139 - buildRegionFromLocation honors custom latitudeDelta / longitudeDelta
+  ---
+  duration_ms: 0.059583
+  ...
+# (node:28079) ExperimentalWarning: CommonJS module /Users/anthonyh/Desktop/Fuel Up/tests/predictiveFuelingDemo.test.cjs is loading ES Module /Users/anthonyh/Desktop/Fuel Up/src/screens/onboarding/predictive/constants.js using require().
+# Support for loading ES Module in require() is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: buildPredictiveRouteMetrics composes the expensive leg and reroute leg
+ok 140 - buildPredictiveRouteMetrics composes the expensive leg and reroute leg
+  ---
+  duration_ms: 63.710417
+  ...
+# Subtest: densifyCoordinates adds interpolation points for smoother motion
+ok 141 - densifyCoordinates adds interpolation points for smoother motion
+  ---
+  duration_ms: 2.556875
+  ...
+# Subtest: demo snapshot starts at route origin and ends at cheaper destination
+ok 142 - demo snapshot starts at route origin and ends at cheaper destination
+  ---
+  duration_ms: 82.158917
+  ...
+# Subtest: scene phase moves from driving to expensive warning to cheaper reroute
+ok 143 - scene phase moves from driving to expensive warning to cheaper reroute
+  ---
+  duration_ms: 42.538166
+  ...
+# Subtest: distance timing remains non-linear around turn windows
+ok 144 - distance timing remains non-linear around turn windows
+  ---
+  duration_ms: 18.337625
+  ...
+# Subtest: route diagnostics report reroute metadata for fallback routes
+ok 145 - route diagnostics report reroute metadata for fallback routes
+  ---
+  duration_ms: 24.447083
+  ...
+# Subtest: camera target remains continuous through turn windows and arrival handoff
+ok 146 - camera target remains continuous through turn windows and arrival handoff
+  ---
+  duration_ms: 740.224125
+  ...
+# Subtest: close turns are grouped into one camera event
+ok 147 - close turns are grouped into one camera event
+  ---
+  duration_ms: 7.405667
+  ...
+# Subtest: expensive chip reveals 800ms before the cheaper chip during the reroute overview
+ok 148 - expensive chip reveals 800ms before the cheaper chip during the reroute overview
+  ---
+  duration_ms: 15.179084
+  ...
+# Subtest: visible route switches from expensive leg to cheaper reroute leg
+ok 149 - visible route switches from expensive leg to cheaper reroute leg
+  ---
+  duration_ms: 13.145208
+  ...
+# Subtest: rejects a stale low replay and replaces it with the predicted price
+ok 150 - rejects a stale low replay and replaces it with the predicted price
+  ---
+  duration_ms: 10.676125
+  ...
+# Subtest: accepts an API price that stays close to the station-market prediction
+ok 151 - accepts an API price that stays close to the station-market prediction
+  ---
+  duration_ms: 1.900875
+  ...
+# Subtest: accepts the API price on a cold start instead of forcing a replacement
+ok 152 - accepts the API price on a cold start instead of forcing a replacement
+  ---
+  duration_ms: 0.467917
+  ...
+# Subtest: trusts a newly updated source timestamp that changed from the last station price
+ok 153 - trusts a newly updated source timestamp that changed from the last station price
+  ---
+  duration_ms: 0.782667
+  ...
+# Subtest: keeps expensive stations above the local market when a stale source is corrected upward
+ok 154 - keeps expensive stations above the local market when a stale source is corrected upward
+  ---
+  duration_ms: 2.909167
+  ...
+# Subtest: 24-hour eligibility uses the price posting time and rejects missing, future, or non-positive data
+ok 155 - 24-hour eligibility uses the price posting time and rejects missing, future, or non-positive data
+  ---
+  duration_ms: 3.3945
+  ...
+# Subtest: grade/payment ages are independent and filtering does not overwrite the archive object
+ok 156 - grade/payment ages are independent and filtering does not overwrite the archive object
+  ---
+  duration_ms: 0.5665
+  ...
+# Subtest: local snapshots cannot revive old corrections or keep an expired cheapest price
+ok 157 - local snapshots cannot revive old corrections or keep an expired cheapest price
+  ---
+  duration_ms: 1.685875
+  ...
+# Subtest: E85 expiry removes every price fallback but preserves a navigable availability record
+ok 158 - E85 expiry removes every price fallback but preserves a navigable availability record
+  ---
+  duration_ms: 0.252292
+  ...
+# (node:28082) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelSearchState.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: MIN_SEARCH_RADIUS_MILES and MAX_SEARCH_RADIUS_MILES pin the validated range
+ok 159 - MIN_SEARCH_RADIUS_MILES and MAX_SEARCH_RADIUS_MILES pin the validated range
+  ---
+  duration_ms: 0.673292
+  ...
+# Subtest: normalizeSearchRadiusMiles clamps small positive values to MIN
+ok 160 - normalizeSearchRadiusMiles clamps small positive values to MIN
+  ---
+  duration_ms: 0.112458
+  ...
+# Subtest: normalizeSearchRadiusMiles resolves non-positive values to DEFAULT (then clamped)
+ok 161 - normalizeSearchRadiusMiles resolves non-positive values to DEFAULT (then clamped)
+  ---
+  duration_ms: 0.050041
+  ...
+# Subtest: normalizeSearchRadiusMiles clamps values above MAX to MAX
+ok 162 - normalizeSearchRadiusMiles clamps values above MAX to MAX
+  ---
+  duration_ms: 0.114125
+  ...
+# Subtest: normalizeSearchRadiusMiles preserves valid in-range values
+ok 163 - normalizeSearchRadiusMiles preserves valid in-range values
+  ---
+  duration_ms: 0.133208
+  ...
+# Subtest: normalizeSearchRadiusMiles rounds fractional values before clamping
+ok 164 - normalizeSearchRadiusMiles rounds fractional values before clamping
+  ---
+  duration_ms: 0.054625
+  ...
+# Subtest: normalizeSearchRadiusMiles coerces non-numeric input to the default
+ok 165 - normalizeSearchRadiusMiles coerces non-numeric input to the default
+  ---
+  duration_ms: 0.047792
+  ...
+# Subtest: normalizeFuelSearchPreferences snaps legacy stored radii into the new range
+ok 166 - normalizeFuelSearchPreferences snaps legacy stored radii into the new range
+  ---
+  duration_ms: 0.215875
+  ...
+# Subtest: buildFuelSearchCriteriaSignature collapses legacy radii to the clamped value
+ok 167 - buildFuelSearchCriteriaSignature collapses legacy radii to the clamped value
+  ---
+  duration_ms: 0.257708
+  ...
+# Subtest: NativeSettingsForm wires the slider to MIN/MAX search radius constants
+ok 168 - NativeSettingsForm wires the slider to MIN/MAX search radius constants
+  ---
+  duration_ms: 9.868625
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: slow background permission read cannot overwrite the completed explicit setup
+ok 169 - slow background permission read cannot overwrite the completed explicit setup
+  ---
+  duration_ms: 464.103709
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: repeated permission taps share one native setup flow
+ok 170 - repeated permission taps share one native setup flow
+  ---
+  duration_ms: 94.600958
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: permission completion after leaving Settings cannot display an orphan alert
+ok 171 - permission completion after leaving Settings cannot display an orphan alert
+  ---
+  duration_ms: 57.651
+  ...
+# Subtest: Settings links open dedicated fuel and station brand pages
+ok 172 - Settings links open dedicated fuel and station brand pages
+  ---
+  duration_ms: 32.079958
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# (node:28084) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/fuelGrade.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: rounded movement and identical refreshes reuse presentation; visible updates invalidate it
+ok 173 - rounded movement and identical refreshes reuse presentation; visible updates invalidate it
+  ---
+  duration_ms: 306.353167
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: card skips native redraws but actions receive latest station and changed UI props render
+ok 174 - card skips native redraws but actions receive latest station and changed UI props render
+  ---
+  duration_ms: 202.9805
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: ranking correction cannot interrupt a drag or its momentum; explicit navigation still works
+ok 175 - ranking correction cannot interrupt a drag or its momentum; explicit navigation still works
+  ---
+  duration_ms: 76.466833
+  ...
+# Subtest: reordering during a swipe selects its actual landing card without a delayed correction
+ok 176 - reordering during a swipe selects its actual landing card without a delayed correction
+  ---
+  duration_ms: 53.594334
+  ...
+# (node:28085) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/cluster/stationMarkerPresentation.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: station marker view tracking signature ignores suppression-only changes
+ok 177 - station marker view tracking signature ignores suppression-only changes
+  ---
+  duration_ms: 0.809959
+  ...
+# Subtest: station marker view tracking signature changes for rendered content and theme updates
+ok 178 - station marker view tracking signature changes for rendered content and theme updates
+  ---
+  duration_ms: 0.102208
+  ...
+# Subtest: same-day trend history falls back to hourly chart buckets
+ok 179 - same-day trend history falls back to hourly chart buckets
+  ---
+  duration_ms: 3.791958
+  ...
+# Subtest: trend history never fills missing observations with a current average
+ok 180 - trend history never fills missing observations with a current average
+  ---
+  duration_ms: 0.127917
+  ...
+# Subtest: trend projection upgrades the latest displayed station row to the current validated quote
+ok 181 - trend projection upgrades the latest displayed station row to the current validated quote
+  ---
+  duration_ms: 26.50075
+  ...
+# (node:28086) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anthonyh/Desktop/Fuel%20Up/src/lib/homeState.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/anthonyh/Desktop/Fuel Up/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: trend leaderboard prices stay identical to the Home ranking pipeline for the same location and filters
+ok 182 - trend leaderboard prices stay identical to the Home ranking pipeline for the same location and filters
+  ---
+  duration_ms: 17.627292
+  ...
+# Subtest: buildLatestFuelStationQuotesFromRows suppresses duplicate gasoline grades while retaining independently priced diesel
+ok 183 - buildLatestFuelStationQuotesFromRows suppresses duplicate gasoline grades while retaining independently priced diesel
+  ---
+  duration_ms: 0.79725
+  ...
+# Subtest: buildLatestFuelStationQuotesFromRows drops uniform multi-grade rows for non-regular queries
+ok 184 - buildLatestFuelStationQuotesFromRows drops uniform multi-grade rows for non-regular queries
+  ---
+  duration_ms: 19.28925
+  ...
+# Subtest: buildLatestFuelStationQuotesFromRows suppresses duplicate higher grades and keeps the cheapest matching grade
+ok 185 - buildLatestFuelStationQuotesFromRows suppresses duplicate higher grades and keeps the cheapest matching grade
+  ---
+  duration_ms: 0.736709
+  ...
+# Subtest: buildLatestFuelStationQuotesFromRows drops duplicate grades when the requested grade is not the cheapest match
+ok 186 - buildLatestFuelStationQuotesFromRows drops duplicate grades when the requested grade is not the cheapest match
+  ---
+  duration_ms: 0.389167
+  ...
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+# Subtest: GPS renders keep unchanged Trends leaves stable while displayed data, theme and grade still update
+ok 187 - GPS renders keep unchanged Trends leaves stable while displayed data, theme and grade still update
+  ---
+  duration_ms: 773.343375
+  ...
+# Subtest: leaderboard memoization preserves its internal dynamic layout updates
+ok 188 - leaderboard memoization preserves its internal dynamic layout updates
+  ---
+  duration_ms: 8.571709
+  ...
+1..188
+# tests 188
+# suites 0
+# pass 188
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1427.264584

@@ -1,0 +1,23 @@
+steps:
+  - launch: com.anthonyh.fuelup
+  - tool: await-ui-element
+    args:
+      timeoutMs: 30000
+      condition: visible
+      selector:
+        text: Navigate to
+  - await:
+      idle: true
+  - swipe:
+      from:
+        id: glass-lab-station-cards
+      direction: left
+      duration: 500
+  - tool: await-ui-element
+    args:
+      timeoutMs: 30000
+      condition: visible
+      selector:
+        text: Show all stations
+  - await:
+      idle: true

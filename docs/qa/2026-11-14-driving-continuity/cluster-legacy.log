@@ -1,0 +1,38 @@
+TAP version 13
+# Subtest: cluster probe integration enforces strict smoothness, continuity, and transition coverage
+not ok 1 - cluster probe integration enforces strict smoothness, continuity, and transition coverage
+  ---
+  duration_ms: 56168.732375
+  location: '/Users/anthonyh/Desktop/Fuel Up/tests/clusterProbe.integration.test.cjs:240:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Cluster probe quality gates failed:
+    1. visible frame delta p99 too high: expected <= 1.75px, received 6.790px.
+    2. maxFrameDelta too high: expected <= 2px, received 82.907px.
+    3. outside layer coverage too low: expected >= 100, received 33.
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'fail'
+  stack: |-
+    TestContext.<anonymous> (/Users/anthonyh/Desktop/Fuel Up/tests/clusterProbe.integration.test.cjs:270:12)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# probe token=probe-test-1794651174744
+# probe report file=/Users/anthonyh/Library/Developer/CoreSimulator/Devices/AF1A4AD7-8C23-42B2-B371-E96455EFB8C1/data/Containers/Data/Application/41816495-7779-47B4-879D-B1944DFF212A/Documents/cluster-debug-probe.json
+# samples=1623 transitions=155 maxFrameDelta=82.907px
+# visible p95=0.910px p99=6.790px max=82.907px
+# mode coverage: {"warmup":4,"stepped":1571,"one-shot":44,"settle":3}
+# phase coverage: {"live":1482,"split_active":60,"split_handoff":3,"merge_active":77}
+# transition coverage: {"split-sequence-start":10,"split-duplicate-spawn":18,"split-duplicate-arrive":15,"split-handoff-complete":6,"merge-sequence-start":21,"merge-duplicate-spawn":37,"merge-accumulator-increment":32,"merge-sequence-complete":16}
+# layer coverage: {"outside":33,"accumulator":568,"mergeMover":75,"splitMover":59}
+# layer travel: {"outside":0,"accumulator":0,"mergeMover":268.9639815582528,"splitMover":176.53616500984216}
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 56414.442083

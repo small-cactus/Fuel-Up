@@ -395,12 +395,14 @@ test('initial camera fit shows every station and count within safe margins on it
             const top = y - 16 - bounds.y;
             const bottom = bounds.y + bounds.height - y - 16;
             assert.ok(Math.min(left, right, top, bottom) >= -1, `fit clipped ${view.id}: ${[left, right, top, bottom]}`);
-            tightestMargin = Math.min(tightestMargin, left, right);
+            // Latitude and the live card inset can make height the binding fit
+            // constraint. A tight top/bottom edge is just as optimal as a side.
+            tightestMargin = Math.min(tightestMargin, left, right, top, bottom);
         }
     }
     assert.equal(report.events.length, 0, 'initial fit triggered split/merge flights');
     assert.ok(tightestMargin <= 1, 'native camera zoomed out beyond the solved fit');
-    t.diagnostic(`${report.samples.length} fitted frames; minimum side clearance beyond 17pt inset: ${tightestMargin.toFixed(2)}pt`);
+    t.diagnostic(`${report.samples.length} fitted frames; minimum edge clearance beyond safe inset: ${tightestMargin.toFixed(2)}pt`);
 });
 
 test('native user location stays visible with a nearby price and count gently displaced', { timeout: 30000 }, async t => {

@@ -1,0 +1,32 @@
+{
+  "version": "1.0.5",
+  "build": "43",
+  "releaseType": "AFTER_APPROVAL",
+  "phasedRelease": false,
+  "localizations": {
+    "en-US": {
+      "promotionalText": "Compare nearby fuel prices, explore price trends, and find your next stop with Fuel Up.",
+      "whatsNew": "Smoother updates as your location changes. Map price chips and station cards stay in place during refreshes, your selected station stays selected, and card swipes are no longer interrupted by location updates."
+    },
+    "zh-Hans": {
+      "promotionalText": "使用 Fuel Up 比较附近油价、查看价格趋势，轻松找到下一处加油站。",
+      "whatsNew": "位置变化时更新更流畅。刷新期间保留地图价格标签和加油站卡片，保持已选加油站，并避免位置更新打断卡片滑动。"
+    },
+    "zh-Hant": {
+      "promotionalText": "使用 Fuel Up 比較附近油價、查看價格趨勢，輕鬆找到下一處加油站。",
+      "whatsNew": "位置變化時更新更流暢。重新整理期間保留地圖價格標籤和加油站卡片，維持已選加油站，並避免位置更新打斷卡片滑動。"
+    },
+    "fr-FR": {
+      "promotionalText": "Comparez les prix du carburant à proximité, consultez les tendances et trouvez votre prochain arrêt avec Fuel Up.",
+      "whatsNew": "Des mises à jour plus fluides lorsque votre position change. Les prix sur la carte et les fiches des stations restent en place pendant l’actualisation. Votre sélection est conservée et le balayage des fiches n’est plus interrompu par les mises à jour de position."
+    },
+    "es-MX": {
+      "promotionalText": "Compara precios de combustible cercanos, consulta las tendencias y encuentra tu próxima parada con Fuel Up.",
+      "whatsNew": "Actualizaciones más fluidas al cambiar de ubicación. Los precios del mapa y las tarjetas de estaciones permanecen visibles al actualizarse. Se conserva la estación seleccionada y las actualizaciones de ubicación ya no interrumpen el deslizamiento de las tarjetas."
+    },
+    "vi": {
+      "promotionalText": "So sánh giá nhiên liệu gần bạn, xem xu hướng giá và tìm điểm dừng tiếp theo với Fuel Up.",
+      "whatsNew": "Cập nhật mượt mà hơn khi vị trí thay đổi. Nhãn giá trên bản đồ và thẻ trạm xăng được giữ nguyên khi làm mới. Trạm đã chọn vẫn được chọn và thao tác vuốt thẻ không còn bị gián đoạn khi vị trí cập nhật."
+    }
+  }
+}
