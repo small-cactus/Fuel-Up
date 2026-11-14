@@ -208,3 +208,31 @@ archive integrity was already verified at 11:48; no new recovery occurred here.
 and passing consistency assertions. No provider collection, app launch, raw-price
 write, billing change or research modification was triggered. Coverage is relative
 to the fixed 141,660-ID inventory; reported prices are not verified pump truth.
+
+## 20:13 UTC: continued collection and publication
+
+The 19:00 sweep 61528 completed all 72 batches on its fixed 59/9/4 routes, with
+141,660 catalog observations and 91,636 reported-price stations. Its 73 requests
+and 143,660 lookups are within budget. Ten Trends scopes published at 19:16 UTC,
+with no latest-complete projection backlog. Run 61588 (20:00) was 52/72 at the
+status snapshot and remains within its 21:00 deadline. The retained slot counts
+are unchanged: 176 complete, 15 known partial, one current running, no expired
+absent/running slots. Older metadata expiry is not counted as failed collection.
+The three previously documented November 10 projection gaps remain unchanged.
+
+All six schedules are active; retention returned HTTP 200 at 20:00 and 20:10.
+There are no eligible raw objects or overdue metadata hours. Archive usage is
+748,331,545 / 900,000,000 bytes. The transient shared cooldown expired naturally
+at 20:09:14; continuous service is enabled and the city campaign remains complete.
+No pause, cooldown, budget or retention protection was modified.
+
+The compact retention index is valid/ready at 22,839,296 bytes (+163,840 since the
+previous check); index size alone does not establish bloat. Host metrics show
+149,737,472 bytes available RAM, 477,884,416 bytes occupied swap and load averages
+0.95/0.78/0.47. No lock waits appear in the activity snapshot. Full and supplemental
+reads succeeded; continuing swap use remains a known concern without a new
+service failure or evidence justifying a speculative repair. No additional repair
+attempt, provider collection, app launch or archive rewrite occurred. The prior
+recovery archive read-back remains the integrity evidence; this is continued
+scheduled operation, not a new recovery. Fixed-inventory coverage is not verified
+pump truth. `followup-2013.json` preserves the passing checks and host counters.
