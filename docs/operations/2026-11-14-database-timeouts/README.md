@@ -264,3 +264,29 @@ attempts this check; the incident total remains one. No provider requests, app
 launch, raw-price overwrite or research change was triggered. The prior recovery
 archive sample remains verified; no new recovery occurred. Coverage is relative
 to the fixed inventory and is not verified pump truth.
+
+## 22:14 UTC: scheduled service remains current
+
+Run 61648 (21:00) completed 72/72 batches on the correct 59/9/4 routes, with
+141,660 catalog observations, 91,284 reported-price stations and 72 requests /
+141,660 lookups. Ten cache scopes published at 21:15 with zero latest-run
+projection gaps. Run 61708 (22:00) was 51/72 at the status snapshot, progressing
+within its 23:00 deadline. Retained slot counts remain 176 complete, 15 previously
+known partial, one current running and zero expired absent/running. The three
+old November 10 projection gaps are unchanged; expired metadata is not treated
+as missing collection.
+
+All six schedules, budgets and fixed routes passed. Retention returned HTTP 200
+at 22:00 and 22:10, with zero raw or metadata backlog. Archive usage is
+748,222,575 / 900,000,000 bytes. The shared cooldown expired naturally at 22:05:24;
+continuous mode and the completed city campaign remain as intended. The compact
+reference index is valid/ready at 23,093,248 bytes (+98,304 since 21:12); size growth
+alone is not a bloat measurement. Available RAM is 171,982,848 bytes, occupied swap
+516,861,952 bytes and loads 1.21/1.00/0.58. Both protected reads succeeded; no lock
+waits were observed. Known memory pressure continues to be monitored.
+
+`followup-2214.json` records passing checks and host counters. There was no new
+recovery, repair, provider collection, app launch, raw rewrite or research change.
+The incident attempt count remains one and the previously verified recovery
+archive sample remains the read-back evidence. Coverage is relative to the fixed
+inventory, not verified pump truth. No user action is needed.
