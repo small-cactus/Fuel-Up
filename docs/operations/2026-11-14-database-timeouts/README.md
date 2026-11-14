@@ -1,5 +1,10 @@
 # November 14 database access degradation
 
+**Current outcome, 11:48 UTC:** The first full post-restart sweep and its complete
+Trends publication, app API delivery, regional immutable archive read-back and
+scheduled retention are verified. No new expired hourly gaps were found. One
+recovery attempt was used; resource pressure under load remains a limitation.
+
 At 10:45 UTC, the protected status read failed at database connection setup. Its
 independent host metrics and bounded fallback database reads also timed out.
 A four-run SQL read, direct authenticated REST read, and activity/index-size query
@@ -130,3 +135,41 @@ no new expired gaps, latest complete-cache alignment, archive budget, retention
 backlog and three post-restart immutable archive samples. No app/device UI was
 opened. National station coverage remains relative to the fixed 141,660-ID catalog;
 these reported prices are not verified pump truth.
+
+## 11:48 UTC: full scheduled sweep and cache verified
+
+Run 61048 completed at 11:14:33.952343 UTC with 72/72 batches, 141,660 fixed-catalog
+observations, 93,251 stations with reported prices and zero missed batches. The
+59/9/4 allocations all completed on their correct fixed regional routes. It used
+72 requests and 141,660 lookups, within unchanged limits of 92 and 161,660.
+The expired 08:06:38 cooldown was not cleared or overridden.
+
+All ten Trends scopes published this run at 11:15:00.223751. The latest complete
+sweep has zero missing projections. All ten fuel/E85 API combinations returned
+HTTP 200, source=national-cache, scanId=61048 and no history error. A fresh sample
+of one immutable object per region, selected after sweep completion, passed
+actual Storage read-back and all hash, size, exact-ID, schema, time-window and
+provenance checks. This samples three objects, while database manifests establish
+72-batch coverage; neither establishes verified pump truth.
+
+The retained eight-day window has 177 complete and the same 15 historical partial
+hours, zero expired absent/running slots and zero current absent slots. No new
+operational hour gap was found. Previously expired metadata is not counted as
+absent collection. The three previously recorded November 10 derived gaps remain
+unchanged and separate from the latest complete cache.
+
+All six required schedules remain active. Retention returned HTTP 200 at 11:40
+with no deferrals, and there are zero eligible raw objects or overdue metadata
+hours. Archive usage is 749,484,117 / 900,000,000 bytes. The compact reference
+index is valid/ready at 21,708,800 bytes; its continued growth is retained as a
+monitoring signal, without claiming an exact bloat ratio or recurrence of the
+removed INCLUDE definition. No further restart, index operation, schema change,
+re-enable, provider collection, raw-price rewrite or billing change was performed.
+
+A 60.336-second resource interval ending 11:48:19 had advancing counters, 97.32%
+CPU idle, 1.71% I/O wait, 21.5 MB swap-in, 19.8 MB swap-out, 143.9 MB available RAM
+and zero new OOM kills. This quieter interval does not erase the measured pressure
+during collection or prove a permanent capacity fix. Recovery-attempt count stays
+one. JSON assertions checked complete regional coverage, budgets, cache alignment,
+absence of new expired gaps, active schedules, retention capacity and archive
+integrity. Evidence is in complete-sweep-*.json and resource-1148.json.

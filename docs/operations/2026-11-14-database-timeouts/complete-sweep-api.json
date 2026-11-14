@@ -1,0 +1,106 @@
+{
+  "verifiedAt": "2026-11-14T11:47:43.874Z",
+  "providerRequests": 0,
+  "checks": [
+    {
+      "fuelType": "regular",
+      "requiresE85": false,
+      "status": 200,
+      "source": "national-cache",
+      "scanId": 61048,
+      "quotes": 5,
+      "historyPoints": 152,
+      "elapsedMs": 947
+    },
+    {
+      "fuelType": "regular",
+      "requiresE85": true,
+      "status": 200,
+      "source": "national-cache",
+      "scanId": 61048,
+      "quotes": 5,
+      "historyPoints": 152,
+      "elapsedMs": 352
+    },
+    {
+      "fuelType": "midgrade",
+      "requiresE85": false,
+      "status": 200,
+      "source": "national-cache",
+      "scanId": 61048,
+      "quotes": 5,
+      "historyPoints": 152,
+      "elapsedMs": 364
+    },
+    {
+      "fuelType": "midgrade",
+      "requiresE85": true,
+      "status": 200,
+      "source": "national-cache",
+      "scanId": 61048,
+      "quotes": 5,
+      "historyPoints": 152,
+      "elapsedMs": 326
+    },
+    {
+      "fuelType": "premium",
+      "requiresE85": false,
+      "status": 200,
+      "source": "national-cache",
+      "scanId": 61048,
+      "quotes": 5,
+      "historyPoints": 152,
+      "elapsedMs": 200
+    },
+    {
+      "fuelType": "premium",
+      "requiresE85": true,
+      "status": 200,
+      "source": "national-cache",
+      "scanId": 61048,
+      "quotes": 5,
+      "historyPoints": 152,
+      "elapsedMs": 151
+    },
+    {
+      "fuelType": "diesel",
+      "requiresE85": false,
+      "status": 200,
+      "source": "national-cache",
+      "scanId": 61048,
+      "quotes": 5,
+      "historyPoints": 152,
+      "elapsedMs": 206
+    },
+    {
+      "fuelType": "diesel",
+      "requiresE85": true,
+      "status": 200,
+      "source": "national-cache",
+      "scanId": 61048,
+      "quotes": 5,
+      "historyPoints": 152,
+      "elapsedMs": 167
+    },
+    {
+      "fuelType": "e85",
+      "requiresE85": false,
+      "status": 200,
+      "source": "national-cache",
+      "scanId": 61048,
+      "quotes": 4,
+      "historyPoints": 152,
+      "elapsedMs": 183
+    },
+    {
+      "fuelType": "e85",
+      "requiresE85": true,
+      "status": 200,
+      "source": "national-cache",
+      "scanId": 61048,
+      "quotes": 4,
+      "historyPoints": 152,
+      "elapsedMs": 139
+    }
+  ]
+}
