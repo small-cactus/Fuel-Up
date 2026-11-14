@@ -1,0 +1,64 @@
+{
+  "observedAt": "2026-11-14T11:03:32.644Z",
+  "rows": [
+    {
+      "observed_at": "2026-11-14 11:03:34.550911+00",
+      "recent_responses": [
+        {
+          "created": "2026-11-14T11:02:00.422252+00:00",
+          "result": "{\"results\":[{\"id\":4391214,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1267,\"projection\":\"published\"},{\"id\":4391215,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1274,\"projection\":\"published\"},{\"id\":4391216,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1293,\"projection\":\"published\"},{\"id\":4391217,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1218,\"projection\":\"published\"},{\"id\":4391218,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1203,\"projection\":\"published\"}],\"expectedRegion\":\"us-east-1\",\"actualRegion\":\"us-east-1\"}",
+          "status_code": 200,
+          "timed_out": false
+        },
+        {
+          "created": "2026-11-14T11:01:00.297956+00:00",
+          "result": "{\"results\":[{\"id\":4391273,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1443,\"projection\":\"published\"},{\"id\":4391274,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1325,\"projection\":\"published\"},{\"id\":4391275,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1295,\"projection\":\"pending\"},{\"id\":4391276,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1609,\"projection\":\"published\"},{\"id\":4391277,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1640,\"projection\":\"published\"}],\"expectedRegion\":\"us-west-1\",\"actualRegion\":\"us-west-1\"}",
+          "status_code": 200,
+          "timed_out": false
+        },
+        {
+          "created": "2026-11-14T11:00:00.119947+00:00",
+          "result": "{\"results\":[{\"id\":4391282,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1095,\"projection\":\"published\"},{\"id\":4391283,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1383,\"projection\":\"published\"},{\"id\":4391284,\"status\":\"succeeded\",\"stations\":2000,\"priced\":1307,\"projection\":\"published\"},{\"id\":4391285,\"status\":\"succeeded\",\"stations\":213,\"priced\":164,\"projection\":\"published\"}],\"expectedRegion\":\"us-west-2\",\"actualRegion\":\"us-west-2\"}",
+          "status_code": 200,
+          "timed_out": false
+        },
+        {
+          "created": "2026-11-14T11:00:00.119947+00:00",
+          "result": "{\"status\":\"retained\",\"removedObjects\":72,\"marked_archives\":72,\"removed_operational_hours\":1,\"deferred_operational_hours\":0,\"detached_content_references\":13,\"providerRequests\":0}",
+          "status_code": 200,
+          "timed_out": false
+        }
+      ],
+      "regions": [
+        {
+          "execution_region": "us-west-1",
+          "expected_batches": 9,
+          "observed_stations": 16000,
+          "run_id": 61048,
+          "slot_at": "2026-11-14T11:00:00+00:00",
+          "succeeded_batches": 8,
+          "wrong_region_jobs": 0
+        },
+        {
+          "execution_region": "us-east-1",
+          "expected_batches": 59,
+          "observed_stations": 10000,
+          "run_id": 61048,
+          "slot_at": "2026-11-14T11:00:00+00:00",
+          "succeeded_batches": 5,
+          "wrong_region_jobs": 0
+        },
+        {
+          "execution_region": "us-west-2",
+          "expected_batches": 4,
+          "observed_stations": 6213,
+          "run_id": 61048,
+          "slot_at": "2026-11-14T11:00:00+00:00",
+          "succeeded_batches": 4,
+          "wrong_region_jobs": 0
+        }
+      ]
+    }
+  ],
+  "elapsedMs": 2515
+}

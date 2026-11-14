@@ -1,0 +1,44 @@
+{
+  "auditedAt": "2026-11-14T10:54:51.783Z",
+  "runId": 61015,
+  "slotAt": "2026-11-14T10:00:00+00:00",
+  "runStatusAtSelection": "complete",
+  "verified": true,
+  "providerRequests": 0,
+  "batches": [
+    {
+      "jobId": 4388896,
+      "objectPath": "61015/4388896/4f5f22e7-f658-49a2-abe6-a04e1e8e1312.json.gz",
+      "sha256": "7b9e72cb2b856bd851e765fd75821279e8ddd8a7009aebdc5cfe4ccdd162a036",
+      "stations": 1700,
+      "priced": 1078,
+      "bytes": 39575,
+      "executionRegion": "us-east-1",
+      "startedAt": "2026-11-14T10:14:32.447Z",
+      "observedAt": "2026-11-14T10:14:34.991Z"
+    },
+    {
+      "jobId": 4388905,
+      "objectPath": "61015/4388905/54021652-b9fe-4b61-85af-44e14403a07c.json.gz",
+      "sha256": "f740d7ae107458531ee5c7ad47173343e57d03408d6c28a536baed6c7a3dd0a4",
+      "stations": 1747,
+      "priced": 1328,
+      "bytes": 58998,
+      "executionRegion": "us-west-1",
+      "startedAt": "2026-11-14T10:03:36.775Z",
+      "observedAt": "2026-11-14T10:03:38.581Z"
+    },
+    {
+      "jobId": 4388909,
+      "objectPath": "61015/4388909/b2abaf11-6b0a-43ce-a154-66cb9df731c0.json.gz",
+      "sha256": "3ec53657f3d2640b8d9ed3b0e020dddc88323fd88a98f76abe982cb20c7ceabb",
+      "stations": 213,
+      "priced": 164,
+      "bytes": 6835,
+      "executionRegion": "us-west-2",
+      "startedAt": "2026-11-14T10:00:38.311Z",
+      "observedAt": "2026-11-14T10:00:39.032Z"
+    }
+  ],
+  "limitation": "One successful immutable batch per assigned region. Verifies hashes, exact IDs, prices schema and provenance; not full-hour completeness or pump truth."
+}

@@ -1,0 +1,36 @@
+{
+  "observedAt": "2026-11-14T10:58:06.392Z",
+  "rows": [
+    {
+      "archive_deleted_at": "2026-11-12 16:00:05.67788+00",
+      "attempts": null,
+      "completed_at": null,
+      "job_id": 3996968,
+      "last_error": null,
+      "next_attempt_at": null,
+      "run_id": 55572,
+      "slot_at": "2026-11-10 15:00:00+00"
+    },
+    {
+      "archive_deleted_at": "2026-11-12 16:00:05.67788+00",
+      "attempts": null,
+      "completed_at": null,
+      "job_id": 3996969,
+      "last_error": null,
+      "next_attempt_at": null,
+      "run_id": 55572,
+      "slot_at": "2026-11-10 15:00:00+00"
+    },
+    {
+      "archive_deleted_at": "2026-11-12 16:00:05.67788+00",
+      "attempts": null,
+      "completed_at": null,
+      "job_id": 3997010,
+      "last_error": null,
+      "next_attempt_at": null,
+      "run_id": 55572,
+      "slot_at": "2026-11-10 15:00:00+00"
+    }
+  ],
+  "elapsedMs": 6411
+}

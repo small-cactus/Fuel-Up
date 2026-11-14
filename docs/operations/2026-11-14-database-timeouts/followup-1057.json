@@ -1,0 +1,95 @@
+{
+  "observedAt": "2026-11-14T10:57:18.598Z",
+  "rows": [
+    {
+      "result": {
+        "all_retained_operational_projection_backlog": 3,
+        "campaign": [
+          {
+            "ends_at": "2026-10-07T18:19:00+00:00",
+            "status": "complete"
+          }
+        ],
+        "cooldown": {
+          "backoff_until": "2026-11-14T08:06:38.572858+00:00",
+          "enabled": true,
+          "halt_reason": "UPSTREAM_HTTP_503",
+          "last_request": "2026-11-14T10:14:31.822512+00:00"
+        },
+        "observed_at": "2026-11-14T10:57:20.567634+00:00",
+        "recent_cron": [
+          {
+            "end_time": "2026-11-14T10:57:00.226039+00:00",
+            "jobname": "fuel-national-discovery",
+            "start_time": "2026-11-14T10:57:00.149121+00:00",
+            "status": "succeeded"
+          },
+          {
+            "end_time": "2026-11-14T10:57:00.159114+00:00",
+            "jobname": "fuel-national-trends-cache",
+            "start_time": "2026-11-14T10:57:00.148004+00:00",
+            "status": "succeeded"
+          },
+          {
+            "end_time": "2026-11-14T10:57:00.217713+00:00",
+            "jobname": "fuel-national-dispatch",
+            "start_time": "2026-11-14T10:57:00.144602+00:00",
+            "status": "succeeded"
+          },
+          {
+            "end_time": "2026-11-14T10:57:00.230006+00:00",
+            "jobname": "fuel-national-projection-repair",
+            "start_time": "2026-11-14T10:57:00.143482+00:00",
+            "status": "succeeded"
+          },
+          {
+            "end_time": "2026-11-14T10:56:00.054853+00:00",
+            "jobname": "fuel-national-discovery",
+            "start_time": "2026-11-14T10:56:00.040914+00:00",
+            "status": "succeeded"
+          },
+          {
+            "end_time": "2026-11-14T10:56:00.043208+00:00",
+            "jobname": "fuel-national-trends-cache",
+            "start_time": "2026-11-14T10:56:00.038759+00:00",
+            "status": "succeeded"
+          },
+          {
+            "end_time": "2026-11-14T10:56:00.049982+00:00",
+            "jobname": "fuel-national-dispatch",
+            "start_time": "2026-11-14T10:56:00.036524+00:00",
+            "status": "succeeded"
+          },
+          {
+            "end_time": "2026-11-14T10:56:00.047678+00:00",
+            "jobname": "fuel-national-projection-repair",
+            "start_time": "2026-11-14T10:56:00.03545+00:00",
+            "status": "succeeded"
+          }
+        ],
+        "retention": null,
+        "runs": [
+          {
+            "deadline_at": "2026-11-14T11:00:00+00:00",
+            "id": 61015,
+            "lookups": 141660,
+            "requests": 72,
+            "slot_at": "2026-11-14T10:00:00+00:00",
+            "status": "complete",
+            "succeeded": 72
+          },
+          {
+            "deadline_at": "2026-11-14T10:00:00+00:00",
+            "id": 60955,
+            "lookups": 141660,
+            "requests": 72,
+            "slot_at": "2026-11-14T09:00:00+00:00",
+            "status": "complete",
+            "succeeded": 72
+          }
+        ]
+      }
+    }
+  ],
+  "elapsedMs": 4150
+}

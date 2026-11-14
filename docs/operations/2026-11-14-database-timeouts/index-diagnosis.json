@@ -1,0 +1,41 @@
+{
+  "observedAt": "2026-11-14T10:55:14.641Z",
+  "rows": [
+    {
+      "diagnostic_extensions": null,
+      "latest_run": [
+        {
+          "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+          "completed_at": "2026-11-14T10:14:35.143396+00:00",
+          "created_at": "2026-11-14T10:00:00.096966+00:00",
+          "deadline_at": "2026-11-14T11:00:00+00:00",
+          "expected_batches": 72,
+          "expected_stations": 141660,
+          "id": 61015,
+          "slot_at": "2026-11-14T10:00:00+00:00",
+          "status": "complete"
+        }
+      ],
+      "observed_at": "2026-11-14 10:55:16.520033+00",
+      "table_stats": [
+        {
+          "autovacuum_count": 3281,
+          "last_analyze": null,
+          "last_autovacuum": "2026-11-14T10:53:43.357647+00:00",
+          "n_dead_tup": 0,
+          "n_live_tup": 153654,
+          "relname": "fuel_station_latest"
+        },
+        {
+          "autovacuum_count": 3423,
+          "last_analyze": null,
+          "last_autovacuum": "2026-11-14T10:10:21.25048+00:00",
+          "n_dead_tup": 7002,
+          "n_live_tup": 354837,
+          "relname": "fuel_station_price_lookup"
+        }
+      ]
+    }
+  ],
+  "elapsedMs": 2452
+}

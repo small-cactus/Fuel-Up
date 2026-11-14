@@ -1,0 +1,74 @@
+{
+  "observedAt": "2026-11-14T10:53:03.685Z",
+  "rows": [
+    {
+      "config": {
+        "approved_lookups_per_hour": 161660,
+        "archive_budget_bytes": 900000000,
+        "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+        "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+        "continuous": true,
+        "enabled": true,
+        "ends_at": "2026-10-07T18:19:00+00:00",
+        "halt_reason": "UPSTREAM_HTTP_503",
+        "id": true,
+        "last_dispatch_at": "2026-11-14T10:14:00.256642+00:00",
+        "last_request_at": "2026-11-14T10:14:31.822512+00:00",
+        "max_requests_per_hour": 92,
+        "operational_raw_hours": 48,
+        "operational_starts_at": "2026-10-07T19:00:00+00:00",
+        "provider_backoff_until": "2026-11-14T08:06:38.572858+00:00",
+        "request_interval_seconds": 10,
+        "starts_at": "2026-09-30T22:00:00+00:00"
+      },
+      "observed_at": "2026-11-14 10:53:05.657424+00",
+      "runs": [
+        {
+          "completed_at": "2026-11-14T10:14:35.143396+00:00",
+          "deadline_at": "2026-11-14T11:00:00+00:00",
+          "id": 61015,
+          "slot_at": "2026-11-14T10:00:00+00:00",
+          "status": "complete"
+        },
+        {
+          "completed_at": "2026-11-14T09:14:34.357109+00:00",
+          "deadline_at": "2026-11-14T10:00:00+00:00",
+          "id": 60955,
+          "slot_at": "2026-11-14T09:00:00+00:00",
+          "status": "complete"
+        },
+        {
+          "completed_at": "2026-11-14T08:15:06.250203+00:00",
+          "deadline_at": "2026-11-14T09:00:00+00:00",
+          "id": 60895,
+          "slot_at": "2026-11-14T08:00:00+00:00",
+          "status": "complete"
+        },
+        {
+          "completed_at": "2026-11-14T07:14:45.70242+00:00",
+          "deadline_at": "2026-11-14T08:00:00+00:00",
+          "id": 60835,
+          "slot_at": "2026-11-14T07:00:00+00:00",
+          "status": "complete"
+        },
+        {
+          "completed_at": "2026-11-14T06:14:50.17797+00:00",
+          "deadline_at": "2026-11-14T07:00:00+00:00",
+          "id": 60775,
+          "slot_at": "2026-11-14T06:00:00+00:00",
+          "status": "complete"
+        },
+        {
+          "completed_at": "2026-11-14T05:14:44.820158+00:00",
+          "deadline_at": "2026-11-14T06:00:00+00:00",
+          "id": 60715,
+          "slot_at": "2026-11-14T05:00:00+00:00",
+          "status": "complete"
+        }
+      ],
+      "shared_buffers": "96MB",
+      "started_at": "2026-11-14 10:52:34.105078+00"
+    }
+  ],
+  "elapsedMs": 2847
+}
