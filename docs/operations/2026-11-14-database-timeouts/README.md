@@ -399,3 +399,29 @@ repair or recovery occurred (incident attempts remain one). The previous recover
 archive read-back remains verified. No provider collection, app launch, raw rewrite,
 billing or research change was triggered. Fixed-inventory observations are not
 verified pump truth.
+
+## November 15, 03:18 UTC: current hour already complete
+
+Runs 61948 (02:00) and 62008 (03:00) both completed all 72 batches on the correct
+59/9/4 regional routes. Run 62008 has 141,660 catalog observations and 90,587
+reported-price stations; 73 requests / 143,407 lookups are within budget. Its ten
+cache scopes published at 03:17 with zero latest-run projection gaps. Retained
+slots are now 177 complete and the same 15 known partial, with zero current or
+expired absent/running slots. The three old November 10 projection gaps remain
+unchanged; expired metadata outside the window is not treated as a collection gap.
+
+All six schedules are active; national retention returned HTTP 200 at 03:00 and
+03:10. Raw, operational metadata and local-history backlogs are all zero. Archive
+accounting is 749,059,230 / 900,000,000 bytes. A transient upstream HTTP 503 cooldown
+expired naturally at 03:03:41 and scheduled collection completed without intervention.
+The compact index is valid/ready at 23,781,376 bytes (+253,952), without a measured
+bloat ratio. Available RAM is 152,285,184 bytes, occupied swap 383,594,496 bytes and
+loads 0.32/0.56/0.47. Both protected reads succeeded with no lock waits. Known
+resource pressure remains monitored despite this quieter snapshot.
+
+`followup-1115-0318.json` records passing checks. The city campaign remains complete.
+No new incident repair or recovery occurred (repair attempts remain one); routine
+transient retry completion is automatic, not an effect of a monitor repair. Prior
+recovery archive read-back remains verified. No provider collection, app launch,
+raw rewrite, billing or research change was triggered. Fixed-inventory observations
+are not verified pump truth.
