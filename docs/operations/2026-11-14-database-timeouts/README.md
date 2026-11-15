@@ -373,3 +373,29 @@ expired; the city campaign remains complete. No new repair or recovery occurred
 verified. No provider request, phone-app launch, raw rewrite, billing or research
 change was triggered. `followup-1115-0113.json` records passing checks and cleanup
 evidence. Fixed-inventory observations are not verified pump truth.
+
+## November 15, 02:11 UTC: local-history backlog drained
+
+Run 61888 (01:00) completed 72/72 batches on the correct three routes, with
+141,660 catalog observations and 90,322 reported-price stations. Its 72 requests /
+141,660 lookups are within budget. All ten cache scopes published at 01:15 with
+zero latest-run projection gaps. Run 61948 (02:00) was 52/72 at the status snapshot
+and has until 03:00. Retained operational counts remain 176 complete, 15 known
+partial, one current running and zero expired absent/running. The three old
+November 10 projection gaps remain unchanged; metadata expiry is not a new gap.
+
+The previously pending local-history cleanup has drained: zero rows remain past
+the date threshold, and oldest day is November 8. All six schedules are active.
+National retention returned HTTP 200 at 02:00 and 02:10, with zero raw or metadata
+backlog. Archive accounting is 748,097,828 / 900,000,000 bytes. The compact index
+is valid/ready at 23,527,424 bytes (+73,728); no bloat ratio is inferred from size.
+Available RAM is 111,742,976 bytes, occupied swap 538,099,712 bytes and loads
+0.66/0.69/0.41. Both protected reads succeeded; a data-file write wait was observed,
+with no lock waits. Known memory pressure remains under observation.
+
+`followup-1115-0211.json` records passing checks. The shared cooldown is expired
+and the city campaign remains complete. Cleanup completion was automatic; no new
+repair or recovery occurred (incident attempts remain one). The previous recovery
+archive read-back remains verified. No provider collection, app launch, raw rewrite,
+billing or research change was triggered. Fixed-inventory observations are not
+verified pump truth.
