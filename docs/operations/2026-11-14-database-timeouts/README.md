@@ -452,3 +452,29 @@ No repair or new incident recovery occurred (incident attempts remain one); prio
 recovery archive read-back remains verified. No provider request, app launch,
 raw overwrite, billing or research change was triggered. Fixed-inventory price
 observations are not verified pump truth.
+
+## November 15, 05:15 UTC: completed sweep and next-tick publication
+
+Runs 62068 (04:00) and 62128 (05:00) completed all 72 batches on their fixed
+59/9/4 routes. Run 62128 completed at 05:14:37, with 141,660 catalog observations,
+90,635 reported-price stations and 72 requests / 141,660 lookups. The initial
+status snapshot briefly showed the previous cache after completion; a small
+protected read verified the normal 05:15 scheduled publication of all ten scopes
+to run 62128. No manual publication or repair was needed. Latest-run projection
+backlog is zero. Retained slots are 177 complete and 15 known partial, with zero
+current or expired absent/running; the three old November 10 projection gaps are
+unchanged. Expired metadata is not counted as a collection gap.
+
+All six schedules remain active. National retention returned HTTP 200 at 05:00
+and 05:10; raw, metadata and local-history backlogs are zero. Archive usage is
+748,935,579 / 900,000,000 bytes. The compact index is valid/ready at 24,002,560 bytes
+(+90,112); size alone does not quantify bloat. Available RAM is 137,302,016 bytes,
+occupied swap 578,076,672 bytes and loads 1.01/0.94/0.64. Full and supplemental
+protected reads succeeded, with no observed lock waits. Resource pressure remains
+monitored. The shared cooldown is expired and the city campaign remains complete.
+
+`followup-1115-0515.json` preserves the initial snapshot, next-tick cache read and
+passing checks. No new repair or incident recovery occurred (attempt count remains
+one), and previous recovery archive read-back remains verified. No provider
+collection, app launch, raw rewrite, billing or research change was triggered.
+Fixed-inventory observations are not verified pump truth.
