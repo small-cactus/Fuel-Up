@@ -607,3 +607,33 @@ remains verified; the routine transient retry is automatic behavior, not an
 agent repair. No app launch, provider request, billing change, raw rewrite or
 research mutation was performed. Coverage describes the fixed inventory and
 reported prices, not verified pump truth.
+
+## November 15, 11:27 UTC: complete sweep and current cache
+
+Run 62488 (11:00) completed all 72 batches at 11:14:34 on the fixed 59/9/4
+regional routes, observing 141,660 inventory stations and 90,410 reported-price
+stations. Its 72 requests / 141,660 lookups stayed within budget. All ten cache
+scopes published at 11:15 with zero latest-run projection gaps. Two saved
+serving-client timeouts did not prevent complete collection or current cache
+publication. The three old November 10 projection gaps remain unchanged.
+Retained operational slots remain 177 complete and 15 known partial, with zero
+expired absent/running and current absent slots; expired metadata outside this
+window is not counted as missed collection.
+
+All six schedules remain active; national retention returned HTTP 200 at 11:00,
+11:10 and 11:20. Raw, metadata and local-history backlogs are zero. Accounted
+archive usage is 748,561,261 / 900,000,000 bytes. Shared cooldown has expired;
+city collection remains complete, and the research endpoint is unchanged.
+The compact index is valid/ready at 24,477,696 bytes (+73,728); size alone does
+not establish bloat. Both protected reads succeeded with no lock waits.
+Available RAM is 148,463,616 bytes, occupied swap 382,554,112 bytes, and loads
+are 0.15/0.13/0.19. Across about 68 minutes, swap-in/out counters increased
+1,205,994 / 1,507,399; nvme0n1/nvme1n1 busy counters increased 75.011 / 391.160
+seconds. Host memory pressure remains observable despite successful service;
+no new repair is indicated by this check.
+
+`followup-1115-1127.json` contains passing assertions. No repair or incident
+recovery occurred; incident attempt count remains one and prior recovery
+archive read-back remains verified. This check made no provider requests,
+app launches, billing changes, raw rewrites or research mutations. Coverage is
+relative to the fixed inventory, not verified pump truth.
