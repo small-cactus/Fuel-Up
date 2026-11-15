@@ -732,3 +732,33 @@ behavior, not an agent repair. Prior incident recovery archive read-back remains
 verified. This check made no provider request, app launch, billing change, raw
 rewrite or research mutation. Coverage is relative to the fixed inventory and
 reported prices, not verified pump truth.
+
+## November 15, 15:30 UTC: complete sweep, current cache and no new gaps
+
+Run 62728 (15:00) completed all 72 batches at 15:14:37 on the correct fixed
+59/9/4 regional routes, with 141,660 inventory observations and 89,172
+reported-price stations. Its 72 requests / 141,660 lookups stayed within the
+92 / 161,660 budgets. All ten cache scopes published at 15:15 with zero
+latest-run projection gaps despite three saved serving-client timeouts.
+The three old November 10 projection gaps remain. The rolling 192-slot window
+contains 179 complete and 13 partial hours, with zero expired absent/running
+or current absent slots. Reduced retained partial counts do not repair historical
+gaps; expired metadata outside this window is not inferred to be missing collection.
+
+All six schedules are active. National retention returned HTTP 200 at 15:10,
+15:20 and 15:30; raw, metadata and local-history backlogs are zero. Accounted
+archive usage is 748,260,302 / 900,000,000 bytes. Shared cooldown remains expired,
+city collection complete, and the original research endpoint unchanged.
+The compact retention index is valid/ready at 24,936,448 bytes (+114,688); size
+alone does not establish bloat. Both protected reads succeeded without lock waits.
+Available RAM is 157,405,184 bytes, occupied swap 518,848,512 bytes, and loads
+are 0.37/0.15/0.23. Across about 66.5 minutes, swap-in/out counters increased
+1,486,178 / 1,616,903; nvme0n1/nvme1n1 busy counters increased 71.550 / 425.888
+seconds. Memory pressure remains observable despite successful scheduled service
+and bounded reads; this check does not establish permanent resource recovery.
+
+`followup-1115-1530.json` records passing assertions. No repair or new incident
+recovery occurred; repair count remains one. Prior incident recovery archive
+read-back remains verified. This check made no provider requests, app launches,
+billing changes, raw rewrites or research mutations. Coverage describes the fixed
+inventory and reported prices, not verified pump truth.
