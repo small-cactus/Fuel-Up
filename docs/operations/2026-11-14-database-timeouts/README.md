@@ -637,3 +637,34 @@ recovery occurred; incident attempt count remains one and prior recovery
 archive read-back remains verified. This check made no provider requests,
 app launches, billing changes, raw rewrites or research mutations. Coverage is
 relative to the fixed inventory, not verified pump truth.
+
+## November 15, 12:29 UTC: complete sweep after automatic 503 retry
+
+Run 62548 (12:00) completed all 72 batches at 12:15:45 using the correct fixed
+59/9/4 regional routes, with 141,660 inventory observations and 90,117
+reported-price stations. A saved HTTP 503 received a five-second shared
+cooldown, expired at 12:04:17; scheduled collection completed automatically
+with 73 requests / 143,660 lookups within the 92 / 161,660 budgets. All ten
+cache scopes published at 12:16, with zero latest-run projection gaps despite
+one saved serving-client timeout. The three old November 10 projection gaps
+are unchanged. Retained slots remain 177 complete / 15 known partial, with
+zero expired absent/running or current absent slots. Expired metadata beyond
+the retained window is not inferred to be missed collection.
+
+All six schedules are active. National retention returned HTTP 200 at 12:00,
+12:10 and 12:20; raw, metadata and local-history backlogs are zero. Archive
+accounting is 748,494,302 / 900,000,000 bytes. City collection remains complete
+and the original research endpoint is unchanged. The compact retention index
+is valid/ready at 24,584,192 bytes (+106,496); size alone is not a bloat measure.
+Both protected reads succeeded with no lock waits. Available RAM is
+151,703,552 bytes, occupied swap 394,022,912 bytes, and loads 0.26/0.20/0.25.
+Across about 61.5 minutes, swap-in/out counters increased 1,171,660 / 1,466,004;
+nvme0n1/nvme1n1 busy counters increased 70.790 / 371.518 seconds. Memory pressure
+remains observable, but scheduled collection, cache and bounded reads passed.
+
+`followup-1115-1229.json` records passing assertions. No new repair was indicated
+or attempted; the existing incident attempt count remains one. The transient
+retry was automatic, not an agent repair, and prior incident recovery archive
+read-back remains verified. This check made no provider request, app launch,
+billing change, raw rewrite or research mutation. Coverage describes the fixed
+inventory and reported prices, not verified pump truth.
