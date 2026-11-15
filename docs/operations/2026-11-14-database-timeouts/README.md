@@ -575,3 +575,35 @@ occurred (attempt count remains one); prior recovery archive read-back remains
 verified. No provider collection, app launch, raw rewrite, billing or research
 change was triggered. Coverage is relative to the fixed inventory, not verified
 pump truth.
+
+## November 15, 10:19 UTC: complete sweep after automatic transient retry
+
+Run 62428 (10:00) completed all 72 batches at 10:16:04 on the fixed 59/9/4
+regional routes, with 141,660 inventory observations and 90,493 reported-price
+stations. A transient GraphQL failure received the shared 60-second cooldown,
+which expired at 10:05:38; scheduled collection completed automatically using
+73 requests / 143,660 lookups, within the 92 / 161,660 budgets. No override or
+manual collection occurred. All ten cache scopes published at 10:17 with zero
+latest-run projection gaps. The three old November 10 projection gaps remain.
+Retained operational slots are 177 complete and 15 known partial, with zero
+expired absent/running or current absent slots. Expired metadata is not inferred
+to be missing collection.
+
+All six schedules are active. Retention returned HTTP 200 at 10:00 and 10:10;
+raw, metadata and local-history cleanup backlogs are zero. Accounted archive
+usage is 748,624,067 / 900,000,000 bytes. City collection remains complete and
+the original research window remains closed. The compact retention index is
+valid/ready at 24,403,968 bytes (+73,728); size alone does not establish bloat.
+Both protected reads succeeded without lock waits. Host available RAM is
+152,006,656 bytes, occupied swap 404,336,640 bytes, loads 0.19/0.37/0.36.
+Since the previous sample (about 55.7 minutes), swap-in/out counters increased
+1,148,878 / 1,410,119 and disk busy counters increased 59.349 / 362.935 seconds
+for nvme0n1 / nvme1n1. Memory pressure remains observable, but this interval has
+successful scheduled service and bounded reads; no new repair is indicated.
+
+`followup-1115-1019.json` contains passing assertions. Incident repair attempts
+remain one; this check made none. Prior incident recovery archive read-back
+remains verified; the routine transient retry is automatic behavior, not an
+agent repair. No app launch, provider request, billing change, raw rewrite or
+research mutation was performed. Coverage describes the fixed inventory and
+reported prices, not verified pump truth.
