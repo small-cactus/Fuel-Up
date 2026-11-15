@@ -525,3 +525,28 @@ remains monitored. The shared cooldown is expired and city collection complete.
 occurred (attempt count remains one); prior recovery archive read-back remains
 verified. No provider collection, app launch, raw rewrite, billing or research
 change was triggered. Coverage is fixed-inventory coverage, not verified pump truth.
+
+## November 15, 08:18 UTC: current sweep and cache verified
+
+Run 62308 (08:00) completed 72/72 batches on the fixed 59/9/4 routes at 08:15:36,
+with 141,660 catalog observations and 90,549 reported-price stations. Its 73
+requests / 143,660 lookups stayed within budget. All ten cache scopes published
+at 08:16 with zero latest-run projection gaps. Retained counts are 177 complete
+and 15 known partial, with zero current or expired absent/running. The three old
+November 10 projection gaps are unchanged; expired metadata is not counted as a
+new collection gap.
+
+All six schedules remain active; retention returned HTTP 200 at 08:00 and 08:10.
+Raw, metadata and local-history backlogs are zero. Archive accounting is
+748,754,870 / 900,000,000 bytes. The transient HTTP 503 cooldown expired naturally
+at 08:01:08 and scheduled collection completed without intervention. The compact
+index is valid/ready at 24,240,128 bytes (+81,920), without a measured bloat ratio.
+Available RAM is 133,849,088 bytes, occupied swap 428,081,152 bytes and loads
+0.37/0.46/0.36. Protected reads succeeded with no lock waits; known resource
+pressure remains monitored.
+
+`followup-1115-0818.json` preserves passing checks. City collection remains
+complete. No new repair or incident recovery occurred (attempt count remains one);
+prior recovery archive read-back remains verified. No provider collection, app
+launch, raw rewrite, billing or research change was triggered. Coverage remains
+relative to the fixed inventory, not verified pump truth.
