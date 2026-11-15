@@ -343,3 +343,33 @@ cooldown remains expired and city collection remains complete. Zero new repairs
 billing changes or research changes. No new recovery occurred; the previous
 recovery archive read-back remains verified. Coverage is fixed-inventory coverage,
 not verified pump truth.
+
+## November 15, 01:13 UTC: scheduled service and bounded cleanup
+
+Run 61828 (00:00) completed 72/72 batches on the correct 59/9/4 routes, with
+141,660 catalog observations, 90,403 reported-price stations and 72 requests /
+141,660 lookups. All ten Trends scopes published at 00:15 with no latest-run
+projection gaps. Run 61888 (01:00) was 63/72 at the snapshot, within its 02:00
+deadline. Retained counts remain 176 complete, 15 known partial and one current
+running, with zero expired absent/running. The three old November 10 projection
+gaps remain unchanged; expired metadata is not inferred to be absent collection.
+
+All six schedules are active. National retention returned HTTP 200 at 01:00 and
+01:10; its temporary one-hour metadata deferral drained by 01:10. Eligible raw
+objects and overdue operational metadata are both zero. Archive accounting is
+748,716,863 / 900,000,000 bytes. Local-history rows past the date threshold fell
+from 90,336 to 14,444. A targeted protected read confirms the 00:17 local cleanup
+succeeded and the live function retains its 20,000-row, SKIP LOCKED cap. The next
+cleanup is 01:17; this remaining bounded backlog is not a failed schedule and no
+manual deletion was performed. The observed decline is not attributed solely to
+the capped function.
+
+The compact index is valid/ready at 23,453,696 bytes (+106,496); size alone does
+not establish bloat. Available RAM is 142,184,448 bytes, occupied swap 557,043,712
+bytes and loads 0.98/0.91/0.62. Protected reads succeeded with no observed lock
+waits. Known resource pressure continues to be monitored. The shared cooldown is
+expired; the city campaign remains complete. No new repair or recovery occurred
+(incident attempts remain one), and previous recovery archive read-back remains
+verified. No provider request, phone-app launch, raw rewrite, billing or research
+change was triggered. `followup-1115-0113.json` records passing checks and cleanup
+evidence. Fixed-inventory observations are not verified pump truth.
