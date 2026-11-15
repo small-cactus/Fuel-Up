@@ -986,3 +986,35 @@ were automatic scheduled behavior, not agent interventions. Prior incident
 recovery archive read-back remains verified. No provider request, app launch,
 billing change, raw rewrite or research mutation was performed by this check.
 Coverage describes the fixed inventory and reported prices, not verified pump truth.
+
+## November 15, 23:35 UTC: complete sweep and automatic projection repair
+
+Run 63208 (23:00) completed all 72 batches at 23:14:45 on the correct fixed
+59/9/4 regional routes, with 141,660 inventory observations and 86,085
+reported-price stations. Its 72 requests / 141,660 lookups stayed within the
+92 / 161,660 budgets. Five saved serving-client timeouts were observed; scheduled
+projection repair completed job 4546804 on its first attempt at 23:15:06.
+All ten cache scopes published at 23:16 with zero latest-run projection gaps.
+The three old November 10 projection gaps remain unchanged. The rolling
+192-slot window contains 179 complete and 13 known partial hours, with zero
+expired absent/running or current absent slots. Expired metadata is not inferred
+to be missing collection or repaired history.
+
+All six schedules are active. Retention returned HTTP 200 at 23:10, 23:20 and
+23:30; raw, metadata and local-history backlogs are zero. Accounted archive
+usage is 747,220,773 / 900,000,000 bytes. Shared cooldown remains expired,
+city collection complete, and the original research endpoint unchanged.
+The compact index is valid/ready at 25,886,720 bytes (+57,344); size alone does
+not establish bloat. Both protected reads succeeded without lock waits.
+Available RAM is 141,565,952 bytes, occupied swap 388,943,872 bytes, and loads
+are 0.33/0.12/0.17. Across about 58.5 minutes, swap-in/out counters increased
+1,764,545 / 1,751,821; nvme0n1/nvme1n1 busy counters increased 87.345 / 476.305
+seconds. Memory pressure remains observable while scheduled service and bounded
+reads continue to pass.
+
+`followup-1115-2335.json` records passing assertions. This check attempted no
+repair; incident repair count remains one. Projection repair was automatic
+scheduled behavior, not an agent intervention. Prior incident recovery archive
+read-back remains verified. No provider request, app launch, billing change,
+raw rewrite or research mutation was performed by this check. Coverage describes
+the fixed inventory and reported prices, not verified pump truth.
