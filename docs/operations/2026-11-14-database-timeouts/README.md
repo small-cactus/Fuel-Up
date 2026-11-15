@@ -314,3 +314,32 @@ remains expired and city collection remains complete. No new recovery or repair
 occurred (incident attempts remain one); the prior recovery archive read-back
 remains verified. No provider request, app launch, raw rewrite, billing or research
 change was triggered. Fixed-inventory observations are not verified pump truth.
+
+## November 15, 00:14 UTC: collection continues across midnight
+
+Run 61768 (November 14, 23:00) completed all 72 batches on the correct three
+routes, with 141,660 catalog observations and 90,857 reported-price stations.
+Its 73 requests / 143,660 lookups are within budget. All ten Trends scopes
+published at 23:16 with zero latest-run projection backlog. Run 61828 (00:00)
+was 69/72 at the status snapshot and remains within its 01:00 deadline. The
+retained window is unchanged: 176 complete, 15 known partial, one current running,
+zero expired absent/running. The three old projection gaps remain unchanged;
+metadata expiry outside the retained window is not counted as absent collection.
+
+All six schedules remain active. National retention returned HTTP 200 at 00:00
+and 00:10, with zero raw or operational metadata backlog. Archive accounting is
+749,083,937 / 900,000,000 bytes. UTC day rollover newly puts 90,336 local-history
+rows past their date threshold; the next scheduled local-history cleanup is
+00:17, so this snapshot does not establish a missed retention execution.
+The compact reference index is valid/ready at 23,347,200 bytes (+122,880).
+Index size alone is not evidence of bloat. Available RAM is 114,196,480 bytes,
+occupied swap 535,171,072 bytes and loads 0.78/0.64/0.42. Activity includes data
+file I/O waits but no lock waits; both protected reads succeeded. Known memory
+pressure remains under observation without a new outage or speculative repair.
+
+`followup-1115-0014.json` preserves the passing consistency checks. The shared
+cooldown remains expired and city collection remains complete. Zero new repairs
+(incident total remains one), provider requests, app launches, raw overwrites,
+billing changes or research changes. No new recovery occurred; the previous
+recovery archive read-back remains verified. Coverage is fixed-inventory coverage,
+not verified pump truth.
