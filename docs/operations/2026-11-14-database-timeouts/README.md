@@ -425,3 +425,30 @@ transient retry completion is automatic, not an effect of a monitor repair. Prio
 recovery archive read-back remains verified. No provider collection, app launch,
 raw rewrite, billing or research change was triggered. Fixed-inventory observations
 are not verified pump truth.
+
+## November 15, 04:16 UTC: current collection within deadline
+
+Run 62068 (04:00) was 68/72 at the status snapshot, progressing on the fixed routes
+within its 05:00 deadline. The supplemental count was 70 requests / 137,960 lookups,
+within budget. The latest complete run remains 62008 (03:00): all 72 batches,
+141,660 catalog observations, ten cache scopes published at 03:17 and zero
+latest-run projection gaps. Retained slots are 176 complete, 15 known partial and
+one current running, with zero expired absent/running. The change from 177 complete
+reflects the rolling window and current running slot, not a new gap. The three old
+November 10 projection gaps remain unchanged; expired metadata is not inferred to
+be absent collection.
+
+All six schedules remain active. National retention returned HTTP 200 at 04:00
+and 04:10; raw, metadata and local-history backlogs are zero. Archive accounting
+is 748,808,830 / 900,000,000 bytes. The transient HTTP 502 cooldown expired
+naturally at 04:13:02 and collection progressed without monitor intervention.
+The compact index is valid/ready at 23,912,448 bytes (+131,072); size alone does
+not measure bloat. Available RAM is 121,044,992 bytes, occupied swap 505,864,192
+bytes and loads 0.69/0.58/0.43. Protected reads succeeded with no observed lock
+waits; known memory pressure remains monitored.
+
+`followup-1115-0416.json` records passing checks. City collection remains complete.
+No repair or new incident recovery occurred (incident attempts remain one); prior
+recovery archive read-back remains verified. No provider request, app launch,
+raw overwrite, billing or research change was triggered. Fixed-inventory price
+observations are not verified pump truth.
