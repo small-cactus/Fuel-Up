@@ -550,3 +550,28 @@ complete. No new repair or incident recovery occurred (attempt count remains one
 prior recovery archive read-back remains verified. No provider collection, app
 launch, raw rewrite, billing or research change was triggered. Coverage remains
 relative to the fixed inventory, not verified pump truth.
+
+## November 15, 09:24 UTC: complete sweep, no new gaps
+
+Run 62368 (09:00) completed all 72 batches at 09:14:39 on the correct fixed
+59/9/4 routes, with 141,660 catalog observations and 90,529 reported-price stations.
+Its 72 requests / 141,660 lookups stayed within budget. All ten cache scopes
+published at 09:15 with zero latest-run projection gaps. Retained slots remain
+177 complete and 15 known partial, with zero current or expired absent/running.
+The three old November 10 projection gaps are unchanged; metadata expiry outside
+the retained window is not counted as absent collection.
+
+All six schedules are active; national retention returned HTTP 200 at 09:10 and
+09:20. Raw, operational metadata and local-history backlogs are zero. Archive
+accounting is 748,690,458 / 900,000,000 bytes. The compact index is valid/ready at
+24,330,240 bytes (+90,112); no bloat ratio is inferred from size. Available RAM is
+209,379,328 bytes, occupied swap 486,752,256 bytes and loads 0.29/0.19/0.24. Both
+protected reads succeeded with no lock waits. Known memory pressure remains under
+observation despite the quiet current interval. Shared cooldown is expired and
+city collection remains complete.
+
+`followup-1115-0924.json` records passing checks. No new repair or incident recovery
+occurred (attempt count remains one); prior recovery archive read-back remains
+verified. No provider collection, app launch, raw rewrite, billing or research
+change was triggered. Coverage is relative to the fixed inventory, not verified
+pump truth.
