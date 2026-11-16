@@ -1124,3 +1124,33 @@ agent repairs; prior incident recovery archive read-back remains verified.
 This check made no provider requests, app launches, billing changes, raw rewrites
 or research mutations. Coverage describes the fixed inventory and reported prices,
 not verified pump truth.
+
+## November 16, 03:42 UTC: complete sweep and current cache
+
+Run 63448 (03:00) completed all 72 batches at 03:14:46 on the correct fixed
+59/9/4 regional routes, with 141,660 inventory observations and 84,720
+reported-price stations. Its 72 requests / 141,660 lookups stayed within the
+92 / 161,660 budgets. All ten cache scopes published at 03:15 with zero
+latest-run projection gaps despite saved serving-client timeouts. Three old
+November 10 projection gaps remain unchanged. Retained operational slots remain
+179 complete and 13 known partial out of 192, with zero expired absent/running
+or current absent slots. Expired metadata is not inferred to be missing collection
+or repaired history.
+
+All six schedules are active. National retention returned HTTP 200 at 03:20,
+03:30 and 03:40; raw, metadata and local-history backlogs are zero. Accounted
+archive usage is 746,421,419 / 900,000,000 bytes. Shared cooldown remains expired,
+city collection complete, and the original research endpoint unchanged.
+The compact index is valid/ready at 26,337,280 bytes (+172,032); size alone does
+not establish bloat. Both protected reads succeeded without lock waits.
+Available RAM is 188,280,832 bytes, occupied swap 497,090,560 bytes, and loads
+are 0.32/0.11/0.14. Across about 62 minutes, swap-in/out counters increased
+1,683,561 / 1,774,323; nvme0n1/nvme1n1 busy counters increased 91.058 / 467.719
+seconds. Memory pressure remains observable while scheduled service and bounded
+reads continue to pass.
+
+`followup-1116-0342.json` records passing assertions. This check attempted no
+repair; incident repair count remains one. Prior incident recovery archive
+read-back remains verified. No provider request, app launch, billing change,
+raw rewrite or research mutation was performed by this check. Coverage describes
+the fixed inventory and reported prices, not verified pump truth.
