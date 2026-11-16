@@ -1154,3 +1154,34 @@ repair; incident repair count remains one. Prior incident recovery archive
 read-back remains verified. No provider request, app launch, billing change,
 raw rewrite or research mutation was performed by this check. Coverage describes
 the fixed inventory and reported prices, not verified pump truth.
+
+## November 16, 04:41 UTC: complete sweep after automatic 503 retries
+
+Run 63508 (04:00) completed all 72 batches at 04:15:25 on the correct fixed
+59/9/4 regional routes, with 141,660 inventory observations and 84,415
+reported-price stations. Two saved HTTP 503 responses received five-second
+shared cooldowns; the latest expired at 04:04:19. Scheduled collection completed
+automatically with 74 requests / 145,660 lookups, within the 92 / 161,660 budgets.
+All ten cache scopes published at 04:16 with zero latest-run projection gaps
+despite ten saved serving-client timeouts. Three old November 10 projection
+gaps remain unchanged. Retained slots remain 179 complete and 13 known partial
+out of 192, with zero expired absent/running or current absent slots. Expired
+metadata is not inferred to be missing collection or repaired history.
+
+All six schedules are active. National retention returned HTTP 200 at 04:20,
+04:30 and 04:40; raw, metadata and local-history backlogs are zero. Accounted
+archive usage is 746,215,469 / 900,000,000 bytes. City collection remains complete
+and the original research endpoint unchanged. The compact index is valid/ready
+at 26,435,584 bytes (+98,304); size alone does not establish bloat. Both protected
+reads succeeded without lock waits. Available RAM is 195,694,592 bytes, occupied
+swap 415,252,480 bytes, and loads 0.38/0.23/0.24. Across about 58.5 minutes,
+swap-in/out counters increased 1,685,906 / 1,711,298; nvme0n1/nvme1n1 busy counters
+increased 86.466 / 481.859 seconds. Memory pressure remains observable while
+scheduled service and bounded reads continue to pass.
+
+`followup-1116-0441.json` records passing assertions. No new repair was indicated
+or attempted; incident repair count remains one. Retries were automatic, not
+agent repairs; prior incident recovery archive read-back remains verified.
+This check made no provider requests, app launches, billing changes, raw rewrites
+or research mutations. Coverage describes the fixed inventory and reported prices,
+not verified pump truth.
