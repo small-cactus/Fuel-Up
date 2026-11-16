@@ -1309,3 +1309,34 @@ read-back remains verified; this routine check did not fetch another raw object.
 No provider request, app launch, billing change, raw rewrite or research mutation
 was performed by this check. Coverage describes the fixed inventory and reported
 prices, not verified pump truth.
+
+## November 16, 09:47 UTC: complete sweep with no new operational gaps
+
+Run 63808 (09:00) completed 72/72 batches at 09:14:34 on the correct fixed
+59/9/4 regional routes. It observed 141,660 inventory stations, 84,041 with
+reported prices. Both checked hours used 72 requests / 141,660 lookups, within
+92 / 161,660 budgets. All ten cache scopes published at 09:15 and latest-run
+projection backlog is zero, despite two transient serving-deferred events.
+Three old November 10 projection gaps remain unchanged. The rolling 192-slot
+window contains 182 complete and 10 known partial hours, with zero expired
+absent/running or current absent slots. Another old partial aged out; no historical
+repair or missing collection is inferred from expired metadata.
+
+All six schedules and three routes remain active. Shared cooldown is expired;
+city collection remains complete and the original research endpoint unchanged.
+National retention returned HTTP 200 at 09:20, 09:30 and 09:40. Raw, metadata
+and local-history backlogs are zero. Accounted archive usage is 745,207,113 /
+900,000,000 bytes. Compact retention index size is 26,763,264 bytes (+98,304),
+valid/ready; size alone does not establish bloat. Both protected reads passed
+without lock waits. Available RAM is 172,863,488 bytes; occupied swap is
+410,312,704 bytes and loads are 0.10/0.10/0.10. Over about 66.2 minutes, swap-in/out
+counters increased 1,228,530 / 1,490,090; nvme0n1/nvme1n1 busy counters increased
+59.689 / 379.118 seconds. Memory pressure persists while scheduled service and
+bounded reads continue to pass.
+
+`followup-1116-0947.json` records passing assertions. No repair was indicated or
+attempted; incident repair count remains one. Prior recovery archive read-back
+remains verified; no additional raw object was fetched for this routine check.
+This check made no provider requests, app launches, billing changes, raw rewrites
+or research mutations. Fixed-inventory coverage and reported prices are not
+verified pump truth.
