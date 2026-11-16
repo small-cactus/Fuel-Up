@@ -1448,3 +1448,41 @@ Prior incident recovery archive read-back remains verified; this routine check
 did not fetch another raw object. No provider requests, app launches, billing
 changes, raw rewrites or research mutations were performed by this check.
 Fixed-inventory coverage and reported prices are not verified pump truth.
+
+## November 16, 13:53 UTC: complete sweep and confirmed automatic retries
+
+Run 64048 (13:00) completed 72/72 batches at 13:17:35 on the fixed 59/9/4
+regional routes, observing 141,660 inventory stations and 85,263 with reported
+prices. A transient GraphQL event imposed a 60-second cooldown at 13:03:25;
+a separate NETWORK_OR_RUNTIME_ERROR occurred at 13:09:26. A small protected
+job read confirms both jobs succeeded on their second attempt: 4607280 at
+13:06:06 and 4607234 at 13:10:35, with archive size and SHA manifests present.
+The generic runtime code does not identify its underlying cause; source review
+confirms it is a catch-all for errors outside NationalPriceError. No stronger
+root-cause attribution is made. These were automatic retries, not agent repairs.
+
+This hour used 74 requests / 145,660 lookups; the prior hour used 76 / 149,660,
+both within 92 / 161,660 budgets. Shared cooldown is expired. All ten cache scopes
+published at 13:18 with zero latest-run projection gaps. Three old November 10
+projection gaps remain unchanged. The rolling 192-slot window contains 186
+complete and six known partial hours, with zero expired absent/running or current
+absent slots. An old partial aged out; this is not historical repair and metadata
+outside retention is not inferred to represent missing collection.
+
+All six schedules and three routes remain active. City collection remains
+complete and the original research endpoint unchanged. National retention
+returned HTTP 200 at 13:30, 13:40 and 13:50. Raw, metadata and local-history
+backlogs are zero. Accounted archive usage is 744,430,304 / 900,000,000 bytes.
+The compact index is valid/ready at 27,279,360 bytes (+163,840); size alone does
+not establish bloat. Its definition was verified at 11:44. Protected reads passed
+without lock waits. Available RAM is 170,504,192 bytes, occupied swap 417,951,744
+bytes, and loads are 0.36/0.12/0.09. Over about 60.7 minutes, swap-in/out counters
+increased 1,321,934 / 1,609,041; nvme0n1/nvme1n1 busy counters increased
+86.322 / 409.920 seconds. Memory pressure persists while scheduled service passes.
+
+`followup-1116-1353.json` records passing assertions and the two retry job records.
+No repair was indicated or attempted; incident repair count remains one. Prior
+incident recovery archive read-back remains verified; this routine check only
+read archive manifests, not raw objects. No provider requests, app launches,
+billing changes, raw rewrites or research mutations were performed by this check.
+Fixed-inventory coverage and reported prices are not verified pump truth.
