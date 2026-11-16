@@ -1412,3 +1412,39 @@ incident recovery archive read-back remains verified; this routine check did not
 fetch another raw object. No provider requests, app launches, billing changes,
 raw rewrites or research mutations were performed by this check. Fixed-inventory
 coverage and reported prices are not verified pump truth.
+
+## November 16, 12:52 UTC: scheduled retries completed the sweep
+
+Run 63988 (12:00) completed all 72 batches at 12:20:13 on the fixed 59/9/4
+regional routes, observing 141,660 inventory stations, 84,689 with reported
+prices. Three transient GraphQL events imposed 60-second cooldowns and one
+HTTP 503 imposed five seconds. Scheduled retries completed automatically using
+76 requests / 149,660 lookups, within the 92 / 161,660 budgets. The prior hour
+used 72 / 141,660. Shared cooldown expired at 12:19:14; no cooldown was cleared
+and no provider collection was manually triggered. All ten cache scopes published
+at 12:21 with zero latest-run projection gaps. Three old November 10 projection
+gaps remain unchanged.
+
+The rolling 192-slot window now has 185 complete and seven known partial hours,
+with zero expired absent/running or current absent slots. One old partial aged
+out; this is not historical repair. Metadata outside retention is not inferred
+to be missing collection. All six schedules and three routes remain active;
+city collection is complete and the original research endpoint unchanged.
+National retention returned HTTP 200 at 12:30, 12:40 and 12:50. Raw, metadata
+and local-history backlogs are zero. Accounted archive usage is 744,610,243 /
+900,000,000 bytes.
+
+The compact index remains valid/ready at 27,115,520 bytes (+155,648); size alone
+does not establish bloat. Its intended definition and recent autovacuum were
+verified in the preceding check. Both protected reads passed without lock waits.
+Available RAM is 156,086,272 bytes, occupied swap 409,128,960 bytes, and loads
+are 0.24/0.07/0.07. Across about 68 minutes, swap-in/out counters increased
+1,390,177 / 1,654,746; nvme0n1/nvme1n1 busy counters increased 78.969 / 439.740
+seconds. Memory pressure persists while scheduled service and bounded reads pass.
+
+`followup-1116-1252.json` records passing assertions. Recovery from upstream
+transients was automatic, not an agent repair; incident repair count remains one.
+Prior incident recovery archive read-back remains verified; this routine check
+did not fetch another raw object. No provider requests, app launches, billing
+changes, raw rewrites or research mutations were performed by this check.
+Fixed-inventory coverage and reported prices are not verified pump truth.
