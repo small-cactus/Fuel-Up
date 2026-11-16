@@ -1560,3 +1560,38 @@ archive read-back remains verified; no additional raw object was fetched for
 this routine check. No provider requests, app launches, billing changes, raw
 rewrites or research mutations were performed by this check. Fixed-inventory
 coverage and reported prices are not verified pump truth.
+
+## November 16, 16:56 UTC: complete sweep and no new operational gaps
+
+Run 64228 (16:00) completed 72/72 batches at 16:15:47 on the fixed 59/9/4
+regional routes, observing 141,660 inventory stations and 85,613 with reported
+prices. A transient GraphQL event at 16:04:46 imposed a 60-second shared
+cooldown, now expired. Scheduled collection completed automatically with 73
+requests / 143,660 lookups; the prior hour used 74 / 145,660, both within
+92 / 161,660 budgets. All ten cache scopes published at 16:16 with zero
+latest-run projection gaps despite serving-deferred events. Three old November 10
+projection gaps remain unchanged.
+
+The rolling 192-slot window remains 188 complete and four known partial hours,
+with zero expired absent/running or current absent slots. Metadata beyond retention
+is not inferred to represent missing collection. All six schedules and three
+routes remain active; city collection is complete and the original research
+endpoint unchanged. National retention returned HTTP 200 at 16:30, 16:40 and
+16:50. Raw, metadata and local-history backlogs are zero. Accounted archive usage
+is 743,945,805 / 900,000,000 bytes.
+
+The compact index remains valid/ready at 27,680,768 bytes (+147,456); size alone
+does not establish bloat. Its intended definition was verified at 11:44. Both
+protected reads passed without lock waits. Available RAM is 152,301,568 bytes,
+occupied swap 395,542,528 bytes (down 114,835,456), and loads are 0.21/0.11/0.10.
+Across about 64.5 minutes, swap-in/out counters increased 1,408,277 / 1,644,766;
+nvme0n1/nvme1n1 busy counters increased 79.734 / 441.007 seconds. Paging pressure
+remains observable despite the lower occupied-swap snapshot; this is not a claim
+of permanent resource recovery.
+
+`followup-1116-1656.json` records passing assertions. Recovery from the upstream
+transient was automatic, not an agent repair; incident repair count remains one.
+Prior incident recovery archive read-back remains verified; this routine check
+did not fetch another raw object. No provider requests, app launches, billing
+changes, raw rewrites or research mutations were performed by this check.
+Fixed-inventory coverage and reported prices are not verified pump truth.
