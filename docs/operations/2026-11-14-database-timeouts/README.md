@@ -1375,3 +1375,40 @@ remains one. Prior incident recovery archive read-back remains verified; this
 routine check did not fetch another raw object. No provider requests, app launches,
 billing changes, raw rewrites or research mutations were performed by this check.
 Fixed-inventory coverage and reported prices are not verified pump truth.
+
+## November 16, 11:44 UTC: complete sweep and compact-index catalog check
+
+Run 63928 (11:00) completed 72/72 batches at 11:14:35 on the correct fixed
+59/9/4 regional routes. It observed 141,660 inventory stations, 84,201 with
+reported prices, using 72 requests / 141,660 lookups. The prior hour used
+73 / 143,660; both remain within 92 / 161,660 budgets. All ten cache scopes
+published at 11:15. Latest-run projection backlog is zero despite two
+serving-deferred events; three old November 10 projection gaps are unchanged.
+The rolling 192-slot window has 184 complete and eight known partial hours,
+with zero expired absent/running or current absent slots. An old partial aged
+out; this is not historical repair, and expired metadata is not inferred to be
+missing collection.
+
+All six schedules and three routes remain active. Shared cooldown is expired,
+city collection complete, and the original research endpoint unchanged.
+National retention returned HTTP 200 at 11:20, 11:30 and 11:40; raw, metadata
+and local-history backlogs are zero. Accounted archive usage is 744,806,952 /
+900,000,000 bytes. The compact index is valid/ready at 26,959,872 bytes (+98,304).
+A separate bounded catalog read confirms the four-column index still has no
+INCLUDE clause and no reloptions overriding default deduplication. Table stats
+report 141,660 live / 481 dead tuples and successful autovacuum/autoanalyze at
+11:14. These table estimates and index size are not a direct measurement of
+index page bloat; no reindex was attempted.
+
+Protected reads succeeded without lock waits. Available RAM is 154,869,760 bytes,
+occupied swap 411,086,848 bytes, and loads are 0.20/0.18/0.18. Across about
+59 minutes, swap-in/out counters increased 1,218,776 / 1,487,566; nvme0n1/nvme1n1
+busy counters increased 75.034 / 380.990 seconds. Memory pressure persists while
+scheduled service and bounded reads continue to pass.
+
+`followup-1116-1144.json` records passing assertions and index diagnostics. No
+repair was indicated or attempted; incident repair count remains one. Prior
+incident recovery archive read-back remains verified; this routine check did not
+fetch another raw object. No provider requests, app launches, billing changes,
+raw rewrites or research mutations were performed by this check. Fixed-inventory
+coverage and reported prices are not verified pump truth.
