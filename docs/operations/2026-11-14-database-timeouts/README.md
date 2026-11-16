@@ -1092,3 +1092,35 @@ repair; incident repair count remains one. Prior incident recovery archive
 read-back remains verified. No provider request, app launch, billing change,
 raw rewrite or research mutation was performed by this check. Coverage describes
 the fixed inventory and reported prices, not verified pump truth.
+
+## November 16, 02:40 UTC: complete sweep after automatic retries
+
+Run 63388 (02:00) completed all 72 batches at 02:16:46 on the correct fixed
+59/9/4 regional routes, with 141,660 inventory observations and 84,763
+reported-price stations. Saved evidence includes a transient GraphQL response
+with a shared cooldown expiring at 02:06:14 and a NETWORK_OR_RUNTIME_ERROR at
+02:12:58; the latter category alone does not establish a specific root cause.
+Scheduled collection completed automatically with 74 requests / 145,660 lookups,
+within the 92 / 161,660 budgets. All ten cache scopes published at 02:17 with
+zero latest-run projection gaps. Three old November 10 projection gaps remain.
+Retained slots remain 179 complete and 13 known partial out of 192, with zero
+expired absent/running or current absent slots. Expired metadata is not inferred
+to be missing collection or repaired history.
+
+All six schedules are active. National retention returned HTTP 200 at 02:20,
+02:30 and 02:40; raw, metadata and local-history backlogs are zero. Accounted
+archive usage is 746,629,920 / 900,000,000 bytes. City collection remains complete
+and the original research endpoint unchanged. The compact index is valid/ready
+at 26,165,248 bytes (+98,304); size alone does not establish bloat. Both protected
+reads succeeded without lock waits. Available RAM is 166,240,256 bytes, occupied
+swap 405,753,856 bytes, and loads 0.16/0.18/0.26. Across about 69 minutes,
+swap-in/out counters increased 1,586,142 / 1,709,845; nvme0n1/nvme1n1 busy counters
+increased 73.130 / 440.635 seconds. Memory pressure remains observable while
+scheduled service and bounded reads continue to pass.
+
+`followup-1116-0240.json` records passing assertions. No new repair was indicated
+or attempted; incident repair count remains one. Retries were automatic, not
+agent repairs; prior incident recovery archive read-back remains verified.
+This check made no provider requests, app launches, billing changes, raw rewrites
+or research mutations. Coverage describes the fixed inventory and reported prices,
+not verified pump truth.
