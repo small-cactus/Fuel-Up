@@ -1018,3 +1018,42 @@ scheduled behavior, not an agent intervention. Prior incident recovery archive
 read-back remains verified. No provider request, app launch, billing change,
 raw rewrite or research mutation was performed by this check. Coverage describes
 the fixed inventory and reported prices, not verified pump truth.
+
+## November 16, 00:31 UTC: complete sweep and midnight retention rollover
+
+Run 63268 (00:00) completed all 72 batches at 00:16:03 on the correct fixed
+59/9/4 regional routes, with 141,660 inventory observations and 85,406
+reported-price stations. Its 73 requests / 143,660 lookups stayed within the
+92 / 161,660 budgets; shared transient cooldown expired at 00:05:44. Scheduled
+projection repair completed jobs 4551088 and 4551089 on first attempts at 00:17
+and 00:18. All ten cache scopes published at 00:19 with zero latest-run projection
+gaps. The three old November 10 projection gaps remain. Retained operational
+slots remain 179 complete and 13 known partial out of 192, with zero expired
+absent/running or current absent slots. Expired metadata is not inferred to be
+missing collection or repaired history.
+
+All six schedules are active. National retention returned HTTP 200 at 00:10,
+00:20 and 00:30; raw and operational metadata backlogs are zero. Local daily
+history has 64,532 rows beyond the newly advanced UTC retention threshold.
+A separate protected read verified the live 20,000-row SKIP LOCKED prune limit
+and successful 00:17 cron completion at 00:17:05. This is a bounded midnight
+cleanup backlog, not a failed schedule; subsequent hourly passes remain due.
+No manual deletion or schedule change was made. Accounted archive usage is
+747,035,556 / 900,000,000 bytes. City collection remains complete and the original
+research endpoint unchanged.
+
+The compact index is valid/ready at 25,993,216 bytes (+106,496); size alone does
+not establish bloat. All three protected reads succeeded without observed lock
+waits. Available RAM is 163,368,960 bytes, occupied swap 404,987,904 bytes, and
+loads are 0.26/0.13/0.25. Across about 56.5 minutes, swap-in/out counters increased
+1,804,409 / 1,874,791; nvme0n1/nvme1n1 busy counters increased 87.308 / 479.060
+seconds. Memory pressure remains observable while scheduled service and bounded
+reads continue to pass.
+
+`followup-1116-0031.json` records passing checks, including the nonzero local
+history backlog and successful bounded prune. This check attempted no repair;
+incident repair count remains one. Retry and projection repair were automatic
+scheduled behavior, not agent interventions. Prior incident recovery archive
+read-back remains verified. No provider request, app launch, billing change,
+raw rewrite or research mutation was performed by this check. Coverage describes
+the fixed inventory and reported prices, not verified pump truth.
