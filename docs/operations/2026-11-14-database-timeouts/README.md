@@ -2224,3 +2224,38 @@ incident repair count remains one. Prior recovery archive read-back remains
 verified; no additional raw object was fetched. No provider requests, app launches,
 billing changes, raw rewrites or research mutations were performed. Fixed-inventory
 coverage and reported prices are not verified pump truth.
+
+
+## November 17 10:06 UTC follow-up
+
+Scheduled run 65248 (09:00) completed all 72 batches at 09:14:34, observing
+141,660 fixed-inventory stations with 89,577 priced, using 72 requests / 141,660
+lookups. All ten cache scopes published at 09:15; latest-complete projection
+backlog is zero. Three old November 10 gaps remain unchanged. Run 65308 (10:00)
+is running with 31/72 successful batches in status, then 33 requests / 63,960
+lookups in the supplemental read, within budgets and its 11:00 deadline. The
+retained 192-slot window has 187 complete, four known partial and one running hour;
+expired absent/running and current absent counts remain zero. Incomplete batches
+are not complete sweeps; metadata outside retention is not inferred missing.
+
+All six schedules and three fixed regional routes remain active with zero
+wrong-region jobs. Shared cooldown expired; city collection remains complete and
+research endpoints unchanged. Retention returned HTTP 200 at 09:40, 09:50 and
+10:00; the 10:00 pass removed 72 eligible objects and one operational metadata
+hour. Raw, operational metadata and local-history backlogs are zero. Accounted
+archive usage is 740,545,621 / 900,000,000 bytes during collection. The compact
+reference index remains valid/ready at 27,721,728 bytes, unchanged; size alone
+does not prove bloat.
+
+Protected reads and host metrics passed. No lock waits or idle-in-transaction
+sessions were present; background checkpoint pacing appeared. Available RAM is
+105,361,408 bytes, occupied swap 508,067,840 bytes, and loads are 0.76/0.45/0.24.
+Since the preceding check, swap-in/out increased 1,018,038 / 1,205,934 and
+nvme0n1/nvme1n1 busy counters increased 52.671 / 329.124 seconds. Paging pressure
+persists; successful scheduled collection does not prove permanent recovery.
+
+`followup-1117-1006.json` records passing assertions. No agent repair was needed;
+incident repair count remains one. Prior recovery archive read-back remains
+verified; this check fetched no additional raw object. No provider requests, app
+launches, billing changes, raw rewrites or research mutations were performed.
+Fixed-inventory coverage and reported prices are not verified pump truth.
