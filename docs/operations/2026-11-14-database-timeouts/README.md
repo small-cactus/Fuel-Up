@@ -1964,3 +1964,43 @@ remains verified; this check did not fetch another raw object. No provider
 requests, app launches, billing changes, raw rewrites or research mutations were
 performed by this check. Fixed-inventory coverage and reported prices are not
 verified pump truth.
+
+## November 17, 03:09 UTC: 02:00 complete and midnight history cleanup cleared
+
+Run 64828 (02:00) completed 72/72 batches at 02:16:06 on the fixed 59/9/4
+regional routes, observing 141,660 inventory stations and 88,871 with reported
+prices. It used 74 requests / 145,660 lookups within 92 / 161,660 budgets.
+All ten cache scopes published at 02:17; latest-complete-run projection backlog
+is zero. Three old November 10 projection gaps remain unchanged.
+
+Run 64888 (03:00) is running: 43/72 successful batches in the status snapshot,
+then 45 requests / 87,960 lookups in the budget read. Its 04:00 deadline remains
+ahead. The retained 192-slot window has 187 complete, four known partial and one
+running hour, with zero expired absent/running or current absent slots. Current
+incomplete batches are not a complete sweep or missing hour. Metadata beyond
+retention is not inferred to represent missing collection.
+
+All six schedules and three routes remain active with no wrong-region jobs.
+Shared cooldown is expired; city collection is complete and the original research
+endpoint unchanged. National retention returned HTTP 200 at 02:40, 02:50 and
+03:00; the latest pass removed 72 eligible objects and one operational metadata
+hour. Raw, operational metadata and local-history backlogs are now zero.
+The 02:17 local-history cron succeeded in about 1.5 seconds; oldest retained day
+is November 10. The midnight history backlog cleared without monitor intervention;
+these snapshots do not assign every removed row to a single cron invocation.
+
+Accounted archive usage is 741,316,910 / 900,000,000 bytes during the incomplete
+sweep. The compact index remains valid/ready at 27,721,728 bytes, unchanged;
+size alone does not establish bloat. Its definition was verified November 16
+at 11:44. Both protected reads passed without lock waits. Available RAM is
+152,764,416 bytes, occupied swap 549,703,680 bytes, and loads are 0.61/0.57/0.35.
+Across about 63.4 minutes, swap-in/out counters increased 1,776,388 / 1,817,315;
+nvme0n1/nvme1n1 busy counters increased 97.086 / 490.532 seconds. Paging pressure
+persists despite successful scheduled service and bounded reads.
+
+`followup-1117-0309.json` records passing assertions and local-history cron
+results. Retention recovery was automatic, not an agent repair; incident repair
+count remains one. Prior incident recovery archive read-back remains verified;
+this check did not fetch another raw object. No provider requests, app launches,
+billing changes, raw rewrites or research mutations were performed by this check.
+Fixed-inventory coverage and reported prices are not verified pump truth.
