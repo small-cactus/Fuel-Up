@@ -2259,3 +2259,43 @@ incident repair count remains one. Prior recovery archive read-back remains
 verified; this check fetched no additional raw object. No provider requests, app
 launches, billing changes, raw rewrites or research mutations were performed.
 Fixed-inventory coverage and reported prices are not verified pump truth.
+
+
+## November 17 11:14 UTC follow-up
+
+Scheduled runs 65308 (10:00) and 65368 (11:00) both completed all 72 batches,
+using 72 requests / 141,660 lookups each. The 11:00 sweep completed at 11:14:37,
+observing 141,660 fixed-inventory stations with 89,657 priced. The initial snapshot
+caught the cache before its next scheduled publication; a scoped follow-up verified
+all ten scopes published run 65368 at 11:15:00. This was normal scheduled publication,
+not an agent repair. Latest-complete projection backlog is zero; three old November
+10 gaps remain unchanged. The retained 192-slot window contains 188 complete and
+four known partial hours, with zero expired absent/running or current absent slots.
+No new operational gaps were found; older expired metadata is not inferred missing.
+
+All six schedules and three fixed regional routes remain active with zero
+wrong-region jobs. Shared cooldown is expired, city collection remains complete,
+and research endpoints are unchanged. Retention returned HTTP 200 at 10:50, 11:00
+and 11:10; the 11:00 pass removed 72 eligible objects and one operational metadata
+hour. Raw, metadata and local-history backlogs are zero. Accounted archive usage
+is 742,623,280 / 900,000,000 bytes after the complete sweep.
+
+The compact reference index remains valid/ready at 27,721,728 bytes. Its definition
+was rechecked: the four reference columns, no INCLUDE clause, default options
+(deduplication not disabled), 3,384 pages. Table statistics report 1,147 dead tuples,
+with autovacuum at 11:13:09 and autoanalyze at 11:09:18; tuple statistics are
+estimates. Index size is unchanged and does not alone prove bloat.
+
+Protected reads and host metrics passed with no lock waits or idle-in-transaction
+sessions. Available RAM is 142,479,360 bytes, occupied swap 470,708,224 bytes, and
+loads are 1.01/0.73/0.47. Since the preceding check, swap-in/out increased
+1,836,077 / 2,229,602 and nvme0n1/nvme1n1 busy counters increased 100.478 / 539.922
+seconds. Paging pressure persists despite successful scheduled service; permanent
+resource recovery is not claimed.
+
+`followup-1117-1114.json` preserves the initial cache snapshot and its verified
+scheduled advance, index diagnostics and passing assertions. No agent repair was
+needed; incident repair count remains one. Prior recovery archive read-back remains
+verified; no additional raw object was fetched. No provider requests, app launches,
+billing changes, raw rewrites or research mutations were performed. Fixed-inventory
+coverage and reported prices are not verified pump truth.
