@@ -2657,3 +2657,39 @@ archive read-back remains verified; no additional raw object was fetched. No
 provider requests, app launches, billing changes, raw rewrites or research
 mutations were performed. Fixed-inventory coverage and reported prices are not
 verified pump truth.
+
+
+## November 17 22:24 UTC follow-up
+
+Scheduled run 66028 (22:00) completed all 72 batches at 22:14:37, observing
+141,660 fixed-inventory stations with 91,748 priced. Both 21:00 and 22:00 sweeps
+used 72 requests / 141,660 lookups, within budgets. Scheduled projection repair
+completed job 4749776 on its first attempt at 22:15:06; all ten cache scopes
+published the latest run at 22:16. Latest-complete projection backlog is zero;
+three old November 10 gaps remain unchanged. The retained 192-slot window has
+189 complete and three known partial hours, with zero expired absent/running or
+current absent slots. No new gaps were found; metadata outside retention is not
+inferred missing collection.
+
+All six schedules and three fixed regional routes remain active with zero
+wrong-region jobs. The earlier shared cooldown remains expired. City collection
+is complete and research endpoints unchanged. Retention returned HTTP 200 at
+22:00, 22:10 and 22:20; the 22:00 pass removed 72 eligible objects and one
+operational metadata hour. Raw, metadata and local-history backlogs are zero.
+Accounted archive usage is 743,099,461 / 900,000,000 bytes after the complete sweep.
+The compact reference index remains valid/ready at 27,828,224 bytes, unchanged;
+size alone does not establish bloat. Its compact definition was verified at 11:15.
+
+Protected reads and host metrics passed with no lock waits or idle-in-transaction
+sessions. Available RAM is 198,033,408 bytes, occupied swap 435,367,936 bytes, and
+loads are 0.30/0.32/0.35. Since the preceding check, swap-in/out increased
+1,624,961 / 1,706,981 and nvme0n1/nvme1n1 busy counters increased 87.651 / 457.311
+seconds. Paging pressure persists despite successful scheduled service; permanent
+resource recovery is not claimed.
+
+`followup-1117-2224.json` records passing assertions. Projection recovery was
+automatic, not an agent repair; incident repair count remains one. Prior recovery
+archive read-back remains verified; no additional raw object was fetched. No
+provider requests, app launches, billing changes, raw rewrites or research
+mutations were performed. Fixed-inventory coverage and reported prices are not
+verified pump truth.
