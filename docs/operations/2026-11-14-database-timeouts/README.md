@@ -1921,3 +1921,46 @@ read-back remains verified; this check did not fetch another raw object. No
 provider requests, app launches, billing changes, raw rewrites or research
 mutations were performed by this check. Fixed-inventory coverage and reported
 prices are not verified pump truth.
+
+## November 17, 02:05 UTC: 01:00 complete and rollover backlog nearly cleared
+
+Run 64768 (01:00) completed 72/72 batches at 01:17:36 on the fixed 59/9/4
+regional routes, observing 141,660 inventory stations and 88,906 with reported
+prices. It used 73 requests / 143,660 lookups within 92 / 161,660 budgets,
+following the previously recorded automatic HTTP 502 retry. All ten cache scopes
+published at 01:18. Latest-complete-run projection backlog is zero; three old
+November 10 projection gaps remain unchanged.
+
+Run 64828 (02:00) is running: 25/72 successful batches in the status snapshot,
+then 28 requests / 53,960 lookups in the budget read. Its 03:00 deadline remains
+ahead. The retained 192-slot window contains 187 complete, four known partial
+and one running hour, with zero expired absent/running or current absent slots.
+The current batch count is not a complete sweep or a missing hour. Metadata
+beyond retention is not inferred to represent missing collection.
+
+All six schedules and three routes remain active with no wrong-region jobs.
+Shared cooldown is expired; city collection remains complete and the original
+research endpoint unchanged. National retention returned HTTP 200 at 01:40,
+01:50 and 02:00; the latest pass removed 72 eligible objects and one operational
+metadata hour. Raw and operational metadata backlogs are zero. Local-history
+rows past the day threshold declined from 21,111 to 1,060 without monitor
+intervention. The 01:17 local-history cron succeeded in about 4.2 seconds;
+02:17 is not yet due. Cleanup is progressing, not yet claimed complete, and the
+entire decline is not attributed to that single bounded invocation.
+
+Accounted archive usage is 740,564,626 / 900,000,000 bytes during the incomplete
+sweep. The compact index remains valid/ready at 27,721,728 bytes, unchanged;
+size alone does not establish bloat. Its definition was verified November 16
+at 11:44. Both protected reads passed without lock waits. Available RAM is
+102,318,080 bytes, occupied swap 482,537,472 bytes, and loads are 0.50/0.43/0.24.
+Across about 59.1 minutes, swap-in/out counters increased 1,629,465 / 1,667,450;
+nvme0n1/nvme1n1 busy counters increased 84.087 / 443.500 seconds. Paging pressure
+persists despite successful scheduled service and bounded reads.
+
+`followup-1117-0205.json` records passing assertions and local-history cron
+results. Recovery and retention progress were automatic, not agent repairs;
+incident repair count remains one. Prior incident recovery archive read-back
+remains verified; this check did not fetch another raw object. No provider
+requests, app launches, billing changes, raw rewrites or research mutations were
+performed by this check. Fixed-inventory coverage and reported prices are not
+verified pump truth.
