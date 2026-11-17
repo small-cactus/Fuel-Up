@@ -2405,3 +2405,39 @@ read-back remains verified; no additional raw object was fetched. No provider
 requests, app launches, billing changes, raw rewrites or research mutations were
 performed by this check. Fixed-inventory coverage and reported prices are not
 verified pump truth.
+
+
+## November 17 15:18 UTC follow-up
+
+Scheduled run 65608 (15:00) completed all 72 batches at 15:14:40, observing
+141,660 fixed-inventory stations with 90,449 priced, using 72 requests / 141,660
+lookups. The prior 14:00 sweep used 73 / 143,660; both are within budgets. All ten
+cache scopes published the latest run at 15:15; latest-complete projection backlog
+is zero. Three old November 10 projection gaps remain unchanged. The retained
+192-slot window now has 189 complete and three known partial hours, with zero
+expired absent/running or current absent slots. The falling partial count reflects
+the rolling retention window, not repaired historical collection. No new gaps
+were found; metadata outside retention is not inferred missing.
+
+All six schedules and three fixed regional routes remain active with zero
+wrong-region jobs. The earlier GraphQL cooldown remains expired; city collection
+is complete and research endpoints unchanged. Retention returned HTTP 200 at
+14:50, 15:00 and 15:10; the 15:00 pass removed 72 eligible objects and one
+operational metadata hour. Raw, metadata and local-history backlogs are zero.
+Accounted archive usage is 742,626,912 / 900,000,000 bytes after the complete sweep.
+The compact reference index remains valid/ready at 27,762,688 bytes, up one
+8,192-byte page since the preceding check; this alone does not establish bloat.
+Its compact definition was verified at 11:15.
+
+Protected reads and host metrics passed, with no lock waits or idle-in-transaction
+sessions; background checkpoint pacing appeared. Available RAM is 147,443,712
+bytes, occupied swap 412,364,800 bytes, and loads are 0.41/0.44/0.36. Since the
+preceding check, swap-in/out increased 1,380,129 / 1,607,912 and nvme0n1/nvme1n1
+busy counters increased 83.583 / 421.038 seconds. Paging pressure persists despite
+successful scheduled service; permanent resource recovery is not claimed.
+
+`followup-1117-1518.json` records passing assertions. No agent repair was needed;
+incident repair count remains one. Prior recovery archive read-back remains
+verified; no additional raw object was fetched. No provider requests, app launches,
+billing changes, raw rewrites or research mutations were performed. Fixed-inventory
+coverage and reported prices are not verified pump truth.
