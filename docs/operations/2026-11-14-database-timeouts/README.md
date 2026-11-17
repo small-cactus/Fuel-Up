@@ -2004,3 +2004,44 @@ count remains one. Prior incident recovery archive read-back remains verified;
 this check did not fetch another raw object. No provider requests, app launches,
 billing changes, raw rewrites or research mutations were performed by this check.
 Fixed-inventory coverage and reported prices are not verified pump truth.
+
+## November 17, 04:11 UTC: 03:00 complete and current sweep progressing
+
+Run 64888 (03:00) completed 72/72 batches at 03:14:46 on the fixed 59/9/4
+regional routes, observing 141,660 inventory stations and 89,135 with reported
+prices. It used 72 requests / 141,660 lookups within 92 / 161,660 budgets.
+Scheduled projection repair completed job 4667756 on its first attempt at
+03:15:07. All ten cache scopes published at 03:16; latest-complete-run projection
+backlog is zero. Three old November 10 projection gaps remain unchanged.
+
+Run 64948 (04:00) is running: 53/72 successful batches in the status snapshot,
+then 56 requests / 109,960 lookups in the budget read. Its 05:00 deadline remains
+ahead. An HTTP 503 at 04:05:24 imposed a five-second shared cooldown, now expired;
+collection progressed automatically. The retained 192-slot window contains 187
+complete, four known partial and one running hour, with zero expired absent/
+running or current absent slots. The current batch count is not a complete sweep
+or missing hour. Metadata beyond retention is not inferred as missing collection.
+
+All six schedules and three routes remain active with no wrong-region jobs.
+City collection is complete and the original research endpoint unchanged.
+National retention returned HTTP 200 at 03:50, 04:00 and 04:10; the 04:00 pass
+removed 72 eligible objects and one operational metadata hour. Raw, operational
+metadata and local-history backlogs remain zero. Accounted archive usage is
+741,844,130 / 900,000,000 bytes during the incomplete sweep. The compact index
+remains valid/ready at 27,721,728 bytes, unchanged; size alone does not establish
+bloat. Its definition was verified November 16 at 11:44.
+
+Both protected reads passed without lock waits; one active DataFileRead wait
+and background checkpoint pacing were observed. Available RAM is 96,067,584
+bytes, occupied swap 531,804,160 bytes, and loads are 0.84/0.76/0.54 during
+collection. Across about 62.5 minutes, swap-in/out counters increased
+1,891,950 / 1,919,480; nvme0n1/nvme1n1 busy counters increased 102.214 / 531.599
+seconds. Paging pressure persists despite successful scheduled service and
+bounded reads; no permanent resource recovery is claimed.
+
+`followup-1117-0411.json` records passing assertions. Retry and projection
+recovery were automatic, not agent repairs; incident repair count remains one.
+Prior incident recovery archive read-back remains verified; this check did not
+fetch another raw object. No provider requests, app launches, billing changes,
+raw rewrites or research mutations were performed by this check. Fixed-inventory
+coverage and reported prices are not verified pump truth.
