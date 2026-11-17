@@ -2554,3 +2554,37 @@ recovery archive read-back remains verified; no additional raw object was fetche
 No provider requests, app launches, billing changes, raw rewrites or research
 mutations were performed by this check. Fixed-inventory coverage and reported
 prices are not verified pump truth.
+
+
+## November 17 19:22 UTC follow-up
+
+Scheduled run 65848 (19:00) completed all 72 batches at 19:14:45, observing
+141,660 fixed-inventory stations with 90,667 priced, using 72 requests / 141,660
+lookups. The preceding 18:00 sweep used 73 / 143,660; both remain within budgets.
+All ten cache scopes published the latest run at 19:15; latest-complete projection
+backlog is zero. Three old November 10 gaps remain unchanged. The retained
+192-slot window contains 189 complete and three known partial hours, with zero
+expired absent/running or current absent slots. No new gaps were found; metadata
+outside retention is not inferred missing collection.
+
+All six schedules and three fixed regional routes remain active with zero
+wrong-region jobs. The earlier shared cooldown remains expired. City collection
+is complete and research endpoints unchanged. Retention returned HTTP 200 at
+19:00, 19:10 and 19:20; the 19:00 pass removed 72 eligible objects and one
+operational metadata hour. Raw, metadata and local-history backlogs are zero.
+Accounted archive usage is 742,803,868 / 900,000,000 bytes after the complete sweep.
+The compact reference index remains valid/ready at 27,828,224 bytes, unchanged;
+size alone does not establish bloat. Its compact definition was verified at 11:15.
+
+Protected reads and host metrics passed with no lock waits or idle-in-transaction
+sessions. Available RAM is 222,879,744 bytes, occupied swap 516,956,160 bytes, and
+loads are 0.32/0.21/0.26. Since the preceding check, swap-in/out increased
+1,354,052 / 1,632,281 and nvme0n1/nvme1n1 busy counters increased 84.308 / 411.516
+seconds. Paging pressure persists despite successful scheduled service; permanent
+resource recovery is not claimed.
+
+`followup-1117-1922.json` records passing assertions. No agent repair was needed;
+incident repair count remains one. Prior recovery archive read-back remains
+verified; no additional raw object was fetched. No provider requests, app launches,
+billing changes, raw rewrites or research mutations were performed. Fixed-inventory
+coverage and reported prices are not verified pump truth.
