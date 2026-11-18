@@ -1,0 +1,275 @@
+{
+  "status": {
+    "statusError": "STATEMENT_TIMEOUT",
+    "observedAt": "2026-11-18T01:23:39.821Z",
+    "partial": true,
+    "providerRequests": 0,
+    "host": {
+      "ok": false,
+      "error": "CLIENT_TIMEOUT"
+    },
+    "database": {
+      "ok": false,
+      "error": "STATEMENT_TIMEOUT"
+    }
+  },
+  "supplemental": {
+    "observedAt": "2026-11-18T01:23:15.316Z",
+    "partial": true,
+    "providerRequests": 0,
+    "host": {
+      "ok": false,
+      "error": "CLIENT_TIMEOUT"
+    },
+    "database": {
+      "ok": false,
+      "error": "DATABASE_CONNECTION_TIMEOUT"
+    }
+  },
+  "smallRuns": {
+    "ok": true,
+    "rows": [
+      {
+        "completed_at": null,
+        "deadline_at": "2026-11-18 02:00:00+00",
+        "id": 66208,
+        "observed_at": "2026-11-18 01:24:33.02344+00",
+        "slot_at": "2026-11-18 01:00:00+00",
+        "status": "running"
+      },
+      {
+        "completed_at": "2026-11-18 00:16:24.862401+00",
+        "deadline_at": "2026-11-18 01:00:00+00",
+        "id": 66148,
+        "observed_at": "2026-11-18 01:24:33.02344+00",
+        "slot_at": "2026-11-18 00:00:00+00",
+        "status": "complete"
+      },
+      {
+        "completed_at": "2026-11-17 23:14:35.939066+00",
+        "deadline_at": "2026-11-18 00:00:00+00",
+        "id": 66088,
+        "observed_at": "2026-11-18 01:24:33.02344+00",
+        "slot_at": "2026-11-17 23:00:00+00",
+        "status": "complete"
+      }
+    ]
+  },
+  "probe": {
+    "observedAt": "2026-11-18T01:26:50.468Z",
+    "partial": true,
+    "providerRequests": 0,
+    "host": {
+      "ok": false,
+      "error": "CLIENT_TIMEOUT"
+    },
+    "database": {
+      "ok": false,
+      "error": "STATEMENT_TIMEOUT"
+    }
+  },
+  "jobs": {
+    "ok": true,
+    "rows": [
+      {
+        "attempts": 16,
+        "count": 16,
+        "last_observed": "2026-11-18 01:14:38.404+00",
+        "status": "succeeded"
+      },
+      {
+        "attempts": 0,
+        "count": 56,
+        "last_observed": null,
+        "status": "queued"
+      }
+    ]
+  },
+  "waits": {
+    "ok": true,
+    "rows": [
+      {
+        "backend_type": "walwriter",
+        "count": 1,
+        "state": null,
+        "wait_event": "WalWriterMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "backend_type": "checkpointer",
+        "count": 1,
+        "state": null,
+        "wait_event": "CheckpointerMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "backend_type": "client backend",
+        "count": 14,
+        "state": "idle",
+        "wait_event": "ClientRead",
+        "wait_event_type": "Client"
+      },
+      {
+        "backend_type": "background writer",
+        "count": 1,
+        "state": null,
+        "wait_event": "BgwriterHibernate",
+        "wait_event_type": "Activity"
+      },
+      {
+        "backend_type": "pg_net 0.19.5 worker",
+        "count": 1,
+        "state": null,
+        "wait_event": "Extension",
+        "wait_event_type": "Extension"
+      },
+      {
+        "backend_type": "pg_cron launcher",
+        "count": 1,
+        "state": null,
+        "wait_event": null,
+        "wait_event_type": null
+      },
+      {
+        "backend_type": "autovacuum launcher",
+        "count": 1,
+        "state": null,
+        "wait_event": "AutovacuumMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "backend_type": "client backend",
+        "count": 2,
+        "state": "active",
+        "wait_event": null,
+        "wait_event_type": null
+      },
+      {
+        "backend_type": "archiver",
+        "count": 1,
+        "state": null,
+        "wait_event": "ArchiveCommand",
+        "wait_event_type": "IPC"
+      },
+      {
+        "backend_type": "logical replication launcher",
+        "count": 1,
+        "state": null,
+        "wait_event": "LogicalLauncherMain",
+        "wait_event_type": "Activity"
+      }
+    ]
+  },
+  "config": {
+    "ok": true,
+    "rows": [
+      {
+        "config": {
+          "approved_lookups_per_hour": 161660,
+          "archive_budget_bytes": 900000000,
+          "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+          "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+          "continuous": true,
+          "enabled": true,
+          "ends_at": "2026-10-07T18:19:00+00:00",
+          "halt_reason": "UPSTREAM_TRANSIENT_GRAPHQL",
+          "id": true,
+          "last_dispatch_at": "2026-11-18T01:28:05.306265+00:00",
+          "last_request_at": "2026-11-18T01:14:25.513698+00:00",
+          "max_requests_per_hour": 92,
+          "operational_raw_hours": 48,
+          "operational_starts_at": "2026-10-07T19:00:00+00:00",
+          "provider_backoff_until": "2026-11-18T00:09:37.427435+00:00",
+          "request_interval_seconds": 10,
+          "starts_at": "2026-09-30T22:00:00+00:00"
+        },
+        "events": [
+          {
+            "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+            "created_at": "2026-11-18T01:14:47.926249+00:00",
+            "retry_after_seconds": 0
+          },
+          {
+            "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+            "created_at": "2026-11-18T01:14:22.89913+00:00",
+            "retry_after_seconds": 0
+          },
+          {
+            "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+            "created_at": "2026-11-18T01:01:52.254003+00:00",
+            "retry_after_seconds": 0
+          },
+          {
+            "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+            "created_at": "2026-11-18T01:01:41.587926+00:00",
+            "retry_after_seconds": 0
+          },
+          {
+            "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+            "created_at": "2026-11-18T01:01:26.334167+00:00",
+            "retry_after_seconds": 0
+          },
+          {
+            "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+            "created_at": "2026-11-18T01:01:13.377052+00:00",
+            "retry_after_seconds": 0
+          },
+          {
+            "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+            "created_at": "2026-11-18T01:00:37.303362+00:00",
+            "retry_after_seconds": 0
+          },
+          {
+            "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+            "created_at": "2026-11-18T00:12:13.25391+00:00",
+            "retry_after_seconds": 0
+          }
+        ],
+        "indexes": [
+          {
+            "bytes": 27828224,
+            "definition": "CREATE INDEX fuel_station_retention_reference_compact ON public.fuel_station_latest USING btree (job_id, observation_catalog_id, observation_ordinal, observed_at)",
+            "indexrelname": "fuel_station_retention_reference_compact"
+          }
+        ],
+        "observed_at": "2026-11-18 01:28:56.513088+00",
+        "started": "2026-11-14 10:52:34.105078+00"
+      }
+    ]
+  },
+  "dashboard": {
+    "observedAt": "2026-11-18T01:28:00Z",
+    "status": "Unhealthy",
+    "memoryUsageLabel": "397.17 MB",
+    "memoryCommitmentLabel": "1.34 GB",
+    "memorySeverity": "SEVERE",
+    "cpuUsageLabel": "9.69%",
+    "chartLatestLabel": "2026-11-18T01:15:00Z",
+    "unavailableCharts": [
+      "network",
+      "disk IOPS",
+      "disk throughput",
+      "connections",
+      "disk usage"
+    ],
+    "logs": [
+      "national dispatch and Trends cron startup timeouts",
+      "projection repair cron startup timeout",
+      "statement timeouts",
+      "SSL connection resets",
+      "national regional job claim HTTP 500",
+      "transaction ShareLock acquired after 14339.897 ms",
+      "pg_stat_statements metadata read 11425.689 ms"
+    ],
+    "limitation": "Dashboard labels are not independent interval resource measurements; quota grace notice is not an active restriction."
+  },
+  "repair": {
+    "action": "full project restart through Supabase dashboard",
+    "acceptedAtApprox": "2026-11-18T01:29:15Z",
+    "observedState": "Restarting; project offline while restart proceeds",
+    "attemptsThisIncident": 1,
+    "verifiedRecovery": false,
+    "reason": "Broad service degradation and stalled scheduled collection; same recovery path verified on November 14. No identified query blocker in protected activity snapshot. Compact retention index unchanged at 27828224 bytes, four keys without INCLUDE."
+  },
+  "monitorProviderRequests": 0
+}

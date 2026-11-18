@@ -1,0 +1,92 @@
+{
+  "verifiedAt": "2026-11-18T01:36:56.734Z",
+  "verified": true,
+  "providerRequests": 0,
+  "runId": 66208,
+  "slotAt": "2026-11-18T01:00:00+00:00",
+  "runStatusAtSelection": "running",
+  "batches": [
+    {
+      "jobId": 4762746,
+      "objectPath": "66208/4762746/c1c3b385-7af6-4d53-af35-a09530951402.json.gz",
+      "sha256": "69918733308572043972127fef10c0e80a9f25abab9367c013583efbcb19b144",
+      "stations": 2000,
+      "priced": 1086,
+      "bytes": 42392,
+      "executionRegion": "us-east-1",
+      "startedAt": "2026-11-18T01:36:42.465Z",
+      "observedAt": "2026-11-18T01:36:43.980Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-11-18T01:36:43.930Z",
+        "elapsedMs": 1465,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a5c33ee96bf83ff2-IAD",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Wed, 18 Nov 2026 01:36:43 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 723050,
+        "fullElapsedMs": 1503
+      }
+    },
+    {
+      "jobId": 4762801,
+      "objectPath": "66208/4762801/1b2499cf-03d9-45a7-a4fb-a984affa1d00.json.gz",
+      "sha256": "b40fc7f816d9a471ccd74e0ad005551b86ae04e4cbc8110cd4c1e1f8156d821d",
+      "stations": 1747,
+      "priced": 1314,
+      "bytes": 59348,
+      "executionRegion": "us-west-1",
+      "startedAt": "2026-11-18T01:35:44.435Z",
+      "observedAt": "2026-11-18T01:35:46.817Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-11-18T01:35:46.366Z",
+        "elapsedMs": 1931,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a5c33d7f0c11efc2-PDX",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Wed, 18 Nov 2026 01:35:46 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 783836,
+        "fullElapsedMs": 2365
+      }
+    },
+    {
+      "jobId": 4762805,
+      "objectPath": "66208/4762805/12e5c596-da27-4c0b-b95a-593120bfa7e4.json.gz",
+      "sha256": "bbe834ecee70b928c83cadb231b2c950d68f470f983b29b118c5e5ef41c77efe",
+      "stations": 213,
+      "priced": 153,
+      "bytes": 6484,
+      "executionRegion": "us-west-2",
+      "startedAt": "2026-11-18T01:00:39.196Z",
+      "observedAt": "2026-11-18T01:00:39.696Z",
+      "responseEvidence": {
+        "status": 200,
+        "observedAt": "2026-11-18T01:00:39.518Z",
+        "elapsedMs": 322,
+        "headers": {
+          "age": "0",
+          "cf-ray": "a5c30a18fa6ccb5f-PDX",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Wed, 18 Nov 2026 01:00:39 GMT",
+          "server": "cloudflare",
+          "via": "1.1 varnish-v4",
+          "x-cache": "MISS"
+        },
+        "decodedBodyBytes": 89139,
+        "fullElapsedMs": 498
+      }
+    }
+  ],
+  "limitation": "Three immutable regional samples; not all 72 objects and not verified pump truth. Compare each observation timestamp with restart time; pre-restart batches are not repair effects."
+}

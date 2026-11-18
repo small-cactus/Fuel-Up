@@ -1,0 +1,49 @@
+[
+  {
+    "jobs": [
+      {
+        "attempts": 9,
+        "count": 9,
+        "execution_region": "us-west-1",
+        "latest": "2026-11-18T01:35:46.817+00:00",
+        "status": "succeeded"
+      },
+      {
+        "attempts": 0,
+        "count": 51,
+        "execution_region": "us-east-1",
+        "latest": null,
+        "status": "queued"
+      },
+      {
+        "attempts": 4,
+        "count": 4,
+        "execution_region": "us-west-2",
+        "latest": "2026-11-18T01:00:39.696+00:00",
+        "status": "succeeded"
+      },
+      {
+        "attempts": 8,
+        "count": 8,
+        "execution_region": "us-east-1",
+        "latest": "2026-11-18T01:14:38.404+00:00",
+        "status": "succeeded"
+      }
+    ],
+    "local_retention": [
+      {
+        "end_time": "2026-11-18T01:19:09.424034+00:00",
+        "return_message": "ERROR:  canceling statement due to statement timeout\nCONTEXT:  SQL statement \"delete from fuel_local_daily_prices where (station_id,day) in (\n  select station_id,day from fuel_local_daily_prices where day<(now() at time zone 'UTC')::date-7\n  order by day limit 20000 for update skip locked)\"\nPL/pgSQL function prune_fuel_local_daily_prices() line 4 at SQL statement\n",
+        "start_time": "2026-11-18T01:17:07.690731+00:00",
+        "status": "failed"
+      },
+      {
+        "end_time": "2026-11-18T00:17:05.078757+00:00",
+        "return_message": "1 row",
+        "start_time": "2026-11-18T00:17:00.272146+00:00",
+        "status": "succeeded"
+      }
+    ],
+    "observed_at": "2026-11-18 01:35:54.223541+00"
+  }
+]

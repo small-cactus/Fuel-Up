@@ -1,0 +1,24 @@
+{
+  "earlyProbe": {
+    "ok": false,
+    "error": "CLIENT_TIMEOUT"
+  },
+  "duringRestartDiagnostics": {
+    "observedAt": "2026-11-18T01:31:20.573Z",
+    "partial": true,
+    "providerRequests": 0,
+    "host": {
+      "ok": false,
+      "error": "CLIENT_TIMEOUT"
+    },
+    "database": {
+      "ok": false,
+      "error": "READ_FAILED"
+    }
+  },
+  "probe0133": {
+    "ok": false,
+    "error": "READ_FAILED"
+  },
+  "note": "Expected unavailability while dashboard still reports Restarting; no second restart."
+}
