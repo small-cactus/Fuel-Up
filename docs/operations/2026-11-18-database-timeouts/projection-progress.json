@@ -1,0 +1,226 @@
+[
+  {
+    "cache_run": 66148,
+    "missing_batches": 5,
+    "observed_at": "2026-11-18 01:48:32.214644+00",
+    "published_at": "2026-11-18 00:17:00.269972+00",
+    "repairs": [
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:47:04.286652+00:00",
+        "job_id": 4762738,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:48:04.286652+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:48:04.112295+00:00",
+        "job_id": 4762740,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:49:04.112295+00:00"
+      }
+    ]
+  },
+  {
+    "cache_run": 66148,
+    "missing_batches": 4,
+    "observed_at": "2026-11-18 01:49:46.848959+00",
+    "published_at": "2026-11-18 00:17:00.269972+00",
+    "repairs": [
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:47:04.286652+00:00",
+        "job_id": 4762738,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:48:04.286652+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:48:04.112295+00:00",
+        "job_id": 4762740,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:49:04.112295+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:49:04.573092+00:00",
+        "job_id": 4762741,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:50:04.573092+00:00"
+      }
+    ]
+  },
+  {
+    "cache_run": 66148,
+    "missing_batches": 2,
+    "observed_at": "2026-11-18 01:51:05.802027+00",
+    "published_at": "2026-11-18 00:17:00.269972+00",
+    "repairs": [
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:47:04.286652+00:00",
+        "job_id": 4762738,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:48:04.286652+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:48:04.112295+00:00",
+        "job_id": 4762740,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:49:04.112295+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:49:04.573092+00:00",
+        "job_id": 4762741,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:50:04.573092+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:50:07.014119+00:00",
+        "job_id": 4762785,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:51:07.014119+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:51:03.108251+00:00",
+        "job_id": 4762786,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:52:03.108251+00:00"
+      }
+    ]
+  },
+  {
+    "cache_run": 66148,
+    "missing_batches": 1,
+    "observed_at": "2026-11-18 01:52:24.704942+00",
+    "published_at": "2026-11-18 00:17:00.269972+00",
+    "repairs": [
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:47:04.286652+00:00",
+        "job_id": 4762738,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:48:04.286652+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:48:04.112295+00:00",
+        "job_id": 4762740,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:49:04.112295+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:49:04.573092+00:00",
+        "job_id": 4762741,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:50:04.573092+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:50:07.014119+00:00",
+        "job_id": 4762785,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:51:07.014119+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:51:03.108251+00:00",
+        "job_id": 4762786,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:52:03.108251+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:52:07.39671+00:00",
+        "job_id": 4762793,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:53:07.39671+00:00"
+      }
+    ]
+  },
+  {
+    "cache_run": 66148,
+    "missing_batches": 0,
+    "observed_at": "2026-11-18 01:53:31.867767+00",
+    "published_at": "2026-11-18 00:17:00.269972+00",
+    "repairs": [
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:47:04.286652+00:00",
+        "job_id": 4762738,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:48:04.286652+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:48:04.112295+00:00",
+        "job_id": 4762740,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:49:04.112295+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:49:04.573092+00:00",
+        "job_id": 4762741,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:50:04.573092+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:50:07.014119+00:00",
+        "job_id": 4762785,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:51:07.014119+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:51:03.108251+00:00",
+        "job_id": 4762786,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:52:03.108251+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:52:07.39671+00:00",
+        "job_id": 4762793,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:53:07.39671+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-18T01:53:05.566961+00:00",
+        "job_id": 4762794,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-18T01:54:05.566961+00:00"
+      }
+    ]
+  }
+]

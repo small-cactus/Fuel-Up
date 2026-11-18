@@ -1,0 +1,30 @@
+{
+  "allPassed": true,
+  "runId": 66208,
+  "requests": 72,
+  "lookups": 141660,
+  "monitorProviderRequests": 0,
+  "operatorRepairAttempts": 1,
+  "checked": [
+    "complete 72-batch fixed inventory sweep",
+    "59/9/4 fixed regional routes",
+    "six schedules active",
+    "hour slots including absent rows",
+    "request and lookup budgets",
+    "complete ten-scope cache",
+    "zero latest-run projection backlog",
+    "three unchanged historical projection gaps",
+    "scheduled retention success",
+    "archive capacity",
+    "valid compact index without INCLUDE",
+    "closed city campaign",
+    "ten app API combinations",
+    "three immutable regional archive samples"
+  ],
+  "limitations": [
+    "Three-object archive sample, not a full 72-object audit",
+    "Older expired metadata cannot establish a new all-time gap count",
+    "Fixed inventory provider observations are not verified pump truth",
+    "Memory pressure and local daily cleanup backlog remain reported separately"
+  ]
+}

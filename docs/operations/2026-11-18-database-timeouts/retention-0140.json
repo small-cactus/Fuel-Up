@@ -1,0 +1,35 @@
+[
+  {
+    "cron": [
+      {
+        "end_time": "2026-11-18T01:40:00.439185+00:00",
+        "return_message": "1 row",
+        "start_time": "2026-11-18T01:40:00.332167+00:00",
+        "status": "succeeded"
+      },
+      {
+        "end_time": "2026-11-18T01:30:55.867348+00:00",
+        "return_message": "job startup timeout",
+        "start_time": "2026-11-18T01:30:00.000096+00:00",
+        "status": "failed"
+      }
+    ],
+    "observed_at": "2026-11-18 01:41:55.773834+00",
+    "retention": [
+      {
+        "created": "2026-11-18T01:40:00.443734+00:00",
+        "result": {
+          "deferred_operational_hours": 0,
+          "detached_content_references": 0,
+          "marked_archives": 0,
+          "providerRequests": 0,
+          "removedObjects": 0,
+          "removed_operational_hours": 0,
+          "status": "idle"
+        },
+        "status_code": 200,
+        "timed_out": false
+      }
+    ]
+  }
+]

@@ -1,0 +1,247 @@
+[
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 24,
+        "latest": "2026-11-18T01:36:24.597+00:00",
+        "status": "succeeded"
+      },
+      {
+        "count": 48,
+        "latest": null,
+        "status": "queued"
+      }
+    ],
+    "observed_at": "2026-11-18 01:36:28.521415+00",
+    "run_status": "running"
+  },
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 29,
+        "latest": "2026-11-18T01:37:24.118+00:00",
+        "status": "succeeded"
+      },
+      {
+        "count": 43,
+        "latest": null,
+        "status": "queued"
+      }
+    ],
+    "observed_at": "2026-11-18 01:37:31.047756+00",
+    "run_status": "running"
+  },
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 34,
+        "latest": "2026-11-18T01:38:24.259+00:00",
+        "status": "succeeded"
+      },
+      {
+        "count": 37,
+        "latest": null,
+        "status": "queued"
+      },
+      {
+        "count": 1,
+        "latest": null,
+        "status": "running"
+      }
+    ],
+    "observed_at": "2026-11-18 01:38:33.678653+00",
+    "run_status": "running"
+  },
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 40,
+        "latest": "2026-11-18T01:39:34.398+00:00",
+        "status": "succeeded"
+      },
+      {
+        "count": 32,
+        "latest": null,
+        "status": "queued"
+      }
+    ],
+    "observed_at": "2026-11-18 01:39:36.477563+00",
+    "run_status": "running"
+  },
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 45,
+        "latest": "2026-11-18T01:40:36.538+00:00",
+        "status": "succeeded"
+      },
+      {
+        "count": 27,
+        "latest": null,
+        "status": "queued"
+      }
+    ],
+    "observed_at": "2026-11-18 01:40:38.883081+00",
+    "run_status": "running"
+  },
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 50,
+        "latest": "2026-11-18T01:41:34.525+00:00",
+        "status": "succeeded"
+      },
+      {
+        "count": 22,
+        "latest": null,
+        "status": "queued"
+      }
+    ],
+    "observed_at": "2026-11-18 01:41:41.231446+00",
+    "run_status": "running"
+  },
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 55,
+        "latest": "2026-11-18T01:42:34.394+00:00",
+        "status": "succeeded"
+      },
+      {
+        "count": 16,
+        "latest": null,
+        "status": "queued"
+      },
+      {
+        "count": 1,
+        "latest": null,
+        "status": "running"
+      }
+    ],
+    "observed_at": "2026-11-18 01:42:43.500646+00",
+    "run_status": "running"
+  },
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 61,
+        "latest": "2026-11-18T01:43:43.439+00:00",
+        "status": "succeeded"
+      },
+      {
+        "count": 11,
+        "latest": null,
+        "status": "queued"
+      }
+    ],
+    "observed_at": "2026-11-18 01:43:46.44151+00",
+    "run_status": "running"
+  },
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 65,
+        "latest": "2026-11-18T01:44:36.014+00:00",
+        "status": "succeeded"
+      },
+      {
+        "count": 6,
+        "latest": null,
+        "status": "queued"
+      },
+      {
+        "count": 1,
+        "latest": null,
+        "status": "running"
+      }
+    ],
+    "observed_at": "2026-11-18 01:44:49.361847+00",
+    "run_status": "running"
+  },
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 70,
+        "latest": "2026-11-18T01:45:42.951+00:00",
+        "status": "succeeded"
+      },
+      {
+        "count": 2,
+        "latest": null,
+        "status": "queued"
+      }
+    ],
+    "observed_at": "2026-11-18 01:45:51.758393+00",
+    "run_status": "running"
+  },
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 72,
+        "latest": "2026-11-18T01:46:14.591+00:00",
+        "status": "succeeded"
+      }
+    ],
+    "observed_at": "2026-11-18 01:46:54.150667+00",
+    "run_status": "complete"
+  },
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 72,
+        "latest": "2026-11-18T01:46:14.591+00:00",
+        "status": "succeeded"
+      }
+    ],
+    "observed_at": "2026-11-18 01:47:56.520247+00",
+    "run_status": "complete"
+  },
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 72,
+        "latest": "2026-11-18T01:46:14.591+00:00",
+        "status": "succeeded"
+      }
+    ],
+    "observed_at": "2026-11-18 01:48:58.67613+00",
+    "run_status": "complete"
+  },
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 72,
+        "latest": "2026-11-18T01:46:14.591+00:00",
+        "status": "succeeded"
+      }
+    ],
+    "observed_at": "2026-11-18 01:50:00.792581+00",
+    "run_status": "complete"
+  },
+  {
+    "cache_run": 66148,
+    "jobs": [
+      {
+        "count": 72,
+        "latest": "2026-11-18T01:46:14.591+00:00",
+        "status": "succeeded"
+      }
+    ],
+    "observed_at": "2026-11-18 01:51:03.343811+00",
+    "run_status": "complete"
+  }
+]

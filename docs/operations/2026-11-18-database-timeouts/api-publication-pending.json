@@ -1,0 +1,9 @@
+{
+  "checkedAtApprox": "2026-11-18T01:47:36Z",
+  "httpStatus": 200,
+  "source": "national-cache",
+  "actualRunId": 66148,
+  "expectedRunId": 66208,
+  "assertionPassed": false,
+  "providerRequests": 0
+}
