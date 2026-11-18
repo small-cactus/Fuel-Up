@@ -2729,3 +2729,44 @@ archive read-back remains verified; no additional raw object was fetched. No
 provider requests, app launches, billing changes, raw rewrites or research
 mutations were performed. Fixed-inventory coverage and reported prices are not
 verified pump truth.
+
+
+## November 18 00:23 UTC follow-up
+
+Scheduled run 66148 (00:00) completed all 72 batches at 00:16:24, observing
+141,660 fixed-inventory stations with 92,493 priced. A transient GraphQL event at
+00:08:37 imposed a 60-second shared cooldown until 00:09:37. Automatic retry
+completed with 73 requests / 143,660 lookups, within budgets; the preceding 23:00
+sweep used 72 / 141,660. All ten cache scopes published the latest run at 00:17;
+latest-complete projection backlog is zero. Three old November 10 gaps remain
+unchanged. The retained 192-slot window has 189 complete and three known partial
+hours, with zero expired absent/running or current absent slots. No new gaps were
+found; metadata outside retention is not inferred missing collection.
+
+All six schedules and three fixed regional routes remain active with zero
+wrong-region jobs. Cooldown expired naturally without override. City collection
+remains complete and research endpoints unchanged. National retention returned
+HTTP 200 at 00:00, 00:10 and 00:20; the 00:00 pass removed 72 eligible objects and
+one operational metadata hour. Raw and operational metadata backlogs are zero.
+The UTC day rollover made November 10 local-history rows eligible: 71,943 remain
+in the snapshot, oldest day November 10 and newest November 18. The bounded
+local-history retention schedule succeeded at 00:17 in 4.8 seconds; its preceding
+23:17 run also succeeded. This is the known midnight cleanup pattern, not a failed
+schedule. Follow subsequent scheduled progress; no manual pruning was performed.
+
+Accounted archive usage is 743,389,184 / 900,000,000 bytes after the complete sweep.
+The compact reference index remains valid/ready at 27,828,224 bytes, unchanged;
+size alone does not establish bloat. Its compact definition was verified November
+17 at 11:15. Protected reads and host metrics passed, with no lock waits or idle-
+in-transaction sessions. Available RAM is 137,953,280 bytes, occupied swap
+381,267,968 bytes, and loads are 0.15/0.20/0.31. Since the preceding check,
+swap-in/out increased 1,637,995 / 1,894,968 and nvme0n1/nvme1n1 busy counters
+increased 93.651 / 483.479 seconds. Paging pressure persists despite successful
+scheduled service; permanent resource recovery is not claimed.
+
+`followup-1118-0023.json` records passing assertions and local retention execution
+evidence. Retry recovery was automatic, not an agent repair; incident repair count
+remains one. Prior recovery archive read-back remains verified; no additional raw
+object was fetched. No provider requests, app launches, billing changes, raw
+rewrites or research mutations were performed by this check. Fixed-inventory
+coverage and reported prices are not verified pump truth.
