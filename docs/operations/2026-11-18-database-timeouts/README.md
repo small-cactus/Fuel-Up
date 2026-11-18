@@ -683,3 +683,44 @@ replay was automatic. Fresh three-region archive read-back at 12:36 remains
 verification evidence; no new raw-object download this check. No manual provider
 requests, phone app launch, billing/routing/budget changes or raw/research
 modifications occurred. These observations are not verified pump truth.
+
+## 15:44 UTC follow-up: automatic retry and replay completed
+
+Run 67029 completed 72/72 batches at 15:15:14.162186 UTC, with 141,660
+fixed-inventory observations and 93,150 stations containing reported prices.
+Routes completed 59/9/4 batches, zero wrong-region jobs. Requests 73/92 and
+lookups 143,660/161,660 stayed within budget. HTTP 503 at 15:09:33 triggered a
+five-second shared cooldown, expired at 15:09:38; scheduled collection retried
+automatically. The projection worker replayed job 4821908 at 15:16:08.178526 on
+its first attempt without error. All ten Trends scopes published complete run
+67029 at 15:17:00.232770. Latest projection backlog is zero; three old November
+10 derived gaps remain unchanged. No operator re-enable occurred.
+
+The rolling eight-day query has 192/192 complete slots, zero partial, expired
+absent/running or current absent slots. Historical November 10 partials are
+outside this rolling window, not repaired; their saved evidence remains. This
+is not a fresh all-time gap recount after metadata expiry. All six schedules and
+three routes remain active; the city campaign and research window remain closed.
+
+National retention returned HTTP 200 at 15:00/10/20/30/40, removing 72 expired
+operational objects and one metadata hour at 15:00. Raw eligibility, overdue
+metadata, deferred hours and local-history backlog are zero. Local retention
+succeeded at 15:17. Local history has 709,651 rows, oldest day November 11,
+318,349,312 bytes. Raw 48-hour/metadata eight-day retention and protected
+research/evaluation/latest-cache policies remain unchanged.
+
+Archive accounting is 746,538,771/900,000,000 bytes, Storage 750,813,719 bytes;
+database size is 2,115,316,883 bytes. The compact index is 28,147,712 bytes,
+valid/ready with four keys and no INCLUDE, up 98,304 bytes since 14:43. Both
+serving indexes are valid/ready; size alone does not establish bloat. Available
+RAM is 140,771,328 bytes, occupied swap 348,983,296 bytes, load 0.05/0.03/0.11.
+Cumulative paging/I/O counters are saved, not interval rates or proof of permanent
+capacity resolution. No Lock wait or idle transaction appeared. PostgreSQL start
+remains 01:33:51 and shared_buffers 96 MiB without pending restart.
+
+Protected-read assertions passed; followup-1544.json holds sanitized evidence.
+Zero operator attempts this check; incident total remains one. Retry/replay were
+automatic. The 12:36 regional archive read-back remains evidence; no new raw
+sample this check. No manual provider requests, phone app launch, billing,
+routing or budget changes, or raw/research modifications occurred. Observations
+represent fixed inventory, not verified pump truth.
