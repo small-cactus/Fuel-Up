@@ -344,3 +344,42 @@ Zero repair attempts this check; incident total remains one. The 02:28 regional
 archive read-back remains the recovery verification. No manual provider request,
 app launch, billing/routing/budget change or raw/research modification occurred.
 These are fixed-inventory observations, not verified pump truth.
+
+## 07:32 UTC follow-up: scheduled service remains current
+
+Run 66549 (07:00) completed all 72 batches at 07:14:34.558048 UTC, with 141,660
+fixed-inventory observations and 93,622 stations containing reported prices.
+Routes remain 59/9/4 with zero wrong-region jobs; requests 72/92 and lookups
+141,660/161,660. The existing shared cooldown expired at 06:10:15; no new provider
+denial or operator re-enable occurred. All ten Trends scopes published the
+complete run at 07:15:00.321702. Latest projection backlog is zero and the three
+old November 10 derived gaps remain unchanged.
+
+The retained eight-day reconciliation remains 192 expected hourly slots, 189
+complete and three known partial, with zero expired absent/running or current
+absent slots. No new operational gap was found. Intentionally expired metadata
+is not counted as absent runs; historical gaps remain in the saved incident
+records. The city campaign and original research window remain closed.
+
+All six schedules and three routes remain active. National retention returned
+HTTP 200 at 07:00/10/20/30; the 07:00 pass removed 72 expired operational objects
+and one metadata hour. Eligible raw objects, overdue metadata, deferred hours and
+local daily-history backlog remain zero. Local retention succeeded at 07:17;
+daily history has 706,701 rows, oldest day November 11, occupying 318,349,312
+bytes. Raw 48-hour/metadata eight-day retention and protected research,
+evaluation and latest-cache policies remain unchanged.
+
+Archive accounting is 744,849,155/900,000,000 bytes, Storage 749,124,103 bytes and
+database size 2,103,512,211 bytes. The compact index remains 27,828,224 bytes,
+valid/ready, four keys without INCLUDE. Both serving indexes are valid/ready.
+Independent host metrics succeeded: 138,809,344 bytes available RAM, 321,171,456
+bytes occupied swap, load 0.07/0.05/0.14. Cumulative paging increased; this is not
+an exact interval rate or proof of a permanent capacity fix. No Lock wait or idle
+transaction appeared in the activity snapshot; PostgreSQL start is unchanged.
+
+Protected-read assertions passed; evidence is in followup-0732.json. No new
+repair or recovery; zero operator attempts this check, incident total one.
+The 02:28 post-restart regional archive read-back remains recovery evidence.
+No manual provider request, phone app launch, billing/routing/budget change or
+raw/research modification occurred. Fixed-inventory observations are not verified
+pump truth.
