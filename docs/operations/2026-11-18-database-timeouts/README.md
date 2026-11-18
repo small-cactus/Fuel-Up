@@ -146,3 +146,47 @@ Exactly one operator recovery attempt was made. Scheduled resumption and the
 seven automatic projection replays are distinguished from operator actions.
 See final-status.json, final-extra.json, final-api.json, final-checks.json,
 projection-progress.json, collection-progress.json and archive-sample.json.
+
+## 02:27 UTC follow-up: first full post-restart sweep; cleanup cleared
+
+Run 66249 (02:00) completed 72/72 batches at 02:16:14.914587 UTC, observing
+141,660 fixed-inventory station records, 92,837 with reported prices. Regional
+coverage is 59/9/4 with zero wrong-region jobs. A transient GraphQL response at
+02:13:25 imposed the existing shared 60-second cooldown through 02:14:25; the
+scheduled worker retried automatically. Requests were 73/92 and lookups
+143,660/161,660. No denial was bypassed and no manual collection occurred.
+All ten Trends scopes published run 66249 at 02:17:00.282439. Latest projection
+backlog is zero; three old November 10 derived gaps remain unchanged.
+
+The 02:17 local-history retention cron succeeded in 5.8 seconds. The previously
+reported 13,746-row cleanup backlog is now zero; oldest daily history is November
+11, with 702,496 rows occupying 318,349,312 bytes. This is automatic scheduled
+cleanup following the earlier restart, not a new operator repair. National
+retention returned HTTP 200 at 02:00, 02:10 and 02:20; the 02:00 pass removed 72
+expired operational objects and one metadata hour. Eligible raw objects, overdue
+metadata and deferred hours are zero. All six schedules and three routes remain
+active; the city campaign remains complete.
+
+Retained slot reconciliation: 192 expected, 189 complete, three previously known
+partial, zero expired absent/running and zero current absent. No new operational
+gap was found. Older expired metadata and original research gaps retain the
+limitations and saved incident history described above.
+
+At 02:28:22, actual Storage read-back passed SHA-256, byte size, exact station IDs,
+schema, time-window and provenance checks for one object from each region in
+run 66249. All three observations postdate the 01:33:51 restart. This samples
+three immutable objects, not all 72, and does not verify pump truth or coverage
+beyond the fixed inventory.
+
+Archive accounting is 743,764,466/900,000,000 bytes, total Storage 748,039,414 bytes,
+and database size 2,085,473,427 bytes. The compact retention index remains
+27,828,224 bytes, valid/ready, with four keys and no INCLUDE. Independent metrics
+succeeded: 122,855,424 bytes available RAM, 279,375,872 bytes occupied swap and
+load averages 0.08/0.11/0.22. Cumulative paging counters still advance; this single
+snapshot is not an interval rate or proof that underlying memory pressure is
+permanently fixed. PostgreSQL start time is unchanged.
+
+Protected reads, archive verification and final invariant assertions passed;
+evidence is in followup-0227.json. Zero operator repair attempts this check;
+incident total remains one. No code, billing, routing, budgets, research data,
+raw prices or phone app were changed.
