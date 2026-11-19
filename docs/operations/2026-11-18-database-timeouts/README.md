@@ -2008,3 +2008,56 @@ no pending restart. Assertions passed; followup-20261119-2200.json contains
 sanitized evidence and archive audit. Operator attempts this check: zero;
 November 18 incident total: one. No manual provider collection, phone launch,
 billing/routing/budget changes or raw/research modifications occurred.
+
+## November 19, 22:59 heartbeat: split diagnostics verify continued service
+
+The combined status query reached its protected statement timeout. Fallback
+database and independent host evidence succeeded, as did the supplemental read.
+Five smaller protected status groups then all succeeded in 2.2–7.5 seconds
+including CLI overhead. This is diagnostic recovery, not an operator service
+repair. No identical full-status retry or new gap inference from missing data.
+
+Run 68889 completed the 22:00 sweep at 22:16:46.303746 UTC: 72/72 batches,
+141,660 fixed-inventory observations, 92,327 stations reporting prices and
+correct 59/9/4 regional routes. Two HTTP 503 responses (jobs 4955796 at 22:09
+and 4955820 at 22:15) recovered automatically; shared cooldown expired at
+22:15:08. Requests 74/92 and lookups 145,660/161,660 stayed within budget.
+Eight serving client timeouts occurred during 22:00 and three early in 23:00.
+Scheduled projection replay for job 4955825 succeeded on attempt one at
+22:17:06.679254 without error. Latest and retained complete-run projection
+backlogs are zero. All ten Trends scopes published run 68889 at 22:18:00.209755.
+
+Fresh immutable Storage read-back passed at 23:01:25.444 for one sample per
+region, including recovered east job 4955820 and replayed southwest job 4955825.
+Hashes, bytes, provenance, station data and observation windows passed. These
+three samples do not verify all 72 objects or establish pump truth. Recovery
+was automatic, without an operator repair or re-enable.
+
+The split snapshot had current run 68949 at 3/72 batches, within its midnight
+UTC deadline. The earlier supplemental snapshot recorded one request and 2,000
+lookups; differing counts reflect progressing snapshots. Rolling reconciliation
+has 191 complete plus the current running hour, zero partial or expired absent/
+running/current absent slots in the retained eight-day window. Older gaps remain
+documented, not reconstructed. All six schedules and three fixed routes are
+active; continuous service and closed city/research boundaries remain unchanged.
+
+Retention returned HTTP 200 at 22:00/10/20/30/40/50 and 23:00. Latest pass removed
+72 operational objects, one metadata hour and 79 detached references. Eligible
+raw objects, overdue metadata, deferred hours and local-history backlog are zero.
+Local retention succeeded at 22:17; 23:17 was not due. Raw 48-hour and metadata
+eight-day policies preserve original research, evaluation data and latest cache.
+Local history has 716,772 rows, oldest November 12. Archive accounting is
+746,465,063/900,000,000 bytes; Storage 750,740,011; database 2,164,558,995.
+Compact index is 28,311,552 bytes (16 KiB above the prior snapshot), valid/ready,
+four keys without INCLUDE; this small increase alone does not establish bloat.
+Both serving indexes are also valid/ready.
+
+Available RAM 128,532,480 bytes, occupied swap 423,149,568, load 0.54/0.22/0.14.
+One active DataFileRead wait and no Lock wait or idle transaction appeared in
+both supplemental and fallback snapshots. Cumulative paging/I/O counters do not
+establish interval health or a permanent resource fix. PostgreSQL start remains
+November 18 01:33:51; shared_buffers 96 MiB, no pending restart. Assertions passed;
+followup-20261119-2259.json preserves the initial failure and successful split
+reads plus archive audit. Operator attempts this check: zero; November 18 incident
+total: one. No manual provider collection, phone launch, billing/routing/budget
+changes or raw/research modifications occurred.
