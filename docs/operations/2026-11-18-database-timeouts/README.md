@@ -1682,3 +1682,40 @@ operator repair. Assertions passed; followup-20261119-1500.json preserves the
 initial partial failure, split-read timings, service evidence and fresh archive
 audit. Operator attempts this check: zero; November 18 incident total: one.
 No phone launch, billing/routing/budget changes or raw/research modifications.
+
+## November 19, 15:59 heartbeat: complete sweep; full status succeeds
+
+The protected full status query and supplemental reads succeeded this check.
+Run 68469 completed the 15:00 sweep at 15:14:34.817782 UTC: 72/72 batches,
+141,660 fixed-inventory observations, 92,631 stations reporting prices, correct
+59/9/4 regional routes. Requests 72/92 and lookups 141,660/161,660 were within
+budget. Six serving client timeout events occurred early in the hour; scheduled
+projection repair replayed job 4925588 once at 15:15:11.690470 without error.
+Latest and retained complete-run projection backlogs are zero; all ten Trends
+scopes published run 68469 at 15:16:00.234065. Prior shared cooldown remains
+expired, with no new provider denial. Recovery was automatic, not an operator
+repair.
+
+The 15:59 snapshot reconciles 192 complete operational slots in the retained
+eight-day window, zero partial or absent/expired-running slots. This does not
+reconstruct older gaps whose metadata expired. All six schedules and three
+fixed routes are active. Continuous operation, closed city/research boundaries,
+raw 48-hour and metadata eight-day policies remain unchanged. Retention returned
+HTTP 200 at 15:00/10/20/30/40/50; zero raw eligibility, overdue metadata, deferred
+hours or local-history backlog. Local retention succeeded at 15:17. Archive
+accounting is 749,579,035/900,000,000 bytes; Storage 753,853,983; database
+2,157,841,555. Local history has 710,128 rows, oldest November 12.
+
+Compact index remains 28,295,168 bytes, four keys without INCLUDE, valid/ready;
+both serving indexes also valid/ready. Available RAM 129,409,024 bytes, occupied
+swap 377,352,192, load 0.39/0.16/0.11. One DataFileRead wait, no Lock wait or idle
+transaction in the supplemental snapshot. Host paging/I/O counters are saved as
+cumulative values, not interval rates or permanent capacity proof. PostgreSQL
+start and 96 MiB shared_buffers remain unchanged, no pending restart.
+
+Assertions passed; followup-20261119-1559.json contains sanitized evidence.
+Latest immutable archive read-back passed at 15:03:47 for three regional samples
+from run 68409; no new raw sample was needed this check. Fixed-inventory
+observations are not verified pump truth. Operator attempts this check: zero;
+November 18 incident total: one. No manual provider collection, phone launch,
+billing/routing/budget changes or raw/research modifications.
