@@ -1871,3 +1871,50 @@ it does not prove a specific initiating cause or permanent resource recovery.
 Small queries, collection progress, complete cache, retention and archive reads
 were nevertheless verified. No speculative restart or index rebuild is justified
 by this snapshot; index size is unchanged and no serving stoppage is observed.
+
+## November 19, 20:05 heartbeat: full reads succeed; automatic retries verified
+
+Protected full status, supplemental SQL and host metrics succeeded. Run 68709
+completed the 19:00 sweep at 19:17:45.464015 UTC: 72/72 batches, 141,660
+fixed-inventory observations, 92,473 stations reporting prices, correct 59/9/4
+routes. Requests 74/92 and lookups 145,660/161,660 stayed within budget.
+Southwest job 4942871 recorded NETWORK_OR_RUNTIME_ERROR at 19:03 and succeeded
+on attempt two at 19:05:06; east job 4942826 recorded transient GraphQL at 19:08
+and succeeded on attempt two at 19:10:06. These broad error categories do not
+establish narrower root causes. Their retained last_error values describe past
+failures, not current failed jobs. Shared cooldown expired at 19:09:04.
+
+Seven serving client timeouts appeared during 19:00 and six early in 20:00.
+Scheduled projection replay for job 4942868 completed on its first attempt at
+19:18:08.106514 without error. Latest and retained complete-run projection
+backlogs are zero; all ten Trends scopes published run 68709 at 19:19:00.251275.
+Fresh immutable archive read-back at 20:06:53.605 passed hashes, bytes,
+provenance, station data and observation windows for three regional samples,
+including both recovered retry jobs. Recovery was automatic; no operator repair.
+These samples do not verify all 72 objects or establish pump truth.
+
+Current run 68769 had 29/72 batches complete (east 16, southwest 9, northwest 4),
+29 requests and 55,960 lookups, within its 21:00 deadline. Rolling eight-day
+reconciliation has 191 complete plus this running hour, with zero partial,
+expired absent/running or current absent slots. Historical aged-out gaps remain
+documented, not reconstructed. All six schedules and three fixed routes are
+active. Continuous service and closed city/research boundaries are unchanged.
+
+Retention returned HTTP 200 at 19:00/10/20/30/40/50 and 20:00. Latest pass
+removed 72 operational objects, one metadata hour and 57 detached references.
+Raw eligibility, overdue metadata, deferred hours and local-history backlog are
+zero. Local retention succeeded at 19:17; 20:17 was not yet due. Raw 48-hour and
+metadata eight-day policies preserve research/evaluation data and latest cache.
+Local history has 714,426 rows, oldest November 12. Archive accounting is
+747,663,651/900,000,000 bytes; Storage 751,938,599; database 2,159,226,003.
+Compact index remains 28,295,168 bytes, four keys without INCLUDE; all three
+maintenance indexes are valid/ready.
+
+Available RAM 115,486,720 bytes, occupied swap 429,903,872, load 0.92/0.58/0.31.
+No active I/O wait, Lock wait or idle transaction appeared in the supplemental
+snapshot. Cumulative paging/I/O metrics do not prove resolution of the preceding
+measured pressure. PostgreSQL start remains November 18 01:33:51, shared_buffers
+96 MiB, no pending restart. Assertions passed; followup-20261119-2005.json contains
+sanitized evidence. Operator attempts this check: zero; November 18 incident
+total: one. No manual provider collection, phone launch, billing/routing/budget
+changes or raw/research modifications occurred.
