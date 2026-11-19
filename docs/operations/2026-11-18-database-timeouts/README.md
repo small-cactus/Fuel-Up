@@ -1809,3 +1809,65 @@ followup-20261119-1759.json preserves initial and subsequent retention evidence.
 Operator attempts this check: zero; November 18 incident total: one. No manual
 provider collection, phone launch, billing/routing/budget changes or raw/research
 modifications occurred.
+
+## November 19, 19:01 heartbeat: narrow reads and archive verification
+
+The combined status query hit its protected 15-second statement timeout; the
+combined supplemental query also hit its 10-second timeout. Status fallback
+returned usable database and independent host evidence. After rereading the
+November 8 runbook, all five smaller status groups succeeded (2.2–5.8 seconds
+including CLI overhead), as did three smaller supplemental groups (2.1–4.1
+seconds). This diagnostic recovery is not an operator service repair. Neither
+failed combined query was repeated, and no unavailable data was treated as a gap.
+
+Run 68649 completed the 18:00 sweep at 18:14:37.815753 UTC: 72/72 batches,
+141,660 fixed-inventory observations, 92,466 stations reporting prices and correct
+59/9/4 routing. Requests 72/92 and lookups 141,660/161,660 remained within budget.
+Six serving client timeouts appeared during that hour, with latest and retained
+complete-run projection backlogs now zero. All ten Trends scopes published
+run 68649 at 18:15:00.280307. Prior cooldown remains expired; no new provider
+denial or operator re-enable.
+
+Current run 68709 had 10/72 batches complete at the split service snapshot
+(east 1, southwest 5, northwest 4). The later budget read recorded 13 requests
+and 24,213 lookups. It is progressing within its 20:00 deadline, not a complete
+sweep or missing hour. Reconciliation has 191 complete plus the current running
+slot, zero partial or expired absent/running/current absent slots in the retained
+eight-day window. Older gaps remain documented, not reconstructed. All six
+schedules and three fixed routes are active; continuous operation and closed
+city/research boundaries remain unchanged.
+
+Retention returned HTTP 200 throughout 18:00/10/20/30/40/50 and 19:00. The latest
+pass removed 72 operational objects, one metadata hour and 78 detached references.
+Raw eligibility, overdue metadata, deferred hours and local-history backlog are
+zero. Local retention succeeded at 18:17; 19:17 was not yet due. Local history
+has 712,993 rows, oldest November 12. Raw 48-hour and metadata eight-day policies,
+research/evaluation protection and latest-cache preservation remain unchanged.
+Archive accounting is 746,740,521/900,000,000 bytes; Storage 751,015,469;
+database 2,158,685,331. Compact index remains 28,295,168 bytes, valid/ready,
+four keys without INCLUDE; both serving indexes are valid/ready.
+
+Initial host metrics show available RAM 100,802,560 bytes, occupied swap
+428,052,480 and load 0.63/0.22/0.12. Fallback activity showed an autovacuum worker
+in VacuumDelay, no Lock wait or idle transaction; later narrow activity had no
+active I/O wait. These observations do not establish the precise timeout cause.
+PostgreSQL start remains November 18 01:33:51, shared_buffers 96 MiB with no
+pending restart. A separate advancing-counter pressure sample is saved below.
+
+Fresh actual Storage read-back passed at 19:03:00.110 for three regional samples
+from complete run 68649, including east/southwest batches with earlier serving
+client timeouts. SHA-256, bytes, provenance, station data and observation windows
+passed. This is three samples, not all 72 objects or verified pump truth.
+Service assertions passed; followup-20261119-1901.json preserves both initial
+failures and successful diagnostic evidence. Operator attempts this check: zero;
+November 18 incident total: one. No manual provider collection, phone launch,
+billing/routing/budget changes or raw/research modifications occurred.
+
+The 60.639-second sample ending 19:03:41 had advancing counters, no reboot or
+OOM kill: 184,532,992 bytes swapped in and 219,095,040 swapped out (4 KiB pages),
+24,444 major faults and 12.58% CPU I/O wait. Available RAM ended at 128,462,848
+bytes. This establishes ongoing paging and I/O pressure during scheduled work;
+it does not prove a specific initiating cause or permanent resource recovery.
+Small queries, collection progress, complete cache, retention and archive reads
+were nevertheless verified. No speculative restart or index rebuild is justified
+by this snapshot; index size is unchanged and no serving stoppage is observed.
