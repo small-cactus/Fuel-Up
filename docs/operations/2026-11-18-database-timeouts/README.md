@@ -1719,3 +1719,45 @@ from run 68409; no new raw sample was needed this check. Fixed-inventory
 observations are not verified pump truth. Operator attempts this check: zero;
 November 18 incident total: one. No manual provider collection, phone launch,
 billing/routing/budget changes or raw/research modifications.
+
+## November 19, 16:57 heartbeat: transient retries recovered automatically
+
+Protected status, supplemental SQL and independent host metrics succeeded.
+Run 68529 completed the 16:00 sweep at 16:19:25.094868 UTC: 72/72 batches,
+141,660 fixed-inventory observations, 92,611 stations reporting prices, correct
+59/9/4 regional routes. Two transient GraphQL responses (16:01 and 16:13) and
+one HTTP 503 (16:15) recovered through scheduled retries. Requests 75/92 and
+lookups 147,660/161,660 remained within budget. Shared cooldown expired at
+16:15:30; no operator re-enable. Five serving client timeouts were recorded;
+latest and retained complete-run projection backlogs are zero. All ten Trends
+scopes published this run at 16:20:00.270673.
+
+Actual immutable archive read-back passed at 16:58:14.462 UTC for three regional
+samples, including recovered east job 4929887 and southwest job 4929907.
+SHA-256, bytes, provenance, station data and observation-window checks passed.
+This samples three objects, not all 72; fixed-inventory observations are not
+verified pump truth. All recovery was automatic, with no operator repair.
+
+Rolling eight-day reconciliation has 192 complete slots and zero partial,
+absent or expired-running slots. This does not reconstruct aged-out historical
+gaps. All six schedules and three fixed routes are active; continuous service
+and closed city/research boundaries are unchanged. Retention returned HTTP 200
+at 16:00/10/20/30/40/50. The 16:00 pass removed 72 operational objects and
+deferred one metadata hour; the 16:10 pass removed that hour, leaving no overdue
+metadata, deferred hours, raw eligibility or local-history backlog. Local
+retention succeeded at 16:17. Raw 48-hour/metadata eight-day policies and
+research/evaluation/latest-cache preservation remain unchanged.
+
+Archive accounting is 749,646,575/900,000,000 bytes; Storage 753,921,523;
+database 2,158,062,739. Local history has 710,996 rows, oldest November 12.
+Compact retention index remains 28,295,168 bytes with four keys and no INCLUDE;
+all three maintenance indexes are valid/ready. Available RAM 143,175,680 bytes,
+occupied swap 409,055,232, load 0.10/0.15/0.16. One DataFileRead wait, no Lock
+wait or idle transaction appeared. Paging/I/O counters are cumulative, not
+interval rates or proof of a permanent capacity fix. PostgreSQL start remains
+November 18 01:33:51; shared_buffers 96 MiB, no pending restart.
+
+Assertions passed; followup-20261119-1657.json contains sanitized evidence and
+fresh archive audit. Operator attempts this check: zero; November 18 incident
+total: one. No manual provider collection, phone launch, billing/routing/budget
+changes or raw/research modifications occurred.
