@@ -1628,3 +1628,57 @@ repair this check. Operator attempts: zero; November 18 incident total: one.
 No manual provider collection, phone app launch, billing/routing/budget changes
 or raw/research modifications occurred. Fixed-inventory observations are not
 verified pump truth.
+
+## November 19, 15:00 heartbeat: split reads resolved status timeout
+
+The combined status query reached its protected statement timeout. Its fallback
+returned database and independent host evidence. Following the November 8
+runbook, five smaller protected read groups all succeeded (2.5–9.5 seconds
+including CLI overhead): service, raw retention, maintenance, capacity and local
+history. This was diagnostic recovery, not a service repair. No repeated full
+status request, restart, index change or provider collection was performed.
+
+Run 68409 completed the 14:00 sweep at 14:16:14.639493 UTC: 72/72 batches,
+141,660 fixed-inventory observations and 92,697 stations reporting prices.
+Routes completed 59/9/4 with no wrong-region jobs. Two HTTP 503 responses at
+14:14:33 and 14:15:04 recovered automatically; requests 74/92 and lookups
+145,360/161,660 stayed within budget. Shared cooldown expired at 14:15:09.
+All ten Trends scopes published this complete run at 14:17:00.266269; latest
+and retained complete-run projection backlogs are zero. Actual immutable Storage
+read-back at 15:03:47 passed SHA-256, bytes and archive validation for one batch
+per region, including recovered east job 4921264. These are three samples, not
+verification of all 72 objects or pump truth.
+
+At the split service snapshot, current run 68469 had 7/72 successful batches
+(northwest 4, southwest 3, east 0), within its 16:00 deadline. Rolling eight-day
+reconciliation has 191 complete plus the current running hour, with no partial,
+expired absent/running or current absent slots. This is not an all-time gap
+recount: older operational gaps remain preserved in previous evidence. All six
+schedules and three fixed routes are active; continuous configuration and closed
+city/research boundaries are unchanged. Seven serving client timeout events
+appear in the 14:00 hour and three early in the current sweep; these are not
+inferred raw collection gaps.
+
+Retention returned HTTP 200 at 14:00/10/20/30/40/50 and 15:00. The 15:00 pass
+removed 72 operational objects, one metadata hour and 63 detached references.
+Raw eligibility, overdue metadata, deferred hours and local-history backlog are
+zero. Local retention succeeded at 14:17; 15:17 was not due. Raw 48-hour and
+metadata eight-day policies remain unchanged, preserving original research,
+evaluation data and latest cache. Archive accounting is 746,321,048/900,000,000
+bytes; Storage 750,595,996; database 2,155,588,755. Compact retention index is
+28,295,168 bytes, valid/ready with four keys and no INCLUDE. Its 40 KiB increase
+since the previous sample alone does not establish bloat; both serving indexes
+are valid/ready. Local history has 709,578 rows, oldest November 12.
+
+Host snapshot: available RAM 99,454,976 bytes, occupied swap 420,790,272 bytes,
+load 0.28/0.17/0.15 and data-volume free space 5,867,958,272 bytes. Saved paging
+and I/O values are cumulative, not interval rates or proof of a permanent
+capacity fix. Two DataFileRead waits appeared in the supplemental snapshot;
+no Lock wait or idle transaction, and no active I/O wait in the later fallback.
+PostgreSQL start remains November 18 01:33:51, shared_buffers 96 MiB with no
+pending restart. Small reads and scheduled service succeeded despite the
+combined monitoring-query timeout; there is no evidence requiring a new
+operator repair. Assertions passed; followup-20261119-1500.json preserves the
+initial partial failure, split-read timings, service evidence and fresh archive
+audit. Operator attempts this check: zero; November 18 incident total: one.
+No phone launch, billing/routing/budget changes or raw/research modifications.
