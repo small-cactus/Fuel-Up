@@ -1333,3 +1333,47 @@ or repair was needed. Operator attempts this check: zero; November 18 incident
 total: one. No manual provider collection, phone app launch, billing/routing/
 budget changes or raw/research modifications occurred. Fixed-inventory
 observations are not verified pump truth.
+
+
+## November 19, 07:58 UTC follow-up: complete sweep after automatic 503 retry
+
+Run 67989 completed 72/72 at 07:15:25.440399 UTC, with 141,660 fixed-inventory
+observations and 92,934 stations containing reported prices. Routes completed
+59/9/4 with zero wrong-region jobs. Requests 73/92 and lookups 143,660/161,660
+remained within budget. HTTP 503 at 07:11:15 caused a five-second shared cooldown,
+expired at 07:11:20. Scheduled collection retried successfully without operator
+re-enable. One serving client timeout left zero latest or retained projection
+backlog. All ten Trends scopes published run 67989 at 07:16:00.242748.
+
+At 07:59:16.740, fresh immutable Storage read-back passed SHA-256, byte size,
+gzip, schema, station ordering, region and timestamp checks for all three
+regional samples. East job 4891007 is the automatically retried batch: 52,454
+bytes, 2,000 stations, 1,438 priced, observed 07:12:25. Northwest job 4891037
+contains 213 stations; southwest job 4891033 contains 1,747. These are three
+verified objects, not all 72 archives or independent pump-price truth. The audit
+made no provider collection requests.
+
+Rolling reconciliation remains 192/192 complete, zero partial, expired absent/
+running or current absent slots. Older gap evidence remains preserved; this is
+not an all-time recount after metadata expiry. All six schedules and three
+routes are active. Continuous operation and the closed city/research boundaries
+are unchanged. Retention returned HTTP 200 at 07:00/10/20/30/40/50, removing 72
+operational objects, one metadata hour and 44 detached references at 07:00.
+Eligible raw objects, overdue metadata, deferred hours and local-history backlog
+are zero. Local retention succeeded at 07:17. History has 707,152 rows, oldest
+November 12. Raw 48-hour/metadata eight-day policies and research/evaluation/
+latest-cache preservation remain unchanged.
+
+Archive accounting is 748,847,149/900,000,000 bytes; Storage 753,122,097 bytes;
+database 2,146,102,419 bytes. Compact index remains 28,237,824 bytes, valid/ready,
+four keys with no INCLUDE; both serving indexes are valid/ready. Host metrics
+succeeded: available RAM 169,041,920 bytes, occupied swap
+417,329,152 bytes, load 0.28/0.15/0.14. Cumulative paging/I/O counters are saved,
+not interval rates or permanent capacity proof. No IO/Lock wait or idle
+transaction appeared in the activity snapshot. PostgreSQL start remains
+November 18 01:33:51; shared_buffers 96 MiB, no pending restart.
+
+Protected-read and archive assertions passed; followup-20261119-0758.json holds
+sanitized evidence. Operator repair attempts this check: zero; November 18
+incident total: one. Recovery was automatic. No phone app launch, billing/
+routing/budget changes or raw/research modifications occurred.
