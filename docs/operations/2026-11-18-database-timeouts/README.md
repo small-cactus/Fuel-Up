@@ -1052,3 +1052,46 @@ The 18:49 regional archive read-back remains verification evidence; no new raw
 sample this check. No manual provider collection, phone app launch, billing,
 routing or budget changes, or raw/research modifications occurred. These
 fixed-inventory observations are not verified pump truth.
+
+
+## November 19, 00:50 UTC follow-up: complete sweep; bounded midnight cleanup
+
+Run 67569 completed 72/72 at 00:14:37.547169 UTC, with 141,660 fixed-inventory
+observations and 92,623 stations containing reported prices. The three fixed
+routes completed 59/9/4 with zero wrong-region jobs. Requests 72/92 and lookups
+141,660/161,660 remained within budget. Nine serving client timeouts left no
+latest or retained projection backlog. All ten Trends scopes published run 67569
+at 00:15:00.276006. The prior shared cooldown is expired; no new denial, operator
+re-enable or provider retry was needed for this sweep.
+
+Rolling operational reconciliation remains 192/192 complete, with zero partial,
+expired absent/running or current absent slots. Preserved older gap evidence is
+unchanged; expired metadata is not an all-time recount. All six schedules and
+three routes are active. Continuous operation, the closed city campaign and
+original research boundary remain unchanged.
+
+National retention returned HTTP 200 at 00:00/10/20/30/40/50. The first pass
+removed 72 expired operational objects, one metadata hour and 76 detached
+references. Eligible raw objects, overdue national metadata and deferred hours
+are zero. Local retention succeeded at 00:17. Its live function deliberately
+prunes at most 20,000 rows per hourly pass. Midnight made November 11 eligible;
+70,777 rows from that day remain for subsequent scheduled passes. This is bounded
+cleanup in progress, not a failed schedule or a cleared backlog. Local history
+has 771,489 rows and occupies 318,349,312 bytes. No retention policy was changed.
+
+Archive accounting is 748,078,655/900,000,000 bytes, Storage 752,353,603 bytes,
+and database size 2,126,793,875 bytes. The compact retention index remains
+28,237,824 bytes, valid/ready with four keys and no INCLUDE. Both serving indexes
+are valid/ready. Host metrics succeeded: available RAM 155,869,184 bytes,
+occupied swap 420,667,392 bytes, load 0.30/0.16/0.16. Cumulative paging and I/O
+counters are saved; these are not interval rates or permanent capacity proof.
+No Lock wait or idle transaction appeared. PostgreSQL start remains November 18
+01:33:51; shared_buffers remains 96 MiB without pending restart.
+
+Protected-read assertions passed; followup-20261119-0050.json contains the
+sanitized evidence, including the deployed bounded cleanup definition. Zero
+operator repair attempts this check; November 18 incident total remains one.
+The November 18 18:49 three-region immutable archive read-back remains the latest
+raw verification; no new raw sample was downloaded. No manual provider
+collection, phone app launch, billing/routing/budget changes or raw/research
+modifications occurred. Fixed-inventory observations are not verified pump truth.
