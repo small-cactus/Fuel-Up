@@ -1505,3 +1505,38 @@ shared_buffers 96 MiB, no pending restart. Protected-read and archive assertions
 passed; followup-20261119-1101.json holds sanitized evidence. Operator attempts
 this check: zero; November 18 incident total: one. Recovery was automatic.
 No phone app launch, billing/routing/budget changes or raw/research modifications.
+
+
+## November 19, 11:57 UTC follow-up: current hour completed
+
+Run 68229 completed 72/72 at 11:14:45.952631 UTC, with 141,660 fixed-inventory
+observations and 92,867 stations with reported prices. Routes completed 59/9/4,
+zero wrong-region jobs. Requests 72/92 and lookups 141,660/161,660 remained within
+budget. 5 serving client timeouts left zero latest or retained projection
+backlog. All ten Trends scopes published run 68229 at 11:15:00.258634. Prior
+cooldown is expired; no new denial or re-enable. Rolling reconciliation is
+192/192 complete, zero partial, expired absent/running or current absent slots.
+Older documented gaps are preserved, not recounted from expired metadata.
+All six schedules and three routes remain active. Continuous operation and
+closed city/research boundaries are unchanged.
+
+Retention returned HTTP 200 at 11:00/10/20/30/40/50; 11:00 removed 72 operational
+objects, one metadata hour and five detached references. Eligible raw objects,
+overdue metadata, deferred hours and local-history backlog are zero. Local
+retention succeeded at 11:17; history has 707,621 rows, oldest November 12.
+Raw 48-hour/metadata eight-day policies and research/evaluation/latest-cache
+preservation are unchanged. Archive accounting is 749,254,536/900,000,000 bytes;
+Storage 753,529,484 bytes; database 2,147,142,803 bytes. Compact index remains
+28,237,824 bytes, valid/ready, four keys with no INCLUDE; serving indexes valid/ready.
+
+Host metrics succeeded: available RAM 170,635,264 bytes, occupied swap
+433,987,584 bytes, load 0.25/0.10/0.09. Cumulative paging/I/O counters are saved,
+not interval rates or permanent capacity proof. One DataFileRead wait, no Lock
+wait or idle transaction appeared. PostgreSQL start remains November 18 01:33:51;
+shared_buffers 96 MiB with no pending restart. Assertions passed;
+followup-20261119-1157.json holds sanitized evidence. Three regional immutable
+archive samples passed read-back at 11:02 today for run 68169; no new sample or
+repair was needed. Operator attempts this check: zero; November 18 incident
+total: one. No manual provider collection, phone app launch, billing/routing/
+budget changes or raw/research modifications occurred. Fixed-inventory
+observations are not verified pump truth.
