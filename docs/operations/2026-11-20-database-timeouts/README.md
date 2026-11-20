@@ -227,3 +227,40 @@ Structured service assertions passed in `followup-0402.json`. No new gaps,
 operator repair, provider replay, configuration change, billing change or phone
 interaction. One operator repair remains recorded for this incident. The previously
 reported December 2 database-size quota warning is unchanged.
+
+## 04:59 UTC: no new gaps; next hour starts on schedule
+
+Run 69205 completed 72/72 batches at 04:16:05.125028, covering 141,660 inventory
+stations with 92,604 priced stations and correct 59 / 9 / 4 routing. It used
+73 requests / 143,660 lookups. A transient GraphQL response invoked the normal
+shared cooldown until 04:08:34; it expired naturally. All ten cache scopes
+published run 69205 at 04:17:00.316121. Latest and retained complete-run projection
+gaps are zero; no new projection-repair rows follow the previously recorded
+03:18 replay. No operator repair or provider replay was performed.
+
+The 04:59 snapshot has 191 complete hours, the unchanged midnight partial hour
+and zero expired absent/running slots in its rolling 192-slot window. A separate
+05:00:15 read confirms run 69265 started with one successful batch and has until
+06:00. That new hour is still running, not a complete sweep. Older aged-out gaps
+remain in their preserved incident records.
+
+All six schedules and three regional routes are active. Retention through 04:50
+returned HTTP 200; eligible raw objects, overdue metadata hours, deferred hours
+and local daily-history backlog are zero in the 04:59 snapshot. Local cleanup
+succeeded at 04:17. Archive accounting is 747,158,743 / 900,000,000 bytes; Storage
+totals 751,433,691 bytes. No new raw read-back was needed after the three-region
+02:59:55 audit; this does not claim a fresh object audit for run 69205. City research
+remains complete and the research/evaluation protections are unchanged.
+
+Full status and all three small supplemental reads succeeded. The compact index
+remains 28,319,744 bytes, valid/ready with four keys and no INCLUDE. PostgreSQL
+still reports its 01:13:20 start, 96 MiB shared buffers and no pending restart;
+no lock wait or idle transaction appeared in the snapshots. An advancing
+62.491-second interval ending 05:00:45 measured 293,609,472 bytes swap-in,
+412,790,784 bytes swap-out, 39,674 major faults and 24.69% CPU I/O wait, with no
+OOM kills and 145,272,832 bytes available RAM. Known resource pressure persists.
+
+`followup-0459.json` records passed service assertions and the separate new-hour
+read. No new operational gap or service change requires a notification. Zero
+operator repairs this check; one for the incident. The previously reported
+December 2 database-size quota warning remains unchanged; billing was untouched.
