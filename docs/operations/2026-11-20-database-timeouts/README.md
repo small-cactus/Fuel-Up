@@ -264,3 +264,38 @@ OOM kills and 145,272,832 bytes available RAM. Known resource pressure persists.
 read. No new operational gap or service change requires a notification. Zero
 operator repairs this check; one for the incident. The previously reported
 December 2 database-size quota warning remains unchanged; billing was untouched.
+
+## 06:03 UTC: hourly service remains operational
+
+Run 69265 completed 72/72 batches at 05:14:34.375531 with 141,660 fixed-inventory
+observations, 92,659 priced stations, correct 59 / 9 / 4 regional routing and
+72 requests / 141,660 lookups. All ten Trends scopes published it at
+05:15:00.509939; latest and retained complete-run projection gaps are zero.
+Run 69325 for 06:00 had 16 successful batches at status capture and 17 requests /
+32,213 lookups in the later budget read, within limits and its 07:00 deadline.
+Rolling 192-slot reconciliation remains 190 complete, one known midnight partial
+hour, one current running hour and no expired absent/running slots. Older gaps
+remain documented; no new gaps were inferred.
+
+All six schedules and three regional routes remain active. The previous transient
+cooldown expired at 04:08:34 with no newer upstream denial in the returned recent
+events. National retention at 06:00 returned HTTP 200, removing 72 operational
+objects and one metadata hour, detaching 29 covered references. Eligible raw,
+overdue metadata, deferred hours and local daily-history backlog are all zero.
+The 05:17 local cleanup succeeded. Archive accounting is 744,313,700 / 900,000,000
+bytes; Storage is 748,588,648 bytes. The last actual regional archive integrity
+sample remains the 02:59:55 audit; no new object audit is claimed this check.
+City research stays complete; research/evaluation protections remain unchanged.
+
+Full status and three small supplemental reads succeeded. The compact index is
+unchanged at 28,319,744 bytes, valid/ready and without INCLUDE. PostgreSQL still
+has the 01:13:20 start and 96 MiB shared buffers, with no pending restart. One
+DataFileRead wait appeared, with no lock wait or idle transaction. A measured
+63.626-second interval ending 06:04:21 recorded 422,596,608 bytes swap-in,
+579,616,768 bytes swap-out, 62,484 major faults and 34.68% CPU I/O wait, zero OOM
+kills and 213,995,520 bytes available RAM. Known resource pressure persists despite
+successful service checks; no permanent resource fix is claimed.
+
+Service assertions passed in `followup-0603.json`. No new repair, collection
+replay, billing/configuration change or phone interaction. Incident repair count
+remains one. The previously reported December 2 quota warning is unchanged.
