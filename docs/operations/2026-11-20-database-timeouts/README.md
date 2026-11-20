@@ -154,3 +154,38 @@ quota warning remains an external capacity concern; billing was not changed.
 `followup-0203.json` preserves structured assertions, protected reads, resource
 measurements, ten API results and the three-object archive audit. No source change
 or phone interaction; zero repair attempts this check, one for the incident.
+
+## 02:59 UTC: scheduled service continues and local cleanup drained
+
+Run 69085 completed 72/72 batches at 02:14:46.665756, with 141,660 observations,
+92,471 priced stations and correct 59 / 9 / 4 regional routing. The sweep used
+73 requests / 143,660 lookups, within unchanged budgets. A transient 503 cooldown
+expired at 02:06:57 without intervention. Two scheduled projection replays finished
+on their first attempts at 02:15 and 02:16. All ten cache scopes published run
+69085 at 02:17:00.325366; latest and retained complete-run projection gaps are zero.
+Three actual immutable archive read-backs passed, including southwest job 4969945,
+whose projection was repaired automatically. No operator collection or repair.
+
+At 02:59 the rolling 192-slot window has 191 complete hours and the unchanged
+midnight partial hour, with zero expired absent/running slots. A separate 03:00:08
+minimal read confirms scheduled run 69145 exists and has begun, with deadline
+04:00. It is not yet a complete sweep. Older aged-out gaps remain in prior evidence.
+
+All six schedules and three routes remain active. Scheduled local-history cleanup
+succeeded at 02:17 and its old-row backlog is zero. National retention through
+02:50 returned HTTP 200; the 02:59 snapshot has zero eligible raw objects, overdue
+metadata hours or deferred hours. Accounted archive use is 747,170,047 of
+900,000,000 bytes; Storage totals 751,444,995 bytes. Original research and the
+closed city campaign remain unchanged. No billing or quota override was made.
+
+Full status and all three small supplemental reads succeeded. The compact index
+remains 28,319,744 bytes, valid/ready and without INCLUDE. PostgreSQL has not
+restarted again. A 60.813-second interval ending 03:00:12 recorded 209,195,008 bytes
+swap-in, 189,906,944 bytes swap-out, 24,589 major faults and 13.36% CPU I/O wait,
+with no OOM kills and 108,920,832 bytes available RAM. The 03:00 snapshot includes
+one DataFileRead wait but no lock wait or idle transaction. Pressure persists;
+this interval is lower than the preceding sample, not proof of permanent recovery.
+
+`followup-0259.json` preserves the successful checks and three-object integrity
+audit. No new operational gap or repair; normal scheduled continuation requires
+no new user action. The previously reported December 2 capacity warning remains.
