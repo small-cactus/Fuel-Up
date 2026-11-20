@@ -189,3 +189,41 @@ this interval is lower than the preceding sample, not proof of permanent recover
 `followup-0259.json` preserves the successful checks and three-object integrity
 audit. No new operational gap or repair; normal scheduled continuation requires
 no new user action. The previously reported December 2 capacity warning remains.
+
+## 04:02 UTC: continued scheduled service
+
+Run 69145 completed 72/72 batches at 03:16:16.130092, covering the 141,660 fixed
+inventory with 92,718 priced stations and correct 59 / 9 / 4 regional routing.
+It used 73 requests / 143,660 lookups within budget. Two scheduled projection
+replays completed on their first attempts at 03:17 and 03:18. All ten Trends
+scopes published run 69145 at 03:19:00.346789; latest and retained complete-run
+projection gaps are zero. These are automatic scheduled results, not new repairs.
+
+Current run 69205 had ten successful batches at the status snapshot, with twelve
+attempts / 22,213 lookups in the later budget read, and has until 05:00 UTC.
+Rolling eight-day reconciliation reports 190 complete, the unchanged midnight
+partial hour, one current running hour and zero absent expired or expired-running
+slots. Older historical gaps remain documented. The shared cooldown expired at
+02:06:57 and no newer upstream denial appears in the returned recent events.
+
+All six schedules and three routes are active. National retention at 04:00
+returned HTTP 200, removing 72 operational raw objects and one metadata hour,
+with 70 detached covered references. No eligible raw objects, overdue metadata
+hours, deferred hours or local daily-history backlog remain. The 03:17 local
+cleanup succeeded. Archive accounting is 744,027,208 / 900,000,000 bytes and Storage
+is 748,302,156 bytes. Last actual three-region immutable read-back passed at
+02:59:55 and is preserved in the preceding follow-up; no fresh object audit is
+claimed for run 69145. City research remains complete and closed.
+
+Full status and all three protected supplemental reads succeeded. The compact
+index remains 28,319,744 bytes, valid/ready and without INCLUDE; PostgreSQL start
+remains 01:13:20. The activity snapshot had no lock wait or idle transaction.
+An advancing 61.43-second interval ending 04:03:15 recorded 368,877,568 bytes
+swap-in, 362,348,544 bytes swap-out, 46,804 major faults and 24.98% CPU I/O wait,
+with zero OOM kills and 114,409,472 bytes available RAM. Known pressure persists;
+working service does not establish permanent resolution.
+
+Structured service assertions passed in `followup-0402.json`. No new gaps,
+operator repair, provider replay, configuration change, billing change or phone
+interaction. One operator repair remains recorded for this incident. The previously
+reported December 2 database-size quota warning is unchanged.
