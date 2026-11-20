@@ -1,0 +1,46 @@
+{
+  "sampledAt": "2026-11-20T01:16:23.657Z",
+  "project": "vjindchxfebaltbslqwc",
+  "elapsedSeconds": 60.923,
+  "rebooted": false,
+  "countersAdvanced": true,
+  "limitation": null,
+  "memoryBytes": {
+    "total": 431304704,
+    "available": 129126400,
+    "free": 4354048,
+    "cached": 186986496,
+    "buffers": 339968,
+    "swapTotal": 1073737728,
+    "swapFree": 766504960
+  },
+  "swapInPages": 171040,
+  "swapOutPages": 178168,
+  "swapInBytesAt4KiB": 700579840,
+  "swapOutBytesAt4KiB": 729776128,
+  "majorFaults": 71090,
+  "oomKills": 0,
+  "cpuModePercent": {
+    "idle": 68.56241473396999,
+    "iowait": 21.759890859481587,
+    "irq": 0,
+    "nice": 0,
+    "softirq": 0.08952933151432471,
+    "steal": 0.20463847203274216,
+    "system": 2.907571623465212,
+    "user": 6.4759549795361515
+  },
+  "cpuIoWaitPercent": 21.759890859481587,
+  "disks": {
+    "nvme0n1": {
+      "written_bytes": 734498816,
+      "read_bytes": 1336590336,
+      "io_time_seconds": 35.705
+    },
+    "nvme1n1": {
+      "written_bytes": 143319040,
+      "read_bytes": 386875392,
+      "io_time_seconds": 12.208000000000002
+    }
+  }
+}

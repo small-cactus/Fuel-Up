@@ -1,0 +1,298 @@
+{
+  "trigger": "2026-11-20T01:03:30.847Z",
+  "status": {
+    "statusError": "STATEMENT_TIMEOUT",
+    "observedAt": "2026-11-20T01:04:07.180Z",
+    "partial": true,
+    "providerRequests": 0,
+    "host": {
+      "ok": true,
+      "data": [
+        {
+          "name": "node_memory_SwapFree_bytes",
+          "value": 539967488
+        },
+        {
+          "name": "node_disk_read_bytes_total",
+          "device": "nvme0n1",
+          "value": 657309914112
+        },
+        {
+          "name": "node_disk_read_bytes_total",
+          "device": "nvme1n1",
+          "value": 152964978688
+        },
+        {
+          "name": "node_disk_written_bytes_total",
+          "device": "nvme0n1",
+          "value": 312430604800
+        },
+        {
+          "name": "node_disk_written_bytes_total",
+          "device": "nvme1n1",
+          "value": 67174244352
+        },
+        {
+          "name": "node_filesystem_avail_bytes",
+          "device": "/dev/nvme0n1p2",
+          "mountpoint": "/",
+          "value": 3184099328
+        },
+        {
+          "name": "node_filesystem_avail_bytes",
+          "device": "/dev/nvme1n1",
+          "mountpoint": "/data",
+          "value": 5855944704
+        },
+        {
+          "name": "node_memory_MemTotal_bytes",
+          "value": 431304704
+        },
+        {
+          "name": "node_memory_SwapTotal_bytes",
+          "value": 1073737728
+        },
+        {
+          "name": "node_load5",
+          "value": 9.29
+        },
+        {
+          "name": "node_load15",
+          "value": 10.52
+        },
+        {
+          "name": "node_disk_io_time_seconds_total",
+          "device": "nvme0n1",
+          "value": 23539.037
+        },
+        {
+          "name": "node_disk_io_time_seconds_total",
+          "device": "nvme1n1",
+          "value": 3893.355
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "idle",
+          "value": 148375.68
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "iowait",
+          "value": 16656.01
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "irq",
+          "value": 0
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "nice",
+          "value": 2.95
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "softirq",
+          "value": 49.3
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "steal",
+          "value": 3.88
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "system",
+          "value": 1810.22
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "0",
+          "mode": "user",
+          "value": 3107.61
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "idle",
+          "value": 148373.96
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "iowait",
+          "value": 16618.42
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "irq",
+          "value": 0
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "nice",
+          "value": 2.92
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "softirq",
+          "value": 53.44
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "steal",
+          "value": 4.18
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "system",
+          "value": 1821.35
+        },
+        {
+          "name": "node_cpu_seconds_total",
+          "cpu": "1",
+          "mode": "user",
+          "value": 3115.02
+        },
+        {
+          "name": "node_load1",
+          "value": 8.68
+        },
+        {
+          "name": "node_vmstat_pswpin",
+          "value": 70263840
+        },
+        {
+          "name": "node_vmstat_pswpout",
+          "value": 75310240
+        },
+        {
+          "name": "node_memory_MemAvailable_bytes",
+          "value": 137494528
+        }
+      ]
+    },
+    "database": {
+      "ok": false,
+      "error": "STATEMENT_TIMEOUT"
+    }
+  },
+  "minimal": [
+    {
+      "result": {
+        "config": {
+          "backoff": "2026-11-19T22:15:08.380631+00:00",
+          "continuous": true,
+          "enabled": true,
+          "halt_reason": "UPSTREAM_HTTP_503",
+          "last_request_at": "2026-11-20T00:03:22.750215+00:00"
+        },
+        "now": "2026-11-20T01:06:10.979048+00:00",
+        "runs": [
+          {
+            "completed_at": null,
+            "deadline_at": "2026-11-20T02:00:00+00:00",
+            "id": 69035,
+            "slot_at": "2026-11-20T01:00:00+00:00",
+            "status": "running"
+          },
+          {
+            "completed_at": "2026-11-20T01:01:00.492887+00:00",
+            "deadline_at": "2026-11-20T01:00:00+00:00",
+            "id": 69009,
+            "slot_at": "2026-11-20T00:00:00+00:00",
+            "status": "partial"
+          }
+        ]
+      }
+    }
+  ],
+  "splitStatus": {
+    "observedAt": "2026-11-20T01:04:31.798Z",
+    "groups": {
+      "service": {
+        "ok": false,
+        "error": "CLIENT_TIMEOUT",
+        "elapsedMs": 25024
+      },
+      "retention": {
+        "ok": false,
+        "error": "DATABASE_CONNECTION_TIMEOUT",
+        "elapsedMs": 16944
+      },
+      "maintenance": {
+        "ok": false,
+        "error": "STATEMENT_TIMEOUT",
+        "elapsedMs": 19148
+      },
+      "capacity": {
+        "ok": false,
+        "error": "STATEMENT_TIMEOUT",
+        "elapsedMs": 19573
+      },
+      "localHistory": {
+        "ok": false,
+        "error": "CLIENT_TIMEOUT",
+        "elapsedMs": 25020
+      }
+    },
+    "status": {},
+    "providerRequests": 0
+  },
+  "splitExtra": {
+    "groups": {
+      "brief": {
+        "ok": false,
+        "error": "CLIENT_TIMEOUT",
+        "elapsedMs": 25025
+      },
+      "budgets": {
+        "ok": false,
+        "error": "CLIENT_TIMEOUT",
+        "elapsedMs": 25023
+      },
+      "projections": {
+        "ok": false,
+        "error": "STATEMENT_TIMEOUT",
+        "elapsedMs": 19062
+      }
+    },
+    "data": {}
+  },
+  "additionalFailures": {
+    "pressureSampler": "CLIENT_TIMEOUT",
+    "smallIndexAndActivity": "DATABASE_CONNECTION_TIMEOUT"
+  },
+  "dashboard": {
+    "observedAt": "2026-11-20T01:08:00Z",
+    "health": "Unhealthy",
+    "errors": [
+      "504 claim_fuel_national_region_job at 01:06:16 UTC",
+      "504 national_fuel_trends at 01:06:08 UTC",
+      "57014 statement timeouts",
+      "ShareUpdateExclusiveLock wait 1691.366 ms at 01:06:10 UTC"
+    ],
+    "quotaWarning": "Previous billing cycle quota exceeded; restriction from December 2 if organization remains over quota. No billing changes made."
+  },
+  "repair": {
+    "attempt": 1,
+    "action": "Full project restart through authenticated Supabase dashboard",
+    "acceptedBy": "2026-11-20T01:09:14Z",
+    "uiState": "Restarting; project offline during restart",
+    "reason": "Confirmed partial midnight sweep, stalled current sweep, unhealthy dashboard, internal database claim and serving timeouts with high host load",
+    "providerRequests": 0,
+    "configChanges": 0
+  }
+}

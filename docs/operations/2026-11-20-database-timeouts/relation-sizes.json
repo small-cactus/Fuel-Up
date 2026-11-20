@@ -1,0 +1,122 @@
+[
+  {
+    "heap_bytes": 625385472,
+    "last_autoanalyze": "2026-11-18 07:47:12.841637+00",
+    "last_autovacuum": "2026-11-13 20:42:42.933632+00",
+    "n_dead_tup": 1515,
+    "n_live_tup": 544693,
+    "relname": "driving_research_events",
+    "schemaname": "public",
+    "total_bytes": 1222172672
+  },
+  {
+    "heap_bytes": 265437184,
+    "last_autoanalyze": "2026-11-19 01:01:07.024624+00",
+    "last_autovacuum": "2026-11-18 01:01:49.182859+00",
+    "n_dead_tup": 112376,
+    "n_live_tup": 732723,
+    "relname": "fuel_local_daily_prices",
+    "schemaname": "public",
+    "total_bytes": 318537728
+  },
+  {
+    "heap_bytes": 174817280,
+    "last_autoanalyze": "2026-11-19 23:12:09.132078+00",
+    "last_autovacuum": "2026-11-20 00:02:12.950892+00",
+    "n_dead_tup": 2731,
+    "n_live_tup": 153729,
+    "relname": "fuel_station_latest",
+    "schemaname": "public",
+    "total_bytes": 225533952
+  },
+  {
+    "heap_bytes": 27721728,
+    "last_autoanalyze": "2026-11-19 23:17:05.957758+00",
+    "last_autovacuum": "2026-11-20 00:14:40.698699+00",
+    "n_dead_tup": 4176,
+    "n_live_tup": 357230,
+    "relname": "fuel_station_price_lookup",
+    "schemaname": "public",
+    "total_bytes": 99794944
+  },
+  {
+    "heap_bytes": 50937856,
+    "last_autoanalyze": "2026-11-20 01:14:21.023889+00",
+    "last_autovacuum": "2026-11-10 13:55:39.252435+00",
+    "n_dead_tup": 11794,
+    "n_live_tup": 317327,
+    "relname": "job_run_details",
+    "schemaname": "cron",
+    "total_bytes": 58425344
+  },
+  {
+    "heap_bytes": 41558016,
+    "last_autoanalyze": "2026-11-18 22:50:54.175438+00",
+    "last_autovacuum": "2026-11-18 01:34:52.80936+00",
+    "n_dead_tup": 47,
+    "n_live_tup": 109205,
+    "relname": "app_installation_events",
+    "schemaname": "public",
+    "total_bytes": 56573952
+  },
+  {
+    "heap_bytes": 46948352,
+    "last_autoanalyze": "2026-11-19 15:14:42.531501+00",
+    "last_autovacuum": "2026-11-19 22:01:01.717586+00",
+    "n_dead_tup": 144,
+    "n_live_tup": 21750,
+    "relname": "fuel_national_trend_batches",
+    "schemaname": "public",
+    "total_bytes": 47833088
+  },
+  {
+    "heap_bytes": 9273344,
+    "last_autoanalyze": "2026-11-19 18:14:49.777754+00",
+    "last_autovacuum": "2026-11-19 21:07:58.786146+00",
+    "n_dead_tup": 618,
+    "n_live_tup": 14183,
+    "relname": "objects",
+    "schemaname": "storage",
+    "total_bytes": 40574976
+  },
+  {
+    "heap_bytes": 20406272,
+    "last_autoanalyze": "2026-11-19 23:11:04.704915+00",
+    "last_autovacuum": "2026-11-08 16:16:31.798572+00",
+    "n_dead_tup": 14605,
+    "n_live_tup": 141660,
+    "relname": "fuel_station_collection_state",
+    "schemaname": "public",
+    "total_bytes": 24731648
+  },
+  {
+    "heap_bytes": 11501568,
+    "last_autoanalyze": "2026-11-19 06:46:16.303263+00",
+    "last_autovacuum": "2026-11-19 06:46:16.14387+00",
+    "n_dead_tup": 0,
+    "n_live_tup": 11313,
+    "relname": "fuel_e85_directory",
+    "schemaname": "public",
+    "total_bytes": 16154624
+  },
+  {
+    "heap_bytes": 8749056,
+    "last_autoanalyze": "2026-11-20 01:02:23.641385+00",
+    "last_autovacuum": "2026-11-19 07:01:17.434614+00",
+    "n_dead_tup": 5025,
+    "n_live_tup": 25488,
+    "relname": "fuel_national_jobs",
+    "schemaname": "public",
+    "total_bytes": 11943936
+  },
+  {
+    "heap_bytes": 2965504,
+    "last_autoanalyze": null,
+    "last_autovacuum": null,
+    "n_dead_tup": 0,
+    "n_live_tup": 0,
+    "relname": "fuel_research_snapshots",
+    "schemaname": "public",
+    "total_bytes": 10412032
+  }
+]
