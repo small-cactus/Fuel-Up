@@ -110,3 +110,47 @@ Evidence is in `verified-recovery.json`, `archive-readback.json`, `trends-api.js
 and `resource-pressure.json`. No application source changed and no phone app was
 opened. One operator repair attempt total; zero monitor-triggered provider calls.
 Resource pressure and the December 2 quota warning remain unresolved limitations.
+
+## 02:03 UTC: complete sweep and refreshed Trends confirmed
+
+Run 69035 completed at 01:31:35.601760 UTC, before its deadline: 72/72 batches,
+141,660 fixed-inventory observations and 92,465 priced stations. Routing was
+59 / 9 / 4 batches in the three assigned regions, with zero wrong-region jobs.
+It used 74 requests and 145,660 lookups, within the unchanged limits. All ten
+Trends scopes published it at 01:32:00.466381; ten live API combinations and three
+fresh immutable archive samples from the complete sweep passed at 02:03. Latest
+complete-run and retained complete-run projection gaps are zero. Completion and
+publication followed scheduled work after the prior restart, without another
+operator repair or manual collection.
+
+The 02:00 run 69085 was progressing (15 successful batches at status capture,
+18 attempted requests / 33,960 lookups in the later budget read) and has until
+03:00. Rolling reconciliation remains 190 complete, one known partial midnight
+hour, one current running hour and no absent expired or expired-running slots.
+The midnight 56 missed batches remain recorded.
+
+All six schedules remain active. National retention at 02:00 returned HTTP 200,
+removed 72 operational raw objects and one metadata hour, and detached 93 covered
+references; no eligible raw objects, overdue metadata hours or deferred hours
+remain. Archive accounting is 744,288,371 / 900,000,000 bytes; Storage totals
+748,563,319 bytes. The local daily-history backlog is 17,538 rows; its most recent
+01:17 job succeeded and the next bounded run is due at 02:17. City research stays
+complete and closed.
+
+Full status succeeded. A combined supplemental read hit its 10-second SQL timeout;
+three smaller protected reads succeeded in 2.47, 2.62 and 7.18 seconds. The activity
+snapshot showed no lock wait or idle transaction. The compact retention index is
+unchanged at 28,319,744 bytes, valid/ready, four keys and no INCLUDE. PostgreSQL
+start time remains 01:13:20 with 96 MiB shared buffers and no pending restart.
+
+Resource pressure remains material: an advancing 60.712-second sample ending
+02:04:30 recorded 757,268,480 bytes swap-in, 673,722,368 bytes swap-out, 99,070 major
+faults and 64.12% CPU I/O wait, with zero OOM kills and 162,873,344 bytes available
+RAM. Successful service checks do not imply that this pressure is resolved.
+No further restart or index change was justified by the working collection,
+publication and archive evidence. The previously reported December 2 database-size
+quota warning remains an external capacity concern; billing was not changed.
+
+`followup-0203.json` preserves structured assertions, protected reads, resource
+measurements, ten API results and the three-object archive audit. No source change
+or phone interaction; zero repair attempts this check, one for the incident.
