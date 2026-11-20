@@ -2061,3 +2061,56 @@ followup-20261119-2259.json preserves the initial failure and successful split
 reads plus archive audit. Operator attempts this check: zero; November 18 incident
 total: one. No manual provider collection, phone launch, billing/routing/budget
 changes or raw/research modifications occurred.
+
+## November 20, 00:00 heartbeat: complete sweep; midnight local cleanup pending
+
+Full protected status, supplemental SQL and independent host metrics succeeded.
+Run 68949 completed November 19's 23:00 sweep at 23:14:34.211148 UTC: 72/72
+batches, 141,660 fixed-inventory observations, 92,315 stations reporting prices
+and correct 59/9/4 routing. Requests 72/92 and lookups 141,660/161,660 stayed
+within budget. Six serving client timeouts appeared in that hour and three early
+in 00:00. Scheduled projection replay completed northwest jobs 4960154/55/56
+on their first attempts at 23:15:07, 23:16:07 and 23:17:06 without errors.
+Latest and retained complete-run projection backlogs are zero. All ten Trends
+scopes published run 68949 at 23:18:00.244093. Prior shared cooldown remains
+expired; no new provider denial or operator re-enable.
+
+Fresh immutable archive read-back passed at 00:01:55.010 for one batch per
+region, including replayed northwest job 4960156. Hashes, bytes, provenance,
+station data and observation windows passed. Three samples do not verify all
+72 objects or establish pump truth. Recovery was automatic, not an operator
+repair. Current run 69009 had 5/72 batches complete at the status snapshot;
+the later budget read showed six requests and 10,213 lookups, within its 01:00
+deadline. Rolling eight-day reconciliation has 191 complete plus the current
+running hour, with zero partial or expired absent/running/current absent slots.
+Aged-out historical gaps remain documented, not reconstructed.
+
+All six schedules and three fixed routes are active. National retention returned
+HTTP 200 at 23:00/10/20/30/40/50 and 00:00. Latest pass removed 72 operational
+objects, one metadata hour and 68 detached references. Raw eligibility, overdue
+national metadata and deferred hours are zero. Local retention last succeeded
+at November 19 23:17; the first cleanup after midnight is due at 00:17. UTC day
+rollover made 90,347 November 12 local-history rows newly eligible. Live function
+read-back confirms cleanup is bounded to 20,000 rows per invocation. This is a
+pending scheduled cleanup backlog, not a zero-backlog claim or a missed schedule;
+subsequent checks must track its reduction. Other automatic metadata cleanup may
+also remove references, so a later drop cannot be attributed solely to that bound.
+Local history has 721,664 rows, oldest November 12, newest November 20.
+
+Raw 48-hour and metadata eight-day policies, original research/evaluation and
+latest-cache protections are unchanged. Archive accounting is
+746,541,392/900,000,000 bytes; Storage 750,816,340; database 2,167,049,363.
+Compact index is 28,319,744 bytes (8 KiB increase), four keys without INCLUDE;
+all three maintenance indexes are valid/ready. Size alone does not establish
+bloat. Available RAM 105,701,376 bytes, occupied swap 457,850,880, load
+0.96/0.39/0.28. No active I/O wait, Lock wait or idle transaction appeared in
+the supplemental snapshot. Cumulative paging/I/O values do not demonstrate a
+permanent resource fix. PostgreSQL start remains November 18 01:33:51,
+shared_buffers 96 MiB, no pending restart.
+
+Service assertions passed with the explicitly recorded midnight local-history
+backlog; followup-20261120-0000.json includes live cleanup policy and archive
+audit. Operator attempts this check: zero; November 18 incident total: one.
+No manual provider collection, phone launch, billing/routing/budget changes or
+raw/research modifications occurred. Continuous service and closed city/research
+boundaries remain unchanged.
