@@ -335,3 +335,37 @@ A separate 07:00:22 protected read confirms run 69385 began on schedule, with on
 successful batch and another in progress. Its deadline is 08:00; it is not yet a
 complete sweep. This later observation is stored separately from the 06:58 full
 status snapshot.
+
+## 08:04 UTC: scheduled collection, publication and retention pass
+
+Run 69385 completed 72/72 batches at 07:14:45.130353: 141,660 fixed-inventory
+observations, 92,694 priced stations, correct 59 / 9 / 4 routing, 72 requests and
+141,660 lookups. All ten Trends scopes published it at 07:15:00.378278. Latest
+and retained complete-run projection gaps are zero. Current run 69445 has 22
+successful batches at status capture and 23 requests / 43,960 lookups in the
+later budget read, within the unchanged limits and 09:00 deadline. Rolling
+192-slot reconciliation remains 190 complete, one known midnight partial hour,
+one current running hour and no expired absent/running slots; older gaps remain
+preserved separately.
+
+All six schedules and three routes are active. The old transient cooldown expired
+at 06:09:27; recent returned events show serving timeouts without a newer denial.
+National retention at 08:00 returned HTTP 200, removing 72 operational objects and
+one metadata hour, detaching 32 covered references. Eligible raw objects, overdue
+metadata, deferred hours and local-history backlog are zero. The 07:17 local
+cleanup succeeded. Archive accounting is 744,601,763 / 900,000,000 bytes and Storage
+is 748,876,711 bytes. Last actual immutable regional sampling remains the 02:59:55
+audit; no new object audit is claimed. Research, evaluation data and closed city
+collection are unchanged.
+
+Full status and all protected supplemental reads succeeded. The compact index is
+still 28,319,744 bytes, valid/ready with four keys and no INCLUDE. PostgreSQL start
+remains 01:13:20, shared buffers 96 MiB, pending restart false; snapshots show no
+lock wait or idle transaction. An advancing 61.474-second interval ending
+08:05:49 recorded 309,805,056 bytes swap-in, 360,431,616 bytes swap-out, 39,774 major
+faults and 22.16% CPU I/O wait, zero OOM kills and 151,515,136 bytes available RAM.
+Resource pressure persists; successful service checks do not prove its resolution.
+
+`followup-0804.json` records passed assertions. No new gap, operator repair,
+provider replay, configuration/billing change or phone interaction. Incident repair
+count remains one; the previously reported December 2 quota warning is unchanged.
