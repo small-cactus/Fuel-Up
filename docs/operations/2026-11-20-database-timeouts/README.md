@@ -299,3 +299,39 @@ successful service checks; no permanent resource fix is claimed.
 Service assertions passed in `followup-0603.json`. No new repair, collection
 replay, billing/configuration change or phone interaction. Incident repair count
 remains one. The previously reported December 2 quota warning is unchanged.
+
+## 06:58 UTC: complete sweep and no new operational gap
+
+Run 69325 completed 72/72 batches at 06:16:46.373049 with 141,660 fixed-inventory
+observations, 92,684 priced stations and correct 59 / 9 / 4 routing. It used
+74 requests / 145,660 lookups within unchanged limits. A transient 503 cooldown
+expired at 06:09:27 without intervention. All ten cache scopes published the
+complete run at 06:17:00.276484. Latest and retained complete-run projection gaps
+are zero. The rolling 192-slot snapshot contains 191 complete hours and the
+unchanged midnight partial hour, with no absent or expired-running slots.
+Historical gaps outside retained metadata remain in their incident records.
+
+All six schedules and three routes are active. National retention through 06:50
+returned HTTP 200; eligible raw objects, overdue metadata hours, deferred hours
+and local daily-history backlog are zero. The 06:17 local cleanup succeeded.
+Archive accounting is 747,137,069 / 900,000,000 bytes and Storage is 751,412,017
+bytes. Last actual regional archive sampling remains the successful 02:59:55
+audit; no fresh object audit is claimed for run 69325. City research is complete,
+and research/evaluation protections, raw retention and billing remain unchanged.
+
+Full status and all supplemental reads succeeded. The compact index remains
+28,319,744 bytes, valid/ready with four keys and no INCLUDE; PostgreSQL still
+reports its 01:13:20 start and 96 MiB shared buffers. No lock wait or idle
+transaction appeared. An advancing 60.66-second interval ending 06:59:47 recorded
+88,002,560 bytes swap-in, 94,474,240 bytes swap-out, 12,656 major faults and 8.06%
+CPU I/O wait, with no OOM kills and 188,100,608 bytes available RAM. This is a
+lower-pressure interval, not proof of permanent resource recovery.
+
+`followup-0658.json` contains passed service assertions. No new gap, operator
+repair, provider collection/replay, configuration change or phone interaction.
+The existing December 2 quota warning is unchanged. Incident repair count is one.
+
+A separate 07:00:22 protected read confirms run 69385 began on schedule, with one
+successful batch and another in progress. Its deadline is 08:00; it is not yet a
+complete sweep. This later observation is stored separately from the 06:58 full
+status snapshot.
