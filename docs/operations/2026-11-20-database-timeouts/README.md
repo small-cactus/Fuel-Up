@@ -369,3 +369,43 @@ Resource pressure persists; successful service checks do not prove its resolutio
 `followup-0804.json` records passed assertions. No new gap, operator repair,
 provider replay, configuration/billing change or phone interaction. Incident repair
 count remains one; the previously reported December 2 quota warning is unchanged.
+
+## 09:07 UTC: service and fresh regional archive checks pass
+
+Run 69445 completed 72/72 batches at 08:15:04.872459 with 141,660 fixed-inventory
+observations, 92,661 priced stations, correct 59 / 9 / 4 routing, 73 requests and
+143,660 lookups. Scheduled projection replay for east job 4995836 completed on
+its first attempt at 08:16:05. All ten cache scopes published the run at
+08:17:00.303093; latest and retained complete-run projection gaps are zero.
+At 09:08:24 actual immutable read-back passed hash, byte count, station-ID,
+schema, observation-window and provenance checks for one object per region,
+including replayed job 4995836. This is three-object sampling, not all 72 objects
+or verified pump truth. Replay and publication were automatic, with no operator
+repair or provider collection.
+
+Current run 69505 had 35 successful batches at status capture, with 37 requests /
+71,960 lookups in the later budget read and a 10:00 deadline. Its transient 503
+cooldown expired at 09:05:40 without intervention. Rolling reconciliation remains
+190 complete hours, the known midnight partial hour, one current running hour and
+zero expired absent/running slots; older documented gaps are not erased.
+
+All six schedules and three routes remain active. National retention at 09:00
+returned HTTP 200, removing 72 operational objects and one metadata hour and
+detaching 13 covered references. Eligible raw objects, overdue metadata, deferred
+hours and local-history backlog are zero. Local cleanup succeeded at 08:17.
+Archive accounting is 745,109,072 / 900,000,000 bytes and Storage is 749,384,020
+bytes. City research remains complete; research and evaluation boundaries are
+unchanged.
+
+Full status and all small supplemental reads succeeded. Compact index size is
+unchanged at 28,319,744 bytes, valid/ready with no INCLUDE; PostgreSQL still has
+its 01:13:20 start, 96 MiB shared buffers and no pending restart. No lock wait or
+idle transaction appeared. An advancing 61.128-second interval ending 09:08:49
+recorded 353,554,432 bytes swap-in, 466,104,320 bytes swap-out, 46,964 major faults,
+26.98% CPU I/O wait, zero OOM kills and 102,252,544 bytes available RAM. Known
+resource pressure persists despite continued successful scheduled service.
+
+`followup-0907.json` contains passed service assertions and the fresh archive
+audit. No new operational gap, repair, configuration/billing change or phone
+interaction. The incident repair count remains one and the prior December 2 quota
+warning is unchanged.
