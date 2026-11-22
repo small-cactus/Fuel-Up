@@ -1,0 +1,27 @@
+# November 22 midnight job startup timeouts
+
+The daily check at 17:56 UTC found one new partial operational hour. Run 71812 (00:00) succeeded in 52 of 72 batches, observing 101,960 fixed-inventory stations (63,366 priced), and closed partial at 01:01:15 with 20 missed batches. Those missed jobs had zero attempts and HOUR_DEADLINE_MISSED. Successful observations stopped at 00:10:40. Seven saved serving timeout events preceded that stop. No missing data was recreated.
+
+## Saved diagnosis and automatic recovery
+
+Cron history establishes a broader startup failure beginning at 00:11: dispatch, discovery, projection repair and Trends cache had respectively 45, 44, 41 and 45 failed invocations in the checked 00:00–01:30 interval. Their recorded errors were job startup timeout, with last failures ending around 01:13:10. Watchdog, retention, local retention and alert delivery also recorded startup timeouts. One alert sample statement timed out; this does not establish that it caused the outage. No configured cron entry runs exclusively at midnight. The local-retention invocation at 00:17 failed to start, after collection had already stopped. Historical worker HTTP responses had expired: their oldest retained timestamp was 12:00, so those responses cannot identify the midnight failure mechanism.
+
+The 01:00 sweep completed 72/72 at 01:28:35; the 02:00 sweep completed at 02:14:35. PostgreSQL still reports its November 20 01:13:20 start. Recovery occurred automatically before this check, without a new operator restart or repair. The exact initiating cause of the recurring midnight startup failures remains unresolved. Present resource metrics cannot establish the state of the host during the historical outage.
+
+## Current verification
+
+Run 72787 (17:00) completed all 72 batches at 17:16:04, observing 141,660 inventory stations and 88,469 priced stations. All three fixed routes matched their assigned regions (59 east, 9 southwest, 4 northwest), with no wrong-region jobs. Ten complete-sweep cache scopes published at 17:17. Latest and retained complete-run projection backlogs were zero. The 17:00 and 16:00 sweeps used 73/74 requests and 143,660/145,660 lookups, below 92/161,660 limits. Shared cooldown expired normally at 16:14:22; the service remains enabled and continuous. All six national/local service schedules remain active. The completed city campaign and original research window remain closed.
+
+The retained 192-hour window contains 189 complete and three partial hours: November 20, 21 and 22 midnight, with 56, 39 and 20 missed batches respectively. There are zero absent expired slots and zero expired running slots. The current 17:00 hour was complete. Earlier operational gaps outside retained metadata remain documented separately; this is not a fresh all-time gap total.
+
+Three actual immutable archive reads, one per fixed region of run 72787, passed SHA-256, compressed byte count, schema, ordered inventory IDs, time-window and provenance checks. The monitor issued no provider collection requests. This sample verifies three objects, not all 72; fixed-inventory app prices are not verified pump truth.
+
+National retention responses all returned HTTP 200. At 16:00 and 17:00 each pass removed 72 raw objects and detached the bounded maximum of 100 content references, deferring one metadata hour. The 16:10 and 17:10 passes detached the remaining 13 and 39 references and removed those hours. Latest retention at 17:50 was idle with zero deferrals. Raw eligible, overdue metadata and overdue local-history counts are all zero; local retention succeeded at 17:17. Accounted archive usage was 746,039,180 of 900,000,000 bytes; storage reported 750,314,128 bytes. Raw retention remains 48 hours and operational metadata eight days, with original research, reserved evaluation and latest published cache protections unchanged.
+
+The compact reference index remains valid and ready at 28,549,120 bytes, unchanged from yesterday, and has no INCLUDE columns. This rules out new size growth in this interval, not all possible bloat. No lock waits or idle transactions appeared in the activity snapshot. Host counters advanced over 60.919 seconds: 112,226,304 available memory bytes, 45,875,200 bytes swapped in, 34,299,904 swapped out, 4.13% CPU I/O wait and zero OOM kills. Resource pressure persists. Table statistics show latest-station autovacuum at 17:16 with zero estimated dead tuples; local daily history has 135,358 estimated dead tuples and remains within retention.
+
+## Validation and actions
+
+Read the November 8 incident guidance. Full status, three small protected SQL groups, historical failure reads, current invariant assertions and regional archive read-back passed. The initial blanket assertion requiring every recent retention pass to have zero deferrals correctly identified the two bounded deferrals; validation now explicitly verifies their 100-reference cap and subsequent successful drain, preserving both in the evidence. No deferral is hidden as a failure-free pass.
+
+Zero repair attempts this incident: scheduled service and archive integrity were already recovered, and the evidence does not establish a safe targeted change that resolves historical startup timeouts. No restart, re-enablement, schedule modification, billing change, provider replay, raw-price rewrite or research-data change was made. Continue daily monitoring at the user's selected 1 PM America/New_York cadence; do not attribute automatic recovery to this diagnostic work.

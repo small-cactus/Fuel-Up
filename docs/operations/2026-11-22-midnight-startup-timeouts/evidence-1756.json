@@ -1,0 +1,1213 @@
+{
+  "observedAt": "2026-11-22T17:57:16.232119+00:00",
+  "status": {
+    "accounted_archive_bytes": 746039180,
+    "config": {
+      "approved_lookups_per_hour": 161660,
+      "archive_budget_bytes": 900000000,
+      "catalog_id": "4d220708-04f3-4c27-bdae-88d1aa45ebe2",
+      "catalog_valid_until": "2026-10-07T18:19:00+00:00",
+      "continuous": true,
+      "enabled": true,
+      "ends_at": "2026-10-07T18:19:00+00:00",
+      "halt_reason": "UPSTREAM_HTTP_503",
+      "id": true,
+      "last_dispatch_at": "2026-11-22T17:16:00.327461+00:00",
+      "last_request_at": "2026-11-22T17:16:01.358226+00:00",
+      "max_requests_per_hour": 92,
+      "operational_raw_hours": 48,
+      "operational_starts_at": "2026-10-07T19:00:00+00:00",
+      "provider_backoff_until": "2026-11-22T16:14:22.593108+00:00",
+      "request_interval_seconds": 10,
+      "starts_at": "2026-09-30T22:00:00+00:00"
+    },
+    "cron": [
+      {
+        "active": true,
+        "name": "fuel-national-dispatch",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-watchdog",
+        "schedule": "*/5 * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-trends-cache",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-projection-repair",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-national-retention",
+        "schedule": "*/10 * * * *"
+      },
+      {
+        "active": true,
+        "name": "fuel-local-history-retention",
+        "schedule": "17 * * * *"
+      }
+    ],
+    "database_bytes": 2287176851,
+    "events": [
+      {
+        "code": "NETWORK_OR_RUNTIME_ERROR",
+        "created_at": "2026-11-22T17:02:34.632435+00:00",
+        "job_id": 5236425,
+        "retry_after_seconds": 0
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-11-22T17:01:44.687567+00:00",
+        "job_id": 5236484,
+        "retry_after_seconds": 0
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-11-22T17:01:23.407524+00:00",
+        "job_id": 5236482,
+        "retry_after_seconds": 0
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-11-22T17:00:28.28786+00:00",
+        "job_id": 5236491,
+        "retry_after_seconds": 0
+      },
+      {
+        "code": "UPSTREAM_HTTP_503",
+        "created_at": "2026-11-22T16:14:17.593108+00:00",
+        "job_id": 5232148,
+        "retry_after_seconds": 5
+      },
+      {
+        "code": "PROVIDER_RESPONSE",
+        "created_at": "2026-11-22T16:14:17.375666+00:00",
+        "job_id": 5232148,
+        "retry_after_seconds": 0
+      }
+    ],
+    "hours": [
+      {
+        "archive_bytes": 3559538,
+        "completed_at": "2026-11-22T17:16:04.847368+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 72787,
+        "missed_batches": 0,
+        "observed_stations": 141660,
+        "priced_stations": 88469,
+        "slot_at": "2026-11-22T17:00:00+00:00",
+        "status": "complete",
+        "succeeded_batches": 72
+      },
+      {
+        "archive_bytes": 3564385,
+        "completed_at": "2026-11-22T16:17:25.152855+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 72727,
+        "missed_batches": 0,
+        "observed_stations": 141660,
+        "priced_stations": 88527,
+        "slot_at": "2026-11-22T16:00:00+00:00",
+        "status": "complete",
+        "succeeded_batches": 72
+      },
+      {
+        "archive_bytes": 3578612,
+        "completed_at": "2026-11-22T15:15:25.168641+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 72667,
+        "missed_batches": 0,
+        "observed_stations": 141660,
+        "priced_stations": 88912,
+        "slot_at": "2026-11-22T15:00:00+00:00",
+        "status": "complete",
+        "succeeded_batches": 72
+      },
+      {
+        "archive_bytes": 3582426,
+        "completed_at": "2026-11-22T14:14:35.725385+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 72607,
+        "missed_batches": 0,
+        "observed_stations": 141660,
+        "priced_stations": 89173,
+        "slot_at": "2026-11-22T14:00:00+00:00",
+        "status": "complete",
+        "succeeded_batches": 72
+      }
+    ],
+    "local_trends_history": {
+      "bytes": 307912704,
+      "newest_day": "2026-11-22",
+      "oldest_day": "2026-11-15",
+      "past_retention_rows": 0,
+      "rows": 706454
+    },
+    "maintenance_indexes": [
+      {
+        "bytes": 47259648,
+        "name": "fuel_national_price_order",
+        "ready": true,
+        "valid": true
+      },
+      {
+        "bytes": 27475968,
+        "name": "fuel_station_price_lookup_pkey",
+        "ready": true,
+        "valid": true
+      },
+      {
+        "bytes": 28549120,
+        "name": "fuel_station_retention_reference_compact",
+        "ready": true,
+        "valid": true
+      }
+    ],
+    "operational_slots": {
+      "complete": 189,
+      "current_absent": 0,
+      "expected": 192,
+      "expired_absent": 0,
+      "expired_running": 0,
+      "partial": 3
+    },
+    "projection_backlog": {
+      "completed_at": "2026-11-22T17:16:04.847368+00:00",
+      "missing_batches": 0,
+      "run_id": 72787,
+      "slot_at": "2026-11-22T17:00:00+00:00"
+    },
+    "projection_repairs": [
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-22T13:15:07.80983+00:00",
+        "job_id": 5219211,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-22T13:16:07.80983+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-22T08:15:12.30679+00:00",
+        "job_id": 5197604,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-22T08:16:12.30679+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-22T05:15:06.872091+00:00",
+        "job_id": 5184645,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-22T05:16:06.872091+00:00"
+      },
+      {
+        "attempts": 1,
+        "completed_at": "2026-11-21T22:18:06.870575+00:00",
+        "job_id": 5157586,
+        "last_error": null,
+        "lease_until": null,
+        "next_attempt_at": "2026-11-21T22:19:06.870575+00:00"
+      }
+    ],
+    "regional_hours": [
+      {
+        "execution_region": "us-west-2",
+        "expected_batches": 4,
+        "observed_stations": 6213,
+        "run_id": 72787,
+        "slot_at": "2026-11-22T17:00:00+00:00",
+        "succeeded_batches": 4,
+        "wrong_region_jobs": 0
+      },
+      {
+        "execution_region": "us-west-1",
+        "expected_batches": 9,
+        "observed_stations": 17747,
+        "run_id": 72787,
+        "slot_at": "2026-11-22T17:00:00+00:00",
+        "succeeded_batches": 9,
+        "wrong_region_jobs": 0
+      },
+      {
+        "execution_region": "us-east-1",
+        "expected_batches": 59,
+        "observed_stations": 117700,
+        "run_id": 72787,
+        "slot_at": "2026-11-22T17:00:00+00:00",
+        "succeeded_batches": 59,
+        "wrong_region_jobs": 0
+      },
+      {
+        "execution_region": "us-west-1",
+        "expected_batches": 9,
+        "observed_stations": 17747,
+        "run_id": 72727,
+        "slot_at": "2026-11-22T16:00:00+00:00",
+        "succeeded_batches": 9,
+        "wrong_region_jobs": 0
+      },
+      {
+        "execution_region": "us-west-2",
+        "expected_batches": 4,
+        "observed_stations": 6213,
+        "run_id": 72727,
+        "slot_at": "2026-11-22T16:00:00+00:00",
+        "succeeded_batches": 4,
+        "wrong_region_jobs": 0
+      },
+      {
+        "execution_region": "us-east-1",
+        "expected_batches": 59,
+        "observed_stations": 117700,
+        "run_id": 72727,
+        "slot_at": "2026-11-22T16:00:00+00:00",
+        "succeeded_batches": 59,
+        "wrong_region_jobs": 0
+      }
+    ],
+    "regions": [
+      {
+        "enabled": true,
+        "function_name": "fuel-national-northwest",
+        "last_dispatch_at": "2026-11-22T17:00:00.158359+00:00",
+        "region": "us-west-2"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-southwest",
+        "last_dispatch_at": "2026-11-22T17:05:00.38456+00:00",
+        "region": "us-west-1"
+      },
+      {
+        "enabled": true,
+        "function_name": "fuel-national-east",
+        "last_dispatch_at": "2026-11-22T17:16:00.327461+00:00",
+        "region": "us-east-1"
+      }
+    ],
+    "retention": {
+      "eligible_objects": 0
+    },
+    "retention_metadata": {
+      "oldest_deadline": null,
+      "past_age_threshold_runs": 0
+    },
+    "retention_worker": [
+      {
+        "created": "2026-11-22T17:50:00.26422+00:00",
+        "result": {
+          "deferred_operational_hours": 0,
+          "detached_content_references": 0,
+          "marked_archives": 0,
+          "providerRequests": 0,
+          "removedObjects": 0,
+          "removed_operational_hours": 0,
+          "status": "idle"
+        },
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-11-22T17:40:00.255876+00:00",
+        "result": {
+          "deferred_operational_hours": 0,
+          "detached_content_references": 0,
+          "marked_archives": 0,
+          "providerRequests": 0,
+          "removedObjects": 0,
+          "removed_operational_hours": 0,
+          "status": "idle"
+        },
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-11-22T17:30:00.291339+00:00",
+        "result": {
+          "deferred_operational_hours": 0,
+          "detached_content_references": 0,
+          "marked_archives": 0,
+          "providerRequests": 0,
+          "removedObjects": 0,
+          "removed_operational_hours": 0,
+          "status": "idle"
+        },
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-11-22T17:20:01.174818+00:00",
+        "result": {
+          "deferred_operational_hours": 0,
+          "detached_content_references": 0,
+          "marked_archives": 0,
+          "providerRequests": 0,
+          "removedObjects": 0,
+          "removed_operational_hours": 0,
+          "status": "idle"
+        },
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-11-22T17:10:00.547479+00:00",
+        "result": {
+          "deferred_operational_hours": 0,
+          "detached_content_references": 39,
+          "marked_archives": 0,
+          "providerRequests": 0,
+          "removedObjects": 0,
+          "removed_operational_hours": 1,
+          "status": "idle"
+        },
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-11-22T17:00:00.318856+00:00",
+        "result": {
+          "deferred_operational_hours": 1,
+          "detached_content_references": 100,
+          "marked_archives": 72,
+          "providerRequests": 0,
+          "removedObjects": 72,
+          "removed_operational_hours": 0,
+          "status": "retained"
+        },
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-11-22T16:50:00.263861+00:00",
+        "result": {
+          "deferred_operational_hours": 0,
+          "detached_content_references": 0,
+          "marked_archives": 0,
+          "providerRequests": 0,
+          "removedObjects": 0,
+          "removed_operational_hours": 0,
+          "status": "idle"
+        },
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-11-22T16:40:00.269957+00:00",
+        "result": {
+          "deferred_operational_hours": 0,
+          "detached_content_references": 0,
+          "marked_archives": 0,
+          "providerRequests": 0,
+          "removedObjects": 0,
+          "removed_operational_hours": 0,
+          "status": "idle"
+        },
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-11-22T16:30:00.312484+00:00",
+        "result": {
+          "deferred_operational_hours": 0,
+          "detached_content_references": 0,
+          "marked_archives": 0,
+          "providerRequests": 0,
+          "removedObjects": 0,
+          "removed_operational_hours": 0,
+          "status": "idle"
+        },
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-11-22T16:20:00.408043+00:00",
+        "result": {
+          "deferred_operational_hours": 0,
+          "detached_content_references": 0,
+          "marked_archives": 0,
+          "providerRequests": 0,
+          "removedObjects": 0,
+          "removed_operational_hours": 0,
+          "status": "idle"
+        },
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-11-22T16:10:00.432142+00:00",
+        "result": {
+          "deferred_operational_hours": 0,
+          "detached_content_references": 13,
+          "marked_archives": 0,
+          "providerRequests": 0,
+          "removedObjects": 0,
+          "removed_operational_hours": 1,
+          "status": "idle"
+        },
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-11-22T16:00:00.299005+00:00",
+        "result": {
+          "deferred_operational_hours": 1,
+          "detached_content_references": 100,
+          "marked_archives": 72,
+          "providerRequests": 0,
+          "removedObjects": 72,
+          "removed_operational_hours": 0,
+          "status": "retained"
+        },
+        "status_code": 200,
+        "timed_out": false
+      }
+    ],
+    "storage_bytes": 750314128,
+    "trends_cache": {
+      "age_minutes": 40.115703933333336,
+      "behind_latest_complete": false,
+      "published_at": "2026-11-22T17:17:00.339337+00:00",
+      "run_id": 72787,
+      "scopes": 10
+    }
+  },
+  "supplemental": {
+    "activity": [
+      {
+        "count": 1,
+        "state": null,
+        "wait_event": "WalWriterMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "count": 1,
+        "state": null,
+        "wait_event": "LogicalLauncherMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "count": 1,
+        "state": null,
+        "wait_event": "AutovacuumMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "count": 1,
+        "state": null,
+        "wait_event": "CheckpointerMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "count": 2,
+        "state": "active",
+        "wait_event": null,
+        "wait_event_type": null
+      },
+      {
+        "count": 1,
+        "state": null,
+        "wait_event": "BgwriterMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "count": 14,
+        "state": "idle",
+        "wait_event": "ClientRead",
+        "wait_event_type": "Client"
+      },
+      {
+        "count": 1,
+        "state": null,
+        "wait_event": "ArchiverMain",
+        "wait_event_type": "Activity"
+      },
+      {
+        "count": 2,
+        "state": null,
+        "wait_event": "Extension",
+        "wait_event_type": "Extension"
+      }
+    ],
+    "campaign": [
+      {
+        "backoff_until": "2026-10-07T18:12:54.381439+00:00",
+        "ends_at": "2026-10-07T18:19:00+00:00",
+        "status": "complete"
+      }
+    ],
+    "index_structure": "CREATE INDEX fuel_station_retention_reference_compact ON public.fuel_station_latest USING btree (job_id, observation_catalog_id, observation_ordinal, observed_at)",
+    "observed_at": "2026-11-22T17:57:16.232119+00:00",
+    "postmaster_start": "2026-11-20T01:13:20.319639+00:00",
+    "settings": {
+      "pending_restart": false,
+      "setting": "12288",
+      "unit": "8kB"
+    },
+    "budgets": [
+      {
+        "deadline_at": "2026-11-22T18:00:00+00:00",
+        "id": 72787,
+        "lookups": 143660,
+        "requests": 73,
+        "slot_at": "2026-11-22T17:00:00+00:00",
+        "status": "complete"
+      },
+      {
+        "deadline_at": "2026-11-22T17:00:00+00:00",
+        "id": 72727,
+        "lookups": 145660,
+        "requests": 74,
+        "slot_at": "2026-11-22T16:00:00+00:00",
+        "status": "complete"
+      }
+    ],
+    "retained_projection_gaps": 0
+  },
+  "splitGroups": {
+    "brief": {
+      "ok": true,
+      "elapsedMs": 3856
+    },
+    "budgets": {
+      "ok": true,
+      "elapsedMs": 2088
+    },
+    "projections": {
+      "ok": true,
+      "elapsedMs": 3492
+    }
+  },
+  "pressure": {
+    "sampledAt": "2026-11-22T17:58:19.330Z",
+    "project": "vjindchxfebaltbslqwc",
+    "elapsedSeconds": 60.919,
+    "rebooted": false,
+    "countersAdvanced": true,
+    "limitation": null,
+    "memoryBytes": {
+      "total": 431304704,
+      "available": 112226304,
+      "free": 6922240,
+      "cached": 167481344,
+      "buffers": 516096,
+      "swapTotal": 1073737728,
+      "swapFree": 695926784
+    },
+    "swapInPages": 11200,
+    "swapOutPages": 8374,
+    "swapInBytesAt4KiB": 45875200,
+    "swapOutBytesAt4KiB": 34299904,
+    "majorFaults": 5493,
+    "oomKills": 0,
+    "cpuModePercent": {
+      "idle": 94.08981489167493,
+      "iowait": 4.133809247114919,
+      "irq": 0,
+      "nice": 0,
+      "softirq": 0.03320328712541734,
+      "steal": 0.09960986137622842,
+      "system": 0.7304723167590399,
+      "user": 0.9130903959494605
+    },
+    "cpuIoWaitPercent": 4.133809247114919,
+    "disks": {
+      "nvme0n1": {
+        "io_time_seconds": 2.838000000003376,
+        "read_bytes": 65892352,
+        "written_bytes": 35217408
+      },
+      "nvme1n1": {
+        "io_time_seconds": 6.59900000000016,
+        "read_bytes": 90378240,
+        "written_bytes": 3170304
+      }
+    }
+  },
+  "localRetention": [
+    {
+      "end_time": "2026-11-22 17:17:00.435841+00",
+      "return_message": "1 row",
+      "start_time": "2026-11-22 17:17:00.331471+00",
+      "status": "succeeded"
+    }
+  ],
+  "assertionsPassed": true,
+  "repairAttemptsThisCheck": 0,
+  "incidentRepairAttempts": 0,
+  "monitorProviderRequests": 0,
+  "limitations": [
+    "Rolling eight-day slot count contains the November 20, November 21 and November 22 midnight partial hours; older aged-out gaps remain documented.",
+    "Current running hour is allowed until its deadline.",
+    "Fixed inventory app observations are not verified pump truth.",
+    "Resource pressure persists; successful service checks are not proof of permanent resolution."
+  ],
+  "midnight": {
+    "events": [
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-11-22T00:09:09.861435+00:00",
+        "job_id": 5166252,
+        "retry_after_seconds": 0
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-11-22T00:08:40.969535+00:00",
+        "job_id": 5166250,
+        "retry_after_seconds": 0
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-11-22T00:08:13.184561+00:00",
+        "job_id": 5166247,
+        "retry_after_seconds": 0
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-11-22T00:04:40.491579+00:00",
+        "job_id": 5166230,
+        "retry_after_seconds": 0
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-11-22T00:01:43.438268+00:00",
+        "job_id": 5166284,
+        "retry_after_seconds": 0
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-11-22T00:01:11.961801+00:00",
+        "job_id": 5166281,
+        "retry_after_seconds": 0
+      },
+      {
+        "code": "SERVING_DEFERRED_CLIENT_TIMEOUT",
+        "created_at": "2026-11-22T00:00:29.881802+00:00",
+        "job_id": 5166291,
+        "retry_after_seconds": 0
+      }
+    ],
+    "jobs": [
+      {
+        "attempts": 0,
+        "batches": 20,
+        "first_start": null,
+        "last_error": "HOUR_DEADLINE_MISSED",
+        "last_observed": null,
+        "status": "missed"
+      },
+      {
+        "attempts": 52,
+        "batches": 52,
+        "first_start": "2026-11-22T00:00:10.453+00:00",
+        "last_error": null,
+        "last_observed": "2026-11-22T00:10:40.761+00:00",
+        "status": "succeeded"
+      }
+    ],
+    "partials": [
+      {
+        "archive_bytes": 841433,
+        "completed_at": "2026-11-20T01:01:00.492887+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 69009,
+        "missed_batches": 56,
+        "observed_stations": 30213,
+        "priced_stations": 20126,
+        "slot_at": "2026-11-20T00:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 16
+      },
+      {
+        "archive_bytes": 2605880,
+        "completed_at": "2026-11-22T01:01:15.551923+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 71812,
+        "missed_batches": 20,
+        "observed_stations": 101960,
+        "priced_stations": 63366,
+        "slot_at": "2026-11-22T00:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 52
+      },
+      {
+        "archive_bytes": 1610750,
+        "completed_at": "2026-11-21T01:01:00.817269+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 70405,
+        "missed_batches": 39,
+        "observed_stations": 63960,
+        "priced_stations": 39507,
+        "slot_at": "2026-11-21T00:00:00+00:00",
+        "status": "partial",
+        "succeeded_batches": 33
+      }
+    ],
+    "schedules": [
+      {
+        "active": true,
+        "jobid": 7,
+        "name": "fuel-national-discovery",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "jobid": 15,
+        "name": "fuel-national-trends-cache",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "jobid": 17,
+        "name": "fuel-e85-directory-daily",
+        "schedule": "45 6 * * *"
+      },
+      {
+        "active": true,
+        "jobid": 20,
+        "name": "fuel-national-projection-repair",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "jobid": 4,
+        "name": "fuel-national-dispatch",
+        "schedule": "* * * * *"
+      },
+      {
+        "active": true,
+        "jobid": 12,
+        "name": "fuel-national-watchdog",
+        "schedule": "*/5 * * * *"
+      },
+      {
+        "active": true,
+        "jobid": 23,
+        "name": "fuel-national-retention",
+        "schedule": "*/10 * * * *"
+      },
+      {
+        "active": true,
+        "jobid": 26,
+        "name": "fuel-local-history-retention",
+        "schedule": "17 * * * *"
+      },
+      {
+        "active": true,
+        "jobid": 28,
+        "name": "fuel-price-alert-samples",
+        "schedule": "7,27,47 * * * *"
+      },
+      {
+        "active": true,
+        "jobid": 29,
+        "name": "fuel-price-alert-delivery",
+        "schedule": "9,29,49 * * * *"
+      }
+    ]
+  },
+  "cronDiagnosis": {
+    "cron_midnight": [
+      {
+        "executions": 1,
+        "failed": 1,
+        "first_start": "2026-11-22T00:17:00.008078+00:00",
+        "jobname": "fuel-local-history-retention",
+        "last_end": "2026-11-22T00:17:39.552694+00:00",
+        "max_seconds": 39.544616,
+        "status": "failed"
+      },
+      {
+        "executions": 1,
+        "failed": 0,
+        "first_start": "2026-11-22T01:17:00.334399+00:00",
+        "jobname": "fuel-local-history-retention",
+        "last_end": "2026-11-22T01:17:05.797194+00:00",
+        "max_seconds": 5.462795,
+        "status": "succeeded"
+      },
+      {
+        "executions": 44,
+        "failed": 44,
+        "first_start": "2026-11-22T00:11:00.004159+00:00",
+        "jobname": "fuel-national-discovery",
+        "last_end": "2026-11-22T01:13:10.027802+00:00",
+        "max_seconds": 119.943622,
+        "status": "failed"
+      },
+      {
+        "executions": 46,
+        "failed": 0,
+        "first_start": "2026-11-22T00:00:00.40897+00:00",
+        "jobname": "fuel-national-discovery",
+        "last_end": "2026-11-22T01:29:00.402008+00:00",
+        "max_seconds": 37.160338,
+        "status": "succeeded"
+      },
+      {
+        "executions": 45,
+        "failed": 45,
+        "first_start": "2026-11-22T00:11:00.004159+00:00",
+        "jobname": "fuel-national-dispatch",
+        "last_end": "2026-11-22T01:13:10.011845+00:00",
+        "max_seconds": 119.899625,
+        "status": "failed"
+      },
+      {
+        "executions": 45,
+        "failed": 0,
+        "first_start": "2026-11-22T00:00:00.404173+00:00",
+        "jobname": "fuel-national-dispatch",
+        "last_end": "2026-11-22T01:29:00.453802+00:00",
+        "max_seconds": 45.960409,
+        "status": "succeeded"
+      },
+      {
+        "executions": 41,
+        "failed": 41,
+        "first_start": "2026-11-22T00:11:00.004159+00:00",
+        "jobname": "fuel-national-projection-repair",
+        "last_end": "2026-11-22T01:13:10.00628+00:00",
+        "max_seconds": 119.871625,
+        "status": "failed"
+      },
+      {
+        "executions": 49,
+        "failed": 0,
+        "first_start": "2026-11-22T00:00:00.44336+00:00",
+        "jobname": "fuel-national-projection-repair",
+        "last_end": "2026-11-22T01:29:00.449348+00:00",
+        "max_seconds": 9.140284,
+        "status": "succeeded"
+      },
+      {
+        "executions": 6,
+        "failed": 6,
+        "first_start": "2026-11-22T00:20:00.008034+00:00",
+        "jobname": "fuel-national-retention",
+        "last_end": "2026-11-22T01:10:18.047505+00:00",
+        "max_seconds": 73.130829,
+        "status": "failed"
+      },
+      {
+        "executions": 3,
+        "failed": 0,
+        "first_start": "2026-11-22T00:00:00.446105+00:00",
+        "jobname": "fuel-national-retention",
+        "last_end": "2026-11-22T01:20:00.628873+00:00",
+        "max_seconds": 0.163264,
+        "status": "succeeded"
+      },
+      {
+        "executions": 45,
+        "failed": 45,
+        "first_start": "2026-11-22T00:11:00.004159+00:00",
+        "jobname": "fuel-national-trends-cache",
+        "last_end": "2026-11-22T01:13:10.019903+00:00",
+        "max_seconds": 119.919588,
+        "status": "failed"
+      },
+      {
+        "executions": 45,
+        "failed": 0,
+        "first_start": "2026-11-22T00:00:00.406198+00:00",
+        "jobname": "fuel-national-trends-cache",
+        "last_end": "2026-11-22T01:29:09.639584+00:00",
+        "max_seconds": 19.308353,
+        "status": "succeeded"
+      },
+      {
+        "executions": 12,
+        "failed": 12,
+        "first_start": "2026-11-22T00:15:00.000119+00:00",
+        "jobname": "fuel-national-watchdog",
+        "last_end": "2026-11-22T01:10:17.975505+00:00",
+        "max_seconds": 73.018729,
+        "status": "failed"
+      },
+      {
+        "executions": 6,
+        "failed": 0,
+        "first_start": "2026-11-22T00:00:00.410855+00:00",
+        "jobname": "fuel-national-watchdog",
+        "last_end": "2026-11-22T01:25:00.40665+00:00",
+        "max_seconds": 0.133533,
+        "status": "succeeded"
+      },
+      {
+        "executions": 3,
+        "failed": 3,
+        "first_start": "2026-11-22T00:29:00.008518+00:00",
+        "jobname": "fuel-price-alert-delivery",
+        "last_end": "2026-11-22T01:09:10.003052+00:00",
+        "max_seconds": 10.12895,
+        "status": "failed"
+      },
+      {
+        "executions": 2,
+        "failed": 0,
+        "first_start": "2026-11-22T00:09:00.413403+00:00",
+        "jobname": "fuel-price-alert-delivery",
+        "last_end": "2026-11-22T01:29:00.410899+00:00",
+        "max_seconds": 0.07837,
+        "status": "succeeded"
+      },
+      {
+        "executions": 3,
+        "failed": 3,
+        "first_start": "2026-11-22T00:27:00.000131+00:00",
+        "jobname": "fuel-price-alert-samples",
+        "last_end": "2026-11-22T01:07:10.387728+00:00",
+        "max_seconds": 126.568579,
+        "status": "failed"
+      },
+      {
+        "executions": 2,
+        "failed": 0,
+        "first_start": "2026-11-22T00:07:00.32879+00:00",
+        "jobname": "fuel-price-alert-samples",
+        "last_end": "2026-11-22T01:27:01.748917+00:00",
+        "max_seconds": 2.342102,
+        "status": "succeeded"
+      }
+    ],
+    "http_evidence_range": {
+      "latest": "2026-11-22T17:50:00.26422+00:00",
+      "oldest": "2026-11-22T12:00:00.37223+00:00"
+    },
+    "recovery": [
+      {
+        "archive_bytes": 3624941,
+        "completed_at": "2026-11-22T02:14:35.520053+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 71887,
+        "missed_batches": 0,
+        "observed_stations": 141660,
+        "priced_stations": 90427,
+        "slot_at": "2026-11-22T02:00:00+00:00",
+        "status": "complete",
+        "succeeded_batches": 72
+      },
+      {
+        "archive_bytes": 3624416,
+        "completed_at": "2026-11-22T01:28:35.125214+00:00",
+        "expected_batches": 72,
+        "expected_stations": 141660,
+        "id": 71834,
+        "missed_batches": 0,
+        "observed_stations": 141660,
+        "priced_stations": 90391,
+        "slot_at": "2026-11-22T01:00:00+00:00",
+        "status": "complete",
+        "succeeded_batches": 72
+      }
+    ]
+  },
+  "failureDetails": {
+    "extensions": [
+      "pg_stat_statements"
+    ],
+    "failures": [
+      {
+        "count": 1,
+        "first_start": "2026-11-22T00:17:00.008078+00:00",
+        "jobname": "fuel-local-history-retention",
+        "last_end": "2026-11-22T00:17:39.552694+00:00",
+        "message": "job startup timeout"
+      },
+      {
+        "count": 44,
+        "first_start": "2026-11-22T00:11:00.004159+00:00",
+        "jobname": "fuel-national-discovery",
+        "last_end": "2026-11-22T01:13:10.027802+00:00",
+        "message": "job startup timeout"
+      },
+      {
+        "count": 45,
+        "first_start": "2026-11-22T00:11:00.004159+00:00",
+        "jobname": "fuel-national-dispatch",
+        "last_end": "2026-11-22T01:13:10.011845+00:00",
+        "message": "job startup timeout"
+      },
+      {
+        "count": 41,
+        "first_start": "2026-11-22T00:11:00.004159+00:00",
+        "jobname": "fuel-national-projection-repair",
+        "last_end": "2026-11-22T01:13:10.00628+00:00",
+        "message": "job startup timeout"
+      },
+      {
+        "count": 6,
+        "first_start": "2026-11-22T00:20:00.008034+00:00",
+        "jobname": "fuel-national-retention",
+        "last_end": "2026-11-22T01:10:18.047505+00:00",
+        "message": "job startup timeout"
+      },
+      {
+        "count": 45,
+        "first_start": "2026-11-22T00:11:00.004159+00:00",
+        "jobname": "fuel-national-trends-cache",
+        "last_end": "2026-11-22T01:13:10.019903+00:00",
+        "message": "job startup timeout"
+      },
+      {
+        "count": 12,
+        "first_start": "2026-11-22T00:15:00.000119+00:00",
+        "jobname": "fuel-national-watchdog",
+        "last_end": "2026-11-22T01:10:17.975505+00:00",
+        "message": "job startup timeout"
+      },
+      {
+        "count": 3,
+        "first_start": "2026-11-22T00:29:00.008518+00:00",
+        "jobname": "fuel-price-alert-delivery",
+        "last_end": "2026-11-22T01:09:10.003052+00:00",
+        "message": "job startup timeout"
+      },
+      {
+        "count": 1,
+        "first_start": "2026-11-22T00:47:02.820394+00:00",
+        "jobname": "fuel-price-alert-samples",
+        "last_end": "2026-11-22T00:49:09.388973+00:00",
+        "message": "ERROR:  canceling statement due to statement timeout\nCONTEXT:  SQL statement \"insert into fuel_app_private.price_samples(station_id,product,payment,price,reported_at)\n select station_id,product,payment,price,reported_at from fuel_app_private.watched_"
+      },
+      {
+        "count": 2,
+        "first_start": "2026-11-22T00:27:00.000131+00:00",
+        "jobname": "fuel-price-alert-samples",
+        "last_end": "2026-11-22T01:07:10.387728+00:00",
+        "message": "job startup timeout"
+      }
+    ],
+    "table_maintenance": [
+      {
+        "dead": 3033,
+        "last_autoanalyze": "2026-11-22T10:12:15.798821+00:00",
+        "last_autovacuum": "2026-11-22T07:01:06.555495+00:00",
+        "live": 25416,
+        "table": "fuel_national_jobs"
+      },
+      {
+        "dead": 0,
+        "last_autoanalyze": "2026-11-22T17:10:52.167903+00:00",
+        "last_autovacuum": "2026-11-22T17:16:47.581261+00:00",
+        "live": 156458,
+        "table": "fuel_station_latest"
+      },
+      {
+        "dead": 135358,
+        "last_autoanalyze": "2026-11-22T01:20:53.314876+00:00",
+        "last_autovacuum": "2026-11-21T01:21:42.773107+00:00",
+        "live": 707147,
+        "table": "fuel_local_daily_prices"
+      }
+    ]
+  },
+  "archiveReadback": {
+    "verifiedAt": "2026-11-22T17:57:44.554Z",
+    "verified": true,
+    "providerRequests": 0,
+    "runId": 72787,
+    "slotAt": "2026-11-22T17:00:00+00:00",
+    "runStatusAtSelection": "complete",
+    "batches": [
+      {
+        "jobId": 5236480,
+        "objectPath": "72787/5236480/f9958fd0-b3e4-44b6-b6ab-22ce829ea711.json.gz",
+        "sha256": "09caee3a91a12a780339acdad3b4bffc980b6464e3d9015a54196ce1a3707192",
+        "stations": 1700,
+        "priced": 1018,
+        "bytes": 38893,
+        "executionRegion": "us-east-1",
+        "startedAt": "2026-11-22T17:16:01.643Z",
+        "observedAt": "2026-11-22T17:16:04.557Z",
+        "responseEvidence": {
+          "status": 200,
+          "observedAt": "2026-11-22T17:16:04.512Z",
+          "elapsedMs": 2869,
+          "headers": {
+            "age": "0",
+            "cf-ray": "a5e9945e6aaa821a-IAD",
+            "content-type": "application/json; charset=utf-8",
+            "date": "Sun, 22 Nov 2026 17:16:04 GMT",
+            "server": "cloudflare",
+            "via": "1.1 varnish-v4",
+            "x-cache": "MISS"
+          },
+          "decodedBodyBytes": 629657,
+          "fullElapsedMs": 2903
+        }
+      },
+      {
+        "jobId": 5236489,
+        "objectPath": "72787/5236489/8f00214c-be3b-4ad6-a0a8-7815e3ba9057.json.gz",
+        "sha256": "a349cd08a46a84c4f97146bb24b7b23cc6f4012126f48e47c19a1f74c978dfed",
+        "stations": 1747,
+        "priced": 1262,
+        "bytes": 57190,
+        "executionRegion": "us-west-1",
+        "startedAt": "2026-11-22T17:05:01.966Z",
+        "observedAt": "2026-11-22T17:05:04.422Z",
+        "responseEvidence": {
+          "status": 200,
+          "observedAt": "2026-11-22T17:05:04.050Z",
+          "elapsedMs": 2083,
+          "headers": {
+            "age": "0",
+            "cf-ray": "a5e984437bfecf16-SJC",
+            "content-type": "application/json; charset=utf-8",
+            "date": "Sun, 22 Nov 2026 17:05:04 GMT",
+            "server": "cloudflare",
+            "via": "1.1 varnish-v4",
+            "x-cache": "MISS"
+          },
+          "decodedBodyBytes": 776856,
+          "fullElapsedMs": 2440
+        }
+      },
+      {
+        "jobId": 5236493,
+        "objectPath": "72787/5236493/e0c48292-0edb-4fc4-91d7-8ec0537c2399.json.gz",
+        "sha256": "6be7c00a1978e63686b69c90fbf8db3cd8295bb892c37e4b2ec337a2f693584b",
+        "stations": 213,
+        "priced": 146,
+        "bytes": 6291,
+        "executionRegion": "us-west-2",
+        "startedAt": "2026-11-22T17:00:41.676Z",
+        "observedAt": "2026-11-22T17:00:42.199Z",
+        "responseEvidence": {
+          "status": 200,
+          "observedAt": "2026-11-22T17:00:42.076Z",
+          "elapsedMs": 400,
+          "headers": {
+            "age": "0",
+            "cf-ray": "a5e97de87cabefc2-PDX",
+            "content-type": "application/json; charset=utf-8",
+            "date": "Sun, 22 Nov 2026 17:00:42 GMT",
+            "server": "cloudflare",
+            "via": "1.1 varnish-v4",
+            "x-cache": "MISS"
+          },
+          "decodedBodyBytes": 88430,
+          "fullElapsedMs": 522
+        }
+      }
+    ],
+    "limitation": "Three immutable regional samples; not all 72 objects and not verified pump truth. Latest complete sweep after automatic recovery; no operator restart this check."
+  }
+}
